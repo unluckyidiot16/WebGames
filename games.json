@@ -14,5 +14,13 @@
     "tags": ["교육"],
     "updated": "2025-09-30",
     "desc": "자신의 성향을 알아보는 심리 테스트"
+  },
+ {
+    "title": "Apple Game",
+    "url": "https://unluckyidiot16.github.io/assets-common/AppleGame/AppleGame.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/AppleGame/AppleGame.png",
+    "tags": ["교육"],
+    "updated": "2025-09-30",
+    "desc": "숫자를 터치해서 10을 만드는 게임"
   }
 ]
