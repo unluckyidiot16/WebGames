@@ -62,5 +62,14 @@
     "tags": ["교육"],
     "updated": "2025-10-01",
     "desc": "갯벌 생존 게임"
+  },
+  {
+    "title": "CleanStairHit",
+    "url": "https://unluckyidiot16.github.io/assets-common/CleanStairHit/CleanStairHit.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/CleanStairHit/CleanStairHit.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "수 감각을 키우는 숫자 합 맞추기 게임"
   }
+  
 ]
