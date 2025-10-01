@@ -38,5 +38,13 @@
     "tags": ["교육"],
     "updated": "2025-10-01",
     "desc": "진로 탐색 인생 게임"
+  },
+  {
+    "title": "MudAnimalAutoBattle",
+    "url": "https://unluckyidiot16.github.io/assets-common/MudAnimalAutoBattle/MudAnimalAutoBattle.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/MudAnimalAutoBattle/MudAnimalAutoBattle.png",
+    "tags": ["교육"],
+    "updated": "2025-10-01",
+    "desc": "갯벌 생물 자동 전투 게임"
   }
 ]
