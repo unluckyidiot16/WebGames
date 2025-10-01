@@ -46,5 +46,13 @@
     "tags": ["교육"],
     "updated": "2025-10-01",
     "desc": "갯벌 생물 자동 전투 게임"
+  },
+  {
+    "title": "MudExplorer",
+    "url": "https://unluckyidiot16.github.io/assets-common/MudExplorer/MudExplorer.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/MudExplorer/MudExplorer.png",
+    "tags": ["교육"],
+    "updated": "2025-10-01",
+    "desc": "갯벌 탐사 게임"
   }
 ]
