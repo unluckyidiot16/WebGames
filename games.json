@@ -24,11 +24,19 @@
     "desc": "숫자를 터치해서 10을 만드는 게임"
   },
   {
-    "title": "CivilizationGame",
+    "title": "CivilizationClicker Game",
     "url": "https://unluckyidiot16.github.io/assets-common/CivilizationClicker/CivilizationClicker.html",
     "thumb": "https://unluckyidiot16.github.io/assets-common/CivilizationClicker/CivilizationClicker.png",
     "tags": ["교육"],
     "updated": "2025-10-01",
     "desc": "사회 발달 클리커 게임"
+  },
+  {
+    "title": "LifeSim Game",
+    "url": "https://unluckyidiot16.github.io/assets-common/LifeSim/LifeSim.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/LifeSim/LifeSim.png",
+    "tags": ["교육"],
+    "updated": "2025-10-01",
+    "desc": "진로 탐색 인생 게임"
   }
 ]
