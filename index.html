@@ -1,264 +1,248 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>갯벌 서바이버 (이펙트 색상 개선)</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>WebGames | unluckyidiot16</title>
+  <meta name="description" content="안재형의 웹게임 모음. 수업/프로토타입/미니게임을 한 곳에서 플레이!" />
+  <meta property="og:title" content="WebGames | unluckyidiot16" />
+  <meta property="og:description" content="안재형의 웹게임 모음. 수업/프로토타입/미니게임을 한 곳에서 플레이!" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://unluckyidiot16.github.io/WebGames/" />
+  <meta name="color-scheme" content="light dark" />
   <style>
-    body {
-      background-color: #000;
-      font-family: 'Inter', sans-serif;
-      overflow: hidden;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
+    :root{
+      --bg:#0b0f14; --fg:#e8eef4; --muted:#9db1c1; --card:#121821; --accent:#61d3ff; --accent-2:#a4ff9b;
+      --border: color-mix(in oklab, var(--fg) 10%, transparent);
     }
-    #game-container {
-      width: 100vw;
-      height: 100vh;
-      position: relative;
+    @media (prefers-color-scheme: light){
+      :root{ --bg:#f7f9fb; --fg:#0e141b; --muted:#516170; --card:#ffffff; --border:#e8eef4; --accent:#0ea5e9; --accent-2:#16a34a; }
     }
-    canvas {
-      background-color: #d2c8b4;
-      display: block;
-      position: absolute;
-      top: 0;
-      left: 0;
-      image-rendering: crisp-edges;
-      image-rendering: pixelated;
-    }
-    #ui-wrapper {
-      transform-origin: top left;
-      width: 1280px; /* Base width for scaling */
-      height: 720px; /* Base height for scaling */
-      pointer-events: none;
-    }
-    .modal-backdrop {
-      background-color: rgba(0, 0, 0, 0.8);
-    }
-    .ui-element { pointer-events: all; }
-    .character-card {
-      background: #fff;
-      border: 4px solid #a89d86;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .character-card.locked {
-      filter: grayscale(1);
-      background: #d1d5db;
-    }
-    .character-card:not(.locked):hover {
-      transform: translateY(-10px);
-      box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-      border-color: #f59e0b;
-    }
-    .card {
-      background: #fff;
-      border: 2px solid #a89d86;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
-    .card:hover {
-      transform: translateY(-10px);
-      box-shadow: 0 10px 15px rgba(0,0,0,0.2);
-    }
+    *{ box-sizing:border-box; }
+    html,body{ height:100%; }
+    body{ margin:0; font:16px/1.5 system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Apple SD Gothic Neo, \"Apple SD Gothic Neo\", \"Noto Sans KR\", sans-serif; background:var(--bg); color:var(--fg); }
+    a{ color:var(--accent); text-decoration:none }
+    a:hover{ text-decoration:underline }
+    .container{ max-width:1200px; margin:0 auto; padding:24px; }
+    header{ display:flex; align-items:center; gap:16px; justify-content:space-between; padding:20px 0 8px; }
+    .brand{ display:flex; align-items:center; gap:12px; }
+    .logo{ width:36px; height:36px; border-radius:10px; background:linear-gradient(135deg,var(--accent),var(--accent-2)); box-shadow:0 6px 24px color-mix(in oklab, var(--accent) 20%, transparent); }
+    h1{ font-size:22px; margin:0; letter-spacing:0.2px; }
+    .nav{ display:flex; gap:10px; align-items:center; }
+    .btn{ display:inline-flex; align-items:center; gap:8px; padding:10px 14px; background:var(--card); border:1px solid var(--border); border-radius:12px; color:var(--fg); text-decoration:none; transition:transform .06s ease, background .2s ease; }
+    .btn:hover{ transform:translateY(-1px); text-decoration:none; }
+
+    .controls{ display:grid; grid-template-columns: 1fr auto; gap:12px; margin:16px 0 12px; }
+    .search{ display:flex; align-items:center; gap:10px; padding:10px 12px; background:var(--card); border:1px solid var(--border); border-radius:12px; }
+    .search input{ flex:1; border:0; outline:0; background:transparent; color:var(--fg); font-size:15px; }
+    .select{ padding:10px 12px; background:var(--card); border:1px solid var(--border); border-radius:12px; color:var(--fg); }
+
+    .filters{ display:flex; gap:8px; flex-wrap:wrap; margin:8px 0 18px; }
+    .chip{ padding:6px 10px; border:1px solid var(--border); border-radius:999px; background:color-mix(in oklab, var(--card) 70%, transparent); cursor:pointer; font-size:13px; color:var(--muted); }
+    .chip.active{ background:linear-gradient(135deg, color-mix(in oklab,var(--accent) 12%, transparent), color-mix(in oklab,var(--accent-2) 10%, transparent)); color:var(--fg); border-color: color-mix(in oklab, var(--accent) 40%, var(--border)); }
+
+    .grid{ display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:14px; }
+    .card{ background:var(--card); border:1px solid var(--border); border-radius:18px; overflow:hidden; display:flex; flex-direction:column; min-height:280px; }
+    .thumb{ aspect-ratio: 16 / 9; width:100%; background:linear-gradient(135deg, #253041, #151c27); display:grid; place-items:center; color:#9fb2c8; font-weight:600; letter-spacing:0.3px; }
+    .thumb img{ width:100%; height:100%; object-fit:cover; display:block; }
+    .card-body{ padding:14px; display:flex; flex-direction:column; gap:8px; }
+    .title{ font-size:16px; font-weight:700; margin:0; }
+    .desc{ color:var(--muted); font-size:13.5px; margin:0; }
+    .meta{ display:flex; justify-content:space-between; align-items:center; font-size:12px; color:var(--muted); }
+    .tags{ display:flex; gap:6px; flex-wrap:wrap; }
+    .tag{ font-size:11px; padding:4px 8px; border:1px solid var(--border); border-radius:999px; color:var(--muted); }
+    .actions{ display:flex; gap:8px; margin-top:8px; }
+    .play{ flex:1; text-align:center; padding:10px 12px; border-radius:12px; border:1px solid var(--border); background:linear-gradient(135deg, color-mix(in oklab, var(--accent) 18%, transparent), color-mix(in oklab, var(--accent-2) 12%, transparent)); color:var(--fg); text-decoration:none; font-weight:600; }
+
+    .empty{ text-align:center; padding:48px 8px; color:var(--muted); border:1px dashed var(--border); border-radius:16px; background:color-mix(in oklab, var(--card) 80%, transparent); }
+
+    footer{ color:var(--muted); font-size:12.5px; text-align:center; margin:28px 0 10px; }
+    code.kbd{ padding:2px 6px; border-radius:6px; border:1px solid var(--border); background:color-mix(in oklab, var(--card) 70%, transparent); font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; }
   </style>
 </head>
 <body>
-<div id="game-container">
-  <canvas id="gameCanvas"></canvas>
-  <!-- UI Wrapper for Scaling -->
-  <div id="ui-wrapper" class="absolute top-0 left-0">
-    <!-- Game UI -->
-    <div id="ui" class="relative w-full h-full p-4 text-gray-800 z-10 hidden">
-      <div class="flex justify-between items-start">
-        <div class="p-2 bg-white/50 rounded-md">
-          <div id="level-display" class="font-bold text-xl">레벨: 1</div>
-          <div class="w-64 h-6 bg-gray-300 rounded-full mt-2 border border-gray-400">
-            <div id="hp-bar" class="h-full bg-red-500 rounded-full text-center text-white text-sm" style="width: 100%;"></div>
-          </div>
-          <div id="hp-text" class="text-sm font-semibold ml-2">40 / 40</div>
-        </div>
-        <div id="timer" class="text-4xl font-bold bg-white/50 px-4 py-2 rounded-lg shadow-lg">10:00</div>
-        <div class="flex flex-col items-end space-y-2">
-          <div id="coin-display" class="font-bold text-xl bg-white/50 px-3 py-1 rounded-md">코인: 0</div>
-          <div class="flex space-x-2">
-            <div id="weapon-ui" class="flex flex-col items-start p-2 bg-white/50 rounded-md"></div>
-            <div id="passive-ui" class="flex flex-col items-start p-2 bg-white/50 rounded-md"></div>
-          </div>
-        </div>
+<div class="container">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true"></div>
+      <div>
+        <h1>WebGames</h1>
+        <div style="font-size:13px; color:var(--muted);">수업 · 프로토타입 · 미니게임 모음</div>
       </div>
     </div>
-    <!-- Modals -->
-    <div id="titleModal" class="absolute inset-0 z-40 flex flex-col items-center justify-center modal-backdrop">
-      <div class="text-center text-white">
-        <h1 class="text-8xl font-bold mb-4">갯벌 서바이버</h1>
-        <p class="text-2xl mb-12">작은 게의 위대한 생존기</p>
-        <button id="showCharacterSelectBtn" class="ui-element bg-green-500 hover:bg-green-700 text-white font-bold py-4 px-10 rounded-lg text-3xl transition-transform transform hover:scale-105">
-          게임 시작
-        </button>
-      </div>
-    </div>
+    <nav class="nav">
+      <a class="btn" href="https://github.com/unluckyidiot16/WebGames" target="_blank" rel="noopener">GitHub</a>
+    </nav>
+  </header>
 
-    <div id="characterSelectModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop">
-      <h2 class="text-5xl font-bold mb-4 text-white">캐릭터 선택</h2>
-      <p class="text-xl mb-8 text-amber-300">보유한 골드: <span id="playerGold">0</span> G</p>
-      <div id="character-options" class="flex gap-8"></div>
+  <section class="controls" role="search">
+    <label class="search" style="grid-column: span 2;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="2"/></svg>
+      <input id="q" type="search" placeholder="게임 검색 (제목/태그)" autocomplete="off" />
+    </label>
+    <select id="sort" class="select" aria-label="정렬">
+      <option value="updated-desc">최신 업데이트 순</option>
+      <option value="title-asc">제목 A→Z</option>
+      <option value="title-desc">제목 Z→A</option>
+    </select>
+    <div style="align-self:center; justify-self:end; font-size:13px; color:var(--muted);">
+      <span id="count">0</span>개 게임
     </div>
+  </section>
 
-    <div id="levelUpModal" class="hidden absolute inset-0 z-20 flex-col items-center justify-center modal-backdrop">
-      <div class="bg-amber-100 p-8 rounded-lg shadow-2xl text-center">
-        <h2 class="text-3xl font-bold mb-6 text-amber-800">레벨 업! 능력을 선택하세요.</h2>
-        <div id="card-options" class="flex gap-6"></div>
-      </div>
-    </div>
+  <div class="filters" id="filters" aria-label="장르/태그 필터"></div>
 
-    <div id="gameOverModal" class="hidden absolute inset-0 z-30 flex-col items-center justify-center modal-backdrop">
-      <div class="bg-slate-200 p-12 rounded-lg shadow-2xl text-center">
-        <h2 id="gameOverTitle" class="text-5xl font-bold mb-4 text-slate-800">게임 오버</h2>
-        <p id="gameOverText" class="text-xl mb-8 text-slate-600">최종 스코어: 0</p>
-        <button id="restartGameBtn" class="ui-element bg-blue-500 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg text-2xl transition-transform transform hover:scale-105">
-          캐릭터 선택으로
-        </button>
-      </div>
-    </div>
+  <section class="grid" id="grid" aria-live="polite" aria-busy="true"></section>
+
+  <div id="empty" class="empty" hidden>
+    결과가 없습니다. 검색어나 필터를 변경해보세요.
   </div>
+
+  <footer>
+    <p>게임을 추가하려면 <code class="kbd">games.json</code> 파일을 루트에 만들거나, 이 페이지의 내장 목록을 수정하세요.</p>
+    <p>예: <code class="kbd">[{&quot;title&quot;:&quot;Flappy Boat&quot;,&quot;url&quot;:&quot;https://unluckyidiot16.github.io/assets-common/FlappyBoat/FlappyBoat.html&quot;,&quot;thumb&quot;:&quot;https://unluckyidiot16.github.io/assets-common/FlappyBoat/thumbnail.png&quot;,&quot;tags":[&quot;교육&quot;,&quot;아케이드&quot;],&quot;updated&quot;:&quot;2025-09-30&quot;,&quot;desc&quot;:&quot;플래피 보트를 응용한 밀물·썰물 타이밍 게임&quot;}]</code></p>
+  </footer>
 </div>
 
 <script>
-  const canvas = document.getElementById('gameCanvas');
-  const ctx = canvas.getContext('2d');
-
-  let gameState = 'title'; // 'title', 'characterSelect', 'playing', 'paused', 'gameOver'
-
-  const GLOBAL_SCALE = 2.0;
-  const ORIGINAL_UI_WIDTH = 1280;
-  const ORIGINAL_UI_HEIGHT = 720;
-
-  // --- UI Elements ---
-  const uiWrapper = document.getElementById('ui-wrapper');
-  const uiContainer = document.getElementById('ui');
-  const hpBar = document.getElementById('hp-bar'), hpText = document.getElementById('hp-text');
-  const levelDisplay = document.getElementById('level-display'), timerDisplay = document.getElementById('timer');
-  const coinDisplay = document.getElementById('coin-display'), titleModal = document.getElementById('titleModal');
-  const characterSelectModal = document.getElementById('characterSelectModal');
-  const characterOptionsContainer = document.getElementById('character-options');
-  const playerGoldDisplay = document.getElementById('playerGold');
-  const levelUpModal = document.getElementById('levelUpModal'), cardOptionsContainer = document.getElementById('card-options');
-  const gameOverModal = document.getElementById('gameOverModal'), gameOverTitle = document.getElementById('gameOverTitle'), gameOverText = document.getElementById('gameOverText');
-  const weaponUI = document.getElementById('weapon-ui'), passiveUI = document.getElementById('passive-ui');
-  const showCharacterSelectBtn = document.getElementById('showCharacterSelectBtn'), restartGameBtn = document.getElementById('restartGameBtn');
-
-  const imageCache = {};
-  const IMAGE_BASE_URL = "https://unluckyidiot16.github.io/assets-common/MudAnimalAutoBattle/";
-
-  // --- Game Database ---
-  const WEAPON_DB = {
-    'W01': { name: "집게 휘두르기", desc: "가까운 적에게 부채꼴 근접 공격", baseDmg: 18, cooldown: 600, range: 40 * GLOBAL_SCALE, angle: 45, type: 'melee' },
-    'W_Nongge': { name: "큰 집게 내려치기", desc: "느리지만 강력한 원형 공격", baseDmg: 30, cooldown: 1080, range: 30 * GLOBAL_SCALE, type: 'melee_slam' },
-    'W_Kkotge': { name: "물살 가르기", desc: "빠른 직선 공격", baseDmg: 14, cooldown: 500, range: 42 * GLOBAL_SCALE, width: 20 * GLOBAL_SCALE, type: 'melee_line' },
-    'W02': { name: "모래 분사", desc: "전방으로 관통하는 모래알 발사", baseDmg: 12, cooldown: 500, projectileSpeed: 8, pierce: 1, projectileSize: 8 * GLOBAL_SCALE, type: 'ranged' },
-    'W03': { name: "거품 방패", desc: "주위를 맴도는 거품으로 공격", baseDmg: 8, cooldown: 100, count: 2, orbitRadius: 70 * GLOBAL_SCALE, orbitSpeed: 2, type: 'orbital' },
-    'W09': { name: "조류 파동", desc: "주기적으로 퍼져나가는 파동 방출", baseDmg: 22, cooldown: 2500, maxRadius: (200 / 3) * GLOBAL_SCALE, pulseSpeed: 3, type: 'pulse' }
-  };
-  const PASSIVE_DB = {
-    'P01': { name: "껍질 강화", desc: "방어력 +2", effect: p => { p.defense += 2; } },
-    'P02': { name: "촉각 예민", desc: "아이템 획득 범위 +20%", effect: p => { p.pickupRadius *= 1.2; } },
-    'P03': { name: "삼켜진 공기", desc: "최대 HP +15%", effect: p => { p.maxHp *= 1.15; p.hp = p.maxHp; } },
-    'P04': { name: "근력 성장", desc: "근접 피해 +15%", effect: p => { p.meleeDamageMultiplier += 0.15; } },
-    'P05': { name: "영역 확장", desc: "범위 스킬의 크기 +20%", effect: p => {
-        Object.values(p.weapons).forEach(w => {
-          if (w.type === 'melee' || w.type === 'melee_slam' || w.type === 'melee_line') {
-            w.range *= 1.2;
-            if(w.angle) w.angle *= 1.2;
-            if(w.width) w.width *= 1.2;
-          }
-          if (w.type === 'pulse') {
-            w.maxRadius *= 1.2;
-          }
-        });
-      } },
-    'P07': { name: "여과 섭식", desc: "경험치 획득량 +10%", effect: p => { p.xpMultiplier += 0.1; } },
-    'P14': { name: "조수 연구", desc: "모든 재사용 대기시간 -5%", effect: p => { p.cooldownReduction *= 0.95; } },
-    'P_Speed': { name: "유영 특화", desc: "이동 속도 +15%", effect: p => { p.speed *= 1.15; } }
-  };
-  const CHARACTER_DB = {
-    'smallCrab': { id: 'smallCrab', name: '기본 게', image: IMAGE_BASE_URL + "smallCrab.png", unlockCost: 0, startingWeapon: 'W01', startingPassive: 'P02' },
-    'nongge': { id: 'nongge', name: '농게', image: IMAGE_BASE_URL + "nongge.png", unlockCost: 50, startingWeapon: 'W_Nongge', startingPassive: 'P04' },
-    'kkotge': { id: 'kkotge', name: '꽃게', image: IMAGE_BASE_URL + "kkotge.png", unlockCost: 100, startingWeapon: 'W_Kkotge', startingPassive: 'P_Speed' },
-    'chilge': { id: 'chilge', name: '칠게', image: IMAGE_BASE_URL + "chilge.png", unlockCost: 150, startingWeapon: 'W02', startingPassive: 'P01' }
-  };
-  const ENEMY_CATALOG = {
-    mudworm: { name: '갯지렁이', hp: 15, dmg: 3, spd: 2.3, size: 18 * GLOBAL_SCALE, xp: 1, imgKey: 'mudworm' },
-    mudSnail: { name: '갯벌 달팽이', hp: 35, dmg: 2, spd: 1.2, size: 22 * GLOBAL_SCALE, xp: 2, imgKey: 'mudSnail' },
-    bajirak: { name: '바지락', hp: 25, dmg: 3, spd: 2.0, size: 20 * GLOBAL_SCALE, xp: 2, imgKey: 'bajirak' },
-    mangdungeo: { name: '망둥어', hp: 28, dmg: 4, spd: 3.2, size: 20 * GLOBAL_SCALE, xp: 3, imgKey: 'mangdungeo' },
-    chilge: { name: '칠게', hp: 55, dmg: 6, spd: 2.6, size: 25 * GLOBAL_SCALE, xp: 5, imgKey: 'chilge' },
-    jjangddungeo: { name: '짱뚱어', hp: 65, dmg: 7, spd: 2.8, size: 26 * GLOBAL_SCALE, xp: 7, imgKey: 'jjangddungeo' },
-    nakji: { name: '낙지', hp: 90, dmg: 8, spd: 2.2, size: 30 * GLOBAL_SCALE, xp: 10, imgKey: 'nakji' }
-  };
-  const BOSS_CATALOG = { sandpiper: { hp: 6000, dmg: 40, spd: 2, size: 40 * GLOBAL_SCALE, xp: 1000 } };
-  const SPAWNER_CLIPS = [
-    { start: 0,   end: 60,  enemies: [{ type: "mudworm", every: 1.8, count: [4, 6] }] },
-    { start: 60,  end: 120, enemies: [{ type: "mudworm", every: 2.5, count: [3, 5] }, { type: "mudSnail", every: 4.5, count: [1, 2] }] },
-    { start: 120, end: 180, enemies: [{ type: "mudSnail", every: 4.0, count: [2, 3] }, { type: "bajirak", every: 4.0, count: [2, 4] }] },
-    { start: 180, end: 240, enemies: [{ type: "bajirak", every: 3.5, count: [3, 5] }, { type: "mangdungeo", every: 3.0, count: [2, 4] }] },
-    { start: 240, end: 300, enemies: [{ type: "mangdungeo", every: 2.8, count: [4, 6] }, { type: "chilge", every: 5.0, count: [1, 2] }] },
-    { start: 300, end: 360, enemies: [{ type: "chilge", every: 4.5, count: [2, 3] }, { type: "jjangddungeo", every: 6.0, count: [1, 2] }] },
-    { start: 360, end: 420, enemies: [{ type: "jjangddungeo", every: 5.5, count: [2, 3] }, { type: "nakji", every: 7.0, count: [1, 1] }] },
-    { start: 420, end: 540, enemies: [{ type: "chilge", every: 3.5, count: [2, 4] }, { type: "jjangddungeo", every: 5.0, count: [2, 2] }, { type: "nakji", every: 6.5, count: [1, 2] }] },
-    { start: 540, end: 600, enemies: [{ type: "mudworm", every: 1.2, count: [10, 15] }, { type: "mangdungeo", every: 2.5, count: [5, 8] }] }
+  // 기본 게임 목록 (games.json이 없으면 이걸 사용)
+  const DEFAULT_GAMES = [
+    {
+      title: "Flappy Boat",
+      url: "https://unluckyidiot16.github.io/assets-common/FlappyBoat/FlappyBoat.html",
+      thumb: "https://unluckyidiot16.github.io/assets-common/FlappyBoat/thumbnail.png",
+      tags: ["교육","아케이드"],
+      updated: "2025-09-30",
+      desc: "플래피 버드 느낌의 밀물·썰물 타이밍 학습용 변주"
+    }
+    // 필요 시 여기에 더 추가하거나 games.json을 사용하세요.
   ];
 
-  let keys = {}, player, enemies, projectiles, pickups, boss, effects, playerData;
-  let gameTime, lastSpawnTimes, camera;
+  const $q = document.getElementById('q');
+  const $grid = document.getElementById('grid');
+  const $filters = document.getElementById('filters');
+  const $count = document.getElementById('count');
+  const $sort = document.getElementById('sort');
+  const $empty = document.getElementById('empty');
 
-  // --- Core Functions ---
-  function preloadImages() { Object.values(CHARACTER_DB).forEach(char => { imageCache[char.id] = new Image(); imageCache[char.id].src = char.image; }); Object.keys(ENEMY_CATALOG).forEach(key => { if (ENEMY_CATALOG[key].imgKey) { imageCache[key] = new Image(); imageCache[key].src = IMAGE_BASE_URL + ENEMY_CATALOG[key].imgKey + ".png"; } }); imageCache['sandpiper'] = new Image(); imageCache['sandpiper'].src = 'https://placehold.co/160x160/666666/FFFFFF?text=Bird';}
-  function loadPlayerData(){const data=localStorage.getItem('mudSurvivorData');if(data){playerData=JSON.parse(data);}else{playerData={gold:0,unlockedCharacters:['smallCrab']};}}
-  function savePlayerData(){localStorage.setItem('mudSurvivorData',JSON.stringify(playerData));}
-  function resizeGame() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; const scaleX = canvas.width / ORIGINAL_UI_WIDTH; const scaleY = canvas.height / ORIGINAL_UI_HEIGHT; const uiScale = Math.min(scaleX, scaleY); uiWrapper.style.transform = `scale(${uiScale})`; const uiLeft = (canvas.width - ORIGINAL_UI_WIDTH * uiScale) / 2; const uiTop = (canvas.height - ORIGINAL_UI_HEIGHT * uiScale) / 2; uiWrapper.style.left = `${uiLeft}px`; uiWrapper.style.top = `${uiTop}px`; }
-  function initGame(characterId = 'smallCrab') { const charData = CHARACTER_DB[characterId]; gameTime = 600 * 1000; player = { id: charData.id, x: 0, y: 0, size: 20 * GLOBAL_SCALE * 1.5, speed: 3.6 * 0.7 * 1.1, hp: 40, maxHp: 40, defense: 0, meleeDamageMultiplier: 1.0, level: 1, xp: 0, xpToNextLevel: 12, pickupRadius: 50 * GLOBAL_SCALE, weapons: {}, passives: {}, growthStage: 1, invincible: false, invincibleTimer: 0, xpMultiplier: 1.0, cooldownReduction: 1.0, coins: 0,}; camera = { x: 0, y: 0 }; enemies = []; projectiles = []; pickups = []; effects = []; boss = null; lastSpawnTimes = {}; addWeapon(charData.startingWeapon, true); if(charData.startingPassive){player.passives[charData.startingPassive]={id:charData.startingPassive,name:PASSIVE_DB[charData.startingPassive].name,level:1};PASSIVE_DB[charData.startingPassive].effect(player);} updateUI(); }
-  function showCharacterSelect(){loadPlayerData();gameState='characterSelect';titleModal.style.display='none';gameOverModal.style.display='none';characterSelectModal.style.display='flex';playerGoldDisplay.textContent=playerData.gold;characterOptionsContainer.innerHTML='';Object.values(CHARACTER_DB).forEach(char=>{const isUnlocked=playerData.unlockedCharacters.includes(char.id);const card=document.createElement('div');card.className=`character-card ui-element w-64 p-4 rounded-lg text-center ${isUnlocked?'cursor-pointer':'locked'}`;let buttonHtml;if(isUnlocked){buttonHtml=`<button class="mt-4 bg-green-500 text-white font-bold py-2 px-4 rounded w-full">선택</button>`;card.onclick=()=>startGame(char.id);}else{if(playerData.gold>=char.unlockCost){buttonHtml=`<button class="mt-4 bg-amber-500 text-white font-bold py-2 px-4 rounded w-full">해금 (${char.unlockCost}G)</button>`;card.onclick=()=>{playerData.gold-=char.unlockCost;playerData.unlockedCharacters.push(char.id);savePlayerData();showCharacterSelect();};}else{buttonHtml=`<button class="mt-4 bg-gray-500 text-white font-bold py-2 px-4 rounded w-full" disabled>${char.unlockCost} G 필요</button>`;}} card.innerHTML=`<img src="${char.image}" class="w-32 h-32 mx-auto mb-4"><h3 class="text-2xl font-bold">${char.name}</h3><p class="text-sm text-gray-600 mt-2">시작 무기: ${WEAPON_DB[char.startingWeapon].name}</p><p class="text-sm text-gray-600">고유 능력: ${PASSIVE_DB[char.startingPassive].name}</p>${buttonHtml}`;characterOptionsContainer.appendChild(card);});}
-  function startGame(characterId) { initGame(characterId); gameState = 'playing'; characterSelectModal.style.display = 'none'; uiContainer.classList.remove('hidden'); lastTime = performance.now(); requestAnimationFrame(gameLoop); }
-  function update(dt){let dx=0,dy=0;if(keys['ArrowUp']||keys['w'])dy-=1;if(keys['ArrowDown']||keys['s'])dy+=1;if(keys['ArrowLeft']||keys['a'])dx-=1;if(keys['ArrowRight']||keys['d'])dx+=1;if(dx!==0||dy!==0){const mag=Math.sqrt(dx*dx+dy*dy);player.x+=(dx/mag)*player.speed*(dt/16.67);player.y+=(dy/mag)*player.speed*(dt/16.67);} camera.x=player.x-canvas.width/2;camera.y=player.y-canvas.height/2;if(player.invincibleTimer>0){player.invincibleTimer-=dt;if(player.invincibleTimer<=0)player.invincible=false;} spawnEnemies();Object.values(player.weapons).forEach(w=>{w.timer-=dt;if(w.timer<=0){fireWeapon(w);w.timer=w.cooldown*player.cooldownReduction;} if(w.type==='orbital'){w.orbitals.forEach(o=>o.angle+=w.orbitSpeed*(dt/1000));}}); enemies.forEach(e=>updateEnemy(e,dt));projectiles.forEach(p=>updateProjectile(p,dt));pickups.forEach(p=>updatePickup(p)); effects=effects.filter(e=>{e.duration-=dt;if(e.type==='pulse')e.currentRadius+=e.pulseSpeed*(dt/16.67);return e.duration>0;}); checkCollisions();gameTime-=dt;if(gameTime<0)gameTime=0;if(gameTime<=0&&!boss)winGame("시간까지 생존했습니다!");}
-  function fireWeapon(weapon){const closestEnemy=findClosestEnemy(player.x,player.y);const angle=closestEnemy?Math.atan2(closestEnemy.y-player.y,closestEnemy.x-player.x):0; if(weapon.type==='melee'){if(!closestEnemy)return;enemies.forEach(enemy=>{const dist=Math.hypot(enemy.x-player.x,enemy.y-player.y);if(dist<weapon.range+10){let angleDiff=Math.abs(angle-Math.atan2(enemy.y-player.y,enemy.x-player.x));if(angleDiff>Math.PI)angleDiff=2*Math.PI-angleDiff;if(angleDiff<(weapon.angle*Math.PI/180)/2){enemyTakeDamage(enemy,weapon.baseDmg*player.meleeDamageMultiplier);}}}); effects.push({type:'slash_arc',x:player.x,y:player.y,angle,range:weapon.range,angleWidth:weapon.angle*Math.PI/180,duration:150,maxDuration:150});}else if(weapon.type==='melee_slam'){if(!closestEnemy)return;const slamX=closestEnemy.x;const slamY=closestEnemy.y;enemies.forEach(enemy=>{if(Math.hypot(enemy.x-slamX,enemy.y-slamY)<weapon.range){enemyTakeDamage(enemy,weapon.baseDmg*player.meleeDamageMultiplier);}}); effects.push({type:'slam_circle',x:slamX,y:slamY,radius:weapon.range,duration:200,maxDuration:200});}else if (weapon.type === 'melee_line') { if (!closestEnemy) return; effects.push({ type: 'line_slash', x: player.x, y: player.y, angle, range: weapon.range, width: weapon.width, duration: 150, maxDuration: 150 }); enemies.forEach(enemy => { const dx = enemy.x - player.x; const dy = enemy.y - player.y; const rotatedX = dx * Math.cos(-angle) - dy * Math.sin(-angle); const rotatedY = dx * Math.sin(-angle) + dy * Math.cos(-angle); if (rotatedX > 0 && rotatedX < weapon.range && Math.abs(rotatedY) < weapon.width / 2) { enemyTakeDamage(enemy, weapon.baseDmg * player.meleeDamageMultiplier); } }); } else if(weapon.type==='ranged'){if(!closestEnemy)return;projectiles.push({x:player.x,y:player.y,angle,speed:weapon.projectileSpeed,damage:weapon.baseDmg,pierce:weapon.pierce,size:weapon.projectileSize,color:'#c2b280',hitEnemies:[],lived:0});}else if(weapon.type==='pulse'){effects.push({type:'pulse',x:player.x,y:player.y,currentRadius:0,maxRadius:weapon.maxRadius,pulseSpeed:weapon.pulseSpeed,damage:weapon.baseDmg,duration:(weapon.maxRadius/weapon.pulseSpeed)*16.67,hitEnemies:[]});}}
-  function playerTakeDamage(damage){if(player.invincible)return;const actualDamage=Math.max(1,damage-player.defense);player.hp-=actualDamage;player.invincible=true;player.invincibleTimer=500;if(player.hp<=0){player.hp=0;loseGame();} updateUI();}
-  function enemyTakeDamage(enemy,damage){enemy.hp-=damage;enemy.isHit=true;enemy.hitTimer=100;if(enemy.hp<=0){createPickups(enemy);enemies=enemies.filter(i=>i.id!==enemy.id);}}
-  function draw(){ctx.clearRect(0,0,canvas.width,canvas.height);ctx.save();ctx.translate(-camera.x,-camera.y); drawGrid();pickups.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size,0,Math.PI*2);ctx.fill();}); projectiles.forEach(p=>{ctx.fillStyle=p.color;ctx.beginPath();ctx.arc(p.x,p.y,p.size/2,0,Math.PI*2);ctx.fill();}); Object.values(player.weapons).filter(w=>w.type==='orbital').forEach(w=>{w.orbitals.forEach(o=>{const x=player.x+Math.cos(o.angle)*w.orbitRadius;const y=player.y+Math.sin(o.angle)*w.orbitRadius;ctx.fillStyle='rgba(173, 216, 230, 0.7)';ctx.beginPath();ctx.arc(x,y,15*GLOBAL_SCALE,0,Math.PI*2);ctx.fill();});}); enemies.forEach(e=>{const img=imageCache[e.type];if(e.isHit){ctx.save();ctx.filter='brightness(2)';} if(img?.complete)ctx.drawImage(img,e.x-e.size/2,e.y-e.size/2,e.size,e.size);if(e.isHit){ctx.restore();}}); if(player){const playerImg=imageCache[player.id];if(player.invincible)ctx.globalAlpha=Math.floor(player.invincibleTimer/100)%2===0?0.5:1.0; if(playerImg?.complete)ctx.drawImage(playerImg,player.x-player.size/2,player.y-player.size/2,player.size,player.size);ctx.globalAlpha=1.0;} effects.forEach(e=>{const opacity=(e.duration/e.maxDuration);if(e.type==='slash_arc'){ctx.save();ctx.translate(e.x,e.y);ctx.rotate(e.angle);ctx.strokeStyle=`rgba(255, 255, 255, ${opacity*0.7})`;ctx.lineWidth=20;ctx.beginPath();ctx.arc(0,0,e.range,-e.angleWidth/2,e.angleWidth/2);ctx.stroke();ctx.restore();}else if(e.type==='pulse'){ctx.strokeStyle=`rgba(0, 220, 255, ${opacity*0.6})`;ctx.lineWidth=15;ctx.beginPath();ctx.arc(e.x,e.y,e.currentRadius,0,Math.PI*2);ctx.stroke();}else if(e.type==='slam_circle'){ctx.fillStyle=`rgba(220, 100, 100, ${opacity*0.6})`;ctx.beginPath();ctx.arc(e.x,e.y,e.radius*(1-opacity),0,Math.PI*2);ctx.fill();}else if (e.type === 'line_slash') { ctx.save(); ctx.translate(e.x, e.y); ctx.rotate(e.angle); ctx.fillStyle = `rgba(100, 150, 255, ${opacity * 0.7})`; ctx.fillRect(0, -e.width / 2, e.range, e.width); ctx.restore(); }}); ctx.restore();}
-  function loseGame(){gameState='gameOver';playerData.gold+=player.coins||0;savePlayerData();const score=player.level*100+(player.coins||0)*10+Math.floor((600000-gameTime)/1000);gameOverText.textContent=`생존 시간: ${Math.floor((600000-gameTime)/1000)}초. 최종 점수: ${score}`;gameOverModal.style.display='flex';}
-  function winGame(message){if(gameState==='gameOver')return;gameState='gameOver';playerData.gold+=player.coins||0;savePlayerData();const score=player.level*1000+(player.coins||0)*50+player.hp*10;gameOverText.textContent=`${message} 최종 점수: ${score}`;gameOverModal.style.display='flex';boss=null;}
-  let lastTime = 0;
-  function gameLoop(timestamp){if(gameState==='title'||gameState==='gameOver'||gameState==='characterSelect')return;if(!lastTime)lastTime=timestamp;const dt=timestamp-lastTime;lastTime=timestamp;if(gameState==='playing'){update(dt);updateUI();} draw();requestAnimationFrame(gameLoop);}
-  function levelUp(){gameState='paused';player.level++;player.xp-=player.xpToNextLevel;player.xpToNextLevel=Math.floor(player.xpToNextLevel*1.3+10);if(player.level===5&&player.growthStage===1){player.growthStage=2;player.size*=1.2;player.speed*=0.9;player.maxHp*=1.5;player.hp=player.maxHp;player.invincible=true;player.invincibleTimer=1500;} if(player.level===10&&player.growthStage===2){player.growthStage=3;player.size*=1.2;player.speed*=0.9;player.maxHp*=2;player.hp=player.maxHp;player.invincible=true;player.invincibleTimer=1500;} showLevelUpOptions();updateUI();}
-  function selectUpgrade(id){if(WEAPON_DB[id]){if(player.weapons[id]){player.weapons[id].baseDmg*=1.15;player.weapons[id].level++;if(id==='W03'){player.weapons[id].count++;addWeapon(id,false);}}else addWeapon(id,true);}else if(PASSIVE_DB[id]){if(player.passives[id])player.passives[id].level++;else player.passives[id]={id,name:PASSIVE_DB[id].name,level:1};PASSIVE_DB[id].effect(player);} levelUpModal.style.display='none';gameState='playing';updateUI();}
-  showCharacterSelectBtn.addEventListener('click', showCharacterSelect);
-  restartGameBtn.addEventListener('click', showCharacterSelect);
-  window.addEventListener('keydown', e => keys[e.key] = true);
-  window.addEventListener('keyup', e => keys[e.key] = false);
-  window.addEventListener('resize', resizeGame);
-  preloadImages();
-  initGame();
-  resizeGame();
-  draw();
-  function drawGrid(){if(!camera)return;ctx.strokeStyle="#c0b4a0";ctx.lineWidth=2;const gridSize=200;const startX=Math.floor(camera.x/gridSize)*gridSize;const startY=Math.floor(camera.y/gridSize)*gridSize;for(let x=startX;x<camera.x+canvas.width;x+=gridSize){ctx.beginPath();ctx.moveTo(x,camera.y);ctx.lineTo(x,camera.y+canvas.height);ctx.stroke();} for(let y=startY;y<camera.y+canvas.height;y+=gridSize){ctx.beginPath();ctx.moveTo(camera.x,y);ctx.lineTo(camera.x+canvas.width,y);ctx.stroke();}}
-  function updateEnemy(e,dt){if(e.isHit){e.hitTimer-=dt;if(e.hitTimer<=0)e.isHit=false;} const a=Math.atan2(player.y-e.y,player.x-e.x);e.x+=Math.cos(a)*e.speed*(dt/16.67);e.y+=Math.sin(a)*e.speed*(dt/16.67);const m=200,lB=camera.x-m,rB=camera.x+canvas.width+m,tB=camera.y-m,bB=camera.y+canvas.height+m;if(e.x<lB)e.x=rB;else if(e.x>rB)e.x=lB;if(e.y<tB)e.y=bB;else if(e.y>bB)e.y=tB;}
-  function spawnEnemies(){const s=(600000-gameTime)/1000;if(s>=540&&!boss){} const cC=SPAWNER_CLIPS.find(c=>s>=c.start&&s<c.end);if(!cC)return;const dM=1+(s/60)*0.08;cC.enemies.forEach(sI=>{if(!lastSpawnTimes[sI.type])lastSpawnTimes[sI.type]=0;if(s-lastSpawnTimes[sI.type]>sI.every){lastSpawnTimes[sI.type]=s;const n=Math.floor(Math.random()*(sI.count[1]-sI.count[0]+1))+sI.count[0];for(let i=0;i<n;i++){if(enemies.length>150)break;const a=Math.random()*Math.PI*2,r=Math.max(canvas.width/2,canvas.height/2)+100;const x=player.x+Math.cos(a)*r,y=player.y+Math.sin(a)*r;const eD=ENEMY_CATALOG[sI.type];enemies.push({...eD,x,y,hp:eD.hp*dM,speed:eD.spd*(1+(s/60)*0.02),id:Math.random(),type:sI.type,isHit:false,hitTimer:0});}}});}
-  function updateUI(){if(!player)return;hpBar.style.width=`${(player.hp/player.maxHp)*100}%`;hpText.textContent=`${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}`;levelDisplay.innerHTML=`레벨: ${player.level} <span class="text-sm">(${player.xp}/${player.xpToNextLevel} XP)</span>`;const m=Math.floor(gameTime/60000),s=Math.floor((gameTime%60000)/1000);timerDisplay.textContent=`${m}:${s.toString().padStart(2,'0')}`;coinDisplay.textContent=`코인: ${player.coins||0}`;weaponUI.innerHTML='<h4 class="font-bold">무기</h4>'+Object.values(player.weapons).map(w=>`<div>${w.name} Lv.${w.level}</div>`).join('');passiveUI.innerHTML='<h4 class="font-bold">패시브</h4>'+Object.values(player.passives).map(p=>`<div>${p.name} Lv.${p.level}</div>`).join('');}
-  function updateProjectile(p,dt){p.x+=Math.cos(p.angle)*p.speed*(dt/16.67);p.y+=Math.sin(p.angle)*p.speed*(dt/16.67);p.lived+=dt;}
-  function updatePickup(p){if(Math.hypot(p.x-player.x,p.y-player.y)<player.pickupRadius){const a=Math.atan2(player.y-p.y,player.x-p.x);p.x+=Math.cos(a)*8;p.y+=Math.sin(a)*8;}}
-  function findClosestEnemy(x,y){let c=null,dI=Infinity;[...enemies,boss].filter(Boolean).forEach(e=>{const d=Math.hypot(x-e.x,y-e.y);if(d<dI){dI=d;c=e;}});return c;}
-  function checkCollisions(){projectiles.forEach(p=>{enemies.forEach(e=>{if(!p.hitEnemies.includes(e.id)&&Math.hypot(p.x-e.x,p.y-e.y)<(p.size+e.size)/2){enemyTakeDamage(e,p.damage);p.hitEnemies.push(e.id);}});p.lived>2000||p.hitEnemies.length>=p.pierce?projectiles=projectiles.filter(i=>i!==p):null;}); enemies.forEach(e=>{if(Math.hypot(player.x-e.x,player.y-e.y)<(player.size+e.size)/2)playerTakeDamage(e.dmg);}); pickups=pickups.filter(p=>{if(Math.hypot(player.x-p.x,player.y-p.y)<(player.size/2+p.size)){collectPickup(p);return false;}return true;}); Object.values(player.weapons).filter(w=>w.type==='orbital').forEach(w=>{w.orbitals.forEach(o=>{const x=player.x+Math.cos(o.angle)*w.orbitRadius;const y=player.y+Math.sin(o.angle)*w.orbitRadius;enemies.forEach(e=>{if(!o.hitEnemies.includes(e.id)&&Math.hypot(x-e.x,y-e.y)<(15*GLOBAL_SCALE+e.size)/2){enemyTakeDamage(e,w.baseDmg);o.hitEnemies.push(e.id);setTimeout(()=>o.hitEnemies=o.hitEnemies.filter(id=>id!==e.id),500);}});});}); effects.filter(e=>e.type==='pulse').forEach(p=>{enemies.forEach(e=>{if(!p.hitEnemies.includes(e.id)){const dist=Math.hypot(e.x-p.x,e.y-p.y);if(Math.abs(dist-p.currentRadius)<(15+e.size)/2){enemyTakeDamage(e,p.damage);p.hitEnemies.push(e.id);}}});});}
-  function bossTakeDamage(d){if(!boss)return;boss.hp-=d;if(!boss.enraged&&boss.hp<=BOSS_CATALOG.sandpiper.hp/2)boss.enraged=true;if(boss.hp<=0){createPickups(boss,true);winGame("보스를 처치했습니다!");}}
-  function createPickups(e,isBoss=false){const n=isBoss?20:1;for(let i=0;i<n;i++){const r=Math.random(),o=(r-0.5)*20*GLOBAL_SCALE;if(r<0.8)pickups.push({x:e.x+o,y:e.y+o,type:'xp',value:e.xp,size:4*GLOBAL_SCALE,color:'#90ee90'});else if(r<0.9)pickups.push({x:e.x+o,y:e.y+o,type:'coin',value:1,size:6*GLOBAL_SCALE,color:'#ffd700'});else pickups.push({x:e.x+o,y:e.y+o,type:'health',value:5,size:7*GLOBAL_SCALE,color:'#add8e6'});}}
-  function collectPickup(p){if(p.type==='xp'){player.xp+=p.value*player.xpMultiplier;if(player.xp>=player.xpToNextLevel)levelUp();}else if(p.type==='coin'){player.coins=(player.coins||0)+p.value;updateUI();}else if(p.type==='health')player.hp=Math.min(player.maxHp,player.hp+p.value);updateUI();}
-  function showLevelUpOptions(){cardOptionsContainer.innerHTML='';const o=getLevelUpChoices(3);o.forEach(opt=>{const c=document.createElement('div');c.className='card ui-element w-60 h-80 p-4 rounded-lg cursor-pointer flex flex-col justify-center text-center';c.innerHTML=`<h3 class="text-xl font-bold mb-2">${opt.name}</h3><p class="text-gray-600">${opt.desc}</p>`;c.onclick=()=>selectUpgrade(opt.id);cardOptionsContainer.appendChild(c);});levelUpModal.style.display='flex';}
-  function getLevelUpChoices(n){const aW=Object.keys(WEAPON_DB).filter(w=>!player.weapons[w]),aP=Object.keys(PASSIVE_DB).filter(p=>!player.passives[p]||player.passives[p].level<5);let pool=[...Object.values(player.weapons).map(w=>({...w,upgrade:true})),...aW.map(id=>({id,...WEAPON_DB[id]})),...aP.map(id=>({id,...PASSIVE_DB[id]}))];pool.sort(()=>0.5-Math.random());return pool.slice(0,n);}
-  function addWeapon(id,isNew=true){if(isNew&&Object.keys(player.weapons).length>=6)return;player.weapons[id]={...player.weapons[id],id,...WEAPON_DB[id],timer:WEAPON_DB[id].cooldown*player.cooldownReduction,level:isNew?1:player.weapons[id].level};if(id==='W03'){player.weapons[id].orbitals=[];for(let i=0;i<player.weapons[id].count;i++){player.weapons[id].orbitals.push({angle:(Math.PI*2/player.weapons[id].count)*i,hitEnemies:[]});}}}
-  function levelUp(){gameState='paused';player.level++;player.xp-=player.xpToNextLevel;player.xpToNextLevel=Math.floor(player.xpToNextLevel*1.3+10);if(player.level===5&&player.growthStage===1){player.growthStage=2;player.size*=1.2;player.speed*=0.9;player.maxHp*=1.5;player.hp=player.maxHp;player.invincible=true;player.invincibleTimer=1500;} if(player.level===10&&player.growthStage===2){player.growthStage=3;player.size*=1.2;player.speed*=0.9;player.maxHp*=2;player.hp=player.maxHp;player.invincible=true;player.invincibleTimer=1500;} showLevelUpOptions();updateUI();}
-  function selectUpgrade(id){if(WEAPON_DB[id]){if(player.weapons[id]){player.weapons[id].baseDmg*=1.15;player.weapons[id].level++;if(id==='W03'){player.weapons[id].count++;addWeapon(id,false);}}else addWeapon(id,true);}else if(PASSIVE_DB[id]){if(player.passives[id])player.passives[id].level++;else player.passives[id]={id,name:PASSIVE_DB[id].name,level:1};PASSIVE_DB[id].effect(player);} levelUpModal.style.display='none';gameState='playing';updateUI();}
+  const asDate = (s) => s ? new Date(s) : new Date(0);
+
+  function placeholderSVG(text){
+    const t = encodeURIComponent(text);
+    const svg = `<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'>\n  <defs>\n    <linearGradient id='g' x1='0' y1='0' x2='1' y2='1'>\n      <stop offset='0%' stop-color='%23253041'/>\n      <stop offset='100%' stop-color='%23151c27'/>\n    </linearGradient>\n  </defs>\n  <rect width='100%' height='100%' fill='url(%23g)'/>\n  <text x='50%' y='50%' text-anchor='middle' fill='%239fb2c8' font-family='system-ui, -apple-system, Segoe UI, Roboto, Noto Sans KR' font-size='42' font-weight='700'>${t}</text>\n</svg>`;
+    return `data:image/svg+xml;utf8,${svg}`;
+  }
+
+  function cardTemplate(g){
+    const tags = (g.tags||[]).map(t => `<span class='tag'>#${escapeHtml(t)}</span>`).join('');
+    const updated = g.updated ? new Date(g.updated).toLocaleDateString('ko-KR') : '';
+    const img = g.thumb || placeholderSVG(g.title || 'Game');
+    return `
+        <article class="card">
+          <div class="thumb"><img alt="${escapeHtml(g.title||'게임 썸네일')}" loading="lazy" referrerpolicy="no-referrer" /></div>
+          <div class="card-body">
+            <h3 class="title">${escapeHtml(g.title||'제목 미정')}</h3>
+            <p class="desc">${escapeHtml(g.desc||'설명이 아직 없습니다.')}</p>
+            <div class="meta">
+              <div class="tags">${tags}</div>
+              <div>${updated?`업데이트 ${updated}`:''}</div>
+            </div>
+            <div class="actions">
+              <a class="play" href="${escapeAttr(g.url||'#')}" target="_blank" rel="noopener">▶ 플레이</a>
+            </div>
+          </div>
+        </article>`;
+  }
+
+  function escapeHtml(s){
+    return String(s).replace(/[&<>\"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;','\'':'&#39;'}[c]));
+  }
+  function escapeAttr(s){
+    return String(s).replace(/\"/g,'&quot;');
+  }
+
+  function applyImages(){
+    document.querySelectorAll('.card .thumb img').forEach((imgEl, i) => {
+      const g = current[i];
+      const src = (g && g.thumb) ? g.thumb : placeholderSVG(g?.title||'Game');
+      imgEl.src = src;
+      imgEl.onerror = () => { imgEl.src = placeholderSVG(g?.title||'Game'); };
+    });
+  }
+
+  let all = [];
+  let current = [];
+  let activeTag = null;
+
+  function render(){
+    let items = [...all];
+    const q = $q.value.trim().toLowerCase();
+    if(q){
+      items = items.filter(g =>
+              (g.title||'').toLowerCase().includes(q) ||
+              (g.desc||'').toLowerCase().includes(q) ||
+              (g.tags||[]).some(t => (t||'').toLowerCase().includes(q))
+      );
+    }
+    if(activeTag){
+      items = items.filter(g => (g.tags||[]).includes(activeTag));
+    }
+    const sort = $sort.value;
+    items.sort((a,b)=>{
+      if(sort==='updated-desc') return asDate(b.updated) - asDate(a.updated);
+      if(sort==='title-asc') return (a.title||'').localeCompare(b.title||'','ko');
+      if(sort==='title-desc') return (b.title||'').localeCompare(a.title||'','ko');
+      return 0;
+    });
+
+    current = items;
+    $count.textContent = String(items.length);
+    $grid.innerHTML = items.map(cardTemplate).join('');
+    $grid.setAttribute('aria-busy','false');
+    $empty.hidden = items.length > 0;
+    applyImages();
+  }
+
+  function buildFilterChips(){
+    const tagSet = new Set();
+    all.forEach(g => (g.tags||[]).forEach(t => t && tagSet.add(t)));
+    const tags = Array.from(tagSet).sort((a,b)=> a.localeCompare(b,'ko'));
+    $filters.innerHTML = ['전체', ...tags].map(tag=>{
+      const isAll = tag==='전체';
+      const active = isAll ? (activeTag===null) : (activeTag===tag);
+      return `<button class="chip ${active?'active':''}" data-tag="${isAll?"":escapeAttr(tag)}">${tag}</button>`;
+    }).join('');
+
+    $filters.querySelectorAll('button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const t = btn.dataset.tag;
+        activeTag = t ? t : null; // 빈 문자열이면 전체
+        $filters.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+        btn.classList.add('active');
+        render();
+      });
+    });
+  }
+
+  async function load(){
+    let data = DEFAULT_GAMES;
+    try{
+      const res = await fetch('games.json', { cache: 'no-store' });
+      if(res.ok){ data = await res.json(); }
+    }catch(e){ /* games.json이 없으면 기본값 사용 */ }
+    // 정규화
+    all = (Array.isArray(data)?data:[]).map(g=>({
+      title: g.title||'', url: g.url||'#', thumb: g.thumb||'', tags: Array.isArray(g.tags)?g.tags:[],
+      updated: g.updated||'', desc: g.desc||''
+    }));
+    buildFilterChips();
+    render();
+  }
+
+  $q.addEventListener('input', render);
+  $sort.addEventListener('change', render);
+
+  load();
 </script>
 </body>
 </html>
-
