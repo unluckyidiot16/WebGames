@@ -54,5 +54,13 @@
     "tags": ["교육"],
     "updated": "2025-10-01",
     "desc": "갯벌 탐사 게임"
+  },
+  {
+    "title": "MudSurvivor",
+    "url": "https://unluckyidiot16.github.io/assets-common/MudSurvivor/MudSurvivor.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/MudSurvivor/MudSurvivor.png",
+    "tags": ["교육"],
+    "updated": "2025-10-01",
+    "desc": "갯벌 생존 게임"
   }
 ]
