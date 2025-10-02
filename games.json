@@ -86,6 +86,14 @@
     "tags": ["교육"],
     "updated": "2025-10-02",
     "desc": "나누기와 나눗셈 게임"
+  },
+  {
+    "title": "ToBeAPresident",
+    "url": "https://unluckyidiot16.github.io/assets-common/ToBeAPresident/ToBeAPresident.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/ToBeAPresident/ToBeAPresident.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "도덕 및 사회 정책 의사결정 게임"
   }
   
 ]
