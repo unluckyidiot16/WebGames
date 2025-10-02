@@ -70,6 +70,22 @@
     "tags": ["교육"],
     "updated": "2025-10-02",
     "desc": "수 감각을 키우는 숫자 합 맞추기 게임"
+  },
+  {
+    "title": "SocDevSolitaire",
+    "url": "https://unluckyidiot16.github.io/assets-common/SocDevSolitaire/SocDevSolitaire.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/SocDevSolitaire/SocDevSolitaire.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "작물 키우기 사회 게임"
+  },
+  {
+    "title": "QuadKicker",
+    "url": "https://unluckyidiot16.github.io/assets-common/QuadKicker/QuadKicker.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/QuadKicker/QuadKicker.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "나누기와 나눗셈 게임"
   }
   
 ]
