@@ -94,6 +94,14 @@
     "tags": ["교육"],
     "updated": "2025-10-02",
     "desc": "도덕 및 사회 정책 의사결정 게임"
+  },
+  {
+    "title": "MyTinyPlants",
+    "url": "https://unluckyidiot16.github.io/assets-common/ToBeAPresident/MyTinyPlants.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/ToBeAPresident/MyTinyPlants.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "식물 키우기 게임"
   }
   
 ]
