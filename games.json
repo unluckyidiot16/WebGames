@@ -102,6 +102,14 @@
     "tags": ["교육"],
     "updated": "2025-10-02",
     "desc": "식물 키우기 게임"
+  },
+  {
+    "title": "StrangeSeedFarm",
+    "url": "https://unluckyidiot16.github.io/assets-common/StrangeSeedFarm/StrangeSeedFarm.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/StrangeSeedFarm/StrangeSeedFarm.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "식물 키우기 게임"
   }
   
 ]
