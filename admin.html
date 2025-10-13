@@ -2,69 +2,213 @@
 <meta charset="utf-8" />
 <title>Admin (RPC)</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcodejs/qrcode.min.js"></script>
+
 <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; margin: 24px; }
-    button { padding: 10px 14px; border: 1px solid #ccc; border-radius: 10px; margin-right: 8px; cursor: pointer; }
-    pre { background:#111; color:#0f0; padding:16px; border-radius:12px; overflow:auto; }
-    input, select { padding: 8px 10px; border:1px solid #ccc; border-radius:8px; margin-right: 8px; }
-    .row { margin: 12px 0; }
-    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
-    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-    th { background: #f7f7f7; }
+    :root {
+        --card: #ffffff; --muted:#f6f7f9; --line:#e6e8ee; --text:#1b1f23;
+        --primary:#0ea5e9; --ok:#16a34a; --warn:#f59e0b;
+    }
+    * { box-sizing: border-box; }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif;
+        margin: 0; color: var(--text); background: #fafbfc;
+    }
+    header {
+        position: sticky; top:0; z-index:10; background:#fff; border-bottom:1px solid var(--line);
+        padding: 14px 18px; display:flex; gap:12px; align-items:center; justify-content:space-between;
+    }
+    .tabs { display:flex; gap:8px; flex-wrap:wrap; }
+    .tabbtn {
+        padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; cursor:pointer;
+    }
+    .tabbtn.active { background: var(--primary); color:#fff; border-color: var(--primary); }
+    main { padding: 18px; max-width: 1100px; margin: 0 auto; }
+    .card { background: var(--card); border:1px solid var(--line); border-radius:14px; padding:16px; margin-bottom:16px; }
+    .row { display:flex; gap:8px; flex-wrap:wrap; align-items:center; margin: 10px 0; }
+    input, select, textarea {
+        padding:10px 12px; border:1px solid var(--line); border-radius:10px; background:#fff; min-height:40px;
+    }
+    button { padding:10px 14px; border:1px solid var(--line); border-radius:10px; background:#fff; cursor:pointer; }
+    button.primary { background: var(--primary); color:#fff; border-color: var(--primary); }
+    button.ghost { background:#fff; }
+    .muted { color:#6b7280; font-size: 13px; }
+    .grid { display:grid; gap:12px; }
+    .grid.catalog { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+    .gamecard { border:1px solid var(--line); border-radius:12px; padding:10px; background:#fff; }
+    .gameimg { height:110px; background:var(--muted); border-radius:8px; display:flex; align-items:center; justify-content:center; overflow:hidden; margin-bottom:8px; }
+    .gameimg img { max-width:100%; max-height:110px; display:block; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border:1px solid var(--line); padding:8px; text-align:left; }
+    th { background: var(--muted); }
+    code.inline { background:#f1f5f9; padding:2px 6px; border-radius:6px; border:1px solid var(--line); }
+    #qrWrap > div { display:inline-block;margin:8px;padding:8px;border:1px solid var(--line);border-radius:12px;text-align:center;background:#fff; }
 </style>
+
+<header>
+    <div class="row">
+        <strong>Admin</strong>
+        <button onclick="signIn()" class="ghost">로그인</button>
+    </div>
+    <div class="tabs">
+        <button class="tabbtn active" data-tab="tab-class" onclick="showTab('tab-class', this)">반/QR</button>
+        <button class="tabbtn" data-tab="tab-index" onclick="showTab('tab-index', this)">인덱스/카탈로그</button>
+        <button class="tabbtn" data-tab="tab-launch" onclick="showTab('tab-launch', this)">시작 버튼 설정</button>
+        <button class="tabbtn" data-tab="tab-analytics" onclick="showTab('tab-analytics', this)">분석(스냅샷)</button>
+    </div>
+</header>
+
+<main>
+    <!-- 반/QR -->
+    <section id="tab-class" class="tab card">
+        <h2>반 관리 & 학생 코드/QR</h2>
+        <div class="row">
+            <button onclick="createTempClass()" class="primary">임시 반 생성</button>
+            <button onclick="exportCodes()">코드 CSV 저장</button>
+            <span class="muted">생성 후 아래에서 반 선택 가능</span>
+        </div>
+
+        <div class="row">
+            <button onclick="loadMyClasses(true)">내 반 목록 불러오기</button>
+            <select id="classSelect" style="min-width:360px"></select>
+            <button onclick="chooseSelectedClass()">선택한 반으로 설정</button>
+            <button onclick="setClassIdManually()">class_id 수동 입력</button>
+        </div>
+        <div class="row">현재 class_id: <code class="inline" id="classId"></code></div>
+
+        <hr style="border:none;border-top:1px solid var(--line);margin:12px 0">
+
+        <h3>QR 토큰</h3>
+        <div class="row">
+            <input id="ttlMin" type="number" value="60" style="width:120px"> 분 유효
+            <label><input type="checkbox" id="singleUse"> 싱글 유즈</label>
+            <button onclick="issueQRTokens()">QR 토큰 발급</button>
+            <button onclick="renderQRTokens()">QR 표시</button>
+        </div>
+        <div id="qrWrap" class="row"></div>
+    </section>
+
+    <!-- 인덱스/카탈로그 -->
+    <section id="tab-index" class="tab card" style="display:none">
+        <h2>맞춤 인덱스 (게임 카탈로그에서 토글 선택)</h2>
+
+        <div class="card" style="background:#fbfdff">
+            <div class="row">
+                <input id="catalogUrl" style="min-width:520px" placeholder="게임 목록 JSON URL (예: https://.../games.json)">
+                <input id="catalogFilter" placeholder="검색(제목/태그)" oninput="filterCatalog()">
+                <button onclick="loadCatalog()" class="primary">불러오기</button>
+                <button onclick="selectAllGames(true)">전체 선택</button>
+                <button onclick="selectAllGames(false)">전체 해제</button>
+            </div>
+            <div id="catalogGrid" class="grid catalog"></div>
+        </div>
+
+        <div class="card">
+            <div class="row">
+                <input id="idxSlug"  placeholder="슬러그 (예: week1)">
+                <input id="idxTitle" placeholder="제목 (예: 1주차 활동)" style="min-width:320px">
+                <button onclick="saveIndexFromSelection()" class="primary">선택 항목으로 인덱스 저장</button>
+                <button onclick="listIndexes()">내 인덱스 보기</button>
+            </div>
+            <div class="row">
+                <select id="idxSelect" style="min-width:360px"></select>
+                <button onclick="assignIndexToClass()">현재 반 전체 배정</button>
+                <button onclick="assignIndexToLabels()">선택 학생 라벨 배정</button>
+            </div>
+            <p class="muted">* 저장 시 DB 테이블 <code class="inline">indexes</code> / <code class="inline">index_assignments</code> 를 사용합니다.</p>
+        </div>
+    </section>
+
+    <!-- 시작 버튼 설정 -->
+    <section id="tab-launch" class="tab card" style="display:none">
+        <h2>학생 페이지의 “게임 시작” 버튼</h2>
+        <div class="row">
+            <button onclick="loadLaunchSettings()">불러오기</button>
+            <input id="launchUrl" placeholder="게임 URL (예: https://.../FlappyBoat.html)" style="min-width:520px">
+            <label><input type="checkbox" id="allowLaunch"> 게임 시작 버튼 활성화</label>
+            <button onclick="saveLaunchSettings()" class="primary">설정 저장</button>
+        </div>
+        <p class="muted">* 학생은 <code class="inline">student_view.html</code> 에서 토큰/코드로 접속 시, 허용되면 해당 URL로 바로 이동합니다.</p>
+    </section>
+
+    <!-- 분석(스냅샷) -->
+    <section id="tab-analytics" class="tab card" style="display:none">
+        <h2>반 스냅샷</h2>
+        <div class="row">
+            <button onclick="showSnapshot()" class="primary">내 반 스냅샷 보기</button>
+        </div>
+        <canvas id="classRadar" width="360" height="360" style="max-width:420px"></canvas>
+        <div class="card">
+            <table>
+                <thead>
+                <tr>
+                    <th>학생</th><th>Reaction</th><th>Timing</th><th>Literacy</th><th>Problem</th><th>Strategy</th><th>Persistence</th><th>기록시각</th>
+                </tr>
+                </thead>
+                <tbody id="snapshotBody"></tbody>
+            </table>
+        </div>
+
+        <pre id="out" style="white-space:pre-wrap"></pre>
+    </section>
+</main>
+
 <script>
-    /** === 설정 === **/
+    /** === Supabase 설정 === **/
     const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
     const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
     const supa = supabase.createClient(SUPA_URL, ANON_KEY);
 
-    /** === 상태 === **/
+    /** === 전역 상태 === **/
     let lastClassId = null;
-    let lastCodes = null;
+    let lastCodes = null;        // createTempClass 응답 codes (필요시 사용)
+    let lastTokens = [];         // [{label, token}]
     let radarChart = null;
+
+    // 학생 뷰 페이지(토큰 QR 링크용)
+    const STUDENT_VIEW_URL = "https://unluckyidiot16.github.io/WebGames/student_view.html";
+
+    /** === 유틸 / 탭 === **/
+    function showTab(id, btn){
+        document.querySelectorAll('.tab').forEach(s => s.style.display='none');
+        document.getElementById(id).style.display='block';
+        document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+    }
 
     /** === 인증 === **/
     async function signIn(){
         const email = prompt("이메일:");
         const password = prompt("비밀번호:");
-        const { data, error } = await supa.auth.signInWithPassword({ email, password });
+        const { error } = await supa.auth.signInWithPassword({ email, password });
         if (error) alert(error.message); else alert("로그인 완료");
     }
 
-    /** === 임시 반 생성 (RPC) === **/
+    /** === 반/코드 === **/
     async function createTempClass(){
         const session = (await supa.auth.getSession()).data.session;
         if (!session) return alert("먼저 로그인하세요.");
-
         const name = prompt("반 이름", "Temp Class");
         const count = Number(prompt("학생 수", "10"));
         const { data, error } = await supa.rpc('rpc_create_temp_class', { _name: name, _student_count: count });
         if (error) return alert(error.message);
 
-        // RPC는 { class_id, codes } 형태를 반환
         lastClassId = data.class_id || data.class?.id || null;
         lastCodes   = data.codes || [];
-
         document.getElementById("classId").textContent = lastClassId || '';
         document.getElementById("out").textContent = JSON.stringify(data, null, 2);
-
-        // 새로 만든 반을 드롭다운에 반영
         await loadMyClasses(true);
     }
 
-    /** === 내 반 목록 불러오기 === **/
     async function loadMyClasses(selectNewest=false){
         const session = (await supa.auth.getSession()).data.session;
         if (!session) return alert("먼저 로그인하세요.");
 
-        const { data, error } = await supa
-            .from('classes')
-            .select('id,name,created_at')
-            .order('created_at', { ascending: false });
-
+        const { data, error } = await supa.from('classes').select('id,name,created_at').order('created_at', { ascending: false });
         if (error) return alert(error.message);
 
         const sel = document.getElementById('classSelect');
@@ -75,95 +219,56 @@
             opt.textContent = `${cls.name} — ${cls.id}`;
             sel.appendChild(opt);
         });
-
         if (data?.length){
-            if (selectNewest || !lastClassId) {
-                lastClassId = data[0].id;
-            }
+            if (selectNewest || !lastClassId) lastClassId = data[0].id;
             sel.value = lastClassId;
             document.getElementById("classId").textContent = lastClassId;
         }
     }
-
-    /** === 드롭다운에서 반 선택 === **/
     function chooseSelectedClass(){
         const sel = document.getElementById('classSelect');
         if (!sel.value) return alert("반을 선택하세요.");
         lastClassId = sel.value;
         document.getElementById("classId").textContent = lastClassId;
     }
-
-    /** === class_id 수동 입력 === **/
     function setClassIdManually(){
-        const id = prompt("class_id 입력:");
-        if (!id) return;
+        const id = prompt("class_id 입력:"); if (!id) return;
         lastClassId = id.trim();
         document.getElementById("classId").textContent = lastClassId;
     }
-
-    /** === 반 스냅샷 보기 (RPC) === **/
-    async function showSnapshot(){
-        if (!lastClassId) return alert("먼저 반을 선택하거나 class_id를 설정하세요.");
-
-        const { data, error } = await supa.rpc('rpc_class_snapshot', { _class_id: lastClassId });
-        if (error) return alert(error.message);
-
-        // 평균 레이더 차트
-        const keys = ['reaction','timing','literacy','problem','strategy','persistence'];
-        const sums = {reaction:0,timing:0,literacy:0,problem:0,strategy:0,persistence:0};
-        let cnt = 0;
-        (data||[]).forEach(r=>{
-            if (!r.axes) return;
-            cnt++;
-            keys.forEach(k=> sums[k]+= (r.axes[k]??0));
-        });
-        const avg = keys.map(k => cnt? (sums[k]/cnt) : 0);
-
-        const ctx = document.getElementById('classRadar').getContext('2d');
-        if (radarChart) radarChart.destroy();
-        radarChart = new Chart(ctx, {
-            type:'radar',
-            data:{ labels: ['Reaction','Timing','Literacy','Problem','Strategy','Persistence'],
-                datasets:[{ label:'반 평균', data: avg }] },
-            options:{ scales:{ r:{ min:0, max:1, ticks:{ stepSize:0.2 } } }, plugins:{ legend:{ display:false } } }
-        });
-
-        // 학생별 최신 스냅샷 테이블
-        const tbody = document.getElementById('snapshotBody');
-        tbody.innerHTML = '';
-        (data||[]).forEach(r=>{
-            const tr = document.createElement('tr');
-            const axes = r.axes || {};
-            tr.innerHTML = `
-      <td>${r.display_label ?? ''}</td>
-      <td>${(axes.reaction ?? 0).toFixed(2)}</td>
-      <td>${(axes.timing ?? 0).toFixed(2)}</td>
-      <td>${(axes.literacy ?? 0).toFixed(2)}</td>
-      <td>${(axes.problem ?? 0).toFixed(2)}</td>
-      <td>${(axes.strategy ?? 0).toFixed(2)}</td>
-      <td>${(axes.persistence ?? 0).toFixed(2)}</td>
-      <td>${r.created_at ? new Date(r.created_at).toLocaleString() : '-'}</td>
-    `;
-            tbody.appendChild(tr);
-        });
-    }
-
-    /** === 코드 CSV 저장 === **/
     function exportCodes(){
         if (!lastCodes || !lastCodes.length) return alert("먼저 임시 반을 생성하세요.");
         const rows = ['code', ...lastCodes];
         const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = 'student_codes.csv';
-        a.click();
+        const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'student_codes.csv'; a.click();
     }
 
+    /** === QR 토큰 === **/
+    async function issueQRTokens(){
+        if (!lastClassId) return alert("먼저 반을 선택하세요.");
+        const ttl = Number(document.getElementById('ttlMin').value || '60');
+        const singleUse = document.getElementById('singleUse').checked;
+        const { data, error } = await supa.rpc('rpc_issue_qr_tokens', { _class_id: lastClassId, _ttl_minutes: ttl, _single_use: singleUse });
+        if (error) return alert(error.message);
+        lastTokens = (data || []).map(d => ({ label: d.display_label || '', token: d.token }));
+        alert(`발급 완료: ${lastTokens.length}건`);
+    }
+    function renderQRTokens(){
+        if (!lastTokens.length) return alert("먼저 'QR 토큰 발급'을 실행하세요.");
+        const box = document.getElementById('qrWrap'); box.innerHTML = '';
+        lastTokens.forEach((row, i) => {
+            const url = `${STUDENT_VIEW_URL}?t=${encodeURIComponent(row.token)}`;
+            const card = document.createElement('div');
+            const ctn = document.createElement('div');
+            new QRCode(ctn, { text: url, width: 128, height: 128 });
+            const cap = document.createElement('div'); cap.textContent = row.label || ('S'+String(i+1).padStart(2,'0')); cap.style.marginTop='6px';
+            const small = document.createElement('div'); small.textContent = url; small.style.cssText='font-size:12px;color:#888;max-width:180px;overflow-wrap:anywhere;margin-top:4px;';
+            card.appendChild(ctn); card.appendChild(cap); card.appendChild(small);
+            box.appendChild(card);
+        });
+    }
 
-    // 학생 뷰 페이지 절대/상대 경로
-    const STUDENT_VIEW_URL = "https://unluckyidiot16.github.io/WebGames/student_view.html"; // 배포 위치로 교체
-    let lastTokens = []; // [{label, token}...]
-
+    /** === 시작 버튼 설정 === **/
     async function loadLaunchSettings(){
         if (!lastClassId) return alert("먼저 반을 선택하세요.");
         const { data, error } = await supa.rpc('rpc_get_class_settings', { _class_id: lastClassId });
@@ -172,7 +277,6 @@
         document.getElementById('allowLaunch').checked = !!row.allow_launch;
         document.getElementById('launchUrl').value = row.launch_game_url || '';
     }
-
     async function saveLaunchSettings(){
         if (!lastClassId) return alert("먼저 반을 선택하세요.");
         const allow = document.getElementById('allowLaunch').checked;
@@ -182,99 +286,143 @@
         alert('저장 완료');
     }
 
-    async function issueQRTokens(){
+    /** === 분석(스냅샷) === **/
+    async function showSnapshot(){
         if (!lastClassId) return alert("먼저 반을 선택하세요.");
-        const ttl = Number(document.getElementById('ttlMin').value || '60');
-        const singleUse = document.getElementById('singleUse').checked;
-        const { data, error } = await supa.rpc('rpc_issue_qr_tokens', {
-            _class_id: lastClassId, _ttl_minutes: ttl, _single_use: singleUse
-        });
+        const { data, error } = await supa.rpc('rpc_class_snapshot', { _class_id: lastClassId });
         if (error) return alert(error.message);
-        // [{display_label, token}]
-        lastTokens = (data || []).map(d => ({ label: d.display_label || '', token: d.token }));
-        alert(`발급 완료: ${lastTokens.length}건`);
-    }
 
-    function renderQRTokens(){
-        if (!lastTokens.length) return alert("먼저 'QR 토큰 발급'을 실행하세요.");
-        const box = document.getElementById('qrWrap');
-        box.innerHTML = '';
-        lastTokens.forEach((row, i) => {
-            const url = `${STUDENT_VIEW_URL}?t=${encodeURIComponent(row.token)}`;
-            const card = document.createElement('div');
-            card.style.cssText = 'display:inline-block;margin:8px;padding:8px;border:1px solid #eee;border-radius:10px;text-align:center;';
-            const ctn = document.createElement('div');
-            new QRCode(ctn, { text: url, width: 128, height: 128 });
-            const cap = document.createElement('div');
-            const label = row.label || ('S'+String(i+1).padStart(2,'0'));
-            cap.textContent = `${label}`;
-            cap.style.marginTop = '6px';
-            const small = document.createElement('div');
-            small.textContent = url;
-            small.style.cssText = 'font-size:12px;color:#888;max-width:180px;overflow-wrap:anywhere;margin-top:4px;';
-            card.appendChild(ctn); card.appendChild(cap); card.appendChild(small);
-            box.appendChild(card);
+        const keys = ['reaction','timing','literacy','problem','strategy','persistence'];
+        const sums = {reaction:0,timing:0,literacy:0,problem:0,strategy:0,persistence:0}; let cnt=0;
+        (data||[]).forEach(r => { if (!r.axes) return; cnt++; keys.forEach(k=> sums[k]+= (r.axes[k]??0)); });
+        const avg = keys.map(k => cnt? (sums[k]/cnt) : 0);
+
+        const ctx = document.getElementById('classRadar').getContext('2d');
+        if (radarChart) radarChart.destroy();
+        radarChart = new Chart(ctx, { type:'radar',
+            data:{ labels: ['Reaction','Timing','Literacy','Problem','Strategy','Persistence'], datasets:[{ label:'반 평균', data: avg }] },
+            options:{ scales:{ r:{ min:0, max:1, ticks:{ stepSize:0.2 } } }, plugins:{ legend:{ display:false } } }
         });
+
+        const tbody = document.getElementById('snapshotBody'); tbody.innerHTML='';
+        (data||[]).forEach(r=>{
+            const a=r.axes||{}; const tr=document.createElement('tr');
+            tr.innerHTML = `
+      <td>${r.display_label ?? ''}</td>
+      <td>${(a.reaction ?? 0).toFixed(2)}</td>
+      <td>${(a.timing ?? 0).toFixed(2)}</td>
+      <td>${(a.literacy ?? 0).toFixed(2)}</td>
+      <td>${(a.problem ?? 0).toFixed(2)}</td>
+      <td>${(a.strategy ?? 0).toFixed(2)}</td>
+      <td>${(a.persistence ?? 0).toFixed(2)}</td>
+      <td>${r.created_at ? new Date(r.created_at).toLocaleString() : '-'}</td>`;
+            tbody.appendChild(tr);
+        });
+        document.getElementById('out').textContent = JSON.stringify(data, null, 2);
     }
-    
-    
+
+    /** === 인덱스/카탈로그 === **/
+    let CATALOG = [];                 // 전체 게임 목록
+    let CATALOG_VIEW = [];            // 필터 적용 후
+    let SELECTED_SLUGS = new Set();   // 선택된 게임 slug
+
+    function normalizeGame(g, idx){
+        const slug = (g.slug || g.id || (g.title||('game'+idx))).toString()
+            .toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-_]/g,'');
+        return {
+            slug,
+            title: g.title || ('Game '+idx),
+            url: g.url || '#',
+            thumb: g.thumb || g.image || '',
+            desc: g.desc || g.description || '',
+            tags: Array.isArray(g.tags)? g.tags : (g.tags ? [g.tags] : []),
+            updated: g.updated || g.updated_at || ''
+        };
+    }
+    function gameCardHTML(game){
+        const checked = SELECTED_SLUGS.has(game.slug) ? 'checked' : '';
+        const tags = (game.tags||[]).join(', ');
+        return `
+  <div class="gamecard">
+    <div class="gameimg">${game.thumb ? `<img src="${game.thumb}" alt="">` : '<div class="muted">No image</div>'}</div>
+    <div style="font-weight:600">${game.title}</div>
+    <div class="muted" style="word-break:break-all">${game.url}</div>
+    <div class="muted" style="margin:6px 0">${tags}</div>
+    <label class="row" style="margin:6px 0 0">
+      <input type="checkbox" data-slug="${game.slug}" ${checked} onchange="toggleSelect(this)">
+      이 게임 포함
+    </label>
+  </div>`;
+    }
+    function renderCatalog(){
+        const grid = document.getElementById('catalogGrid');
+        grid.innerHTML = CATALOG_VIEW.map(gameCardHTML).join('');
+    }
+    function filterCatalog(){
+        const q = (document.getElementById('catalogFilter').value||'').toLowerCase().trim();
+        if (!q) { CATALOG_VIEW = [...CATALOG]; renderCatalog(); return; }
+        CATALOG_VIEW = CATALOG.filter(g => (g.title||'').toLowerCase().includes(q) ||
+            (g.tags||[]).join(',').toLowerCase().includes(q));
+        renderCatalog();
+    }
+    function toggleSelect(cb){
+        const slug = cb.getAttribute('data-slug');
+        if (cb.checked) SELECTED_SLUGS.add(slug); else SELECTED_SLUGS.delete(slug);
+    }
+    function selectAllGames(on){
+        SELECTED_SLUGS = new Set(on ? CATALOG.map(g=>g.slug) : []);
+        renderCatalog();
+    }
+
+    async function loadCatalog(){
+        const url = document.getElementById('catalogUrl').value.trim();
+        if (!url) return alert('게임 목록 JSON URL을 입력하세요.');
+        try{
+            const res = await fetch(url, { cache:'no-cache' });
+            if (!res.ok) throw new Error(await res.text());
+            const arr = await res.json();
+            if (!Array.isArray(arr)) throw new Error('JSON 배열 형식이 아닙니다.');
+            CATALOG = arr.map(normalizeGame);
+            CATALOG_VIEW = [...CATALOG];
+            SELECTED_SLUGS = new Set();
+            renderCatalog();
+            alert(`불러오기 완료: ${CATALOG.length}개`);
+        }catch(e){ alert('불러오기 실패: '+e.message); }
+    }
+
+    async function saveIndexFromSelection(){
+        const slug  = (document.getElementById('idxSlug').value||'').trim();
+        const title = (document.getElementById('idxTitle').value||'').trim();
+        if (!slug || !title) return alert('슬러그/제목을 입력하세요.');
+        if (!CATALOG.length) return alert('먼저 게임 카탈로그를 불러오세요.');
+        const chosen = CATALOG.filter(g => SELECTED_SLUGS.has(g.slug))
+            .map(g => ({ title:g.title, url:g.url, thumb:g.thumb, desc:g.desc, tags:g.tags, updated:g.updated }));
+        if (!chosen.length) return alert('선택된 게임이 없습니다.');
+        const { error } = await supa.rpc('rpc_upsert_index', { _slug: slug, _title: title, _games: chosen });
+        if (error) return alert(error.message);
+        alert('인덱스 저장 완료'); listIndexes();
+    }
+
+    async function listIndexes(){
+        const { data, error } = await supa.rpc('rpc_list_indexes');
+        if (error) return alert(error.message);
+        const sel = document.getElementById('idxSelect'); sel.innerHTML='';
+        (data||[]).forEach(i => { const opt=document.createElement('option'); opt.value=i.slug; opt.textContent=`${i.title} (${i.slug})`; sel.appendChild(opt); });
+    }
+    async function assignIndexToClass(){
+        if (!lastClassId) return alert('먼저 반을 선택하세요.');
+        const slug = document.getElementById('idxSelect').value; if (!slug) return alert('인덱스를 선택하세요.');
+        const { error } = await supa.rpc('rpc_assign_index_class', { _class_id: lastClassId, _slug: slug });
+        if (error) return alert(error.message);
+        alert('반 전체에 배정 완료');
+    }
+    async function assignIndexToLabels(){
+        if (!lastClassId) return alert('먼저 반을 선택하세요.');
+        const slug = document.getElementById('idxSelect').value; if (!slug) return alert('인덱스를 선택하세요.');
+        const labels = prompt('배정할 학생 라벨을 쉼표로 구분해 입력 (예: S01,S02,S03)')||'';
+        const arr = labels.split(',').map(s=>s.trim()).filter(Boolean);
+        const { error } = await supa.rpc('rpc_assign_index_students', { _class_id: lastClassId, _slug: slug, _labels: arr });
+        if (error) return alert(error.message);
+        alert('선택 학생 배정 완료');
+    }
 </script>
-
-<h1>임시 반 & 학생 코드 발급 (RPC)</h1>
-
-<div class="row">
-    <button onclick="signIn()">로그인</button>
-    <button onclick="createTempClass()">임시 반 생성</button>
-    <button onclick="exportCodes()">코드 CSV 저장</button>
-</div>
-
-<div class="row">
-    <button onclick="loadMyClasses()">내 반 목록 불러오기</button>
-    <select id="classSelect" style="min-width: 360px;"></select>
-    <button onclick="chooseSelectedClass()">선택한 반으로 설정</button>
-    <button onclick="setClassIdManually()">class_id 수동 입력</button>
-</div>
-
-<div class="row">class_id: <code id="classId"></code></div>
-
-<div class="row">
-    <button onclick="showSnapshot()">내 반 스냅샷 보기</button>
-    <button onclick="renderQRCodes()">QR 표시</button>
-<div id="qrWrap" style="margin-top:12px;"></div>
-    
-<div class="row">
-    <input id="launchUrl" placeholder="게임 URL (예: https://.../FlappyBoat.html)" style="min-width:420px;">
-    <label><input type="checkbox" id="allowLaunch"> 게임 시작 버튼 활성화</label>
-    <button onclick="saveLaunchSettings()">설정 저장</button>
-</div>
-
-<div class="row">
-    <input id="ttlMin" type="number" value="60" style="width:100px;"> 분 유효
-    <label><input type="checkbox" id="singleUse"> 싱글 유즈</label>
-    <button onclick="issueQRTokens()">선택한 반 QR 토큰 발급</button>
-    <button onclick="renderQRTokens()">QR 표시</button>
-</div>
-    
-<div id="qrWrap" style="margin-top:12px;"></div>
-    
-    
-    
-<canvas id="classRadar" width="360" height="360"></canvas>
-
-<table>
-    <thead>
-    <tr>
-        <th>학생</th>
-        <th>Reaction</th>
-        <th>Timing</th>
-        <th>Literacy</th>
-        <th>Problem</th>
-        <th>Strategy</th>
-        <th>Persistence</th>
-        <th>기록시각</th>
-    </tr>
-    </thead>
-    <tbody id="snapshotBody"></tbody>
-</table>
-
-<pre id="out"></pre>

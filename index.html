@@ -11,7 +11,7 @@
   style-src  'self' 'unsafe-inline';
   img-src    'self' https://unluckyidiot16.github.io https://api.qrserver.com data:;
   font-src   'self';
-  connect-src 'self';
+  connect-src 'self' https://nfkjolrlegftyvxyrpfr.supabase.co;
   frame-src  'self';
   object-src 'none';
   base-uri   'self';
@@ -147,6 +147,58 @@
     // --- Security: URL whitelist & helpers ---
     const ALLOWED_HOSTS = ['unluckyidiot16.github.io'];
     const ALLOWED_PATH_PREFIXES = ['/WebGames/', '/assets-common/'];
+
+    const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
+    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
+
+    function qp(k){ return new URLSearchParams(location.search).get(k); }
+
+    async function load(){
+        const t = qp('t');         // 토큰으로 열렸는지?
+        const code = qp('code');   // 코드로 열렸는지?
+
+        // 1) 개인 인덱스 우선: REST RPC 호출
+        if (t || code){
+            try{
+                const rpc = t ? 'rpc_student_index_games_by_token' : 'rpc_student_index_games_by_code';
+                const body = t ? { _token: t } : { _code: code };
+                const res = await fetch(`${SUPA_URL}/rest/v1/rpc/${rpc}`, {
+                    method: 'POST',
+                    headers: {
+                        'apikey': ANON_KEY,
+                        'Authorization': `Bearer ${ANON_KEY}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(body)
+                });
+                if (res.ok){
+                    const arr = await res.json();            // JSON 배열 기대
+                    if (Array.isArray(arr) && arr.length){
+                        all = arr.map(g => ({
+                            title: g.title||'', url: g.url||'#', thumb: g.thumb||'',
+                            tags: Array.isArray(g.tags)?g.tags:[], updated: g.updated||'', desc: g.desc||''
+                        }));
+                        buildFilterChips();
+                        render();
+                        return; // 개인 인덱스 렌더 완료
+                    }
+                }
+            }catch(e){ console.warn('개인 인덱스 로드 실패, 기본 목록으로 폴백', e); }
+        }
+
+        // 2) 폴백: 기존 games.json
+        let data = DEFAULT_GAMES;
+        try{
+            const res = await fetch('games.json', {cache:'no-cache'});
+            if (res.ok) data = await res.json();
+        }catch(e){ console.warn('games.json 불러오기 실패, 기본 목록 사용', e); }
+        all = data.map(g => ({
+            title: g.title||'', url: g.url||'#', thumb: g.thumb||'',
+            tags: Array.isArray(g.tags)?g.tags:[], updated: g.updated||'', desc: g.desc||''
+        }));
+        buildFilterChips();
+        render();
+    }
 
     function validateGameUrl(raw){
         try{
