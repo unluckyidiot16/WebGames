@@ -162,6 +162,8 @@
     const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
     const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
     const supa = supabase.createClient(SUPA_URL, ANON_KEY);
+    const DEFAULT_CATALOG_URL = "https://unluckyidiot16.github.io/WebGames/games.json";
+
 
     /** === 전역 상태 === **/
     let lastClassId = null;
@@ -174,10 +176,23 @@
 
     /** === 유틸 / 탭 === **/
     function showTab(id, btn){
-        document.querySelectorAll('.tab').forEach(s => s.style.display='none');
-        document.getElementById(id).style.display='block';
-        document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
-        if (btn) btn.classList.add('active');
+        let _catalogLoadedOnce = false;
+        function showTab(id, btn){
+            document.querySelectorAll('.tab').forEach(s => s.style.display='none');
+            document.getElementById(id).style.display='block';
+            document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+
+            if (id === 'tab-index' && !_catalogLoadedOnce) {
+                const el = document.getElementById('catalogUrl');
+                if (el && !el.value) el.value = DEFAULT_CATALOG_URL;
+                // 자동 로드 시도
+                if (el && el.value) {
+                    loadCatalog().catch(()=>{ /* 로드 실패해도 무시 */ });
+                    _catalogLoadedOnce = true;
+                }
+            }
+        }
     }
 
     /** === 인증 === **/
