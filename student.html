@@ -1,0 +1,81 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Student (RPC)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; margin: 24px; }
+  button { padding: 10px 14px; border: 1px solid #ccc; border-radius: 10px; margin-right: 8px; cursor: pointer; }
+  canvas { max-width: 420px; }
+</style>
+<script>
+// Replace:
+const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
+const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
+const supa = supabase.createClient(SUPA_URL, ANON_KEY);
+
+let studentCode = "";
+
+function drawRadar(values){
+  const ctx = document.getElementById('radar').getContext('2d');
+  new Chart(ctx, {
+    type: 'radar',
+    data: { labels:['Reaction','Timing','Literacy','Problem','Strategy','Persistence'],
+      datasets:[{ label:'개인 지표', data: values }] },
+    options: { scales:{ r:{ min:0,max:1,ticks:{stepSize:0.2} } }, plugins:{ legend:{ display:false } } }
+  });
+}
+
+function setCode(){
+  const c = prompt("학생 코드 입력 (예: ABCD-234F)");
+  if (!c) return;
+  studentCode = c.trim();
+  alert("코드 저장됨");
+}
+
+async function uploadResult(){
+  if (!studentCode) return alert("먼저 코드 입력!");
+  // 예시 데이터(실제 게임 결과로 대체)
+  const axes = { reaction:0.82, timing:0.76, literacy:0.61, problem:0.70, strategy:0.55, persistence:0.88 };
+  const summary = { accuracy: 0.91, avgLatencyMs: 380 };
+  const { data, error } = await supa.rpc('rpc_ingest', {
+    _code: studentCode,
+    _game_slug: 'flappy-boat',
+    _summary: summary,
+    _axes: axes
+  });
+  if (error) return alert(error.message);
+  drawRadar(Object.values(axes));
+}
+
+function getStudentCode(){
+    let c = localStorage.getItem('studentCode');
+    if (!c) {
+        c = prompt("학생 코드 입력 (예: ABCD-234F)")?.trim();
+        if (!c) return null;
+        localStorage.setItem('studentCode', c);
+    }
+    return c;
+}
+
+function openGame(path){               // 예: 'FlappyBoat/FlappyBoat.html'
+    const code = getStudentCode();
+    if (!code) return alert("코드가 필요합니다.");
+    window.open(`${path}?code=${encodeURIComponent(code)}`, '_blank');
+}
+
+// 게임 페이지 쪽에선 URL 파라미터로 code 읽기:
+function readCodeFromURL(){
+    const m = new URLSearchParams(location.search).get('code');
+    return m || null;
+}
+
+
+</script>
+
+<h1>학생 페이지 (RPC 테스트)</h1>
+<p>1) 학생 코드 입력 → 2) 결과 업로드 → 3) 레이더 차트로 확인</p>
+<button onclick="setCode()">학생코드 입력</button>
+<button onclick="uploadResult()">(테스트) 결과 업로드 & 차트보기</button>
+<div><canvas id="radar" width="360" height="360"></canvas></div>

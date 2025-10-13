@@ -1,0 +1,58 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>My Radar</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; margin: 24px; }
+    #wrap { max-width: 420px; margin: 0 auto; }
+    canvas { max-width: 420px; }
+</style>
+<div id="wrap">
+    <h1>내 레이더</h1>
+    <p id="who"></p>
+    <canvas id="radar" width="360" height="360"></canvas>
+    <div id="msg" style="margin-top:12px;color:#888;"></div>
+</div>
+<script>
+    const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
+    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
+    const supa = supabase.createClient(SUPA_URL, ANON_KEY);
+
+    function getCode(){
+        return new URLSearchParams(location.search).get('code');
+    }
+
+    function drawRadar(axes){
+        const keys = ['reaction','timing','literacy','problem','strategy','persistence'];
+        const vals = keys.map(k => (axes?.[k] ?? 0));
+        const ctx = document.getElementById('radar').getContext('2d');
+        new Chart(ctx, {
+            type: 'radar',
+            data: { labels: ['Reaction','Timing','Literacy','Problem','Strategy','Persistence'],
+                datasets:[{ label:'최근 지표', data: vals }] },
+            options:{ scales:{ r:{ min:0, max:1, ticks:{ stepSize:0.2 } } }, plugins:{ legend:{ display:false } } }
+        });
+    }
+
+    (async function main(){
+        const code = getCode();
+        if (!code) {
+            document.getElementById('msg').textContent = 'QR 코드로 접속해주세요 (code 파라미터 필요)';
+            return;
+        }
+        const { data, error } = await supa.rpc('rpc_student_latest_metrics', { _code: code, _limit: 1 });
+        if (error) {
+            document.getElementById('msg').textContent = error.message;
+            return;
+        }
+        if (!data || !data.length) {
+            document.getElementById('msg').textContent = '아직 기록이 없습니다.';
+            return;
+        }
+        const row = data[0];
+        document.getElementById('who').textContent = row.display_label ? `학생: ${row.display_label}` : '';
+        drawRadar(row.axes || {});
+    })();
+</script>

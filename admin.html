@@ -1,0 +1,201 @@
+<!doctype html>
+<meta charset="utf-8" />
+<title>Admin (RPC)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; margin: 24px; }
+    button { padding: 10px 14px; border: 1px solid #ccc; border-radius: 10px; margin-right: 8px; cursor: pointer; }
+    pre { background:#111; color:#0f0; padding:16px; border-radius:12px; overflow:auto; }
+    input, select { padding: 8px 10px; border:1px solid #ccc; border-radius:8px; margin-right: 8px; }
+    .row { margin: 12px 0; }
+    table { width: 100%; border-collapse: collapse; margin-top: 12px; }
+    th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+    th { background: #f7f7f7; }
+</style>
+<script>
+    /** === 설정 === **/
+    const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
+    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
+    const supa = supabase.createClient(SUPA_URL, ANON_KEY);
+
+    /** === 상태 === **/
+    let lastClassId = null;
+    let lastCodes = null;
+    let radarChart = null;
+
+    /** === 인증 === **/
+    async function signIn(){
+        const email = prompt("이메일:");
+        const password = prompt("비밀번호:");
+        const { data, error } = await supa.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message); else alert("로그인 완료");
+    }
+
+    /** === 임시 반 생성 (RPC) === **/
+    async function createTempClass(){
+        const session = (await supa.auth.getSession()).data.session;
+        if (!session) return alert("먼저 로그인하세요.");
+
+        const name = prompt("반 이름", "Temp Class");
+        const count = Number(prompt("학생 수", "10"));
+        const { data, error } = await supa.rpc('rpc_create_temp_class', { _name: name, _student_count: count });
+        if (error) return alert(error.message);
+
+        // RPC는 { class_id, codes } 형태를 반환
+        lastClassId = data.class_id || data.class?.id || null;
+        lastCodes   = data.codes || [];
+
+        document.getElementById("classId").textContent = lastClassId || '';
+        document.getElementById("out").textContent = JSON.stringify(data, null, 2);
+
+        // 새로 만든 반을 드롭다운에 반영
+        await loadMyClasses(true);
+    }
+
+    /** === 내 반 목록 불러오기 === **/
+    async function loadMyClasses(selectNewest=false){
+        const session = (await supa.auth.getSession()).data.session;
+        if (!session) return alert("먼저 로그인하세요.");
+
+        const { data, error } = await supa
+            .from('classes')
+            .select('id,name,created_at')
+            .order('created_at', { ascending: false });
+
+        if (error) return alert(error.message);
+
+        const sel = document.getElementById('classSelect');
+        sel.innerHTML = '';
+        (data || []).forEach(cls => {
+            const opt = document.createElement('option');
+            opt.value = cls.id;
+            opt.textContent = `${cls.name} — ${cls.id}`;
+            sel.appendChild(opt);
+        });
+
+        if (data?.length){
+            if (selectNewest || !lastClassId) {
+                lastClassId = data[0].id;
+            }
+            sel.value = lastClassId;
+            document.getElementById("classId").textContent = lastClassId;
+        }
+    }
+
+    /** === 드롭다운에서 반 선택 === **/
+    function chooseSelectedClass(){
+        const sel = document.getElementById('classSelect');
+        if (!sel.value) return alert("반을 선택하세요.");
+        lastClassId = sel.value;
+        document.getElementById("classId").textContent = lastClassId;
+    }
+
+    /** === class_id 수동 입력 === **/
+    function setClassIdManually(){
+        const id = prompt("class_id 입력:");
+        if (!id) return;
+        lastClassId = id.trim();
+        document.getElementById("classId").textContent = lastClassId;
+    }
+
+    /** === 반 스냅샷 보기 (RPC) === **/
+    async function showSnapshot(){
+        if (!lastClassId) return alert("먼저 반을 선택하거나 class_id를 설정하세요.");
+
+        const { data, error } = await supa.rpc('rpc_class_snapshot', { _class_id: lastClassId });
+        if (error) return alert(error.message);
+
+        // 평균 레이더 차트
+        const keys = ['reaction','timing','literacy','problem','strategy','persistence'];
+        const sums = {reaction:0,timing:0,literacy:0,problem:0,strategy:0,persistence:0};
+        let cnt = 0;
+        (data||[]).forEach(r=>{
+            if (!r.axes) return;
+            cnt++;
+            keys.forEach(k=> sums[k]+= (r.axes[k]??0));
+        });
+        const avg = keys.map(k => cnt? (sums[k]/cnt) : 0);
+
+        const ctx = document.getElementById('classRadar').getContext('2d');
+        if (radarChart) radarChart.destroy();
+        radarChart = new Chart(ctx, {
+            type:'radar',
+            data:{ labels: ['Reaction','Timing','Literacy','Problem','Strategy','Persistence'],
+                datasets:[{ label:'반 평균', data: avg }] },
+            options:{ scales:{ r:{ min:0, max:1, ticks:{ stepSize:0.2 } } }, plugins:{ legend:{ display:false } } }
+        });
+
+        // 학생별 최신 스냅샷 테이블
+        const tbody = document.getElementById('snapshotBody');
+        tbody.innerHTML = '';
+        (data||[]).forEach(r=>{
+            const tr = document.createElement('tr');
+            const axes = r.axes || {};
+            tr.innerHTML = `
+      <td>${r.display_label ?? ''}</td>
+      <td>${(axes.reaction ?? 0).toFixed(2)}</td>
+      <td>${(axes.timing ?? 0).toFixed(2)}</td>
+      <td>${(axes.literacy ?? 0).toFixed(2)}</td>
+      <td>${(axes.problem ?? 0).toFixed(2)}</td>
+      <td>${(axes.strategy ?? 0).toFixed(2)}</td>
+      <td>${(axes.persistence ?? 0).toFixed(2)}</td>
+      <td>${r.created_at ? new Date(r.created_at).toLocaleString() : '-'}</td>
+    `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    /** === 코드 CSV 저장 === **/
+    function exportCodes(){
+        if (!lastCodes || !lastCodes.length) return alert("먼저 임시 반을 생성하세요.");
+        const rows = ['code', ...lastCodes];
+        const blob = new Blob([rows.join('\n')], {type:'text/csv;charset=utf-8;'});
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'student_codes.csv';
+        a.click();
+    }
+</script>
+
+<h1>임시 반 & 학생 코드 발급 (RPC)</h1>
+
+<div class="row">
+    <button onclick="signIn()">로그인</button>
+    <button onclick="createTempClass()">임시 반 생성</button>
+    <button onclick="exportCodes()">코드 CSV 저장</button>
+</div>
+
+<div class="row">
+    <button onclick="loadMyClasses()">내 반 목록 불러오기</button>
+    <select id="classSelect" style="min-width: 360px;"></select>
+    <button onclick="chooseSelectedClass()">선택한 반으로 설정</button>
+    <button onclick="setClassIdManually()">class_id 수동 입력</button>
+</div>
+
+<div class="row">class_id: <code id="classId"></code></div>
+
+<div class="row">
+    <button onclick="showSnapshot()">내 반 스냅샷 보기</button>
+</div>
+
+<canvas id="classRadar" width="360" height="360"></canvas>
+
+<table>
+    <thead>
+    <tr>
+        <th>학생</th>
+        <th>Reaction</th>
+        <th>Timing</th>
+        <th>Literacy</th>
+        <th>Problem</th>
+        <th>Strategy</th>
+        <th>Persistence</th>
+        <th>기록시각</th>
+    </tr>
+    </thead>
+    <tbody id="snapshotBody"></tbody>
+</table>
+
+<pre id="out"></pre>
