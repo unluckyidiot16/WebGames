@@ -30,8 +30,10 @@
 
 <header>
     <div class="tabs">
-        <button class="tabbtn active" data-tab="tab-games" onclick="showTab('tab-games',this)">수업 게임</button>
-        <button class="tabbtn" data-tab="tab-radar" onclick="showTab('tab-radar',this)">내 레이더</button>
+        <button class="tabbtn active" data-tab="tab-games"
+                onclick="onTabClick(event,'tab-games',this)">오늘의 게임</button>
+        <button class="tabbtn" data-tab="tab-radar"
+                onclick="onTabClick(event,'tab-radar',this)">내 레이더</button>
     </div>
 </header>
 
@@ -41,7 +43,7 @@
     <!-- 수업 게임 -->
     <section id="tab-games" class="tab card">
         <div class="row">
-            <button id="launchBtn" class="primary" disabled>게임 시작</button>
+            <button id="launchBtn" class="primary" disabled>오늘의 게임</button>
             <span id="gamesMsg" class="muted"></span>
         </div>
         <div id="gamesGrid" class="grid games"></div>
@@ -57,7 +59,7 @@
 <script>
     /** Supabase 설정 **/
     const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
-    const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
+    const ANON_KEY = "ANON_KEY";
     const supa = supabase.createClient(SUPA_URL, ANON_KEY);
 
     /** 탭 **/
@@ -68,6 +70,13 @@
         if (btn) btn.classList.add('active');
     }
 
+
+    // 🔒 탭 버튼 클릭 시 다른 핸들러로 전파되지 않도록 차단
+    function onTabClick(ev, id, btn){
+        if (ev) { ev.preventDefault(); ev.stopPropagation(); }
+        showTab(id, btn);
+    }
+    
     /** 유틸 **/
     const qp = k => new URLSearchParams(location.search).get(k);
     function drawRadar(axes){

@@ -53,6 +53,7 @@
     <div class="row">
         <strong>Admin</strong>
         <span id="authStatus" class="muted"></span>
+        <span id="classBadge" class="muted" style="margin-left:8px"></span> <!-- 🔸 추가: 현재 반 배지 -->
         <button id="loginBtn" onclick="signIn()" class="ghost">로그인</button>
     </div>
     <div class="tabs">
@@ -122,6 +123,27 @@
             </div>
             <p class="muted">* 저장 시 DB 테이블 <code class="inline">indexes</code> / <code class="inline">index_assignments</code> 를 사용합니다.</p>
         </div>
+        
+        <!-- 현재 반 안내 + 빠른 배정 -->
+        <div class="card" style="display:flex;align-items:center;justify-content:space-between;gap:8px">
+            <div>현재 반: <code class="inline" id="classBadgeInline"></code></div>
+            <div class="row">
+                <select id="idxSelect" style="min-width:260px"></select>
+                <button onclick="assignIndexToClass()" title="위에서 선택한 인덱스를 현재 반 전체에 배정">현재 반 전체 배정</button>
+                <button onclick="document.querySelector('[data-tab=\\'tab-class\\']').click()">반 바꾸기</button>
+            </div>
+        </div>
+
+        <!-- 인덱스 저장 직후 미리보기 -->
+        <div class="card">
+            <div class="row" style="justify-content:space-between">
+                <div><strong>인덱스 미리보기</strong> <span class="muted">(* 저장 후 자동 갱신)</span></div>
+                <label><input type="checkbox" id="autoAssign"> 저장 후 현재 반에 바로 배정</label>
+            </div>
+            <div id="idxPreview" class="grid catalog"></div>
+        </div>
+
+
     </section>
 
     <!-- 시작 버튼 설정 -->
@@ -178,23 +200,25 @@
 
     /** === 유틸 / 탭 === **/
     function showTab(id, btn){
-        // 섹션 토글
         document.querySelectorAll('.tab').forEach(s => s.style.display='none');
         document.getElementById(id).style.display='block';
-        // 버튼 active 토글
         document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
         if (btn) btn.classList.add('active');
 
-        // 인덱스 탭 최초 진입 시, 카탈로그 자동 로드
-        if (id === 'tab-index' && !_catalogLoadedOnce) {
-            const el = document.getElementById('catalogUrl');
-            if (el && !el.value) el.value = DEFAULT_CATALOG_URL;
-            if (el && el.value) {
-                loadCatalog().catch(()=>{ /* 실패해도 무시 */ });
-                _catalogLoadedOnce = true;
+        if (id === 'tab-index'){
+            syncClassBadges();     // 🔸 현재 반 배지 동기화
+            listIndexes().catch(()=>{});
+            if (!_catalogLoadedOnce) {
+                const el = document.getElementById('catalogUrl');
+                if (el && !el.value) el.value = DEFAULT_CATALOG_URL;
+                if (el && el.value) {
+                    loadCatalog().catch(()=>{});
+                    _catalogLoadedOnce = true;
+                }
             }
         }
     }
+
 
     // 첫 로딩 시, 현재 active 탭 보이기 보장
     document.addEventListener('DOMContentLoaded', () => {
@@ -368,6 +392,8 @@
     </label>
   </div>`;
     }
+
+
     function renderCatalog(){
         const grid = document.getElementById('catalogGrid');
         grid.innerHTML = CATALOG_VIEW.map(gameCardHTML).join('');
@@ -388,6 +414,45 @@
         renderCatalog();
     }
 
+    function gamePreviewCard(g){
+    const tags = (g.tags||[]).join(', ');
+    return `
+  <div class="gamecard">
+    <div class="gameimg">${g.thumb ? `<img src="${g.thumb}" alt="">` : '<div class="muted">No image</div>'}</div>
+    <div style="font-weight:600">${g.title||''}</div>
+    <div class="muted" style="word-break:break-all">${g.url||''}</div>
+    <div class="muted" style="margin:6px 0">${tags}</div>
+  </div>`;
+    }
+
+    function renderIndexPreview(games){
+    const box = document.getElementById('idxPreview');
+    box.innerHTML = (games && games.length) ? games.map(gamePreviewCard).join('') : '<div class="muted">선택/저장된 게임이 없습니다.</div>';
+    }
+
+    // 헤더 배지와 인덱스 탭 배지 동기화
+    function syncClassBadges(){
+    document.getElementById('classBadgeInline').textContent = lastClassId || '';
+    }
+
+
+    function setCurrentClass(id){
+        lastClassId = id || null;
+        document.getElementById("classId").textContent = lastClassId || '';
+        const badge = document.getElementById('classBadge');
+        badge.textContent = lastClassId ? `현재 반: ${lastClassId}` : '';
+        localStorage.setItem('lastClassId', lastClassId || '');
+        syncClassBadges(); // 🔸 추가
+    }
+
+    // DOMContentLoaded 시 로컬 복구
+    document.addEventListener('DOMContentLoaded', () => {
+        const saved = localStorage.getItem('lastClassId');
+        if (saved) setCurrentClass(saved);
+        const first = document.querySelector('.tabbtn.active')?.dataset.tab || 'tab-class';
+        showTab(first, document.querySelector('.tabbtn.active'));
+    });
+
     async function loadCatalog(){
         const url = document.getElementById('catalogUrl').value.trim();
         if (!url) return alert('게임 목록 JSON URL을 입력하세요.');
@@ -405,17 +470,41 @@
     }
 
     async function saveIndexFromSelection(){
-        const slug  = (document.getElementById('idxSlug').value||'').trim();
-        const title = (document.getElementById('idxTitle').value||'').trim();
-        if (!slug || !title) return alert('슬러그/제목을 입력하세요.');
-        if (!CATALOG.length) return alert('먼저 게임 카탈로그를 불러오세요.');
-        const chosen = CATALOG.filter(g => SELECTED_SLUGS.has(g.slug))
-            .map(g => ({ title:g.title, url:g.url, thumb:g.thumb, desc:g.desc, tags:g.tags, updated:g.updated }));
-        if (!chosen.length) return alert('선택된 게임이 없습니다.');
-        const { error } = await supa.rpc('rpc_upsert_index', { _slug: slug, _title: title, _games: chosen });
-        if (error) return alert(error.message);
-        alert('인덱스 저장 완료'); listIndexes();
+    const slug  = (document.getElementById('idxSlug').value||'').trim();
+    const title = (document.getElementById('idxTitle').value||'').trim();
+    if (!slug || !title) return alert('슬러그/제목을 입력하세요.');
+    if (!CATALOG.length) return alert('먼저 게임 카탈로그를 불러오세요.');
+
+    const chosen = CATALOG
+        .filter(g => SELECTED_SLUGS.has(g.slug))
+        .map(g => ({ title:g.title, url:g.url, thumb:g.thumb, desc:g.desc, tags:g.tags, updated:g.updated }));
+
+    if (!chosen.length) return alert('선택된 게임이 없습니다.');
+
+    const { error } = await supa.rpc('rpc_upsert_index', { _slug: slug, _title: title, _games: chosen });
+    if (error) return alert(error.message);
+
+    // ✅ 저장 직후 미리보기 렌더
+    renderIndexPreview(chosen);
+
+    // 인덱스 셀렉트 갱신
+    await listIndexes();
+
+    // 옵션: 자동 배정
+    const auto = document.getElementById('autoAssign')?.checked;
+    if (auto){
+        if (!lastClassId) {
+            alert('현재 반이 설정되어 있지 않습니다. 상단 배지를 확인하세요.');
+        } else {
+            const { error: err2 } = await supa.rpc('rpc_assign_index_class', { _class_id: lastClassId, _slug: slug });
+            if (err2) return alert('배정 실패: ' + err2.message);
+            alert('인덱스 저장 및 현재 반에 배정 완료');
+        }
+    } else {
+        alert('인덱스 저장 완료');
     }
+    }
+
 
     async function listIndexes(){
         const { data, error } = await supa.rpc('rpc_list_indexes');
