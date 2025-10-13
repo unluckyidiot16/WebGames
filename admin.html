@@ -286,25 +286,64 @@
         if (!lastClassId) return alert("먼저 반을 선택하세요.");
         const ttl = Number(document.getElementById('ttlMin').value || '60');
         const singleUse = document.getElementById('singleUse').checked;
-        const { data, error } = await supa.rpc('rpc_issue_qr_tokens', { _class_id: lastClassId, _ttl_minutes: ttl, _single_use: singleUse });
+
+        const { data, error } = await supa.rpc('rpc_issue_or_renew_qr_tokens', {
+            _class_id: lastClassId,
+            _ttl_minutes: ttl,
+            _single_use: singleUse
+        });
         if (error) return alert(error.message);
-        lastTokens = (data || []).map(d => ({ label: d.display_label || '', token: d.token }));
-        alert(`발급 완료: ${lastTokens.length}건`);
+
+        lastTokens = (data || []).map(d => ({
+            label: d.display_label || '',
+            token: d.token,
+            expires_at: d.expires_at
+        }));
+
+        alert(`완료: ${lastTokens.length}건 (활성 토큰이 있으면 TTL 연장, 없으면 신규 발급)`);
+        renderQRTokens(); // 바로 표시
     }
-    function renderQRTokens(){
-        if (!lastTokens.length) return alert("먼저 'QR 토큰 발급'을 실행하세요.");
-        const box = document.getElementById('qrWrap'); box.innerHTML = '';
+
+    async function renderQRTokens(){
+        if (!lastClassId) return alert("먼저 반을 선택하세요.");
+        const singleUse = document.getElementById('singleUse').checked;
+
+        if (!lastTokens.length){
+            const { data, error } = await supa.rpc('rpc_list_active_qr_tokens', {
+                _class_id: lastClassId,
+                _single_use: singleUse
+            });
+            if (error) return alert(error.message);
+            lastTokens = (data || []).map(d => ({
+                label: d.display_label || '',
+                token: d.token,
+                expires_at: d.expires_at
+            }));
+            if (!lastTokens.length) return alert('활성 토큰이 없습니다. 먼저 발급/연장을 실행하세요.');
+        }
+
+        const box = document.getElementById('qrWrap');
+        box.innerHTML = '';
         lastTokens.forEach((row, i) => {
             const url = `${STUDENT_VIEW_URL}?t=${encodeURIComponent(row.token)}`;
             const card = document.createElement('div');
             const ctn = document.createElement('div');
             new QRCode(ctn, { text: url, width: 128, height: 128 });
-            const cap = document.createElement('div'); cap.textContent = row.label || ('S'+String(i+1).padStart(2,'0')); cap.style.marginTop='6px';
-            const small = document.createElement('div'); small.textContent = url; small.style.cssText='font-size:12px;color:#888;max-width:180px;overflow-wrap:anywhere;margin-top:4px;';
+
+            const cap = document.createElement('div');
+            cap.textContent = row.label || ('S'+String(i+1).padStart(2,'0'));
+            cap.style.marginTop = '6px';
+
+            const small = document.createElement('div');
+            const exp = row.expires_at ? new Date(row.expires_at).toLocaleString() : '-';
+            small.innerHTML = `${url}<br><span class="muted">만료: ${exp}</span>`;
+            small.style.cssText='font-size:12px;color:#888;max-width:180px;overflow-wrap:anywhere;margin-top:4px;';
+
             card.appendChild(ctn); card.appendChild(cap); card.appendChild(small);
             box.appendChild(card);
         });
     }
+
 
     /** === 시작 버튼 설정 === **/
     async function loadLaunchSettings(){
