@@ -52,7 +52,8 @@
 <header>
     <div class="row">
         <strong>Admin</strong>
-        <button onclick="signIn()" class="ghost">로그인</button>
+        <span id="authStatus" class="muted"></span>
+        <button id="loginBtn" onclick="signIn()" class="ghost">로그인</button>
     </div>
     <div class="tabs">
         <button class="tabbtn active" data-tab="tab-class" onclick="showTab('tab-class', this)">반/QR</button>
@@ -163,6 +164,7 @@
     const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
     const supa = supabase.createClient(SUPA_URL, ANON_KEY);
     const DEFAULT_CATALOG_URL = "https://unluckyidiot16.github.io/WebGames/games.json";
+    let _catalogLoadedOnce = false;
 
 
     /** === 전역 상태 === **/
@@ -176,32 +178,29 @@
 
     /** === 유틸 / 탭 === **/
     function showTab(id, btn){
-        let _catalogLoadedOnce = false;
-        function showTab(id, btn){
-            document.querySelectorAll('.tab').forEach(s => s.style.display='none');
-            document.getElementById(id).style.display='block';
-            document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
-            if (btn) btn.classList.add('active');
+        // 섹션 토글
+        document.querySelectorAll('.tab').forEach(s => s.style.display='none');
+        document.getElementById(id).style.display='block';
+        // 버튼 active 토글
+        document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
 
-            if (id === 'tab-index' && !_catalogLoadedOnce) {
-                const el = document.getElementById('catalogUrl');
-                if (el && !el.value) el.value = DEFAULT_CATALOG_URL;
-                // 자동 로드 시도
-                if (el && el.value) {
-                    loadCatalog().catch(()=>{ /* 로드 실패해도 무시 */ });
-                    _catalogLoadedOnce = true;
-                }
+        // 인덱스 탭 최초 진입 시, 카탈로그 자동 로드
+        if (id === 'tab-index' && !_catalogLoadedOnce) {
+            const el = document.getElementById('catalogUrl');
+            if (el && !el.value) el.value = DEFAULT_CATALOG_URL;
+            if (el && el.value) {
+                loadCatalog().catch(()=>{ /* 실패해도 무시 */ });
+                _catalogLoadedOnce = true;
             }
         }
     }
 
-    /** === 인증 === **/
-    async function signIn(){
-        const email = prompt("이메일:");
-        const password = prompt("비밀번호:");
-        const { error } = await supa.auth.signInWithPassword({ email, password });
-        if (error) alert(error.message); else alert("로그인 완료");
-    }
+    // 첫 로딩 시, 현재 active 탭 보이기 보장
+    document.addEventListener('DOMContentLoaded', () => {
+        const first = document.querySelector('.tabbtn.active')?.dataset.tab || 'tab-class';
+        showTab(first, document.querySelector('.tabbtn.active'));
+    });
 
     /** === 반/코드 === **/
     async function createTempClass(){
@@ -440,4 +439,32 @@
         if (error) return alert(error.message);
         alert('선택 학생 배정 완료');
     }
+
+    async function updateAuthUI(){
+        const { data } = await supa.auth.getSession();
+        const user = data?.session?.user || null;
+        const loginBtn = document.getElementById('loginBtn');
+        const authStatus = document.getElementById('authStatus');
+        if (user){
+            if (loginBtn) loginBtn.style.display = 'none';
+            if (authStatus) authStatus.textContent = `✅ 로그인됨: ${user.email || user.user_metadata?.email || user.id}`;
+        } else {
+            if (loginBtn) loginBtn.style.display = '';
+            if (authStatus) authStatus.textContent = '';
+        }
+    }
+
+    supa.auth.onAuthStateChange(() => { updateAuthUI(); });
+
+    async function signIn(){
+        const email = prompt("이메일:"); if (!email) return;
+        const password = prompt("비밀번호:"); if (!password) return;
+        const { error } = await supa.auth.signInWithPassword({ email, password });
+        if (error) alert(error.message);
+        await updateAuthUI();
+    }
+
+    // 초기 1회
+    updateAuthUI();
+    
 </script>

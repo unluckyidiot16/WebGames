@@ -1,31 +1,78 @@
 <!doctype html>
 <meta charset="utf-8" />
-<title>My Radar</title>
+<title>Student View</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <style>
-    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Noto Sans KR', sans-serif; margin: 24px; }
-    #wrap { max-width: 420px; margin: 0 auto; }
-    canvas { max-width: 420px; }
+    :root{--line:#e5e7eb;--muted:#f8fafc;--text:#111827;--primary:#0ea5e9;}
+    *{box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Noto Sans KR',sans-serif;margin:0;background:#fff;color:var(--text)}
+    header{position:sticky;top:0;z-index:10;background:#fff;border-bottom:1px solid var(--line);padding:12px 16px}
+    main{max-width:900px;margin:0 auto;padding:16px}
+    .tabs{display:flex;gap:8px}
+    .tabbtn{padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
+    .tabbtn.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+    .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:10px 0}
+    .muted{color:#6b7280}
+    .card{border:1px solid var(--line);border-radius:12px;padding:12px;background:#fff}
+    .grid{display:grid;gap:12px}
+    .grid.games{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+    .gamecard{border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#fff;display:flex;flex-direction:column}
+    .thumb{height:120px;background:#f3f4f6;display:flex;align-items:center;justify-content:center}
+    .thumb img{max-width:100%;max-height:120px;display:block}
+    .gbody{padding:10px}
+    .gtitle{font-weight:700;margin-bottom:4px}
+    button{padding:10px 14px;border:1px solid var(--line);border-radius:10px;background:#fff;cursor:pointer}
+    button.primary{background:var(--primary);color:#fff;border-color:var(--primary)}
+    canvas{max-width:420px}
 </style>
-<div id="wrap">
-    <h1>내 레이더</h1>
-    <p id="who"></p>
-    <canvas id="radar" width="360" height="360"></canvas>
-    <div id="msg" style="margin-top:12px;color:#888;"></div>
-</div>
+
+<header>
+    <div class="tabs">
+        <button class="tabbtn active" data-tab="tab-games" onclick="showTab('tab-games',this)">수업 게임</button>
+        <button class="tabbtn" data-tab="tab-radar" onclick="showTab('tab-radar',this)">내 레이더</button>
+    </div>
+</header>
+
+<main>
+    <div id="who" class="muted" style="margin:6px 0 12px;"></div>
+
+    <!-- 수업 게임 -->
+    <section id="tab-games" class="tab card">
+        <div class="row">
+            <button id="launchBtn" class="primary" disabled>게임 시작</button>
+            <span id="gamesMsg" class="muted"></span>
+        </div>
+        <div id="gamesGrid" class="grid games"></div>
+    </section>
+
+    <!-- 내 레이더 -->
+    <section id="tab-radar" class="tab card" style="display:none">
+        <canvas id="radar" width="360" height="360"></canvas>
+        <div id="radarMsg" class="muted" style="margin-top:8px;"></div>
+    </section>
+</main>
+
 <script>
+    /** Supabase 설정 **/
     const SUPA_URL = "https://nfkjolrlegftyvxyrpfr.supabase.co";
     const ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im5ma2pvbHJsZWdmdHl2eHlycGZyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAzMTI3NzgsImV4cCI6MjA3NTg4ODc3OH0.p2IhcLKDqNdbDWu6w6R_dvsxubvWf6xtNOqlSkWTSpY";
     const supa = supabase.createClient(SUPA_URL, ANON_KEY);
 
+    /** 탭 **/
+    function showTab(id, btn){
+        document.querySelectorAll('.tab').forEach(s=>s.style.display='none');
+        document.getElementById(id).style.display='block';
+        document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+    }
 
-    function qp(k){ return new URLSearchParams(location.search).get(k); }
-
+    /** 유틸 **/
+    const qp = k => new URLSearchParams(location.search).get(k);
     function drawRadar(axes){
         const keys = ['reaction','timing','literacy','problem','strategy','persistence'];
-        const vals = keys.map(k => (axes?.[k] ?? 0));
+        const vals = keys.map(k => axes?.[k] ?? 0);
         const ctx = document.getElementById('radar').getContext('2d');
         new Chart(ctx, { type:'radar',
             data:{ labels:['Reaction','Timing','Literacy','Problem','Strategy','Persistence'],
@@ -33,53 +80,95 @@
             options:{ scales:{ r:{ min:0,max:1,ticks:{stepSize:0.2} } }, plugins:{ legend:{ display:false } } }
         });
     }
+    function renderGames(games, carryParam){
+        const grid = document.getElementById('gamesGrid');
+        if (!games || !games.length){
+            document.getElementById('gamesMsg').textContent = '아직 배정된 게임이 없습니다.';
+            grid.innerHTML = '';
+            return;
+        }
+        document.getElementById('gamesMsg').textContent = '';
+        grid.innerHTML = games.map(g=>{
+            const href = (()=>{ try{
+                const u = new URL(g.url);
+                if (carryParam.key && carryParam.val) u.searchParams.set(carryParam.key, carryParam.val);
+                return u.toString();
+            }catch{ return g.url; }})();
+            const tags = (g.tags||[]).join(', ');
+            const thumb = g.thumb ? `<img src="${g.thumb}" alt="">` : '<div class="muted">No image</div>';
+            return `
+      <div class="gamecard">
+        <div class="thumb">${thumb}</div>
+        <div class="gbody">
+          <div class="gtitle">${g.title||''}</div>
+          <div class="muted" style="word-break:break-all">${g.url||''}</div>
+          <div class="muted" style="margin:6px 0">${tags}</div>
+          <div><a href="${href}" target="_blank"><button>바로가기</button></a></div>
+        </div>
+      </div>`;
+        }).join('');
+    }
 
+    /** 메인 **/
     (async function main(){
-        const t = qp('t');
-        const code = qp('code');
-
-        let info;
-        if (t) {
-            const { data, error } = await supa.rpc('rpc_student_view_info_by_token', { _token: t });
-            if (error) { document.getElementById('msg').textContent = error.message; return; }
-            info = (data && data[0]) || null;
-            // 토큰을 로컬에 저장 (게임에서 코드 없이 업로드 가능)
-            localStorage.setItem('studentToken', t);
-        } else if (code) {
-            const { data, error } = await supa.rpc('rpc_student_view_info_by_code', { _code: code });
-            if (error) { document.getElementById('msg').textContent = error.message; return; }
-            info = (data && data[0]) || null;
-            localStorage.setItem('studentCode', code);
-        } else {
-            document.getElementById('msg').textContent = 'QR 또는 code 파라미터가 필요합니다.';
+        const t = qp('t'); const code = qp('code');
+        if (!t && !code){
+            document.getElementById('gamesMsg').textContent = 'QR 또는 code 파라미터가 필요합니다.';
+            document.getElementById('radarMsg').textContent = 'QR 또는 code 파라미터가 필요합니다.';
             return;
         }
 
-        if (!info) {
-            document.getElementById('msg').textContent = '유효하지 않거나 만료된 토큰/코드이거나, 아직 기록이 없습니다.';
-            return;
-        }
+        try{
+            let info, carryParam = {};
+            if (t){
+                const { data, error } = await supa.rpc('rpc_student_view_info_by_token', { _token: t });
+                if (error) throw error;
+                info = (data && data[0]) || null;
+                localStorage.setItem('studentToken', t);
+                carryParam = { key:'t', val:t };
+            } else {
+                const { data, error } = await supa.rpc('rpc_student_view_info_by_code', { _code: code });
+                if (error) throw error;
+                info = (data && data[0]) || null;
+                localStorage.setItem('studentCode', code);
+                carryParam = { key:'code', val:code };
+            }
 
-        document.getElementById('who').textContent = info.display_label ? `학생: ${info.display_label}` : '';
-        if (info.latest_axes) drawRadar(info.latest_axes);
+            if (!info){
+                document.getElementById('gamesMsg').textContent = '유효하지 않거나 만료된 토큰/코드입니다.';
+                document.getElementById('radarMsg').textContent = '유효하지 않거나 만료된 토큰/코드입니다.';
+                return;
+            }
 
-        const btn = document.getElementById('launchBtn');
-        if (info.allow_launch && info.launch_game_url) {
-            btn.disabled = false;
-            btn.onclick = () => {
-                // 토큰 우선 전달 (게임은 토큰으로 업로드 가능)
-                const url = new URL(info.launch_game_url);
-                if (t) url.searchParams.set('t', t);
-                else if (code) url.searchParams.set('code', code);
-                window.open(url.toString(), '_blank');
-            };
-        } else {
-            btn.disabled = true;
+            // 상단 이름표
+            document.getElementById('who').textContent = info.display_label ? `학생: ${info.display_label}` : '';
+
+            // 시작 버튼 허용
+            const btn = document.getElementById('launchBtn');
+            if (info.allow_launch && info.launch_game_url){
+                btn.disabled = false;
+                btn.onclick = () => {
+                    const u = new URL(info.launch_game_url);
+                    if (carryParam.key) u.searchParams.set(carryParam.key, carryParam.val);
+                    window.open(u.toString(),'_blank');
+                };
+            } else {
+                btn.disabled = true;
+            }
+
+            // 레이더
+            if (info.latest_axes) drawRadar(info.latest_axes);
+            else document.getElementById('radarMsg').textContent = '아직 지표가 없습니다.';
+
+            // 수업 게임(인덱스)
+            if (info.index_games){
+                renderGames(info.index_games, carryParam);
+            } else {
+                document.getElementById('gamesMsg').textContent = '아직 배정된 게임이 없습니다.';
+            }
+        }catch(e){
+            document.getElementById('gamesMsg').textContent = e.message || '오류가 발생했습니다.';
+            document.getElementById('radarMsg').textContent = e.message || '오류가 발생했습니다.';
         }
     })();
 </script>
-
-<button id="launchBtn" disabled style="margin-top:12px;padding:10px 14px;border:1px solid #ccc;border-radius:10px;cursor:pointer;">
-    게임 시작
-</button>
-<div id="msg" style="margin-top:12px;color:#888;"></div>
