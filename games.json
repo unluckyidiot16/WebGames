@@ -112,4 +112,12 @@
     "desc": "식물 키우기 게임"
   }
   
+{
+    "title": "Dokdo defense",
+    "url": "https://unluckyidiot16.github.io/assets-common/DokdoDef/DokdoDef.html",
+    "thumb": "https://unluckyidiot16.github.io/assets-common/DokdoDef/DokdoDef.png",
+    "tags": ["교육"],
+    "updated": "2025-10-02",
+    "desc": "독도 지키기 게임"
+  }
 ]
