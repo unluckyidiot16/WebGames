@@ -2098,11 +2098,39 @@
 <script>
     /* === QDD QuizPack Loader (network-first, fallback-safe) === */
     (function () {
+        // === PATCH: quizpack 선택 방식 개선 (기본: quizpack.json, ?pack=Eng5_9, ?qp=...) ===
         const QP_VER = window.QP_VER || "20251112"; // ← 배포 시 날짜/커밋 해시로 바꿔주세요
-        const QUIZ_PACK_BASE =
-            "https://unluckyidiot16.github.io/assets-common/QuizDiceDefense/QuizPack/quizpack.json";
-        const QUIZ_PACK_URL = `${QUIZ_PACK_BASE}?v=${encodeURIComponent(QP_VER)}`;
-        const QUIZ_CACHE_NAME = `QDD-QuizPack-quizpack-v${QP_VER}`;
+
+        const params = new URLSearchParams(window.location.search);
+        const qpParam = params.get("qp");     // 전체 URL 지정용
+        const packParam = params.get("pack"); // 파일명 지정용 (예: Eng5_9)
+
+        let QUIZ_PACK_BASE;
+
+        if (qpParam) {
+            // qp가 절대 URL이면 그대로, 상대 경로면 origin 기준으로 변환
+            if (/^https?:\/\//i.test(qpParam)) {
+                QUIZ_PACK_BASE = qpParam;
+            } else {
+                const origin = window.location.origin;
+                const cleaned = qpParam.replace(/^\//, "");
+                QUIZ_PACK_BASE = `${origin}/${cleaned}`;
+            }
+        } else {
+            // 기본: /assets-common/QuizDiceDefense/QuizPack/{파일명}.json
+            const origin = window.location.origin;
+            const basePath = "/assets-common/QuizDiceDefense/QuizPack/";
+            const fileName = (packParam && packParam.trim()) || "quizpack"; // 기본은 quizpack
+            QUIZ_PACK_BASE = `${origin}${basePath}${fileName}.json`;
+        }
+
+        // v 파라미터 추가 (이미 ?가 있으면 &v=..., 없으면 ?v=...)
+        const hasQuery = QUIZ_PACK_BASE.includes("?");
+        const QUIZ_PACK_URL =
+            `${QUIZ_PACK_BASE}${hasQuery ? "&" : "?"}v=${encodeURIComponent(QP_VER)}`;
+
+        const cacheKeyName = (packParam && packParam.trim()) || "quizpack";
+        const QUIZ_CACHE_NAME = `QDD-QuizPack-${cacheKeyName}-v${QP_VER}`;
 
         let _ready = null;
 
