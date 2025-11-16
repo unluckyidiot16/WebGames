@@ -571,6 +571,7 @@
     <link rel="icon" href="data:,">
     <script src="../../ClassGame/LineBattle/src/gfx/assetPath.ts"></script>
     <script src="../../ClassGame/LineBattle/src/gfx/unitAnims.ts"></script>
+    <script src="classhub-bridge.js"></script>
     <!-- removed: invalid TypeScript include (supaRpc.ts) -->
 </head>
 <body>
@@ -744,6 +745,8 @@
     </div>
 </div>
 
+<!-- ClassHub 임베드용 bridge (단독 플레이 시에도 문제 없음) -->
+<script src="./classhub-bridge.js"></script>
 
 <script>
     window.autosizeOptionLabels = window.autosizeOptionLabels || function(){};
@@ -931,6 +934,7 @@
     let achievements = {};
 
     let currentQuiz = null;
+    let currentQuizIndex = -1;
     let quizTimerInterval;
     let timeLeft = 0;
 
@@ -1001,7 +1005,9 @@
         answerOptionsEl.innerHTML = '';
 
         clearInterval(quizTimerInterval);
-        currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
+        // 현재 퀴즈 인덱스도 함께 기록해둔다 (ClassHub 로그용)
+        currentQuizIndex = Math.floor(Math.random() * quizData.length);
+        currentQuiz = quizData[currentQuizIndex];
 
         questionEl.textContent = currentQuiz.question;
         const reward = Math.round(currentQuiz.reward * (1 + ((rogueliteUpgrades && rogueliteUpgrades.quizQP ? rogueliteUpgrades.quizQP.level : 1) - 1) * 0.1));
@@ -1056,6 +1062,32 @@
             answerOptionsEl.children[currentQuiz.answer].classList.add('correct');
         }
 
+        // [NEW] ClassHub 임베드 환경이면 정답 결과를 부모(Host)로 전송
+        try {
+            if (window.ClassHubBridge &&
+                window.ClassHubBridge.inEmbed &&
+                typeof window.ClassHubBridge.reportAnswer === 'function') {                 
+                const q = currentQuiz || {};
+                const totalTime = (typeof q.time === 'number') ? q.time : timeLeft;
+                const spent = (typeof totalTime === 'number')
+                    ? (totalTime - timeLeft)
+                    : null;
+                window.ClassHubBridge.reportAnswer({
+                    // Supabase question_id: pack에서 id가 오면 그대로, 없으면 index 기반
+                    questionId: q.id || q.questionId || String(
+                        currentQuizIndex >= 0 ? currentQuizIndex : ''
+                    ),
+                    correct: !!isCorrect,
+                    answerIndex: userAnswerIndex,
+                    timeMs: (typeof spent === 'number')
+                        ? Math.max(0, Math.round(spent * 1000))
+                        : null,
+                });
+            }
+        } catch (e) {
+            console.warn('[QDD] reportAnswer failed', e);
+        }
+        
         setTimeout(loadQuiz, 1500);
     }
 
@@ -1063,6 +1095,26 @@
         clearInterval(quizTimerInterval);
         quizFeedback.textContent = '스킵했습니다.';
         quizFeedback.style.color = 'gray';
+
+        // [선택] 스킵도 "오답" 로그로 남기고 싶을 때
+        try {
+            if (window.ClassHubBridge &&
+                window.ClassHubBridge.inEmbed &&
+                typeof window.ClassHubBridge.reportAnswer === 'function') {
+                const q = currentQuiz || {};
+                window.ClassHubBridge.reportAnswer({
+                        questionId: q.id || q.questionId || String(
+                            currentQuizIndex >= 0 ? currentQuizIndex : ''
+                        ),
+                        correct: false,
+                        answerIndex: null,
+                        timeMs: null,
+                });
+            }
+        } catch (e) {
+            console.warn('[QDD] reportAnswer(skip) failed', e);
+        }
+        
         setTimeout(loadQuiz, 500);
     }
     skipBtn.onclick = skipQuiz;
@@ -1725,6 +1777,23 @@
         totalKnowledgePoints += pointsEarned;
         saveGameData();
 
+        // [NEW] ClassHub 요약 리포트 (패배)
+        try {
+            if (window.ClassHubBridge &&
+                window.ClassHubBridge.inEmbed &&
+                typeof window.ClassHubBridge.reportSummary === 'function') {
+                window.ClassHubBridge.reportSummary({
+                        outcome: "defeat",
+                        wave,
+                        pointsEarned,
+                        totalKnowledgePoints,
+                        timestamp: Date.now(),
+                });
+            }
+        } catch (e) {
+            console.warn("[QDD] reportSummary(defeat) failed", e);
+        }
+
         finalWaveDisplay.textContent = wave;
         pointsEarnedDisplay.textContent = `${pointsEarned} KP`;
         totalPointsDisplay.textContent = `${totalKnowledgePoints} KP`;
@@ -1737,6 +1806,23 @@
         const pointsEarned = (wave * 10) + 500; // 50웨이브 클리어 보너스
         totalKnowledgePoints += pointsEarned;
         saveGameData();
+
+        // [NEW] ClassHub 요약 리포트 (클리어)
+        try {
+            if (window.ClassHubBridge &&
+                window.ClassHubBridge.inEmbed &&
+                typeof window.ClassHubBridge.reportSummary === 'function') {
+                window.ClassHubBridge.reportSummary({
+                        outcome: "victory",
+                        wave,
+                        pointsEarned,
+                        totalKnowledgePoints,
+                        timestamp: Date.now(),
+                });
+            }
+        } catch (e) {
+            console.warn("[QDD] reportSummary(victory) failed", e);
+        }
 
         victoryPointsEarnedDisplay.textContent = `${pointsEarned} KP`;
         victoryTotalPointsDisplay.textContent = `${totalKnowledgePoints} KP`;
@@ -2131,8 +2217,50 @@
 
         const cacheKeyName = (packParam && packParam.trim()) || "quizpack";
         const QUIZ_CACHE_NAME = `QDD-QuizPack-${cacheKeyName}-v${QP_VER}`;
-
         let _ready = null;
+        // ClassHub / Supabase / 기존 json 모두를 QDD 포맷으로 맞추는 helper
+        function normalizeQuizpackForQDD(raw) {
+            // 배열이면 그대로 question 리스트라고 보고 사용
+            const src = Array.isArray(raw)
+                ? raw
+                : (raw && Array.isArray(raw.questions) ? raw.questions : null);
+            if (!src) return null;
+            
+            return src.map((q, idx) => {
+                const question =
+                    q.question ||
+                    q.stem ||
+                    q.prompt ||
+                    "";
+                const options =
+                    q.options ||
+                    q.choices ||
+                    q.answers ||
+                    [];
+                
+                let answerIndex;
+                if (typeof q.answerIndex === "number") {
+                    // v1 quizpack.json 형식 (0-base)
+                    answerIndex = q.answerIndex;
+                } else if (typeof q.answer === "number") {
+                    // 기존 QDD 포맷 (0-base 가정, 1-base면 host 쪽에서 미리 보정)
+                    answerIndex = q.answer;
+                } else {
+                    answerIndex = 0;
+                }
+                
+                return {
+                    question,
+                        options,
+                        answer: answerIndex,
+                        difficulty: q.difficulty || "normal",
+                        reward: q.reward || 50,
+                        time: q.time || 15,
+                    // Supabase 쪽 question_id가 있으면 그대로 사용
+                        id: q.id || q.questionId || String(idx),
+                };
+            });
+        }
 
         async function loadNetworkFirst(url) {
             // 1) 항상 네트워크로 ETag 재검증해서 최신 시도
@@ -2154,11 +2282,55 @@
         async function ensureQuizPack() {
             if (_ready) return _ready;
             _ready = (async () => {
+                // 1) ClassHub 임베드 모드라면 host에서 퀴즈팩을 먼저 받아본다
+                if (window.ClassHubBridge &&
+                    window.ClassHubBridge.inEmbed &&
+                    typeof window.ClassHubBridge.onQuizpackReady === 'function') {
+                                       try {
+                                           const qp = await new Promise((resolve) => {
+                                               let done = false;
+                                               const timeout = setTimeout(() => {
+                                                   if (done) return;
+                                                   done = true;
+                                                   console.warn("[QDD] ClassHub quizpack timeout, fallback to network.");
+                                                   resolve(null);
+                                               }, 3000); // 3초 정도 기다린 뒤 네트워크로 폴백
+                                               window.ClassHubBridge.onQuizpackReady((pack) => {
+                                                   if (done) return;
+                                                   done = true;
+                                                   clearTimeout(timeout);
+                                                   resolve(pack);
+                                               });
+                                               // 혹시 game 쪽에서 직접 요청 안 하는 경우 대비
+                                               window.ClassHubBridge.requestQuizpack();
+                                           });
+                                           const normalizedFromHost = qp && normalizeQuizpackForQDD(qp);
+                                           if (normalizedFromHost && normalizedFromHost.length) {
+                                               quizData.splice(0, quizData.length, ...normalizedFromHost);
+                                               console.log("[QDD] QuizPack loaded via ClassHubBridge:", normalizedFromHost.length);
+                                               return;
+                                           }
+                                       } catch (e) {
+                                           console.warn("[QDD] ClassHub quizpack failed, fallback to network.", e);
+                                       }
+                }
+                // 2) ClassHub에서 못 받았으면 기존 네트워크-first 로직
                 try {
-                    try { const keys = await caches.keys(); await Promise.all(keys.filter(k=>k.startsWith('QDD-QuizPack-quizpack-v') && k!==QUIZ_CACHE_NAME).map(k=>caches.delete(k))); } catch(_){}
+                    try {
+                        const keys = await caches.keys();
+                        await Promise.all(
+                            keys
+                                .filter(k => k !== QUIZ_CACHE_NAME)
+                                .map(k => caches.delete(k))
+                        );
+                    } catch (_){
+                        
+                    }
                     const remote = await loadNetworkFirst(QUIZ_PACK_URL);
-                    if (Array.isArray(remote) && remote.length) {
-                        quizData.splice(0, quizData.length, ...remote); // 제자리 교체
+                    const normalized = normalizeQuizpackForQDD(remote)
+                        || (Array.isArray(remote) ? remote : null);
+                    if (normalized && normalized.length) {
+                        quizData.splice(0, quizData.length, ...normalized); // 제자리 교체
                     } else {
                         console.warn("[QDD] Remote pack empty, using built-in fallback.");
                     }
