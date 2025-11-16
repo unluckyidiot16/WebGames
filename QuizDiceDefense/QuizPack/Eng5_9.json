@@ -1,1302 +1,1412 @@
-[
-  {
-    "question": "다음을 읽고, 나라의 favorite subject를 고르세요.\n\nNara: My favorite subject is art.",
-    "options": [
-      "art",
-      "math",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음을 읽고, 에디의 favorite subject를 고르세요.\n\nEddie: My favorite subject is science.",
-    "options": [
-      "Korean",
-      "science",
-      "music",
-      "art"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음을 읽고, 하나의 favorite subject를 고르세요.\n\nHana: My favorite subject is math.",
-    "options": [
-      "art",
-      "music",
-      "math",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음을 읽고, 진우의 favorite subject를 고르세요.\n\nJinwoo: My favorite subject is Korean.",
-    "options": [
-      "English",
-      "Korean",
-      "math",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음을 읽고, 케빈의 favorite subject를 고르세요.\n\nKevin: My favorite subject is music.",
-    "options": [
-      "art",
-      "science",
-      "music",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음을 읽고, 빈칸에 알맞은 과목을 고르세요.\n\nMy favorite subject is ______.\n(나는 미술을 가장 좋아해.)",
-    "options": [
-      "art",
-      "math",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음을 읽고, 빈칸에 알맞은 과목을 고르세요.\n\nMy favorite subject is _____.\n(나는 과학을 가장 좋아해.)",
-    "options": [
-      "Korean",
-      "music",
-      "art",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "다음을 읽고, 민수의 favorite subject를 고르세요.\n\nMinsu: My favorite subject is Korean.",
-    "options": [
-      "Korean",
-      "math",
-      "art",
-      "music"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음을 읽고, 수지의 favorite subject를 고르세요.\n\nSuji: My favorite subject is math.",
-    "options": [
-      "science",
-      "music",
-      "math",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음을 읽고, 유리의 favorite subject를 고르세요.\n\nYuri: My favorite subject is music.",
-    "options": [
-      "art",
-      "music",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English.\n(나는 영어로 말하는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "listen",
-      "draw",
-      "study"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ music.\n(나는 음악 듣는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "listen to",
-      "study",
-      "draw"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ pictures.\n(나는 그림 그리기를 좋아해.)",
-    "options": [
-      "study",
-      "speak",
-      "draw",
-      "listen"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ math.\n(나는 수학 공부하는 것을 좋아해.)",
-    "options": [
-      "study",
-      "listen",
-      "draw",
-      "sing"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ Korean.\n(나는 한국어로 말하는 것을 좋아해.)",
-    "options": [
-      "listen",
-      "draw",
-      "speak",
-      "study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ songs.\n(나는 노래 듣는 것을 좋아해.)",
-    "options": [
-      "study",
-      "listen to",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English songs.\n(나는 영어 노래를 듣는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "study",
-      "listen to",
-      "draw"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ today.\n(나는 오늘 공부하는 것을 좋아해.)",
-    "options": [
-      "study",
-      "listen",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nHana likes to ______ art.\n(하나는 미술로 그림 그리는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "draw",
-      "listen",
-      "study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nKevin likes to ______ music in class.\n(케빈은 수업에서 음악 듣는 것을 좋아해.)",
-    "options": [
-      "study",
-      "draw",
-      "listen to",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nJinwoo likes to ______ science.\n(진우는 과학 공부하는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "listen",
-      "study",
-      "draw"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nEddie likes to ______ Korean.\n(에디는 한국어로 말하는 것을 좋아해.)",
-    "options": [
-      "draw",
-      "speak",
-      "listen",
-      "study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nNara likes to ______ pictures in art class.\n(나라는 미술 시간에 그림 그리기를 좋아해.)",
-    "options": [
-      "listen to",
-      "draw",
-      "study",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English every day.\n(나는 매일 영어를 공부하는 것을 좋아해.)",
-    "options": [
-      "listen to",
-      "study",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nWe like to ______ songs in music class.\n(우리는 음악 시간에 노래를 듣는 것을 좋아해.)",
-    "options": [
-      "listen to",
-      "study",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 말의 뜻으로 알맞은 것을 고르세요.\n\nKevin: What is your favorite subject?\nHana: My favorite subject is math.\n\n밑줄 친 subject의 뜻은?",
-    "options": [
-      "과목",
-      "운동",
-      "노래",
-      "그림"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 질문에 알맞은 답을 고르세요.\n\nKevin: What is your favorite subject?\nEddie: My favorite subject is science.\n\n에디가 가장 좋아하는 것은?",
-    "options": [
-      "미술 시간",
-      "수학 문제",
-      "과학 시간",
-      "음악 시간"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 진우가 좋아하는 선생님을 고르세요.\n\nJinwoo: I like the P.E. teacher, Mr. Wilson. He is very kind.\n\n진우가 좋아하는 선생님은?",
-    "options": [
-      "music teacher",
-      "P.E. teacher",
-      "art teacher",
-      "math teacher"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nHana: I don’t like P.E.\nJinwoo: What’s your favorite , Hana?\nHana: My favorite subject is math.",
-    "options": [
-      "song",
-      "sport",
-      "subject",
-      "teacher"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 kind의 의미로 알맞은 것을 고르세요.\n\nJinwoo: I like the P.E. teacher, Mr. Wilson.\nHe is very kind.",
-    "options": [
-      "친절한",
-      "빠른",
-      "재미있는",
-      "조용한"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nMr. Wilson: ______ up! We will play soccer today.",
-    "options": [
-      "Listen",
-      "Speak",
-      "Draw",
-      "Study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 오늘 할 활동을 고르세요.\n\nMr. Wilson: Listen up! We will play soccer today.",
-    "options": [
-      "play baseball",
-      "play soccer",
-      "study math",
-      "sing a song"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 나라가 좋아하는 활동을 고르세요.\n\nNara: Wow! You draw very well.\nEddie: Thanks. I like to draw.\nNara: I like to play sports.\n\n나라가 좋아하는 것은?",
-    "options": [
-      "그림 그리기",
-      "스포츠 하기",
-      "노래 부르기",
-      "수학 공부하기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 에디가 좋아하는 활동을 고르세요.\n\nNara: Wow! You draw very well.\nEddie: Thanks. I like to draw.",
-    "options": [
-      "노래 듣기",
-      "영어 말하기",
-      "그림 그리기",
-      "야구 하기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 speak의 뜻으로 알맞은 것을 고르세요.\n\nKevin: I like to speak English.",
-    "options": [
-      "듣다",
-      "말하다",
-      "그리다",
-      "공부하다"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / your / What / subject / is / ?",
-    "options": [
-      "What is your favorite subject?",
-      "What subject is your favorite?",
-      "Your favorite subject what is?",
-      "Is what your favorite subject?"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nMy / subject / favorite / art / is / .",
-    "options": [
-      "My subject favorite is art.",
-      "My favorite art is subject.",
-      "My favorite subject is art.",
-      "Art is my favorite subject is."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nlike / I / English / speak / to / .",
-    "options": [
-      "I like to speak English.",
-      "I like speak to English.",
-      "Like I to speak English.",
-      "English I like to speak."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nsong / favorite / My / is / 'Lemon Tree' / .",
-    "options": [
-      "My favorite song is 'Lemon Tree'.",
-      "Song favorite my is 'Lemon Tree'.",
-      "My is favorite song 'Lemon Tree'.",
-      "'Lemon Tree' is my favorite song is."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nmusic / listen / to / like / I / to / .",
-    "options": [
-      "I like to listen to music.",
-      "I like listen to to music.",
-      "To music I like listen to.",
-      "Music I to like listen to."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nsport / is / favorite / My / basketball / .",
-    "options": [
-      "My basketball favorite sport is.",
-      "My favorite sport is basketball.",
-      "Sport is my favorite basketball.",
-      "Basketball sport is my favorite."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / subject / My / Korean / is / .",
-    "options": [
-      "My favorite subject is Korean.",
-      "Subject Korean my favorite is.",
-      "My subject Korean is favorite.",
-      "Korean is subject my favorite."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / art / My / is / subject / .",
-    "options": [
-      "My favorite subject is art.",
-      "Art is my favorite subject.",
-      "My art favorite subject is.",
-      "Favorite subject my is art is."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nlike / to / I / draw / .",
-    "options": [
-      "I like draw to.",
-      "I to like draw.",
-      "Like draw I to.",
-      "I like to draw."
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nstudy / math / to / like / I / to / .",
-    "options": [
-      "I like to study math.",
-      "I study like to math.",
-      "Math I like to study.",
-      "Study math I like to."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\ntoday / we / soccer / play / will / .",
-    "options": [
-      "We will play soccer today.",
-      "We will today play soccer.",
-      "Today soccer we will play.",
-      "Soccer will we play today."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nFun Art Class\nDraw and paint\nEvery Friday",
-    "options": [
-      "music",
-      "art",
-      "science",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nScience Time\nEasy experiments\nJoin us today",
-    "options": [
-      "math",
-      "art",
-      "science",
-      "music"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nMath Club\nWe like to study numbers\nAfter school",
-    "options": [
-      "science",
-      "math",
-      "Korean",
-      "P.E."
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nMusic Class\nListen to songs\nSing together",
-    "options": [
-      "art",
-      "music",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nKorean Class\nSpeak and read Korean\nHave fun",
-    "options": [
-      "Korean",
-      "English",
-      "science",
-      "music"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 활동을 하는지 고르세요.\n\nArt Club\nWe like to draw pictures.\nCome and join us!",
-    "options": [
-      "그림 그리기",
-      "노래 부르기",
-      "야구 하기",
-      "수학 문제 풀기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 활동을 하는지 고르세요.\n\nMusic Club\nWe like to listen to music.\nLet’s sing a song!",
-    "options": [
-      "야구 하기",
-      "음악 듣기",
-      "그림 그리기",
-      "달리기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목을 공부하는지 고르세요.\n\nScience Club\nWe study plants and animals.",
-    "options": [
-      "music",
-      "art",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 오늘 무엇을 하는지 고르세요.\n\nP.E. Class Today\nWe will play soccer.",
-    "options": [
-      "야구",
-      "테니스",
-      "축구",
-      "농구"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 빈칸에 알맞은 말을 고르세요.\n\n Class\nWe like to listen to songs.\nMy favorite subject is ______.",
-    "options": [
-      "Music / music",
-      "Art / art",
-      "Math / math",
-      "Science / science"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 학생이 이 수업을 가장 좋아할지 고르세요.\n\nArt Class\nWe draw and paint.\n\n누가 이 수업을 가장 좋아할까요?",
-    "options": [
-      "I like to study math.",
-      "I like to draw pictures.",
-      "I like to play soccer.",
-      "I like to listen to music."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 안내문을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in science class,\nwe will study the stars.\nScience is my favorite ______.",
-    "options": [
-      "sport",
-      "song",
-      "subject",
-      "teacher"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 안내문을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in music class,\nwe will listen to a new ______.",
-    "options": [
-      "song",
-      "subject",
-      "sport",
-      "math"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWe read a Korean story.\nWe speak Korean in class.",
-    "options": [
-      "music",
-      "Korean",
-      "science",
-      "art"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 과목은 미술이야."",
-    "options": [
-      "My favorite subject is art.",
-      "My favorite subject is music.",
-      "My favorite sport is art.",
-      "My favorite song is art."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 과목은 수학이야."",
-    "options": [
-      "My favorite subject is math.",
-      "My favorite sport is math.",
-      "My favorite subject is music.",
-      "My favorite song is math."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 영어로 이야기하는 것을 좋아해."",
-    "options": [
-      "I like English.",
-      "I like to speak English.",
-      "I like to listen English.",
-      "I like to draw English."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 음악 듣는 것을 좋아해."",
-    "options": [
-      "I like to speak music.",
-      "I like to listen to music.",
-      "I like to study music.",
-      "I like to draw music."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 노래는 'Lemon Tree'야."",
-    "options": [
-      "My favorite song is 'Lemon Tree'.",
-      "My favorite subject is 'Lemon Tree'.",
-      "My favorite sport is 'Lemon Tree'.",
-      "My favorite art is 'Lemon Tree'."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 그림 그리기를 좋아해."",
-    "options": [
-      "I like to draw.",
-      "I like to speak.",
-      "I like to study.",
-      "I like to listen."
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 과학 공부하는 것을 좋아해."",
-    "options": [
-      "I like to draw science.",
-      "I like to study science.",
-      "I like to listen science.",
-      "I like to speak science."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 운동은 농구야."",
-    "options": [
-      "My favorite subject is basketball.",
-      "My favorite sport is basketball.",
-      "My favorite song is basketball.",
-      "My favorite art is basketball."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 오늘 수학 공부하는 것을 좋아해."",
-    "options": [
-      "I like to today study math.",
-      "I like study math today.",
-      "I like to study math today.",
-      "I study math today like to."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 과목은 과학이야."",
-    "options": [
-      "My favorite sport is science.",
-      "My favorite subject is science.",
-      "My favorite song is science.",
-      "My favorite science is subject."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 노래 듣는 것을 좋아해."",
-    "options": [
-      "I like to listen to songs.",
-      "I like to speak songs.",
-      "I like to draw songs.",
-      "I like to study songs."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 한국어로 말하는 것을 좋아해."",
-    "options": [
-      "I like to listen Korean.",
-      "I like to speak Korean.",
-      "I like to draw Korean.",
-      "I like to study Korean."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 오늘 음악 듣는 것을 좋아해."",
-    "options": [
-      "I like to listen to music today.",
-      "I today like listen to music.",
-      "I like listen to music today.",
-      "Today I like to study music."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 오늘 과학 공부하는 것을 좋아해."",
-    "options": [
-      "I like to study science today.",
-      "I like study today science.",
-      "I today like to science study.",
-      "I like to today science study."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 말에 알맞은 것을 고르세요.\n\nKevin: What is your favorite sport?\nJinwoo: My favorite sport is ______.",
-    "options": [
-      "math",
-      "art",
-      "basketball",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 질문에 알맞은 답을 고르세요.\n\nHana: What is your favorite subject?\nKevin: My favorite subject is music.\n\n케빈이 가장 좋아하는 과목은?",
-    "options": [
-      "music",
-      "math",
-      "science",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nJinwoo: What is your favorite subject, Nara?\nNara: My favorite subject is ______. I like to draw pictures.",
-    "options": [
-      "Korean",
-      "music",
-      "art",
-      "science"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 today의 뜻으로 알맞은 것을 고르세요.\n\nMr. Wilson: We will play soccer today.",
-    "options": [
-      "어제",
-      "오늘",
-      "내일",
-      "항상"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 오늘 수업을 고르세요.\n\nTeacher: Today, we will listen to a new song.\nStudents: Great! We like music class.\n\n오늘 하는 수업은?",
-    "options": [
-      "art class",
-      "music class",
-      "science class",
-      "math class"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to study math.\nMy favorite subject is ______.",
-    "options": [
-      "art",
-      "music",
-      "math",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to listen to music.\nMy favorite subject is ______.",
-    "options": [
-      "music",
-      "Korean",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to speak Korean.\nMy favorite subject is ______.",
-    "options": [
-      "Korean",
-      "art",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to draw pictures.\nMy favorite subject is ______.",
-    "options": [
-      "math",
-      "art",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to study science.\nMy favorite subject is ______.",
-    "options": [
-      "art",
-      "music",
-      "science",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 운동에 대한 광고인지 고르세요.\n\nFun Sports Day\nLet’s play soccer together!\nToday after school",
-    "options": [
-      "baseball",
-      "soccer",
-      "basketball",
-      "tennis"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 운동에 대한 광고인지 고르세요.\n\nBasketball Club\nWe like to play basketball.\nJoin us today!",
-    "options": [
-      "soccer",
-      "basketball",
-      "tennis",
-      "baseball"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in art class,\nI will ______ a picture.",
-    "options": [
-      "listen",
-      "draw",
-      "study",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in Korean class,\nI will ______ Korean with my friend.",
-    "options": [
-      "draw",
-      "speak",
-      "listen to",
-      "study to"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is science.\nI like to study stars and plants.",
-    "options": [
-      "I Like Sports",
-      "I Like Science",
-      "I Like Music",
-      "I Like Art"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is music.\nI like to listen to songs.",
-    "options": [
-      "I Like Art",
-      "I Like Music",
-      "I Like Math",
-      "I Like Science"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is art.\nI like to draw pictures.",
-    "options": [
-      "I Like Art",
-      "I Like Sports",
-      "I Like Korean",
-      "I Like Music"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is math.\nI like to study numbers.",
-    "options": [
-      "I Like Music",
-      "I Like Science",
-      "I Like Math",
-      "I Like Art"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is Korean.\nI like to speak Korean with my friends.",
-    "options": [
-      "I Like Korean",
-      "I Like Art",
-      "I Like English",
-      "I Like Music"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite sport is baseball.\nI like to play catch with my dad.",
-    "options": [
-      "I Like Music",
-      "I Like Baseball",
-      "I Like Art",
-      "I Like Math"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe study numbers.\nMath is fun!",
-    "options": [
-      "music",
-      "Korean",
-      "art",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe draw and color.\nIt is my favorite subject.",
-    "options": [
-      "science",
-      "art",
-      "music",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe listen to many songs.\nMusic is my favorite subject.",
-    "options": [
-      "music",
-      "math",
-      "science",
-      "art"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) My favorite ______ is science.\n(2) My favorite ______ is art.\n(3) My favorite ______ is music.",
-    "options": [
-      "sport",
-      "song",
-      "subject",
-      "teacher"
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I like to ______ English.\n(2) I like to ______ Korean.\n(3) I like to ______ music in class.",
-    "options": [
-      "study",
-      "draw",
-      "listen to",
-      "speak"
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I like to ______ music.\n(2) I like to ______ songs.\n(3) I like to ______ English songs.",
-    "options": [
-      "speak",
-      "draw",
-      "listen to",
-      "study"
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  }
-]
+{
+  "type": "quizpack",
+  "version": "v1",
+  "pack": {
+    "title": "Eng5_9",
+    "subject": "영어",
+    "grade": "5",
+    "description": "5학년 영어 9단원: favorite subject"
+  },
+  "questions": [
+    {
+      "id": "Eng5_9-001",
+      "index": 0,
+      "prompt": "다음을 읽고, 나라의 favorite subject를 고르세요.\n\nNara: My favorite subject is art.",
+      "options": [
+        "art",
+        "math",
+        "music",
+        "science"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-002",
+      "index": 1,
+      "prompt": "다음을 읽고, 에디의 favorite subject를 고르세요.\n\nEddie: My favorite subject is science.",
+      "options": [
+        "Korean",
+        "science",
+        "music",
+        "art"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-003",
+      "index": 2,
+      "prompt": "다음을 읽고, 하나의 favorite subject를 고르세요.\n\nHana: My favorite subject is math.",
+      "options": [
+        "art",
+        "music",
+        "math",
+        "science"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-004",
+      "index": 3,
+      "prompt": "다음을 읽고, 진우의 favorite subject를 고르세요.\n\nJinwoo: My favorite subject is Korean.",
+      "options": [
+        "English",
+        "Korean",
+        "math",
+        "science"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-005",
+      "index": 4,
+      "prompt": "다음을 읽고, 케빈의 favorite subject를 고르세요.\n\nKevin: My favorite subject is music.",
+      "options": [
+        "art",
+        "science",
+        "music",
+        "math"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-006",
+      "index": 5,
+      "prompt": "다음을 읽고, 빈칸에 알맞은 과목을 고르세요.\n\nMy favorite subject is ______.\n(나는 미술을 가장 좋아해.)",
+      "options": [
+        "art",
+        "math",
+        "music",
+        "science"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-007",
+      "index": 6,
+      "prompt": "다음을 읽고, 빈칸에 알맞은 과목을 고르세요.\n\nMy favorite subject is _____.\n(나는 과학을 가장 좋아해.)",
+      "options": [
+        "Korean",
+        "music",
+        "art",
+        "science"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-008",
+      "index": 7,
+      "prompt": "다음을 읽고, 민수의 favorite subject를 고르세요.\n\nMinsu: My favorite subject is Korean.",
+      "options": [
+        "Korean",
+        "math",
+        "art",
+        "music"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-009",
+      "index": 8,
+      "prompt": "다음을 읽고, 수지의 favorite subject를 고르세요.\n\nSuji: My favorite subject is math.",
+      "options": [
+        "science",
+        "music",
+        "math",
+        "Korean"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-010",
+      "index": 9,
+      "prompt": "다음을 읽고, 유리의 favorite subject를 고르세요.\n\nYuri: My favorite subject is music.",
+      "options": [
+        "art",
+        "music",
+        "science",
+        "math"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-011",
+      "index": 10,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English.\n(나는 영어로 말하는 것을 좋아해.)",
+      "options": [
+        "speak",
+        "listen",
+        "draw",
+        "study"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-012",
+      "index": 11,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ music.\n(나는 음악 듣는 것을 좋아해.)",
+      "options": [
+        "speak",
+        "listen to",
+        "study",
+        "draw"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-013",
+      "index": 12,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ pictures.\n(나는 그림 그리기를 좋아해.)",
+      "options": [
+        "study",
+        "speak",
+        "draw",
+        "listen"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-014",
+      "index": 13,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ math.\n(나는 수학 공부하는 것을 좋아해.)",
+      "options": [
+        "study",
+        "listen",
+        "draw",
+        "sing"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-015",
+      "index": 14,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ Korean.\n(나는 한국어로 말하는 것을 좋아해.)",
+      "options": [
+        "listen",
+        "draw",
+        "speak",
+        "study"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-016",
+      "index": 15,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ songs.\n(나는 노래 듣는 것을 좋아해.)",
+      "options": [
+        "study",
+        "listen to",
+        "draw",
+        "speak"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-017",
+      "index": 16,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English songs.\n(나는 영어 노래를 듣는 것을 좋아해.)",
+      "options": [
+        "speak",
+        "study",
+        "listen to",
+        "draw"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-018",
+      "index": 17,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ today.\n(나는 오늘 공부하는 것을 좋아해.)",
+      "options": [
+        "study",
+        "listen",
+        "draw",
+        "speak"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-019",
+      "index": 18,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nHana likes to ______ art.\n(하나는 미술로 그림 그리는 것을 좋아해.)",
+      "options": [
+        "speak",
+        "draw",
+        "listen",
+        "study"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-020",
+      "index": 19,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nKevin likes to ______ music in class.\n(케빈은 수업에서 음악 듣는 것을 좋아해.)",
+      "options": [
+        "study",
+        "draw",
+        "listen to",
+        "speak"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-021",
+      "index": 20,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nJinwoo likes to ______ science.\n(진우는 과학 공부하는 것을 좋아해.)",
+      "options": [
+        "speak",
+        "listen",
+        "study",
+        "draw"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-022",
+      "index": 21,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nEddie likes to ______ Korean.\n(에디는 한국어로 말하는 것을 좋아해.)",
+      "options": [
+        "draw",
+        "speak",
+        "listen",
+        "study"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-023",
+      "index": 22,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nNara likes to ______ pictures in art class.\n(나라는 미술 시간에 그림 그리기를 좋아해.)",
+      "options": [
+        "listen to",
+        "draw",
+        "study",
+        "speak"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-024",
+      "index": 23,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English every day.\n(나는 매일 영어를 공부하는 것을 좋아해.)",
+      "options": [
+        "listen to",
+        "study",
+        "draw",
+        "speak"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-025",
+      "index": 24,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nWe like to ______ songs in music class.\n(우리는 음악 시간에 노래를 듣는 것을 좋아해.)",
+      "options": [
+        "listen to",
+        "study",
+        "draw",
+        "speak"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-026",
+      "index": 25,
+      "prompt": "대화를 읽고, 밑줄 친 말의 뜻으로 알맞은 것을 고르세요.\n\nKevin: What is your favorite subject?\nHana: My favorite subject is math.\n\n밑줄 친 subject의 뜻은?",
+      "options": [
+        "과목",
+        "운동",
+        "노래",
+        "그림"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-027",
+      "index": 26,
+      "prompt": "대화를 읽고, 질문에 알맞은 답을 고르세요.\n\nKevin: What is your favorite subject?\nEddie: My favorite subject is science.\n\n에디가 가장 좋아하는 것은?",
+      "options": [
+        "미술 시간",
+        "수학 문제",
+        "과학 시간",
+        "음악 시간"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-028",
+      "index": 27,
+      "prompt": "대화를 읽고, 진우가 좋아하는 선생님을 고르세요.\n\nJinwoo: I like the P.E. teacher, Mr. Wilson. He is very kind.\n\n진우가 좋아하는 선생님은?",
+      "options": [
+        "music teacher",
+        "P.E. teacher",
+        "art teacher",
+        "math teacher"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-029",
+      "index": 28,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nHana: I don’t like P.E.\nJinwoo: What’s your favorite , Hana?\nHana: My favorite subject is math.",
+      "options": [
+        "song",
+        "sport",
+        "subject",
+        "teacher"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-030",
+      "index": 29,
+      "prompt": "대화를 읽고, 밑줄 친 kind의 의미로 알맞은 것을 고르세요.\n\nJinwoo: I like the P.E. teacher, Mr. Wilson.\nHe is very kind.",
+      "options": [
+        "친절한",
+        "빠른",
+        "재미있는",
+        "조용한"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-031",
+      "index": 30,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nMr. Wilson: ______ up! We will play soccer today.",
+      "options": [
+        "Listen",
+        "Speak",
+        "Draw",
+        "Study"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-032",
+      "index": 31,
+      "prompt": "대화를 읽고, 오늘 할 활동을 고르세요.\n\nMr. Wilson: Listen up! We will play soccer today.",
+      "options": [
+        "play baseball",
+        "play soccer",
+        "study math",
+        "sing a song"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-033",
+      "index": 32,
+      "prompt": "대화를 읽고, 나라가 좋아하는 활동을 고르세요.\n\nNara: Wow! You draw very well.\nEddie: Thanks. I like to draw.\nNara: I like to play sports.\n\n나라가 좋아하는 것은?",
+      "options": [
+        "그림 그리기",
+        "스포츠 하기",
+        "노래 부르기",
+        "수학 공부하기"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-034",
+      "index": 33,
+      "prompt": "대화를 읽고, 에디가 좋아하는 활동을 고르세요.\n\nNara: Wow! You draw very well.\nEddie: Thanks. I like to draw.",
+      "options": [
+        "노래 듣기",
+        "영어 말하기",
+        "그림 그리기",
+        "야구 하기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-035",
+      "index": 34,
+      "prompt": "대화를 읽고, 밑줄 친 speak의 뜻으로 알맞은 것을 고르세요.\n\nKevin: I like to speak English.",
+      "options": [
+        "듣다",
+        "말하다",
+        "그리다",
+        "공부하다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-036",
+      "index": 35,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / your / What / subject / is / ?",
+      "options": [
+        "What is your favorite subject?",
+        "What subject is your favorite?",
+        "Your favorite subject what is?",
+        "Is what your favorite subject?"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-037",
+      "index": 36,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nMy / subject / favorite / art / is / .",
+      "options": [
+        "My subject favorite is art.",
+        "My favorite art is subject.",
+        "My favorite subject is art.",
+        "Art is my favorite subject is."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-038",
+      "index": 37,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nlike / I / English / speak / to / .",
+      "options": [
+        "I like to speak English.",
+        "I like speak to English.",
+        "Like I to speak English.",
+        "English I like to speak."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-039",
+      "index": 38,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nsong / favorite / My / is / 'Lemon Tree' / .",
+      "options": [
+        "My favorite song is 'Lemon Tree'.",
+        "Song favorite my is 'Lemon Tree'.",
+        "My is favorite song 'Lemon Tree'.",
+        "'Lemon Tree' is my favorite song is."
+      ],
+      "answerIndex": 0,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-040",
+      "index": 39,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nmusic / listen / to / like / I / to / .",
+      "options": [
+        "I like to listen to music.",
+        "I like listen to to music.",
+        "To music I like listen to.",
+        "Music I to like listen to."
+      ],
+      "answerIndex": 0,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-041",
+      "index": 40,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nsport / is / favorite / My / basketball / .",
+      "options": [
+        "My basketball favorite sport is.",
+        "My favorite sport is basketball.",
+        "Sport is my favorite basketball.",
+        "Basketball sport is my favorite."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-042",
+      "index": 41,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / subject / My / Korean / is / .",
+      "options": [
+        "My favorite subject is Korean.",
+        "Subject Korean my favorite is.",
+        "My subject Korean is favorite.",
+        "Korean is subject my favorite."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-043",
+      "index": 42,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / art / My / is / subject / .",
+      "options": [
+        "My favorite subject is art.",
+        "Art is my favorite subject.",
+        "My art favorite subject is.",
+        "Favorite subject my is art is."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-044",
+      "index": 43,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nlike / to / I / draw / .",
+      "options": [
+        "I like draw to.",
+        "I to like draw.",
+        "Like draw I to.",
+        "I like to draw."
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-045",
+      "index": 44,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nstudy / math / to / like / I / to / .",
+      "options": [
+        "I like to study math.",
+        "I study like to math.",
+        "Math I like to study.",
+        "Study math I like to."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-046",
+      "index": 45,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\ntoday / we / soccer / play / will / .",
+      "options": [
+        "We will play soccer today.",
+        "We will today play soccer.",
+        "Today soccer we will play.",
+        "Soccer will we play today."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-047",
+      "index": 46,
+      "prompt": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nFun Art Class\nDraw and paint\nEvery Friday",
+      "options": [
+        "music",
+        "art",
+        "science",
+        "Korean"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-048",
+      "index": 47,
+      "prompt": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nScience Time\nEasy experiments\nJoin us today",
+      "options": [
+        "math",
+        "art",
+        "science",
+        "music"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-049",
+      "index": 48,
+      "prompt": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nMath Club\nWe like to study numbers\nAfter school",
+      "options": [
+        "science",
+        "math",
+        "Korean",
+        "P.E."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-050",
+      "index": 49,
+      "prompt": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nMusic Class\nListen to songs\nSing together",
+      "options": [
+        "art",
+        "music",
+        "science",
+        "math"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-051",
+      "index": 50,
+      "prompt": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nKorean Class\nSpeak and read Korean\nHave fun",
+      "options": [
+        "Korean",
+        "English",
+        "science",
+        "music"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-052",
+      "index": 51,
+      "prompt": "다음 광고를 읽고, 어떤 활동을 하는지 고르세요.\n\nArt Club\nWe like to draw pictures.\nCome and join us!",
+      "options": [
+        "그림 그리기",
+        "노래 부르기",
+        "야구 하기",
+        "수학 문제 풀기"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-053",
+      "index": 52,
+      "prompt": "다음 광고를 읽고, 어떤 활동을 하는지 고르세요.\n\nMusic Club\nWe like to listen to music.\nLet’s sing a song!",
+      "options": [
+        "야구 하기",
+        "음악 듣기",
+        "그림 그리기",
+        "달리기"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-054",
+      "index": 53,
+      "prompt": "다음 광고를 읽고, 어떤 과목을 공부하는지 고르세요.\n\nScience Club\nWe study plants and animals.",
+      "options": [
+        "music",
+        "art",
+        "science",
+        "math"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-055",
+      "index": 54,
+      "prompt": "다음 광고를 읽고, 오늘 무엇을 하는지 고르세요.\n\nP.E. Class Today\nWe will play soccer.",
+      "options": [
+        "야구",
+        "테니스",
+        "축구",
+        "농구"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-056",
+      "index": 55,
+      "prompt": "다음 광고를 읽고, 빈칸에 알맞은 말을 고르세요.\n\n Class\nWe like to listen to songs.\nMy favorite subject is ______.",
+      "options": [
+        "Music / music",
+        "Art / art",
+        "Math / math",
+        "Science / science"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-057",
+      "index": 56,
+      "prompt": "다음 광고를 읽고, 어떤 학생이 이 수업을 가장 좋아할지 고르세요.\n\nArt Class\nWe draw and paint.\n\n누가 이 수업을 가장 좋아할까요?",
+      "options": [
+        "I like to study math.",
+        "I like to draw pictures.",
+        "I like to play soccer.",
+        "I like to listen to music."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-058",
+      "index": 57,
+      "prompt": "다음 안내문을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in science class,\nwe will study the stars.\nScience is my favorite ______.",
+      "options": [
+        "sport",
+        "song",
+        "subject",
+        "teacher"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-059",
+      "index": 58,
+      "prompt": "다음 안내문을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in music class,\nwe will listen to a new ______.",
+      "options": [
+        "song",
+        "subject",
+        "sport",
+        "math"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-060",
+      "index": 59,
+      "prompt": "다음 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWe read a Korean story.\nWe speak Korean in class.",
+      "options": [
+        "music",
+        "Korean",
+        "science",
+        "art"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-061",
+      "index": 60,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n내가 가장 좋아하는 과목은 미술이야.",
+      "options": [
+        "My favorite subject is art.",
+        "My favorite subject is music.",
+        "My favorite sport is art.",
+        "My favorite song is art."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-062",
+      "index": 61,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n내가 가장 좋아하는 과목은 수학이야.",
+      "options": [
+        "My favorite subject is math.",
+        "My favorite sport is math.",
+        "My favorite subject is music.",
+        "My favorite song is math."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-063",
+      "index": 62,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 영어로 이야기하는 것을 좋아해.",
+      "options": [
+        "I like English.",
+        "I like to speak English.",
+        "I like to listen English.",
+        "I like to draw English."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-064",
+      "index": 63,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 음악 듣는 것을 좋아해.",
+      "options": [
+        "I like to speak music.",
+        "I like to listen to music.",
+        "I like to study music.",
+        "I like to draw music."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-065",
+      "index": 64,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n내가 가장 좋아하는 노래는 'Lemon Tree'야.",
+      "options": [
+        "My favorite song is 'Lemon Tree'.",
+        "My favorite subject is 'Lemon Tree'.",
+        "My favorite sport is 'Lemon Tree'.",
+        "My favorite art is 'Lemon Tree'."
+      ],
+      "answerIndex": 0,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-066",
+      "index": 65,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 그림 그리기를 좋아해.",
+      "options": [
+        "I like to draw.",
+        "I like to speak.",
+        "I like to study.",
+        "I like to listen."
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-067",
+      "index": 66,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 과학 공부하는 것을 좋아해.",
+      "options": [
+        "I like to draw science.",
+        "I like to study science.",
+        "I like to listen science.",
+        "I like to speak science."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-068",
+      "index": 67,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n내가 가장 좋아하는 운동은 농구야.",
+      "options": [
+        "My favorite subject is basketball.",
+        "My favorite sport is basketball.",
+        "My favorite song is basketball.",
+        "My favorite art is basketball."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-069",
+      "index": 68,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 오늘 수학 공부하는 것을 좋아해.",
+      "options": [
+        "I like to today study math.",
+        "I like study math today.",
+        "I like to study math today.",
+        "I study math today like to."
+      ],
+      "answerIndex": 2,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-070",
+      "index": 69,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n내가 가장 좋아하는 과목은 과학이야.",
+      "options": [
+        "My favorite sport is science.",
+        "My favorite subject is science.",
+        "My favorite song is science.",
+        "My favorite science is subject."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-071",
+      "index": 70,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 노래 듣는 것을 좋아해.",
+      "options": [
+        "I like to listen to songs.",
+        "I like to speak songs.",
+        "I like to draw songs.",
+        "I like to study songs."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-072",
+      "index": 71,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 한국어로 말하는 것을 좋아해.",
+      "options": [
+        "I like to listen Korean.",
+        "I like to speak Korean.",
+        "I like to draw Korean.",
+        "I like to study Korean."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-073",
+      "index": 72,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 오늘 음악 듣는 것을 좋아해.",
+      "options": [
+        "I like to listen to music today.",
+        "I today like listen to music.",
+        "I like listen to music today.",
+        "Today I like to study music."
+      ],
+      "answerIndex": 0,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-074",
+      "index": 73,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 오늘 과학 공부하는 것을 좋아해.",
+      "options": [
+        "I like to study science today.",
+        "I like study today science.",
+        "I today like to science study.",
+        "I like to today science study."
+      ],
+      "answerIndex": 0,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-075",
+      "index": 74,
+      "prompt": "대화를 읽고, 밑줄 친 말에 알맞은 것을 고르세요.\n\nKevin: What is your favorite sport?\nJinwoo: My favorite sport is ______.",
+      "options": [
+        "math",
+        "art",
+        "basketball",
+        "Korean"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-076",
+      "index": 75,
+      "prompt": "대화를 읽고, 질문에 알맞은 답을 고르세요.\n\nHana: What is your favorite subject?\nKevin: My favorite subject is music.\n\n케빈이 가장 좋아하는 과목은?",
+      "options": [
+        "music",
+        "math",
+        "science",
+        "Korean"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-077",
+      "index": 76,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nJinwoo: What is your favorite subject, Nara?\nNara: My favorite subject is ______. I like to draw pictures.",
+      "options": [
+        "Korean",
+        "music",
+        "art",
+        "science"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-078",
+      "index": 77,
+      "prompt": "대화를 읽고, 밑줄 친 today의 뜻으로 알맞은 것을 고르세요.\n\nMr. Wilson: We will play soccer today.",
+      "options": [
+        "어제",
+        "오늘",
+        "내일",
+        "항상"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-079",
+      "index": 78,
+      "prompt": "대화를 읽고, 오늘 수업을 고르세요.\n\nTeacher: Today, we will listen to a new song.\nStudents: Great! We like music class.\n\n오늘 하는 수업은?",
+      "options": [
+        "art class",
+        "music class",
+        "science class",
+        "math class"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-080",
+      "index": 79,
+      "prompt": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to study math.\nMy favorite subject is ______.",
+      "options": [
+        "art",
+        "music",
+        "math",
+        "science"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-081",
+      "index": 80,
+      "prompt": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to listen to music.\nMy favorite subject is ______.",
+      "options": [
+        "music",
+        "Korean",
+        "science",
+        "math"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-082",
+      "index": 81,
+      "prompt": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to speak Korean.\nMy favorite subject is ______.",
+      "options": [
+        "Korean",
+        "art",
+        "music",
+        "science"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-083",
+      "index": 82,
+      "prompt": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to draw pictures.\nMy favorite subject is ______.",
+      "options": [
+        "math",
+        "art",
+        "music",
+        "science"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-084",
+      "index": 83,
+      "prompt": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to study science.\nMy favorite subject is ______.",
+      "options": [
+        "art",
+        "music",
+        "science",
+        "Korean"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-085",
+      "index": 84,
+      "prompt": "다음 광고를 읽고, 어떤 운동에 대한 광고인지 고르세요.\n\nFun Sports Day\nLet’s play soccer together!\nToday after school",
+      "options": [
+        "baseball",
+        "soccer",
+        "basketball",
+        "tennis"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-086",
+      "index": 85,
+      "prompt": "다음 광고를 읽고, 어떤 운동에 대한 광고인지 고르세요.\n\nBasketball Club\nWe like to play basketball.\nJoin us today!",
+      "options": [
+        "soccer",
+        "basketball",
+        "tennis",
+        "baseball"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-087",
+      "index": 86,
+      "prompt": "짧은 글을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in art class,\nI will ______ a picture.",
+      "options": [
+        "listen",
+        "draw",
+        "study",
+        "speak"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-088",
+      "index": 87,
+      "prompt": "짧은 글을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in Korean class,\nI will ______ Korean with my friend.",
+      "options": [
+        "draw",
+        "speak",
+        "listen to",
+        "study to"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-089",
+      "index": 88,
+      "prompt": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is science.\nI like to study stars and plants.",
+      "options": [
+        "I Like Sports",
+        "I Like Science",
+        "I Like Music",
+        "I Like Art"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-090",
+      "index": 89,
+      "prompt": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is music.\nI like to listen to songs.",
+      "options": [
+        "I Like Art",
+        "I Like Music",
+        "I Like Math",
+        "I Like Science"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-091",
+      "index": 90,
+      "prompt": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is art.\nI like to draw pictures.",
+      "options": [
+        "I Like Art",
+        "I Like Sports",
+        "I Like Korean",
+        "I Like Music"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-092",
+      "index": 91,
+      "prompt": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is math.\nI like to study numbers.",
+      "options": [
+        "I Like Music",
+        "I Like Science",
+        "I Like Math",
+        "I Like Art"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-093",
+      "index": 92,
+      "prompt": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is Korean.\nI like to speak Korean with my friends.",
+      "options": [
+        "I Like Korean",
+        "I Like Art",
+        "I Like English",
+        "I Like Music"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-094",
+      "index": 93,
+      "prompt": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite sport is baseball.\nI like to play catch with my dad.",
+      "options": [
+        "I Like Music",
+        "I Like Baseball",
+        "I Like Art",
+        "I Like Math"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-095",
+      "index": 94,
+      "prompt": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe study numbers.\nMath is fun!",
+      "options": [
+        "music",
+        "Korean",
+        "art",
+        "math"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-096",
+      "index": 95,
+      "prompt": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe draw and color.\nIt is my favorite subject.",
+      "options": [
+        "science",
+        "art",
+        "music",
+        "Korean"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-097",
+      "index": 96,
+      "prompt": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe listen to many songs.\nMusic is my favorite subject.",
+      "options": [
+        "music",
+        "math",
+        "science",
+        "art"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-098",
+      "index": 97,
+      "prompt": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) My favorite ______ is science.\n(2) My favorite ______ is art.\n(3) My favorite ______ is music.",
+      "options": [
+        "sport",
+        "song",
+        "subject",
+        "teacher"
+      ],
+      "answerIndex": 2,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-099",
+      "index": 98,
+      "prompt": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I like to ______ English.\n(2) I like to ______ Korean.\n(3) I like to ______ music in class.",
+      "options": [
+        "study",
+        "draw",
+        "listen to",
+        "speak"
+      ],
+      "answerIndex": 3,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "Eng5_9-100",
+      "index": 99,
+      "prompt": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I like to ______ music.\n(2) I like to ______ songs.\n(3) I like to ______ English songs.",
+      "options": [
+        "speak",
+        "draw",
+        "listen to",
+        "study"
+      ],
+      "answerIndex": 2,
+      "difficulty": 3,
+      "tags": null
+    }
+  ]
+}
