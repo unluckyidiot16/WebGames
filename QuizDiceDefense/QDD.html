@@ -2215,6 +2215,8 @@
         const QUIZ_PACK_URL =
             `${QUIZ_PACK_BASE}${hasQuery ? "&" : "?"}v=${encodeURIComponent(QP_VER)}`;
 
+        console.log("[QDD] packParam =", packParam, "QUIZ_PACK_URL =", QUIZ_PACK_URL);
+
         const cacheKeyName = (packParam && packParam.trim()) || "quizpack";
         const QUIZ_CACHE_NAME = `QDD-QuizPack-${cacheKeyName}-v${QP_VER}`;
         let _ready = null;
