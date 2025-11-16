@@ -1,0 +1,2536 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>다이스 랜덤 퀴즈 디펜스 (v3.3b)</title>
+    <link rel="preload"
+          href="https://unluckyidiot16.github.io/assets-common/QuizDiceDefense/QuizPack/quizpack.json?v=20251112"
+          as="fetch"
+          crossorigin="anonymous">
+    <style>
+        :root {
+            --canvas-bg: #dbe4ee;
+            --grid-bg: #ffffff;
+            --grid-border: #b0c4de;
+            --path-color: #c5d3e0;
+            --text-dark: #333;
+            --qp-color: #2a9d8f;
+            --hp-color: #e76f51;
+            --wave-color: #f3a261;
+            --point-color: #8e44ad;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen,
+            Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            background-color: #f0f4f8;
+            padding: 20px 10px;
+            color: var(--text-dark);
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        h1 {
+            color: var(--text-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        #game-container, #quiz-container {
+            display: none;
+        }
+        #game-container {
+            flex-wrap: nowrap;
+            justify-content: center;
+            gap: 20px;
+            width: 100%;
+            max-width: 1050px;
+        }
+
+        #left-panel {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .panel {
+            background-color: var(--grid-bg);
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        #player-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 1.1em;
+            font-weight: 500;
+            margin-bottom: 15px;
+        }
+        #player-hp { color: var(--hp-color); font-weight: bold; }
+        #wave-display { color: var(--wave-color); font-weight: bold; }
+
+        #resource-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--qp-color);
+            margin-bottom: 10px;
+        }
+        #summon-dice-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: var(--hp-color);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        #summon-dice-btn:hover:not(:disabled) {
+            background-color: #f4a261;
+        }
+        #summon-dice-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #summon-cost-display {
+            font-size: 0.9em;
+            color: #555;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* --- 강화 패널 --- */
+        #upgrade-panel {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr); /* 1줄 5칸 */
+            gap: 10px;
+            padding: 10px;
+        }
+        .upgrade-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 10px;
+            border: 1px solid var(--grid-border);
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color 0.2s, box-shadow 0.2s;
+        }
+        .upgrade-section:hover {
+            background-color: #f9f9f9;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .upgrade-section.disabled {
+            background-color: #fdfdfd;
+            color: #aaa;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .upgrade-section.disabled:hover {
+            box-shadow: none;
+        }
+
+        .dice-icon {
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            border: 2px solid white;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+        }
+        .upgrade-info {
+            font-size: 0.9em;
+            font-weight: bold;
+            text-align: center;
+            color: #333;
+            margin-top: 8px;
+        }
+        .upgrade-cost {
+            font-size: 0.8em;
+            color: var(--qp-color);
+            font-weight: 500;
+            margin-top: 4px;
+        }
+        .disabled .upgrade-cost {
+            color: #aaa;
+        }
+
+        /* --- 캔버스 영역 --- */
+        #game-canvas-container {
+            border: 2px solid var(--grid-border);
+            padding: 10px;
+            border-radius: 8px;
+            background-color: var(--canvas-bg);
+            width: 510px;
+            height: 430px;
+            box-sizing: border-box;
+        }
+
+        #game-canvas {
+            display: block;
+            background-color: var(--canvas-bg);
+            cursor: grab;
+        }
+        #game-canvas:active {
+            cursor: grabbing;
+        }
+
+        /* --- 퀴즈 패널 (HTML) --- */
+        #quiz-container {
+            width: 400px;
+            box-sizing: border-box;
+        }
+
+        #quiz-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+        #quiz-timer-bar { height: 10px; flex-grow: 1; background-color: #eee; border-radius: 5px; overflow: hidden; margin-right: 15px; }
+        #quiz-timer-progress { height: 100%; width: 100%; background-color: #4caf50; transition: width 0.1s linear; }
+        #quiz-reward { font-size: 0.9em; font-weight: 500; color: var(--qp-color); }
+        #question { font-size: 1.1em; font-weight: 500; margin-bottom: 15px; min-height: 50px; }
+        #answer-options { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+
+        /* [수정] 퀴즈 버튼 롤백 */
+        .option-btn {
+            padding: 12px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-size: 1em;
+            width: 100%; /* 너비 100% */
+            box-sizing: border-box; /* 패딩 포함 */
+        }
+        .option-btn:hover { background-color: #eef; border-color: #aac; }
+        .option-btn.correct { background-color: #d4edda; border-color: #c3e6cb; }
+        .option-btn.wrong { background-color: #f8d7da; border-color: #f5c6cb; }
+        #skip-btn { padding: 10px; background-color: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 0.9em; align-self: flex-end; }
+        #skip-btn:hover { background-color: #5a6268; }
+        #quiz-feedback { margin-top: 15px; font-weight: bold; text-align: center; }
+
+
+        /* --- 모달 공통 스타일 --- */
+        .modal-overlay {
+            display: flex;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 30px 40px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+        .modal-content h2 {
+            font-size: 2.2em;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+        .modal-content p {
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+        .modal-close-btn {
+            position: absolute;
+            top: 15px;
+            right: 20px;
+            font-size: 2em;
+            cursor: pointer;
+            color: #aaa;
+            background: none;
+            border: none;
+        }
+        .modal-btn {
+            padding: 12px 25px;
+            font-size: 1.2em;
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background-color 0.2s;
+        }
+        .modal-btn:hover {
+            background-color: #0056b3;
+        }
+        .modal-btn.secondary {
+            background-color: #6c757d;
+        }
+        .modal-btn.secondary:hover {
+            background-color: #5a6268;
+        }
+
+        /* --- 시작 화면 --- */
+        #start-screen h1 {
+            font-size: 2.5em;
+            color: var(--hp-color);
+        }
+        #start-screen .instructions {
+            text-align: left;
+            padding: 0 10px;
+            margin-bottom: 25px;
+            background-color: #f9f9f9;
+            border-radius: 5px;
+            border: 1px solid #eee;
+        }
+
+        /* --- 영구 강화 모달 --- */
+        #total-points-display {
+            font-size: 1.5em;
+            font-weight: bold;
+            color: var(--point-color);
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #eee;
+        }
+        .roguelite-upgrade-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        .roguelite-upgrade-item {
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+        .roguelite-upgrade-item h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            color: var(--text-dark);
+        }
+        .roguelite-upgrade-item p {
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .roguelite-upgrade-btn {
+            width: 100%;
+            padding: 10px;
+            font-size: 1em;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            background-color: var(--point-color);
+            color: white;
+            transition: background-color 0.2s;
+        }
+        .roguelite-upgrade-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        .roguelite-upgrade-btn:hover:not(:disabled) {
+            background-color: #7a3d9b;
+        }
+        .roguelite-cost {
+            font-size: 0.9em;
+            font-weight: 500;
+            margin-top: 5px;
+        }
+
+        /* --- 업적 모달 --- */
+        #achievement-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+        }
+        #achievement-list li {
+            font-size: 1.1em;
+            padding: 12px;
+            border-bottom: 1px solid #eee;
+        }
+        #achievement-list li.unlocked {
+            color: green;
+            font-weight: bold;
+            text-decoration: line-through;
+        }
+        #achievement-list li.locked {
+            color: #aaa;
+        }
+        #achievement-list li.locked::before { content: '🔒 '; }
+        #achievement-list li.unlocked::before { content: '🏆 '; }
+
+
+        /* --- 게임 오버/승리 모달 --- */
+        #game-over-modal, #game-victory-modal { display: none; }
+        #game-over-content h2 { color: var(--hp-color); }
+        #game-victory-modal h2 { color: var(--qp-color); }
+        .points-display {
+            font-size: 1.2em;
+            margin: 15px 0;
+        }
+        .points-display strong {
+            color: var(--point-color);
+            font-size: 1.3em;
+        }
+
+        /* --- [수정] 모바일 반응형 --- */
+        @media (max-width: 960px) { /* 태블릿/데스크탑 좁게 */
+            body {
+                padding: 10px 5px;
+            }
+            #game-container, #quiz-container {
+                flex-direction: column; /* 세로로 쌓기 */
+                align-items: center;
+                display: none;
+            }
+            #game-container.active, #quiz-container.active {
+                display: flex;
+            }
+            #left-panel, #quiz-container {
+                width: 98%;
+                max-width: 530px;
+            }
+            #game-canvas-container {
+                width: 100%;
+                height: auto;
+                aspect-ratio: 510 / 430;
+            }
+            #game-canvas {
+                width: 100%;
+                height: 100%;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            /* [수정] 강화 패널 3열 */
+            #upgrade-panel {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .roguelite-upgrade-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+        @media (max-width: 600px) {
+            /* [수정] 강화 패널 2열 */
+            #upgrade-panel {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+
+        /* --- Portrait: upgrade panel 1-row 5-col, shrink contents, fix widths --- */
+        @media (orientation: portrait) {
+            #upgrade-panel {
+                display: grid !important;
+                grid-template-columns: repeat(5, minmax(0, 1fr)) !important;
+                grid-auto-flow: row !important;
+                gap: 6px !important;
+            }
+            #upgrade-panel .upgrade-section {
+                min-width: 0; /* allow shrink inside grid cell */
+                padding: 6px !important;
+            }
+            #upgrade-panel .dice-icon {
+                width: 28px; height: 28px;
+            }
+            #upgrade-panel .upgrade-info,
+            #upgrade-panel .upgrade-cost {
+                width: 100%;
+                text-align: center;
+                line-height: 1.1;
+                /* shrink-to-fit text based on viewport width with bounds */
+                font-size: clamp(10px, 2.6vw, 12px);
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            /* Keep roguelite grid to single column in portrait small, but buttons full-width */
+            .roguelite-upgrade-grid { grid-template-columns: 1fr !important; }
+            .roguelite-upgrade-btn { width: 100%; }
+        }
+        /* Ensure equal-looking buttons regardless of text length */
+        .option-btn,
+        .modal-btn,
+        .roguelite-upgrade-btn { width: 100%; box-sizing: border-box; }
+        /* Prefer dynamic font sizing for long labels */
+        .option-btn { font-size: clamp(14px, 3.8vw, 18px); }
+
+
+        /* Strong override so active screens always show */
+        #game-container.active, #quiz-container.active { display: flex !important; }
+        html, body { min-height: 100dvh; }
+        :root { --vh: 1vh; }
+
+
+        /* === Quiz option sizing fixes === */
+        :root { --opt-height: 54px; --opt-font-max: 18px; --opt-font-min: 12px; }
+
+        #answer-options { display: flex; flex-direction: column; gap: 10px; }
+
+        .option-btn {
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            height: var(--opt-height);
+            width: 100%;
+            box-sizing: border-box;
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background-color: #f9f9f9;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: background-color .2s, border-color .2s, transform .1s;
+            overflow: hidden; /* prevent height growth */
+        }
+
+        .option-btn .option-label {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2; /* allow up to 2 lines */
+            overflow: hidden;
+            line-height: 1.15;
+            width: 100%;
+            /* initial responsive bound, JS will fine-tune */
+            font-size: clamp(var(--opt-font-min), 3.4vw, var(--opt-font-max));
+            white-space: normal;
+            text-overflow: ellipsis;
+        }
+
+        @media (orientation: portrait) {
+            :root { --opt-height: 50px; --opt-font-max: 16px; --opt-font-min: 11px; }
+        }
+
+
+        /* === PATCH: Force equal-width quiz option boxes === */
+        #answer-options {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            align-items: stretch !important;
+            gap: 10px;
+        }
+        #answer-options .option-btn {
+            width: 100% !important;
+            box-sizing: border-box !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+        }
+        #answer-options .option-btn .option-label {
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        /* === END PATCH === */
+
+
+        /* === PATCH v3: Quiz panel alignment & equal widths === */
+        #quiz-container { display: flex; flex-direction: column; align-items: stretch; }
+        #question { text-align: left !important; }
+        #answer-options {
+            display: grid !important;
+            grid-template-columns: 1fr !important;
+            justify-items: stretch !important;
+            align-items: stretch !important;
+            gap: 10px !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+        }
+        #answer-options .option-btn {
+            display: flex !important;
+            align-items: center !important;
+            justify-content: flex-start !important;
+            width: 100% !important;
+            max-width: none !important;
+            align-self: stretch !important;
+            box-sizing: border-box !important;
+            text-align: left !important;
+            min-width: 0 !important;
+        }
+        #answer-options .option-btn .option-label {
+            width: 100% !important;
+            min-width: 0 !important;
+        }
+        /* === END PATCH v3 === */
+
+    </style>
+    <link rel="icon" href="data:,">
+    <script src="../../ClassGame/LineBattle/src/gfx/assetPath.ts"></script>
+    <script src="../../ClassGame/LineBattle/src/gfx/unitAnims.ts"></script>
+    <!-- removed: invalid TypeScript include (supaRpc.ts) -->
+</head>
+<body>
+
+<!-- 시작 화면 모달 -->
+<div id="start-screen" class="modal-overlay">
+    <div class="modal-content">
+        <h1>다이스 퀴즈 디펜스</h1>
+        <div class="instructions">
+            <p><strong>📜 게임 방법</strong></p>
+            <ul>
+                <li>퀴즈를 풀고 <strong>QP</strong>를 모으세요.</li>
+                <li><strong>QP</strong>로 랜덤 다이스를 소환하세요.</li>
+                <li>같은 종류, 같은 눈금의 다이스를 합쳐 강화하세요.</li>
+                <li>몰려오는 적들을 막고 웨이브를 클리어하세요!</li>
+                <li>게임 오버 시 <strong>지식 포인트(KP)</strong>를 얻습니다.</li>
+            </ul>
+        </div>
+        <button id="start-game-btn" class="modal-btn">게임 시작</button>
+        <button id="show-roguelite-btn" class="modal-btn secondary">영구 강화</button>
+        <button id="show-achievements-btn" class="modal-btn secondary">업적</button>
+    </div>
+</div>
+
+<!-- 영구 강화 모달 -->
+<div id="roguelite-upgrade-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <button id="close-roguelite-btn" class="modal-close-btn">&times;</button>
+        <h2>영구 강화</h2>
+        <div id="total-points-display">보유: 0 KP</div>
+        <div class="roguelite-upgrade-grid">
+            <div class="roguelite-upgrade-item">
+                <h3>시작 QP 증가</h3>
+                <p id="roguelite-startQP-desc">시작 QP가 20 증가합니다. (현재 +0)</p>
+                <button id="roguelite-startQP-btn" class="roguelite-upgrade-btn">강화</button>
+                <div class="roguelite-cost" id="roguelite-startQP-cost">비용: 200 KP</div>
+            </div>
+            <div class="roguelite-upgrade-item">
+                <h3>퀴즈 보상 증가</h3>
+                <p id="roguelite-quizQP-desc">퀴즈 정답 QP 보상이 10% 증가합니다. (현재 +0%)</p>
+                <button id="roguelite-quizQP-btn" class="roguelite-upgrade-btn">강화</button>
+                <div class="roguelite-cost" id="roguelite-quizQP-cost">비용: 300 KP</div>
+            </div>
+            <div class="roguelite-upgrade-item">
+                <h3>최대 HP 증가</h3>
+                <p id="roguelite-hpmax-desc">최대 HP가 5 증가합니다. (현재 +0)</p>
+                <button id="roguelite-hpmax-btn" class="roguelite-upgrade-btn">강화</button>
+                <div class="roguelite-cost" id="roguelite-hpmax-cost">비용: 180 KP</div>
+            </div>
+            <div class="roguelite-upgrade-item">
+                <h3>상위 소환 확률</h3>
+                <p id="roguelite-highSpawn-desc">다이스 소환 시 1% 확률로 2성 등장. (현재 0%)</p>
+                <button id="roguelite-highSpawn-btn" class="roguelite-upgrade-btn">강화</button>
+                <div class="roguelite-cost" id="roguelite-highSpawn-cost">비용: 400 KP</div>
+            </div>
+            <div class="roguelite-upgrade-item">
+                <h3>2단 합성 확률</h3>
+                <p id="roguelite-mergeBonus-desc">합성 시 1% 확률로 +2성(Bonus). (현재 0%)</p>
+                <button id="roguelite-mergeBonus-btn" class="roguelite-upgrade-btn">강화</button>
+                <div class="roguelite-cost" id="roguelite-mergeBonus-cost">비용: 500 KP</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 업적 모달 -->
+<div id="achievements-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <button id="close-achievements-btn" class="modal-close-btn">&times;</button>
+        <h2>업적</h2>
+        <ul id="achievement-list">
+            <li id="ach-wave5" class="locked">첫 번째 보스 조우 (Wave 5)</li>
+            <li id="ach-wave10" class="locked">Wave 10 달성</li>
+            <li id="ach-wave20" class="locked">Wave 20 달성</li>
+            <li id="ach-wave30" class="locked">Wave 30 달성</li>
+            <li id="ach-wave50" class="locked">Wave 50 클리어! (승리)</li>
+            <li id="ach-pip7" class="locked">7성 다이스 제작</li>
+        </ul>
+    </div>
+</div>
+
+
+<div id="game-container">
+    <!-- 왼쪽: 게임 보드 및 UI -->
+    <div id="left-panel">
+        <div id="ui-panel" class="panel">
+            <div id="player-stats">
+                <span>HP: <span id="player-hp">20</span> / <span id="player-hp-max">20</span></span>
+                <span>Wave: <span id="wave-display">0</span></span>
+            </div>
+            <div id="resource-display">QP: 100</div>
+            <button id="summon-dice-btn">다이스 소환</button>
+            <div id="summon-cost-display">비용: 50 QP</div>
+        </div>
+
+        <div id="upgrade-panel" class="panel">
+            <div class="upgrade-section" id="upgrade-fire">
+                <div class="dice-icon" style="background-color: #e74c3c;"></div>
+                <div class="upgrade-info" id="fire-lvl">Lvl 1</div>
+                <div class="upgrade-cost" id="fire-cost">100 QP</div>
+            </div>
+            <div class="upgrade-section" id="upgrade-ice">
+                <div class="dice-icon" style="background-color: #3498db;"></div>
+                <div class="upgrade-info" id="ice-lvl">Lvl 1</div>
+                <div class="upgrade-cost" id="ice-cost">100 QP</div>
+            </div>
+            <div class="upgrade-section" id="upgrade-wind">
+                <div class="dice-icon" style="background-color: #2ecc71;"></div>
+                <div class="upgrade-info" id="wind-lvl">Lvl 1</div>
+                <div class="upgrade-cost" id="wind-cost">100 QP</div>
+            </div>
+            <div class="upgrade-section" id="upgrade-earth">
+                <div class="dice-icon" style="background-color: #f39c12;"></div>
+                <div class="upgrade-info" id="earth-lvl">Lvl 1</div>
+                <div class="upgrade-cost" id="earth-cost">100 QP</div>
+            </div>
+            <div class="upgrade-section" id="upgrade-light">
+                <div class="dice-icon" style="background-color: #f1c40f;"></div>
+                <div class="upgrade-info" id="light-lvl">Lvl 1</div>
+                <div class="upgrade-cost" id="light-cost">100 QP</div>
+            </div>
+        </div>
+
+        <div id="game-canvas-container">
+            <canvas id="game-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- 오른쪽: 퀴즈 패널 -->
+    <div id="quiz-container" class="panel">
+        <div id="quiz-header">
+            <div id="quiz-timer-bar">
+                <div id="quiz-timer-progress"></div>
+            </div>
+            <div id="quiz-reward">QP: 100</div>
+        </div>
+        <div id="question">퀴즈가 로드 중입니다...</div>
+        <div id="answer-options"></div>
+        <button id="skip-btn">스킵</button>
+        <div id="quiz-feedback"></div>
+    </div>
+</div>
+
+<!-- 게임 오버 모달 -->
+<div id="game-over-modal" class="modal-overlay">
+    <div class="modal-content">
+        <h2>게임 오버</h2>
+        <p>최종 웨이브: <span id="final-wave">0</span></p>
+        <div class="points-display">
+            획득한 지식 포인트: <strong><span id="points-earned">0</span> KP</strong>
+        </div>
+        <div class="points-display">
+            총 보유 지식 포인트: <strong><span id="total-points">0</span> KP</strong>
+        </div>
+        <button id="restart-btn" class="modal-btn">타이틀로</button>
+    </div>
+</div>
+
+<!-- 게임 승리 모달 -->
+<div id="game-victory-modal" class="modal-overlay" style="display: none;">
+    <div class="modal-content">
+        <h2 style="color: var(--qp-color);">🎉 게임 승리! 🎉</h2>
+        <p>축하합니다! 50 웨이브를 모두 클리어하셨습니다!</p>
+        <div class="points-display">
+            획득한 지식 포인트: <strong><span id="victory-points-earned">0</span> KP</strong>
+        </div>
+        <div class="points-display">
+            총 보유 지식 포인트: <strong><span id="victory-total-points">0</span> KP</strong>
+        </div>
+        <button id="victory-restart-btn" class="modal-btn">타이틀로</button>
+    </div>
+</div>
+
+
+<script>
+    window.autosizeOptionLabels = window.autosizeOptionLabels || function(){};
+
+    // --- 1. [수정] 퀴즈 데이터 (6학년 사회 - 지리, 문화 중심 100+) ---
+    const quizData = [
+        // (100+개의 퀴즈 데이터는 이전과 동일하므로 생략)
+        { question: "세계에서 가장 큰 대륙은 어디인가요?", options: ["아프리카", "아시아", "북아메리카", "유럽"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "세계에서 가장 큰 바다는 어디인가요?", options: ["대서양", "인도양", "북극해", "태평양"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "6대주에 속하지 *않는* 것은 무엇인가요?", options: ["아시아", "유럽", "남극", "오세아니아"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "아시아 대륙에 대한 설명으로 *틀린* 것은?", options: ["세계에서 가장 넓은 대륙이다", "세계에서 인구가 가장 많은 대륙이다", "세계에서 가장 긴 강(나일강)이 있다", "우리나라가 속해 있는 대륙이다"], answer: 2, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "오세아니아 대륙을 대표하는 나라는?", options: ["이집트", "브라질", "오스트레일리아", "캐나다"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "아마존 열대 우림이 주로 위치한 대륙은?", options: ["아시아", "아프리카", "남아메리카", "북아메리카"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "캥거루와 코알라의 고향으로 유명한 대륙은?", options: ["아프리카", "오세아니아", "남아메리카", "유럽"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "이집트의 피라미드와 스핑크스가 있는 대륙은?", options: ["아시아", "유럽", "아프리카", "북아메리카"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "세계에서 가장 작은 대륙은 어디인가요?", options: ["유럽", "오세아니아", "남아메리카", "북아메리카"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "1년 내내 눈과 얼음으로 덮여있고 펭귄이 사는 추운 땅은?", options: ["북극", "시베리아", "남극 대륙", "그린란드"], answer: 2, difficulty: 'easy', reward: 50, time: 15 },
+        { question: "세계에서 가장 인구가 적은 대륙은?", options: ["오세아니아", "남아메리카", "유럽", "북아메리카"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "지구의 육지를 크게 나눈 6개의 큰 땅덩어리를 무엇이라고 하나요?", options: ["6대륙", "5대양", "6대주", "5대주"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "지구의 바다를 크게 나눈 5개의 큰 바다를 무엇이라고 하나요?", options: ["6대륙", "5대양", "6대주", "5대주"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "세계에서 가장 작은 바다는?", options: ["남극해", "북극해", "인도양", "대서양"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "다음 중 5대양에 속하지 않는 바다는?", options: ["태평양", "대서양", "지중해", "인도양"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "다음 중 6대주에 속하지 않는 대륙은?", options: ["아시아", "아프리카", "그린란드", "유럽"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "지구본의 장점이 *아닌* 것은 무엇인가요?", options: ["실제 지구의 모습을 축소함", "대륙과 바다의 크기 비교가 쉬움", "한눈에 전 세계를 볼 수 있음", "위치와 거리를 비교적 정확하게 표시함"], answer: 2, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "디지털 영상 지도의 특징으로 *틀린* 것은?", options: ["정보를 쉽게 수정하고 추가할 수 있다", "원하는 장소를 확대/축소하기 어렵다", "위성 사진을 통해 실제 모습을 볼 수 있다", "길 찾기, 거리 측정 등 다양한 기능이 있다"], answer: 1, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "지도에서 땅의 높낮이를 같은 지점끼리 연결한 선은?", options: ["등고선", "위선", "경선", "해안선"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "지도에서 실제 거리를 줄인 비율을 무엇이라고 하나요?", options: ["축척", "범례", "방위", "등고선"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "지도에서 기호를 설명해 놓은 부분은?", options: ["축척", "범례", "방위", "등고선"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "지도의 위쪽이 항상 가리키는 방향은?", options: ["동", "서", "남", "북"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "지구본에서 가로로 그어진 선을 무엇이라고 하나요?", options: ["위선", "경선", "적도", "본초 자오선"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "지구본에서 세로로 그어진 선을 무엇이라고 하나요?", options: ["위선", "경선", "적도", "날짜 변경선"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "위선의 기준이 되며 위도 0도인 선은?", options: ["북회귀선", "남회귀선", "본초 자오선", "적도"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "경선의 기준이 되며 경도 0도인 선(영국 그리니치 천문대)은?", options: ["적도", "본초 자오선", "날짜 변경선", "남회귀선"], answer: 1, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "우리나라는 적도를 기준으로 어느 쪽에 위치하나요?", options: ["북쪽 (북반구)", "남쪽 (남반구)", "적도 위", "알 수 없음"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "1년 내내 덥고 비가 많이 내리는 기후는?", options: ["열대 기후", "온대 기후", "한대 기후", "건조 기후"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "사계절이 뚜렷하게 나타나는 기후는?", options: ["열대 기후", "온대 기후", "한대 기후", "고산 기후"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "1년 내내 춥고, 사람들이 순록을 기르며 사는 기후는?", options: ["열대 기후", "건조 기후", "한대 기후", "온대 기후"], answer: 2, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "춥고 건조하며, 풀이 거의 자라지 않는 '툰드라'가 나타나는 기후는?", options: ["온대 기후", "건조 기후", "한대 기후", "열대 기후"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "밀, 옥수수 등 농사를 짓기에 가장 적합하고 사계절이 뚜렷한 기후는?", options: ["온대 기후", "열대 기후", "한대 기후", "건조 기후"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "사막이 넓게 나타나고, 강수량이 매우 적은 기후는?", options: ["열대 기후", "고산 기후", "냉대 기후", "건조 기후"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "지중해 연안에서 주로 나타나며, 여름이 덥고 건조한 기후는?", options: ["열대 우림 기후", "지중해성 기후", "툰드라 기후", "사막 기후"], answer: 1, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "포도, 올리브 등을 많이 재배하는 기후는?", options: ["열대 기후", "한대 기후", "지중해성 기후", "냉대 기후"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "북극곰이 사는 곳으로 매우 추운 기후 지역은?", options: ["한대 기후", "냉대 기후", "고산 기후", "온대 기후"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "우리나라처럼 뚜렷한 사계절이 나타나는 기후는?", options: ["열대 기후", "냉대 기후", "온대 기후", "건조 기후"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "1년 내내 기온이 높고, 비가 오는 계절과 오지 않는 계절이 뚜렷한 기후는?", options: ["사바나 기후", "지중해성 기후", "사막 기후", "툰드라 기후"], answer: 0, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "동남아시아나 인도처럼 계절에 따라 바람의 방향이 바뀌는 '계절풍'의 영향을 받는 기후는?", options: ["열대 몬순 기후", "서안 해양성 기후", "냉대 기후", "고산 기후"], answer: 0, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "해발 고도가 높아 1년 내내 봄처럼 선선한 기후는?", options: ["고산 기후", "냉대 기후", "한대 기후", "사막 기후"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "산, 강, 바다, 날씨처럼 자연 그대로의 환경을 무엇이라고 하나요?", options: ["자연 환경", "인문 환경", "사회 환경", "도시 환경"], answer: 0, difficulty: 'easy', reward: 50, time: 15 },
+        { question: "사람들이 만든 도시, 건물, 도로, 다리 등을 무엇이라고 하나요?", options: ["자연 환경", "인문 환경", "문화 환경", "지리 환경"], answer: 1, difficulty: 'easy', reward: 50, time: 15 },
+        { question: "인문 환경에 해당하는 것을 고르세요.", options: ["사막", "높은 산", "논과 밭", "계절풍"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "자연 환경에 해당하는 것을 고르세요.", options: ["공장", "아파트", "계절풍", "다리"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "열대 기후 지역의 전통 가옥이 개방적인 이유는?", options: ["나무가 많아서", "춥고 눈이 많이 와서", "바람이 잘 통하고 시원하게", "동물의 침입을 막기 위해"], answer: 2, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "한대 기후 지역의 가옥이 폐쇄적이고 창이 작은 이유는?", options: ["나무가 부족해서", "추위를 막고 열을 보존하기 위해", "비가 많이 와서", "햇빛이 너무 강해서"], answer: 1, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "건조 기후 지역에서 집을 흙벽돌로 짓는 이유는?", options: ["흙이 많아서", "나무가 없어서", "비가 자주 와서", "낮의 열기를 막고 밤의 추위를 막기 위해"], answer: 3, difficulty: 'hard', reward: 150, time: 25 },
+        { question: "우리나라의 이웃 나라가 *아닌* 곳은?", options: ["중국", "일본", "러시아", "베트남"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "일본의 수도는 어디인가요?", options: ["베이징", "도쿄", "오사카", "모스크바"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "세계에서 영토가 가장 넓은 나라는?", options: ["중국", "캐나다", "미국", "러시아"], answer: 3, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "우리나라(대한민국)의 수도는 어디인가요?", options: ["부산", "인천", "평양", "서울"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "'에펠탑'이 있는 나라는 어디인가요?", options: ["영국", "이탈리아", "독일", "프랑스"], answer: 3, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "'자유의 여신상'이 있는 나라는 어디인가요?", options: ["미국", "캐나다", "멕시코", "브라질"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "중국의 수도는 어디인가요?", options: ["상하이", "홍콩", "베이징", "톈진"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "러시아의 수도는 어디인가요?", options: ["상트페테르부르크", "키이우", "블라디보스토크", "모스크바"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "세계에서 가장 높은 산인 '에베레스트산'이 있는 산맥은?", options: ["안데스산맥", "로키산맥", "알프스산맥", "히말라야산맥"], answer: 3, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "세계에서 가장 긴 강은?", options: ["아마존강", "나일강", "미시시피강", "양쯔강"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "알프스산맥과 관련이 깊은 대륙은 어디인가요?", options: ["아시아", "유럽", "북아메리카", "아프리카"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "미국의 수도는 어디인가요?", options: ["뉴욕", "로스앤젤레스", "워싱턴 D.C.", "시카고"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "영국의 수도는 어디인가요?", options: ["파리", "로마", "베를린", "런던"], answer: 3, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "프랑스의 수도는 어디인가요?", options: ["파리", "리옹", "마르세유", "니스"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "이탈리아의 수도는 어디인가요?", options: ["밀라노", "나폴리", "로마", "피렌체"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "캐나다의 수도는 어디인가요?", options: ["토론토", "밴쿠버", "몬트리올", "오타와"], answer: 3, difficulty: 'hard', reward: 150, time: 20 },
+        { question: "오스트레일리아(호주)의 수도는 어디인가요?", options: ["시드니", "멜버른", "캔버라", "브리즈번"], answer: 2, difficulty: 'hard', reward: 150, time: 20 },
+        { question: "브라질의 수도는 어디인가요?", options: ["리우데자네이루", "상파울루", "브라질리아", "사우바도르"], answer: 2, difficulty: 'hard', reward: 150, time: 20 },
+        { question: "이집트의 수도는 어디인가요?", options: ["알렉산드리아", "카이로", "기자", "룩소르"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "인도의 수도는 어디인가요?", options: ["뭄바이", "콜카타", "뉴델리", "벵갈루루"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "우리나라가 여름일 때, 오스트레일리아(호주)는 어떤 계절인가요?", options: ["여름", "가을", "겨울", "봄"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "석유가 많이 생산되는 지역은?", options: ["유럽", "북극", "서남아시아(중동)", "동남아시아"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "로키산맥이 위치한 대륙은?", options: ["북아메리카", "남아메리카", "아프리카", "유럽"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "안데스산맥이 위치한 대륙은?", options: ["북아메리카", "남아메리카", "아시아", "오세아니아"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "세계의 지붕이라고 불리는 고원은?", options: ["티베트고원", "콜로라도고원", "이란고원", "브라질고원"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "다음 중 섬나라는?", options: ["이탈리아", "태국", "일본", "베트남"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "독일의 수도는 어디인가요?", options: ["뮌헨", "함부르크", "프랑크푸르트", "베를린"], answer: 3, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "스페인의 수도는 어디인가요?", options: ["바르셀로나", "마드리드", "세비야", "발렌시아"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "베트남의 수도는 어디인가요?", options: ["호찌민", "다낭", "하노이", "후에"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "태국의 수도는 어디인가요?", options: ["방콕", "치앙마이", "푸껫", "파타야"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "아르헨티나의 수도는 어디인가요?", options: ["부에노스아이레스", "산티아고", "리마", "보고타"], answer: 0, difficulty: 'hard', reward: 150, time: 20 },
+        { question: "케냐의 수도는 어디인가요?", options: ["라고스", "나이로비", "카이로", "케이프타운"], answer: 1, difficulty: 'hard', reward: 150, time: 20 },
+        { question: "중국의 '만리장성'은 어느 대륙에 있나요?", options: ["유럽", "아프리카", "아시아", "북아메리카"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "이탈리아의 '콜로세움'은 어느 대륙에 있나요?", options: ["유럽", "아프리카", "아시아", "남아메리카"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "페루의 '마추픽추'는 어느 대륙에 있나요?", options: ["아프리카", "아시아", "북아메리카", "남아메리카"], answer: 3, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "인도의 '타지마할'은 어느 대륙에 있나요?", options: ["아시아", "아프리카", "유럽", "오세아니아"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "호주의 '오페라 하우스'는 어느 대륙에 있나요?", options: ["아시아", "오세아니아", "유럽", "북아메리카"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "세계에서 가장 큰 사막인 '사하라 사막'은 어느 대륙에 있나요?", options: ["아시아", "오세아니아", "아프리카", "북아메리카"], answer: 2, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "아시아에 있는 '고비 사막'은 주로 어느 나라들에 걸쳐 있나요?", options: ["중국과 몽골", "인도와 파키스탄", "사우디아라비아", "카자흐스탄"], answer: 0, difficulty: 'hard', reward: 150, time: 25 },
+        { question: "적도 부근에 위치한 나라들의 기후는?", options: ["열대 기후", "한대 기후", "온대 기후", "건조 기후"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "북극이나 남극에 가까운 나라들의 기후는?", options: ["열대 기후", "한대 기후", "온대 기후", "건조 기후"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        // 문화: 의식주, 전통
+        { question: "세계 여러 나라의 전통 의상이 *아닌* 것은?", options: ["한복(한국)", "기모노(일본)", "치파오(중국)", "청바지(미국)"], answer: 3, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "인도의 여성들이 입는 전통 의상은?", options: ["사리", "아오자이", "한푸", "하카마"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "베트남의 여성이 입는 긴 전통 의상은?", options: ["사리", "아오자이", "치파오", "기모노"], answer: 1, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "스코틀랜드 남성들이 입는 체크무늬 치마는?", options: ["킬트", "판초", "로인클로스", "토가"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "밀을 주식으로 하는 지역에서 주로 먹는 음식은?", options: ["빵", "쌀밥", "감자", "옥수수"], answer: 0, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "쌀을 주식으로 하는 지역은 주로 어디인가요?", options: ["유럽", "아시아", "북아메리카", "오세아니아"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "이탈리아의 대표적인 음식으로 *틀린* 것은?", options: ["피자", "파스타", "스시", "라자냐"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "일본의 대표적인 음식으로, 식초로 간을 한 밥에 생선 등을 얹은 것은?", options: ["라멘", "스시", "카레", "돈카츠"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "멕시코의 대표적인 음식으로, 토르티야에 고기, 채소 등을 싸 먹는 것은?", options: ["타코", "파에야", "부리토", "나초"], answer: 0, difficulty: 'medium', reward: 100, time: 15 },
+        { question: "우리나라의 대표적인 발효 음식은?", options: ["피자", "김치", "스시", "빵"], answer: 1, difficulty: 'easy', reward: 50, time: 10 },
+        { question: "더운 기후 지역의 전통 의상 특징은?", options: ["털가죽 옷", "몸에 붙는 옷", "얇고 헐렁한 옷", "검은색 옷"], answer: 2, difficulty: 'easy', reward: 50, time: 15 },
+        { question: "추운 기후 지역의 전통 의상 특징은?", options: ["털가죽 옷", "얇은 면 옷", "반팔, 반바지", "헐렁한 옷"], answer: 0, difficulty: 'easy', reward: 50, time: 15 },
+        { question: "건조 기후 지역에서 온몸을 감싸는 옷을 입는 이유는?", options: ["멋을 내기 위해", "강한 햇빛과 모래바람을 막기 위해", "종교적인 이유로", "추위를 막기 위해"], answer: 1, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "세계 여러 나라가 모여 평화와 안전을 논의하는 국제기구는?", options: ["NATO (나토)", "UN (국제 연합)", "WHO (세계 보건 기구)", "APEC (아시아 태평양 경제 협력체)"], answer: 1, difficulty: 'medium', reward: 100, time: 20 },
+        { question: "4년마다 열리는 세계적인 스포츠 축제는?", options: ["월드컵", "동계 올림픽", "하계 올림픽", "아시안 게임"], answer: 2, difficulty: 'easy', reward: 50, time: 10 },
+    ];
+
+
+    // --- 2. 다이스 설정 ---
+    const DICE_TYPES = ['fire', 'ice', 'wind', 'earth', 'light'];
+    const DICE_CONFIG = {
+        'fire': { name: '불', color: '#e74c3c' },
+        'ice': { name: '얼음', color: '#3498db' },
+        'wind': { name: '바람', color: '#2ecc71' },
+        'earth': { name: '대지', color: '#f39c12' },
+        'light': { name: '빛', color: '#f1c40f' },
+    };
+    const GRID_ROWS = 4;
+    const GRID_COLS = 5;
+    const GRID_SIZE = GRID_ROWS * GRID_COLS;
+
+    // --- 3. 캔버스 & 길(Path) 설정 ---
+    const canvas = document.getElementById('game-canvas');
+    const ctx = canvas.getContext('2d');
+
+    const computedStyles = getComputedStyle(document.documentElement);
+    const PATH_COLOR = computedStyles.getPropertyValue('--path-color').trim();
+    const GRID_BG_COLOR = computedStyles.getPropertyValue('--grid-bg').trim();
+    const GRID_BORDER_COLOR = computedStyles.getPropertyValue('--grid-border').trim();
+
+    const CELL_SIZE = 70;
+    const GAP = 10;
+    const PATH_WIDTH = 50;
+
+    const GRID_OFFSET_X = PATH_WIDTH;
+    const GRID_OFFSET_Y = PATH_WIDTH;
+    const GRID_WIDTH = (CELL_SIZE * GRID_COLS) + (GAP * (GRID_COLS - 1)); // 390
+    const GRID_HEIGHT = (CELL_SIZE * GRID_ROWS) + (GAP * (GRID_ROWS - 1)); // 310
+
+    canvas.width = GRID_WIDTH + PATH_WIDTH * 2; // 490
+    canvas.height = GRID_HEIGHT + PATH_WIDTH * 2; // 410
+
+    const pathCenter = PATH_WIDTH / 2;
+    const enemyPath = [
+        { x: 0, y: pathCenter },
+        { x: pathCenter, y: pathCenter },
+        { x: canvas.width - pathCenter, y: pathCenter },
+        { x: canvas.width - pathCenter, y: canvas.height - pathCenter },
+        { x: pathCenter, y: canvas.height - pathCenter },
+        { x: pathCenter, y: pathCenter + 20 }
+    ];
+
+    // --- 4. 게임 상태 변수 ---
+    let resources = 100;
+    let summonCost = 50;
+    let playerHP = 20;
+    let MAX_HP = 20;
+    let wave = 0;
+    const MAX_WAVE = 50; // [신규] 최대 웨이브
+    let enemiesToSpawn = 0;
+    let spawnInterval;
+    let gameRunning = false;
+
+    let diceGrid = new Array(GRID_SIZE).fill(null);
+    let enemies = [];
+    let projectiles = [];
+    let damageNumbers = [];
+
+    let diceUpgrades = {};
+    const UPGRADE_COST_START = 10;
+    const UPGRADE_COST_STEP  = 5;
+
+    let totalKnowledgePoints = 0;
+    let rogueliteUpgrades = {};
+    const KP_KEY = 'quizTowerDefense_KP';
+    const ROGUELITE_KEY = 'quizTowerDefense_Roguelite';
+    const ACHIEVEMENTS_KEY = 'quizTowerDefense_Achievements';
+
+    let achievements = {};
+
+    let currentQuiz = null;
+    let quizTimerInterval;
+    let timeLeft = 0;
+
+    let dragState = {
+        isDragging: false,
+        die: null,
+        startIndex: -1,
+        x: 0,
+        y: 0
+    };
+    let animationFrameId;
+
+    // --- 5. DOM 요소 (HTML UI) ---
+    const resourceDisplay = document.getElementById('resource-display');
+    const summonBtn = document.getElementById('summon-dice-btn');
+    const summonCostDisplay = document.getElementById('summon-cost-display');
+    const hpDisplay = document.getElementById('player-hp');
+    const waveDisplay = document.getElementById('wave-display');
+
+    const questionEl = document.getElementById('question');
+    const answerOptionsEl = document.getElementById('answer-options');
+    const quizRewardDisplay = document.getElementById('quiz-reward');
+    const timerBarProgress = document.getElementById('quiz-timer-progress');
+    const skipBtn = document.getElementById('skip-btn');
+    const quizFeedback = document.getElementById('quiz-feedback');
+
+    const startScreenModal = document.getElementById('start-screen');
+    const rogueliteModal = document.getElementById('roguelite-upgrade-modal');
+    const achievementsModal = document.getElementById('achievements-modal');
+    const gameOverModal = document.getElementById('game-over-modal');
+    const gameVictoryModal = document.getElementById('game-victory-modal');
+
+    const finalWaveDisplay = document.getElementById('final-wave');
+    const pointsEarnedDisplay = document.getElementById('points-earned');
+    const totalPointsDisplay = document.getElementById('total-points');
+    const restartBtn = document.getElementById('restart-btn');
+
+    const victoryPointsEarnedDisplay = document.getElementById('victory-points-earned');
+    const victoryTotalPointsDisplay = document.getElementById('victory-total-points');
+    const victoryRestartBtn = document.getElementById('victory-restart-btn');
+
+    const totalPointsDisplayRoguelite = document.getElementById('total-points-display');
+    const rogueliteButtons = {
+        startQP: { btn: document.getElementById('roguelite-startQP-btn'), desc: document.getElementById('roguelite-startQP-desc'), cost: document.getElementById('roguelite-startQP-cost') },
+        quizQP: { btn: document.getElementById('roguelite-quizQP-btn'), desc: document.getElementById('roguelite-quizQP-desc'), cost: document.getElementById('roguelite-quizQP-cost') },
+        highSpawn: { btn: document.getElementById('roguelite-highSpawn-btn'), desc: document.getElementById('roguelite-highSpawn-desc'), cost: document.getElementById('roguelite-highSpawn-cost') },
+        mergeBonus: { btn: document.getElementById('roguelite-mergeBonus-btn'), desc: document.getElementById('roguelite-mergeBonus-desc'), cost: document.getElementById('roguelite-mergeBonus-cost') }
+    };
+
+    const achievementList = document.getElementById('achievement-list');
+
+    const upgradeDOMElements = {};
+    DICE_TYPES.forEach(type => {
+        upgradeDOMElements[type] = {
+            section: document.getElementById(`upgrade-${type}`),
+            lvl: document.getElementById(`${type}-lvl`),
+            cost: document.getElementById(`${type}-cost`),
+        };
+    });
+
+    const gameContainer = document.getElementById('game-container');
+    const quizContainer = document.getElementById('quiz-container');
+
+
+    // --- 6. 퀴즈 로직 (HTML UI 제어) ---
+    function loadQuiz() {
+        quizFeedback.textContent = '';
+        answerOptionsEl.innerHTML = '';
+
+        clearInterval(quizTimerInterval);
+        currentQuiz = quizData[Math.floor(Math.random() * quizData.length)];
+
+        questionEl.textContent = currentQuiz.question;
+        const reward = Math.round(currentQuiz.reward * (1 + ((rogueliteUpgrades && rogueliteUpgrades.quizQP ? rogueliteUpgrades.quizQP.level : 1) - 1) * 0.1));
+        quizRewardDisplay.textContent = `획득 QP: ${reward}`;
+
+        currentQuiz.options.forEach((option, index) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            btn.innerHTML = `<span class="option-label">${index + 1}. ${option}</span>`;
+            btn.onclick = () => checkAnswer(index, btn);
+            answerOptionsEl.appendChild(btn);
+        });
+        if (typeof autosizeOptionLabels==='function') autosizeOptionLabels();
+
+        timeLeft = currentQuiz.time;
+        timerBarProgress.style.transition = 'none';
+        timerBarProgress.style.width = '100%';
+
+        setTimeout(() => {
+            timerBarProgress.style.transition = `width ${timeLeft}s linear`;
+            timerBarProgress.style.width = '0%';
+        }, 50);
+
+        quizTimerInterval = setInterval(() => {
+            timeLeft -= 0.1;
+            if (timeLeft <= 0) {
+                skipQuiz();
+            }
+        }, 100);
+    }
+
+    function checkAnswer(userAnswerIndex, btnElement) {
+        clearInterval(quizTimerInterval);
+        Array.from(answerOptionsEl.children).forEach(btn => btn.disabled = true);
+
+        const currentWidth = timerBarProgress.style.width;
+        timerBarProgress.style.transition = 'none';
+        timerBarProgress.style.width = currentWidth;
+
+        const isCorrect = (userAnswerIndex === currentQuiz.answer);
+
+        if (isCorrect) {
+            const reward = Math.round(currentQuiz.reward * (1 + ((rogueliteUpgrades && rogueliteUpgrades.quizQP ? rogueliteUpgrades.quizQP.level : 1) - 1) * 0.1));
+            quizFeedback.textContent = `정답! +${reward} QP`;
+            quizFeedback.style.color = 'green';
+            btnElement.classList.add('correct');
+            addResources(reward);
+        } else {
+            quizFeedback.textContent = `오답... (정답: ${currentQuiz.options[currentQuiz.answer]})`;
+            quizFeedback.style.color = 'red';
+            btnElement.classList.add('wrong');
+            answerOptionsEl.children[currentQuiz.answer].classList.add('correct');
+        }
+
+        setTimeout(loadQuiz, 1500);
+    }
+
+    function skipQuiz() {
+        clearInterval(quizTimerInterval);
+        quizFeedback.textContent = '스킵했습니다.';
+        quizFeedback.style.color = 'gray';
+        setTimeout(loadQuiz, 500);
+    }
+    skipBtn.onclick = skipQuiz;
+    if (typeof autosizeOptionLabels==='function') window.setTimeout(autosizeOptionLabels, 0);
+
+    // --- 7. 게임 UI 로직 (HTML UI 제어) ---
+    function addResources(amount) {
+        resources += amount;
+        updateUI();
+    }
+
+    function _upgradePreview(level){
+        // 현재 설계: 데미지 (레벨-1)*10% 누적, 쿨다운 ×0.95^(레벨-1)
+        const currDmgPct = (Math.max(1, level)-1) * 10;
+        const nextDmgPct = (level) * 10;
+        const currCdMul  = Math.pow(0.95, Math.max(1, level)-1);
+        const nextCdMul  = Math.pow(0.95, level);
+        return { currDmgPct, nextDmgPct, currCdMul, nextCdMul };
+    }
+
+    function _fmtPct(x){ return (Math.round(x*10)/10).toFixed(1); }
+
+    function showUpgradeToast(type, beforeLv, afterLv){
+        const t = document.getElementById('upgrade-toast');
+        if(!t) return;
+        const a = _upgradePreview(afterLv);
+        t.textContent = `【${DICE_CONFIG[type].name}】 Lv${beforeLv}→${afterLv}  데미지 +10% (누적 +${a.currDmgPct}%) · 쿨다운 ×${_fmtPct(a.currCdMul)}`;
+        t.classList.add('show');
+        setTimeout(()=>t.classList.remove('show'), 1300);
+    }
+
+
+    function updateUI() {
+        resourceDisplay.textContent = `QP: ${resources}`;
+        summonCostDisplay.textContent = `비용: ${summonCost} QP`;
+        summonBtn.disabled = resources < summonCost;
+        hpDisplay.textContent = `HP: ${playerHP}`;  // 플레이어 체력 업데이트 추가
+        const hpMaxEl = document.getElementById('player-hp-max');
+        if (hpMaxEl) hpMaxEl.textContent = `${MAX_HP}`;
+        waveDisplay.textContent = `${wave}`;
+
+        DICE_TYPES.forEach(type => {
+            const upgrade = diceUpgrades[type];
+            const els = upgradeDOMElements[type];
+            els.lvl.textContent = `Lvl ${upgrade.level}`;
+            els.cost.textContent = `${upgrade.cost} QP`;
+            if (resources < upgrade.cost) {
+                els.section.classList.add('disabled');
+            } else {
+                els.section.classList.remove('disabled');
+            }
+        });
+    }
+
+    // --- 7.5 인게임 강화 로직 ---
+    function initInGameUpgrades() {
+        diceUpgrades = {};
+        DICE_TYPES.forEach(type => {
+            diceUpgrades[type] = {
+                level: 1,
+                cost: UPGRADE_COST_START
+            };
+            const els = upgradeDOMElements[type];
+            els.section.onclick = () => handleInGameUpgrade(type);
+        });
+    }
+
+    function handleInGameUpgrade(type) {
+        const upgrade = diceUpgrades[type];
+        if (resources >= upgrade.cost) {
+            resources -= upgrade.cost;
+            upgrade.level++;
+            // 곱셈 스케일 대신 고정 증가(+5)
+            upgrade.cost += UPGRADE_COST_STEP;
+            updateUI();
+        }
+    }
+
+    // --- 8. 다이스 소환 로직 (diceGrid 데이터 변경) ---
+    function summonDice() {
+        if (resources < summonCost) return;
+        const emptyIndex = diceGrid.findIndex(cell => cell === null);
+        if (emptyIndex === -1) {
+            quizFeedback.textContent = '그리드가 꽉 찼습니다!';
+            quizFeedback.style.color = 'orange';
+            return;
+        }
+        resources -= summonCost;
+        summonCost += 10;
+
+        let startPips = 1;
+        const highSpawnChance = ((rogueliteUpgrades && rogueliteUpgrades.highSpawn ? rogueliteUpgrades.highSpawn.level : 1) - 1) * 0.01;
+        if (Math.random() < highSpawnChance) {
+            startPips = 2;
+        }
+        const randomType = DICE_TYPES[Math.floor(Math.random() * DICE_TYPES.length)];
+        diceGrid[emptyIndex] = {
+            type: randomType,
+            pips: startPips,
+            cooldown: 0
+        };
+        updateUI();
+    }
+    summonBtn.onclick = summonDice;
+
+    // --- 9. 캔버스 렌더링 로직 ---
+    function gameLoop() {
+        if (!gameRunning) return;
+        clearCanvas();
+        drawPath();
+        drawGrid();
+        drawDice();
+        updateEnemies();
+        drawEnemies();
+        updateDiceAttacks();
+        updateProjectiles();
+        drawProjectiles();
+        updateDamageNumbers();
+        drawDamageNumbers();
+        drawDraggingDice();
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height); }
+    function drawPath() {
+        ctx.fillStyle = PATH_COLOR;
+        ctx.fillRect(0, 0, canvas.width, PATH_WIDTH);
+        ctx.fillRect(0, canvas.height - PATH_WIDTH, canvas.width, PATH_WIDTH);
+        ctx.fillRect(0, PATH_WIDTH, PATH_WIDTH, GRID_HEIGHT);
+        ctx.fillRect(canvas.width - PATH_WIDTH, PATH_WIDTH, PATH_WIDTH, GRID_HEIGHT);
+        const basePos = enemyPath[enemyPath.length-1];
+        const baseSize = 30;
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.3)';
+        ctx.beginPath();
+        ctx.moveTo(basePos.x, basePos.y - baseSize / 2);
+        ctx.lineTo(basePos.x - baseSize / 2, basePos.y + baseSize / 2);
+        ctx.lineTo(basePos.x + baseSize / 2, basePos.y + baseSize / 2);
+        ctx.closePath();
+        ctx.fill();
+    }
+    function drawGrid() {
+        ctx.strokeStyle = GRID_BORDER_COLOR;
+        ctx.fillStyle = GRID_BG_COLOR;
+        for (let i = 0; i < GRID_SIZE; i++) {
+            const { x, y } = getGridCoords(i);
+            ctx.beginPath();
+            ctx.roundRect(x, y, CELL_SIZE, CELL_SIZE, 6);
+            ctx.fill();
+            ctx.stroke();
+        }
+    }
+    function drawDice() {
+        for (let i = 0; i < GRID_SIZE; i++) {
+            const die = diceGrid[i];
+            if (die && !(dragState.isDragging && dragState.startIndex === i)) {
+                const { x, y } = getGridCoords(i);
+                drawDie(x, y, die);
+            }
+        }
+    }
+    function drawDraggingDice() {
+        if (dragState.isDragging && dragState.die) {
+            const x = dragState.x - CELL_SIZE / 2;
+            const y = dragState.y - CELL_SIZE / 2;
+            ctx.save();
+            ctx.globalAlpha = 0.7;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 10;
+            drawDie(x, y, dragState.die);
+            ctx.restore();
+        }
+    }
+    function drawDie(x, y, die) {
+        ctx.fillStyle = DICE_CONFIG[die.type].color;
+        ctx.beginPath();
+        ctx.roundRect(x, y, CELL_SIZE, CELL_SIZE, 10);
+        ctx.fill();
+        drawPips(x, y, die.pips);
+    }
+    function drawPips(x, y, pips) {
+        const pipSize = 5;
+        const padding = 12;
+        const center = CELL_SIZE / 2;
+        const left = padding, right = CELL_SIZE - padding;
+        const top = padding, bottom = CELL_SIZE - padding;
+        const positions = {
+            1: [[center, center]], 2: [[left, top], [right, bottom]], 3: [[left, top], [center, center], [right, bottom]],
+            4: [[left, top], [right, top], [left, bottom], [right, bottom]], 5: [[left, top], [right, top], [center, center], [left, bottom], [right, bottom]],
+            6: [[left, top], [right, top], [left, center], [right, center], [left, bottom], [right, bottom]],
+            7: [[left, top], [right, top], [left, center], [center, center], [right, center], [left, bottom], [right, bottom]]
+        };
+        const pipsToDraw = positions[pips] || positions[7];
+        ctx.fillStyle = 'white';
+        ctx.shadowColor = 'rgba(0,0,0,0.5)';
+        ctx.shadowBlur = 2;
+        pipsToDraw.forEach(([px, py]) => {
+            ctx.beginPath();
+            ctx.arc(x + px, y + py, pipSize, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+    }
+
+    // --- 10. 적 (Enemy) 로직 ---
+    class Enemy {
+        constructor(isBoss = false) {
+            this.isBoss = isBoss;
+            this.pathIndex = 1;
+            this.statusEffects = {};
+            // [수정] 계단형 난이도 계산
+            const chapter = Math.max(0, Math.floor((wave - 1) / 10)); // wave 1~10 = chap 0
+            const postWave6Multiplier = (wave > 6) ? 1.5 : 1.0; // [수정] 6웨이브 이후 난이도 상승 (1.5 -> 2.2)
+
+            if (isBoss) {
+                this.x = enemyPath[0].x; this.y = enemyPath[0].y;
+                this.originalSpeed = 0.5 + (chapter * 0.15);
+                this.speed = this.originalSpeed;
+                this.maxHp = (500 + (wave * 100)) * Math.pow(2.7, chapter) * postWave6Multiplier; // [수정] 난이도 상향 (100 -> 120, 2.7 -> 3.0)
+                this.hp = this.maxHp;
+                this.radius = 20; this.color = '#8e44ad';
+            } else {
+                this.x = enemyPath[0].x; this.y = enemyPath[0].y;
+                this.originalSpeed = 1 + (chapter * 0.3) + (wave * 0.02);
+                this.speed = this.originalSpeed;
+                this.maxHp = (50 + (wave * 20)) * Math.pow(2.7, chapter) * postWave6Multiplier; // [수정] 난이도 상향 (20 -> 25, 2.7 -> 3.0)
+                this.hp = this.maxHp;
+                this.radius = 10; this.color = '#c0392b';
+            }
+        }
+        applyStatus(type, pips) {
+            switch(type) {
+                case 'ice': this.statusEffects.slow = { duration: 120 }; this.speed = this.originalSpeed * 0.5; break;
+                case 'fire': this.statusEffects.burn = { duration: 180, damage: pips * 2, tick: 60 }; break;
+                case 'wind': this.statusEffects.poison = { duration: 300, damage: pips * 1, tick: 60 }; break;
+                case 'earth': this.statusEffects.stun = { duration: 15 }; break;
+                case 'light': this.statusEffects.armorBreak = { duration: 240 }; break;
+            }
+        }
+        updateStatusEffects() {
+            for (const key in this.statusEffects) {
+                const effect = this.statusEffects[key];
+                effect.duration--;
+                if (key === 'burn' || key === 'poison') {
+                    effect.tick--;
+                    if (effect.tick <= 0) {
+                        const upgrade = diceUpgrades[key === 'burn' ? 'fire' : 'wind'];
+                        const dotDamage = Math.round(effect.damage * (1 + (upgrade.level - 1) * 0.1));
+                        this.hp -= dotDamage;
+                        createDamageNumber(this.x, this.y - this.radius, dotDamage, (key === 'burn' ? '#e74c3c' : '#2ecc71'));
+                        effect.tick = 60;
+                    }
+                }
+                if (effect.duration <= 0) {
+                    if (key === 'slow') { this.speed = this.originalSpeed; }
+                    delete this.statusEffects[key];
+                }
+            }
+        }
+        move() {
+            this.updateStatusEffects();
+            if (this.statusEffects.stun) return;
+            if (this.pathIndex >= enemyPath.length) return;
+            const target = enemyPath[this.pathIndex];
+            const dx = target.x - this.x; const dy = target.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < this.speed) {
+                this.x = target.x; this.y = target.y;
+                this.pathIndex++;
+            } else {
+                this.x += (dx / dist) * this.speed;
+                this.y += (dy / dist) * this.speed;
+            }
+        }
+        draw() {
+            ctx.fillStyle = this.color;
+            if (this.statusEffects.slow) ctx.fillStyle = '#3498db';
+            if (this.statusEffects.poison) ctx.fillStyle = '#2ecc71';
+            if (this.statusEffects.armorBreak) ctx.fillStyle = '#f1c40f';
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+            if(this.statusEffects.burn) { ctx.strokeStyle = '#e74c3c'; ctx.lineWidth = 3; ctx.stroke(); }
+            if(this.statusEffects.stun) { ctx.fillStyle = 'white'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('Stun!', this.x, this.y - this.radius - 15); }
+            const hpBarWidth = this.isBoss ? 40 : 20; const hpBarHeight = 4;
+            const hpPercent = this.hp / this.maxHp;
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(this.x - hpBarWidth / 2, this.y - this.radius - 10, hpBarWidth, hpBarHeight);
+            ctx.fillStyle = '#2ecc71';
+            ctx.fillRect(this.x - hpBarWidth / 2, this.y - this.radius - 10, hpBarWidth * hpPercent, hpBarHeight);
+        }
+    }
+    function startNextWave() {
+        if (wave > MAX_WAVE) {
+            gameVictory();
+            return;
+        }
+
+        wave++;
+        waveDisplay.textContent = wave;
+        checkAchievements();
+        const chapter = Math.max(0, Math.floor((wave - 1) / 10));
+        if (wave % 5 === 0) {
+            enemies.push(new Enemy(true));
+            enemiesToSpawn = 0;
+            clearInterval(spawnInterval);
+        } else {
+            enemiesToSpawn = 10 + (wave * 3) + (chapter * 20); // [수정] 스폰 수 상향
+            spawnInterval = setInterval(() => {
+                if (enemiesToSpawn > 0) {
+                    enemies.push(new Enemy(false));
+                    enemiesToSpawn--;
+                } else {
+                    clearInterval(spawnInterval);
+                }
+            }, Math.max(100, 1000 - (wave * 30) - (chapter * 70))); // [수정] 스폰 속도 상향
+        }
+    }
+    function updateEnemies() {
+        let waveOver = (enemiesToSpawn === 0 && enemies.length === 0);
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const enemy = enemies[i];
+            enemy.move();
+            if (enemy.pathIndex >= enemyPath.length) {
+                enemies.splice(i, 1);
+                playerHP--;
+                if (playerHP <= 0) { playerHP = 0; gameOver(); }
+                updateUI();
+            } else if (enemy.hp <= 0) {
+                const reward = enemy.isBoss ? (100 + wave * 10) : (5 + wave);
+                addResources(reward);
+                enemies.splice(i, 1);
+            }
+        }
+        if (waveOver && gameRunning) {
+            if (wave === MAX_WAVE) { // 50웨이브 클리어 시
+                gameVictory();
+            } else {
+                startNextWave();
+            }
+        }
+    }
+    function drawEnemies() { enemies.forEach(enemy => enemy.draw()); }
+
+    // --- 11. 다이스 공격 & 발사체 로직 ---
+    class Projectile {
+        constructor(x, y, target, die) {
+            this.x = x; this.y = y;
+            this.target = target;
+            this.speed = 5;
+            this.pips = die.pips; this.type = die.type;
+            this.color = DICE_CONFIG[die.type].color;
+            this.radius = 4;
+            const upgrade = diceUpgrades[this.type];
+            const baseDamage = die.pips * 10 + (die.pips - 1) * 5;
+            this.damage = Math.round(baseDamage * (1 + (upgrade.level - 1) * 0.1));
+        }
+        move() {
+            if (!this.target || this.target.hp <= 0) return false;
+            const dx = this.target.x - this.x; const dy = this.target.y - this.y;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < this.speed) {
+                let damageDealt = this.damage;
+                if (this.target.statusEffects.armorBreak) { damageDealt *= 1.3; }
+                damageDealt = Math.round(damageDealt);
+                this.target.hp -= damageDealt;
+                createDamageNumber(this.target.x, this.target.y - this.target.radius, damageDealt, this.color);
+                this.target.applyStatus(this.type, this.pips);
+                return false;
+            } else {
+                this.x += (dx / dist) * this.speed;
+                this.y += (dy / dist) * this.speed;
+                return true;
+            }
+        }
+        draw() {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+            ctx.fill();
+        }
+    }
+    function findTarget(dieX, dieY, range) {
+        let closestEnemy = null; let minRange = range;
+        for (const enemy of enemies) {
+            const dx = enemy.x - dieX; const dy = enemy.y - dieY;
+            const dist = Math.sqrt(dx * dx + dy * dy);
+            if (dist < minRange) { minRange = dist; closestEnemy = enemy; }
+        }
+        return closestEnemy;
+    }
+    function updateDiceAttacks() {
+        for (let i = 0; i < diceGrid.length; i++) {
+            const die = diceGrid[i];
+            if (!die) continue;
+            if (die.cooldown > 0) { die.cooldown--; continue; }
+            const { x, y } = getGridCoords(i);
+            const dieCenterX = x + CELL_SIZE / 2; const dieCenterY = y + CELL_SIZE / 2;
+            const range = 100 + die.pips * 15;
+            let target = findTarget(dieCenterX, dieCenterY, range);
+            if (target) {
+                projectiles.push(new Projectile(dieCenterX, dieCenterY, target, die));
+                const upgrade = diceUpgrades[die.type];
+                const baseCooldown = 60 - die.pips * 5;
+                die.cooldown = Math.max(10, Math.round(baseCooldown * Math.pow(0.95, upgrade.level - 1)));
+            }
+        }
+    }
+    function updateProjectiles() {
+        for (let i = projectiles.length - 1; i >= 0; i--) {
+            if (!projectiles[i].move()) { projectiles.splice(i, 1); }
+        }
+    }
+    function drawProjectiles() { projectiles.forEach(p => p.draw()); }
+
+    // --- 11.5 데미지 숫자 로직 ---
+    function createDamageNumber(x, y, text, color) {
+        damageNumbers.push({ x, y, text: Math.round(text), color, alpha: 1.0, duration: 60 });
+    }
+    function updateDamageNumbers() {
+        for (let i = damageNumbers.length - 1; i >= 0; i--) {
+            const dn = damageNumbers[i];
+            dn.y -= 0.5; dn.duration--;
+            dn.alpha = dn.duration / 60;
+            if (dn.duration <= 0) { damageNumbers.splice(i, 1); }
+        }
+    }
+    function drawDamageNumbers() {
+        ctx.save();
+        ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+        for (const dn of damageNumbers) {
+            ctx.globalAlpha = dn.alpha; ctx.fillStyle = dn.color;
+            ctx.fillText(dn.text, dn.x, dn.y);
+        }
+        ctx.restore();
+    }
+
+    // --- 12. 캔버스 이벤트 핸들링 (드래그 앤 드롭) ---
+    function getMousePos(e) {
+        const rect = canvas.getBoundingClientRect();
+        const scaleX = canvas.width / rect.width; const scaleY = canvas.height / rect.height;
+        let x, y;
+        if (e.changedTouches) {
+            x = (e.changedTouches[0].clientX - rect.left) * scaleX;
+            y = (e.changedTouches[0].clientY - rect.top) * scaleY;
+        } else {
+            x = (e.clientX - rect.left) * scaleX;
+            y = (e.clientY - rect.top) * scaleY;
+        }
+        return { x, y };
+    }
+    function getGridIndexFromPos(x, y) {
+        const gridX = x - GRID_OFFSET_X; const gridY = y - GRID_OFFSET_Y;
+        for (let i = 0; i < GRID_SIZE; i++) {
+            const col = i % GRID_COLS; const row = Math.floor(i / GRID_COLS);
+            const cellX = col * (CELL_SIZE + GAP); const cellY = row * (CELL_SIZE + GAP);
+            if (gridX >= cellX && gridX <= cellX + CELL_SIZE && gridY >= cellY && gridY <= cellY + CELL_SIZE) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    function getGridCoords(index) {
+        const row = Math.floor(index / GRID_COLS); const col = index % GRID_COLS;
+        const x = GRID_OFFSET_X + col * (CELL_SIZE + GAP);
+        const y = GRID_OFFSET_Y + row * (CELL_SIZE + GAP);
+        return { x, y };
+    }
+    function handleDragStart(e) {
+        e.preventDefault();
+        const { x, y } = getMousePos(e);
+        const index = getGridIndexFromPos(x, y);
+        if (index !== -1 && diceGrid[index]) {
+            dragState.isDragging = true;
+            dragState.startIndex = index;
+            dragState.die = { ...diceGrid[index] };
+            dragState.x = x; dragState.y = y;
+            diceGrid[index] = null;
+        }
+    }
+    function handleDragMove(e) {
+        if (!dragState.isDragging) return;
+        e.preventDefault();
+        const { x, y } = getMousePos(e);
+        dragState.x = x; dragState.y = y;
+    }
+    function handleDragEnd(e) {
+        if (!dragState.isDragging) return;
+        e.preventDefault();
+        const { x, y } = getMousePos(e);
+        const dropIndex = getGridIndexFromPos(x, y);
+        const dragDice = dragState.die;
+        const startIndex = dragState.startIndex;
+        if (dropIndex === -1) {
+            diceGrid[startIndex] = dragDice;
+        } else {
+            const dropDice = diceGrid[dropIndex];
+            if (dropDice === null) {
+                diceGrid[dropIndex] = dragDice;
+            } else {
+                if (dragDice.type === dropDice.type && dragDice.pips === dropDice.pips) {
+                    diceGrid[dropIndex].pips += 1;
+                    diceGrid[dropIndex].cooldown = 0;
+                    const mergeBonusChance = ((rogueliteUpgrades && rogueliteUpgrades.mergeBonus ? rogueliteUpgrades.mergeBonus.level : 1) - 1) * 0.01;
+                    if (Math.random() < mergeBonusChance) {
+                        diceGrid[dropIndex].pips += 1;
+                        const {x: cellX, y: cellY} = getGridCoords(dropIndex);
+                        createDamageNumber(cellX + CELL_SIZE / 2, cellY + CELL_SIZE / 2, "BONUS!", "#f1c40f");
+                    }
+                    if (diceGrid[dropIndex].pips >= 7) {
+                        checkAchievements('pip7');
+                    }
+                } else {
+                    diceGrid[startIndex] = dropDice;
+                    diceGrid[dropIndex] = dragDice;
+                }
+            }
+        }
+        dragState.isDragging = false;
+        dragState.die = null;
+        dragState.startIndex = -1;
+    }
+    canvas.addEventListener('mousedown', handleDragStart);
+    canvas.addEventListener('mousemove', handleDragMove);
+    canvas.addEventListener('mouseup', handleDragEnd);
+    canvas.addEventListener('mouseleave', handleDragEnd);
+    canvas.addEventListener('touchstart', handleDragStart, { passive: false });
+    canvas.addEventListener('touchmove', handleDragMove, { passive: false });
+    canvas.addEventListener('touchend', handleDragEnd, { passive: false });
+
+
+    // --- 13. [수정] 게임 시작/저장/로드/종료 로직 ---
+
+    function showModal(modalElement) {
+        modalElement.style.display = 'flex';
+        document.body.classList.add('modal-open');
+    }
+    function hideModal(modalElement) {
+        modalElement.style.display = 'none';
+        document.body.classList.remove('modal-open');
+    }
+
+    function initRogueliteUpgrades() {
+        return {
+            startQP: { level: 1, cost: 100 },
+            quizQP: { level: 1, cost: 150 },
+            hpMax:    { level: 1, cost: 180 },
+            highSpawn: { level: 1, cost: 200 },
+            mergeBonus: { level: 1, cost: 250 }
+        };
+    }
+    function initAchievements() {
+        return {
+            wave5: false, wave10: false, wave20: false, wave30: false, wave50: false, pip7: false
+        };
+    }
+    function updateRogueliteUI() {
+        totalPointsDisplayRoguelite.textContent = `보유: ${totalKnowledgePoints} KP`;
+        let rgu = rogueliteUpgrades.startQP;
+        rogueliteButtons.startQP.desc.textContent = `시작 QP가 20 증가합니다. (현재 +${(rgu.level - 1) * 20})`;
+        rogueliteButtons.startQP.cost.textContent = `비용: ${rgu.cost} KP`;
+        rogueliteButtons.startQP.btn.disabled = totalKnowledgePoints < rgu.cost;
+        rgu = rogueliteUpgrades.quizQP;
+        rogueliteButtons.quizQP.desc.textContent = `퀴즈 보상이 10% 증가합니다. (현재 +${(rgu.level - 1) * 10}%)`;
+        rogueliteButtons.quizQP.cost.textContent = `비용: ${rgu.cost} KP`;
+        rogueliteButtons.quizQP.btn.disabled = totalKnowledgePoints < rgu.cost;
+        rgu = rogueliteUpgrades.hpMax;
+        rogueliteButtons.hpMax.desc.textContent = `최대 HP가 5 증가합니다. (현재 +${(rgu.level - 1) * 5})`;
+        rogueliteButtons.hpMax.cost.textContent = `비용: ${rgu.cost} KP`;
+        rogueliteButtons.hpMax.btn.disabled = totalKnowledgePoints < rgu.cost;
+        rgu = rogueliteUpgrades.highSpawn;
+        rogueliteButtons.highSpawn.desc.textContent = `2성 소환 확률이 1% 증가합니다. (현재 ${(rgu.level - 1) * 1}%)`;
+        rogueliteButtons.highSpawn.cost.textContent = `비용: ${rgu.cost} KP`;
+        rogueliteButtons.highSpawn.btn.disabled = totalKnowledgePoints < rgu.cost;
+        rgu = rogueliteUpgrades.mergeBonus;
+        rogueliteButtons.mergeBonus.desc.textContent = `2단 합성 확률이 1% 증가합니다. (현재 ${(rgu.level - 1) * 1}%)`;
+        rogueliteButtons.mergeBonus.cost.textContent = `비용: ${rgu.cost} KP`;
+        rogueliteButtons.mergeBonus.btn.disabled = totalKnowledgePoints < rgu.cost;
+    }
+    function buyRogueliteUpgrade(key) {
+        const upgrade = rogueliteUpgrades[key];
+        if (totalKnowledgePoints >= upgrade.cost) {
+            totalKnowledgePoints -= upgrade.cost;
+            upgrade.level++;
+            upgrade.cost = Math.floor(upgrade.cost * (1.2 + (upgrade.level * 0.1))); // 비용 증가
+
+            // 체력 업그레이드 시 현재 체력도 증가
+            if (key === 'hpMax' && gameRunning) {
+                const hpIncrease = 5; // 레벨당 5씩 증가
+                MAX_HP += hpIncrease;
+                playerHP += hpIncrease; // 현재 체력도 같은 양만큼 증가
+                updateUI();
+            }
+
+            saveGameData();
+            updateRogueliteUI();
+        }
+    }
+    function updateAchievementsUI() {
+        Object.keys(achievements).forEach(key => {
+            const el = document.getElementById(`ach-${key}`);
+            if (el) {
+                if (achievements[key]) {
+                    el.classList.add('unlocked');
+                    el.classList.remove('locked');
+                } else {
+                    el.classList.add('locked');
+                    el.classList.remove('unlocked');
+                }
+            }
+        });
+    }
+    function checkAchievements(type = 'wave') {
+        let changed = false;
+        if (type === 'wave') {
+            if (wave >= 5 && !achievements.wave5) { achievements.wave5 = true; changed = true; }
+            if (wave >= 10 && !achievements.wave10) { achievements.wave10 = true; changed = true; }
+            if (wave >= 20 && !achievements.wave20) { achievements.wave20 = true; changed = true; }
+            if (wave >= 30 && !achievements.wave30) { achievements.wave30 = true; changed = true; }
+            if (wave >= 50 && !achievements.wave50) { achievements.wave50 = true; changed = true; }
+        } else if (type === 'pip7' && !achievements.pip7) {
+            achievements.pip7 = true; changed = true;
+        }
+        if (changed) { saveGameData(); }
+    }
+    function saveGameData() {
+        try {
+            localStorage.setItem(KP_KEY, totalKnowledgePoints.toString());
+            localStorage.setItem(ROGUELITE_KEY, JSON.stringify(rogueliteUpgrades));
+            localStorage.setItem(ACHIEVEMENTS_KEY, JSON.stringify(achievements));
+        } catch (e) { console.error("Failed to save game data:", e); }
+    }
+    function loadGameData() {
+        try {
+            totalKnowledgePoints = parseInt(localStorage.getItem(KP_KEY)) || 0;
+            rogueliteUpgrades = JSON.parse(localStorage.getItem(ROGUELITE_KEY)) || initRogueliteUpgrades();
+            if (!rogueliteUpgrades.hpMax) rogueliteUpgrades.hpMax = { level: 1, cost: 180 };
+            achievements = JSON.parse(localStorage.getItem(ACHIEVEMENTS_KEY)) || initAchievements();
+        } catch (e) {
+            console.error("Failed to load game data, resetting:", e);
+            totalKnowledgePoints = 0;
+            rogueliteUpgrades = initRogueliteUpgrades();
+            achievements = initAchievements();
+        }
+        if (!rogueliteUpgrades.startQP) rogueliteUpgrades.startQP = initRogueliteUpgrades().startQP;
+        if (!rogueliteUpgrades.quizQP) rogueliteUpgrades.quizQP = initRogueliteUpgrades().quizQP;
+        if (!rogueliteUpgrades.highSpawn) rogueliteUpgrades.highSpawn = initRogueliteUpgrades().highSpawn;
+        if (!rogueliteUpgrades.mergeBonus) rogueliteUpgrades.mergeBonus = initRogueliteUpgrades().mergeBonus;
+    }
+
+    function stopGame() {
+        gameRunning = false;
+        cancelAnimationFrame(animationFrameId);
+        clearInterval(spawnInterval);
+        clearInterval(quizTimerInterval);
+    }
+
+    function gameOver() {
+        stopGame();
+        const pointsEarned = wave * 10;
+        totalKnowledgePoints += pointsEarned;
+        saveGameData();
+
+        finalWaveDisplay.textContent = wave;
+        pointsEarnedDisplay.textContent = `${pointsEarned} KP`;
+        totalPointsDisplay.textContent = `${totalKnowledgePoints} KP`;
+        showModal(gameOverModal);
+    }
+
+    function gameVictory() {
+        stopGame();
+        checkAchievements('wave50');
+        const pointsEarned = (wave * 10) + 500; // 50웨이브 클리어 보너스
+        totalKnowledgePoints += pointsEarned;
+        saveGameData();
+
+        victoryPointsEarnedDisplay.textContent = `${pointsEarned} KP`;
+        victoryTotalPointsDisplay.textContent = `${totalKnowledgePoints} KP`;
+        showModal(gameVictoryModal);
+    }
+
+    function resetGame() {
+        if (!rogueliteUpgrades || !rogueliteUpgrades.startQP) { rogueliteUpgrades = initRogueliteUpgrades(); }
+        stopGame();
+
+        resources = 100 + ((rogueliteUpgrades && rogueliteUpgrades.startQP ? rogueliteUpgrades.startQP.level : 1) - 1) * 20;
+        summonCost = 50;
+        MAX_HP = 20 + ((rogueliteUpgrades?.hpMax?.level ?? 1) - 1) * 5;
+        playerHP = MAX_HP;
+        wave = 0;
+        enemiesToSpawn = 0;
+
+        diceGrid = new Array(GRID_SIZE).fill(null);
+        enemies = [];
+        projectiles = [];
+        damageNumbers = [];
+
+        initInGameUpgrades();
+
+        updateUI();
+
+        gameContainer.classList.add('active');
+        quizContainer.classList.add('active');
+        gameContainer.style.display = 'flex';
+        quizContainer.style.display = 'flex';
+
+        gameRunning = true;
+        loadQuiz();
+        startNextWave();
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    function initGame() {
+        if (!rogueliteUpgrades || !rogueliteUpgrades.startQP) { rogueliteUpgrades = initRogueliteUpgrades(); }
+        hideModal(startScreenModal);
+        resetGame();
+    }
+
+    function returnToTitle() {
+        hideModal(gameOverModal);
+        hideModal(gameVictoryModal);
+
+        gameContainer.style.display = 'none';
+        quizContainer.style.display = 'none';
+        gameContainer.classList.remove('active');
+        quizContainer.classList.remove('active');
+        showModal(startScreenModal);
+    }
+
+    // --- 14. 초기화 및 이벤트 리스너 ---
+
+    document.addEventListener('DOMContentLoaded', () => {
+        function fitTextToBox(el, minPx, maxPx) {
+            // Shrink font until fits within parent height and width (2 lines clamp)
+            let size = maxPx;
+            el.style.fontSize = size + 'px';
+            const parent = el.parentElement;
+            let guard = 0;
+            while (guard++ < 20) {
+                const overflows = el.scrollHeight > parent.clientHeight - 6 || el.scrollWidth > parent.clientWidth - 6;
+                if (!overflows || size <= minPx) break;
+                size -= 1;
+                el.style.fontSize = size + 'px';
+            }
+        }
+        function autosizeOptionLabels() {
+            document.querySelectorAll('.option-btn .option-label').forEach(el => {
+                const style = getComputedStyle(document.documentElement);
+                const minPx = parseFloat(style.getPropertyValue('--opt-font-min')) || 11;
+                const maxPx = parseFloat(style.getPropertyValue('--opt-font-max')) || 16;
+                fitTextToBox(el, minPx, maxPx);
+            });
+        }
+
+        function fitTextWithin(el, minPx, maxPx) {
+            const parent = el.parentElement || el;
+            let size = maxPx;
+            el.style.fontSize = size + 'px';
+            // Try shrink until it fits (safeguard iterations)
+            let guard = 0;
+            while (guard++ < 16 && size > minPx && el.scrollWidth > parent.clientWidth - 4) {
+                size -= 1;
+                el.style.fontSize = size + 'px';
+            }
+        }
+        function autosizeUpgradeTexts() {
+            const infos = document.querySelectorAll('#upgrade-panel .upgrade-info, #upgrade-panel .upgrade-cost');
+            infos.forEach(el => fitTextWithin(el, 10, 14));
+        }
+
+        loadGameData();
+
+        // 시작 화면
+        showModal(startScreenModal);
+        document.getElementById('start-game-btn').onclick = initGame;
+        document.getElementById('show-roguelite-btn').onclick = () => {
+            updateRogueliteUI();
+            showModal(rogueliteModal);
+        };
+        document.getElementById('show-achievements-btn').onclick = () => {
+            updateAchievementsUI();
+            showModal(achievementsModal);
+        };
+
+        restartBtn.onclick = returnToTitle;
+        victoryRestartBtn.onclick = returnToTitle;
+
+        // 모달 닫기 버튼
+        document.getElementById('close-roguelite-btn').onclick = () => {
+            hideModal(rogueliteModal);
+        };
+        document.getElementById('close-achievements-btn').onclick = () => {
+            hideModal(achievementsModal);
+        };
+
+        if (typeof rogueliteButtons === 'object') {
+            rogueliteButtons.hpMax = {
+                btn:  document.getElementById('roguelite-hpmax-btn'),
+                desc: document.getElementById('roguelite-hpmax-desc'),
+                cost: document.getElementById('roguelite-hpmax-cost')
+            };
+        }
+
+
+        // 영구 강화 구매 버튼
+        rogueliteButtons.startQP.btn.onclick = () => buyRogueliteUpgrade('startQP');
+        rogueliteButtons.quizQP.btn.onclick = () => buyRogueliteUpgrade('quizQP');
+        rogueliteButtons.hpMax.btn.onclick     = () => buyRogueliteUpgrade('hpMax');
+        rogueliteButtons.highSpawn.btn.onclick = () => buyRogueliteUpgrade('highSpawn');
+        rogueliteButtons.mergeBonus.btn.onclick = () => buyRogueliteUpgrade('mergeBonus');
+    });
+
+
+    function ensureContainersVisible() {
+        // Recover the correct screen on rotation
+        const modals = Array.from(document.querySelectorAll('.modal-overlay'));
+        const anyModalShown = modals.some(m => m.style.display !== 'none' && m.offsetParent !== null);
+        if (gameRunning && !anyModalShown) {
+            gameContainer.classList.add('active');
+            quizContainer.classList.add('active');
+            gameContainer.style.display = 'flex';
+            quizContainer.style.display = 'flex';
+        }
+        // viewport fix variable
+        document.documentElement.style.setProperty('--vh', (window.innerHeight * 0.01) + 'px');
+        // Nudge canvas redraw to avoid blank frames
+        try {
+            clearCanvas(); drawPath(); drawGrid(); drawDice(); drawEnemies(); drawProjectiles(); drawDamageNumbers();
+        } catch (_) {}
+        autosizeUpgradeTexts();
+    }
+    window.addEventListener('orientationchange', ensureContainersVisible);
+    window.addEventListener('resize', ensureContainersVisible);
+    window.addEventListener('resize', autosizeOptionLabels);
+    window.addEventListener('orientationchange', autosizeOptionLabels);
+
+</script>
+
+<script>
+    // 눈금 1개당 20% 확률
+    window.PERK_ROLL_PER_PIP = 0.2;
+</script>
+
+<!-- === PATCH: Title buttons & rotation white-screen hardener === -->
+<script>
+    (function() {
+        function byId(id){ return document.getElementById(id); }
+        function safeBind(el, handler){
+            if(!el) return;
+            el.onclick = null;
+            el.addEventListener('click', function(e){ e.preventDefault(); handler(); });
+            el.addEventListener('touchend', function(e){ e.preventDefault(); handler(); }, { passive: false });
+        }
+        function ensureVisible(){
+            try {
+                var game = byId('game-container');
+                var quiz = byId('quiz-container');
+                if (!game || !quiz) return;
+                // force reflow for Safari viewport bugs
+                document.documentElement.style.minHeight = '100dvh';
+                void document.body.offsetHeight;
+                if (game.classList.contains('active')) { game.style.display = 'flex'; }
+                if (quiz.classList.contains('active')) { quiz.style.display = 'flex'; }
+            } catch(e){ /* no-op */ }
+        }
+
+        function wireStartButtons(){
+            var startBtn = byId('start-game-btn');
+            var rogueliteBtn = byId('show-roguelite-btn');
+            var achieveBtn = byId('show-achievements-btn');
+
+            // Map to global if present
+            var g = window;
+            var start = g.initGame || (typeof initGame === 'function' ? initGame : null);
+            var showRogue = (g.updateRogueliteUI && g.showModal && byId('roguelite-upgrade-modal'))
+                ? function(){ g.updateRogueliteUI(); g.showModal(byId('roguelite-upgrade-modal')); } : null;
+            var showAch = (g.refreshAchievementsUI && g.showModal && byId('achievements-modal'))
+                ? function(){ g.refreshAchievementsUI(); g.showModal(byId('achievements-modal')); } : null;
+
+            if (start) safeBind(startBtn, start);
+            if (showRogue) safeBind(rogueliteBtn, showRogue);
+            if (showAch) safeBind(achieveBtn, showAch);
+        }
+
+        // Run ASAP after DOM is interactive
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', function(){ wireStartButtons(); ensureVisible(); });
+        } else {
+            wireStartButtons(); ensureVisible();
+        }
+
+        // Fix white blank when rotating or returning to tab
+        window.addEventListener('orientationchange', function(){ setTimeout(ensureVisible, 50); });
+        window.addEventListener('resize', function(){ setTimeout(ensureVisible, 50); });
+        window.addEventListener('pageshow', function(){ setTimeout(ensureVisible, 50); });
+    })();
+</script>
+<script>
+    /* === HOTFIX v3.2b: window.* 참조로 깨진 강화 버튼 복구 + 난이도/비용 완화 유지 === */
+    (function () {
+        const COST_FACTOR = 0.5;   // 영구강화 반값
+        const HP_RAMP    = 1.04;   // 6웨이브 이후 HP 완만 상승
+        const SPAWN_RAMP = 1.04;   // 6웨이브 이후 스폰 수 완만 상승
+        const SPEED_RAMP = 1.03;   // 6웨이브 이후 스폰 속도(간격 감소) 완만 상승
+        const MIG_KEY    = "quizTowerDefense_migrated_v32a";
+        const ROG_KEY    = (typeof ROGUELITE_KEY !== 'undefined' ? ROGUELITE_KEY : 'quizTowerDefense_Roguelite');
+
+        /* 1) 1회 마이그레이션: 저장된 영구강화 비용을 반값으로 */
+        try {
+            if (!localStorage.getItem(MIG_KEY)) {
+                const raw = localStorage.getItem(ROG_KEY);
+                if (raw) {
+                    const data = JSON.parse(raw);
+                    ['startQP','quizQP','highSpawn','mergeBonus'].forEach(k => {
+                        if (data && data[k] && typeof data[k].cost === 'number') {
+                            data[k].cost = Math.max(1, Math.round(data[k].cost * COST_FACTOR));
+                        }
+                    });
+                    localStorage.setItem(ROG_KEY, JSON.stringify(data));
+                    if (typeof rogueliteUpgrades !== 'undefined' && rogueliteUpgrades) {
+                        Object.assign(rogueliteUpgrades, data);
+                    }
+                }
+                localStorage.setItem(MIG_KEY, '1');
+            }
+        } catch(e) {}
+
+        /* 2) 영구강화 UI 패치: 표기/disabled를 반값 기준으로 갱신 */
+        if (typeof updateRogueliteUI === 'function') {
+            const __u = updateRogueliteUI;
+            updateRogueliteUI = function () {
+                __u();
+                try {
+                    ['startQP','quizQP','highSpawn','mergeBonus'].forEach(key => {
+                        const up = rogueliteUpgrades?.[key];
+                        const el = rogueliteButtons?.[key];
+                        if (!up || !el) return;
+                        const eff = Math.max(1, Math.round((up.cost|0) * COST_FACTOR));
+                        if (el.cost) el.cost.textContent = `비용: ${eff} KP`;
+                        if (el.btn)  el.btn.disabled = (totalKnowledgePoints < eff);
+                    });
+                } catch(_) {}
+            };
+        }
+
+        /* 3) 영구강화 구매 로직 패치: 반값 차감 + 원래 성장식 유지 */
+        if (typeof buyRogueliteUpgrade === 'function') {
+            buyRogueliteUpgrade = function (key) {
+                const up = rogueliteUpgrades?.[key];
+                if (!up) return;
+                const eff = Math.max(1, Math.round((up.cost|0) * COST_FACTOR));
+                if ((totalKnowledgePoints|0) < eff) return;
+                totalKnowledgePoints -= eff;
+                up.level = (up.level|0) + 1;
+                up.cost  = Math.floor(up.cost * (1.2 + (up.level * 0.1))); // 저장/성장은 원 공식
+
+                // 체력 업그레이드 시 현재 체력도 증가
+                if (key === 'hpMax' && gameRunning) {
+                    const hpIncrease = 5; // 레벨당 5씩 증가
+                    MAX_HP += hpIncrease;
+                    playerHP += hpIncrease; // 현재 체력도 같은 양만큼 증가
+                    if (typeof updateUI === 'function') updateUI();
+                }
+
+                if (typeof saveGameData === 'function') saveGameData();
+                if (typeof updateRogueliteUI === 'function') updateRogueliteUI();
+            };
+        }
+
+        /* 4) 인게임 강화 시작가/증가 고정: 10 시작, 이후 +5 (반값 보정 제거) */
+        if (typeof initInGameUpgrades === 'function') {
+            const __initIG = initInGameUpgrades;
+            initInGameUpgrades = function(){
+                __initIG();
+                try {
+                    Object.values(diceUpgrades || {}).forEach(u => {
+                        if (u) u.cost = Math.max(10, u.cost); // 시작가를 10 이상으로 고정
+                    });
+                    if (typeof updateUI === 'function') updateUI();
+                } catch(_) {}
+            };
+        }
+
+        /* 5) 난이도 완화: HP 램프(1.5 고정배수 → 완만 램프) */
+        if (typeof Enemy === 'function') {
+            const Base = Enemy;
+            Enemy = class extends Base {
+                constructor(isBoss){
+                    super(isBoss);
+                    try {
+                        if ((typeof wave === 'number') && wave > 6) {
+                            const factor = Math.pow(HP_RAMP, Math.max(0, wave - 6)) / 1.5;
+                            this.maxHp = Math.max(1, Math.round(this.maxHp * factor));
+                            this.hp    = Math.min(this.hp, this.maxHp);
+                        }
+                    } catch(_) {}
+                }
+            };
+        }
+
+        /* 6) 난이도 완화: 스폰 수/속도 램프 완만화 */
+        if (typeof startNextWave === 'function') {
+            const __start = startNextWave;
+            startNextWave = function () {
+                __start();
+                if ((wave|0) % 5 === 0) return; // 보스 웨이브 제외
+                try {
+                    clearInterval(spawnInterval);
+                    const w = wave|0;
+                    const chapter = Math.max(0, Math.floor((w - 1) / 10));
+
+                    const baseCount = 10 + (w * 2) + (chapter * 10);
+                    const rampCount = (w > 6) ? Math.pow(SPAWN_RAMP, (w - 6)) : 1;
+                    enemiesToSpawn = Math.max(0, Math.round(baseCount * rampCount));
+
+                    const baseMs = 1000 - (w * 20) - (chapter * 50);
+                    const rampSp = (w > 6) ? Math.pow(SPEED_RAMP, (w - 6)) : 1;
+                    const delay  = Math.max(100, Math.round(baseMs / rampSp));
+
+                    spawnInterval = setInterval(function () {
+                        if (enemiesToSpawn > 0) {
+                            enemies.push(new Enemy(false));
+                            enemiesToSpawn--;
+                        } else {
+                            clearInterval(spawnInterval);
+                        }
+                    }, delay);
+                } catch(_) {}
+            };
+        }
+    })();
+</script>
+
+<script>
+    /* === QDD QuizPack Loader (network-first, fallback-safe) === */
+    (function () {
+        const QP_VER = window.QP_VER || "20251112"; // ← 배포 시 날짜/커밋 해시로 바꿔주세요
+        const QUIZ_PACK_BASE =
+            "https://unluckyidiot16.github.io/assets-common/QuizDiceDefense/QuizPack/quizpack.json";
+        const QUIZ_PACK_URL = `${QUIZ_PACK_BASE}?v=${encodeURIComponent(QP_VER)}`;
+        const QUIZ_CACHE_NAME = `QDD-QuizPack-quizpack-v${QP_VER}`;
+
+        let _ready = null;
+
+        async function loadNetworkFirst(url) {
+            // 1) 항상 네트워크로 ETag 재검증해서 최신 시도
+            try {
+                const resp = await fetch(url, { cache: "no-cache" });
+                if (!resp.ok) throw new Error("fetch failed: " + resp.status);
+                // 2) 성공 시 캐시에 갱신 저장
+                try { const c = await caches.open(QUIZ_CACHE_NAME); await c.put(url, resp.clone()); } catch (_) {}
+                return await resp.json();
+            } catch (e) {
+                // 3) 오프라인/실패면 캐시→없으면 에러
+                const c = await caches.open(QUIZ_CACHE_NAME);
+                const hit = await c.match(url);
+                if (hit) return hit.json();
+                throw e;
+            }
+        }
+
+        async function ensureQuizPack() {
+            if (_ready) return _ready;
+            _ready = (async () => {
+                try {
+                    try { const keys = await caches.keys(); await Promise.all(keys.filter(k=>k.startsWith('QDD-QuizPack-quizpack-v') && k!==QUIZ_CACHE_NAME).map(k=>caches.delete(k))); } catch(_){}
+                    const remote = await loadNetworkFirst(QUIZ_PACK_URL);
+                    if (Array.isArray(remote) && remote.length) {
+                        quizData.splice(0, quizData.length, ...remote); // 제자리 교체
+                    } else {
+                        console.warn("[QDD] Remote pack empty, using built-in fallback.");
+                    }
+                } catch (e) {
+                    console.warn("[QDD] Network failed, using built-in fallback.", e);
+                }
+            })();
+            return _ready;
+        }
+
+        document.addEventListener("DOMContentLoaded", () => { try { ensureQuizPack(); } catch(_){} });
+
+        const __initGame__ = window.initGame;
+        if (typeof __initGame__ === "function") {
+            window.initGame = async function () {
+                try { await ensureQuizPack(); } catch (_) {}
+                return __initGame__.apply(this, arguments);
+            };
+        }
+    })();
+</script>
+<script>
+    /* === QDD v3.3: HP Max Roguelite + Merge Perks & +50% Damage (drop-in) === */
+    const __QDD_V33_APPLY__ = function(){
+        const FPS = 60;
+        const PERK_COOLDOWN = Math.round(6.1*FPS); // 6.1초
+        // 퍼크 굴림 기본 확률(눈금당). 외부에서 window.PERK_ROLL_PER_PIP 로 재정의 가능
+        const PERK_ROLL_PER_PIP = (typeof window !== 'undefined' && typeof window.PERK_ROLL_PER_PIP === 'number')
+            ? window.PERK_ROLL_PER_PIP
+            : 1;        const PERK_COLORS = {
+            multishot:'#ff66aa', bounce:'#66ccff', range:'#66ff66',
+            selfAS:'#ffaa00', auraAS:'#00ccff', auraATK:'#ffcc00'
+        };
+
+        /* -------------------- 영구강화: 최대 HP 추가 -------------------- */
+        if (typeof initRogueliteUpgrades==='function') {
+            const __init = initRogueliteUpgrades;
+            initRogueliteUpgrades = function(){
+                const u = __init();
+                if (!u.hpMax) u.hpMax = { level:1, cost:180 }; // 기본 비용
+                return u;
+            };
+        }
+        function ensureRogueKeys(){
+            if (!window.rogueliteUpgrades) return;
+            if (!rogueliteUpgrades.hpMax) rogueliteUpgrades.hpMax = { level:1, cost:180 };
+        }
+        function ensureHpMaxUI(){
+            ensureRogueKeys();
+            if (!document.getElementById('roguelite-hpmax-btn')) {
+                const grid = document.querySelector('.roguelite-upgrade-grid');
+                if (!grid) return;
+                const item = document.createElement('div');
+                item.className = 'roguelite-upgrade-item';
+                item.innerHTML = `
+        <h3>최대 HP 증가</h3>
+        <p id="roguelite-hpmax-desc">최대 HP가 5 증가합니다. (현재 +${(rogueliteUpgrades.hpMax.level-1)*5})</p>
+        <button id="roguelite-hpmax-btn" class="roguelite-upgrade-btn">강화</button>
+        <div class="roguelite-cost" id="roguelite-hpmax-cost">비용: ${rogueliteUpgrades.hpMax.cost} KP</div>
+      `;
+                grid.appendChild(item);
+                document.getElementById('roguelite-hpmax-btn').onclick = ()=>buyRogueliteUpgrade('hpMax');
+            }
+        }
+        if (typeof updateRogueliteUI==='function') {
+            const __u = updateRogueliteUI;
+            updateRogueliteUI = function(){
+                __u();
+                try{
+                    ensureHpMaxUI();
+                    const u = rogueliteUpgrades.hpMax;
+                    const desc = document.getElementById('roguelite-hpmax-desc');
+                    const cost = document.getElementById('roguelite-hpmax-cost');
+                    if (desc) desc.textContent = `최대 HP가 5 증가합니다. (현재 +${(u.level-1)*5})`;
+                    // v3.2b 반값 UI 정합
+                    const eff = Math.max(1, Math.round(u.cost * 0.5));
+                    if (cost) cost.textContent = `비용: ${eff} KP`;
+                    const btn = document.getElementById('roguelite-hpmax-btn');
+                    if (btn) btn.disabled = (totalKnowledgePoints < eff);
+                }catch(e){}
+            };
+        }
+        if (typeof resetGame==='function') {
+            const __reset = resetGame;
+            resetGame = function(){
+                ensureRogueKeys();
+                window.playerHPMax = 20 + ((rogueliteUpgrades.hpMax?.level||1)-1)*5;
+                __reset();
+                try{
+                    window.playerHP = Math.min(window.playerHPMax, window.playerHP||window.playerHPMax);
+                    const maxEl = document.getElementById('player-hp-max');
+                    if (maxEl) maxEl.textContent = window.playerHPMax;
+                    if (typeof updateUI==='function') updateUI();
+                }catch(_){}
+            }
+        }
+        if (typeof updateUI==='function') {
+            const __ui = updateUI;
+            updateUI = function(){
+                __ui();
+                try{
+                    const maxEl = document.getElementById('player-hp-max');
+                    if (maxEl && typeof window.playerHPMax==='number') maxEl.textContent = window.playerHPMax;
+                }catch(_){}
+            }
+        }
+
+        /* -------------------- 합성: +50% 데미지 & 랜덤 퍼크 -------------------- */
+        function ensureDieFields(d) {
+            if (!d) return d;
+            if (typeof d.damageMul !== 'number') d.damageMul = 1;
+            if (!d.buffs) d.buffs = [];                // { type:'as'|'atk', v:0.10, t:frames }
+            if (typeof d.tempSpeedMult !== 'number') d.tempSpeedMult = 1;
+            if (typeof d.tempDamageMult !== 'number') d.tempDamageMult = 1;
+            if (typeof d.perkCooldown !== 'number') d.perkCooldown = 0;
+            if (d.perk && !d.borderColor) d.borderColor = PERK_COLORS[d.perk.type] || '#ffffff';
+            return d;
+        }
+
+        function grantRandomPerk(d) {
+            if (!d) {
+                console.error('[grantRandomPerk] Die is null or undefined!');
+                return;
+            }
+            const types = ['multishot', 'bounce', 'range', 'selfAS', 'auraAS', 'auraATK'];
+            const pick = types[Math.floor(Math.random() * types.length)];
+            const prevPerk = d.perk ? { ...d.perk } : null;
+
+            if (!d.perk) {
+                d.perk = { type: pick, level: 1 };
+            } else if (d.perk.type === pick) {
+                d.perk.level++;
+            } else {
+                d.perk = { type: pick, level: 1 };
+            }
+            d.borderColor = PERK_COLORS[d.perk.type] || '#ffffff';
+            ensureDieFields(d);
+
+            console.log(
+                `[Perk] Applied: ${d.perk.type} Lv${d.perk.level}, `
+                + `Previous: ${prevPerk ? `${prevPerk.type} Lv${prevPerk.level}` : 'None'}, `
+                + `BorderColor: ${d.borderColor}`
+            );
+        }
+
+        // 드래그-드롭 합성 로직 패치 (이벤트 리스너까지 교체)
+        if (typeof handleDragEnd === 'function' && typeof canvas !== 'undefined' && canvas) {
+            const __origHandleDragEnd = handleDragEnd;
+
+            const newHandleDragEnd = function (e) {
+                if (!dragState.isDragging) return;
+                e.preventDefault();
+                const { x, y } = getMousePos(e);
+                const dropIndex = getGridIndexFromPos(x, y);
+                const dragDice = dragState.die;
+                const startIndex = dragState.startIndex;
+
+                if (dropIndex === -1) {
+                    diceGrid[startIndex] = dragDice;
+                } else {
+                    const dropDice = diceGrid[dropIndex];
+                    if (dropDice === null) {
+                        diceGrid[dropIndex] = dragDice;
+                    } else {
+                        if (dragDice.type === dropDice.type && dragDice.pips === dropDice.pips) {
+                            // === 합성! ===
+                            ensureDieFields(diceGrid[dropIndex]);  // diceGrid[dropIndex] 직접 사용
+                            diceGrid[dropIndex].pips += 1;
+                            diceGrid[dropIndex].cooldown = 0;
+                            diceGrid[startIndex] = null;  // 드래그한 주사위 제거 (중요!)
+
+                            // +50% 데미지(누적)
+                            diceGrid[dropIndex].damageMul = (diceGrid[dropIndex].damageMul || 1) * 1.5;
+
+                            // 기존 +2성 보너스(영구강화 영향) 유지
+                            const mergeBonusChance =
+                                ((rogueliteUpgrades && rogueliteUpgrades.mergeBonus
+                                    ? rogueliteUpgrades.mergeBonus.level
+                                    : 1) - 1) * 0.01;
+                            if (Math.random() < mergeBonusChance) {
+                                diceGrid[dropIndex].pips += 1;
+                                const c = getGridCoords(dropIndex);
+                                createDamageNumber(c.x + 35, c.y + 35, "BONUS!", "#f1c40f");
+                            }
+
+                            // 퍼크 굴림: 확률 = 눈금 × PERK_ROLL_PER_PIP (상한 100%)
+                            const pips = diceGrid[dropIndex].pips | 0;
+                            const perkChance = Math.min(1, pips * PERK_ROLL_PER_PIP);
+                            console.log(
+                                `[Merge] Pips: ${pips}, Perk chance: ${(perkChance * 100).toFixed(0)}%`
+                            );
+
+                            if (Math.random() < perkChance) {
+                                // diceGrid[dropIndex]에 직접 퍼크 적용
+                                grantRandomPerk(diceGrid[dropIndex]);
+                                console.log(
+                                    `[Merge] Perk granted: ${diceGrid[dropIndex].perk.type}`
+                                );
+                                const c = getGridCoords(dropIndex);
+                                createDamageNumber(
+                                    c.x + 35,
+                                    c.y + 15,
+                                    "PERK!",
+                                    "#ff00ff"
+                                );
+                            }
+
+                            if (diceGrid[dropIndex].pips >= 7) {
+                                checkAchievements("pip7");
+                            }
+                        } else {
+                            // 스왑
+                            diceGrid[startIndex] = dropDice;
+                            diceGrid[dropIndex] = dragDice;
+                        }
+                    }
+                }
+
+                dragState.isDragging = false;
+                dragState.die = null;
+                dragState.startIndex = -1;
+            };
+
+            // 이벤트 리스너를 새 핸들러로 교체 (핸들러 재바인딩이 핵심!)
+            canvas.removeEventListener('mouseup', __origHandleDragEnd);
+            canvas.removeEventListener('mouseleave', __origHandleDragEnd);
+            canvas.removeEventListener('touchend', __origHandleDragEnd);
+
+            canvas.addEventListener('mouseup', newHandleDragEnd);
+            canvas.addEventListener('mouseleave', newHandleDragEnd);
+            canvas.addEventListener('touchend', newHandleDragEnd, { passive: false });
+
+            // 혹시 다른 곳에서 직접 handleDragEnd를 호출할 수도 있으니 전역 심볼도 갱신
+            handleDragEnd = newHandleDragEnd;
+        }
+
+        if (typeof summonDice === 'function') {
+            const __sum = summonDice;
+            summonDice = function () {
+                __sum();
+                try { diceGrid.forEach(ensureDieFields); } catch (_) { }
+            };
+        }
+
+        /* -------------------- 투사체: 데미지 배수/연쇄(bounce) -------------------- */
+        if (typeof Projectile==='function') {
+            const Base = Projectile;
+            Projectile = class extends Base {
+                constructor(x,y,target,die){
+                    super(x,y,target,die);
+                    try {
+                        this.damage = Math.round(this.damage * (die.damageMul||1) * (die.tempDamageMult||1));
+                        this.bounces = (die.perk && die.perk.type==='bounce') ? Math.max(0, die.pips|0) : 0;
+                        this.bounceLoss = 0.85; // 튕길수록 85%로 감쇄
+                        this._visited = new Set();
+                    } catch(_) {}
+                }
+                move(){
+                    if (!this.target || this.target.hp <= 0) return false;
+                    const ok = super.move();
+                    if (!ok) {
+                        // 명중 처리됨 → 연쇄 대상 탐색
+                        if (this.bounces > 0) {
+                            const n = (function(fromEnemy, radius, visited){
+                                let cand=null, min=1e9;
+                                enemies.forEach(e=>{
+                                    if (visited && visited.has(e)) return;
+                                    if (e===fromEnemy || e.hp<=0) return;
+                                    const d=Math.hypot(e.x-fromEnemy.x, e.y-fromEnemy.y);
+                                    if (d<radius && d<min){min=d;cand=e;}
+                                });
+                                return cand;
+                            })(this.target, 140, this._visited);
+                            if (n) {
+                                this._visited.add(this.target);
+                                this.target = n;
+                                this.bounces--;
+                                this.damage = Math.max(1, Math.round(this.damage * this.bounceLoss));
+                                return true; // 계속 비행
+                            }
+                        }
+                    }
+                    return ok;
+                }
+            };
+        }
+
+        /* -------------------- 그리기: 퍼크 테두리 표시 -------------------- */
+        if (typeof drawDie==='function') {
+            const __drawDie = drawDie;
+            drawDie = function(x,y,die){
+                __drawDie(x,y,die);
+                try{
+                    ensureDieFields(die);
+                    if (die && die.perk) {
+                        ctx.save();
+                        ctx.lineWidth = 5;  // 더 두껍게
+                        const perkColor = PERK_COLORS[die.perk.type] || die.borderColor || '#ffffff';
+                        ctx.strokeStyle = perkColor;
+                        ctx.shadowColor = perkColor;  // 그림자 추가
+                        ctx.shadowBlur = 10;
+                        ctx.strokeRect(x-2, y-2, 74, 74); // 약간 더 크게
+                        ctx.restore();
+                    }
+                }catch(e){
+                    console.error('[drawDie] Error:', e);
+                }
+            };
+        }
+
+        /* -------------------- 공격 루프: 멀티샷/사거리/버프/오라 -------------------- */
+        function neighborsWithin(centerIndex, radiusPx){
+            const out=[];
+            const c0 = getGridCoords(centerIndex);
+            const cx0 = c0.x+35, cy0=c0.y+35;
+            diceGrid.forEach((d,idx)=>{
+                if (!d) return;
+                const c=getGridCoords(idx); const cx=c.x+35, cy=c.y+35;
+                if (Math.hypot(cx0-cx, cy0-cy)<=radiusPx) out.push({die:d, idx});
+            });
+            return out;
+        }
+        if (typeof updateDiceAttacks==='function') {
+            updateDiceAttacks = function(){
+                for (let i=0;i<diceGrid.length;i++){
+                    const die = diceGrid[i];
+                    if (!die) continue;
+                    ensureDieFields(die);
+
+                    // 1) 버프 틱
+                    die.tempSpeedMult = 1; die.tempDamageMult = 1;
+                    for (let b=die.buffs.length-1;b>=0;b--){
+                        const bf = die.buffs[b]; bf.t--;
+                        if (bf.type==='as')  die.tempSpeedMult  *= (1+bf.v);
+                        if (bf.type==='atk') die.tempDamageMult *= (1+bf.v);
+                        if (bf.t<=0) die.buffs.splice(b,1);
+                    }
+
+                    // 2) 주기적 퍼크(자기/오라)
+                    if (die.perk && (die.perk.type==='selfAS' || die.perk.type==='auraAS' || die.perk.type==='auraATK')) {
+                        die.perkCooldown--;
+                        if (die.perkCooldown<=0){
+                            const dur = (die.pips|0) * FPS;      // pips초
+                            const val = (die.pips|0) * 0.15;     // +pips*10%
+                            if (die.perk.type==='selfAS'){
+                                die.buffs.push({type:'as', v:val, t:dur});
+                            } else if (die.perk.type==='auraAS'){
+                                neighborsWithin(i,130).forEach(o=>{ if (o.die!==die){ ensureDieFields(o.die); o.die.buffs.push({type:'as', v:val, t:dur}); }});
+                            } else if (die.perk.type==='auraATK'){
+                                neighborsWithin(i,130).forEach(o=>{ if (o.die!==die){ ensureDieFields(o.die); o.die.buffs.push({type:'atk', v:val, t:dur}); }});
+                            }
+                            die.perkCooldown = PERK_COOLDOWN;
+                        }
+                    }
+
+                    // 3) 공격 쿨/사거리/멀티샷
+                    if (die.cooldown > 0) { die.cooldown--; continue; }
+                    const { x, y } = getGridCoords(i);
+                    const cx = x+35, cy = y+35;
+
+                    let range = 100 + (die.pips|0)*15;
+                    if (die.perk && die.perk.type==='range') range += (die.pips|0)*20;
+
+                    const main = findTarget(cx, cy, range);
+                    if (!main) continue;
+
+                    const shots = (die.perk && die.perk.type==='multishot') ? Math.max(1, (die.pips|0)) : 1;
+
+                    const targets = [main];
+                    if (shots>1) {
+                        const cand=[];
+                        enemies.forEach(e=>{
+                            if (e===main) return;
+                            const d = Math.hypot(e.x-cx, e.y-cy);
+                            if (d<range) cand.push({e,d});
+                        });
+                        cand.sort((a,b)=>a.d-b.d);
+                        for (let k=0;k<shots-1 && k<cand.length;k++) targets.push(cand[k].e);
+                        while (targets.length<shots) targets.push(main);
+                    }
+                    targets.forEach(t=>projectiles.push(new Projectile(cx, cy, t, die)));
+
+                    const up = diceUpgrades[die.type];
+                    const baseCd = Math.max(10, 60 - die.pips*5);
+                    const levelScale = Math.pow(0.95, (up.level-1));
+                    const speedScale = 1 / Math.max(0.1, die.tempSpeedMult);
+                    die.cooldown = Math.max(6, Math.round(baseCd * levelScale * speedScale));
+                }
+            };
+        }
+
+        console.log('[QDD v3.3b] patch applied - fixed merge perk bug and HP display');
+        window.__QDD_V33B_ACTIVE__ = true;
+    };
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', __QDD_V33_APPLY__);
+    } else {
+        __QDD_V33_APPLY__();
+    }
+    ;
+</script>
+</body>
+</html>

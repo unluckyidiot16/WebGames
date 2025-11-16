@@ -1,0 +1,2602 @@
+[
+  {
+    "question": "287을 백의 자리에서 반올림하면?",
+    "options": [
+      "500",
+      "200",
+      "300",
+      "400"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "941을 백의 자리에서 반올림하면?",
+    "options": [
+      "1000",
+      "800",
+      "900",
+      "700"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "125을 백의 자리에서 반올림하면?",
+    "options": [
+      "200",
+      "100",
+      "-100",
+      "0"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "368을 십의 자리에서 반올림하면?",
+    "options": [
+      "380",
+      "370",
+      "350",
+      "360"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "749을 백의 자리에서 반올림하면?",
+    "options": [
+      "900",
+      "800",
+      "600",
+      "700"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "150을 백의 자리에서 반올림하면?",
+    "options": [
+      "300",
+      "100",
+      "0",
+      "200"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "999을 백의 자리에서 반올림하면?",
+    "options": [
+      "1100",
+      "1050",
+      "900",
+      "1000"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "430을 백의 자리에서 반올림하면?",
+    "options": [
+      "400",
+      "450",
+      "500",
+      "300"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "512을 십의 자리에서 반올림하면?",
+    "options": [
+      "500",
+      "510",
+      "520",
+      "490"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "675을 백의 자리에서 반올림하면?",
+    "options": [
+      "700",
+      "800",
+      "500",
+      "600"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "832을 백의 자리에서 반올림하면?",
+    "options": [
+      "700",
+      "800",
+      "900",
+      "1000"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "219을 십의 자리에서 반올림하면?",
+    "options": [
+      "210",
+      "230",
+      "220",
+      "200"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "450을 십의 자리에서 반올림하면?",
+    "options": [
+      "455",
+      "450",
+      "440",
+      "460"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "481을 백의 자리에서 반올림하면?",
+    "options": [
+      "600",
+      "550",
+      "400",
+      "500"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "731을 백의 자리에서 반올림하면?",
+    "options": [
+      "700",
+      "750",
+      "800",
+      "600"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "다음 중 300 이상 400 미만인 수는?",
+    "options": [
+      "250",
+      "325",
+      "405",
+      "450"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 500 이상 600 미만인 수는?",
+    "options": [
+      "490",
+      "450",
+      "700",
+      "519"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 700 이상 800 미만인 수는?",
+    "options": [
+      "800",
+      "600",
+      "708",
+      "699"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 100 이상 200 미만인 수는?",
+    "options": [
+      "0",
+      "50",
+      "200",
+      "149"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 900 이상 1000 미만인 수는?",
+    "options": [
+      "1050",
+      "975",
+      "800",
+      "1005"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 1200 이상 1300 미만인 수는?",
+    "options": [
+      "1190",
+      "1100",
+      "1400",
+      "1250"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 150 이상 160 미만인 수는?",
+    "options": [
+      "153",
+      "210",
+      "140",
+      "149"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 430 이상 460 미만인 수는?",
+    "options": [
+      "330",
+      "455",
+      "420",
+      "560"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 800 이상 850 미만인 수는?",
+    "options": [
+      "790",
+      "700",
+      "855",
+      "824"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "다음 중 250 이상 300 미만인 수는?",
+    "options": [
+      "150",
+      "350",
+      "255",
+      "300"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "198×5의 값을 어림한 값으로 가장 알맞은 것은?",
+    "options": [
+      "1190",
+      "890",
+      "940",
+      "1000"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "49×19의 값을 어림한 값으로 가장 알맞은 것은?",
+    "options": [
+      "1900",
+      "1031",
+      "980",
+      "1000"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "102×29의 값을 어림한 값으로 가장 알맞은 것은?",
+    "options": [
+      "3060",
+      "2900",
+      "5800",
+      "2000"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "305×21의 값을 어림한 값으로 가장 알맞은 것은?",
+    "options": [
+      "6000",
+      "8400",
+      "6300",
+      "6100"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "678×9의 값을 어림한 값으로 가장 알맞은 것은?",
+    "options": [
+      "6800",
+      "6780",
+      "6300",
+      "6052"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "399×22의 값을 어림한 값으로 가장 알맞은 것은?",
+    "options": [
+      "8000",
+      "6000",
+      "8800",
+      "7980"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/3 × 6의 값은?",
+    "options": [
+      "3",
+      "5",
+      "4",
+      "6"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/4 × 8의 값은?",
+    "options": [
+      "8",
+      "7",
+      "6",
+      "5"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "5/6 × 12의 값은?",
+    "options": [
+      "11",
+      "12",
+      "9",
+      "10"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "4/5 × 25의 값은?",
+    "options": [
+      "20",
+      "19",
+      "21",
+      "22"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/8 × 16의 값은?",
+    "options": [
+      "6",
+      "8",
+      "5",
+      "7"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "7/9 × 18의 값은?",
+    "options": [
+      "16",
+      "14",
+      "13",
+      "15"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/12 × 24의 값은?",
+    "options": [
+      "11",
+      "10",
+      "9",
+      "12"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/5 × 20의 값은?",
+    "options": [
+      "12",
+      "11",
+      "13",
+      "14"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "9/10 × 20의 값은?",
+    "options": [
+      "20",
+      "18",
+      "19",
+      "17"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/7 × 14의 값은?",
+    "options": [
+      "4",
+      "6",
+      "5",
+      "3"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/7 × 21의 값은?",
+    "options": [
+      "11",
+      "13",
+      "12",
+      "14"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/8 × 16의 값은?",
+    "options": [
+      "11",
+      "10",
+      "9",
+      "12"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/11 × 22의 값은?",
+    "options": [
+      "8",
+      "5",
+      "6",
+      "7"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "7/8 × 16의 값은?",
+    "options": [
+      "16",
+      "13",
+      "15",
+      "14"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "9/12 × 24의 값은?",
+    "options": [
+      "18",
+      "20",
+      "19",
+      "17"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/9 × 18의 값은?",
+    "options": [
+      "11",
+      "10",
+      "12",
+      "9"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "8/15 × 30의 값은?",
+    "options": [
+      "15",
+      "16",
+      "18",
+      "17"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "6/25 × 50의 값은?",
+    "options": [
+      "11",
+      "14",
+      "12",
+      "13"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "7/12 × 24의 값은?",
+    "options": [
+      "14",
+      "16",
+      "15",
+      "13"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/5 × 15의 값은?",
+    "options": [
+      "7",
+      "6",
+      "5",
+      "8"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/3 × 12의 값은?",
+    "options": [
+      "6",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/4 × 12의 값은?",
+    "options": [
+      "8",
+      "9",
+      "11",
+      "10"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "5/6 × 18의 값은?",
+    "options": [
+      "15",
+      "17",
+      "16",
+      "14"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "7/10 × 20의 값은?",
+    "options": [
+      "16",
+      "15",
+      "13",
+      "14"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/3 × 6/2의 값은?",
+    "options": [
+      "2",
+      "1",
+      "4",
+      "3"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/5 × 10/3의 값은?",
+    "options": [
+      "3",
+      "1",
+      "2",
+      "4"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/7 × 14/4의 값은?",
+    "options": [
+      "1",
+      "4",
+      "2",
+      "3"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/8 × 16/5의 값은?",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "4"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "6/11 × 22/6의 값은?",
+    "options": [
+      "3",
+      "4",
+      "2",
+      "1"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "7/12 × 24/7의 값은?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "9/10 × 10/9의 값은?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "3"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/4 × 8/3의 값은?",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "4"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/9 × 9/2의 값은?",
+    "options": [
+      "3",
+      "1",
+      "3",
+      "2"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/6 × 12/5의 값은?",
+    "options": [
+      "4",
+      "3",
+      "2",
+      "1"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "7/15 × 15/7의 값은?",
+    "options": [
+      "3",
+      "3",
+      "2",
+      "1"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "8/9 × 9/8의 값은?",
+    "options": [
+      "2",
+      "3",
+      "3",
+      "1"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "11/12 × 12/11의 값은?",
+    "options": [
+      "1",
+      "3",
+      "3",
+      "2"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/9 × 9/4의 값은?",
+    "options": [
+      "2",
+      "3",
+      "3",
+      "1"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/7 × 14/5의 값은?",
+    "options": [
+      "1",
+      "4",
+      "3",
+      "2"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/8 × 16/3의 값은?",
+    "options": [
+      "2",
+      "3",
+      "1",
+      "4"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/11 × 22/2의 값은?",
+    "options": [
+      "2",
+      "4",
+      "1",
+      "3"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "9/14 × 14/9의 값은?",
+    "options": [
+      "3",
+      "1",
+      "2",
+      "3"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "10/11 × 11/10의 값은?",
+    "options": [
+      "3",
+      "2",
+      "1",
+      "3"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "6/13 × 13/6의 값은?",
+    "options": [
+      "3",
+      "1",
+      "2",
+      "3"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/9 × 9/5의 값은?",
+    "options": [
+      "1",
+      "3",
+      "3",
+      "2"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "6/7 × 28의 값은?",
+    "options": [
+      "24",
+      "26",
+      "23",
+      "25"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/5 × 15의 값은?",
+    "options": [
+      "11",
+      "8",
+      "10",
+      "9"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/2 × 10의 값은?",
+    "options": [
+      "4",
+      "7",
+      "5",
+      "6"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/6 × 12의 값은?",
+    "options": [
+      "1",
+      "3",
+      "4",
+      "2"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "5/9 × 27의 값은?",
+    "options": [
+      "14",
+      "16",
+      "15",
+      "17"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "7/12 × 36의 값은?",
+    "options": [
+      "20",
+      "23",
+      "22",
+      "21"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/6 × 24의 값은?",
+    "options": [
+      "13",
+      "14",
+      "12",
+      "11"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/4 × 20의 값은?",
+    "options": [
+      "14",
+      "15",
+      "17",
+      "16"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "5/7 × 28의 값은?",
+    "options": [
+      "21",
+      "20",
+      "22",
+      "19"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/5 × 15의 값은?",
+    "options": [
+      "12",
+      "11",
+      "14",
+      "13"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "2/5 × 15의 값은?",
+    "options": [
+      "5",
+      "8",
+      "6",
+      "7"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/5 × 25의 값은?",
+    "options": [
+      "16",
+      "14",
+      "17",
+      "15"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/6 × 30의 값은?",
+    "options": [
+      "26",
+      "25",
+      "24",
+      "27"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/6 × 30의 값은?",
+    "options": [
+      "5",
+      "4",
+      "6",
+      "7"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/9 × 36의 값은?",
+    "options": [
+      "18",
+      "16",
+      "17",
+      "15"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/7 × 28의 값은?",
+    "options": [
+      "15",
+      "16",
+      "18",
+      "17"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/8 × 40의 값은?",
+    "options": [
+      "10",
+      "12",
+      "11",
+      "9"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/12 × 48의 값은?",
+    "options": [
+      "16",
+      "18",
+      "17",
+      "15"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/5 × 25의 값은?",
+    "options": [
+      "17",
+      "15",
+      "16",
+      "14"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/7 × 14의 값은?",
+    "options": [
+      "3",
+      "6",
+      "4",
+      "5"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/2 × 10의 값은?",
+    "options": [
+      "5",
+      "7",
+      "4",
+      "6"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "8/12 × 60의 값은?",
+    "options": [
+      "42",
+      "39",
+      "41",
+      "40"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/2 × 6의 값은?",
+    "options": [
+      "3",
+      "4",
+      "5",
+      "2"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/8 × 24의 값은?",
+    "options": [
+      "10",
+      "8",
+      "11",
+      "9"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/12 × 60의 값은?",
+    "options": [
+      "14",
+      "17",
+      "15",
+      "16"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "5/7 × 28의 값은?",
+    "options": [
+      "21",
+      "19",
+      "20",
+      "22"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/7 × 28의 값은?",
+    "options": [
+      "9",
+      "10",
+      "7",
+      "8"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3/9 × 36의 값은?",
+    "options": [
+      "11",
+      "14",
+      "13",
+      "12"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/5 × 25의 값은?",
+    "options": [
+      "7",
+      "6",
+      "5",
+      "4"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/2 × 8의 값은?",
+    "options": [
+      "3",
+      "5",
+      "6",
+      "4"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "5/7 × 28의 값은?",
+    "options": [
+      "20",
+      "21",
+      "19",
+      "22"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/9 × 27의 값은?",
+    "options": [
+      "3",
+      "5",
+      "2",
+      "4"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/5 × 10의 값은?",
+    "options": [
+      "7",
+      "8",
+      "10",
+      "9"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/4 × 16의 값은?",
+    "options": [
+      "12",
+      "11",
+      "13",
+      "14"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/4 × 12의 값은?",
+    "options": [
+      "11",
+      "8",
+      "9",
+      "10"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/4 × 20의 값은?",
+    "options": [
+      "15",
+      "16",
+      "14",
+      "17"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "4/9 × 27의 값은?",
+    "options": [
+      "14",
+      "11",
+      "13",
+      "12"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "6/7 × 35의 값은?",
+    "options": [
+      "29",
+      "32",
+      "30",
+      "31"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "4/6 × 18의 값은?",
+    "options": [
+      "11",
+      "13",
+      "12",
+      "14"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/9 × 45의 값은?",
+    "options": [
+      "16",
+      "14",
+      "15",
+      "17"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/6 × 12의 값은?",
+    "options": [
+      "5",
+      "4",
+      "3",
+      "6"
+    ],
+    "answer": 1,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/2 × 4의 값은?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "1"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/2 × 6의 값은?",
+    "options": [
+      "3",
+      "2",
+      "4",
+      "5"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "10/12 × 36의 값은?",
+    "options": [
+      "30",
+      "31",
+      "32",
+      "29"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/6 × 18의 값은?",
+    "options": [
+      "5",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/4 × 20의 값은?",
+    "options": [
+      "5",
+      "6",
+      "4",
+      "7"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "3/5 × 25의 값은?",
+    "options": [
+      "17",
+      "16",
+      "15",
+      "14"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/9 × 18의 값은?",
+    "options": [
+      "4",
+      "6",
+      "3",
+      "5"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1/2 × 10의 값은?",
+    "options": [
+      "6",
+      "7",
+      "5",
+      "4"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/2 × 10의 값은?",
+    "options": [
+      "5",
+      "7",
+      "4",
+      "6"
+    ],
+    "answer": 0,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "6/8 × 32의 값은?",
+    "options": [
+      "24",
+      "25",
+      "26",
+      "23"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2/4 × 8의 값은?",
+    "options": [
+      "6",
+      "3",
+      "5",
+      "4"
+    ],
+    "answer": 3,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1/8 × 16의 값은?",
+    "options": [
+      "2",
+      "1",
+      "4",
+      "3"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "6/12 × 36의 값은?",
+    "options": [
+      "17",
+      "19",
+      "20",
+      "18"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "다음 중 서로 합동인 도형 쌍은?",
+    "options": [
+      "밑변 5cm, 높이 4cm 삼각형과 밑변 4cm, 높이 5cm 삼각형",
+      "한 변 6cm 정사각형과 한 변 6cm 정사각형",
+      "반지름 3cm 원과 반지름 4cm 원",
+      "가로 3cm, 세로 5cm 직사각형과 가로 5cm, 세로 3cm 직사각형"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "다음 도형 가운데 대칭축이 4개인 것은?",
+    "options": [
+      "정사각형",
+      "정삼각형",
+      "직사각형(가로≠세로)",
+      "원"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "평행이동, 대칭이동, 회전이동은 어떤 공통점을 가지나요?",
+    "options": [
+      "도형의 넓이가 변한다",
+      "길이와 각을 보존한다",
+      "도형의 색만 바뀐다",
+      "도형이 작아진다"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "직사각형(가로≠세로)의 대칭축의 개수는?",
+    "options": [
+      "0개",
+      "1개",
+      "2개",
+      "4개"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정삼각형의 대칭축의 개수는?",
+    "options": [
+      "1개",
+      "2개",
+      "3개",
+      "6개"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "두 도형이 합동이면 반드시 같은 것은?",
+    "options": [
+      "넓이",
+      "둘레",
+      "각도와 변의 길이",
+      "색"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "원의 대칭축의 개수는?",
+    "options": [
+      "0개",
+      "1개",
+      "무수히 많다",
+      "2개"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "대칭이동에서 선대칭의 '축'을 무엇이라 하나요?",
+    "options": [
+      "대칭선",
+      "대칭축",
+      "회전축",
+      "중심선"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "점대칭 도형의 중심을 무엇이라 하나요?",
+    "options": [
+      "대칭선",
+      "대칭축",
+      "대칭중심",
+      "회전중심"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "좌표평면에서 점 (3, -2)를 가로축(수평축)에 대칭이동하면?",
+    "options": [
+      "(3, 2)",
+      "(-3, -2)",
+      "(-3, 2)",
+      "(3, -2)"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "두 정사각형이 합동이려면 필요한 조건은?",
+    "options": [
+      "각이 모두 같으면 된다",
+      "변의 길이가 모두 같으면 된다",
+      "둘레만 같으면 된다",
+      "색이 같으면 된다"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정오각형의 대칭축 개수는?",
+    "options": [
+      "1개",
+      "2개",
+      "3개",
+      "5개"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "평행이동만으로 포개지면 두 도형은?",
+    "options": [
+      "닮음",
+      "합동",
+      "대칭",
+      "무관"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "회전이동에서 도형을 돌리는 기준점은?",
+    "options": [
+      "무게중심",
+      "회전중심",
+      "대칭중심",
+      "도형의 꼭짓점"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "한 변의 길이가 같은 두 정삼각형은?",
+    "options": [
+      "항상 합동",
+      "항상 닮음이지만 합동 아님",
+      "항상 서로 다름",
+      "항상 대칭"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "사다리꼴은 보통 대칭축이?",
+    "options": [
+      "0개일 수도 있다",
+      "반드시 1개",
+      "반드시 2개",
+      "무한"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "마름모의 대칭축 개수는?",
+    "options": [
+      "0개",
+      "1개",
+      "2개",
+      "4개"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정육각형의 대칭축 개수는?",
+    "options": [
+      "3개",
+      "6개",
+      "12개",
+      "무한"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "선대칭 도형을 대칭축에 대해 접으면?",
+    "options": [
+      "겹치지 않는다",
+      "완전히 겹친다",
+      "모양만 같고 위치는 다르다",
+      "넓이가 달라진다"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "점대칭 도형을 대칭중심에 대해 180° 돌리면?",
+    "options": [
+      "겹친다",
+      "겹치지 않는다",
+      "넓이가 변한다",
+      "둘레가 변한다"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "직사각형을 180° 회전했을 때의 모습은?",
+    "options": [
+      "합동",
+      "닮음",
+      "다르다",
+      "변형된다"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정사각형을 90° 회전했을 때의 모습은?",
+    "options": [
+      "합동",
+      "닮음",
+      "다르다",
+      "변형된다"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "직각삼각형 두 개가 합동이려면 필요한 정보가 충분한 것은?",
+    "options": [
+      "한 각만 같다",
+      "밑변과 높이가 같다",
+      "둘레만 같다",
+      "넓이만 같다"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "다음 중 선대칭 도형이 아닌 것은?",
+    "options": [
+      "나비",
+      "하트(좌우 균형)",
+      "글자 A(표준 서체)",
+      "글자 T(표준 서체)"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정사각형의 대각선은 무엇의 역할을 하나요?",
+    "options": [
+      "대칭축",
+      "회전축",
+      "둘레",
+      "넓이"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "원의 지름은 무엇의 역할을 하나요?",
+    "options": [
+      "대칭축",
+      "회전축",
+      "둘레",
+      "넓이"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정사각형의 회전대칭 차수(1~)?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "무한"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정삼각형의 회전대칭 차수는?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "6"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "정오각형의 회전대칭 차수는?",
+    "options": [
+      "2",
+      "3",
+      "4",
+      "5"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "직사각형의 회전대칭 차수는?",
+    "options": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.4×9의 값은?",
+    "options": [
+      "4.6",
+      "3.1",
+      "3.6",
+      "4.1"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1.5×7의 값은?",
+    "options": [
+      "11.5",
+      "10",
+      "11",
+      "10.5"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2.3×30의 값은?",
+    "options": [
+      "70",
+      "68.5",
+      "69",
+      "69.5"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3.8×5의 값은?",
+    "options": [
+      "20",
+      "18.5",
+      "19",
+      "19.5"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.6×50의 값은?",
+    "options": [
+      "30.5",
+      "29.5",
+      "30",
+      "31"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1.2×8의 값은?",
+    "options": [
+      "10.6",
+      "9.1",
+      "9.6",
+      "10.1"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2.5×12의 값은?",
+    "options": [
+      "29.5",
+      "31",
+      "30",
+      "30.5"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.7×6의 값은?",
+    "options": [
+      "5.2",
+      "4.7",
+      "4.2",
+      "3.7"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1.8×9의 값은?",
+    "options": [
+      "15.7",
+      "17.2",
+      "16.7",
+      "16.2"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.9×7의 값은?",
+    "options": [
+      "6.8",
+      "7.3",
+      "6.3",
+      "5.8"
+    ],
+    "answer": 2,
+    "difficulty": "easy",
+    "reward": 50,
+    "time": 10
+  },
+  {
+    "question": "1.1×11의 값은?",
+    "options": [
+      "12.1",
+      "12.6",
+      "13.1",
+      "11.6"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.3×40의 값은?",
+    "options": [
+      "12.5",
+      "12",
+      "11.5",
+      "13"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.5×14의 값은?",
+    "options": [
+      "8",
+      "6.5",
+      "7.5",
+      "7"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.8×25의 값은?",
+    "options": [
+      "21",
+      "19.5",
+      "20",
+      "20.5"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1.6×6의 값은?",
+    "options": [
+      "9.6",
+      "9.1",
+      "10.1",
+      "10.6"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "2.4×5의 값은?",
+    "options": [
+      "11.5",
+      "13",
+      "12.5",
+      "12"
+    ],
+    "answer": 3,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "3.2×4의 값은?",
+    "options": [
+      "13.3",
+      "12.8",
+      "13.8",
+      "12.3"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "1.9×3의 값은?",
+    "options": [
+      "6.2",
+      "5.2",
+      "5.7",
+      "6.7"
+    ],
+    "answer": 2,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.2×60의 값은?",
+    "options": [
+      "11.5",
+      "12",
+      "13",
+      "12.5"
+    ],
+    "answer": 1,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.4×35의 값은?",
+    "options": [
+      "14",
+      "14.5",
+      "13.5",
+      "15"
+    ],
+    "answer": 0,
+    "difficulty": "medium",
+    "reward": 100,
+    "time": 15
+  },
+  {
+    "question": "0.7×49의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "34.8",
+      "33.3",
+      "35.3",
+      "34.3"
+    ],
+    "answer": 3,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "1.9×27의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "52.3",
+      "51.8",
+      "51.3",
+      "50.3"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "2.7×38의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "103.6",
+      "101.6",
+      "102.6",
+      "103.1"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "3.6×19의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "68.9",
+      "67.4",
+      "68.4",
+      "69.4"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "0.8×47의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "36.6",
+      "38.6",
+      "37.6",
+      "38.1"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "1.4×39의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "55.6",
+      "53.6",
+      "54.6",
+      "55.1"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "2.9×24의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "70.1",
+      "69.6",
+      "70.6",
+      "68.6"
+    ],
+    "answer": 1,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "0.6×73의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "44.8",
+      "42.8",
+      "44.3",
+      "43.8"
+    ],
+    "answer": 3,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "1.3×58의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "74.4",
+      "75.4",
+      "76.4",
+      "75.9"
+    ],
+    "answer": 1,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "0.9×64의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "58.6",
+      "58.1",
+      "56.6",
+      "57.6"
+    ],
+    "answer": 3,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "1.7×43의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "73.6",
+      "74.1",
+      "73.1",
+      "72.1"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "1.5×37의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "54.5",
+      "55.5",
+      "56.5",
+      "56"
+    ],
+    "answer": 1,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "2.8×29의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "82.2",
+      "81.7",
+      "80.2",
+      "81.2"
+    ],
+    "answer": 3,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "3.4×21의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "71.4",
+      "71.9",
+      "70.4",
+      "72.4"
+    ],
+    "answer": 0,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "0.5×93의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "45.5",
+      "47",
+      "47.5",
+      "46.5"
+    ],
+    "answer": 3,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "1.2×67의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "79.4",
+      "80.9",
+      "80.4",
+      "81.4"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "0.4×87의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "35.8",
+      "35.3",
+      "34.8",
+      "33.8"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "2.6×34의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "87.4",
+      "89.4",
+      "88.4",
+      "88.9"
+    ],
+    "answer": 2,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "3.7×18의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "66.6",
+      "65.6",
+      "67.1",
+      "67.6"
+    ],
+    "answer": 0,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  },
+  {
+    "question": "2.2×41의 값을 구하세요. (어림셈으로 자리수를 먼저 판단해 보세요)",
+    "options": [
+      "90.2",
+      "89.2",
+      "90.7",
+      "91.2"
+    ],
+    "answer": 0,
+    "difficulty": "hard",
+    "reward": 150,
+    "time": 20
+  }
+]
