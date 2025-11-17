@@ -1,4 +1,4 @@
-// public/WebGames/QuizDiceDefense/classhub-bridge.js (예시 경로)
+// public/WebGames/QuizDiceDefense/classhub-bridge.js
 (function () {
     const isInIframe =
         typeof window !== "undefined" &&
@@ -6,6 +6,17 @@
         window.parent !== window;
 
     const QUIZPACK_LISTENERS = [];
+
+    // ?sessionId=... 쿼리에서 세션 ID 추출
+    let embeddedSessionId = null;
+    if (typeof window !== "undefined") {
+        try {
+            const params = new URLSearchParams(window.location.search);
+            embeddedSessionId = params.get("sessionId");
+        } catch (e) {
+            console.warn("[ClassHubBridge] failed to parse sessionId", e);
+        }
+    }
 
     function safePostToHost(message) {
         if (!isInIframe) return;
@@ -31,7 +42,10 @@
 
         /** QDD → Host : 퀴즈팩 요청 */
         requestQuizpack() {
-            safePostToHost({ type: "CH_REQUEST_QUIZPACK" });
+            safePostToHost({
+                type: "CH_REQUEST_QUIZPACK",
+                sessionId: embeddedSessionId,
+            });
         },
 
         /** QDD ← Host : 퀴즈팩 전달 콜백 등록 */
@@ -59,9 +73,21 @@
                 timeMs: typeof p.timeMs === "number" ? p.timeMs : null,
             };
 
+            // ✅ ClassHub 규격에 맞춰 최상위에 sessionId/필드들을 펼쳐서 보냄
             safePostToHost({
                 type: "CH_REPORT_ANSWER",
-                payload: normalized,
+                sessionId: embeddedSessionId,
+                ...normalized,
+            });
+        },
+
+        /** QDD → Host : 최종 요약 보고 (선택) */
+        reportSummary(summary) {
+            if (!summary) return;
+            safePostToHost({
+                type: "CH_REPORT_SUMMARY",
+                sessionId: embeddedSessionId,
+                summary,
             });
         },
     };
@@ -78,16 +104,26 @@
         const data = event.data;
         if (!data || typeof data !== "object") return;
 
-        // Host에서 내려주는 규격은 source: "ClassHub" 라고 가정
-        if (data.source !== "ClassHub") return;
+        // Host → QDD 퀴즈팩 전달
+        if (data.type === "CH_QUIZPACK_DATA") {
+            // 세션이 다르면 무시 (동시에 여러 QDD가 떠 있을 때 안전망)
+            if (
+                embeddedSessionId &&
+                data.sessionId &&
+                data.sessionId !== embeddedSessionId
+            ) {
+                return;
+            }
 
-        if (data.type === "CH_QUIZPACK_READY") {
-            const pack = data.payload;
+            const pack = data.quizpack;
             for (const cb of QUIZPACK_LISTENERS) {
                 try {
                     cb(pack);
                 } catch (e) {
-                    console.warn("[ClassHubBridge] onQuizpackReady handler error", e);
+                    console.warn(
+                        "[ClassHubBridge] onQuizpackReady handler error",
+                        e
+                    );
                 }
             }
         }

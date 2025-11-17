@@ -2240,6 +2240,46 @@
                 console.warn("[QDD] reportAnswer postMessage failed", e);
             }
         }
+
+        // === 여기부터 추가 ===
+        (function setupClassHubBridge() {
+            const isInIframe = !!(window.parent && window.parent !== window);
+
+            // 기존 bridge가 있으면 재사용, 없으면 새로 만듦
+            const bridge = (window.ClassHubBridge = window.ClassHubBridge || {});
+
+            // 임베드 플래그 세팅
+            bridge.inEmbed = isInIframe;
+
+            // reportAnswer를 postMessage 기반으로 강제로 연결
+            bridge.reportAnswer = function (payload) {
+                try {
+                    if (!payload) return;
+                    const qid =
+                        payload.questionId != null
+                            ? String(payload.questionId)
+                            : "";
+                    const idx =
+                        typeof payload.answerIndex === "number"
+                            ? payload.answerIndex
+                            : null;
+                    const correct = !!payload.correct;
+                    const timeMs =
+                        typeof payload.timeMs === "number"
+                            ? payload.timeMs
+                            : null;
+
+                    reportAnswer(qid, idx, correct, timeMs);
+                } catch (e) {
+                    console.warn(
+                        "[QDD] ClassHubBridge.reportAnswer bridge failed",
+                        e,
+                    );
+                }
+            };
+        })();
+        // === 추가 끝 ===
+        
         const qpParam = params.get("qp");     // 전체 URL 지정용
         const packParam = params.get("pack"); // 파일명 지정용 (예: Eng5_9)
 
