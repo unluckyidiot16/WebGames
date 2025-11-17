@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>픽셀 컬러링 — 도감·퀴즈·뽑기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: ui-sans-serif, system-ui; touch-action: manipulation; }
+        .view { display: none; width: 100%; min-height: 100vh; }
+        .view.active { display: flex; }
+        canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
+        #bookGrid .card { border:2px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#fff; cursor:pointer; transition:.2s; }
+        #bookGrid .card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.08); }
+        #bookGrid img { image-rendering:pixelated; width:100%; aspect-ratio:1/1; object-fit:contain; background:#f9fafb; }
+        .locked { position:relative; filter:grayscale(1) opacity(.8); }
+        .locked::after{
+            content:"🔒"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+            font-size:28px; color:#fff; text-shadow:0 0 5px #000; background:rgba(0,0,0,.35);
+        }
+        #zoomOverlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:1000; }
+        #zoomCard { background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); padding:16px;
+            display:flex; flex-direction:column; align-items:center; gap:12px; max-width:95vw; max-height:90vh; }
+        #zoomCanvas { image-rendering: pixelated; border:2px solid #0ea5e9; border-radius:8px; }
+        #paletteContainer, #zoomPalette {
+            display:grid; grid-auto-flow:column; grid-auto-columns:max-content; gap:10px; width:100%;
+            padding:0 8px 8px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; scrollbar-gutter:stable both-edges;
+        }
+        .palette-button{ width:50px; height:50px; border:2px solid #d1d5db; border-radius:8px; color:#fff; font-weight:700;
+            display:flex; align-items:center; justify-content:center; text-shadow:0 0 2px #000; cursor:pointer;
+            transition:transform .15s, box-shadow .15s, border-color .15s; }
+        .palette-button.selected{ border-color:#0ea5e9; transform:scale(1.08); box-shadow:0 0 15px rgba(14,165,233,.45); }
+        #zoomPalette .palette-button{ width:42px; height:42px; }
+        .composite{ display:flex; justify-content:center; overflow:auto; border:3px solid #374151; border-radius:14px; }
+        .grid-2x2{ display:inline-grid; grid-template-columns:max-content max-content; grid-template-rows:max-content max-content; gap:0; }
+        .modal{ display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,.4); justify-content:center; align-items:center; }
+        .modal-content{ background:#fff; margin:auto; padding:24px; border-radius:12px; width:90%; max-width:520px; text-align:center; }
+        @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-3px,0)} 50%{transform:translate(3px,0)} 75%{transform:translate(-3px,0)} }
+        .shake { animation:shake .25s; }
+        @keyframes popin { 0%{transform:scale(.6) rotate(-3deg); opacity:0} 100%{transform:scale(1) rotate(0deg); opacity:1} }
+        .result-card { animation:popin .25s ease-out both; }
+        .rarity-tag { position:absolute; top:4px; left:4px; font-size:10px; font-weight:800; color:#fff; padding:2px 6px; border-radius:6px; text-shadow:0 1px 2px rgba(0,0,0,.4); }
+        .ring { position:absolute; inset:-3px; border:3px solid transparent; border-radius:12px; pointer-events:none; }
+        .rarity-C .rarity-tag { background:#9ca3af; } .rarity-C .ring { border-color:rgba(156,163,175,.7); box-shadow:0 0 12px rgba(156,163,175,.6) inset, 0 0 8px rgba(156,163,175,.4); }
+        @keyframes pulseGlow { 0%,100%{box-shadow:0 0 18px rgba(245,158,11,.9), 0 0 28px rgba(245,158,11,.5) inset} 50%{box-shadow:0 0 28px rgba(245,158,11,1), 0 0 40px rgba(245,158,11,.7) inset} }
+        .rarity-R .rarity-tag { background:#60a5fa; } .rarity-R .ring { border-color:rgba(96,165,250,.9); box-shadow:0 0 14px rgba(96,165,250,.8) inset, 0 0 10px rgba(96,165,250,.6); }
+        .rarity-SR .rarity-tag { background:#f59e0b; } .rarity-SR .ring { border-color:#f59e0b; animation:pulseGlow 1.2s ease-in-out infinite; }
+    </style>
+    <script src="../../ClassGame/LineBattle/src/gfx/unitAnims.ts"></script>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<!-- 1) 타이틀 -->
+<div id="titleScreen" class="view active flex-col items-center justify-center p-4">
+    <h1 class="text-5xl md:text-7xl font-extrabold text-gray-800 mb-8 animate-pulse">픽셀 컬러링</h1>
+    <button id="startButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg hover:scale-105">
+        시작하기
+    </button>
+</div>
+
+<!-- 2) 로비 -->
+<div id="lobbyScreen" class="view flex-col items-center p-4 md:p-8">
+    <div class="w-full max-w-6xl flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">도감</h1>
+            <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">보유 포인트: <b id="pointsText" class="text-sky-600">0P</b></span>
+                <button id="quizBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow">퀴즈 도전</button>
+                <button id="gacha1Btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow">뽑기 1회</button>
+                <button id="gacha10Btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow">뽑기 10회</button>
+                <button id="resetBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow" title="테스트 초기화">리셋</button>
+            </div>
+        </div>
+        <p class="text-sm text-gray-500">※ 퀴즈로 포인트를 모아 가챠로 도감을 해금하세요. 해금된 항목만 색칠할 수 있어요. 중복 획득 시 가챠 비용의 절반 환급.</p>
+        <div id="bookGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4"></div>
+    </div>
+</div>
+
+<!-- 3) 게임(색칠) -->
+<div id="gameScreen" class="view flex-col items-center p-4">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2">
+            <button id="backButton" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow">&larr; 로비로</button>
+            <span class="text-sm text-gray-500">진행은 브라우저에 저장됩니다</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm px-3 py-1 bg-white rounded-lg border shadow-sm">보유 포인트: <b id="pointsTextGame" class="text-sky-600">0P</b></span>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full max-w-5xl flex flex-col items-center">
+        <div id="loadingSpinner" class="text-center p-8">
+            <svg class="animate-spin h-10 w-10 text-sky-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-3 text-gray-600">이미지 분석 중...</p>
+        </div>
+
+        <div class="composite w-full">
+            <div id="quadGrid" class="grid-2x2"></div>
+        </div>
+
+        <div id="paletteContainer" class="w-full mt-4"></div>
+
+        <div id="progressContainer" class="w-full max-w-md mt-4">
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progressBar" class="bg-sky-500 h-2.5 rounded-full" style="width:0%; transition:width .3s;"></div>
+            </div>
+            <p id="progressText" class="text-center text-sm text-gray-600 mt-1">0%</p>
+        </div>
+    </div>
+</div>
+
+<!-- 확대(줌) -->
+<div id="zoomOverlay">
+    <div id="zoomCard">
+        <canvas id="zoomCanvas"></canvas>
+        <div id="zoomPalette" class="w-full"></div>
+        <div class="flex gap-2">
+            <button id="zoomCloseBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow">닫기(Esc)</button>
+        </div>
+    </div>
+</div>
+
+<!-- 일반 모달 -->
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="text-xl font-bold mb-2"></h2>
+        <p id="modalMessage" class="text-gray-700"></p>
+        <button id="modalCloseButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow mt-4">확인</button>
+    </div>
+</div>
+
+<!-- 퀴즈 모달 -->
+<div id="quizModal" class="modal">
+    <div class="modal-content">
+        <h2 id="quizTitle" class="text-xl font-bold mb-3">퀴즈</h2>
+        <p id="quizSub" class="text-xs text-gray-500 mb-1"></p>
+        <p id="quizQuestion" class="text-gray-800 mb-4"></p>
+        <div id="quizChoices" class="flex flex-col gap-2"></div>
+        <button id="quizCancel" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg shadow mt-4">종료</button>
+    </div>
+</div>
+
+<!-- 가챠 결과 모달 -->
+<div id="gachaModal" class="modal">
+    <div class="modal-content">
+        <h2 class="text-xl font-bold mb-3">가챠 결과</h2>
+        <div id="gachaResults" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-2 justify-items-center mb-3"></div>
+        <p id="gachaSummary" class="text-gray-700 mb-3"></p>
+        <button id="gachaClose" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow">확인</button>
+    </div>
+</div>
+
+<script>
+    /* =========================
+       설정값
+    ========================= */
+    // 도감: 로컬 png/ 먼저 탐색 → 실패 시 원격 폴백
+    const CODEX_PNG_BASE = './png/';
+    const REMOTE_IMAGE_BASE = 'https://unluckyidiot16.github.io/assets-common/PixelArt/PNG/';
+    const REMOTE_COUNT = 151;
+
+    // 가챠
+    const GACHA_COST = 100;
+    const RARITY_CONFIG_DEFAULT = { C:{weight:80}, R:{weight:18}, SR:{weight:3} };
+    const RARITY_CONFIG_10X      = { C:{weight:70}, R:{weight:25}, SR:{weight:6} }; // 10연차 상향
+
+    // 퀴즈
+    const QUIZ_JSON_URL = 'https://unluckyidiot16.github.io/assets-common/PixelArt/Quiz/Quiz.json';
+    const QUIZ_REWARD = 10;           // 기본 점수
+    const STREAK_STEP = 0.2;          // 연속정답 배율 증가
+    const STREAK_MAX_MULT = 3;        // 연속정답 배율 상한
+    const REWARD_MULTIPLIER = 5;      // ✅ 추가: 정답 보너스 5배
+    const QUIZ_SESSION_LEN = 10;
+    const MAX_WRONG = 2;              // ✅ 추가: 오답 2회 시 종료
+
+    /* =========================
+       DOM
+    ========================= */
+    const allViews = document.querySelectorAll('.view');
+    const titleScreen = document.getElementById('titleScreen');
+    const lobbyScreen = document.getElementById('lobbyScreen');
+    const gameScreen  = document.getElementById('gameScreen');
+    const startButton = document.getElementById('startButton');
+
+    const bookGrid = document.getElementById('bookGrid');
+    const pointsText = document.getElementById('pointsText');
+    const pointsTextGame = document.getElementById('pointsTextGame');
+    const quizBtn   = document.getElementById('quizBtn');
+    const gacha1Btn = document.getElementById('gacha1Btn');
+    const gacha10Btn= document.getElementById('gacha10Btn');
+    const resetBtn  = document.getElementById('resetBtn');
+
+    const backButton  = document.getElementById('backButton');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const quadGrid = document.getElementById('quadGrid');
+    const paletteContainer = document.getElementById('paletteContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    const messageModal = document.getElementById('messageModal');
+    const modalTitle   = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseButton = document.getElementById('modalCloseButton');
+
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSub   = document.getElementById('quizSub');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizChoices  = document.getElementById('quizChoices');
+    const quizCancel   = document.getElementById('quizCancel');
+
+    const gachaModal   = document.getElementById('gachaModal');
+    const gachaResults = document.getElementById('gachaResults');
+    const gachaSummary = document.getElementById('gachaSummary');
+    const gachaClose   = document.getElementById('gachaClose');
+
+    const zoomOverlay  = document.getElementById('zoomOverlay');
+    const zoomCanvas   = document.getElementById('zoomCanvas');
+    const zoomPalette  = document.getElementById('zoomPalette');
+    const zoomCloseBtn = document.getElementById('zoomCloseBtn');
+    const zoomCtx = zoomCanvas.getContext('2d'); zoomCtx.imageSmoothingEnabled = false;
+
+    /* =========================
+       상태 & 저장
+    ========================= */
+    const LS_POINTS = 'pixel.points';
+    const LS_OWNED  = 'pixel.owned';
+    const LS_PROGRESS_PREFIX = 'pixel.progress.';
+    function progressKey(idx){ return `${LS_PROGRESS_PREFIX}${idx}`; }
+
+    function getPoints(){ return parseInt(localStorage.getItem(LS_POINTS) || '0', 10); }
+    function setPoints(n){ localStorage.setItem(LS_POINTS, String(Math.max(0,n|0))); syncPointsUI(); }
+    function addPoints(n){ setPoints(getPoints()+n); }
+    function syncPointsUI(){ const t = `${getPoints()}P`; pointsText.textContent = t; pointsTextGame.textContent = t; }
+    function getOwnedSet(){ try{ const arr = JSON.parse(localStorage.getItem(LS_OWNED)||'[]'); return new Set(arr.map(Number)); } catch{ return new Set(); } }
+    function saveOwnedSet(set){ localStorage.setItem(LS_OWNED, JSON.stringify(Array.from(set))); }
+
+    /* =========================
+       유틸
+    ========================= */
+    function shuffleInPlace(arr){
+        for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+        return arr;
+    }
+    function enableHorizontalWheel(el){
+        if (!el) return;
+        el.addEventListener('wheel', (e)=>{
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+                el.scrollLeft += e.deltaY; e.preventDefault();
+            }
+        }, {passive:false});
+    }
+
+    /* =========================
+       도감 이미지 로딩 (로컬 png/ → 원격 폴백)
+    ========================= */
+    let IMAGE_LIST = [];           // [{url, name}]
+    let indicesByRarity = {C:[], R:[], SR:[]};
+
+    async function loadCodexImages(){
+        // 1) manifest.json 또는 index.json
+        for (const name of ['manifest.json', 'index.json']){
+            try{
+                const r = await fetch(CODEX_PNG_BASE + name, {cache:'no-store'});
+                if (r.ok){
+                    const j = await r.json();
+                    let files = Array.isArray(j) ? j : (j.images || j.files || []);
+                    files = files.filter(x=>/\.png(\?.*)?$/i.test(x));
+                    if (files.length){
+                        IMAGE_LIST = files.map(f=>({url: CODEX_PNG_BASE + f, name: f}));
+                        buildRarityBuckets(IMAGE_LIST.length);
+                        return;
+                    }
+                }
+            }catch(_){}
+        }
+        // 2) 디렉터리 인덱스 파싱
+        try{
+            const r = await fetch(CODEX_PNG_BASE, {cache:'no-store'});
+            if (r.ok){
+                const html = await r.text();
+                const hrefs = [...html.matchAll(/href\s*=\s*["']([^"']+\.png(?:\?[^"']*)?)["']/ig)].map(m=>m[1]);
+                if (hrefs.length){
+                    const uniq = [...new Set(hrefs)];
+                    IMAGE_LIST = uniq.map(f=>({url: CODEX_PNG_BASE + f, name: f}));
+                    buildRarityBuckets(IMAGE_LIST.length);
+                    return;
+                }
+            }
+        }catch(_){}
+        // 3) 패턴(0001~0050) HEAD 확인(부하 제한)
+        const pad = n => String(n).padStart(4,'0');
+        const candidates = Array.from({length:50}, (_,i)=> `${CODEX_PNG_BASE}${pad(i+1)}.png`);
+        const ok = [];
+        for (const u of candidates){
+            try{ const h = await fetch(u, {method:'HEAD'}); if (h.ok){ ok.push(u); } }catch(_){}
+            if (ok.length>=12) break;
+        }
+        if (ok.length){
+            IMAGE_LIST = ok.map(u=>({url:u, name:u.split('/').pop()}));
+            buildRarityBuckets(IMAGE_LIST.length);
+            return;
+        }
+        // 4) 폴백: 원격 고정 목록 1..50
+        IMAGE_LIST = Array.from({length:REMOTE_COUNT}, (_,i)=>({url: REMOTE_IMAGE_BASE + `${i+1}.png`, name: `${i+1}.png`}));
+        buildRarityBuckets(IMAGE_LIST.length);
+    }
+
+    function buildRarityBuckets(n){
+        // 인덱스 기반 희귀도 영역 동적 할당(대략 C:70%, R:24%, SR:6%)
+        const sr = Math.max(1, Math.round(n * 0.06));
+        const r  = Math.max(1, Math.round(n * 0.24));
+        const c  = Math.max(1, n - sr - r);
+        indicesByRarity = {C:[], R:[], SR:[]};
+        for (let i=1;i<=n;i++){
+            let tier = 'C';
+            if (i > c && i <= c+r) tier = 'R';
+            if (i > c+r) tier = 'SR';
+            indicesByRarity[tier].push(i);
+        }
+    }
+
+    /* =========================
+       로비(도감)
+    ========================= */
+    function populateBook(){
+        const owned = getOwnedSet();
+        bookGrid.innerHTML = '';
+        IMAGE_LIST.forEach((it, i)=>{
+            const idx = i+1;
+            const card = document.createElement('div'); card.className = 'card';
+            const img = document.createElement('img'); img.src = it.url; img.alt = `No.${idx}`; img.loading='lazy';
+            const title = document.createElement('p'); title.className='text-center text-sm font-semibold text-gray-700 p-2'; title.textContent = `No.${idx}`;
+            if (!owned.has(idx)){ img.classList.add('locked'); card.title='가챠로 해금하세요'; }
+            else { card.addEventListener('click', ()=> startGame(it.url, idx)); }
+            card.appendChild(img); card.appendChild(title); bookGrid.appendChild(card);
+        });
+    }
+
+    /* =========================
+       퀴즈 로딩/정상화(과목 섞기 유지)
+    ========================= */
+    let quizLoaded=false, quizBanks={all:[]}, quizPtr={all:0};
+    async function ensureQuizLoaded(){
+        if (quizLoaded) return;
+        try{
+            const res = await fetch(QUIZ_JSON_URL, {cache:'no-store'});
+            if (!res.ok) throw new Error('fetch failed');
+            const json = await res.json(); normalizeQuiz(json); quizLoaded = true;
+        }catch(e){ quizLoaded = false; }
+    }
+    function normalizeQuiz(json){
+        const raw = Array.isArray(json) ? json
+            : (Array.isArray(json?.questions) ? json.questions : [...(json?.quad||[]), ...(json?.paints||[]), ...(json?.items||[])]);
+        const groups = {};
+        for (const item of raw){
+            const subj = (item?.meta?.subject || item?.subject || '기타').trim();
+            (groups[subj] ||= []).push(item);
+        }
+        Object.values(groups).forEach(shuffleInPlace);
+        const subjects = Object.keys(groups); shuffleInPlace(subjects);
+        const interleaved = [];
+        let remaining = true;
+        while (remaining){
+            remaining = false;
+            for (const s of subjects){
+                const bucket = groups[s];
+                if (bucket && bucket.length){
+                    const picked = bucket.shift();
+                    const norm = normalizeQuestion(picked);
+                    if (norm) interleaved.push(norm);
+                    remaining = true;
+                }
+            }
+        }
+        quizBanks = { all: interleaved }; quizPtr = { all: 0 };
+    }
+    function normalizeQuestion(it){
+        if (!it) return null;
+        const qtext = it.q ?? it.question ?? it.prompt ?? null;
+        let choices = it.choices ?? it.options ?? it.answers ?? null;
+        const answer = it.answer ?? it.correct ?? it.answerText ?? null;
+        let ansIndex = (typeof it.answerIndex==='number') ? it.answerIndex : it.correctIndex;
+        if (choices && !Array.isArray(choices)) choices = Object.values(choices);
+        if (!qtext || !Array.isArray(choices) || choices.length < 2) return null;
+        if (ansIndex == null && answer != null){
+            const idx = choices.findIndex(c => String(c).trim().toLowerCase() === String(answer).trim().toLowerCase());
+            if (idx >= 0) ansIndex = idx;
+        }
+        if (ansIndex == null && typeof answer === 'string' && /^[A-D1-9]$/.test(answer)){
+            const n = parseInt(answer,10); ansIndex = Number.isNaN(n) ? 'ABCD'.indexOf(answer.toUpperCase()) : (n-1);
+        }
+        if (ansIndex == null || ansIndex < 0 || ansIndex >= choices.length) return null;
+        const order = choices.map((_,i)=>i);
+        for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+        const shuffled = order.map(i=>choices[i]);
+        const correct  = order.indexOf(ansIndex);
+        return { question:qtext, choices:shuffled, correctIndex:correct, meta:{...(it.meta||{}), subject:(it?.meta?.subject || it?.subject || '기타')} };
+    }
+    function pullQuestion(){
+        if (quizBanks.all.length===0) return generateMathQuestion();
+        const i = quizPtr.all % quizBanks.all.length;
+        const q = quizBanks.all[i]; quizPtr.all++;
+        return q;
+    }
+    function generateMathQuestion(){
+        const a = Math.floor(Math.random()*9)+2;
+        const b = Math.floor(Math.random()*9)+2;
+        const ops = ['+','-','×']; const op = ops[Math.floor(Math.random()*ops.length)];
+        const ans = (op==='+')?a+b:(op==='-')?a-b:a*b;
+        const choices = new Set([ans]);
+        while (choices.size<4){ const delta = Math.floor(Math.random()*6)-3; const fake = ans + (delta===0?3:delta); choices.add(fake); }
+        const arr = Array.from(choices); shuffleInPlace(arr);
+        return { question:`${a} ${op} ${b} = ?`, choices:arr, correctIndex:arr.indexOf(ans) };
+    }
+
+    /* =========================
+       퀴즈 세션 (✅ 2오답 종료 + 5배 보너스 반영)
+    ========================= */
+    let quizSession = null; // {total, idx, correct, streak, maxStreak, score, wrong}
+    async function startQuizSession(){
+        await ensureQuizLoaded();
+        quizSession = { total: QUIZ_SESSION_LEN, idx: 0, correct:0, streak:0, maxStreak:0, score:0, wrong:0 };
+        askNextQuestion();
+    }
+    function askNextQuestion(){
+        if (!quizSession) return;
+        if (quizSession.idx >= quizSession.total){
+            finishQuiz('퀴즈 종료', `정답 ${quizSession.correct}/${quizSession.total}개!  연속 보너스 포함 +${quizSession.score}P`);
+            return;
+        }
+        const q = pullQuestion();
+        quizTitle.textContent = '퀴즈 도전';
+        const nextMult = Math.min(STREAK_MAX_MULT, 1 + (quizSession.streak) * STREAK_STEP);
+        const totalMult = (nextMult * REWARD_MULTIPLIER).toFixed(1);
+        quizSub.textContent = `문제 ${quizSession.idx+1}/${quizSession.total} · 기본 +${QUIZ_REWARD}P · 보너스 x${totalMult} · 오답 ${quizSession.wrong}/${MAX_WRONG}`;
+        quizQuestion.textContent = q.question;
+        quizChoices.innerHTML = '';
+        q.choices.forEach((c, i)=>{
+            const btn = document.createElement('button');
+            btn.className = 'bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow';
+            btn.textContent = c;
+            btn.addEventListener('click', ()=>{
+                if (!quizSession) return;
+                if (i === q.correctIndex){
+                    quizSession.correct++;
+                    quizSession.streak++;
+                    quizSession.maxStreak = Math.max(quizSession.maxStreak, quizSession.streak);
+                    const mult = Math.min(STREAK_MAX_MULT, 1 + (quizSession.streak - 1) * STREAK_STEP);
+                    const gain = Math.round(QUIZ_REWARD * mult) * REWARD_MULTIPLIER;  // ✅ 5배
+                    quizSession.score += gain;
+                } else {
+                    quizSession.streak = 0;
+                    quizSession.wrong++;
+                    if (quizSession.wrong >= MAX_WRONG){
+                        finishQuiz('퀴즈 종료', `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`);
+                        return;
+                    }
+                }
+                quizSession.idx++;
+                quizModal.style.display='none';
+                askNextQuestion();
+            });
+            quizChoices.appendChild(btn);
+        });
+        quizModal.style.display='flex';
+    }
+    quizCancel.addEventListener('click', ()=>{
+        if (!quizSession){ quizModal.style.display='none'; return; }
+        finishQuiz('퀴즈 종료', `중도 종료: 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`);
+    });
+    function finishQuiz(title, msg){
+        addPoints(quizSession.score);
+        quizModal.style.display='none';
+        showModal(title, `${msg} (최대 연속 ${quizSession.maxStreak})`);
+        quizSession = null;
+    }
+
+    /* =========================
+       가챠 (✅ 10연차 확률 상향)
+    ========================= */
+    function pickRarityByWeight(cfg){
+        const total = Object.values(cfg).reduce((s,r)=>s+r.weight,0);
+        let r = Math.random()*total;
+        for (const [k, v] of Object.entries(cfg)){ if ((r -= v.weight) <= 0) return k; }
+        return 'C';
+    }
+    function pickIndexOf(rarity){
+        const arr = indicesByRarity[rarity];
+        return arr[Math.floor(Math.random()*arr.length)];
+    }
+    function rollGacha(times=1){
+        const need = GACHA_COST * times;
+        if (getPoints() < need){ showModal('포인트 부족', `필요 포인트: ${need}P`); return; }
+        setPoints(getPoints() - need);
+
+        const owned = getOwnedSet();
+        const results = []; // {idx, dup, rarity}
+        let refund = 0;
+
+        const cfg = (times===10) ? RARITY_CONFIG_10X : RARITY_CONFIG_DEFAULT; // ✅ 10연차 상향
+
+        for (let t=0;t<times;t++){
+            const rarity = pickRarityByWeight(cfg);
+            const idx = pickIndexOf(rarity);
+            if (owned.has(idx)){ refund += Math.floor(GACHA_COST/2); results.push({idx, dup:true, rarity}); }
+            else { owned.add(idx); results.push({idx, dup:false, rarity}); }
+        }
+        if (refund>0) addPoints(refund);
+        saveOwnedSet(owned);
+        populateBook();
+
+        gachaResults.innerHTML = '';
+        results.forEach((r, i)=>{
+            const wrap = document.createElement('div'); wrap.className='relative result-card'; wrap.style.animationDelay = `${i*40}ms`;
+            const img = document.createElement('img'); img.src = IMAGE_LIST[r.idx-1].url; img.alt = `No.${r.idx}`;
+            img.style.width='66px'; img.style.height='66px'; img.style.imageRendering='pixelated'; img.style.background='#f3f4f6';
+            img.style.borderRadius='12px'; img.style.border='2px solid #e5e7eb';
+            const ring = document.createElement('div'); ring.className='ring';
+            const tag = document.createElement('div'); tag.className='rarity-tag'; tag.textContent = (r.rarity==='SR'?'SR':r.rarity);
+            wrap.classList.add(`rarity-${r.rarity}`); wrap.appendChild(img); wrap.appendChild(ring); wrap.appendChild(tag);
+            const caption = document.createElement('div'); caption.className='text-xs text-gray-700 text-center mt-1';
+            caption.textContent = r.dup ? `No.${r.idx} (중복)` : `No.${r.idx}`;
+            const cell = document.createElement('div'); cell.className='flex flex-col items-center'; cell.appendChild(wrap); cell.appendChild(caption);
+            gachaResults.appendChild(cell);
+        });
+        const spend = need;
+        gachaSummary.textContent = `소모: ${spend}P  ·  환급: ${refund}P  ·  순소모: ${Math.max(0, spend-refund)}P`;
+        gachaModal.style.display='flex';
+    }
+    gachaClose.addEventListener('click', ()=> gachaModal.style.display='none');
+
+    /* =========================
+       색칠(진행 저장/복원 포함 — 기존 기능 유지)
+    ========================= */
+    const CELL_SCALE = 15;
+    let imgWidth, imgHeight, sourceImage;
+    let palette = {};
+    let paletteMap = [null];
+    let numberGrid = [];
+    let completedGrid = [];
+    let totalCells = 0;
+    let completedCells = 0;
+    let selectedColorIndex = 0;
+    const quadrants = [];
+    let currentStageIndex = 1;
+    let currentZoomQuad = null;
+
+    function serializeCompletedGrid(){
+        const total = imgWidth * imgHeight;
+        const bytes = new Uint8Array(Math.ceil(total / 8));
+        let k = 0;
+        for (let y=0; y<imgHeight; y++){
+            for (let x=0; x<imgWidth; x++){
+                if (completedGrid[y][x]) bytes[k >> 3] |= (1 << (k & 7));
+                k++;
+            }
+        }
+        let s=""; for (let i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]);
+        return btoa(s);
+    }
+    function deserializeCompletedGrid(b64){
+        const bin = atob(b64); const bytes = new Uint8Array(bin.length);
+        for (let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+        let k=0; completedCells=0;
+        for (let y=0;y<imgHeight;y++){
+            for (let x=0;x<imgWidth;x++){
+                const done = (bytes[k >> 3] >> (k & 7)) & 1;
+                completedGrid[y][x] = !!done;
+                if (done && numberGrid[y][x] !== 0) completedCells++;
+                k++;
+            }
+        }
+    }
+    function saveCurrentProgress(){
+        const payload = { w: imgWidth, h: imgHeight, bits: serializeCompletedGrid() };
+        localStorage.setItem(progressKey(currentStageIndex), JSON.stringify(payload));
+    }
+    function restoreProgress(stageIdx){
+        const raw = localStorage.getItem(progressKey(stageIdx));
+        if (!raw) return;
+        try{
+            const p = JSON.parse(raw);
+            if (p && p.w===imgWidth && p.h===imgHeight && typeof p.bits==='string'){ deserializeCompletedGrid(p.bits); }
+        }catch(_){}
+    }
+
+    function showView(id){ allViews.forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function drawQuadToContext(q, ctx, scale, showGridNumbers){
+        ctx.clearRect(0,0,q.w*scale,q.h*scale);
+        if (showGridNumbers){
+            ctx.strokeStyle='#e5e7eb'; const fontSize=Math.max(6, Math.floor(scale*0.5));
+            ctx.font=`bold ${fontSize}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+        }
+        for (let y=q.y; y<q.y+q.h; y++){
+            for (let x=q.x; x<q.x+q.w; x++){
+                const cellX=(x-q.x)*scale, cellY=(y-q.y)*scale;
+                const idx=(numberGrid[y] && numberGrid[y][x]!==undefined) ? numberGrid[y][x] : 0;
+                if (completedGrid[y][x]){
+                    ctx.fillStyle = (idx===0)?'#f5f5f5':paletteMap[idx]; ctx.fillRect(cellX,cellY,scale,scale);
+                }else{
+                    ctx.fillStyle='#ffffff'; ctx.fillRect(cellX,cellY,scale,scale);
+                    if (showGridNumbers){ ctx.strokeRect(cellX,cellY,scale,scale); ctx.fillStyle='#555'; ctx.fillText(idx, cellX+scale/2, cellY+scale/2+1); }
+                }
+            }
+        }
+    }
+    function drawQuad(q, showGridNumbers){ drawQuadToContext(q, q.ctx, CELL_SCALE, showGridNumbers); }
+    function updateAllQuads(show=true){ quadrants.forEach(q=>drawQuad(q, show)); }
+    function updateProgress(){ if (!totalCells) return; const percent = Math.floor((completedCells/totalCells)*100); progressBar.style.width = `${percent}%`; progressText.textContent = `${percent}%`; }
+    function drawCellOnQuad(q, gx, gy){
+        const ctx=q.ctx; const cellX=(gx-q.x)*CELL_SCALE, cellY=(gy-q.y)*CELL_SCALE;
+        const idx=numberGrid[gy][gx]; ctx.fillStyle=(idx===0)?'#f5f5f5':paletteMap[idx]; ctx.fillRect(cellX,cellY,CELL_SCALE,CELL_SCALE);
+    }
+    function drawCellOnZoom(q, gx, gy){
+        const zoomScale = zoomCanvas.width/(q.w*CELL_SCALE);
+        const cellScale = CELL_SCALE * zoomScale;
+        const cellX = (gx - q.x) * cellScale;
+        const cellY = (gy - q.y) * cellScale;
+        const idx   = numberGrid[gy][gx];
+        zoomCtx.fillStyle = (idx===0) ? '#f5f5f5' : paletteMap[idx];
+        zoomCtx.fillRect(cellX, cellY, cellScale, cellScale);
+    }
+    function checkCompletion(){ if (completedCells === totalCells){ updateAllQuads(false); showModal('완성!', `No.${currentStageIndex} 그림을 완성했습니다!`); } }
+    function computeZoomScale(q){
+        const maxW = Math.floor(window.innerWidth * 0.95);
+        const maxH = Math.floor(window.innerHeight * 0.85);
+        const baseW = q.w * CELL_SCALE, baseH = q.h * CELL_SCALE;
+        return Math.max(1, Math.min(Math.floor(maxW/baseW), Math.floor(maxH/baseH)));
+    }
+
+    function startGame(imageUrl, idx){
+        currentStageIndex = idx;
+        showView('gameScreen'); syncPointsUI();
+        loadingSpinner.style.display='block'; quadGrid.innerHTML=''; paletteContainer.innerHTML='';
+        progressBar.style.width='0%'; progressText.textContent='0%';
+        palette={}; paletteMap=[null]; numberGrid=[]; completedGrid=[]; totalCells=0; completedCells=0; selectedColorIndex=0; quadrants.length=0;
+
+        for (let i=0;i<4;i++){
+            const c = document.createElement('canvas'); const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled=false;
+            const wrap = document.createElement('div'); wrap.appendChild(c); quadGrid.appendChild(wrap);
+            const q = {id:i, canvas:c, ctx, x:0,y:0,w:0,h:0}; c.onclick = ()=> openZoom(i); quadrants.push(q);
+        }
+        loadImageAndProcess(imageUrl);
+    }
+    async function loadImageAndProcess(url){
+        try{
+            sourceImage = await new Promise((resolve,reject)=>{ const im = new Image(); im.crossOrigin='Anonymous'; im.src = url; im.onload=()=>resolve(im); im.onerror=()=>reject(new Error('이미지를 불러올 수 없습니다.')); });
+            imgWidth = sourceImage.width; imgHeight = sourceImage.height;
+            const hc = document.createElement('canvas'); hc.width=imgWidth; hc.height=imgHeight;
+            const hctx = hc.getContext('2d'); hctx.drawImage(sourceImage, 0, 0);
+            const data = hctx.getImageData(0,0,imgWidth,imgHeight).data;
+
+            let colorIndex = 1;
+            for (let y=0;y<imgHeight;y++){
+                numberGrid[y]=[]; completedGrid[y]=[];
+                for (let x=0;x<imgWidth;x++){
+                    const i=(y*imgWidth+x)*4; const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+                    if (a<128){ numberGrid[y][x]=0; completedGrid[y][x]=true; }
+                    else{
+                        const rgba=`rgba(${r},${g},${b},${a/255})`;
+                        if (!palette[rgba]){ palette[rgba]=colorIndex; paletteMap[colorIndex]=rgba; colorIndex++; }
+                        numberGrid[y][x]=palette[rgba]; completedGrid[y][x]=false; totalCells++;
+                    }
+                }
+            }
+            const halfW = Math.floor(imgWidth/2), halfH=Math.floor(imgHeight/2);
+            const geoms = [
+                {x:0,y:0,w:halfW,h:halfH},{x:halfW,y:0,w:imgWidth-halfW,h:halfH},
+                {x:0,y:halfH,w:halfW,h:imgHeight-halfH},{x:halfW,y:halfH,w:imgWidth-halfW,h:imgHeight-halfH},
+            ];
+            geoms.forEach((g,i)=>{ const q=quadrants[i]; q.x=g.x; q.y=g.y; q.w=g.w; q.h=g.h;
+                q.canvas.width=g.w*CELL_SCALE; q.canvas.height=g.h*CELL_SCALE; q.canvas.style.width=q.canvas.width+'px'; q.canvas.style.height=q.canvas.height+'px'; });
+
+            restoreProgress(currentStageIndex);
+            updateProgress();
+            loadingSpinner.style.display='none';
+            updateAllQuads(true);
+            buildPaletteUI();
+        }catch(err){
+            console.error(err); showModal('오류', err.message + ' 로비로 돌아갑니다.'); showView('lobbyScreen');
+        }
+    }
+    function buildPaletteUIInto(containerEl){
+        containerEl.innerHTML = '';
+        const count = Math.max(1, paletteMap.length-1);
+        for (let i=1;i<=count;i++){
+            const color = paletteMap[i];
+            const btn = document.createElement('button'); btn.className = 'palette-button'; btn.style.backgroundColor = color; btn.textContent = i; btn.dataset.colorIndex = i;
+            btn.addEventListener('click', ()=>{
+                selectedColorIndex = i;
+                document.querySelectorAll('#paletteContainer .palette-button, #zoomPalette .palette-button')
+                    .forEach(b => b.classList.toggle('selected', parseInt(b.dataset.colorIndex,10) === i));
+            });
+            containerEl.appendChild(btn);
+        }
+    }
+    function buildPaletteUI(){ buildPaletteUIInto(paletteContainer); buildPaletteUIInto(zoomPalette); }
+    function openZoom(quadIndex){
+        const q = quadrants[quadIndex]; currentZoomQuad = q;
+        const s = computeZoomScale(q);
+        zoomCanvas.width = q.w*CELL_SCALE*s; zoomCanvas.height=q.h*CELL_SCALE*s;
+        drawQuadToContext(q, zoomCtx, CELL_SCALE*s, true);
+        buildPaletteUIInto(zoomPalette);
+        if (selectedColorIndex>0){
+            document.querySelectorAll('#paletteContainer .palette-button, #zoomPalette .palette-button')
+                .forEach(b => b.classList.toggle('selected', parseInt(b.dataset.colorIndex,10) === selectedColorIndex));
+        }
+        zoomOverlay.style.display='flex'; window.addEventListener('resize', onResizeZoom, {passive:true});
+    }
+    function onResizeZoom(){
+        if (!currentZoomQuad || zoomOverlay.style.display==='none') return;
+        const q=currentZoomQuad, s=computeZoomScale(q);
+        zoomCanvas.width=q.w*CELL_SCALE*s; zoomCanvas.height=q.h*CELL_SCALE*s;
+        drawQuadToContext(q, zoomCtx, CELL_SCALE*s, true);
+    }
+    function closeZoom(){ zoomOverlay.style.display='none'; window.removeEventListener('resize', onResizeZoom); currentZoomQuad = null; }
+    zoomCloseBtn.addEventListener('click', closeZoom);
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeZoom(); });
+
+    zoomCanvas.addEventListener('click', (e)=>{
+        if (!currentZoomQuad) return;
+        if (selectedColorIndex===0){ showModal('색상 선택', '아래 팔레트에서 색상을 먼저 선택하세요.'); return; }
+        const q=currentZoomQuad;
+        const rect = zoomCanvas.getBoundingClientRect();
+        const scaleX=zoomCanvas.width/rect.width, scaleY=zoomCanvas.height/rect.height;
+        const lx=(e.clientX-rect.left)*scaleX, ly=(e.clientY-rect.top)*scaleY;
+        const zoomScale = zoomCanvas.width/(q.w*CELL_SCALE);
+        const cellScale=CELL_SCALE*zoomScale;
+        const gx=q.x + Math.floor(lx/cellScale);
+        const gy=q.y + Math.floor(ly/cellScale);
+        if (gx<q.x || gx>=q.x+q.w || gy<q.y || gy>=q.y+q.h) return;
+
+        const idx = numberGrid[gy][gx];
+        if (completedGrid[gy][gx] || idx===0) return;
+        if (idx === selectedColorIndex){
+            completedGrid[gy][gx]=true; completedCells++;
+            drawCellOnZoom(q,gx,gy); drawCellOnQuad(q,gx,gy);
+            updateProgress(); checkCompletion(); saveCurrentProgress();
+        }else{ zoomCanvas.classList.add('shake'); setTimeout(()=>zoomCanvas.classList.remove('shake'),250); }
+    });
+
+    /* =========================
+       공통 동작
+    ========================= */
+    modalCloseButton.onclick = ()=> messageModal.style.display='none';
+    function showModal(title, msg){ modalTitle.textContent = title; modalMessage.textContent = msg; messageModal.style.display = 'flex'; }
+    function bootBindings(){
+        startButton.addEventListener('click', async ()=>{
+            if (!localStorage.getItem(LS_POINTS)) setPoints(0);
+            if (!localStorage.getItem(LS_OWNED)) saveOwnedSet(new Set());
+            syncPointsUI();
+            await loadCodexImages(); // ✅ png/ 스캔
+            populateBook();
+            showView('lobbyScreen');
+        });
+        document.getElementById('zoomPalette'); document.getElementById('paletteContainer');
+        enableHorizontalWheel(document.getElementById('paletteContainer'));
+        enableHorizontalWheel(document.getElementById('zoomPalette'));
+
+        document.getElementById('backButton').addEventListener('click', ()=>{
+            saveCurrentProgress(); showView('lobbyScreen'); populateBook(); syncPointsUI();
+        });
+
+        quizBtn.addEventListener('click', startQuizSession);
+        gacha1Btn.addEventListener('click', ()=> rollGacha(1));
+        gacha10Btn.addEventListener('click', ()=> rollGacha(10));
+        resetBtn.addEventListener('click', ()=>{
+            if (!confirm('포인트와 도감을 초기화할까요?')) return;
+            localStorage.removeItem(LS_POINTS); localStorage.removeItem(LS_OWNED);
+            for (let i=0;i<localStorage.length;){ const k=localStorage.key(i); if (k && k.startsWith(LS_PROGRESS_PREFIX)) localStorage.removeItem(k); else i++; }
+            syncPointsUI(); populateBook(); showModal('초기화 완료', '포인트와 도감을 초기화했습니다.');
+        });
+
+        showView('titleScreen');
+    }
+    bootBindings();
+</script>
+</body>
+</html>
