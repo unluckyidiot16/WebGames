@@ -572,6 +572,7 @@
     <script src="../../ClassGame/LineBattle/src/gfx/assetPath.ts"></script>
     <script src="../../ClassGame/LineBattle/src/gfx/unitAnims.ts"></script>
     <script src="classhub-bridge.js"></script>
+    <link rel="stylesheet" href="../../ClassGame/class-hub/src/App.css">
     <!-- removed: invalid TypeScript include (supaRpc.ts) -->
 </head>
 <body>
@@ -873,6 +874,8 @@
     const GRID_ROWS = 4;
     const GRID_COLS = 5;
     const GRID_SIZE = GRID_ROWS * GRID_COLS;
+    // [NEW] 오답 패널티 비율 (0.5 = 기본 보상의 50% 차감)
+    const QUIZ_WRONG_PENALTY_RATIO = 0.5;
 
     // --- 3. 캔버스 & 길(Path) 설정 ---
     const canvas = document.getElementById('game-canvas');
@@ -1056,12 +1059,19 @@
             btnElement.classList.add('correct');
             addResources(reward);
         } else {
-            quizFeedback.textContent = `오답... (정답: ${currentQuiz.options[currentQuiz.answer]})`;
+            // [NEW] 오답 패널티: 기본 보상의 일정 비율만큼 QP 차감
+            const baseReward = (typeof currentQuiz.reward === 'number') ? currentQuiz.reward : 0;
+            const penalty = Math.max(
+                1,
+                Math.round(baseReward * QUIZ_WRONG_PENALTY_RATIO)
+            );
+            addResources(-penalty);
+
+            quizFeedback.textContent = `오답... -${penalty} QP (정답: ${currentQuiz.options[currentQuiz.answer]})`;
             quizFeedback.style.color = 'red';
             btnElement.classList.add('wrong');
             answerOptionsEl.children[currentQuiz.answer].classList.add('correct');
         }
-
         // [NEW] ClassHub 임베드 환경이면 정답 결과를 부모(Host)로 전송
         try {
             if (window.ClassHubBridge &&
@@ -1123,6 +1133,7 @@
     // --- 7. 게임 UI 로직 (HTML UI 제어) ---
     function addResources(amount) {
         resources += amount;
+        if (resources < 0) resources = 0;  // [NEW] QP는 0 아래로 떨어지지 않게
         updateUI();
     }
 
@@ -2188,6 +2199,26 @@
         const QP_VER = window.QP_VER || "20251112"; // ← 배포 시 날짜/커밋 해시로 바꿔주세요
 
         const params = new URLSearchParams(window.location.search);
+        const sessionId = params.get("sessionId") || "local-qdd";
+
+        function reportAnswer(questionId, answerIndex, correct, timeMs) {
+            if (!window.parent) return;
+            try {
+                window.parent.postMessage(
+                    {
+                        type: "CH_REPORT_ANSWER",
+                        sessionId,
+                        questionId,
+                        answerIndex,
+                        correct,
+                        timeMs,
+                    },
+                    "*",
+                );
+            } catch (e) {
+                console.warn("[QDD] reportAnswer postMessage failed", e);
+            }
+        }
         const qpParam = params.get("qp");     // 전체 URL 지정용
         const packParam = params.get("pack"); // 파일명 지정용 (예: Eng5_9)
 
