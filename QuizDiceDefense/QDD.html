@@ -569,8 +569,6 @@
 
     </style>
     <link rel="icon" href="data:,">
-    <script src="../../ClassGame/LineBattle/src/gfx/assetPath.ts"></script>
-    <script src="../../ClassGame/LineBattle/src/gfx/unitAnims.ts"></script>
     <script src="classhub-bridge.js"></script>
     <link rel="stylesheet" href="../../ClassGame/class-hub/src/App.css">
     <!-- removed: invalid TypeScript include (supaRpc.ts) -->
@@ -874,8 +872,8 @@
     const GRID_ROWS = 4;
     const GRID_COLS = 5;
     const GRID_SIZE = GRID_ROWS * GRID_COLS;
-    // [NEW] 오답 패널티 비율 (0.5 = 기본 보상의 50% 차감)
-    const QUIZ_WRONG_PENALTY_RATIO = 0.5;
+    // [NEW] 오답 패널티 비율 (0.1 = 기본 보상의 50% 차감)
+    const QUIZ_WRONG_PENALTY_RATIO = 0.1;
 
     // --- 3. 캔버스 & 길(Path) 설정 ---
     const canvas = document.getElementById('game-canvas');
