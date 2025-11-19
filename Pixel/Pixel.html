@@ -12,7 +12,25 @@
         canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
         #bookGrid .card { border:2px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#fff; cursor:pointer; transition:.2s; }
         #bookGrid .card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.08); }
-        #bookGrid img { image-rendering:pixelated; width:100%; aspect-ratio:1/1; object-fit:contain; background:#f9fafb; }
+        #bookGrid img { image-rendering:pixelated; width:100%; aspect-ratio:1/1; object-fit:contain; background:#f9fafb;position:relative; }
+        .codex-locked {
+            filter: grayscale(1) brightness(0) opacity(.9); /* 거의 검은 실루엣 */
+        }
+        .codex-locked::after {
+            content:"🔒";
+            position:absolute;
+            inset:0;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            font-size:28px;
+            color:#fff;
+            text-shadow:0 0 5px #000;
+            background:rgba(0,0,0,.35);
+        }
+        .codex-unlocked {
+            filter: grayscale(1) opacity(.9);
+        }
         .locked { position:relative; filter:grayscale(1) opacity(.8); }
         .locked::after{
             content:"🔒"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
@@ -63,7 +81,10 @@
 <div id="lobbyScreen" class="view flex-col items-center p-4 md:p-8">
     <div class="w-full max-w-6xl flex flex-col gap-4">
         <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">도감</h1>
+            <div class="flex flex-col gap-1">
+                <h1 class="text-3xl md:text-4xl font-bold text-gray-800">도감</h1>
+                <p id="collectionStats" class="text-sm text-gray-500"></p>
+            </div>
             <div class="flex flex-wrap items-center gap-2">
                 <span class="text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">보유 포인트: <b id="pointsText" class="text-sky-600">0P</b></span>
                 <button id="quizBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow">퀴즈 도전</button>
@@ -187,6 +208,7 @@
     const startButton = document.getElementById('startButton');
 
     const bookGrid = document.getElementById('bookGrid');
+    const collectionStats = document.getElementById('collectionStats');
     const pointsText = document.getElementById('pointsText');
     const pointsTextGame = document.getElementById('pointsTextGame');
     const quizBtn   = document.getElementById('quizBtn');
@@ -238,6 +260,36 @@
     function syncPointsUI(){ const t = `${getPoints()}P`; pointsText.textContent = t; pointsTextGame.textContent = t; }
     function getOwnedSet(){ try{ const arr = JSON.parse(localStorage.getItem(LS_OWNED)||'[]'); return new Set(arr.map(Number)); } catch{ return new Set(); } }
     function saveOwnedSet(set){ localStorage.setItem(LS_OWNED, JSON.stringify(Array.from(set))); }
+
+    /* =========================
+   도감 수집 현황 & 업적
+========================= */
+    function getAchievementLabel(count, total){
+        if (total === 0) return '';
+        if (count >= total) return '업적: 도감 완성! 🎊';
+        if (count >= Math.floor(total * 0.75)) return '업적: 컬러링 마스터 👑';
+        if (count >= Math.floor(total * 0.5)) return '업적: 수집 고수 🌟';
+        if (count >= Math.floor(total * 0.25)) return '업적: 수집 중급자 📚';
+        if (count >= 1) return '업적: 첫 해금 달성! 🎉';
+        return '업적: 아직 해금된 그림이 없어요.';
+    }
+
+    function updateCollectionStats(){
+        if (!collectionStats) return;
+        const total = IMAGE_LIST.length;
+        if (!total){
+            collectionStats.textContent = '이미지 로딩 중...';
+            return;
+        }
+        const owned = getOwnedSet();
+        const count = owned.size;
+        const percent = Math.floor((count / total) * 100);
+
+        const label = getAchievementLabel(count, total);
+        collectionStats.innerHTML =
+            `수집 현황: <b>${count}</b> / ${total} (${percent}%)` +
+            (label ? `<br><span class="text-xs text-gray-500">${label}</span>` : '');
+    }
 
     /* =========================
        유틸
@@ -332,14 +384,37 @@
         bookGrid.innerHTML = '';
         IMAGE_LIST.forEach((it, i)=>{
             const idx = i+1;
-            const card = document.createElement('div'); card.className = 'card';
-            const img = document.createElement('img'); img.src = it.url; img.alt = `No.${idx}`; img.loading='lazy';
-            const title = document.createElement('p'); title.className='text-center text-sm font-semibold text-gray-700 p-2'; title.textContent = `No.${idx}`;
-            if (!owned.has(idx)){ img.classList.add('locked'); card.title='가챠로 해금하세요'; }
-            else { card.addEventListener('click', ()=> startGame(it.url, idx)); }
-            card.appendChild(img); card.appendChild(title); bookGrid.appendChild(card);
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const img = document.createElement('img');
+            img.src = it.url;
+            img.alt = `No.${idx}`;
+            img.loading = 'lazy';
+
+            const title = document.createElement('p');
+            title.className = 'text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `No.${idx}`;
+
+            if (!owned.has(idx)){
+                // 🔒 잠금 상태: 검은 실루엣
+                img.classList.add('codex-locked');
+                card.title = '가챠로 해금하세요';
+            } else {
+                // ✅ 해금 상태: 회색(그레이스케일) 미리보기
+                img.classList.add('codex-unlocked');
+                card.addEventListener('click', ()=> startGame(it.url, idx));
+            }
+
+            card.appendChild(img);
+            card.appendChild(title);
+            bookGrid.appendChild(card);
         });
+
+        // 🔸 도감 수집 현황 + 업적 갱신
+        updateCollectionStats();
     }
+
 
     /* =========================
        퀴즈 로딩/정상화(과목 섞기 유지)
