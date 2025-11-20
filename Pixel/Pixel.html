@@ -11,52 +11,38 @@
         .view.active { display: flex; }
         canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
         #bookGrid .card {
-                    border:2px solid #e5e7eb;
-                    border-radius:10px;
-                    overflow:hidden;
-                    background:#f9fafb; /* 카드에만 배경색 */
-                    cursor:pointer;
-                    transition:.2s;
-                    display:flex;              /* ✅ 위: 이미지 / 아래: 번호 */
-                    flex-direction:column;
+            border:2px solid #e5e7eb;
+            border-radius:10px;
+            overflow:hidden;
+            background:#f9fafb; /* 카드에만 배경색 */
+            cursor:pointer;
+            transition:.2s;
         }
-        #bookGrid .card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.08); }
+        #bookGrid .card:hover {
+            transform:translateY(-2px);
+            box-shadow:0 8px 20px rgba(0,0,0,.08);
+        }
+
+        /* 정사각형 프레임 + 가운데 배치 */
         #bookGrid img {
-                    image-rendering:pixelated;
-                    width:100%;
-                    aspect-ratio:1/1;          /* ✅ 항상 정사각형 */
-                    object-fit:contain;
-                    background:transparent;     /* 이미지 배경은 투명 */
-                    position:relative;
-                    flex-shrink:0;
+            image-rendering:pixelated;
+            width:100%;
+            aspect-ratio:1/1;      /* 항상 1:1 */
+            object-fit:contain;    /* 스프라이트 크기 달라도 프레임 안에서 동일 비율 */
+            background:transparent;
+            display:block;
         }
-        /* 카드 아래쪽 번호줄이 눌리지 않게 보장 */
-                #bookGrid .card > p {
-                    flex:0 0 auto;
-                }
+
         /* 🔒 잠금: 스프라이트만 검은 실루엣 */
         .codex-locked {
-            filter: grayscale(1) brightness(0.35) contrast(1.5);
-            opacity: 0.98;
+            /* 채도 제거 + 대비를 많이 올려서,
+               내부 색은 거의 검은색/흰색으로만 보이도록 */
+            filter: grayscale(1) contrast(2.2) brightness(0.9);
         }
 
-        /* 잠금 아이콘만 살짝, 배경은 건드리지 않음 */
-        .codex-locked::after {
-            content:"🔒";
-            position:absolute;
-            inset:4px 4px 28px 4px; /* 위쪽 이미지 영역 안쪽에만 */
-            display:flex;
-            align-items:flex-start;
-            justify-content:flex-start;
-            font-size:18px;
-            color:#111827;
-            text-shadow:0 0 3px rgba(255,255,255,.9);
-            pointer-events:none;
-        }
-
-        /* ✅ 해금: 회색(그레이) */
+        /* ✅ 해금: 일반적인 회색 톤 */
         .codex-unlocked {
-            filter: grayscale(1);
+            filter: grayscale(1) brightness(1.05);
         }
 
         /* 🎨 색칠완료: 컬러 그대로 */
