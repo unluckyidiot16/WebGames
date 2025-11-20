@@ -269,7 +269,7 @@
     };
 
     // 퀴즈
-    const QUIZ_JSON_URL = 'https://unluckyidiot16.github.io/WebGames/PixelArt/Quiz/Quiz.json';
+    const QUIZ_JSON_URL = 'https://unluckyidiot16.github.io/WebGames/Pixel/Quiz/Quiz.json';
     const QUIZ_REWARD = 10;           // 기본 점수
     const STREAK_STEP = 0.2;          // 연속정답 배율 증가
     const STREAK_MAX_MULT = 3;        // 연속정답 배율 상한
@@ -583,52 +583,75 @@
        로비(도감)
     ========================= */
     function populateBook(){
-        const owned = getOwnedSet();
-        const fully = getFullyColoredSet();
-        const hiddenSorted = (HIDDEN_INDICES || []).slice().sort((a,b)=>a-b);
+        const owned       = getOwnedSet();
+        const hiddenOwned = getHiddenOwnedSet();
+        const fully       = getFullyColoredSet();
 
         bookGrid.innerHTML = '';
 
+        // 1) 일반 도감: No.1 .. No.N
         IMAGE_LIST.forEach((it, i)=>{
             const idx = i + 1;
-            const isHidden = (HIDDEN_INDICES || []).includes(idx);
-            const isOwned  = owned.has(idx);
-
-            // 🔒 히든은 뽑기 전까지 도감에서 완전히 숨김
-            if (isHidden && !isOwned) return;
+            const isOwned = owned.has(idx);
 
             const card = document.createElement('div');
             card.className = 'card';
 
             const img = document.createElement('img');
             img.src = it.url;
-            img.alt = isHidden ? 'Hidden' : `No.${idx}`;
+            img.alt = `No.${idx}`;
             img.loading = 'lazy';
 
             const title = document.createElement('p');
             title.className = 'text-center text-sm font-semibold text-gray-700 p-2';
-
-            if (isHidden){
-                // H1, H2 ... 식으로 표시
-                const ord = hiddenSorted.indexOf(idx);
-                const hLabel = ord >= 0 ? (ord + 1) : idx;
-                title.textContent = `H${hLabel}`;
-            } else {
-                title.textContent = `No.${idx}`;
-            }
+            title.textContent = `No.${idx}`;
 
             if (!isOwned){
                 img.classList.add('locked');
-                card.title = isHidden ? '도전 가챠로 해금하세요' : '가챠로 해금하세요';
+                card.title = '가챠로 해금하세요';
             } else {
+                // 일반 그림: stageId = idx
                 card.addEventListener('click', ()=> startGame(it.url, idx));
             }
 
-            // ✅ 색칠 완료된 그림: 레어도에 맞는 테두리 색
+            // 색칠 완료: 레어도 테두리
             if (fully.has(idx)){
                 const rarity = getRarityOfIndex(idx);
                 card.classList.add('colored');
                 card.classList.add(`rarity-${rarity}`);
+            }
+
+            card.appendChild(img);
+            card.appendChild(title);
+            bookGrid.appendChild(card);
+        });
+
+        // 2) 히든 도감: H1 .. Hn (해금된 것만 표시)
+        HIDDEN_IMAGE_LIST.forEach((it, i)=>{
+            const hiddenIdx = i + 1;
+            if (!hiddenOwned.has(hiddenIdx)) return;     // 뽑기 전까지는 숨김
+
+            // 히든 그림: stageId = -hiddenIdx  (진행/색칠 기록 분리)
+            const stageId = -hiddenIdx;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const img = document.createElement('img');
+            img.src = it.url;
+            img.alt = `Hidden ${hiddenIdx}`;
+            img.loading = 'lazy';
+
+            const title = document.createElement('p');
+            title.className = 'text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `H${hiddenIdx}`;
+
+            card.addEventListener('click', ()=> startGame(it.url, stageId));
+
+            // 히든 색칠 완료: 핑크 테두리 (.rarity-H)
+            if (fully.has(stageId)){
+                card.classList.add('colored');
+                card.classList.add('rarity-H');
             }
 
             card.appendChild(img);
@@ -1311,12 +1334,13 @@
     function bootBindings(){
         if (startButton){
             startButton.addEventListener('click', async ()=>{
-                if (!localStorage.getItem(LS_POINTS)) setPoints(0);
-                if (!localStorage.getItem(LS_OWNED)) saveOwnedSet(new Set());
+                if (!localStorage.getItem(LS_POINTS))  setPoints(0);
+                if (!localStorage.getItem(LS_OWNED))   saveOwnedSet(new Set());
                 if (!localStorage.getItem(LS_COUPONS)) setCoupons(0);
                 syncPointsUI();
                 syncCouponsUI();
-                await loadCodexImages(); // ✅ png/ 스캔
+                await loadCodexImages();  // 일반 도감 png 스캔
+                await loadHiddenImages(); // 히든 도감 png 스캔
                 populateBook();
                 showView('lobbyScreen');
             });
@@ -1398,7 +1422,10 @@
                 addCoupons(1);  // ✅ 처음 완성한 그림이면 쿠폰 1장 지급
                 extra = '\n\n🎁 처음 완성한 그림이라 도전 쿠폰 1장을 받았습니다!';
             }
-            showModal('완성!', `No.${currentStageIndex} 그림을 완성했습니다!${extra}`);
+            const label = (currentStageIndex < 0)
+                ? `H${-currentStageIndex}`
+                : `No.${currentStageIndex}`;
+            showModal('완성!', `${label} 그림을 완성했습니다!${extra}`);
         }
     }
     bootBindings();
