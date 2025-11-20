@@ -10,34 +10,35 @@
         .view { display: none; width: 100%; min-height: 100vh; }
         .view.active { display: flex; }
         canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
+        /* 도감 카드 공통 스타일 */
         #bookGrid .card {
-            border:2px solid #e5e7eb;
-            border-radius:10px;
-            overflow:hidden;
-            background:#f9fafb; /* 카드에만 배경색 */
-            cursor:pointer;
-            transition:.2s;
-        }
-        #bookGrid .card:hover {
-            transform:translateY(-2px);
-            box-shadow:0 8px 20px rgba(0,0,0,.08);
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f9fafb; /* 카드 배경 */
+            cursor: pointer;
+            transition: .2s;
         }
 
-        /* 정사각형 프레임 + 가운데 배치 */
-        #bookGrid img {
-            image-rendering:pixelated;
-            width:100%;
-            aspect-ratio:1/1;      /* 항상 1:1 */
-            object-fit:contain;    /* 스프라이트 크기 달라도 프레임 안에서 동일 비율 */
-            background:transparent;
-            display:block;
+        #bookGrid .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0,0,0,.08);
         }
+
+        /* 정사각형 이미지 슬롯 */
+        #bookGrid img {
+            image-rendering: pixelated;
+            width: 100%;
+            aspect-ratio: 1 / 1;   /* 항상 정사각형 */
+            object-fit: contain;    /* 스프라이트 크기 달라도 가운데 맞춰서 */
+            background: transparent;
+            display: block;
+        }
+
 
         /* 🔒 잠금: 스프라이트만 검은 실루엣 */
         .codex-locked {
-            /* 채도 제거 + 대비를 많이 올려서,
-               내부 색은 거의 검은색/흰색으로만 보이도록 */
-            filter: grayscale(1) contrast(2.2) brightness(0.9);
+            filter: grayscale(1) brightness(0);
         }
 
         /* ✅ 해금: 일반적인 회색 톤 */
