@@ -46,7 +46,6 @@
         .rarity-R .rarity-tag { background:#60a5fa; } .rarity-R .ring { border-color:rgba(96,165,250,.9); box-shadow:0 0 14px rgba(96,165,250,.8) inset, 0 0 10px rgba(96,165,250,.6); }
         .rarity-SR .rarity-tag { background:#f59e0b; } .rarity-SR .ring { border-color:#f59e0b; animation:pulseGlow 1.2s ease-in-out infinite; }
     </style>
-    <script src="../../ClassGame/LineBattle/src/gfx/unitAnims.ts"></script>
 </head>
 <body class="bg-gray-100 min-h-screen">
 
@@ -114,6 +113,7 @@
 
         <div class="text-center text-xs md:text-sm text-gray-500">
             보유 포인트: <b id="pointsTextLobby" class="text-sky-600">0P</b>
+            · 도전 쿠폰: <b id="couponsTextLobby" class="text-rose-500">0장</b>
         </div>
     </div>
 </div>
@@ -127,7 +127,11 @@
         <span class="text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">
           보유 포인트: <b id="pointsText" class="text-sky-600">0P</b>
         </span>
+                <span class="text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">
+          도전 쿠폰: <b id="couponsTextBook" class="text-rose-500">0장</b>
+        </span>
                 <button id="quizBtn" class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow">퀴즈 도전</button>
+                <button id="challengeBtn" class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg shadow">도전 퀴즈</button>
                 <button id="gacha1Btn" class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-4 rounded-lg shadow">뽑기 1회</button>
                 <button id="gacha10Btn" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded-lg shadow">뽑기 10회</button>
                 <button id="resetBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow" title="테스트 초기화">리셋</button>
@@ -225,21 +229,36 @@
     // 도감: 로컬 png/ 먼저 탐색 → 실패 시 원격 폴백
     const CODEX_PNG_BASE = './png/';
     const REMOTE_IMAGE_BASE = 'https://unluckyidiot16.github.io/assets-common/PixelArt/PNG/';
-    const REMOTE_COUNT = 300;
+    const REMOTE_COUNT = 151;
+
+    // ✅ 히든 이미지 전용 폴더 (도전 가챠 전용 풀)
+    const HIDDEN_IMAGE_BASE = 'https://unluckyidiot16.github.io/WebGames/PixelArt/Hidden/';
+    let HIDDEN_IMAGE_LIST = [];   // [{url, name}]
+    let HIDDEN_INDICES = [];      // [1..Hn] - HIDDEN_IMAGE_LIST 인덱스용
 
     // 가챠
     const GACHA_COST = 100;
     const RARITY_CONFIG_DEFAULT = { C:{weight:80}, R:{weight:18}, SR:{weight:3} };
     const RARITY_CONFIG_10X      = { C:{weight:70}, R:{weight:25}, SR:{weight:6} }; // 10연차 상향
 
+    // ✅ 히든/도전 가챠용 설정 (SR 70%, Hidden 30%)
+    const RARITY_CONFIG_CHALLENGE = {
+        SR: { weight: 70 }, // SR (일반 SR 풀)
+        H:  { weight: 30 }, // Hidden (Hidden 폴더 전용)
+    };
+
     // 퀴즈
-    const QUIZ_JSON_URL = 'https://unluckyidiot16.github.io/assets-common/PixelArt/Quiz/Quiz.json';
+    const QUIZ_JSON_URL = 'https://unluckyidiot16.github.io/WebGames/PixelArt/Quiz/Quiz.json';
     const QUIZ_REWARD = 10;           // 기본 점수
     const STREAK_STEP = 0.2;          // 연속정답 배율 증가
     const STREAK_MAX_MULT = 3;        // 연속정답 배율 상한
     const REWARD_MULTIPLIER = 5;      // ✅ 추가: 정답 보너스 5배
     const QUIZ_SESSION_LEN = 10;
     const MAX_WRONG = 2;              // ✅ 추가: 오답 2회 시 종료
+
+    // ✅ 도전 퀴즈용 설정
+    const CHALLENGE_ENTRY_COST = 2500;      // 포인트 입장 비용
+    const CHALLENGE_TIME_LIMIT_SEC = 90;    // 도전 퀴즈 제한 시간(초)
 
     /* =========================
        DOM
@@ -257,6 +276,12 @@
     const pointsText = document.getElementById('pointsText');
     const pointsTextGame = document.getElementById('pointsTextGame');
 
+
+    // ✅ 쿠폰 표시
+    const couponsTextLobby = document.getElementById('couponsTextLobby');
+    const couponsTextBook = document.getElementById('couponsTextBook');
+
+
     // 로비 버튼
     const lobbyCodexBtn = document.getElementById('lobbyCodexBtn');
     const lobbyQuizBtn  = document.getElementById('lobbyQuizBtn');
@@ -267,6 +292,7 @@
     const gacha1Btn = document.getElementById('gacha1Btn');
     const gacha10Btn= document.getElementById('gacha10Btn');
     const resetBtn  = document.getElementById('resetBtn');
+    const challengeBtn = document.getElementById('challengeBtn'); // ✅ 추가
 
     const backButton  = document.getElementById('backButton');
 
@@ -304,8 +330,12 @@
     ========================= */
     const LS_POINTS = 'pixel.points';
     const LS_OWNED  = 'pixel.owned';
+    const LS_HIDDEN_OWNED = 'pixel.hiddenOwned';       // 히든 전용 도감
     const LS_PROGRESS_PREFIX = 'pixel.progress.';
+    const LS_COUPONS = 'pixel.coupons';                // 도전 쿠폰
+    const LS_FULLY_COLORED = 'pixel.fullyColored';     // 색칠 100% 완료 스테이지
     function progressKey(idx){ return `${LS_PROGRESS_PREFIX}${idx}`; }
+
 
     function getPoints(){ return parseInt(localStorage.getItem(LS_POINTS) || '0', 10); }
     function setPoints(n){ localStorage.setItem(LS_POINTS, String(Math.max(0,n|0))); syncPointsUI(); }
@@ -316,8 +346,55 @@
         if (pointsText)      pointsText.textContent = t;
         if (pointsTextGame)  pointsTextGame.textContent = t;
     }
-    function getOwnedSet(){ try{ const arr = JSON.parse(localStorage.getItem(LS_OWNED)||'[]'); return new Set(arr.map(Number)); } catch{ return new Set(); } }
-    function saveOwnedSet(set){ localStorage.setItem(LS_OWNED, JSON.stringify(Array.from(set))); }
+
+
+    // ✅ 쿠폰
+    function getCoupons(){ return parseInt(localStorage.getItem(LS_COUPONS) || '0', 10); }
+    function setCoupons(n){
+        localStorage.setItem(LS_COUPONS, String(Math.max(0, n|0)));
+        syncCouponsUI();
+    }
+    function addCoupons(n){ setCoupons(getCoupons() + n); }
+    function syncCouponsUI(){
+        const t = `${getCoupons()}장`;
+        if (couponsTextLobby) couponsTextLobby.textContent = t;
+        if (couponsTextBook)  couponsTextBook.textContent  = t;
+    }
+
+    // ✅ 색칠 완성 업적 (그림 1개당 1번만 쿠폰 지급)
+    function getFullyColoredSet(){
+        try{
+            const arr = JSON.parse(localStorage.getItem(LS_FULLY_COLORED) || '[]');
+            return new Set(arr.map(Number));
+        }catch(_){
+            return new Set();
+        }
+    }
+    function saveFullyColoredSet(set){
+        localStorage.setItem(LS_FULLY_COLORED, JSON.stringify(Array.from(set)));
+    }
+
+    function getOwnedSet(){
+        try{
+            const arr = JSON.parse(localStorage.getItem(LS_OWNED)||'[]');
+            return new Set(arr.map(Number));
+        } catch{ return new Set(); }
+    }
+    function saveOwnedSet(set){
+        localStorage.setItem(LS_OWNED, JSON.stringify(Array.from(set)));
+    }
+
+    // ✅ Hidden 도감 전용
+    function getHiddenOwnedSet(){
+        try{
+            const arr = JSON.parse(localStorage.getItem(LS_HIDDEN_OWNED)||'[]');
+            return new Set(arr.map(Number));
+        } catch{ return new Set(); }
+    }
+    function saveHiddenOwnedSet(set){
+        localStorage.setItem(LS_HIDDEN_OWNED, JSON.stringify(Array.from(set)));
+    }
+
 
     /* =========================
        유틸
@@ -390,8 +467,25 @@
         buildRarityBuckets(IMAGE_LIST.length);
     }
 
+    async function loadHiddenImages(){
+        HIDDEN_IMAGE_LIST = [];
+        HIDDEN_INDICES = [];
+        const maxTry = 41; // 최대 50장까지 체크 (필요하면 늘려도 됨)
+
+        for (let i=1; i<=maxTry; i++){
+            const url = `${HIDDEN_IMAGE_BASE}${i}.png`;
+            try{
+                const res = await fetch(url, { method:'HEAD', cache:'no-store' });
+                if (res.ok){
+                    HIDDEN_IMAGE_LIST.push({ url, name: `${i}.png` });
+                }
+            }catch(_){}
+        }
+        HIDDEN_INDICES = HIDDEN_IMAGE_LIST.map((_, idx)=> idx+1);
+    }
+
+
     function buildRarityBuckets(n){
-        // 인덱스 기반 희귀도 영역 동적 할당(대략 C:70%, R:24%, SR:6%)
         const sr = Math.max(1, Math.round(n * 0.06));
         const r  = Math.max(1, Math.round(n * 0.24));
         const c  = Math.max(1, n - sr - r);
@@ -404,22 +498,58 @@
         }
     }
 
+
     /* =========================
        로비(도감)
     ========================= */
     function populateBook(){
         const owned = getOwnedSet();
+        const hiddenOwned = getHiddenOwnedSet();
         bookGrid.innerHTML = '';
+
+        // 1) 일반 도감
         IMAGE_LIST.forEach((it, i)=>{
             const idx = i+1;
             const card = document.createElement('div'); card.className = 'card';
             const img = document.createElement('img'); img.src = it.url; img.alt = `No.${idx}`; img.loading='lazy';
-            const title = document.createElement('p'); title.className='text-center text-sm font-semibold text-gray-700 p-2'; title.textContent = `No.${idx}`;
-            if (!owned.has(idx)){ img.classList.add('locked'); card.title='가챠로 해금하세요'; }
-            else { card.addEventListener('click', ()=> startGame(it.url, idx)); }
-            card.appendChild(img); card.appendChild(title); bookGrid.appendChild(card);
+            const title = document.createElement('p');
+            title.className='text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `No.${idx}`;
+
+            if (!owned.has(idx)){
+                img.classList.add('locked');
+                card.title='가챠로 해금하세요';
+            } else {
+                card.addEventListener('click', ()=> startGame(it.url, idx));
+            }
+            card.appendChild(img);
+            card.appendChild(title);
+            bookGrid.appendChild(card);
+        });
+
+        // 2) Hidden 도감 (H1, H2, ...)
+        HIDDEN_IMAGE_LIST.forEach((it, i)=>{
+            const hid = i+1;
+            const card = document.createElement('div'); card.className = 'card';
+            const img = document.createElement('img'); img.src = it.url; img.alt = `Hidden ${hid}`; img.loading='lazy';
+            const title = document.createElement('p');
+            title.className='text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `H${hid}`;
+
+            if (!hiddenOwned.has(hid)){
+                img.classList.add('locked');
+                card.title='도전 가챠로 해금하세요';
+            } else {
+                // Hidden은 스테이지 ID를 10000대 영역으로 분리해서 저장/색칠 충돌 방지
+                const stageId = 10000 + hid;
+                card.addEventListener('click', ()=> startGame(it.url, stageId));
+            }
+            card.appendChild(img);
+            card.appendChild(title);
+            bookGrid.appendChild(card);
         });
     }
+
 
     /* =========================
        퀴즈 로딩/정상화(과목 섞기 유지)
@@ -499,25 +629,94 @@
     }
 
     /* =========================
-       퀴즈 세션 (✅ 2오답 종료 + 5배 보너스 반영)
-    ========================= */
-    let quizSession = null; // {total, idx, correct, streak, maxStreak, score, wrong}
-    async function startQuizSession(){
+      퀴즈 세션 (✅ 일반/도전 모드)
+   ========================= */
+    let quizSession = null; // {total, idx, correct, streak, maxStreak, score, wrong, timeLeft}
+    let quizMode = 'normal';       // 'normal' | 'challenge'
+    let challengeTimerId = null;
+
+    async function startQuizSession(mode = 'normal'){
         await ensureQuizLoaded();
-        quizSession = { total: QUIZ_SESSION_LEN, idx: 0, correct:0, streak:0, maxStreak:0, score:0, wrong:0 };
+
+        if (challengeTimerId){
+            clearInterval(challengeTimerId);
+            challengeTimerId = null;
+        }
+
+        quizMode = mode;
+        quizSession = {
+            total: QUIZ_SESSION_LEN,
+            idx: 0,
+            correct: 0,
+            streak: 0,
+            maxStreak: 0,
+            score: 0,
+            wrong: 0,
+            timeLeft: mode === 'challenge' ? CHALLENGE_TIME_LIMIT_SEC : null,
+        };
+
+        if (quizMode === 'challenge'){
+            challengeTimerId = setInterval(()=>{
+                if (!quizSession || quizMode !== 'challenge'){
+                    clearInterval(challengeTimerId);
+                    challengeTimerId = null;
+                    return;
+                }
+                quizSession.timeLeft--;
+                updateQuizSubText();
+                if (quizSession.timeLeft <= 0){
+                    clearInterval(challengeTimerId);
+                    challengeTimerId = null;
+                    finishQuiz(
+                        '도전 실패',
+                        `시간 초과로 종료되었습니다. 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`,
+                        { fromChallenge:true, success:false },
+                    );
+                }
+            }, 1000);
+        }
+
         askNextQuestion();
     }
-    function askNextQuestion(){
+
+
+    function updateQuizSubText(){
         if (!quizSession) return;
-        if (quizSession.idx >= quizSession.total){
-            finishQuiz('퀴즈 종료', `정답 ${quizSession.correct}/${quizSession.total}개!  연속 보너스 포함 +${quizSession.score}P`);
-            return;
-        }
-        const q = pullQuestion();
-        quizTitle.textContent = '퀴즈 도전';
         const nextMult = Math.min(STREAK_MAX_MULT, 1 + (quizSession.streak) * STREAK_STEP);
         const totalMult = (nextMult * REWARD_MULTIPLIER).toFixed(1);
-        quizSub.textContent = `문제 ${quizSession.idx+1}/${quizSession.total} · 기본 +${QUIZ_REWARD}P · 보너스 x${totalMult} · 오답 ${quizSession.wrong}/${MAX_WRONG}`;
+        let text = `문제 ${quizSession.idx+1}/${quizSession.total} · 기본 +${QUIZ_REWARD}P · 보너스 x${totalMult} · 오답 ${quizSession.wrong}/${MAX_WRONG}`;
+        if (quizMode === 'challenge' && quizSession.timeLeft != null){
+            text += ` · 남은 시간 ${quizSession.timeLeft}s`;
+        }
+        quizSub.textContent = text;
+    }
+
+
+    function askNextQuestion(){
+        if (!quizSession) return;
+
+        // 모든 문제를 다 푼 경우
+        if (quizSession.idx >= quizSession.total){
+            const baseMsg = `정답 ${quizSession.correct}/${quizSession.total}개!  연속 보너스 포함 +${quizSession.score}P`;
+
+            if (quizMode === 'challenge'){
+                const success =
+                    quizSession.correct === quizSession.total &&
+                    quizSession.wrong < MAX_WRONG &&
+                    (quizSession.timeLeft == null || quizSession.timeLeft > 0);
+
+                const title = success ? '도전 성공!' : '도전 종료';
+                const extra = success ? '\n\n도전 보상으로 히든/SR 스페셜 가챠 1회를 진행합니다.' : '';
+                finishQuiz(title, baseMsg + extra, { fromChallenge:true, success });
+            } else {
+                finishQuiz('퀴즈 종료', baseMsg);
+            }
+            return;
+        }
+
+        const q = pullQuestion();
+        quizTitle.textContent = (quizMode === 'challenge') ? '도전 퀴즈' : '퀴즈 도전';
+        updateQuizSubText();
         quizQuestion.textContent = q.question;
         quizChoices.innerHTML = '';
         q.choices.forEach((c, i)=>{
@@ -536,8 +735,20 @@
                 } else {
                     quizSession.streak = 0;
                     quizSession.wrong++;
+
+                    if (quizMode === 'challenge' && quizSession.wrong >= MAX_WRONG){
+                        finishQuiz(
+                            '도전 실패',
+                            `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`,
+                            { fromChallenge:true, success:false },
+                        );
+                        return;
+                    }
                     if (quizSession.wrong >= MAX_WRONG){
-                        finishQuiz('퀴즈 종료', `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`);
+                        finishQuiz(
+                            '퀴즈 종료',
+                            `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`,
+                        );
                         return;
                     }
                 }
@@ -549,16 +760,90 @@
         });
         quizModal.style.display='flex';
     }
+
     quizCancel.addEventListener('click', ()=>{
-        if (!quizSession){ quizModal.style.display='none'; return; }
-        finishQuiz('퀴즈 종료', `중도 종료: 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`);
+        if (!quizSession){
+            quizModal.style.display='none';
+            return;
+        }
+        const fromChallenge = (quizMode === 'challenge');
+        finishQuiz(
+            fromChallenge ? '도전 종료' : '퀴즈 종료',
+            `중도 종료: 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`,
+            { fromChallenge, success:false },
+        );
     });
-    function finishQuiz(title, msg){
+
+    function finishQuiz(title, msg, opts = {}){
+        if (!quizSession){
+            showModal(title, msg);
+            return;
+        }
+        const { fromChallenge=false, success=false } = opts;
+
+        if (challengeTimerId){
+            clearInterval(challengeTimerId);
+            challengeTimerId = null;
+        }
+
+        // 포인트 적립
         addPoints(quizSession.score);
+
+        let bonusMsg = '';
+
+        // ✅ 일반 퀴즈에서 10문제 모두 맞히면 도전 쿠폰 1장 지급
+        if (!fromChallenge &&
+            quizSession.correct === quizSession.total &&
+            quizSession.total === QUIZ_SESSION_LEN){
+            addCoupons(1);
+            bonusMsg += '\n\n🎁 10문제를 모두 맞혀서 도전 쿠폰 1장을 받았습니다!';
+        }
+
+        const finalMsg = `${msg} (최대 연속 ${quizSession.maxStreak})${bonusMsg}`;
+
         quizModal.style.display='none';
-        showModal(title, `${msg} (최대 연속 ${quizSession.maxStreak})`);
+
+        if (fromChallenge && success){
+            // ✅ 도전 퀴즈 성공 시: 히든/SR 스페셜 가챠 1회 (무료)
+            showModal(title, finalMsg, ()=>{
+                rollGacha(1, {
+                    free: true,
+                    config: RARITY_CONFIG_CHALLENGE,
+                    label: '도전 보상',
+                });
+            });
+        } else {
+            showModal(title, finalMsg);
+        }
+
         quizSession = null;
     }
+
+    // ✅ 도전 퀴즈 입장: 쿠폰 1장 우선, 없으면 포인트 2500P 사용
+    function startChallengeEntry(){
+        const coupons = getCoupons();
+        const points = getPoints();
+
+        if (coupons > 0){
+            if (confirm(`도전 쿠폰 1장을 사용해 도전 퀴즈를 시작할까요? (보유: ${coupons}장)`)){
+                setCoupons(coupons - 1);
+                startQuizSession('challenge');
+            }
+            return;
+        }
+
+        if (points >= CHALLENGE_ENTRY_COST){
+            if (confirm(`포인트 ${CHALLENGE_ENTRY_COST}P를 사용해 도전 퀴즈를 시작할까요?`)){
+                setPoints(points - CHALLENGE_ENTRY_COST);
+                startQuizSession('challenge');
+            }
+            return;
+        }
+
+        showModal('도전 불가', `포인트 또는 도전 쿠폰이 부족합니다.\n(필요: ${CHALLENGE_ENTRY_COST}P 또는 도전 쿠폰 1장)`);
+    }
+
+
 
     /* =========================
        가챠 (✅ 10연차 확률 상향)
@@ -570,48 +855,127 @@
         return 'C';
     }
     function pickIndexOf(rarity){
-        const arr = indicesByRarity[rarity];
+        const arr = indicesByRarity[rarity] || indicesByRarity.C || [];
+        if (!arr.length) return 1;
         return arr[Math.floor(Math.random()*arr.length)];
     }
-    function rollGacha(times=1){
-        const need = GACHA_COST * times;
-        if (getPoints() < need){ showModal('포인트 부족', `필요 포인트: ${need}P`); return; }
-        setPoints(getPoints() - need);
+
+
+    function rollGacha(times=1, opts={}){
+        const { free=false, config=null, label=null } = opts || {};
+        const cfg = config || ((times===10) ? RARITY_CONFIG_10X : RARITY_CONFIG_DEFAULT);
+
+        const need = free ? 0 : GACHA_COST * times;
+        if (!free){
+            if (getPoints() < need){
+                showModal('포인트 부족', `필요 포인트: ${need}P`);
+                return;
+            }
+            setPoints(getPoints() - need);
+        }
 
         const owned = getOwnedSet();
-        const results = []; // {idx, dup, rarity}
+        const hiddenOwned = getHiddenOwnedSet();
+        const results = []; // {kind:'normal'|'hidden', idx, dup, rarity}
         let refund = 0;
 
-        const cfg = (times===10) ? RARITY_CONFIG_10X : RARITY_CONFIG_DEFAULT; // ✅ 10연차 상향
-
         for (let t=0;t<times;t++){
-            const rarity = pickRarityByWeight(cfg);
-            const idx = pickIndexOf(rarity);
-            if (owned.has(idx)){ refund += Math.floor(GACHA_COST/2); results.push({idx, dup:true, rarity}); }
-            else { owned.add(idx); results.push({idx, dup:false, rarity}); }
+            let rarity = pickRarityByWeight(cfg);
+            let kind = 'normal';
+            let idx;
+
+            if (rarity === 'H'){
+                // Hidden 가챠: Hidden 폴더에서만 뽑기
+                if (HIDDEN_IMAGE_LIST.length === 0){
+                    // 히든 이미지 없으면 SR로 대체
+                    rarity = 'SR';
+                    kind = 'normal';
+                    idx = pickIndexOf('SR');
+                } else {
+                    kind = 'hidden';
+                    idx = Math.floor(Math.random() * HIDDEN_IMAGE_LIST.length) + 1;
+                }
+            } else {
+                // 일반 가챠 (C/R/SR)
+                idx = pickIndexOf(rarity);
+            }
+
+            if (kind === 'hidden'){
+                if (hiddenOwned.has(idx)){
+                    if (!free) refund += Math.floor(GACHA_COST/2);
+                    results.push({kind, idx, dup:true, rarity});
+                } else {
+                    hiddenOwned.add(idx);
+                    results.push({kind, idx, dup:false, rarity});
+                }
+            } else {
+                if (owned.has(idx)){
+                    if (!free) refund += Math.floor(GACHA_COST/2);
+                    results.push({kind, idx, dup:true, rarity});
+                } else {
+                    owned.add(idx);
+                    results.push({kind, idx, dup:false, rarity});
+                }
+            }
         }
-        if (refund>0) addPoints(refund);
+
+        if (!free && refund>0) addPoints(refund);
         saveOwnedSet(owned);
+        saveHiddenOwnedSet(hiddenOwned);
         populateBook();
 
         gachaResults.innerHTML = '';
         results.forEach((r, i)=>{
-            const wrap = document.createElement('div'); wrap.className='relative result-card'; wrap.style.animationDelay = `${i*40}ms`;
-            const img = document.createElement('img'); img.src = IMAGE_LIST[r.idx-1].url; img.alt = `No.${r.idx}`;
-            img.style.width='66px'; img.style.height='66px'; img.style.imageRendering='pixelated'; img.style.background='#f3f4f6';
-            img.style.borderRadius='12px'; img.style.border='2px solid #e5e7eb';
+            const wrap = document.createElement('div');
+            wrap.className='relative result-card';
+            wrap.style.animationDelay = `${i*40}ms`;
+
+            const img = document.createElement('img');
+            if (r.kind === 'hidden'){
+                const info = HIDDEN_IMAGE_LIST[r.idx-1];
+                img.src = info ? info.url : '';
+                img.alt = `Hidden ${r.idx}`;
+            } else {
+                const info = IMAGE_LIST[r.idx-1];
+                img.src = info ? info.url : '';
+                img.alt = `No.${r.idx}`;
+            }
+            img.style.width='66px';
+            img.style.height='66px';
+            img.style.imageRendering='pixelated';
+            img.style.background='#f3f4f6';
+            img.style.borderRadius='12px';
+            img.style.border='2px solid #e5e7eb';
+
             const ring = document.createElement('div'); ring.className='ring';
-            const tag = document.createElement('div'); tag.className='rarity-tag'; tag.textContent = (r.rarity==='SR'?'SR':r.rarity);
-            wrap.classList.add(`rarity-${r.rarity}`); wrap.appendChild(img); wrap.appendChild(ring); wrap.appendChild(tag);
-            const caption = document.createElement('div'); caption.className='text-xs text-gray-700 text-center mt-1';
-            caption.textContent = r.dup ? `No.${r.idx} (중복)` : `No.${r.idx}`;
-            const cell = document.createElement('div'); cell.className='flex flex-col items-center'; cell.appendChild(wrap); cell.appendChild(caption);
+            const tag = document.createElement('div'); tag.className='rarity-tag';
+            tag.textContent = (r.rarity==='SR'?'SR':r.rarity);
+
+            wrap.classList.add(`rarity-${r.rarity}`);
+            wrap.appendChild(img);
+            wrap.appendChild(ring);
+            wrap.appendChild(tag);
+
+            const caption = document.createElement('div');
+            caption.className='text-xs text-gray-700 text-center mt-1';
+            const baseLabel = (r.kind === 'hidden') ? `H${r.idx}` : `No.${r.idx}`;
+            caption.textContent = r.dup ? `${baseLabel} (중복)` : baseLabel;
+
+            const cell = document.createElement('div');
+            cell.className='flex flex-col items-center';
+            cell.appendChild(wrap);
+            cell.appendChild(caption);
+
             gachaResults.appendChild(cell);
         });
+
         const spend = need;
-        gachaSummary.textContent = `소모: ${spend}P  ·  환급: ${refund}P  ·  순소모: ${Math.max(0, spend-refund)}P`;
+        const labelText = label ? `${label} · ` : '';
+        gachaSummary.textContent = `${labelText}소모: ${spend}P  ·  환급: ${refund}P  ·  순소모: ${Math.max(0, spend-refund)}P`;
         gachaModal.style.display='flex';
     }
+
+
     gachaClose.addEventListener('click', ()=> gachaModal.style.display='none');
 
     /* =========================
@@ -705,7 +1069,20 @@
         zoomCtx.fillStyle = (idx===0) ? '#f5f5f5' : paletteMap[idx];
         zoomCtx.fillRect(cellX, cellY, cellScale, cellScale);
     }
-    function checkCompletion(){ if (completedCells === totalCells){ updateAllQuads(false); showModal('완성!', `No.${currentStageIndex} 그림을 완성했습니다!`); } }
+    function checkCompletion(){
+        if (completedCells === totalCells){
+            updateAllQuads(false);
+            let extra = '';
+            const fully = getFullyColoredSet();
+            if (!fully.has(currentStageIndex)){
+                fully.add(currentStageIndex);
+                saveFullyColoredSet(fully);
+                addCoupons(1);
+                extra = '\n\n🎁 처음 완성한 그림이라 도전 쿠폰 1장을 받았습니다!';
+            }
+            showModal('완성!', `No.${currentStageIndex} 그림을 완성했습니다!${extra}`);
+        }
+    }
     function computeZoomScale(q){
         const maxW = Math.floor(window.innerWidth * 0.95);
         const maxH = Math.floor(window.innerHeight * 0.85);
@@ -825,44 +1202,79 @@
     });
 
     /* =========================
-       공통 동작
-    ========================= */
-    modalCloseButton.onclick = ()=> messageModal.style.display='none';
-    function showModal(title, msg){ modalTitle.textContent = title; modalMessage.textContent = msg; messageModal.style.display = 'flex'; }
+   공통 동작
+========================= */
+    let modalCloseHandler = null;
+    modalCloseButton.onclick = ()=>{
+        messageModal.style.display='none';
+        if (typeof modalCloseHandler === 'function'){
+            const cb = modalCloseHandler;
+            modalCloseHandler = null;
+            cb();
+        }
+    };
+    function showModal(title, msg, onClose){
+        modalTitle.textContent = title;
+        modalMessage.textContent = msg;
+        modalCloseHandler = onClose || null;
+        messageModal.style.display = 'flex';
+    }
     function bootBindings(){
+        // 타이틀 → 로비 진입
         startButton.addEventListener('click', async ()=>{
             if (!localStorage.getItem(LS_POINTS)) setPoints(0);
             if (!localStorage.getItem(LS_OWNED)) saveOwnedSet(new Set());
+            if (!localStorage.getItem(LS_HIDDEN_OWNED)) saveHiddenOwnedSet(new Set());
+            if (!localStorage.getItem(LS_COUPONS)) setCoupons(0);
+
             syncPointsUI();
-            await loadCodexImages(); // ✅ png/ 스캔
+            syncCouponsUI();
+
+            await loadCodexImages();   // 일반 도감 이미지 로딩
+            await loadHiddenImages();  // Hidden 폴더 이미지 로딩
             populateBook();
             showView('lobbyScreen');
         });
-        document.getElementById('zoomPalette'); document.getElementById('paletteContainer');
+
         enableHorizontalWheel(document.getElementById('paletteContainer'));
         enableHorizontalWheel(document.getElementById('zoomPalette'));
 
-        document.getElementById('backButton').addEventListener('click', ()=>{
-            saveCurrentProgress(); showView('bookScreen'); populateBook(); syncPointsUI();
+        backButton.addEventListener('click', ()=>{
+            saveCurrentProgress();
+            showView('bookScreen');
+            populateBook();
+            syncPointsUI();
         });
 
         if (lobbyCodexBtn) lobbyCodexBtn.addEventListener('click', ()=>{
             showView('bookScreen');
         });
 
-        if (lobbyQuizBtn) lobbyQuizBtn.addEventListener('click', startQuizSession);
-
+        if (lobbyQuizBtn) lobbyQuizBtn.addEventListener('click', ()=> startQuizSession('normal'));
         if (lobbyGachaBtn) lobbyGachaBtn.addEventListener('click', ()=> rollGacha(10));
 
-        quizBtn.addEventListener('click', startQuizSession);
+        quizBtn.addEventListener('click', ()=> startQuizSession('normal'));
+        if (challengeBtn) challengeBtn.addEventListener('click', startChallengeEntry);
+
         gacha1Btn.addEventListener('click', ()=> rollGacha(1));
         gacha10Btn.addEventListener('click', ()=> rollGacha(10));
 
         resetBtn.addEventListener('click', ()=>{
-            if (!confirm('포인트와 도감을 초기화할까요?')) return;
-            localStorage.removeItem(LS_POINTS); localStorage.removeItem(LS_OWNED);
-            for (let i=0;i<localStorage.length;){ const k=localStorage.key(i); if (k && k.startsWith(LS_PROGRESS_PREFIX)) localStorage.removeItem(k); else i++; }
-            syncPointsUI(); populateBook(); showModal('초기화 완료', '포인트와 도감을 초기화했습니다.');
+            if (!confirm('포인트, 도감, 쿠폰, 색칠 기록을 모두 초기화할까요?')) return;
+            localStorage.removeItem(LS_POINTS);
+            localStorage.removeItem(LS_OWNED);
+            localStorage.removeItem(LS_HIDDEN_OWNED);
+            localStorage.removeItem(LS_COUPONS);
+            localStorage.removeItem(LS_FULLY_COLORED);
+            for (let i=0;i<localStorage.length;){
+                const k = localStorage.key(i);
+                if (k && k.startsWith(LS_PROGRESS_PREFIX)) localStorage.removeItem(k);
+                else i++;
+            }
+            syncPointsUI();
+            syncCouponsUI();
+            populateBook();
+            showModal('초기화 완료', '포인트, 도감, 쿠폰, 색칠 기록을 초기화했습니다.');
         });
 
         showView('titleScreen');
