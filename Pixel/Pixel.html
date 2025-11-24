@@ -247,16 +247,14 @@
     /* =========================
        설정값
     ========================= */
-    // 도감: 로컬 png/ 먼저 탐색 → 실패 시 원격 폴백
+    // 도감: 로컬 png/ 먼저 탐색 → 실패 시 원격 폴백 (이제 스캔 안함, 바로 개수만큼 생성)
     const CODEX_PNG_BASE = './png/';
-    const REMOTE_IMAGE_BASE = 'https://unluckyidiot16.github.io/WebGames/Pixel/PNG/';
-    const REMOTE_COUNT = 300;
 
-    // ✅ 히든 이미지 전용 폴더 (도전 가챠 전용 풀)
     const HIDDEN_IMAGE_BASE = 'https://unluckyidiot16.github.io/WebGames/Pixel/Hidden/';
-    let HIDDEN_IMAGE_LIST = [];   // [{url, name}]
-    let HIDDEN_INDICES = [];      // [1..Hn] - HIDDEN_IMAGE_LIST 인덱스용
-
+    
+    // ⚠️ 중요: 여기에 실제 업로드한 이미지 파일의 개수를 적어주세요.
+    const MAX_NORMAL_IMAGES = 300; // 예: 1.png ~ 100.png 까지 있다면 300
+    const MAX_HIDDEN_IMAGES = 40;  // 예: 1.png ~ 20.png 까지 있다면 40
     // 가챠
     const GACHA_COST = 100;
     const RARITY_CONFIG_DEFAULT = { C:{weight:80}, R:{weight:18}, SR:{weight:3} };
@@ -483,79 +481,58 @@
         }, {passive:false});
     }
 
-    /* =========================
-       도감 이미지 로딩 (로컬 png/ → 원격 폴백)
-    ========================= */
-    let IMAGE_LIST = [];           // [{url, name}]
-    let indicesByRarity = {C:[], R:[], SR:[]};
-    let rarityByIndex = {}; // idx -> 'C' | 'R' | 'SR' | 'H'
+    // [이 부분 확인] 전역 변수로 선언되어 있어야 오류가 안 납니다.
+    let IMAGE_LIST = [];
+    let HIDDEN_IMAGE_LIST = [];
+    let HIDDEN_INDICES = [];
 
+    // 아래 두 변수가 선언되어 있는지 확인해주세요. 없다면 추가!
+    let indicesByRarity = {};
+    let rarityByIndex = {};
+
+    /* =========================
+       도감 이미지 로딩 (수정됨: 안전한 고정 리스트 방식)
+    ========================= */
+
+    // 1. 일반 도감 로딩
     async function loadCodexImages(){
-        // 1) manifest.json 또는 index.json
-        for (const name of ['manifest.json', 'index.json']){
-            try{
-                const r = await fetch(CODEX_PNG_BASE + name, {cache:'no-store'});
-                if (r.ok){
-                    const j = await r.json();
-                    let files = Array.isArray(j) ? j : (j.images || j.files || []);
-                    files = files.filter(x=>/\.png(\?.*)?$/i.test(x));
-                    if (files.length){
-                        IMAGE_LIST = files.map(f=>({url: CODEX_PNG_BASE + f, name: f}));
-                        buildRarityBuckets(IMAGE_LIST.length);
-                        return;
-                    }
-                }
-            }catch(_){}
+        IMAGE_LIST = [];
+
+        // 설정된 개수(MAX_NORMAL_IMAGES)만큼 반복해서 리스트 생성
+        for (let i = 1; i <= MAX_NORMAL_IMAGES; i++) {
+            IMAGE_LIST.push({
+                // 만약 로컬('./png/') 경로를 쓴다면 CODEX_PNG_BASE 사용
+                // GitHub Pages 배포 시 폴더가 확실하다면 아래처럼 작성
+                url: `${CODEX_PNG_BASE}${i}.png`,
+                name: `${i}.png`
+            });
         }
-        // 2) 디렉터리 인덱스 파싱
-        try{
-            const r = await fetch(CODEX_PNG_BASE, {cache:'no-store'});
-            if (r.ok){
-                const html = await r.text();
-                const hrefs = [...html.matchAll(/href\s*=\s*["']([^"']+\.png(?:\?[^"']*)?)["']/ig)].map(m=>m[1]);
-                if (hrefs.length){
-                    const uniq = [...new Set(hrefs)];
-                    IMAGE_LIST = uniq.map(f=>({url: CODEX_PNG_BASE + f, name: f}));
-                    buildRarityBuckets(IMAGE_LIST.length);
-                    return;
-                }
-            }
-        }catch(_){}
-        // 3) 패턴(01~50) HEAD 확인(부하 제한) - 00을 제거하고 2자리로 변경
-        const pad2 = n => String(n).padStart(2,'0'); // 2자리 패딩으로 변경
-        const candidates = Array.from({length:50}, (_,i)=> `${CODEX_PNG_BASE}${pad2(i+1)}.png`);
-        const ok = [];
-        for (const u of candidates){
-            try{ const h = await fetch(u, {method:'HEAD'}); if (h.ok){ ok.push(u); } }catch(_){}
-            if (ok.length>=12) break;
-        }
-        if (ok.length){
-            IMAGE_LIST = ok.map(u=>({url:u, name:u.split('/').pop()}));
-            buildRarityBuckets(IMAGE_LIST.length);
-            return;
-        }
-        // 4) 폴백: 원격 고정 목록 1..50
-        IMAGE_LIST = Array.from({length:REMOTE_COUNT}, (_,i)=>({url: REMOTE_IMAGE_BASE + `${i+1}.png`, name: `${i+1}.png`}));
+
+        // 희귀도(C, R, SR) 비율 설정
         buildRarityBuckets(IMAGE_LIST.length);
+
+        // 비동기 흉내 (코드 흐름 유지를 위해)
+        return Promise.resolve();
     }
 
+    // 2. 히든 도감 로딩
     async function loadHiddenImages(){
         HIDDEN_IMAGE_LIST = [];
         HIDDEN_INDICES = [];
-        const maxTry = 41; // 최대 50장까지 체크 (필요하면 늘려도 됨)
 
-        for (let i=1; i<=maxTry; i++){
-            const url = `${HIDDEN_IMAGE_BASE}${i}.png`;
-            try{
-                const res = await fetch(url, { method:'HEAD', cache:'no-store' });
-                if (res.ok){
-                    HIDDEN_IMAGE_LIST.push({ url, name: `${i}.png` });
-                }
-            }catch(_){}
+        // 설정된 개수(MAX_HIDDEN_IMAGES)만큼 반복해서 리스트 생성
+        for (let i = 1; i <= MAX_HIDDEN_IMAGES; i++){
+            HIDDEN_IMAGE_LIST.push({
+                url: `${HIDDEN_IMAGE_BASE}${i}.png`,
+                name: `${i}.png`
+            });
         }
-        HIDDEN_INDICES = HIDDEN_IMAGE_LIST.map((_, idx)=> idx+1);
-    }
 
+        // 인덱스 배열 생성
+        HIDDEN_INDICES = HIDDEN_IMAGE_LIST.map((_, idx)=> idx+1);
+
+        return Promise.resolve();
+    }
 
     function buildRarityBuckets(n){
         // 인덱스 기반 희귀도 영역 동적 할당(대략 C:70%, R:24%, SR:6%)
