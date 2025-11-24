@@ -1,0 +1,1411 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>픽셀 컬러링 — 도감·퀴즈·뽑기</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: ui-sans-serif, system-ui; touch-action: manipulation; }
+        .view { display: none; width: 100%; min-height: 100vh; }
+        .view.active { display: flex; }
+        canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
+        .card { border:2px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#fff; cursor:pointer; transition:.2s; }
+        /* 도감: 색칠 완료 카드 테두리 강조 (레어도 색) */
+        #bookGrid .card.colored { border-width:3px; }
+        #bookGrid .card.colored.rarity-C { border-color:#9ca3af; }   /* C = 회색 */
+        #bookGrid .card.colored.rarity-R { border-color:#60a5fa; }   /* R = 파랑 */
+        #bookGrid .card.colored.rarity-SR { border-color:#fbbf24; }  /* SR = 금색 */
+        #bookGrid .card.colored.rarity-H { border-color:#ec4899; }   /* Hidden = 핑크 */        #bookGrid .card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.08); }
+        #bookGrid img { image-rendering:pixelated; width:100%; aspect-ratio:1/1; object-fit:contain; background:#f9fafb; }
+        .locked { position:relative; filter:grayscale(1) opacity(.8); }
+        .locked::after{
+            content:"🔒"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+            font-size:28px; color:#fff; text-shadow:0 0 5px #000; background:rgba(0,0,0,.35);
+        }
+        #zoomOverlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:1000; }
+        #zoomCard { background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); padding:16px;
+            display:flex; flex-direction:column; align-items:center; gap:12px; max-width:95vw; max-height:90vh; }
+        #zoomCanvas { image-rendering: pixelated; border:2px solid #0ea5e9; border-radius:8px; }
+        #paletteContainer, #zoomPalette {
+            display:grid; grid-auto-flow:column; grid-auto-columns:max-content; gap:10px; width:100%;
+            padding:0 8px 8px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; scrollbar-gutter:stable both-edges;
+        }
+        .palette-button{ width:50px; height:50px; border:2px solid #d1d5db; border-radius:8px; color:#fff; font-weight:700;
+            display:flex; align-items:center; justify-content:center; text-shadow:0 0 2px #000; cursor:pointer;
+            transition:transform .15s, box-shadow .15s, border-color .15s; }
+        .palette-button.selected{ border-color:#0ea5e9; transform:scale(1.08); box-shadow:0 0 15px rgba(14,165,233,.45); }
+        #zoomPalette .palette-button{ width:42px; height:42px; }
+        .composite{ display:flex; justify-content:center; overflow:auto; border:3px solid #374151; border-radius:14px; }
+        .grid-2x2{ display:inline-grid; grid-template-columns:max-content max-content; grid-template-rows:max-content max-content; gap:0; }
+        .modal{ display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,.4); justify-content:center; align-items:center; }
+        .modal-content{ background:#fff; margin:auto; padding:24px; border-radius:12px; width:90%; max-width:520px; text-align:center; }
+        @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-3px,0)} 50%{transform:translate(3px,0)} 75%{transform:translate(-3px,0)} }
+        .shake { animation:shake .25s; }
+        @keyframes popin { 0%{transform:scale(.6) rotate(-3deg); opacity:0} 100%{transform:scale(1) rotate(0deg); opacity:1} }
+        .result-card { animation:popin .25s ease-out both; }
+        .rarity-tag { position:absolute; top:4px; left:4px; font-size:10px; font-weight:800; color:#fff; padding:2px 6px; border-radius:6px; text-shadow:0 1px 2px rgba(0,0,0,.4); }
+        .ring { position:absolute; inset:-3px; border:3px solid transparent; border-radius:12px; pointer-events:none; }
+        .rarity-C .rarity-tag { background:#9ca3af; } .rarity-C .ring { border-color:rgba(156,163,175,.7); box-shadow:0 0 12px rgba(156,163,175,.6) inset, 0 0 8px rgba(156,163,175,.4); }
+        @keyframes pulseGlow { 0%,100%{box-shadow:0 0 18px rgba(245,158,11,.9), 0 0 28px rgba(245,158,11,.5) inset} 50%{box-shadow:0 0 28px rgba(245,158,11,1), 0 0 40px rgba(245,158,11,.7) inset} }
+        .rarity-R .rarity-tag { background:#60a5fa; } .rarity-R .ring { border-color:rgba(96,165,250,.9); box-shadow:0 0 14px rgba(96,165,250,.8) inset, 0 0 10px rgba(96,165,250,.6); }
+        .rarity-SR .rarity-tag { background:#f59e0b; } .rarity-SR .ring { border-color:#f59e0b; animation:pulseGlow 1.2s ease-in-out infinite; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<div id="titleScreen" class="view active flex-col items-center justify-center p-4">
+    <h1 class="text-5xl md:text-7xl font-extrabold text-gray-800 mb-8 animate-pulse">픽셀 컬러링</h1>
+    <button id="startButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg hover:scale-105">
+        시작하기
+    </button>
+</div>
+
+<div id="lobbyScreen" class="view flex-col items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-4xl flex flex-col gap-8">
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">무엇부터 시작할까요?</h1>
+            <p class="text-sm md:text-base text-gray-500">
+                퀴즈로 포인트를 모으고, 가챠로 도감을 해금한 뒤 색칠해 보세요.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <button id="lobbyCodexBtn"
+                    class="flex flex-col items-center justify-between gap-2 bg-white rounded-2xl shadow-lg border border-slate-200 px-6 py-6 hover:shadow-xl hover:-translate-y-1 transition">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-xl font-bold text-gray-800">도감 &amp; 색칠</span>
+                    <span class="text-xs text-gray-500 text-center">
+            해금한 픽셀 이미지를 선택해 색칠을 이어서 할 수 있어요.
+          </span>
+                </div>
+                <span class="mt-2 inline-flex items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold px-4 py-1">
+          도감으로 이동
+        </span>
+            </button>
+
+            <button id="lobbyQuizBtn"
+                    class="flex flex-col items-center justify-between gap-2 bg-white rounded-2xl shadow-lg border border-emerald-100 px-6 py-6 hover:shadow-xl hover:-translate-y-1 transition">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-xl font-bold text-emerald-700">퀴즈 도전</span>
+                    <span class="text-xs text-gray-500 text-center">
+            학습용 퀴즈를 풀고 포인트를 모아 보세요.
+          </span>
+                </div>
+                <span class="mt-2 inline-flex items-center justify-center rounded-full bg-emerald-500 text-white text-sm font-semibold px-4 py-1">
+          퀴즈 시작
+        </span>
+            </button>
+
+            <button id="lobbyGachaBtn"
+                    class="flex flex-col items-center justify-between gap-2 bg-white rounded-2xl shadow-lg border border-indigo-100 px-6 py-6 hover:shadow-xl hover:-translate-y-1 transition">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-xl font-bold text-indigo-700">가챠 뽑기</span>
+                    <span class="text-xs text-gray-500 text-center">
+            포인트로 새로운 픽셀 도감을 해금할 수 있어요.
+          </span>
+                </div>
+                <span class="mt-2 inline-flex items-center justify-center rounded-full bg-indigo-600 text-white text-sm font-semibold px-4 py-1">
+          10회 뽑기
+        </span>
+            </button>
+        </div>
+
+        <div class="text-center text-xs md:text-sm text-gray-500">
+            보유 포인트: <b id="pointsTextLobby" class="text-sky-600">0P</b>
+            · 도전 쿠폰: <b id="couponsTextLobby" class="text-rose-500">0장</b>
+        </div>
+    </div>
+</div>
+
+<div id="bookScreen" class="view flex-col items-center p-4 md:p-8">
+    <div class="w-full max-w-6xl flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">도감</h1>
+            <div class="flex flex-wrap items-center gap-2">
+        <span class="text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">
+          보유 포인트: <b id="pointsText" class="text-sky-600">0P</b>
+        </span>
+                <span class="text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">
+          도전 쿠폰: <b id="couponsTextBook" class="text-rose-500">0장</b>
+        </span>
+                <span id="collectionText"
+                      class="text-xs md:text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">
+          수집률: 0/0 (0%)
+        </span>
+                <span id="colorRateText"
+                      class="text-xs md:text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">
+          색칠률: 0/0 (0%)
+        </span>
+                <button id="toLobbyBtn"
+                        class="bg-slate-200 hover:bg-slate-300 text-gray-800 text-sm font-semibold py-2 px-3 rounded-lg shadow">
+                    로비로
+                </button>
+                <button id="quizBtn"
+                        class="bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow">
+                    퀴즈 도전
+                </button>
+                <button id="challengeBtn"
+                        class="bg-rose-500 hover:bg-rose-600 text-white font-bold py-2 px-4 rounded-lg shadow">
+                    도전 퀴즈
+                </button>
+                <button id="gacha1Btn"
+                        class="bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-2 px-3 rounded-lg shadow">
+                    뽑기 1회
+                </button>
+                <button id="gacha10Btn"
+                        class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-3 rounded-lg shadow">
+                    뽑기 10회
+                </button>
+                <button id="gacha100Btn"
+                        class="bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-2 px-3 rounded-lg shadow">
+                    뽑기 100회
+                </button>
+            </div>
+        </div>
+        <p class="text-sm text-gray-500">
+            ※ 퀴즈로 포인트를 모아 가챠로 도감을 해금하세요. 해금된 항목만 색칠할 수 있어요. 중복 획득 시 가챠 비용의 절반 환급.
+        </p>
+        <div id="bookGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4"></div>
+    </div>
+</div>
+
+
+<div id="gameScreen" class="view flex-col items-center p-4">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <div class="flex items-center gap-2">
+            <button id="backButton" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow">&larr; 도감으로</button>
+            <span class="text-sm text-gray-500">진행은 브라우저에 저장됩니다</span>
+        </div>
+        <div class="flex items-center gap-3">
+            <span class="text-sm px-3 py-1 bg-white rounded-lg border shadow-sm">보유 포인트: <b id="pointsTextGame" class="text-sky-600">0P</b></span>
+        </div>
+    </div>
+
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full max-w-5xl flex flex-col items-center">
+        <div id="loadingSpinner" class="text-center p-8">
+            <svg class="animate-spin h-10 w-10 text-sky-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <p class="mt-3 text-gray-600">이미지 분석 중...</p>
+        </div>
+
+        <div class="composite w-full">
+            <div id="quadGrid" class="grid-2x2"></div>
+        </div>
+
+        <div id="paletteContainer" class="w-full mt-4"></div>
+
+        <div id="progressContainer" class="w-full max-w-md mt-4">
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div id="progressBar" class="bg-sky-500 h-2.5 rounded-full" style="width:0%; transition:width .3s;"></div>
+            </div>
+            <p id="progressText" class="text-center text-sm text-gray-600 mt-1">0%</p>
+        </div>
+    </div>
+</div>
+
+<div id="zoomOverlay">
+    <div id="zoomCard">
+        <canvas id="zoomCanvas"></canvas>
+        <div id="zoomPalette" class="w-full"></div>
+        <div class="flex gap-2">
+            <button id="zoomCloseBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow">닫기(Esc)</button>
+        </div>
+    </div>
+</div>
+
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="text-xl font-bold mb-2"></h2>
+        <p id="modalMessage" class="text-gray-700"></p>
+        <button id="modalCloseButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow mt-4">확인</button>
+    </div>
+</div>
+
+<div id="quizModal" class="modal">
+    <div class="modal-content">
+        <h2 id="quizTitle" class="text-xl font-bold mb-3">퀴즈</h2>
+        <p id="quizSub" class="text-xs text-gray-500 mb-1"></p>
+        <p id="quizQuestion" class="text-gray-800 mb-4"></p>
+        <div id="quizChoices" class="flex flex-col gap-2"></div>
+        <button id="quizCancel" class="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg shadow mt-4">종료</button>
+    </div>
+</div>
+
+<div id="gachaModal" class="modal">
+    <div class="modal-content">
+        <h2 class="text-xl font-bold mb-3">가챠 결과</h2>
+        <div id="gachaResults" class="grid grid-cols-5 sm:grid-cols-5 md:grid-cols-5 gap-2 justify-items-center mb-3"></div>
+        <p id="gachaSummary" class="text-gray-700 mb-3"></p>
+        <button id="gachaClose" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow">확인</button>
+    </div>
+</div>
+
+<script>
+    /* =========================
+       설정값
+    ========================= */
+    // 도감: 로컬 png/ 먼저 탐색 → 실패 시 원격 폴백 (이제 스캔 안함, 바로 개수만큼 생성)
+    const CODEX_PNG_BASE = './PNG/';
+
+    const HIDDEN_IMAGE_BASE = 'https://unluckyidiot16.github.io/WebGames/Pixel/Hidden/';
+    
+    // ⚠️ 중요: 여기에 실제 업로드한 이미지 파일의 개수를 적어주세요.
+    const MAX_NORMAL_IMAGES = 300; // 예: 1.png ~ 100.png 까지 있다면 300
+    const MAX_HIDDEN_IMAGES = 40;  // 예: 1.png ~ 20.png 까지 있다면 40
+    // 가챠
+    const GACHA_COST = 100;
+    const RARITY_CONFIG_DEFAULT = { C:{weight:80}, R:{weight:18}, SR:{weight:3} };
+    const RARITY_CONFIG_10X      = { C:{weight:70}, R:{weight:25}, SR:{weight:6} }; // 10연차 상향
+
+    // ✅ 히든/도전 가챠용 설정 (SR 70%, Hidden 30%)
+    const RARITY_CONFIG_CHALLENGE = {
+        SR: { weight: 50 }, // SR (일반 SR 풀)
+        H:  { weight: 50 }, // Hidden (Hidden 폴더 전용)
+    };
+
+    // 퀴즈
+    const QUIZ_JSON_URL = 'https://unluckyidiot16.github.io/WebGames/Pixel/Quiz/Quiz.json';
+    const QUIZ_REWARD = 10;           // 기본 점수
+    const STREAK_STEP = 0.2;          // 연속정답 배율 증가
+    const STREAK_MAX_MULT = 3;        // 연속정답 배율 상한
+    const REWARD_MULTIPLIER = 5;      // ✅ 추가: 정답 보너스 5배
+    const QUIZ_SESSION_LEN = 10;
+    const MAX_WRONG = 2;              // ✅ 추가: 오답 2회 시 종료
+
+    // ✅ 도전 퀴즈용 설정
+    const CHALLENGE_ENTRY_COST = 2500;      // 포인트 입장 비용
+    const CHALLENGE_TIME_LIMIT_SEC = 90;    // 도전 퀴즈 제한 시간(초)
+
+    /* =========================
+       DOM
+    ========================= */
+    const allViews = document.querySelectorAll('.view');
+    const titleScreen = document.getElementById('titleScreen');
+    const lobbyScreen = document.getElementById('lobbyScreen');
+    const gameScreen  = document.getElementById('gameScreen');
+    const startButton = document.getElementById('startButton');
+
+    const bookGrid = document.getElementById('bookGrid');
+
+    // 포인트 표시
+    const pointsTextLobby = document.getElementById('pointsTextLobby');
+    const pointsText = document.getElementById('pointsText');
+    const pointsTextGame = document.getElementById('pointsTextGame');
+
+
+    // ✅ 쿠폰 표시
+    const couponsTextLobby = document.getElementById('couponsTextLobby');
+    const couponsTextBook = document.getElementById('couponsTextBook');
+
+
+    // 로비 버튼
+    const lobbyCodexBtn = document.getElementById('lobbyCodexBtn');
+    const lobbyQuizBtn  = document.getElementById('lobbyQuizBtn');
+    const lobbyGachaBtn = document.getElementById('lobbyGachaBtn');
+
+    // 도감 상단 버튼
+    const quizBtn   = document.getElementById('quizBtn');
+    const gacha1Btn = document.getElementById('gacha1Btn');
+    const gacha10Btn= document.getElementById('gacha10Btn');
+    const gacha100Btn = document.getElementById('gacha100Btn');
+    const resetBtn  = document.getElementById('resetBtn'); // 없으면 null
+    const challengeBtn = document.getElementById('challengeBtn'); // ✅ 도전 퀴즈
+    const collectionText = document.getElementById('collectionText');
+    const colorRateText  = document.getElementById('colorRateText');
+    const toLobbyBtn     = document.getElementById('toLobbyBtn');
+
+
+    const backButton  = document.getElementById('backButton');
+
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const quadGrid = document.getElementById('quadGrid');
+    const paletteContainer = document.getElementById('paletteContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+
+    const messageModal = document.getElementById('messageModal');
+    const modalTitle   = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseButton = document.getElementById('modalCloseButton');
+
+    const quizModal = document.getElementById('quizModal');
+    const quizTitle = document.getElementById('quizTitle');
+    const quizSub   = document.getElementById('quizSub');
+    const quizQuestion = document.getElementById('quizQuestion');
+    const quizChoices  = document.getElementById('quizChoices');
+    const quizCancel   = document.getElementById('quizCancel');
+
+    const gachaModal   = document.getElementById('gachaModal');
+    const gachaResults = document.getElementById('gachaResults');
+    const gachaSummary = document.getElementById('gachaSummary');
+    const gachaClose   = document.getElementById('gachaClose');
+
+    const zoomOverlay  = document.getElementById('zoomOverlay');
+    const zoomCanvas   = document.getElementById('zoomCanvas');
+    const zoomPalette  = document.getElementById('zoomPalette');
+    const zoomCloseBtn = document.getElementById('zoomCloseBtn');
+    const zoomCtx = zoomCanvas.getContext('2d'); zoomCtx.imageSmoothingEnabled = false;
+
+    /* =========================
+       상태 & 저장
+    ========================= */
+    const LS_POINTS = 'pixel.points';
+    const LS_OWNED  = 'pixel.owned';
+    const LS_HIDDEN_OWNED = 'pixel.hiddenOwned';       // 히든 전용 도감
+    const LS_PROGRESS_PREFIX = 'pixel.progress.';
+    const LS_COUPONS = 'pixel.coupons';                // 도전 쿠폰
+    const LS_FULLY_COLORED = 'pixel.fullyColored';     // 색칠 100% 완료 스테이지
+    function progressKey(idx){ return `${LS_PROGRESS_PREFIX}${idx}`; }
+
+
+    function getPoints(){ return parseInt(localStorage.getItem(LS_POINTS) || '0', 10); }
+    function setPoints(n){ localStorage.setItem(LS_POINTS, String(Math.max(0,n|0))); syncPointsUI(); }
+    function addPoints(n){ setPoints(getPoints()+n); }
+    function syncPointsUI(){
+        const t = `${getPoints()}P`;
+        if (pointsTextLobby) pointsTextLobby.textContent = t;
+        if (pointsText)      pointsText.textContent = t;
+        if (pointsTextGame)  pointsTextGame.textContent = t;
+    }
+
+
+    // ✅ 쿠폰
+    function getCoupons(){ return parseInt(localStorage.getItem(LS_COUPONS) || '0', 10); }
+    function setCoupons(n){
+        localStorage.setItem(LS_COUPONS, String(Math.max(0, n|0)));
+        syncCouponsUI();
+    }
+    function addCoupons(n){ setCoupons(getCoupons() + n); }
+    function syncCouponsUI(){
+        const t = `${getCoupons()}장`;
+        if (couponsTextLobby) couponsTextLobby.textContent = t;
+        if (couponsTextBook)  couponsTextBook.textContent  = t;
+    }
+
+    // ✅ 색칠 완성 업적 (그림 1개당 1번만 쿠폰 지급)
+    function getFullyColoredSet(){
+        try{
+            const arr = JSON.parse(localStorage.getItem(LS_FULLY_COLORED) || '[]');
+            return new Set(arr.map(Number));
+        }catch(_){
+            return new Set();
+        }
+    }
+    function saveFullyColoredSet(set){
+        localStorage.setItem(LS_FULLY_COLORED, JSON.stringify(Array.from(set)));
+    }
+
+    // ✅ 도감 수집률 / 색칠률 통계
+    function syncCollectionStats(){
+        if (!collectionText && !colorRateText) return;
+
+        const total = IMAGE_LIST.length || 0;
+        const owned = getOwnedSet();
+        const fully = getFullyColoredSet();
+
+        const ownedCount = owned.size;
+        const fullyCount = fully.size;
+
+        const collectPercent = total ? Math.round((ownedCount / total) * 100) : 0;
+        const colorPercent   = total ? Math.round((fullyCount / total) * 100) : 0;
+
+        if (collectionText){
+            collectionText.textContent =
+                `수집률: ${ownedCount}/${total} (${collectPercent}%)`;
+        }
+        if (colorRateText){
+            colorRateText.textContent =
+                `색칠률: ${fullyCount}/${total} (${colorPercent}%)`;
+        }
+    }
+
+    function getOwnedSet(){
+        try{
+            const arr = JSON.parse(localStorage.getItem(LS_OWNED)||'[]');
+            return new Set(arr.map(Number));
+        } catch{ return new Set(); }
+    }
+    function saveOwnedSet(set){
+        localStorage.setItem(LS_OWNED, JSON.stringify(Array.from(set)));
+    }
+
+    // ✅ Hidden 도감 전용
+    function getHiddenOwnedSet(){
+        try{
+            const arr = JSON.parse(localStorage.getItem(LS_HIDDEN_OWNED)||'[]');
+            return new Set(arr.map(Number));
+        } catch{ return new Set(); }
+    }
+    function saveHiddenOwnedSet(set){
+        localStorage.setItem(LS_HIDDEN_OWNED, JSON.stringify(Array.from(set)));
+    }
+
+    // ✅ 도감 수집률 동기화
+    function syncCollectionRate(){
+        if (!collectionText) return;
+
+        const totalNormal = IMAGE_LIST.length;
+        const totalHidden = HIDDEN_IMAGE_LIST.length;
+
+        const owned = getOwnedSet();
+        const hiddenOwned = getHiddenOwnedSet();
+
+        const normalCount = owned.size;
+        const hiddenCount = hiddenOwned.size;
+
+        const totalAll = totalNormal + totalHidden;
+        const ownedAll = normalCount + hiddenCount;
+        const percentAll = totalAll ? Math.round((ownedAll / totalAll) * 100) : 0;
+
+        collectionText.textContent =
+            `수집률: ${ownedAll}/${totalAll} (${percentAll}%)` +
+            (totalHidden ? ` · 히든 ${hiddenCount}/${totalHidden}` : '');
+    }
+
+    /* =========================
+       유틸
+    ========================= */
+    function shuffleInPlace(arr){
+        for (let i=arr.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [arr[i],arr[j]]=[arr[j],arr[i]]; }
+        return arr;
+    }
+    function enableHorizontalWheel(el){
+        if (!el) return;
+        el.addEventListener('wheel', (e)=>{
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)){
+                el.scrollLeft += e.deltaY; e.preventDefault();
+            }
+        }, {passive:false});
+    }
+
+    // [이 부분 확인] 전역 변수로 선언되어 있어야 오류가 안 납니다.
+    let IMAGE_LIST = [];
+    let HIDDEN_IMAGE_LIST = [];
+    let HIDDEN_INDICES = [];
+
+    // 아래 두 변수가 선언되어 있는지 확인해주세요. 없다면 추가!
+    let indicesByRarity = {};
+    let rarityByIndex = {};
+
+    /* =========================
+       도감 이미지 로딩 (수정됨: 안전한 고정 리스트 방식)
+    ========================= */
+
+    // 1. 일반 도감 로딩
+    async function loadCodexImages(){
+        IMAGE_LIST = [];
+
+        // 설정된 개수(MAX_NORMAL_IMAGES)만큼 반복해서 리스트 생성
+        for (let i = 1; i <= MAX_NORMAL_IMAGES; i++) {
+            IMAGE_LIST.push({
+                // 만약 로컬('./png/') 경로를 쓴다면 CODEX_PNG_BASE 사용
+                // GitHub Pages 배포 시 폴더가 확실하다면 아래처럼 작성
+                url: `${CODEX_PNG_BASE}${i}.png`,
+                name: `${i}.png`
+            });
+        }
+
+        // 희귀도(C, R, SR) 비율 설정
+        buildRarityBuckets(IMAGE_LIST.length);
+
+        // 비동기 흉내 (코드 흐름 유지를 위해)
+        return Promise.resolve();
+    }
+
+    // 2. 히든 도감 로딩
+    async function loadHiddenImages(){
+        HIDDEN_IMAGE_LIST = [];
+        HIDDEN_INDICES = [];
+
+        // 설정된 개수(MAX_HIDDEN_IMAGES)만큼 반복해서 리스트 생성
+        for (let i = 1; i <= MAX_HIDDEN_IMAGES; i++){
+            HIDDEN_IMAGE_LIST.push({
+                url: `${HIDDEN_IMAGE_BASE}${i}.png`,
+                name: `${i}.png`
+            });
+        }
+
+        // 인덱스 배열 생성
+        HIDDEN_INDICES = HIDDEN_IMAGE_LIST.map((_, idx)=> idx+1);
+
+        return Promise.resolve();
+    }
+
+    function buildRarityBuckets(n){
+        // 인덱스 기반 희귀도 영역 동적 할당(대략 C:70%, R:24%, SR:6%)
+        const sr = Math.max(1, Math.round(n * 0.06));
+        const r  = Math.max(1, Math.round(n * 0.24));
+        const c  = Math.max(1, n - sr - r);
+
+        indicesByRarity = {C:[], R:[], SR:[]};
+        rarityByIndex = {};
+
+        for (let i=1;i<=n;i++){
+            let tier = 'C';
+            if (i > c && i <= c+r) tier = 'R';
+            if (i > c+r) tier = 'SR';
+            indicesByRarity[tier].push(i);
+            rarityByIndex[i] = tier;
+        }
+    }
+
+    function getRarityOfIndex(idx){
+        return rarityByIndex[idx] || 'C';
+    }
+
+    /* =========================
+       로비(도감)
+    ========================= */
+    function populateBook(){
+        const owned       = getOwnedSet();
+        const hiddenOwned = getHiddenOwnedSet();
+        const fully       = getFullyColoredSet();
+
+        bookGrid.innerHTML = '';
+
+        // 1) 일반 도감: No.1 .. No.N
+        IMAGE_LIST.forEach((it, i)=>{
+            const idx = i + 1;
+            const isOwned = owned.has(idx);
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const img = document.createElement('img');
+            img.src = it.url;
+            img.alt = `No.${idx}`;
+            img.loading = 'lazy';
+
+            const title = document.createElement('p');
+            title.className = 'text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `No.${idx}`;
+
+            if (!isOwned){
+                img.classList.add('locked');
+                card.title = '가챠로 해금하세요';
+            } else {
+                // 일반 그림: stageId = idx
+                card.addEventListener('click', ()=> startGame(it.url, idx));
+            }
+
+            // 색칠 완료: 레어도 테두리
+            if (fully.has(idx)){
+                const rarity = getRarityOfIndex(idx);
+                card.classList.add('colored');
+                card.classList.add(`rarity-${rarity}`);
+            }
+
+            card.appendChild(img);
+            card.appendChild(title);
+            bookGrid.appendChild(card);
+        });
+
+        // 2) 히든 도감: H1 .. Hn (해금된 것만 표시)
+        HIDDEN_IMAGE_LIST.forEach((it, i)=>{
+            const hiddenIdx = i + 1;
+            if (!hiddenOwned.has(hiddenIdx)) return;     // 뽑기 전까지는 숨김
+
+            // 히든 그림: stageId = -hiddenIdx  (진행/색칠 기록 분리)
+            const stageId = -hiddenIdx;
+
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const img = document.createElement('img');
+            img.src = it.url;
+            img.alt = `Hidden ${hiddenIdx}`;
+            img.loading = 'lazy';
+
+            const title = document.createElement('p');
+            title.className = 'text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `H${hiddenIdx}`;
+
+            card.addEventListener('click', ()=> startGame(it.url, stageId));
+
+            // 히든 색칠 완료: 핑크 테두리 (.rarity-H)
+            if (fully.has(stageId)){
+                card.classList.add('colored');
+                card.classList.add('rarity-H');
+            }
+
+            card.appendChild(img);
+            card.appendChild(title);
+            bookGrid.appendChild(card);
+        });
+
+        // 수집률 / 색칠률 갱신
+        syncCollectionStats();
+    }
+
+    /* =========================
+       퀴즈 로딩/정상화(과목 섞기 유지)
+    ========================= */
+    let quizLoaded=false, quizBanks={all:[]}, quizPtr={all:0};
+    async function ensureQuizLoaded(){
+        if (quizLoaded) return;
+        try{
+            const res = await fetch(QUIZ_JSON_URL, {cache:'no-store'});
+            if (!res.ok) throw new Error('fetch failed');
+            const json = await res.json(); normalizeQuiz(json); quizLoaded = true;
+        }catch(e){ quizLoaded = false; }
+    }
+    function normalizeQuiz(json){
+        const raw = Array.isArray(json) ? json
+            : (Array.isArray(json?.questions) ? json.questions : [...(json?.quad||[]), ...(json?.paints||[]), ...(json?.items||[])]);
+        const groups = {};
+        for (const item of raw){
+            const subj = (item?.meta?.subject || item?.subject || '기타').trim();
+            (groups[subj] ||= []).push(item);
+        }
+        Object.values(groups).forEach(shuffleInPlace);
+        const subjects = Object.keys(groups); shuffleInPlace(subjects);
+        const interleaved = [];
+        let remaining = true;
+        while (remaining){
+            remaining = false;
+            for (const s of subjects){
+                const bucket = groups[s];
+                if (bucket && bucket.length){
+                    const picked = bucket.shift();
+                    const norm = normalizeQuestion(picked);
+                    if (norm) interleaved.push(norm);
+                    remaining = true;
+                }
+            }
+        }
+        quizBanks = { all: interleaved }; quizPtr = { all: 0 };
+    }
+    function normalizeQuestion(it){
+        if (!it) return null;
+        const qtext = it.q ?? it.question ?? it.prompt ?? null;
+        let choices = it.choices ?? it.options ?? it.answers ?? null;
+        const answer = it.answer ?? it.correct ?? it.answerText ?? null;
+        let ansIndex = (typeof it.answerIndex==='number') ? it.answerIndex : it.correctIndex;
+        if (choices && !Array.isArray(choices)) choices = Object.values(choices);
+        if (!qtext || !Array.isArray(choices) || choices.length < 2) return null;
+        if (ansIndex == null && answer != null){
+            const idx = choices.findIndex(c => String(c).trim().toLowerCase() === String(answer).trim().toLowerCase());
+            if (idx >= 0) ansIndex = idx;
+        }
+        if (ansIndex == null && typeof answer === 'string' && /^[A-D1-9]$/.test(answer)){
+            const n = parseInt(answer,10); ansIndex = Number.isNaN(n) ? 'ABCD'.indexOf(answer.toUpperCase()) : (n-1);
+        }
+        if (ansIndex == null || ansIndex < 0 || ansIndex >= choices.length) return null;
+        const order = choices.map((_,i)=>i);
+        for (let i=order.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [order[i],order[j]]=[order[j],order[i]]; }
+        const shuffled = order.map(i=>choices[i]);
+        const correct  = order.indexOf(ansIndex);
+        return { question:qtext, choices:shuffled, correctIndex:correct, meta:{...(it.meta||{}), subject:(it?.meta?.subject || it?.subject || '기타')} };
+    }
+    function pullQuestion(){
+        if (quizBanks.all.length===0) return generateMathQuestion();
+        const i = quizPtr.all % quizBanks.all.length;
+        const q = quizBanks.all[i]; quizPtr.all++;
+        return q;
+    }
+    // ✅ 기본 풀백: 구구단 2단~9단 곱셈 문제
+    function generateMathQuestion(){
+        const a = Math.floor(Math.random() * 8) + 2;  // 2~9단
+        const b = Math.floor(Math.random() * 9) + 1;  // ×1~×9
+        const op = '×';
+        const ans = a * b;
+
+        const choices = new Set([ans]);
+        // 정답 주변의 비슷한 값들로 4지선다 구성
+        while (choices.size < 4){
+            const delta = Math.floor(Math.random() * 7) - 3; // -3 ~ +3
+            const fake = ans + (delta === 0 ? 4 : delta);    // 0 피하기
+            if (fake > 0) choices.add(fake);
+        }
+        const arr = Array.from(choices);
+        shuffleInPlace(arr);
+        return {
+            question: `${a} ${op} ${b} = ?`,
+            choices: arr,
+            correctIndex: arr.indexOf(ans),
+        };
+    }
+
+
+    /* =========================
+      퀴즈 세션 (✅ 일반/도전 모드)
+   ========================= */
+    let quizSession = null; // {total, idx, correct, streak, maxStreak, score, wrong, timeLeft}
+    let quizMode = 'normal';       // 'normal' | 'challenge'
+    let challengeTimerId = null;
+
+    async function startQuizSession(mode = 'normal'){
+        await ensureQuizLoaded();
+
+        if (challengeTimerId){
+            clearInterval(challengeTimerId);
+            challengeTimerId = null;
+        }
+
+        quizMode = mode;
+        quizSession = {
+            total: QUIZ_SESSION_LEN,
+            idx: 0,
+            correct: 0,
+            streak: 0,
+            maxStreak: 0,
+            score: 0,
+            wrong: 0,
+            timeLeft: mode === 'challenge' ? CHALLENGE_TIME_LIMIT_SEC : null,
+        };
+
+        if (quizMode === 'challenge'){
+            challengeTimerId = setInterval(()=>{
+                if (!quizSession || quizMode !== 'challenge'){
+                    clearInterval(challengeTimerId);
+                    challengeTimerId = null;
+                    return;
+                }
+                quizSession.timeLeft--;
+                updateQuizSubText();
+                if (quizSession.timeLeft <= 0){
+                    clearInterval(challengeTimerId);
+                    challengeTimerId = null;
+                    finishQuiz(
+                        '도전 실패',
+                        `시간 초과로 종료되었습니다. 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`,
+                        { fromChallenge:true, success:false },
+                    );
+                }
+            }, 1000);
+        }
+
+        askNextQuestion();
+    }
+
+
+    function updateQuizSubText(){
+        if (!quizSession) return;
+        const nextMult = Math.min(STREAK_MAX_MULT, 1 + (quizSession.streak) * STREAK_STEP);
+        const totalMult = (nextMult * REWARD_MULTIPLIER).toFixed(1);
+        let text = `문제 ${quizSession.idx+1}/${quizSession.total} · 기본 +${QUIZ_REWARD}P · 보너스 x${totalMult} · 오답 ${quizSession.wrong}/${MAX_WRONG}`;
+        if (quizMode === 'challenge' && quizSession.timeLeft != null){
+            text += ` · 남은 시간 ${quizSession.timeLeft}s`;
+        }
+        quizSub.textContent = text;
+    }
+
+
+    function askNextQuestion(){
+        if (!quizSession) return;
+
+        // 모든 문제를 다 푼 경우
+        if (quizSession.idx >= quizSession.total){
+            const baseMsg = `정답 ${quizSession.correct}/${quizSession.total}개!  연속 보너스 포함 +${quizSession.score}P`;
+
+            if (quizMode === 'challenge'){
+                const success =
+                    quizSession.correct === quizSession.total &&
+                    quizSession.wrong < MAX_WRONG &&
+                    (quizSession.timeLeft == null || quizSession.timeLeft > 0);
+
+                const title = success ? '도전 성공!' : '도전 종료';
+                const extra = success ? '\n\n도전 보상으로 히든/SR 스페셜 가챠 1회를 진행합니다.' : '';
+                finishQuiz(title, baseMsg + extra, { fromChallenge:true, success });
+            } else {
+                finishQuiz('퀴즈 종료', baseMsg);
+            }
+            return;
+        }
+
+        const q = pullQuestion();
+        quizTitle.textContent = (quizMode === 'challenge') ? '도전 퀴즈' : '퀴즈 도전';
+        updateQuizSubText();
+        quizQuestion.textContent = q.question;
+        quizChoices.innerHTML = '';
+        q.choices.forEach((c, i)=>{
+            const btn = document.createElement('button');
+            btn.className = 'bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow';
+            btn.textContent = c;
+            btn.addEventListener('click', ()=>{
+                if (!quizSession) return;
+                if (i === q.correctIndex){
+                    quizSession.correct++;
+                    quizSession.streak++;
+                    quizSession.maxStreak = Math.max(quizSession.maxStreak, quizSession.streak);
+                    const mult = Math.min(STREAK_MAX_MULT, 1 + (quizSession.streak - 1) * STREAK_STEP);
+                    const gain = Math.round(QUIZ_REWARD * mult) * REWARD_MULTIPLIER;  // ✅ 5배
+                    quizSession.score += gain;
+                } else {
+                    quizSession.streak = 0;
+                    quizSession.wrong++;
+
+                    if (quizMode === 'challenge' && quizSession.wrong >= MAX_WRONG){
+                        finishQuiz(
+                            '도전 실패',
+                            `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`,
+                            { fromChallenge:true, success:false },
+                        );
+                        return;
+                    }
+                    if (quizSession.wrong >= MAX_WRONG){
+                        finishQuiz(
+                            '퀴즈 종료',
+                            `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`,
+                        );
+                        return;
+                    }
+                }
+                quizSession.idx++;
+                quizModal.style.display='none';
+                askNextQuestion();
+            });
+            quizChoices.appendChild(btn);
+        });
+        quizModal.style.display='flex';
+    }
+
+    quizCancel.addEventListener('click', ()=>{
+        if (!quizSession){
+            quizModal.style.display='none';
+            return;
+        }
+        const fromChallenge = (quizMode === 'challenge');
+        finishQuiz(
+            fromChallenge ? '도전 종료' : '퀴즈 종료',
+            `중도 종료: 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`,
+            { fromChallenge, success:false },
+        );
+    });
+
+    function finishQuiz(title, msg, opts = {}){
+        if (!quizSession){
+            showModal(title, msg);
+            return;
+        }
+        const { fromChallenge=false, success=false } = opts;
+
+        if (challengeTimerId){
+            clearInterval(challengeTimerId);
+            challengeTimerId = null;
+        }
+
+        // 포인트 적립
+        addPoints(quizSession.score);
+
+        let bonusMsg = '';
+
+        // ✅ 일반 퀴즈에서 10문제 모두 맞히면 도전 쿠폰 1장 지급
+        if (!fromChallenge &&
+            quizSession.correct === quizSession.total &&
+            quizSession.total === QUIZ_SESSION_LEN){
+            addCoupons(1);
+            bonusMsg += '\n\n🎁 10문제를 모두 맞혀서 도전 쿠폰 1장을 받았습니다!';
+        }
+
+        const finalMsg = `${msg} (최대 연속 ${quizSession.maxStreak})${bonusMsg}`;
+
+        quizModal.style.display='none';
+
+        if (fromChallenge && success){
+            // ✅ 도전 퀴즈 성공 시: 히든/SR 스페셜 가챠 1회 (무료)
+            showModal(title, finalMsg, ()=>{
+                rollGacha(1, {
+                    free: true,
+                    config: RARITY_CONFIG_CHALLENGE,
+                    label: '도전 보상',
+                });
+            });
+        } else {
+            showModal(title, finalMsg);
+        }
+
+        quizSession = null;
+    }
+
+    // ✅ 도전 퀴즈 입장: 쿠폰 1장 우선, 없으면 포인트 2500P 사용
+    function startChallengeEntry(){
+        const coupons = getCoupons();
+        const points = getPoints();
+
+        if (coupons > 0){
+            if (confirm(`도전 쿠폰 1장을 사용해 도전 퀴즈를 시작할까요? (보유: ${coupons}장)`)){
+                setCoupons(coupons - 1);
+                startQuizSession('challenge');
+            }
+            return;
+        }
+
+        if (points >= CHALLENGE_ENTRY_COST){
+            if (confirm(`포인트 ${CHALLENGE_ENTRY_COST}P를 사용해 도전 퀴즈를 시작할까요?`)){
+                setPoints(points - CHALLENGE_ENTRY_COST);
+                startQuizSession('challenge');
+            }
+            return;
+        }
+
+        showModal('도전 불가', `포인트 또는 도전 쿠폰이 부족합니다.\n(필요: ${CHALLENGE_ENTRY_COST}P 또는 도전 쿠폰 1장)`);
+    }
+
+
+
+    /* =========================
+       가챠 (✅ 10연차 확률 상향)
+    ========================= */
+    function pickRarityByWeight(cfg){
+        const total = Object.values(cfg).reduce((s,r)=>s+r.weight,0);
+        let r = Math.random()*total;
+        for (const [k, v] of Object.entries(cfg)){ if ((r -= v.weight) <= 0) return k; }
+        return 'C';
+    }
+    function pickIndexOf(rarity){
+        const arr = indicesByRarity[rarity] || indicesByRarity.C || [];
+        if (!arr.length) return 1;
+        return arr[Math.floor(Math.random()*arr.length)];
+    }
+
+
+    function rollGacha(times=1, opts={}){
+        const { free=false, config=null, label=null } = opts || {};
+        const cfg = config || ((times===10) ? RARITY_CONFIG_10X : RARITY_CONFIG_DEFAULT);
+
+        const need = free ? 0 : GACHA_COST * times;
+        if (!free){
+            if (getPoints() < need){
+                showModal('포인트 부족', `필요 포인트: ${need}P`);
+                return;
+            }
+            setPoints(getPoints() - need);
+        }
+
+        const owned = getOwnedSet();
+        const hiddenOwned = getHiddenOwnedSet();
+        const results = []; // {kind:'normal'|'hidden', idx, dup, rarity}
+        let refund = 0;
+
+        for (let t=0;t<times;t++){
+            let rarity = pickRarityByWeight(cfg);
+            let kind = 'normal';
+            let idx;
+
+            if (rarity === 'H'){
+                // Hidden 가챠: Hidden 폴더에서만 뽑기
+                if (HIDDEN_IMAGE_LIST.length === 0){
+                    // 히든 이미지 없으면 SR로 대체
+                    rarity = 'SR';
+                    kind = 'normal';
+                    idx = pickIndexOf('SR');
+                } else {
+                    kind = 'hidden';
+                    idx = Math.floor(Math.random() * HIDDEN_IMAGE_LIST.length) + 1;
+                }
+            } else {
+                // 일반 가챠 (C/R/SR)
+                idx = pickIndexOf(rarity);
+            }
+
+            if (kind === 'hidden'){
+                if (hiddenOwned.has(idx)){
+                    if (!free) refund += Math.floor(GACHA_COST/2);
+                    results.push({kind, idx, dup:true, rarity});
+                } else {
+                    hiddenOwned.add(idx);
+                    results.push({kind, idx, dup:false, rarity});
+                }
+            } else {
+                if (owned.has(idx)){
+                    if (!free) refund += Math.floor(GACHA_COST/2);
+                    results.push({kind, idx, dup:true, rarity});
+                } else {
+                    owned.add(idx);
+                    results.push({kind, idx, dup:false, rarity});
+                }
+            }
+        }
+
+        if (!free && refund>0) addPoints(refund);
+        saveOwnedSet(owned);
+        saveHiddenOwnedSet(hiddenOwned);
+        populateBook();
+
+        gachaResults.innerHTML = '';
+        results.forEach((r, i)=>{
+            const wrap = document.createElement('div');
+            wrap.className='relative result-card';
+            wrap.style.animationDelay = `${i*40}ms`;
+
+            const img = document.createElement('img');
+            if (r.kind === 'hidden'){
+                const info = HIDDEN_IMAGE_LIST[r.idx-1];
+                img.src = info ? info.url : '';
+                img.alt = `Hidden ${r.idx}`;
+            } else {
+                const info = IMAGE_LIST[r.idx-1];
+                img.src = info ? info.url : '';
+                img.alt = `No.${r.idx}`;
+            }
+            img.style.width='66px';
+            img.style.height='66px';
+            img.style.imageRendering='pixelated';
+            img.style.background='#f3f4f6';
+            img.style.borderRadius='12px';
+            img.style.border='2px solid #e5e7eb';
+
+            const ring = document.createElement('div'); ring.className='ring';
+            const tag = document.createElement('div'); tag.className='rarity-tag';
+            tag.textContent = (r.rarity==='SR'?'SR':r.rarity);
+
+            wrap.classList.add(`rarity-${r.rarity}`);
+            wrap.appendChild(img);
+            wrap.appendChild(ring);
+            wrap.appendChild(tag);
+
+            const caption = document.createElement('div');
+            caption.className='text-xs text-gray-700 text-center mt-1';
+            const baseLabel = (r.kind === 'hidden') ? `H${r.idx}` : `No.${r.idx}`;
+            caption.textContent = r.dup ? `${baseLabel} (중복)` : baseLabel;
+
+            const cell = document.createElement('div');
+            cell.className='flex flex-col items-center';
+            cell.appendChild(wrap);
+            cell.appendChild(caption);
+
+            gachaResults.appendChild(cell);
+        });
+
+        const spend = need;
+        const labelText = label ? `${label} · ` : '';
+        gachaSummary.textContent = `${labelText}소모: ${spend}P  ·  환급: ${refund}P  ·  순소모: ${Math.max(0, spend-refund)}P`;
+        gachaModal.style.display='flex';
+    }
+
+
+    gachaClose.addEventListener('click', ()=> gachaModal.style.display='none');
+
+    /* =========================
+       색칠(진행 저장/복원 포함 — 기존 기능 유지)
+    ========================= */
+    const CELL_SCALE = 15;
+    let imgWidth, imgHeight, sourceImage;
+    let palette = {};
+    let paletteMap = [null];
+    let numberGrid = [];
+    let completedGrid = [];
+    let totalCells = 0;
+    let completedCells = 0;
+    let selectedColorIndex = 0;
+    const quadrants = [];
+    let currentStageIndex = 1;
+    let currentZoomQuad = null;
+
+    function serializeCompletedGrid(){
+        const total = imgWidth * imgHeight;
+        const bytes = new Uint8Array(Math.ceil(total / 8));
+        let k = 0;
+        for (let y=0; y<imgHeight; y++){
+            for (let x=0; x<imgWidth; x++){
+                if (completedGrid[y][x]) bytes[k >> 3] |= (1 << (k & 7));
+                k++;
+            }
+        }
+        let s=""; for (let i=0;i<bytes.length;i++) s+=String.fromCharCode(bytes[i]);
+        return btoa(s);
+    }
+    function deserializeCompletedGrid(b64){
+        const bin = atob(b64); const bytes = new Uint8Array(bin.length);
+        for (let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+        let k=0; completedCells=0;
+        for (let y=0;y<imgHeight;y++){
+            for (let x=0;x<imgWidth;x++){
+                const done = (bytes[k >> 3] >> (k & 7)) & 1;
+                completedGrid[y][x] = !!done;
+                if (done && numberGrid[y][x] !== 0) completedCells++;
+                k++;
+            }
+        }
+    }
+    function saveCurrentProgress(){
+        const payload = { w: imgWidth, h: imgHeight, bits: serializeCompletedGrid() };
+        localStorage.setItem(progressKey(currentStageIndex), JSON.stringify(payload));
+    }
+    function restoreProgress(stageIdx){
+        const raw = localStorage.getItem(progressKey(stageIdx));
+        if (!raw) return;
+        try{
+            const p = JSON.parse(raw);
+            if (p && p.w===imgWidth && p.h===imgHeight && typeof p.bits==='string'){ deserializeCompletedGrid(p.bits); }
+        }catch(_){}
+    }
+
+    function showView(id){ allViews.forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function drawQuadToContext(q, ctx, scale, showGridNumbers){
+        ctx.clearRect(0,0,q.w*scale,q.h*scale);
+        if (showGridNumbers){
+            ctx.strokeStyle='#e5e7eb'; const fontSize=Math.max(6, Math.floor(scale*0.5));
+            ctx.font=`bold ${fontSize}px sans-serif`; ctx.textAlign='center'; ctx.textBaseline='middle';
+        }
+        for (let y=q.y; y<q.y+q.h; y++){
+            for (let x=q.x; x<q.x+q.w; x++){
+                const cellX=(x-q.x)*scale, cellY=(y-q.y)*scale;
+                const idx=(numberGrid[y] && numberGrid[y][x]!==undefined) ? numberGrid[y][x] : 0;
+                if (completedGrid[y][x]){
+                    ctx.fillStyle = (idx===0)?'#f5f5f5':paletteMap[idx]; ctx.fillRect(cellX,cellY,scale,scale);
+                }else{
+                    ctx.fillStyle='#ffffff'; ctx.fillRect(cellX,cellY,scale,scale);
+                    if (showGridNumbers){ ctx.strokeRect(cellX,cellY,scale,scale); ctx.fillStyle='#555'; ctx.fillText(idx, cellX+scale/2, cellY+scale/2+1); }
+                }
+            }
+        }
+    }
+    function drawQuad(q, showGridNumbers){ drawQuadToContext(q, q.ctx, CELL_SCALE, showGridNumbers); }
+    function updateAllQuads(show=true){ quadrants.forEach(q=>drawQuad(q, show)); }
+    function updateProgress(){ if (!totalCells) return; const percent = Math.floor((completedCells/totalCells)*100); progressBar.style.width = `${percent}%`; progressText.textContent = `${percent}%`; }
+    function drawCellOnQuad(q, gx, gy){
+        const ctx=q.ctx; const cellX=(gx-q.x)*CELL_SCALE, cellY=(gy-q.y)*CELL_SCALE;
+        const idx=numberGrid[gy][gx]; ctx.fillStyle=(idx===0)?'#f5f5f5':paletteMap[idx]; ctx.fillRect(cellX,cellY,CELL_SCALE,CELL_SCALE);
+    }
+    function drawCellOnZoom(q, gx, gy){
+        const zoomScale = zoomCanvas.width/(q.w*CELL_SCALE);
+        const cellScale = CELL_SCALE * zoomScale;
+        const cellX = (gx - q.x) * cellScale;
+        const cellY = (gy - q.y) * cellScale;
+        const idx   = numberGrid[gy][gx];
+        zoomCtx.fillStyle = (idx===0) ? '#f5f5f5' : paletteMap[idx];
+        zoomCtx.fillRect(cellX, cellY, cellScale, cellScale);
+    }
+
+    function computeZoomScale(q){
+        const maxW = Math.floor(window.innerWidth * 0.95);
+        const maxH = Math.floor(window.innerHeight * 0.85);
+        const baseW = q.w * CELL_SCALE, baseH = q.h * CELL_SCALE;
+        return Math.max(1, Math.min(Math.floor(maxW/baseW), Math.floor(maxH/baseH)));
+    }
+
+    function startGame(imageUrl, idx){
+        currentStageIndex = idx;
+        showView('gameScreen'); syncPointsUI();
+        loadingSpinner.style.display='block'; quadGrid.innerHTML=''; paletteContainer.innerHTML='';
+        progressBar.style.width='0%'; progressText.textContent='0%';
+        palette={}; paletteMap=[null]; numberGrid=[]; completedGrid=[]; totalCells=0; completedCells=0; selectedColorIndex=0; quadrants.length=0;
+
+        for (let i=0;i<4;i++){
+            const c = document.createElement('canvas'); const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled=false;
+            const wrap = document.createElement('div'); wrap.appendChild(c); quadGrid.appendChild(wrap);
+            const q = {id:i, canvas:c, ctx, x:0,y:0,w:0,h:0}; c.onclick = ()=> openZoom(i); quadrants.push(q);
+        }
+        loadImageAndProcess(imageUrl);
+    }
+    async function loadImageAndProcess(url){
+        try{
+            sourceImage = await new Promise((resolve,reject)=>{ const im = new Image(); im.crossOrigin='Anonymous'; im.src = url; im.onload=()=>resolve(im); im.onerror=()=>reject(new Error('이미지를 불러올 수 없습니다.')); });
+            imgWidth = sourceImage.width; imgHeight = sourceImage.height;
+            const hc = document.createElement('canvas'); hc.width=imgWidth; hc.height=imgHeight;
+            const hctx = hc.getContext('2d'); hctx.drawImage(sourceImage, 0, 0);
+            const data = hctx.getImageData(0,0,imgWidth,imgHeight).data;
+
+            let colorIndex = 1;
+            for (let y=0;y<imgHeight;y++){
+                numberGrid[y]=[]; completedGrid[y]=[];
+                for (let x=0;x<imgWidth;x++){
+                    const i=(y*imgWidth+x)*4; const r=data[i], g=data[i+1], b=data[i+2], a=data[i+3];
+                    if (a<128){ numberGrid[y][x]=0; completedGrid[y][x]=true; }
+                    else{
+                        const rgba=`rgba(${r},${g},${b},${a/255})`;
+                        if (!palette[rgba]){ palette[rgba]=colorIndex; paletteMap[colorIndex]=rgba; colorIndex++; }
+                        numberGrid[y][x]=palette[rgba]; completedGrid[y][x]=false; totalCells++;
+                    }
+                }
+            }
+            const halfW = Math.floor(imgWidth/2), halfH=Math.floor(imgHeight/2);
+            const geoms = [
+                {x:0,y:0,w:halfW,h:halfH},{x:halfW,y:0,w:imgWidth-halfW,h:halfH},
+                {x:0,y:halfH,w:halfW,h:imgHeight-halfH},{x:halfW,y:halfH,w:imgWidth-halfW,h:imgHeight-halfH},
+            ];
+            geoms.forEach((g,i)=>{ const q=quadrants[i]; q.x=g.x; q.y=g.y; q.w=g.w; q.h=g.h;
+                q.canvas.width=g.w*CELL_SCALE; q.canvas.height=g.h*CELL_SCALE; q.canvas.style.width=q.canvas.width+'px'; q.canvas.style.height=q.canvas.height+'px'; });
+
+            restoreProgress(currentStageIndex);
+            updateProgress();
+            loadingSpinner.style.display='none';
+            updateAllQuads(true);
+            buildPaletteUI();
+        }catch(err){
+            console.error(err); showModal('오류', err.message + ' 도감으로 돌아갑니다.'); showView('bookScreen');
+        }
+    }
+    function buildPaletteUIInto(containerEl){
+        containerEl.innerHTML = '';
+        const count = Math.max(1, paletteMap.length-1);
+        for (let i=1;i<=count;i++){
+            const color = paletteMap[i];
+            const btn = document.createElement('button'); btn.className = 'palette-button'; btn.style.backgroundColor = color; btn.textContent = i; btn.dataset.colorIndex = i;
+            btn.addEventListener('click', ()=>{
+                selectedColorIndex = i;
+                document.querySelectorAll('#paletteContainer .palette-button, #zoomPalette .palette-button')
+                    .forEach(b => b.classList.toggle('selected', parseInt(b.dataset.colorIndex,10) === i));
+            });
+            containerEl.appendChild(btn);
+        }
+    }
+    function buildPaletteUI(){ buildPaletteUIInto(paletteContainer); buildPaletteUIInto(zoomPalette); }
+    function openZoom(quadIndex){
+        const q = quadrants[quadIndex]; currentZoomQuad = q;
+        const s = computeZoomScale(q);
+        zoomCanvas.width = q.w*CELL_SCALE*s; zoomCanvas.height=q.h*CELL_SCALE*s;
+        drawQuadToContext(q, zoomCtx, CELL_SCALE*s, true);
+        buildPaletteUIInto(zoomPalette);
+        if (selectedColorIndex>0){
+            document.querySelectorAll('#paletteContainer .palette-button, #zoomPalette .palette-button')
+                .forEach(b => b.classList.toggle('selected', parseInt(b.dataset.colorIndex,10) === selectedColorIndex));
+        }
+        zoomOverlay.style.display='flex'; window.addEventListener('resize', onResizeZoom, {passive:true});
+    }
+    function onResizeZoom(){
+        if (!currentZoomQuad || zoomOverlay.style.display==='none') return;
+        const q=currentZoomQuad, s=computeZoomScale(q);
+        zoomCanvas.width=q.w*CELL_SCALE*s; zoomCanvas.height=q.h*CELL_SCALE*s;
+        drawQuadToContext(q, zoomCtx, CELL_SCALE*s, true);
+    }
+    function closeZoom(){ zoomOverlay.style.display='none'; window.removeEventListener('resize', onResizeZoom); currentZoomQuad = null; }
+    zoomCloseBtn.addEventListener('click', closeZoom);
+    document.addEventListener('keydown', (e)=>{ if (e.key==='Escape') closeZoom(); });
+
+    zoomCanvas.addEventListener('click', (e)=>{
+        if (!currentZoomQuad) return;
+        if (selectedColorIndex===0){ showModal('색상 선택', '아래 팔레트에서 색상을 먼저 선택하세요.'); return; }
+        const q=currentZoomQuad;
+        const rect = zoomCanvas.getBoundingClientRect();
+        const scaleX=zoomCanvas.width/rect.width, scaleY=zoomCanvas.height/rect.height;
+        const lx=(e.clientX-rect.left)*scaleX, ly=(e.clientY-rect.top)*scaleY;
+        const zoomScale = zoomCanvas.width/(q.w*CELL_SCALE);
+        const cellScale=CELL_SCALE*zoomScale;
+        const gx=q.x + Math.floor(lx/cellScale);
+        const gy=q.y + Math.floor(ly/cellScale);
+        if (gx<q.x || gx>=q.x+q.w || gy<q.y || gy>=q.y+q.h) return;
+
+        const idx = numberGrid[gy][gx];
+        if (completedGrid[gy][gx] || idx===0) return;
+        if (idx === selectedColorIndex){
+            completedGrid[gy][gx]=true; completedCells++;
+            drawCellOnZoom(q,gx,gy); drawCellOnQuad(q,gx,gy);
+            updateProgress(); checkCompletion(); saveCurrentProgress();
+        }else{ zoomCanvas.classList.add('shake'); setTimeout(()=>zoomCanvas.classList.remove('shake'),250); }
+    });
+
+    /* =========================
+   공통 동작
+========================= */
+    let modalCloseHandler = null;
+    modalCloseButton.onclick = ()=>{
+        messageModal.style.display='none';
+        if (typeof modalCloseHandler === 'function'){
+            const cb = modalCloseHandler;
+            modalCloseHandler = null;
+            cb();
+        }
+    };
+    function showModal(title, msg, onClose){
+        modalTitle.textContent = title;
+        modalMessage.textContent = msg;
+        modalCloseHandler = onClose || null;
+        messageModal.style.display = 'flex';
+    }
+    function bootBindings(){
+        if (startButton){
+            startButton.addEventListener('click', async ()=>{
+                if (!localStorage.getItem(LS_POINTS))  setPoints(0);
+                if (!localStorage.getItem(LS_OWNED))   saveOwnedSet(new Set());
+                if (!localStorage.getItem(LS_COUPONS)) setCoupons(0);
+                syncPointsUI();
+                syncCouponsUI();
+                await loadCodexImages();  // 일반 도감 png 스캔
+                await loadHiddenImages(); // 히든 도감 png 스캔
+                populateBook();
+                showView('lobbyScreen');
+            });
+        }
+
+        enableHorizontalWheel(document.getElementById('paletteContainer'));
+        enableHorizontalWheel(document.getElementById('zoomPalette'));
+
+        const backBtn = document.getElementById('backButton');
+        if (backBtn){
+            backBtn.addEventListener('click', ()=>{
+                saveCurrentProgress();
+                showView('bookScreen');
+                populateBook();
+                syncPointsUI();
+            });
+        }
+
+        if (lobbyCodexBtn){
+            lobbyCodexBtn.addEventListener('click', ()=>{
+                showView('bookScreen');
+            });
+        }
+
+        if (toLobbyBtn){
+            toLobbyBtn.addEventListener('click', ()=>{
+                showView('lobbyScreen');
+            });
+        }
+
+        if (lobbyQuizBtn){
+            lobbyQuizBtn.addEventListener('click', ()=> startQuizSession('normal'));
+        }
+
+        if (lobbyGachaBtn){
+            lobbyGachaBtn.addEventListener('click', ()=> rollGacha(10));
+        }
+
+        if (quizBtn){
+            quizBtn.addEventListener('click', ()=> startQuizSession('normal'));
+        }
+        if (challengeBtn){
+            challengeBtn.addEventListener('click', startChallengeEntry);
+        }
+
+        if (gacha1Btn)   gacha1Btn.addEventListener('click', ()=> rollGacha(1));
+        if (gacha10Btn)  gacha10Btn.addEventListener('click', ()=> rollGacha(10));
+        if (gacha100Btn) gacha100Btn.addEventListener('click', ()=> rollGacha(100));
+
+        if (resetBtn){
+            resetBtn.addEventListener('click', ()=>{
+                if (!confirm('포인트, 도감, 쿠폰, 색칠 기록을 모두 초기화할까요?')) return;
+                localStorage.removeItem(LS_POINTS);
+                localStorage.removeItem(LS_OWNED);
+                localStorage.removeItem(LS_COUPONS);
+                localStorage.removeItem(LS_FULLY_COLORED);
+                for (let i=0;i<localStorage.length;){
+                    const k = localStorage.key(i);
+                    if (k && k.startsWith(LS_PROGRESS_PREFIX)) localStorage.removeItem(k);
+                    else i++;
+                }
+                syncPointsUI();
+                syncCouponsUI();
+                populateBook();
+                showModal('초기화 완료', '포인트, 도감, 쿠폰, 색칠 기록을 초기화했습니다.');
+            });
+        }
+
+        showView('titleScreen');
+    }
+    function checkCompletion(){
+        if (completedCells === totalCells){
+            updateAllQuads(false);
+            let extra = '';
+            const fully = getFullyColoredSet();
+            if (!fully.has(currentStageIndex)){
+                fully.add(currentStageIndex);
+                saveFullyColoredSet(fully);
+                addCoupons(1);  // ✅ 처음 완성한 그림이면 쿠폰 1장 지급
+                extra = '\n\n🎁 처음 완성한 그림이라 도전 쿠폰 1장을 받았습니다!';
+            }
+            const label = (currentStageIndex < 0)
+                ? `H${-currentStageIndex}`
+                : `No.${currentStageIndex}`;
+            showModal('완성!', `${label} 그림을 완성했습니다!${extra}`);
+        }
+    }
+    bootBindings();
+</script>
+</body>
+</html>
