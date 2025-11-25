@@ -328,17 +328,21 @@
         return { id, name, rarity, type: { name: typeName, ...TYPE_DATA[typeName] }, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, base };
     }
 
-    function getRandomMoves(typeName, count, maxTier = null) {
+    const TIER_ORDER = ['C', 'R', 'SR', 'SSR', 'UR'];
+
+    function getRandomMoves(typeName, count, maxTierStr = 'UR') {
         const pool = MOVE_POOL[typeName] || MOVE_POOL["노말"];
-        let filtered = pool;
-        if(maxTier === 'C') filtered = pool.filter(m => m.t === 'C');
-        else if(maxTier === 'R') filtered = pool.filter(m => ['C','R'].includes(m.t));
+
+        // [수정] maxTierStr보다 낮거나 같은 등급의 기술만 필터링
+        const maxIdx = TIER_ORDER.indexOf(maxTierStr);
+        const filtered = pool.filter(m => TIER_ORDER.indexOf(m.t) <= maxIdx);
 
         const res = [];
+        if (filtered.length === 0) return res; // 안전장치
+
         for(let i=0; i<count; i++) {
-            let tierMoves = filtered;
-            // 등급 로직 단순화 (랜덤 선택)
-            res.push(tierMoves[Math.floor(Math.random() * tierMoves.length)]);
+            // 랜덤 선택
+            res.push(filtered[Math.floor(Math.random() * filtered.length)]);
         }
         return res;
     }
@@ -395,12 +399,17 @@
         if (pid > 0) {
             const info = getPokeInfo(pid);
             const dupes = getDupes()[pid] || 0;
-            // 시작 XP 보너스 계산
-            let xpBonus = dupes * 50;
+
+            // [변경] 중복 횟수만큼 시작 레벨 증가 (+1)
+            // 0회 중복(최초 획득) = Lv.1 시작
+            // 1회 중복 = Lv.2 시작
+            const startLv = 1 + dupes;
+
             document.getElementById("lobbyPartnerName").textContent = info.name;
             document.getElementById("lobbyPartnerImg").src = info.sprite;
             document.getElementById("partnerInfo").textContent = info.name;
-            document.getElementById("lobbyStartBonus").textContent = `중복 ${dupes}회 / 시작 XP +${xpBonus}`;
+            // UI 텍스트 변경
+            document.getElementById("lobbyStartBonus").textContent = `중복 +${dupes} / 시작 Lv.${startLv}`;
             document.getElementById("startAdventureBtn").disabled = false;
         } else {
             document.getElementById("lobbyPartnerName").textContent = "없음";
@@ -447,12 +456,12 @@
         const pid = getStarterId(); if (!pid) return;
         const info = getPokeInfo(pid);
         const dupes = getDupes()[pid] || 0;
-        let startXp = dupes * 50;
 
-        let level = 1;
-        let xp = startXp;
-        while (xp >= level * 100) { xp -= level * 100; level++; }
+        // [변경] 중복 개수만큼 레벨 추가 (기본 1 + 중복 수)
+        let level = 1 + dupes;
+        let xp = 0; // 레벨업 직후 상태로 시작
 
+        // 해당 레벨에 맞는 스탯 계산
         const stats = calcStats(info.base, level);
         const startMoves = getRandomMoves(info.type.name, 2, 'C'); // 기본 기술 2개
 
@@ -477,26 +486,58 @@
     function startBattleStage() {
         const { stage, player } = battleState;
 
-        let enemyRarityPool = ['C'];
-        if (stage >= 4) enemyRarityPool.push('R');
-        if (stage >= 8) enemyRarityPool.push('SR');
-        if (stage >= 12) enemyRarityPool.push('SSR');
-        if (stage >= 15) enemyRarityPool.push('UR');
+        // [변경] 적 레벨 스케일링 조정
+        // 스테이지 1 -> Lv.1
+        // 스테이지 10 -> Lv.13
+        // 스테이지 30 -> Lv.40
+        const eLevel = Math.floor(stage + (stage / 3));
 
         let enemyId;
-        let safe = 0;
-        do {
-            enemyId = Math.floor(Math.random() * 251) + 1;
-            const checkInfo = getPokeInfo(enemyId);
-            if(enemyRarityPool.includes(checkInfo.rarity)) break;
-            safe++;
-        } while(safe < 100);
+
+        // [추가] 5% 확률로 전설 또는 환상 포켓몬 조우
+        const isLegendaryEncounter = Math.random() < 0.05;
+
+        if (isLegendaryEncounter) {
+            // 전설(LEGENDARY_IDS) + 환상(MYTHICAL_IDS) 합친 배열에서 랜덤 선택
+            const legends = [...LEGENDARY_IDS, ...MYTHICAL_IDS];
+            enemyId = legends[Math.floor(Math.random() * legends.length)];
+        } else {
+            // [기존 로직] 일반적인 스테이지별 등급 제한 적용
+            let allowedRarities = ['C'];
+            if (stage >= 3) allowedRarities.push('R');
+            if (stage >= 7) allowedRarities.push('SR');
+            if (stage >= 12) allowedRarities.push('SSR');
+            // 전설은 위 5% 로직에서 처리되므로 일반 풀에서는 제외하거나 확률 낮게 유지
+            // 여기서는 'UR'을 allowedRarities에 넣지 않아, 5% 찬스가 아니면 전설이 안 나오게 함 (희소성 강화)
+
+            // 난이도 조절: 스테이지가 오르면 낮은 등급 제외
+            if (stage >= 10) allowedRarities = allowedRarities.filter(r => r !== 'C');
+            if (stage >= 20) allowedRarities = allowedRarities.filter(r => r !== 'R');
+
+            let safe = 0;
+            do {
+                enemyId = Math.floor(Math.random() * 251) + 1;
+                const checkInfo = getPokeInfo(enemyId);
+                // 전설/환상 ID가 일반 뽑기에서 나오면 제외 (5% 이벤트로만 등장하게 하려면)
+                if (LEGENDARY_IDS.includes(enemyId) || MYTHICAL_IDS.includes(enemyId)) continue;
+
+                if(allowedRarities.includes(checkInfo.rarity)) break;
+                safe++;
+            } while(safe < 200);
+
+            // 안전장치 (루프 실패시 랜덤)
+            if (!enemyId) enemyId = Math.floor(Math.random() * 150) + 1;
+        }
 
         const eInfo = getPokeInfo(enemyId);
-        const levelDiff = Math.floor(Math.random() * 3) - 1 + Math.floor(stage/3);
-        const eLevel = Math.max(1, player.level + levelDiff);
         const eStats = calcStats(eInfo.base, eLevel);
-        const eMoves = getRandomMoves(eInfo.type.name, 1, 'SR');
+
+        // 적 스킬: 자신의 레어도 + 1단계 기술까지 사용
+        const currentTierIdx = TIER_ORDER.indexOf(eInfo.rarity);
+        const maxSkillIdx = Math.min(TIER_ORDER.length - 1, currentTierIdx + 1);
+        const maxSkillTier = TIER_ORDER[maxSkillIdx];
+
+        const eMoves = getRandomMoves(eInfo.type.name, 1, maxSkillTier);
 
         battleState.enemy = {
             id: enemyId, name: eInfo.name, sprite: eInfo.sprite, type: eInfo.type.name,
@@ -508,7 +549,20 @@
         battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
 
         updateBattleUI();
-        logBattle(eInfo.rarity === 'UR' ? `⚠️ 전설 ${eInfo.name} 등장!!` : `야생의 ${eInfo.name} (Lv.${eLevel}) 등장!`, eInfo.rarity === 'UR' ? 'critical' : 'normal');
+
+        let msg = `야생의 ${eInfo.name} (Lv.${eLevel}) 등장!`;
+        let type = 'normal';
+
+        if (eInfo.rarity === 'UR') {
+            // 5% 당첨 시 메시지 강조
+            msg = `⚡ 전설의 포켓몬 ${eInfo.name} 출현!!`;
+            type = 'critical';
+        } else if (eInfo.rarity === 'SSR') {
+            msg = `강적! ${eInfo.name} (Lv.${eLevel}) 등장!`;
+            type = 'weak';
+        }
+
+        logBattle(msg, type);
     }
 
     function updateBattleUI() {
