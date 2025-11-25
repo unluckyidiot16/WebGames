@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>QuizMon: Ver 7.0 Grand Update</title>
+    <title>QuizMon: Ver 7.1 Fix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -12,7 +12,7 @@
         .poke-card { transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
         .poke-card:active { transform: scale(0.95); }
 
-        /* 등급별 스타일 재정의 */
+        /* 등급별 스타일 */
         .rarity-UR  { border: 2px solid #ef4444; background: linear-gradient(135deg, #fff0f0 0%, #ffe4e4 100%); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
         .rarity-SSR { border: 2px solid #f97316; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); }
         .rarity-SR  { border: 2px solid #eab308; background: #fefce8; }
@@ -43,12 +43,12 @@
         <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter relative z-10">
             <span class="text-red-500">Quiz</span>Mon
         </h1>
-        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 7.0 Grand Update</div>
+        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 7.1 Fix</div>
     </div>
     <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center border-4 border-slate-800">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png" class="w-24 h-24 mx-auto pixel-art animate-bounce" alt="Ho-oh">
         <p class="text-slate-500 text-sm mb-6 font-medium">
-            10연차 기능 추가!<br>스테이지에 따라 강해지는 적들!
+            10연차 기능 정상화!<br>강력한 적들과의 승부
         </p>
         <button id="startButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg text-lg transition-colors border-b-4 border-red-700 active:border-b-0 active:translate-y-1">
             모험 시작하기
@@ -190,7 +190,7 @@
 
 <script>
     /* =========================================
-     * DATA (251 Pokemon) & STATS MAP
+     * DATA 
      * ========================================= */
     const POKE_NAMES_STR = "이상해씨,이상해풀,이상해꽃,파이리,리자드,리자몽,꼬부기,어니부기,거북왕,캐터피,단데기,버터플,뿔충이,딱충이,독침붕,구구,피죤,피죤투,꼬렛,레트라,깨비참,깨비드릴조,아보,아보크,피카츄,라이츄,모래두지,고지,니드런♀,니드리나,니드퀸,니드런♂,니드리노,니드킹,삐삐,픽시,식스테일,나인테일,푸린,푸크린,주뱃,골뱃,뚜벅쵸,냄새꼬,라플레시아,파라스,파라섹트,콘팡,도나리,디그다,닥트리오,나옹,페르시온,고라파덕,골덕,망키,성원숭,가디,윈디,발챙이,슈륙챙이,강챙이,캐이시,윤겔라,후딘,알통몬,근육몬,괴력몬,모다피,우츠동,우츠보트,왕눈해,독파리,꼬마돌,데구리,딱구리,포니타,날쌩마,야돈,야도란,코일,레어코일,파오리,두두,두트리오,쥬쥬,쥬레곤,질퍽이,질뻐기,셀러,파르셀,고오스,고우스트,팬텀,롱스톤,슬리프,슬리퍼,크랩,킹크랩,찌리리공,붐볼,아라리,나시,탕구리,텅구리,시라소몬,홍수몬,내루미,또가스,또도가스,뿔카노,코뿌리,럭키,덩쿠리,캥카,쏘드라,시드라,콘치,왕콘치,별가사리,아쿠스타,마임맨,스턱,루주라,에레브,마그마,쁘사이저,켄타로스,잉어킹,갸라도스,라프라스,메타몽,이브이,샤미드,쥬피썬더,부스터,폴리곤,암나이트,암스타,투구,투구푸스,프테라,잠만보,프리져,썬더,파이어,미뇽,신뇽,망나뇽,뮤츠,뮤,치코리타,베이리프,메가니움,브케인,마그케인,블레이범,리아코,엘리게이,장크로다일,꼬리선,다꼬리,부우부,야부엉,레디바,레디안,페이검,아리아도스,크로뱃,초라기,랜턴,피츄,삐,푸푸린,토게피,토게틱,네이티,네이티오,메리프,보송송,전룡,아르코,마릴,마릴리,꼬지모,왕구리,통통코,두코,솜솜코,에이팜,해너츠,해루미,왕자리,우파,누오,에브이,블래키,니로우,야도킹,무우마,안농,마자용,키링키,피콘,쏘콘,노고치,글라이거,강철톤,블루,그랑블루,침바루,핫삼,단단지,헤라크로스,포뉴라,깜지곰,링곰,마그마그,마그카르고,꾸꾸리,메꾸리,코산호,총어,대포무노,딜리버드,만타인,무장조,델빌,헬가,킹드라,코판,코리갑,폴리곤2,노라키,루브도,배루키,카포에라,뽀뽀라,에레키드,마그비,밀탱크,해피너스,라이코,앤테이,스이쿤,애버라스,데기라스,마기라스,루기아,칠색조,세레비";
     const POKE_NAMES = POKE_NAMES_STR.split(",");
@@ -220,7 +220,7 @@
         "독": [ {n:"독침",p:15,a:100}, {n:"용해액",p:40,a:100}, {n:"스모그",p:30,a:70}, {n:"클리어스모그",p:50,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"독찌르기",p:80,a:100}, {n:"크로스포이즌",p:70,a:100}, {n:"오물웨이브",p:95,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"베놈쇼크",p:65,a:100}, {n:"오물공격",p:65,a:100}, {n:"트림",p:120,a:90}, {n:"포이즌테일",p:50,a:100}, {n:"애시드봄",p:40,a:100}, {n:"셸암즈",p:90,a:100}, {n:"맹독",p:50,a:90} ]
     };
 
-    // [변경] 위력 기반 쿨타임 & 티어 (C: <=60)
+    // 위력 60 이하는 C로 설정하여 초반 풀 확보
     function calcMoveStats(m) {
         let t, c;
         if (m.p <= 60) { t="C"; c=0; }
@@ -234,20 +234,13 @@
     const MOVE_POOL = {};
     Object.keys(RAW_MOVES).forEach(k => { MOVE_POOL[k] = RAW_MOVES[k].map(m => calcMoveStats(m)); });
 
-    // [신규] 포켓몬 스탯/레어도 계산을 위한 시드값 (ID 기반)
     function getStatSeed(id) {
-        // 단순 해시 함수로 ID별 고유 스탯 배율 생성 (0.8 ~ 1.5)
         const x = Math.sin(id * 999) * 10000;
         const rnd = x - Math.floor(x);
-
-        // 전설/환상 보정
         if(LEGENDARY_IDS.includes(id) || MYTHICAL_IDS.includes(id)) return 1.8;
-
-        // 진화체 보정 (대략적) - 3단 진화 등 고려하여 뒷번호일수록 강하게
         let evoBonus = 1.0;
-        if(id % 3 === 0) evoBonus = 1.4; // 3진화체 가정
-        else if(id % 3 === 2) evoBonus = 1.2; // 2진화체
-
+        if(id % 3 === 0) evoBonus = 1.4;
+        else if(id % 3 === 2) evoBonus = 1.2;
         return (0.8 + (rnd * 0.4)) * evoBonus;
     }
 
@@ -255,8 +248,6 @@
         if (id > 251) id = (id % 251) + 1;
         const name = POKE_NAMES[id - 1] || `No.${id}`;
 
-        // [변경] 스탯 기반 레어도 산정
-        // 기본값: HP 50, Atk 50 에 seed 곱하기
         const seed = getStatSeed(id);
         const baseHp = Math.floor(50 * seed);
         const baseAtk = Math.floor(50 * seed);
@@ -283,8 +274,7 @@
         return { id, name, rarity, type: { name: typeName, ...TYPE_DATA[typeName] }, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, baseHp, baseAtk };
     }
 
-    // [변경] 확률 기반 스킬 뽑기 (가중치 적용)
-    function getRandomMoves(typeName, count, maxTier = null) { // maxTier가 있으면 그 이하만 (초반용)
+    function getRandomMoves(typeName, count, maxTier = null) {
         const pool = MOVE_POOL[typeName] || MOVE_POOL["노말"];
         let filtered = pool;
 
@@ -293,7 +283,6 @@
 
         const res = [];
         for(let i=0; i<count; i++) {
-            // 확률 적용: C 50%, R 30%, SR 15%, SSR 4%, UR 1%
             const rnd = Math.random() * 100;
             let targetTier = 'C';
             if(rnd > 99) targetTier = 'UR';
@@ -301,13 +290,11 @@
             else if(rnd > 80) targetTier = 'SR';
             else if(rnd > 50) targetTier = 'R';
 
-            // maxTier 제한이 있으면 다운그레이드
             if (maxTier === 'C') targetTier = 'C';
             if (maxTier === 'R' && ['SR','SSR','UR'].includes(targetTier)) targetTier = 'R';
 
-            // 해당 티어의 스킬 목록에서 랜덤
             let tierMoves = filtered.filter(m => m.t === targetTier);
-            if(tierMoves.length === 0) tierMoves = filtered; // fallback
+            if(tierMoves.length === 0) tierMoves = filtered;
 
             res.push(tierMoves[Math.floor(Math.random() * tierMoves.length)]);
         }
@@ -324,7 +311,7 @@
     /* =========================================
      * STATE & LOGIC
      * ========================================= */
-    const LS_KEY = { POINTS: "qz_p_v7", OWNED: "qz_o_v7", PARTNER: "qz_st_v7", HOF: "qz_hof_v7", TICKETS: "qz_t_v7", DUPES: "qz_d_v7" };
+    const LS_KEY = { POINTS: "qz_p_v71", OWNED: "qz_o_v71", PARTNER: "qz_st_v71", HOF: "qz_hof_v71", TICKETS: "qz_t_v71", DUPES: "qz_d_v71" };
     let battleState = null;
     let quizCallback = null;
 
@@ -449,7 +436,6 @@
     function startBattleStage() {
         const { stage, player } = battleState;
 
-        // [변경] 스테이지 기반 적 스폰 (난이도 곡선)
         let enemyRarityPool = ['C'];
         if (stage >= 4) enemyRarityPool.push('R');
         if (stage >= 8) enemyRarityPool.push('SR');
@@ -457,7 +443,6 @@
         if (stage >= 15) enemyRarityPool.push('UR');
 
         let enemyId;
-        // 해당 Rarity에 맞는 적을 찾을 때까지 랜덤 (비효율적이지만 251마리라 OK)
         let safe = 0;
         do {
             enemyId = Math.floor(Math.random() * 251) + 1;
@@ -470,7 +455,7 @@
         const levelDiff = Math.floor(Math.random() * 3) - 1;
         const eLevel = Math.max(1, player.level + levelDiff);
         const eStats = calcStats(eInfo.baseHp, eInfo.baseAtk, eLevel);
-        const eMoves = getRandomMoves(eInfo.type.name, 1, 'SR'); // 적은 최대 SR까지 사용
+        const eMoves = getRandomMoves(eInfo.type.name, 1, 'SR');
 
         battleState.enemy = {
             id: enemyId, name: eInfo.name, sprite: eInfo.sprite, type: eInfo.type.name,
@@ -532,7 +517,7 @@
             const el = document.getElementById("playerImg"); el.classList.remove("animate-attack-player"); void el.offsetWidth; el.classList.add("animate-attack-player");
 
             const hit = Math.random() * 100 <= move.a;
-            const mult = hit ? 1.0 : 0.5; // [변경] 1배 유지
+            const mult = hit ? 1.0 : 0.5;
 
             const typeInfo = TYPE_DATA[battleState.enemy.type];
             let eff = 1.0; if (typeInfo.weak.includes(battleState.player.type)) eff = 1.5; if (typeInfo.resist.includes(battleState.player.type)) eff = 0.8;
@@ -671,13 +656,11 @@
         return {q,a,choices:Array.from(s).sort(()=>Math.random()-0.5)};
     }
 
-    // [변경] 10연차 지원 Gacha
     function playGacha(type) {
         let count = 1;
         if (type === '10x') { type = 'normal'; count = 10; }
 
         const costPer = type==='normal' ? 100 : 1;
-        // 10연차 할인 (900P)
         const totalCost = count === 10 ? 900 : costPer * count;
         const cur = type==='normal' ? getPoints() : getTickets();
 
@@ -692,7 +675,6 @@
 
         for(let i=0; i<count; i++) {
             let pid;
-            // 전설 소환: 50% 확률로 전설
             if(type==='special') pid = Math.random()<0.5 ? LEGENDARY_IDS[Math.floor(Math.random()*LEGENDARY_IDS.length)] : Math.floor(Math.random()*251)+1;
             else { do { pid = Math.floor(Math.random()*251)+1; } while(LEGENDARY_IDS.includes(pid)); }
             if(pid>251) pid=251;
