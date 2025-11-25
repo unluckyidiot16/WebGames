@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>포켓 수학 토너먼트 V2</title>
+    <title>포켓 수학 토너먼트 V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
 
@@ -118,25 +118,24 @@
                 <div class="text-xs font-bold text-indigo-400 mb-1" id="league-info">16강 예선전</div>
                 <h2 class="text-3xl font-bold game-font text-gray-800" id="main-week-display">1주차</h2>
             </div>
-            <div class="text-center">
-                <span class="text-xs text-gray-400">피로도</span>
-                <div class="w-20 stat-bar-bg mt-1">
-                    <div id="main-fatigue-bar" class="stat-bar-fill bg-orange-400" style="width: 0%"></div>
-                </div>
-            </div>
+            <!-- 피로도 삭제됨 -->
         </div>
 
         <!-- 포켓몬 & 스탯 -->
-        <div class="flex-1 flex flex-col items-center justify-center relative">
-            <div class="relative group" onclick="Game.pokeTouch()">
-                <img id="main-poke-img" src="" class="w-48 h-48 object-contain drop-shadow-lg transition transform group-hover:scale-110">
+        <div class="flex-1 flex flex-col items-center justify-center relative -mt-4">
+            <div class="relative group flex flex-col items-center" onclick="Game.pokeTouch()">
+                <!-- 포켓몬 이미지 (크기 조정됨) -->
+                <img id="main-poke-img" src="" class="object-contain drop-shadow-lg transition-transform duration-500">
+
                 <div id="main-emotion-bubble" class="absolute -top-6 right-0 bg-white px-4 py-2 rounded-2xl text-sm font-bold shadow border border-gray-100 game-font animate-pulse hidden">
                     힘내자!
                 </div>
+
+                <!-- 이름과 스탯이 바로 아래 붙도록 위치 조정 -->
+                <h3 id="main-poke-name" class="text-2xl font-bold text-center text-gray-800 game-font mt-2 mb-2">이름</h3>
             </div>
 
-            <div class="mt-6 w-full max-w-xs px-6">
-                <h3 id="main-poke-name" class="text-2xl font-bold text-center text-gray-800 game-font mb-4">이름</h3>
+            <div class="w-full max-w-xs px-6">
                 <div class="bg-gray-50 rounded-2xl p-4 space-y-3 shadow-inner">
                     <div class="flex items-center justify-between">
                         <span class="text-sm font-bold text-red-500">⚔️ 공격 (덧셈)</span>
@@ -246,10 +245,10 @@
         </button>
     </div>
 
-    <!-- 7. 전투 화면 (수정됨: 높이 고정) -->
+    <!-- 7. 전투 화면 (수정됨: FLEX 레이아웃으로 변경) -->
     <div id="screen-battle" class="screen flex-col h-full bg-white z-50">
-        <!-- 경기장 (상단 60% 고정) -->
-        <div class="h-[60%] bg-pastel-arena relative overflow-hidden flex flex-col rounded-b-3xl shadow-md z-10">
+        <!-- 경기장: 남은 공간 모두 차지 (flex-1) -->
+        <div class="flex-1 w-full bg-pastel-arena relative overflow-hidden flex flex-col rounded-b-3xl shadow-md z-10 min-h-[300px]">
 
             <!-- 상대방 (우측 상단) -->
             <div class="absolute top-8 right-6 flex flex-col items-end w-32 z-20">
@@ -277,8 +276,8 @@
             <div id="battle-fx" class="absolute inset-0 pointer-events-none flex items-center justify-center z-30"></div>
         </div>
 
-        <!-- 전투 로그 (하단 40% 고정) -->
-        <div class="h-[40%] p-6 flex flex-col bg-white">
+        <!-- 전투 로그: 고정 높이 -->
+        <div class="h-48 p-4 flex flex-col bg-white flex-none">
             <div class="flex items-center gap-2 mb-2">
                 <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                 <span class="text-sm font-bold text-gray-400 uppercase">Live Battle Log</span>
@@ -354,7 +353,7 @@
     const Game = {
         state: {
             starter: null,
-            pokemon: { name: "", stage: 0, stats: { atk:0, def:0, skl:0, hp:100 }, fatigue: 0 },
+            pokemon: { name: "", stage: 0, stats: { atk:0, def:0, skl:0, hp:100 } }, // 피로도 제거
             week: 1,
             schedule: [null, null, null],
             player: { totalCorrect: 0, totalQs: 0 },
@@ -366,7 +365,6 @@
         startNewGame: function() {
             this.state.week = 1;
             this.state.pokemon.stage = 0;
-            this.state.pokemon.fatigue = 0;
             this.state.player.totalCorrect = 0;
             this.showScreen('screen-select');
         },
@@ -392,15 +390,19 @@
             document.getElementById('league-info').innerText = roundInfo;
 
             document.getElementById('main-poke-name').innerText = pk.name;
-            document.getElementById('main-poke-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${db.stages[pk.stage]}.png`;
+            const imgEl = document.getElementById('main-poke-img');
+            imgEl.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${db.stages[pk.stage]}.png`;
+
+            // 진화 단계에 따른 크기 변화 (Tailwind width class 조정)
+            if(pk.stage === 0) imgEl.className = "w-40 h-40 object-contain drop-shadow-lg transition-transform duration-500 bounce";
+            else if(pk.stage === 1) imgEl.className = "w-48 h-48 object-contain drop-shadow-lg transition-transform duration-500 bounce";
+            else imgEl.className = "w-56 h-56 object-contain drop-shadow-lg transition-transform duration-500 bounce";
 
             document.getElementById('stat-atk').innerText = Math.floor(pk.stats.atk);
             document.getElementById('stat-def').innerText = Math.floor(pk.stats.def);
             document.getElementById('stat-skl').innerText = Math.floor(pk.stats.skl);
 
-            const fatigue = Math.min(100, pk.fatigue);
-            document.getElementById('main-fatigue-bar').style.width = `${fatigue}%`;
-
+            // 피로도 UI 제거됨
             this.state.schedule = [null, null, null];
             [0,1,2].forEach(i => this.renderSlot(i));
         },
@@ -434,7 +436,7 @@
         startWeek: function() {
             if(this.state.schedule.includes(null)) { alert("계획표를 채워주세요!"); return; }
             this.queue = [...this.state.schedule];
-            this.sessionRes = { atk:0, def:0, skl:0, fatigue:0 };
+            this.sessionRes = { atk:0, def:0, skl:0 }; // 피로도 제거
             this.nextSession();
         },
 
@@ -471,7 +473,7 @@
             });
         },
 
-        // --- 문제 생성 로직 (수정됨) ---
+        // --- 문제 생성 로직 ---
         genQ: function(type) {
             if(type === 'math') { // 덧셈
                 const s = Math.floor(Math.random()*19)+2;
@@ -488,12 +490,8 @@
                 while(arr.length<4) arr.push(Math.floor(Math.random()*20));
                 return { q: `${a} - ${b} = ?`, a: arr, idx: arr.indexOf(r) };
             }
-            else { // 규칙 (패턴 개선)
+            else { // 규칙
                 const icons = ['🍎','🍌','🍇','⭐','❤️','🍄'];
-                // 3가지 패턴 타입
-                // 1. ABAB (4개)
-                // 2. AABAAB (6개)
-                // 3. ABCABC (6개)
                 const pType = Math.floor(Math.random() * 3);
                 let seq = [];
 
@@ -503,22 +501,14 @@
                 let C = icons[Math.floor(Math.random()*icons.length)];
                 while(C===A || C===B) C = icons[Math.floor(Math.random()*icons.length)];
 
-                if(pType === 0) { // ABAB
-                    seq = [A, B, A, B];
-                } else if(pType === 1) { // AABAAB
-                    seq = [A, A, B, A, A, B];
-                } else { // ABCABC
-                    seq = [A, B, C, A, B, C];
-                }
+                if(pType === 0) seq = [A, B, A, B];
+                else if(pType === 1) seq = [A, A, B, A, A, B];
+                else seq = [A, B, C, A, B, C];
 
-                // 빈칸 위치 랜덤 (0 ~ 길이-1)
                 const hideIdx = Math.floor(Math.random() * seq.length);
                 const answer = seq[hideIdx];
-
-                // 문제 문자열 생성
                 const qStr = seq.map((item, idx) => idx === hideIdx ? "[ ? ]" : item).join(" ");
 
-                // 보기 생성 (정답 + 오답 3개)
                 let choices = [answer];
                 while(choices.length < 4) {
                     const wrong = icons[Math.floor(Math.random()*icons.length)];
@@ -535,7 +525,7 @@
                 this.state.player.totalCorrect++;
                 this.sessionRes[SUBJECTS[this.currSubject].stat] += 3;
             }
-            this.sessionRes.fatigue += 5;
+            // 피로도 증가 로직 제거
             this.nextQ();
         },
 
@@ -543,7 +533,7 @@
             const pk = this.state.pokemon;
             const r = this.sessionRes;
             pk.stats.atk += r.atk; pk.stats.def += r.def; pk.stats.skl += r.skl;
-            pk.fatigue += r.fatigue;
+            // 피로도 반영 제거
 
             let msg = "훈련을 무사히 마쳤다!";
             if((this.state.week===3 && pk.stage===0) || (this.state.week===6 && pk.stage===1)) {
