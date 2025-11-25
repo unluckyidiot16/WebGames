@@ -149,17 +149,27 @@
         }
 
         /* 실루엣 효과 */
-        .tile.silhouette::after {
-            content: ""; position: absolute;
-            width: 200%; height: 200%;
-            top: -50%; left: -50%;
-            background-size: contain; background-position: center; background-repeat: no-repeat;
-            filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255,255,255,0.8));
+        .tile.silhouette .silhouette-img {
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            top: -50%;
+            left: -50%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            filter: brightness(0) invert(1)
+            drop-shadow(0 0 5px rgba(255, 255, 255, 0.8));
             opacity: 0.9;
             animation: bounce 1.5s infinite;
             z-index: 5;
+            pointer-events: none;
         }
-        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50%      { transform: translateY(-8px); }
+        }
+        
 
         #player {
             position: absolute; top:0; left:0;
@@ -280,6 +290,59 @@
             box-shadow: 0 4px 0 #cbd5e1; transition: 0.1s;
         }
         .quiz-btn:active { transform: translateY(4px); box-shadow: none; background: #f1f5f9; }
+
+        /* 포켓볼 투척 / 흔들림 연출 */
+        .throw-scene-area {
+            position: relative;
+            width: 100%;
+            height: 160px;
+            margin-top: 10px;
+            overflow: hidden;
+        }
+        .throw-ball-img {
+            position: absolute;
+            left: 50%;
+            bottom: 0; /* 바닥 기준 */
+            width: 80px;
+            height: 80px;
+            transform: translate(-50%, 160px) scale(0.9); /* 화면 아래에서 시작 */
+            image-rendering: pixelated;
+        }
+
+        /* 바닥 → 포켓몬 위치까지 ↑ (이전보다 약 4배 높이) */
+        @keyframes ballThrowUp {
+            0%   { transform: translate(-50%, 160px) scale(0.9); }
+            100% { transform: translate(-50%, -80px) scale(1); }
+        }
+
+        /* 포켓몬 맞춘 뒤, 바닥으로 툭 떨어지는 구간 */
+        @keyframes ballDrop {
+            0%   { transform: translate(-50%, -80px) scale(1); }
+            100% { transform: translate(-50%,   0px) scale(1); }
+        }
+
+        /* 바닥에서 3번 흔들리며 살짝 어두워지는 구간 */
+        @keyframes ballShake {
+            0%   { transform: translate(-50%, 0px) rotate(0deg);   filter:brightness(1); }
+            25%  { transform: translate(-50%, 0px) rotate(-15deg); }
+            50%  { transform: translate(-50%, 0px) rotate(15deg);  }
+            75%  { transform: translate(-50%, 0px) rotate(-10deg); }
+            100% { transform: translate(-50%, 0px) rotate(0deg);   filter:brightness(0.6); }
+        }
+
+        .ball-throw-up { animation: ballThrowUp 0.35s ease-out forwards; }
+        .ball-drop     { animation: ballDrop     0.25s ease-in  forwards; }
+        .ball-shake    { animation: ballShake    0.40s ease-in-out 0s 3 forwards; }
+
+        /* 포켓몬이 볼에 빨려 들어가는 연출 */
+        @keyframes pokeShrink {
+            0%   { transform: scale(1);   opacity: 1; }
+            100% { transform: scale(0.0); opacity: 0; }
+        }
+        .poke-shrink { animation: pokeShrink 0.30s ease-in forwards; }
+        .poke-hidden { opacity: 0; }
+
+
 
     </style>
 </head>
@@ -427,16 +490,20 @@
 
         <div class="ball-select">
             <button class="ball-opt" id="btn-use-monster" onclick="tryCatch('monster')">
-                🔴 몬스터볼<br>x<span id="qty-monster">0</span>
+                <img src="./png/pb.png" style="width:36px; height:36px; image-rendering:pixelated; display:block; margin:0 auto 4px;">
+                몬스터볼<br>x<span id="qty-monster">0</span>
             </button>
             <button class="ball-opt" id="btn-use-super" onclick="tryCatch('super')">
-                🔵 슈퍼볼<br>x<span id="qty-super">0</span>
+                <img src="./png/gb.png" style="width:36px; height:36px; image-rendering:pixelated; display:block; margin:0 auto 4px;">
+                슈퍼볼<br>x<span id="qty-super">0</span>
             </button>
             <button class="ball-opt" id="btn-use-hyper" onclick="tryCatch('hyper')">
-                🟡 하이퍼볼<br>x<span id="qty-hyper">0</span>
+                <img src="./png/ub.png" style="width:36px; height:36px; image-rendering:pixelated; display:block; margin:0 auto 4px;">
+                하이퍼볼<br>x<span id="qty-hyper">0</span>
             </button>
             <button class="ball-opt" id="btn-use-master" onclick="tryCatch('master')">
-                🟣 마스터볼<br>x<span id="qty-master">0</span>
+                <img src="./png/mb.png" style="width:36px; height:36px; image-rendering:pixelated; display:block; margin:0 auto 4px;">
+                마스터볼<br>x<span id="qty-master">0</span>
             </button>
         </div>
         <button style="margin-top:20px; background:#94a3b8; padding:12px; border:none; color:white; border-radius:15px; width:100%; font-size:18px; font-family:inherit; cursor:pointer;" onclick="runAway()">
@@ -449,7 +516,16 @@
         <p id="quiz-txt" style="font-size:22px; margin:20px 0; font-weight:bold; color:#334155; word-break: keep-all;"></p>
         <div id="quiz-opts" style="display:flex; flex-direction:column; gap:12px;"></div>
     </div>
-
+    <div id="modal-throw" class="modal-box hidden">
+        <h3 style="color:#f97316; font-size:24px; margin-top:0;">포켓볼을 던졌다!</h3>
+        <img id="throw-poke-img" src="" class="poke-img-lg" />
+        <div class="throw-scene-area">
+            <img id="throw-ball-img" class="throw-ball-img" />
+        </div>
+        <p style="font-size:16px; color:#64748b; margin-top:10px;">
+            포켓볼이 흔들리고 있어요...
+        </p>
+    </div>
     <div id="modal-msg" class="modal-box hidden">
         <h2 id="msg-title" style="font-size:32px; margin:10px 0;">결과</h2>
         <img id="msg-img" src="" style="width:100px; height:100px; image-rendering:pixelated;" />
@@ -462,6 +538,28 @@
     // --- 데이터 및 상태 ---
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
     const QUIZ_URL = "./quiz/quiz.json"; // 요청하신 경로
+
+    const BALL_SPRITES = {
+        monster: "./png/pb.png", // 몬스터볼
+        super:   "./png/gb.png", // 슈퍼볼
+        hyper:   "./png/ub.png", // 하이퍼볼
+        master:  "./png/mb.png", // 마스터볼
+    };
+
+    const BALL_OPEN_SPRITES = {
+        monster: "./png/pb_open.png",
+        super:   "./png/gb_open.png",
+        hyper:   "./png/ub_open.png",
+        master:  "./png/mb_open.png",
+    };
+
+    const BALL_OPENING_SPRITES = {
+        monster: "./png/pb_opening.png",
+        super:   "./png/gb_opening.png",
+        hyper:   "./png/ub_opening.png",
+        master:  "./png/mb_opening.png",
+    };
+
 
     // 영구 데이터
     let user = {
@@ -488,6 +586,7 @@
     let quizList = [];
     let selectedBall = null;
     let currentQuiz = null;
+    let lastCapture = null;
 
     // --- 초기화 ---
     async function init() {
@@ -544,7 +643,9 @@
         };
 
         // 이번 탐험용 무료 볼 지급
-        user.inventory.monster += bonusBalls;
+        if (user.inventory.monster < bonusBalls) {
+            user.inventory.monster = bonusBalls;
+        }
 
         generateMap();
         player = { x: 4, y: 4 };
@@ -655,48 +756,61 @@
 
     // 실루엣 제거 함수 (버그 수정용)
     function removeSilhouette() {
-        document.querySelectorAll('.tile').forEach(t => {
+        document.querySelectorAll('.tile.silhouette').forEach(t => {
             t.classList.remove('silhouette');
-            const styleTag = t.querySelector('style');
-            if(styleTag) styleTag.remove();
+            const img = t.querySelector('.silhouette-img');
+            if (img) img.remove();
         });
         silhouettePos = { x: -1, y: -1 };
     }
 
+
+
     async function spawnPokemon() {
-        // 기존 실루엣 확실히 제거
+        // 이전 실루엣 완전히 제거
         removeSilhouette();
 
         let x, y;
         do {
-            x = Math.floor(Math.random()*9);
-            y = Math.floor(Math.random()*9);
-        } while(x === player.x && y === player.y);
+            x = Math.floor(Math.random() * 9);
+            y = Math.floor(Math.random() * 9);
+        } while (x === player.x && y === player.y);
 
-        silhouettePos = {x, y};
+        silhouettePos = { x, y };
         currentPokemon = null;
 
         const targetTile = document.querySelector(`.tile[data-x="${x}"][data-y="${y}"]`);
-        if(targetTile) targetTile.classList.add('silhouette');
 
-        // 랜덤 ID
-        const id = Math.floor(Math.random()*151)+1;
+        // 랜덤 포켓몬 ID
+        const id = Math.floor(Math.random() * 151) + 1;
+
         try {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
             const data = await res.json();
-            const name = data.names.find(n=>n.language.name==='ko')?.name || data.name;
+            const name =
+                data.names.find((n) => n.language.name === "ko")?.name || data.name;
             const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 
             currentPokemon = { id, name, rate: data.capture_rate, sprite };
 
-            const style = document.createElement('style');
-            style.innerHTML = `.tile[data-x="${x}"][data-y="${y}"].silhouette::after { background-image: url("${sprite}"); }`;
-            targetTile.appendChild(style);
+            if (targetTile) {
+                targetTile.classList.add("silhouette");
 
-        } catch(e) {
+                // 혹시 남아 있을 수 있는 이전 이미지 제거
+                const oldImg = targetTile.querySelector(".silhouette-img");
+                if (oldImg) oldImg.remove();
+
+                const img = document.createElement("img");
+                img.className = "silhouette-img";
+                img.src = sprite;
+                targetTile.appendChild(img);
+            }
+        } catch (e) {
             console.error(e);
         }
     }
+
+
 
     function startEncounter() {
         if(!currentPokemon) return;
@@ -768,44 +882,139 @@
 
         const success = Math.random() < p;
 
-        document.getElementById('modal-quiz').classList.add('hidden');
-        document.getElementById('modal-msg').classList.remove('hidden');
-        document.getElementById('msg-img').src = currentPokemon.sprite;
-
-        const titleEl = document.getElementById('msg-title');
-        const descEl = document.getElementById('msg-desc');
+        // 메시지/점수 계산만 먼저 해 두고 모달은 나중에 띄움
+        let titleText, titleColor, descHtml;
 
         if(success) {
-            titleEl.textContent = "잡았다!";
-            titleEl.style.color = "#4ade80";
+            titleText = "잡았다!";
+            titleColor = "#4ade80";
 
             let pts = 100;
             if(user.dex.has(currentPokemon.id)) {
                 pts = 50;
-                descEl.innerHTML = `${currentPokemon.name}!<br><span style='font-size:14px; color:#94a3b8;'>또 잡았네요 (+50P)</span>`;
+                descHtml = `${currentPokemon.name}!<br><span style='font-size:14px; color:#94a3b8;'>또 잡았네요 (+50P)</span>`;
             } else {
                 user.dex.add(currentPokemon.id);
-                descEl.innerHTML = `${currentPokemon.name}!<br><span style='font-size:14px; color:#f59e0b;'>새로운 친구! (+100P)</span>`;
+                descHtml = `${currentPokemon.name}!<br><span style='font-size:14px; color:#f59e0b;'>새로운 친구! (+100P)</span>`;
             }
 
             user.points += pts;
             session.earnedPoints += pts;
             session.caught.push({ name: currentPokemon.name, sprite: currentPokemon.sprite });
-
         } else {
-            titleEl.textContent = "놓쳤다...";
-            titleEl.style.color = "#f87171";
-            descEl.textContent = `${currentPokemon.name}이(가) 도망갔어요.`;
+            titleText = "놓쳤다...";
+            titleColor = "#f87171";
+            descHtml = `${currentPokemon.name}이(가) 도망갔어요.`;
         }
 
-        descEl.innerHTML += isCorrect ? "<br><br>⭕ 정답입니다!" : "<br><br>❌ 틀렸어요...";
+        descHtml += isCorrect ? "<br><br>⭕ 정답입니다!" : "<br><br>❌ 틀렸어요...";
+
+        lastCapture = { success, isCorrect, titleText, titleColor, descHtml };
+
+        removeSilhouette();
+
+        // 퀴즈 모달 닫고 → 포켓볼 투척/3번 흔들림 연출
+        document.getElementById('modal-quiz').classList.add('hidden');
+        showThrowAnimation();
     }
+
+    function showThrowAnimation() {
+        const layer = document.getElementById("modal-layer");
+        const throwModal = document.getElementById("modal-throw");
+        const pokeImg = document.getElementById("throw-poke-img");
+        const ballImg = document.getElementById("throw-ball-img");
+
+        layer.classList.remove("hidden");
+        throwModal.classList.remove("hidden");
+
+        // 포켓몬 이미지 초기화
+        pokeImg.src = currentPokemon.sprite;
+        pokeImg.classList.remove("poke-shrink", "poke-hidden");
+        pokeImg.style.transform = "";
+        pokeImg.style.opacity = "1";
+
+        const closedSprite = BALL_SPRITES[selectedBall] || "./png/pb.png";
+        const openSprite =
+            BALL_OPEN_SPRITES[selectedBall] || closedSprite;
+        const openingSprite =
+            BALL_OPENING_SPRITES[selectedBall] || closedSprite;
+
+        // 볼 초기 상태는 "닫힌" 이미지
+        ballImg.src = closedSprite;
+
+        // 애니메이션 초기화
+        ballImg.classList.remove("ball-throw-up", "ball-drop", "ball-shake");
+        void ballImg.offsetWidth; // 강제 리플로우 → 애니 재시작
+        ballImg.classList.add("ball-throw-up");
+
+        ballImg.onanimationend = (e) => {
+            if (e.animationName === "ballThrowUp") {
+                // 포켓몬에 도달 → 볼 열림 & 포켓몬 축소 시작
+                ballImg.src = openSprite;
+
+                pokeImg.classList.remove("poke-shrink", "poke-hidden");
+                void pokeImg.offsetWidth;
+                pokeImg.classList.add("poke-shrink");
+
+                // 포켓몬 축소 완료 후, open → opening → closed 역순 재생
+                pokeImg.onanimationend = () => {
+                    pokeImg.classList.add("poke-hidden");
+
+                    ballImg.src = openSprite;
+                    setTimeout(() => {
+                        ballImg.src = openingSprite;
+                        setTimeout(() => {
+                            ballImg.src = closedSprite;
+
+                            // 이제 바닥으로 떨어지는 애니메이션
+                            ballImg.classList.remove("ball-throw-up");
+                            void ballImg.offsetWidth;
+                            ballImg.classList.add("ball-drop");
+                        }, 80);
+                    }, 80);
+                };
+            } else if (e.animationName === "ballDrop") {
+                ballImg.classList.remove("ball-drop");
+                void ballImg.offsetWidth;
+                ballImg.classList.add("ball-shake");
+            } else if (e.animationName === "ballShake") {
+                // 3번 흔들린 후 결과 모달로
+                ballImg.onanimationend = null;
+                throwModal.classList.add("hidden");
+                showResultModal();
+            }
+        };
+    }
+
+
+
+    function showResultModal() {
+        const layer = document.getElementById('modal-layer');
+        const msgModal = document.getElementById('modal-msg');
+        const titleEl = document.getElementById('msg-title');
+        const descEl = document.getElementById('msg-desc');
+        const imgEl = document.getElementById('msg-img');
+
+        layer.classList.remove('hidden');
+        msgModal.classList.remove('hidden');
+
+        imgEl.src = currentPokemon.sprite;
+
+        if (lastCapture) {
+            titleEl.textContent = lastCapture.titleText;
+            titleEl.style.color = lastCapture.titleColor;
+            descEl.innerHTML = lastCapture.descHtml;
+        }
+    }
+
 
     function closeMsgModal() {
         document.getElementById('modal-layer').classList.add('hidden');
         document.getElementById('modal-msg').classList.add('hidden');
+        const throwModal = document.getElementById('modal-throw');
+        if (throwModal) throwModal.classList.add('hidden');
 
-        // 실루엣 제거 (버그 수정: 확실하게 제거)
+        // 실루엣 제거
         removeSilhouette();
 
         // 볼 확인
