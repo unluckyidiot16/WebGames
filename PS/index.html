@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 맞춤법 탐험대</title>
+    <title>포켓몬 맞춤법 탐험대 (전국도감 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -169,7 +169,7 @@
             0%, 100% { transform: translateY(0); }
             50%      { transform: translateY(-8px); }
         }
-        
+
 
         #player {
             position: absolute; top:0; left:0;
@@ -302,7 +302,6 @@
             z-index: 120;
         }
 
-        /* 🔧 여기 블록 수정 */
         .throw-ball-img {
             position: absolute;
             left: 50%;
@@ -366,7 +365,7 @@
             opacity: 0;
         }
 
-        
+
         .ball-opt img {
             width: 40px;
             height: 40px;              /* 정사각형 캔버스 */
@@ -504,7 +503,7 @@
             <h2 style="margin:0; font-size:24px; color:#92400e;">포켓몬 도감</h2>
         </div>
         <p style="font-size:18px; margin-bottom:15px;">
-            모은 포켓몬: <span id="dex-count" style="font-weight:bold; color:#d97706;">0</span> / 151
+            모은 포켓몬: <span id="dex-count" style="font-weight:bold; color:#d97706;">0</span> / <span id="dex-total">1025</span>
         </p>
         <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; padding-bottom:50px;" id="dex-grid"></div>
     </div>
@@ -568,7 +567,10 @@
 <script>
     // --- 데이터 및 상태 ---
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
-    const QUIZ_URL = "./quiz/quiz.json"; // 요청하신 경로
+    const QUIZ_URL = "./quiz/quiz.json";
+
+    // [수정됨] 최대 포켓몬 번호 (1025번: 9세대 DLC 포함)
+    const MAX_POKEMON_ID = 1025;
 
     const BALL_SPRITES = {
         monster: "./png/pb.png", // 몬스터볼
@@ -785,7 +787,7 @@
 
     // --- 스폰 및 인카운터 ---
 
-    // 실루엣 제거 함수 (버그 수정용)
+    // 실루엣 제거 함수
     function removeSilhouette() {
         document.querySelectorAll('.tile.silhouette').forEach(t => {
             t.classList.remove('silhouette');
@@ -812,8 +814,8 @@
 
         const targetTile = document.querySelector(`.tile[data-x="${x}"][data-y="${y}"]`);
 
-        // 랜덤 포켓몬 ID
-        const id = Math.floor(Math.random() * 151) + 1;
+        // [수정됨] 랜덤 포켓몬 ID 범위를 MAX_POKEMON_ID까지 확장
+        const id = Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
 
         try {
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
@@ -858,7 +860,11 @@
         document.getElementById('enc-img').src = currentPokemon.sprite;
         document.getElementById('enc-name').textContent = currentPokemon.name;
 
+        // 포획률 보정 (기본 rate가 255 기준)
         let baseRate = (currentPokemon.rate / 255);
+        // 희귀 포켓몬(전설 등)은 capture_rate가 낮음. 너무 어려우니 최소 보정
+        if (!baseRate) baseRate = 0.3; // 데이터가 없는 경우 기본값
+
         baseRate += (user.upgrades.catchRate * 0.1);
         if(baseRate > 0.95) baseRate = 0.95;
         document.getElementById('enc-rate').textContent = Math.floor(baseRate*100);
@@ -904,6 +910,8 @@
         updateGameHeader();
 
         let rate = currentPokemon.rate / 255;
+        if(!rate) rate = 0.3; // 안전 장치
+
         const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
         const quizBonus = isCorrect ? 1.5 : 0.5;
         const upgradeBonus = 1 + (user.upgrades.catchRate * 0.1);
@@ -960,7 +968,7 @@
 
         // 포켓몬 이미지 초기화
         pokeImg.src = currentPokemon.sprite;
-        pokeImg.classList.remove("poke-shrink", "poke-hidden");
+        pokeImg.classList.remove("poke-descend-shrink", "poke-hidden");
         pokeImg.style.transform = "";
         pokeImg.style.opacity = "1";
 
@@ -1010,7 +1018,7 @@
                     }, 80);
                 };
 
-        } else if (e.animationName === "ballDrop") {
+            } else if (e.animationName === "ballDrop") {
                 ballImg.classList.remove("ball-drop");
                 void ballImg.offsetWidth;
                 ballImg.classList.add("ball-shake");
@@ -1087,7 +1095,6 @@
         user.points -= cost;
         user.inventory[type]++;
         updateShopUI();
-        // alert 생략: 버튼 눌리는 느낌으로 대체하거나 간단한 토스트 메시지 좋음
     }
 
     function buyUpgrade(key, cost) {
@@ -1103,16 +1110,21 @@
     // --- 도감 렌더링 ---
     function renderDex() {
         document.getElementById('dex-count').textContent = user.dex.size;
+        // [수정됨] 전체 포켓몬 수 업데이트
+        document.getElementById('dex-total').textContent = MAX_POKEMON_ID;
+
         const grid = document.getElementById('dex-grid');
         grid.innerHTML = "";
 
-        for(let i=1; i<=151; i++) {
+        // [수정됨] 1번부터 1025번까지 반복
+        for(let i=1; i<=MAX_POKEMON_ID; i++) {
             const d = document.createElement('div');
-            // 도감 스타일 예쁘게
+            // 도감 스타일
             d.style.cssText = "aspect-ratio:1; background:#fff; border-radius:15px; display:flex; justify-content:center; align-items:center; border:2px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);";
 
             if(user.dex.has(i)) {
-                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png" style="width:80%; image-rendering:pixelated;">`;
+                // [성능 최적화] loading="lazy" 추가
+                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png" style="width:80%; image-rendering:pixelated;" loading="lazy">`;
                 d.style.borderColor = "#4ade80";
                 d.style.background = "#f0fdf4";
             } else {
