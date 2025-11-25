@@ -694,15 +694,21 @@
     function showAlert(t,b){ alert(`${t}\n${b}`); }
 
     window.onload = () => {
-        updateResUI(); updateLobbyPartner();
+        updateResUI();
+        updateLobbyPartner();
+
         document.getElementById("startButton").onclick = () => { document.getElementById("titleScreen").classList.remove("active"); document.getElementById("lobbyScreen").classList.add("active"); };
         document.getElementById("lobbyCodexBtn").onclick = () => { renderCodex(); document.getElementById("lobbyScreen").classList.remove("active"); document.getElementById("codexScreen").classList.add("active"); };
         document.getElementById("codexToLobbyBtn").onclick = () => { document.getElementById("codexScreen").classList.remove("active"); document.getElementById("lobbyScreen").classList.add("active"); };
+
         document.getElementById("lobbyGachaBtn").onclick = () => document.getElementById("gachaModal").classList.remove("hidden");
         document.getElementById("gachaClose").onclick = () => document.getElementById("gachaModal").classList.add("hidden");
-        document.getElementById("gachaNormalBtn").onclick = () => playGacha('normal');
+
+        // [수정됨] gachaNormalBtn -> gacha1Btn 으로 변경
+        document.getElementById("gacha1Btn").onclick = () => playGacha('normal');
         document.getElementById("gacha10Btn").onclick = () => playGacha('10x');
         document.getElementById("gachaSpecialBtn").onclick = () => playGacha('special');
+
         document.getElementById("startAdventureBtn").onclick = initAdventure;
         document.getElementById("battleBackBtn").onclick = () => { if(confirm("포기하시겠습니까?")) handleDefeat(); };
         document.getElementById("quizCancel").onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(false); };
