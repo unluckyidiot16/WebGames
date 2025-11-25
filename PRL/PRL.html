@@ -190,76 +190,119 @@
 
 <script>
     /* =========================================
-     * DATA 
+     * DATA & CONSTANTS
      * ========================================= */
     const POKE_NAMES_STR = "이상해씨,이상해풀,이상해꽃,파이리,리자드,리자몽,꼬부기,어니부기,거북왕,캐터피,단데기,버터플,뿔충이,딱충이,독침붕,구구,피죤,피죤투,꼬렛,레트라,깨비참,깨비드릴조,아보,아보크,피카츄,라이츄,모래두지,고지,니드런♀,니드리나,니드퀸,니드런♂,니드리노,니드킹,삐삐,픽시,식스테일,나인테일,푸린,푸크린,주뱃,골뱃,뚜벅쵸,냄새꼬,라플레시아,파라스,파라섹트,콘팡,도나리,디그다,닥트리오,나옹,페르시온,고라파덕,골덕,망키,성원숭,가디,윈디,발챙이,슈륙챙이,강챙이,캐이시,윤겔라,후딘,알통몬,근육몬,괴력몬,모다피,우츠동,우츠보트,왕눈해,독파리,꼬마돌,데구리,딱구리,포니타,날쌩마,야돈,야도란,코일,레어코일,파오리,두두,두트리오,쥬쥬,쥬레곤,질퍽이,질뻐기,셀러,파르셀,고오스,고우스트,팬텀,롱스톤,슬리프,슬리퍼,크랩,킹크랩,찌리리공,붐볼,아라리,나시,탕구리,텅구리,시라소몬,홍수몬,내루미,또가스,또도가스,뿔카노,코뿌리,럭키,덩쿠리,캥카,쏘드라,시드라,콘치,왕콘치,별가사리,아쿠스타,마임맨,스턱,루주라,에레브,마그마,쁘사이저,켄타로스,잉어킹,갸라도스,라프라스,메타몽,이브이,샤미드,쥬피썬더,부스터,폴리곤,암나이트,암스타,투구,투구푸스,프테라,잠만보,프리져,썬더,파이어,미뇽,신뇽,망나뇽,뮤츠,뮤,치코리타,베이리프,메가니움,브케인,마그케인,블레이범,리아코,엘리게이,장크로다일,꼬리선,다꼬리,부우부,야부엉,레디바,레디안,페이검,아리아도스,크로뱃,초라기,랜턴,피츄,삐,푸푸린,토게피,토게틱,네이티,네이티오,메리프,보송송,전룡,아르코,마릴,마릴리,꼬지모,왕구리,통통코,두코,솜솜코,에이팜,해너츠,해루미,왕자리,우파,누오,에브이,블래키,니로우,야도킹,무우마,안농,마자용,키링키,피콘,쏘콘,노고치,글라이거,강철톤,블루,그랑블루,침바루,핫삼,단단지,헤라크로스,포뉴라,깜지곰,링곰,마그마그,마그카르고,꾸꾸리,메꾸리,코산호,총어,대포무노,딜리버드,만타인,무장조,델빌,헬가,킹드라,코판,코리갑,폴리곤2,노라키,루브도,배루키,카포에라,뽀뽀라,에레키드,마그비,밀탱크,해피너스,라이코,앤테이,스이쿤,애버라스,데기라스,마기라스,루기아,칠색조,세레비";
     const POKE_NAMES = POKE_NAMES_STR.split(",");
+
+    // 주요 포켓몬 실제 스탯 데이터 (HP, Atk, Def, SpA, SpD, Spe)
+    const REAL_STATS = {
+        1: [45,49,49,65,65,45], 2: [60,62,63,80,80,60], 3: [80,82,83,100,100,80], // 이상해씨 계열
+        4: [39,52,43,60,50,65], 5: [58,64,58,80,65,80], 6: [78,84,78,109,85,100], // 파이리 계열
+        7: [44,48,65,50,64,43], 8: [59,63,80,65,80,58], 9: [79,83,100,85,105,78], // 꼬부기 계열
+        25: [35,55,40,50,50,90], 26: [60,90,55,90,80,110], // 피카츄 계열
+        133: [55,55,50,45,65,55], 134: [130,65,60,110,95,65], 135: [65,65,60,110,95,130], 136: [65,130,60,95,110,65], // 이브이 계열
+        143: [160,110,65,65,110,30], // 잠만보
+        144: [90,85,100,95,125,85], 145: [90,90,85,125,90,100], 146: [90,100,90,125,85,90], // 전설의 새
+        149: [91,134,95,100,100,80], // 망나뇽
+        150: [106,110,90,154,90,130], 151: [100,100,100,100,100,100], // 뮤츠, 뮤
+        243: [90,85,75,115,100,115], 244: [115,115,85,90,75,100], 245: [100,75,115,90,115,85], // 전설의 개
+        248: [100,134,110,95,100,61], // 마기라스
+        249: [106,90,130,90,154,110], 250: [106,130,90,110,154,90], 251: [100,100,100,100,100,100] // 루기아, 칠색조, 세레비
+    };
+
     const LEGENDARY_IDS = [144,145,146,150,243,244,245,249,250];
     const MYTHICAL_IDS = [151, 251];
 
+    // 타입별 데이터 및 상성 (페어리 등 최신 타입 일부 제외하고 Gen 2 기준 확장)
     const TYPE_DATA = {
         "풀": { color: "bg-green-500", weak: ["불꽃", "독", "얼음", "비행", "벌레"], resist: ["물", "전기", "풀", "땅"] },
-        "불꽃": { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철", "페어리"] },
+        "불꽃": { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철"] },
         "물": { color: "bg-blue-500", weak: ["전기", "풀"], resist: ["불꽃", "물", "얼음", "강철"] },
         "전기": { color: "bg-yellow-400", weak: ["땅"], resist: ["전기", "비행", "강철"] },
-        "노말": { color: "bg-stone-400", weak: ["격투"], resist: [] },
+        "노말": { color: "bg-stone-400", weak: ["격투"], resist: [] }, // 고스트 무효 구현 생략
         "에스퍼": { color: "bg-pink-400", weak: ["벌레", "고스트", "악"], resist: ["격투", "에스퍼"] },
-        "격투": { color: "bg-orange-600", weak: ["비행", "에스퍼", "페어리"], resist: ["벌레", "바위", "악"] },
-        "독": { color: "bg-purple-500", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레", "페어리"] },
+        "격투": { color: "bg-orange-600", weak: ["비행", "에스퍼"], resist: ["벌레", "바위", "악"] },
+        "독": { color: "bg-purple-500", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레"] },
     };
     const TYPE_KEYS = Object.keys(TYPE_DATA);
 
+    // 물리/특수 분류 (Gen 1~3 기준: 타입에 따라 결정)
+    const PHYSICAL_TYPES = ["노말", "격투", "독", "땅", "비행", "벌레", "바위", "고스트", "강철"];
+    const SPECIAL_TYPES = ["불꽃", "물", "풀", "전기", "에스퍼", "얼음", "드래곤", "악"];
+
+    // 기술 목록
     const RAW_MOVES = {
-        "풀": [ {n:"덩굴채찍",p:45,a:100}, {n:"잎날가르기",p:55,a:95}, {n:"메가드레인",p:40,a:100}, {n:"씨폭탄",p:80,a:100}, {n:"에너지볼",p:90,a:100}, {n:"기가드레인",p:75,a:100}, {n:"매지컬리프",p:60,a:100}, {n:"꽃보라",p:90,a:100}, {n:"솔라빔",p:120,a:100}, {n:"리프스톰",p:130,a:90}, {n:"하드플랜트",p:150,a:90}, {n:"우드해머",p:120,a:100}, {n:"파워휩",p:120,a:85}, {n:"리프블레이드",p:90,a:100}, {n:"솔라블레이드",p:125,a:100}, {n:"풀묶기",p:60,a:100} ],
-        "불꽃": [ {n:"불꽃세례",p:40,a:100}, {n:"불꽃펀치",p:75,a:100}, {n:"니트로차지",p:50,a:100}, {n:"화염바퀴",p:60,a:100}, {n:"화염방사",p:90,a:100}, {n:"열풍",p:95,a:90}, {n:"불꽃오름",p:80,a:100}, {n:"불꽃채찍",p:80,a:100}, {n:"불대문자",p:110,a:85}, {n:"오버히트",p:130,a:90}, {n:"블라스트번",p:150,a:90}, {n:"플레어드라이브",p:120,a:100}, {n:"분화",p:150,a:100}, {n:"마그마스톰",p:100,a:75}, {n:"성스러운불꽃",p:100,a:95}, {n:"V제너레이트",p:180,a:95} ],
-        "물": [ {n:"물대포",p:40,a:100}, {n:"거품광선",p:65,a:100}, {n:"물의파동",p:60,a:100}, {n:"아쿠아제트",p:40,a:100}, {n:"파도타기",p:90,a:100}, {n:"아쿠아테일",p:90,a:90}, {n:"열탕",p:80,a:100}, {n:"탁류",p:90,a:85}, {n:"하이드로펌프",p:110,a:80}, {n:"하이드로캐논",p:150,a:90}, {n:"해일",p:110,a:90}, {n:"근원의파동",p:110,a:85}, {n:"셸블레이드",p:75,a:95}, {n:"폭포오르기",p:80,a:100}, {n:"다이빙",p:80,a:100}, {n:"아쿠아브레이크",p:85,a:100} ],
-        "전기": [ {n:"전기쇼크",p:40,a:100}, {n:"전광석화",p:40,a:100}, {n:"스파크",p:65,a:100}, {n:"전격파",p:60,a:100}, {n:"10만볼트",p:90,a:100}, {n:"번개펀치",p:75,a:100}, {n:"방전",p:80,a:100}, {n:"일렉트릭볼",p:80,a:100}, {n:"번개",p:110,a:70}, {n:"전자포",p:120,a:50}, {n:"볼트태클",p:120,a:100}, {n:"라이징볼트",p:70,a:100}, {n:"뇌격",p:130,a:85}, {n:"크로스썬더",p:100,a:100}, {n:"오라윙",p:80,a:100}, {n:"와일드볼트",p:90,a:100} ],
-        "노말": [ {n:"몸통박치기",p:40,a:100}, {n:"할퀴기",p:40,a:100}, {n:"막치기",p:40,a:100}, {n:"돌진",p:90,a:85}, {n:"은혜갚기",p:102,a:100}, {n:"누르기",p:85,a:100}, {n:"베어가르기",p:70,a:100}, {n:"하이퍼보이스",p:90,a:100}, {n:"파괴광선",p:150,a:90}, {n:"기가임팩트",p:150,a:90}, {n:"이판사판태클",p:120,a:100}, {n:"브레이크크루",p:75,a:95}, {n:"짓밟기",p:65,a:100}, {n:"객기",p:70,a:100}, {n:"스피드스타",p:60,a:100}, {n:"트라이어택",p:80,a:100} ],
-        "에스퍼": [ {n:"염동력",p:50,a:100}, {n:"환상빔",p:65,a:100}, {n:"하트스탬프",p:60,a:100}, {n:"사념의박치기",p:80,a:90}, {n:"사이코키네시스",p:90,a:100}, {n:"사이코쇼크",p:80,a:100}, {n:"신통력",p:80,a:100}, {n:"러스터퍼지",p:70,a:100}, {n:"미래예지",p:120,a:100}, {n:"꿈먹기",p:100,a:100}, {n:"사이코부스트",p:140,a:90}, {n:"프리즘레이저",p:160,a:100}, {n:"와이드포스",p:80,a:100}, {n:"사이코커터",p:70,a:100}, {n:"미러코트",p:60,a:100}, {n:"사이코브레이크",p:100,a:100} ],
-        "격투": [ {n:"바위깨기",p:40,a:100}, {n:"마하펀치",p:40,a:100}, {n:"안다리걸기",p:60,a:100}, {n:"발경",p:60,a:100}, {n:"지옥의바퀴",p:80,a:80}, {n:"깨트리기",p:75,a:100}, {n:"파동탄",p:80,a:100}, {n:"드레인펀치",p:75,a:100}, {n:"인파이트",p:120,a:100}, {n:"엄청난힘",p:120,a:100}, {n:"기합구슬",p:120,a:70}, {n:"폭발펀치",p:100,a:50}, {n:"성스러운칼",p:90,a:100}, {n:"무릎차기",p:130,a:90}, {n:"크로스초프",p:100,a:80}, {n:"암해머",p:100,a:90} ],
-        "독": [ {n:"독침",p:15,a:100}, {n:"용해액",p:40,a:100}, {n:"스모그",p:30,a:70}, {n:"클리어스모그",p:50,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"독찌르기",p:80,a:100}, {n:"크로스포이즌",p:70,a:100}, {n:"오물웨이브",p:95,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"베놈쇼크",p:65,a:100}, {n:"오물공격",p:65,a:100}, {n:"트림",p:120,a:90}, {n:"포이즌테일",p:50,a:100}, {n:"애시드봄",p:40,a:100}, {n:"셸암즈",p:90,a:100}, {n:"맹독",p:50,a:90} ]
+        "풀": [ {n:"덩굴채찍",p:45,a:100}, {n:"잎날가르기",p:55,a:95}, {n:"에너지볼",p:90,a:100}, {n:"기가드레인",p:75,a:100}, {n:"솔라빔",p:120,a:100}, {n:"리프스톰",p:130,a:90}, {n:"하드플랜트",p:150,a:90}, {n:"우드해머",p:120,a:100} ],
+        "불꽃": [ {n:"불꽃세례",p:40,a:100}, {n:"불꽃펀치",p:75,a:100}, {n:"화염방사",p:90,a:100}, {n:"불대문자",p:110,a:85}, {n:"오버히트",p:130,a:90}, {n:"블라스트번",p:150,a:90}, {n:"플레어드라이브",p:120,a:100}, {n:"분화",p:150,a:100} ],
+        "물": [ {n:"물대포",p:40,a:100}, {n:"거품광선",p:65,a:100}, {n:"파도타기",p:90,a:100}, {n:"하이드로펌프",p:110,a:80}, {n:"하이드로캐논",p:150,a:90}, {n:"해일",p:110,a:90}, {n:"폭포오르기",p:80,a:100} ],
+        "전기": [ {n:"전기쇼크",p:40,a:100}, {n:"10만볼트",p:90,a:100}, {n:"번개펀치",p:75,a:100}, {n:"번개",p:110,a:70}, {n:"볼트태클",p:120,a:100}, {n:"라이징볼트",p:70,a:100}, {n:"뇌격",p:130,a:85} ],
+        "노말": [ {n:"몸통박치기",p:40,a:100}, {n:"은혜갚기",p:102,a:100}, {n:"누르기",p:85,a:100}, {n:"파괴광선",p:150,a:90}, {n:"기가임팩트",p:150,a:90}, {n:"이판사판태클",p:120,a:100} ],
+        "에스퍼": [ {n:"염동력",p:50,a:100}, {n:"사이코키네시스",p:90,a:100}, {n:"미래예지",p:120,a:100}, {n:"꿈먹기",p:100,a:100}, {n:"사이코부스트",p:140,a:90}, {n:"사이코브레이크",p:100,a:100} ],
+        "격투": [ {n:"마하펀치",p:40,a:100}, {n:"깨트리기",p:75,a:100}, {n:"인파이트",p:120,a:100}, {n:"엄청난힘",p:120,a:100}, {n:"기합구슬",p:120,a:70}, {n:"무릎차기",p:130,a:90} ],
+        "독": [ {n:"독침",p:15,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"독찌르기",p:80,a:100}, {n:"크로스포이즌",p:70,a:100} ]
     };
 
-    // 위력 60 이하는 C로 설정하여 초반 풀 확보
-    function calcMoveStats(m) {
+    function calcMoveTier(m) {
         let t, c;
         if (m.p <= 60) { t="C"; c=0; }
         else if (m.p < 80) { t="R"; c=1; }
         else if (m.p < 110) { t="SR"; c=2; }
         else if (m.p < 140) { t="SSR"; c=3; }
         else { t="UR"; c=4; }
+        // 물리/특수 구분 추가 (타입 기준)
         return { ...m, t, c };
     }
 
     const MOVE_POOL = {};
-    Object.keys(RAW_MOVES).forEach(k => { MOVE_POOL[k] = RAW_MOVES[k].map(m => calcMoveStats(m)); });
+    Object.keys(RAW_MOVES).forEach(k => { MOVE_POOL[k] = RAW_MOVES[k].map(m => calcMoveTier(m)); });
 
-    function getStatSeed(id) {
-        const x = Math.sin(id * 999) * 10000;
-        const rnd = x - Math.floor(x);
-        if(LEGENDARY_IDS.includes(id) || MYTHICAL_IDS.includes(id)) return 1.8;
-        let evoBonus = 1.0;
-        if(id % 3 === 0) evoBonus = 1.4;
-        else if(id % 3 === 2) evoBonus = 1.2;
-        return (0.8 + (rnd * 0.4)) * evoBonus;
+    function getMoveCategory(typeName) {
+        if (PHYSICAL_TYPES.includes(typeName)) return "Physical";
+        return "Special"; // 기본적으로 8타입 외에는 특수 취급 하거나 로직 추가 필요, 여기선 8타입 내 해결
+    }
+
+    // 6스탯 생성기 (실제 데이터가 없는 경우 종족값 시뮬레이션)
+    function generateStats(id, typeIdx) {
+        if (REAL_STATS[id]) {
+            const [h, a, d, sa, sd, s] = REAL_STATS[id];
+            return { h, a, d, sa, sd, s };
+        }
+
+        // 시드 기반 랜덤 생성 (ID가 같으면 항상 같은 스탯)
+        const seed = Math.sin(id * 999) * 10000;
+        const rnd = (seed - Math.floor(seed));
+
+        // 기본 종족값 총합(BST) 설정
+        let bst = 300 + (rnd * 200); // 300 ~ 500
+        if (id % 3 === 0) bst += 100; // 3단 진화체 보너스
+        else if (id % 3 === 2) bst += 50;
+
+        // 타입별 스탯 가중치 (간단한 로직)
+        let weights = [1, 1, 1, 1, 1, 1]; // H, A, D, SA, SD, S
+        if (typeIdx === 6 || typeIdx === 4) weights[1] += 0.5; // 격투, 노말 -> 공격
+        if (typeIdx === 5 || typeIdx === 1 || typeIdx === 3) weights[3] += 0.5; // 에스퍼, 불, 전기 -> 특공
+        if (typeIdx === 2 || typeIdx === 0) weights[4] += 0.3; // 물, 풀 -> 밸런스/특방
+
+        const totalWeight = weights.reduce((a,b)=>a+b, 0);
+        const unit = bst / totalWeight;
+
+        return {
+            h: Math.floor(weights[0] * unit),
+            a: Math.floor(weights[1] * unit),
+            d: Math.floor(weights[2] * unit),
+            sa: Math.floor(weights[3] * unit),
+            sd: Math.floor(weights[4] * unit),
+            s: Math.floor(weights[5] * unit)
+        };
     }
 
     function getPokeInfo(id) {
         if (id > 251) id = (id % 251) + 1;
         const name = POKE_NAMES[id - 1] || `No.${id}`;
 
-        const seed = getStatSeed(id);
-        const baseHp = Math.floor(50 * seed);
-        const baseAtk = Math.floor(50 * seed);
-        const total = baseHp + baseAtk;
-
-        let rarity = "C";
-        if (total >= 190) rarity = "UR";
-        else if (total >= 160) rarity = "SSR";
-        else if (total >= 130) rarity = "SR";
-        else if (total >= 100) rarity = "R";
-
-        let typeIdx = 4;
+        // 타입 결정
+        let typeIdx = 4; // Default Normal
         const grass = [1,2,3,43,44,45,69,70,71,102,103,114, 152,153,154,182,187,188,189,191,192, 165, 166];
         const fire = [4,5,6,37,38,58,59,77,126,136,146, 155,156,157,218,219,228,229,240,244,250];
         const water = [7,8,9,54,55,60,61,62,86,87,90,91,98,99,116,117,118,119,120,121,129,130,131,134, 158,159,160,170,171,183,184,186,194,195,211,223,224,226,245,249];
@@ -270,48 +313,55 @@
 
         if (grass.includes(id)) typeIdx = 0; else if (fire.includes(id)) typeIdx = 1; else if (water.includes(id)) typeIdx = 2; else if (electric.includes(id)) typeIdx = 3; else if (psychic.includes(id)) typeIdx = 5; else if (fighting.includes(id)) typeIdx = 6; else if (poison.includes(id)) typeIdx = 7;
 
+        // 스탯 생성
+        const base = generateStats(id, typeIdx);
+        const bst = base.h + base.a + base.d + base.sa + base.sd + base.s;
+
+        // 종족값(BST) 기반 레어도 산정
+        let rarity = "C";
+        if (bst >= 580) rarity = "UR";
+        else if (bst >= 500) rarity = "SSR";
+        else if (bst >= 400) rarity = "SR";
+        else if (bst >= 320) rarity = "R";
+
         const typeName = TYPE_KEYS[typeIdx];
-        return { id, name, rarity, type: { name: typeName, ...TYPE_DATA[typeName] }, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, baseHp, baseAtk };
+        return { id, name, rarity, type: { name: typeName, ...TYPE_DATA[typeName] }, sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`, base };
     }
 
     function getRandomMoves(typeName, count, maxTier = null) {
         const pool = MOVE_POOL[typeName] || MOVE_POOL["노말"];
         let filtered = pool;
-
         if(maxTier === 'C') filtered = pool.filter(m => m.t === 'C');
         else if(maxTier === 'R') filtered = pool.filter(m => ['C','R'].includes(m.t));
 
         const res = [];
         for(let i=0; i<count; i++) {
-            const rnd = Math.random() * 100;
-            let targetTier = 'C';
-            if(rnd > 99) targetTier = 'UR';
-            else if(rnd > 95) targetTier = 'SSR';
-            else if(rnd > 80) targetTier = 'SR';
-            else if(rnd > 50) targetTier = 'R';
-
-            if (maxTier === 'C') targetTier = 'C';
-            if (maxTier === 'R' && ['SR','SSR','UR'].includes(targetTier)) targetTier = 'R';
-
-            let tierMoves = filtered.filter(m => m.t === targetTier);
-            if(tierMoves.length === 0) tierMoves = filtered;
-
+            let tierMoves = filtered;
+            // 등급 로직 단순화 (랜덤 선택)
             res.push(tierMoves[Math.floor(Math.random() * tierMoves.length)]);
         }
         return res;
     }
 
-    function calcStats(baseHp, baseAtk, level) {
+    // [수정] 본가 공식 참조 스탯 계산 (IV=31, EV=0 가정)
+    // HP = ((2*Base + 31)*Lv)/100 + Lv + 10
+    // Others = ((2*Base + 31)*Lv)/100 + 5
+    function calcStats(base, level) {
+        const calc = (b, isHp) => Math.floor(((2 * b + 31) * level) / 100) + (isHp ? level + 10 : 5);
         return {
-            maxHp: Math.floor((baseHp * 0.8) + (level * 10) + 20),
-            atk: Math.floor((baseAtk * 0.5) + (level * 3) + 5)
+            maxHp: calc(base.h, true),
+            atk: calc(base.a, false),
+            def: calc(base.d, false),
+            spa: calc(base.sa, false),
+            spd: calc(base.sd, false),
+            spe: calc(base.s, false),
         };
     }
 
     /* =========================================
      * STATE & LOGIC
      * ========================================= */
-    const LS_KEY = { POINTS: "qz_p_v71", OWNED: "qz_o_v71", PARTNER: "qz_st_v71", HOF: "qz_hof_v71", TICKETS: "qz_t_v71", DUPES: "qz_d_v71" };
+    const LS_KEY = { POINTS: "qz_p_v72", OWNED: "qz_o_v72", PARTNER: "qz_st_v72", HOF: "qz_hof_v72", TICKETS: "qz_t_v72", DUPES: "qz_d_v72" };
     let battleState = null;
     let quizCallback = null;
 
@@ -345,13 +395,8 @@
         if (pid > 0) {
             const info = getPokeInfo(pid);
             const dupes = getDupes()[pid] || 0;
-            let xpBonus = 0;
-            if (info.rarity === 'UR') xpBonus = 90 * dupes;
-            else if (info.rarity === 'SSR') xpBonus = 70 * dupes;
-            else if (info.rarity === 'SR') xpBonus = 50 * dupes;
-            else if (info.rarity === 'R') xpBonus = 30 * dupes;
-            else xpBonus = 10 * dupes;
-
+            // 시작 XP 보너스 계산
+            let xpBonus = dupes * 50;
             document.getElementById("lobbyPartnerName").textContent = info.name;
             document.getElementById("lobbyPartnerImg").src = info.sprite;
             document.getElementById("partnerInfo").textContent = info.name;
@@ -396,36 +441,32 @@
     }
 
     /* =========================================
-     * BATTLE
+     * BATTLE SYSTEM (Updated)
      * ========================================= */
     function initAdventure() {
         const pid = getStarterId(); if (!pid) return;
         const info = getPokeInfo(pid);
         const dupes = getDupes()[pid] || 0;
-        let startXp = 0;
-        if (info.rarity === 'UR') startXp = 90 * dupes;
-        else if (info.rarity === 'SSR') startXp = 70 * dupes;
-        else if (info.rarity === 'SR') startXp = 50 * dupes;
-        else if (info.rarity === 'R') startXp = 30 * dupes;
-        else startXp = 10 * dupes;
+        let startXp = dupes * 50;
 
         let level = 1;
         let xp = startXp;
         while (xp >= level * 100) { xp -= level * 100; level++; }
 
-        const stats = calcStats(info.baseHp, info.baseAtk, level);
-        const startMoves = getRandomMoves(info.type.name, 1, 'C');
+        const stats = calcStats(info.base, level);
+        const startMoves = getRandomMoves(info.type.name, 2, 'C'); // 기본 기술 2개
 
         battleState = {
             stage: 1,
             player: {
                 id: pid, name: info.name, sprite: info.sprite, type: info.type.name,
                 level: level, xp: xp,
-                maxHp: stats.maxHp, hp: stats.maxHp, atk: stats.atk,
-                baseHp: info.baseHp, baseAtk: info.baseAtk,
+                maxHp: stats.maxHp, hp: stats.maxHp,
+                atk: stats.atk, def: stats.def, spa: stats.spa, spd: stats.spd, spe: stats.spe,
+                base: info.base,
                 moves: startMoves
             },
-            cooldowns: [0]
+            cooldowns: [0, 0]
         };
         startBattleStage();
         document.getElementById("titleScreen").classList.remove("active");
@@ -452,14 +493,16 @@
         } while(safe < 100);
 
         const eInfo = getPokeInfo(enemyId);
-        const levelDiff = Math.floor(Math.random() * 3) - 1;
+        const levelDiff = Math.floor(Math.random() * 3) - 1 + Math.floor(stage/3);
         const eLevel = Math.max(1, player.level + levelDiff);
-        const eStats = calcStats(eInfo.baseHp, eInfo.baseAtk, eLevel);
+        const eStats = calcStats(eInfo.base, eLevel);
         const eMoves = getRandomMoves(eInfo.type.name, 1, 'SR');
 
         battleState.enemy = {
             id: enemyId, name: eInfo.name, sprite: eInfo.sprite, type: eInfo.type.name,
-            maxHp: eStats.maxHp, hp: eStats.maxHp, atk: eStats.atk, level: eLevel,
+            maxHp: eStats.maxHp, hp: eStats.maxHp,
+            atk: eStats.atk, def: eStats.def, spa: eStats.spa, spd: eStats.spd, spe: eStats.spe,
+            level: eLevel,
             move: eMoves[0], isBoss: eInfo.rarity === 'UR'
         };
         battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
@@ -489,6 +532,7 @@
         player.moves.forEach((m, idx) => {
             const btn = document.createElement("button");
             const cd = battleState.cooldowns[idx];
+            const cat = getMoveCategory(player.type); // 자신의 타입에 맞는 기술만 있다고 가정 (단순화)
             let cls = "bg-white border-slate-200";
             let tColor = "text-slate-500";
             if(m.t === "UR") { cls = "bg-red-50 border-red-300"; tColor = "text-red-600"; }
@@ -498,7 +542,14 @@
 
             if(cd > 0) cls = "btn-cooldown";
             btn.className = `${cls} border-b-4 rounded-xl py-2 flex flex-col items-center justify-center transition-all h-16 ${cd===0 ? 'hover:brightness-95 active:border-b-0 active:translate-y-1' : ''}`;
-            btn.innerHTML = `<span class="font-bold text-xs truncate w-full text-center">${m.n}</span><span class="text-[9px] ${cd > 0 ? 'text-slate-400' : tColor}">${cd > 0 ? `쿨타임 ${cd}` : `${m.t} / 위${m.p}`}</span>`;
+
+            // 물리/특수 표기 추가
+            const isPhys = getMoveCategory(player.type) === "Physical"; // *주의: 현재는 플레이어 타입 기준으로 기술 카테고리 결정 (데이터 한계상)
+            // 더 정확히는 기술별로 지정해야 하지만, RAW_MOVES 구조상 키(Type)로 구분 가능.
+            // 여기선 편의상 Move 버튼 그릴 때, 해당 기술의 타입을 알 수 없으므로(객체에 타입 정보 누락됨) 플레이어 타입 따라감.
+            // *개선*: RAW_MOVES 파싱 시 type을 넣었어야 함. -> 일단 플레이어 타입 기반으로 처리.
+
+            btn.innerHTML = `<span class="font-bold text-xs truncate w-full text-center">${m.n}</span><span class="text-[9px] ${cd > 0 ? 'text-slate-400' : tColor}">${cd > 0 ? `쿨타임 ${cd}` : `${m.t}/${m.p} `}</span>`;
             btn.disabled = cd > 0;
             btn.onclick = () => handlePlayerMove(m, idx);
             btnGrid.appendChild(btn);
@@ -510,24 +561,51 @@
         log.className = `text-xs font-bold mb-3 h-6 text-center overflow-hidden ${type==='critical'?'text-red-500 animate-pulse': type==='weak'?'text-blue-500':'text-slate-500 italic'}`;
     }
 
+    // 데미지 계산 공식 적용
+    function calculateDamage(attacker, defender, move, moveType) {
+        // 1. 카테고리(물리/특수) 결정
+        const cat = getMoveCategory(moveType);
+
+        // 2. 공격/방어 스탯 결정
+        let A, D;
+        if (cat === "Physical") { A = attacker.atk; D = defender.def; }
+        else { A = attacker.spa; D = defender.spd; }
+
+        // 3. 데미지 공식 (본가 4세대 이후 기준 변형)
+        // Damage = ( ((2*Lv/5 + 2) * Power * A/D) / 50 + 2 ) * Modifiers
+        let dmg = Math.floor( (( (2 * attacker.level / 5 + 2) * move.p * (A / D) ) / 50 + 2) );
+
+        // 4. 상성 계산
+        const typeInfo = TYPE_DATA[defender.type];
+        let eff = 1.0;
+        if (typeInfo.weak.includes(moveType)) eff = 2.0; // 2배
+        if (typeInfo.resist.includes(moveType)) eff = 0.5; // 반감
+
+        // 5. 자속 보정 (STAB)
+        if (attacker.type === moveType) dmg *= 1.5;
+
+        // 6. 랜덤 난수 (0.85 ~ 1.0)
+        dmg = Math.floor(dmg * eff * (0.85 + Math.random() * 0.15));
+
+        return { dmg, eff, cat };
+    }
+
     function handlePlayerMove(move, idx) {
         openQuiz((isCorrect) => {
             if(!isCorrect) { logBattle("퀴즈 오답! 공격 실패!"); setTimeout(enemyTurn, 800); return; }
             battleState.cooldowns[idx] = move.c + 1;
             const el = document.getElementById("playerImg"); el.classList.remove("animate-attack-player"); void el.offsetWidth; el.classList.add("animate-attack-player");
 
-            const hit = Math.random() * 100 <= move.a;
-            const mult = hit ? 1.0 : 0.5;
-
-            const typeInfo = TYPE_DATA[battleState.enemy.type];
-            let eff = 1.0; if (typeInfo.weak.includes(battleState.player.type)) eff = 1.5; if (typeInfo.resist.includes(battleState.player.type)) eff = 0.8;
-            let dmg = Math.floor((battleState.player.atk * move.p / 40) * eff * mult * (0.9 + Math.random()*0.2));
+            // 플레이어 공격 (플레이어 타입의 기술로 간주)
+            const { dmg, eff, cat } = calculateDamage(battleState.player, battleState.enemy, move, battleState.player.type);
 
             setTimeout(() => {
                 battleState.enemy.hp -= dmg;
                 const eImg = document.getElementById("enemyImg"); eImg.classList.remove("animate-damage"); void eImg.offsetWidth; eImg.classList.add("animate-damage");
-                let msg = hit ? (eff > 1 ? `급소! 효과가 굉장했다! (${dmg})` : `명중! (${dmg})`) : `빗맞음... (${dmg})`;
-                logBattle(msg, hit && eff > 1 ? 'critical' : (!hit ? 'weak' : 'normal'));
+
+                let msg = eff > 1 ? `급소! 효과가 굉장했다! (${dmg})` : (eff < 1 ? `효과가 별로다... (${dmg})` : `명중! (${dmg})`);
+                logBattle(msg, eff > 1 ? 'critical' : (eff < 1 ? 'weak' : 'normal'));
+
                 battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
                 updateBattleUI();
                 if(battleState.enemy.hp <= 0) setTimeout(handleWin, 800);
@@ -539,12 +617,12 @@
     function enemyTurn() {
         if(battleState.enemy.hp <= 0) return;
         const eImg = document.getElementById("enemyImg"); eImg.classList.remove("animate-attack-enemy"); void eImg.offsetWidth; eImg.classList.add("animate-attack-enemy");
-        const move = battleState.enemy.move;
-        const typeInfo = TYPE_DATA[battleState.player.type];
-        let eff = 1.0; if (typeInfo.weak.includes(battleState.enemy.type)) eff = 1.5; if (typeInfo.resist.includes(battleState.enemy.type)) eff = 0.8;
-        let dmg = Math.floor((battleState.enemy.atk * move.p / 50) * eff);
 
-        if(Math.random()*100 > 85) { setTimeout(() => { logBattle("적의 공격이 빗나갔다!"); }, 300); return; }
+        const move = battleState.enemy.move;
+        // 적 공격 (적 타입의 기술로 간주)
+        const { dmg, eff, cat } = calculateDamage(battleState.enemy, battleState.player, move, battleState.enemy.type);
+
+        if(Math.random()*100 > 90) { setTimeout(() => { logBattle("적의 공격이 빗나갔다!"); }, 300); return; }
 
         setTimeout(() => {
             battleState.player.hp -= dmg;
@@ -558,18 +636,25 @@
     function handleWin() {
         if(battleState.enemy.isBoss) { addTickets(1); alert("✨ 전설 승리! [황금 티켓] 획득!"); }
         const s = battleState.stage;
-        const pt = Math.floor(20 + (s * 10) + (s * s * 0.5));
-        const xp = 30 + (s * 10);
+        const pt = Math.floor(50 + (s * 10) + (s * s * 0.5)); // 포인트 상향
+        const xp = 50 + (s * 10);
         addPoints(pt); battleState.player.xp += xp;
 
         let lvUp = false;
         if(battleState.player.xp >= battleState.player.level * 100) {
             battleState.player.xp -= battleState.player.level * 100;
             battleState.player.level++;
-            const newStats = calcStats(battleState.player.baseHp, battleState.player.baseAtk, battleState.player.level);
+
+            // 레벨업 시 스탯 재계산
+            const newStats = calcStats(battleState.player.base, battleState.player.level);
             battleState.player.maxHp = newStats.maxHp;
             battleState.player.atk = newStats.atk;
-            battleState.player.hp += 20;
+            battleState.player.def = newStats.def;
+            battleState.player.spa = newStats.spa;
+            battleState.player.spd = newStats.spd;
+            battleState.player.spe = newStats.spe;
+
+            battleState.player.hp = battleState.player.maxHp; // 레벨업 시 풀회복
             lvUp = true;
         }
 
@@ -704,7 +789,6 @@
         document.getElementById("lobbyGachaBtn").onclick = () => document.getElementById("gachaModal").classList.remove("hidden");
         document.getElementById("gachaClose").onclick = () => document.getElementById("gachaModal").classList.add("hidden");
 
-        // [수정됨] gachaNormalBtn -> gacha1Btn 으로 변경
         document.getElementById("gacha1Btn").onclick = () => playGacha('normal');
         document.getElementById("gacha10Btn").onclick = () => playGacha('10x');
         document.getElementById("gachaSpecialBtn").onclick = () => playGacha('special');
