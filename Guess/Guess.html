@@ -384,12 +384,12 @@
 
     /**
      * ========================================================
-     * 4. 규칙 퍼즐 게임 엔진 (수정된 로직)
+     * 4. 규칙 퍼즐 게임 엔진 (방어 로직 강화 & 사이즈 최적화 V2)
      * ========================================================
      */
     const PuzzleSystem = {
-        EasyRules: ['PATTERN', 'SIZE', 'COLOR'],
-        HardRules: ['ROTATE', 'FLIP'],
+        Rules: ['PATTERN', 'SIZE', 'COLOR', 'FLIP'],
+        AdvancedPatterns: ['ABC', 'AAB', 'ABB'],
 
         start(mode) {
             if (mode === 'CHALLENGE') {
@@ -418,7 +418,7 @@
             } else {
                 header.className = "bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-white flex justify-between items-center";
                 title.textContent = "규칙 퍼즐";
-                info.textContent = "10콤보 이상 시 도전 티켓 획득!";
+                info.textContent = "10콤보 시 심화 모드 발동!";
             }
             showView('puzzleModal');
             this.nextLevel();
@@ -442,14 +442,27 @@
 
         nextLevel() {
             if(!State.puzzle.isPlaying) return;
+
+            // 이미지 부족 방어
+            const allImages = [...State.normalList, ...State.hiddenList];
+            if (allImages.length < 5) {
+                this.handleWrong('이미지가 부족합니다. (최소 5개 필요)');
+                return;
+            }
+
             let puzzleData;
             if (State.puzzle.mode === 'CHALLENGE') {
-                puzzleData = this.generateChallengePuzzle();
+                puzzleData = this.generateAdvancedPuzzle(true);
             } else {
-                puzzleData = this.generateNormalPuzzle(State.puzzle.combo);
+                if (State.puzzle.combo >= 10) {
+                    puzzleData = this.generateAdvancedPuzzle(false);
+                } else {
+                    puzzleData = this.generateNormalPuzzle();
+                }
             }
+
             if (!puzzleData) {
-                this.handleWrong('문제를 생성할 수 없습니다 (이미지 부족)');
+                this.handleWrong('문제 생성 오류 (재시도 해주세요)');
                 return;
             }
             this.renderUI(puzzleData);
@@ -474,152 +487,166 @@
             }, 1000);
         },
 
-        // 중복 방지를 위한 핵심 로직
-        isDuplicate(choice, existingList) {
-            return existingList.some(ex =>
-                ex.src === choice.src &&
-                ex.r === choice.r &&
-                ex.fx === choice.fx &&
-                ex.scale === choice.scale &&
-                ex.gray === choice.gray
-            );
-        },
-
-        generateNormalPuzzle(combo) {
+        // --- 문제 생성: 일반 모드 ---
+        generateNormalPuzzle() {
             const allImages = [...State.normalList, ...State.hiddenList];
-            if(allImages.length < 3) return null;
-
-            const isHard = combo >= 5;
-            const rulePool = isHard ? this.HardRules : this.EasyRules;
-            const rule = rulePool[Math.floor(Math.random() * rulePool.length)];
+            const rule = this.Rules[Math.floor(Math.random() * this.Rules.length)];
             const baseImg = allImages[Math.floor(Math.random() * allImages.length)];
 
             let sequence = [];
             let answer = {};
+            // 기본 속성 초기화 (중요)
             const def = { r:0, fx:1, scale:1, gray:false };
 
             switch(rule) {
                 case 'PATTERN':
                     let otherImg = baseImg;
-                    // 패턴: 무조건 다른 이미지 사용
-                    for(let k=0; k<20; k++) {
+                    for(let k=0; k<50; k++) {
                         otherImg = allImages[Math.floor(Math.random() * allImages.length)];
                         if(otherImg.url !== baseImg.url) break;
                     }
-                    // A-B-A sequence
-                    for(let i=0; i<3; i++) {
-                        sequence.push({ ...def, src: (i%2===0) ? baseImg.url : otherImg.url });
-                    }
+                    sequence.push({ ...def, src: baseImg.url });
+                    sequence.push({ ...def, src: otherImg.url });
+                    sequence.push({ ...def, src: baseImg.url });
                     answer = { ...def, src: otherImg.url, isCorrect: true };
                     break;
 
                 case 'SIZE':
+                    sequence.push({ ...def, src: baseImg.url, scale: 1.0 });
+                    sequence.push({ ...def, src: baseImg.url, scale: 0.5 });
+                    sequence.push({ ...def, src: baseImg.url, scale: 1.0 });
+                    answer = { ...def, src: baseImg.url, scale: 0.5, isCorrect: true };
+                    break;
+
                 case 'COLOR':
-                    let altImg = baseImg;
-                    if (rule === 'PATTERN') { // should not happen but logic safe
-                        for(let k=0; k<10; k++) {
-                            altImg = allImages[Math.floor(Math.random() * allImages.length)];
-                            if(altImg.url !== baseImg.url) break;
-                        }
-                    }
-                    for(let i=0; i<3; i++) {
-                        let item = { ...def, src: (i%2===0) ? baseImg.url : altImg.url };
-                        if(rule === 'SIZE') item.scale = (i%2===0) ? 1.0 : 0.5;
-                        if(rule === 'COLOR') item.gray = (i%2!==0); // Gray is B
-                        sequence.push(item);
-                    }
-                    answer = { ...def, src: baseImg.url, isCorrect: true };
-                    if(rule === 'SIZE') answer.scale = 0.5; // A(Big)-B(Small)-A(Big) -> B(Small)
-                    if(rule === 'COLOR') answer.gray = true; // A(Col)-B(Gry)-A(Col) -> B(Gry)
+                    sequence.push({ ...def, src: baseImg.url, gray: false });
+                    sequence.push({ ...def, src: baseImg.url, gray: true });
+                    sequence.push({ ...def, src: baseImg.url, gray: false });
+                    answer = { ...def, src: baseImg.url, gray: true, isCorrect: true };
                     break;
 
-                case 'ROTATE':
                 case 'FLIP':
-                    for(let i=0; i<3; i++) {
-                        let item = { ...def, src: baseImg.url };
-                        if(rule === 'ROTATE') item.r = (i * 90) % 360;
-                        if(rule === 'FLIP') item.fx = (i%2===0) ? 1 : -1;
-                        sequence.push(item);
-                    }
-                    answer = { ...def, src: baseImg.url, isCorrect: true };
-                    if(rule === 'ROTATE') answer.r = 270;
-                    if(rule === 'FLIP') answer.fx = -1;
+                    sequence.push({ ...def, src: baseImg.url, fx: 1 });
+                    sequence.push({ ...def, src: baseImg.url, fx: -1 });
+                    sequence.push({ ...def, src: baseImg.url, fx: 1 });
+                    answer = { ...def, src: baseImg.url, fx: -1, isCorrect: true };
                     break;
             }
 
-            const choices = this.makeChoices(answer, allImages, rule);
-            return { sequence, choices, rule };
+            // [방어 로직] 정답과 오답 생성 시 rule 전달
+            return { sequence, choices: this.makeChoices(answer, allImages, rule), rule, isAdvanced: false };
         },
 
-        generateChallengePuzzle() {
+        // --- 문제 생성: 심화 모드 ---
+        generateAdvancedPuzzle(isChallenge) {
             const allImages = [...State.normalList, ...State.hiddenList];
-            if(allImages.length < 3) return null;
-
-            let imgs = [];
-            while(imgs.length < 3) {
+            let selectedImgs = [];
+            let safeLoop = 0;
+            while(selectedImgs.length < 3 && safeLoop < 100) {
+                safeLoop++;
                 const pick = allImages[Math.floor(Math.random() * allImages.length)];
-                if(!imgs.some(x => x.url === pick.url)) imgs.push(pick);
+                if(!selectedImgs.some(x => x.url === pick.url)) selectedImgs.push(pick);
+            }
+            if(selectedImgs.length < 3) selectedImgs = [allImages[0], allImages[1]||allImages[0], allImages[2]||allImages[0]];
+            const [imgA, imgB, imgC] = selectedImgs;
+
+            const patternType = this.AdvancedPatterns[Math.floor(Math.random() * this.AdvancedPatterns.length)];
+            let fullSeq = [];
+            const def = { r:0, fx:1, scale:1, gray:false };
+
+            for(let i=0; i<6; i++) {
+                let currentImgUrl;
+                if (patternType === 'ABC') currentImgUrl = (i%3===0)?imgA.url : (i%3===1)?imgB.url : imgC.url;
+                else if (patternType === 'AAB') currentImgUrl = (i%3===2)?imgB.url : imgA.url;
+                else if (patternType === 'ABB') currentImgUrl = (i%3===0)?imgA.url : imgB.url;
+                fullSeq.push({ ...def, src: currentImgUrl });
             }
 
-            const def = { r:0, fx:1, scale:1, gray:false };
-            let sequence = [];
+            const hideIndex = 3 + Math.floor(Math.random() * 3);
+            const answerItem = fullSeq[hideIndex];
+            const answer = { ...answerItem, isCorrect: true };
+            fullSeq[hideIndex].isHidden = true;
 
-            for(let i=0; i<5; i++) sequence.push({ ...def, src: imgs[i % 3].url });
-            let answer = { ...def, src: imgs[2].url, isCorrect: true };
-
-            return { sequence, choices: this.makeChoices(answer, allImages, 'PATTERN'), rule: 'CHALLENGE' };
+            return { sequence: fullSeq, choices: this.makeChoices(answer, allImages, 'ADVANCED'), rule: isChallenge?'CHALLENGE':'ADVANCED', patternType, isAdvanced: true };
         },
 
-        // [중요 수정] 보기 생성 시 중복/오답 검증 강화
+        // --- [핵심] 개선된 보기(Choices) 생성 방어 로직 ---
         makeChoices(answer, pool, rule) {
+            // 1. 고유성 검사를 위한 Set (Key: src + gray + scale + fx)
+            const seen = new Set();
+            const getSig = (item) => `${item.src}|${item.gray}|${item.scale}|${item.fx}`;
+
             let choices = [answer];
+            seen.add(getSig(answer));
+
             const def = { r:0, fx:1, scale:1, gray:false, src: answer.src };
 
-            let safetyCounter = 0;
-            while(choices.length < 4 && safetyCounter < 100) {
-                safetyCounter++;
-                let distractor = { ...def, isCorrect: false };
+            // "함정 카드(Trap)" 생성 여부: SIZE/COLOR 문제에서만 1개 허용
+            // 예: 정답이 '흑백 피카츄'라면, 오답에 '컬러 피카츄' 하나는 넣어서 헷갈리게 함
+            // 나머지 2개 오답은 무조건 '다른 포켓몬'으로 채움 (중복 방지)
+            let trapUsed = false;
 
-                // 규칙별로 오답을 "확실하게" 다르게 생성
-                if(rule === 'PATTERN' || rule === 'CHALLENGE') {
-                    // 이미지가 무조건 달라야 함
-                    let rndImg = pool[Math.floor(Math.random()*pool.length)];
+            let safety = 0;
+            while(choices.length < 4 && safety < 100) {
+                safety++;
+                let distractor = { ...def, isCorrect: false };
+                let rndImg = pool[Math.floor(Math.random() * pool.length)];
+
+                // 규칙별 오답 생성 전략
+                if (rule === 'FLIP' || rule === 'PATTERN' || rule === 'ADVANCED') {
+                    // 이 규칙들은 오답이 무조건 '다른 그림'이어야 깔끔함
+                    if (rndImg.url === answer.src) continue;
                     distractor.src = rndImg.url;
                 }
-                else if(rule === 'ROTATE') {
-                    // 각도가 무조건 달라야 함 (같은 이미지 사용)
-                    distractor.r = (Math.floor(Math.random()*4)*90) % 360;
-                }
-                else if(rule === 'FLIP') {
-                    // 뒤집힘이 무조건 달라야 함 (같은 이미지 사용)
-                    distractor.fx = Math.random() > 0.5 ? 1 : -1;
-                }
-                else if(rule === 'SIZE' || rule === 'COLOR') {
-                    // 이진 상태(크/작, 흑/백)만으로는 보기가 2개뿐이라 중복 필연적
-                    // -> 다른 이미지를 섞어서 보기를 채움
-                    if(Math.random() > 0.3) {
-                        distractor.src = pool[Math.floor(Math.random()*pool.length)].url;
+                else if (rule === 'SIZE' || rule === 'COLOR') {
+                    // 크기/색깔 문제는 '같은 그림의 다른 상태'를 하나쯤 넣을 수 있음
+                    if (!trapUsed && rndImg.url === answer.src) {
+                        // 함정 생성 시도 (같은 그림)
+                        distractor.src = rndImg.url;
+                        if(rule === 'SIZE') distractor.scale = (answer.scale === 1.0) ? 0.5 : 1.0;
+                        if(rule === 'COLOR') distractor.gray = !answer.gray;
+                        trapUsed = true;
+                    } else {
+                        // 함정을 이미 썼거나 그림이 다르면 -> 그냥 다른 그림 오답
+                        if (rndImg.url === answer.src) continue; // 이미 같은 그림은 썼으므로 패스
+                        distractor.src = rndImg.url;
+                        // 헷갈리게 하기 위해 속성 랜덤 부여
+                        if(rule === 'SIZE') distractor.scale = Math.random()>0.5 ? 1.0 : 0.5;
+                        if(rule === 'COLOR') distractor.gray = Math.random()>0.5;
                     }
-                    if(rule === 'SIZE') distractor.scale = Math.random()>0.5 ? 1.0 : 0.5;
-                    if(rule === 'COLOR') distractor.gray = Math.random()>0.5;
                 }
 
-                // 정답 및 기존 보기들과 시각적으로 겹치는지 확인
-                if(!this.isDuplicate(distractor, choices)) {
-                    choices.push(distractor);
-                }
+                // [최종 방어] 이미 목록에 있는 보기와 똑같은지 서명(Signature)으로 확인
+                // 정답이나 기존 오답과 100% 일치하면 절대 넣지 않음
+                const sig = getSig(distractor);
+                if (seen.has(sig)) continue;
+
+                seen.add(sig);
+                choices.push(distractor);
+            }
+
+            // 만약 이미지가 너무 부족해서 루프가 터지면, 강제로 다른 이미지 채워넣기
+            while(choices.length < 4) {
+                const dump = { ...def, src: pool[choices.length % pool.length].url, isCorrect: false };
+                if(!seen.has(getSig(dump))) { seen.add(getSig(dump)); choices.push(dump); }
+                else choices.push({...dump, scale:0.1}); // 최후의 수단
             }
 
             return choices.sort(() => Math.random() - 0.5);
         },
 
+        // --- UI 렌더링 (사이즈 조정 복구) ---
         async renderUI(data) {
             document.getElementById('puzzleCombo').textContent = `${State.puzzle.combo} Combo`;
             document.getElementById('puzzleMaxCombo').textContent = `MAX: ${State.puzzle.maxCombo}`;
 
-            const subText = State.puzzle.mode === 'CHALLENGE'
-                ? `도전 진행 중 (${State.puzzle.combo}/${CONFIG.challengeGoal})`
-                : `규칙: ${this.getRuleName(data.rule)}`;
+            let subText = "";
+            if (data.isAdvanced) {
+                subText = `⚡ 심화: [${data.patternType || "패턴"}] 빈칸 찾기`;
+            } else {
+                subText = `규칙: ${this.getRuleName(data.rule)}`;
+            }
+            if(State.puzzle.mode === 'CHALLENGE') subText = `도전 진행 중 (${State.puzzle.combo}/${CONFIG.challengeGoal})`;
             document.getElementById('puzzleSubText').textContent = subText;
 
             const qContainer = document.getElementById('questionContainer');
@@ -627,35 +654,58 @@
             qContainer.innerHTML = '';
             aContainer.innerHTML = '';
 
+            // [복구됨] 모바일 화면 넘어가지 않게 사이즈 동적 조절
+            // 심화모드(6개)는 42px, 일반모드(3개)는 64px
+            const boxSize = data.isAdvanced ? 42 : 64;
+
             for(let item of data.sequence) {
-                const cvs = this.createCanvas(64);
+                const cvs = this.createCanvas(boxSize);
                 cvs.className = "border-2 border-gray-300 rounded bg-white shadow-sm shrink-0";
                 qContainer.appendChild(cvs);
-                await this.drawImageOnCanvas(cvs, item);
+                if (item.isHidden) this.drawQuestionMark(cvs);
+                else await this.drawImageOnCanvas(cvs, item);
             }
 
+            // 보기(정답) 버튼 크기는 64px로 고정
             data.choices.forEach((item, idx) => {
                 const wrapper = document.createElement('div');
                 wrapper.className = 'puzzle-box flex items-center justify-center aspect-square';
                 const cvs = this.createCanvas(64);
                 wrapper.appendChild(cvs);
-                // 정답 체크 시 Index가 아닌 Object의 속성을 확인 (더 안전함)
                 wrapper.onclick = () => this.checkAnswer(item, wrapper);
                 aContainer.appendChild(wrapper);
                 this.drawImageOnCanvas(cvs, item);
             });
         },
 
+        // [복구됨] 픽셀 단위(px)로 크기 고정하여 스크롤 생성 방지
         createCanvas(size) {
             const c = document.createElement('canvas');
             c.width = size; c.height = size;
-            c.style.width = `${size}px`; c.style.height = `${size}px`;
+            c.style.width = `${size}px`;
+            c.style.height = `${size}px`;
             return c;
+        },
+
+        drawQuestionMark(canvas) {
+            const ctx = canvas.getContext('2d');
+            ctx.fillStyle = '#f3f4f6';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            const fontSize = Math.floor(canvas.width * 0.6);
+            ctx.font = `bold ${fontSize}px sans-serif`;
+            ctx.fillStyle = '#9ca3af';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('?', canvas.width/2, canvas.height/2);
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0,0,canvas.width,canvas.height);
         },
 
         drawImageOnCanvas(canvas, item) {
             return new Promise(resolve => {
                 const ctx = canvas.getContext('2d');
+                ctx.clearRect(0,0,canvas.width, canvas.height);
                 ctx.imageSmoothingEnabled = false;
                 const img = new Image();
                 img.src = item.src;
@@ -664,13 +714,14 @@
                     const h = canvas.height;
                     ctx.save();
                     ctx.translate(w/2, h/2);
-                    // 회전 정규화
                     const deg = (item.r || 0) % 360;
                     ctx.rotate(deg * Math.PI / 180);
                     const s = item.scale || 1.0;
                     ctx.scale((item.fx || 1) * s, s);
 
+                    // [중요] 흑백 필터 적용
                     if(item.gray) ctx.filter = 'grayscale(100%)';
+
                     ctx.drawImage(img, -w/2, -h/2, w, h);
                     ctx.restore();
                     resolve();
@@ -679,7 +730,6 @@
             });
         },
 
-        // Index 대신 Item 객체 직접 전달
         checkAnswer(item, el) {
             if(!State.puzzle.isPlaying) return;
             clearInterval(State.puzzle.timer);
@@ -690,7 +740,6 @@
                 State.puzzle.combo++;
                 if(State.puzzle.combo > State.puzzle.maxCombo) State.puzzle.maxCombo = State.puzzle.combo;
                 State.puzzle.score += (CONFIG.puzzleReward + (State.puzzle.combo * CONFIG.puzzleComboBonus));
-
                 if (State.puzzle.mode === 'CHALLENGE' && State.puzzle.combo >= CONFIG.challengeGoal) {
                     setTimeout(() => this.winChallenge(), 500);
                 } else {
@@ -699,23 +748,15 @@
             } else {
                 el.classList.add('shake');
                 el.style.backgroundColor = '#fee2e2';
-                if (State.puzzle.mode === 'CHALLENGE') {
-                    State.puzzle.wrongCount++;
-                    if (State.puzzle.wrongCount >= 1) {
-                        setTimeout(() => this.handleWrong('도전 실패!'), 500);
-                        return;
-                    }
-                }
-                setTimeout(() => this.handleWrong('틀렸습니다!'), 400);
+                State.puzzle.wrongCount++;
+                setTimeout(() => this.handleWrong(State.puzzle.mode==='CHALLENGE'?'도전 실패!':'틀렸습니다!'), 400);
             }
         },
 
         winChallenge() {
             State.puzzle.isPlaying = false;
             showView('lobbyScreen');
-            showMessage("도전 성공!", "10문제를 모두 맞췄습니다!\n보상으로 스페셜 가챠가 진행됩니다.", () => {
-                doSpecialGacha();
-            });
+            showMessage("도전 성공!", "성공했습니다!\n보상으로 스페셜 가챠가 진행됩니다.", () => doSpecialGacha());
         },
 
         handleWrong(msg) {
@@ -724,8 +765,8 @@
         },
 
         getRuleName(code) {
-            const names = { 'PATTERN':'패턴 반복', 'ROTATE':'시계 회전', 'FLIP':'좌우 반전', 'SIZE':'크기 변화', 'COLOR':'흑백/컬러', 'CHALLENGE':'3단 패턴' };
-            return names[code] || '';
+            const names = { 'PATTERN':'규칙 찾기', 'FLIP':'거울 모드', 'SIZE':'크기 변화', 'COLOR':'색깔 변화', 'ADVANCED':'심화 패턴', 'CHALLENGE':'도전' };
+            return names[code] || '규칙 찾기';
         }
     };
 
