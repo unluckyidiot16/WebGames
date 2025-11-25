@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>QuizMon: Legend 300 (Ver 2.2 Skill Select)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; touch-action: manipulation; }
+        .view { display: none; }
+        .view.active { display: flex; }
+        .poke-card { transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .poke-card:active { transform: scale(0.95); }
+        .rarity-SR { background: linear-gradient(135deg, #fff 0%, #fff7ed 100%); border: 2px solid #f59e0b; box-shadow: 0 0 10px rgba(245, 158, 11, 0.3); }
+        .rarity-R  { border: 2px solid #60a5fa; }
+        .rarity-C  { border: 1px solid #e2e8f0; }
+        .modal-backdrop { background: rgba(0,0,0,0.6); backdrop-filter: blur(2px); }
+        img.pixel-art { image-rendering: pixelated; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* === 애니메이션 정의 === */
+        @keyframes damageShake {
+            0%, 100% { transform: translateX(0); }
+            20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
+            40% { transform: translateX(6px) rotate(5deg); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
+        .animate-damage { animation: damageShake 0.4s ease-in-out; }
+
+        @keyframes attackRight {
+            0% { transform: translateX(0) scaleX(-1); }
+            50% { transform: translateX(30px) scaleX(-1); }
+            100% { transform: translateX(0) scaleX(-1); }
+        }
+        .animate-attack-player { animation: attackRight 0.2s ease-out; }
+
+        @keyframes attackLeft {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(-30px); }
+            100% { transform: translateX(0); }
+        }
+        .animate-attack-enemy { animation: attackLeft 0.2s ease-out; }
+
+        .animate-bounce-slow { animation: bounce 2s infinite; }
+    </style>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 select-none">
+
+<section id="titleScreen" class="view active flex-col items-center justify-center p-6 h-screen">
+    <div class="mb-8 relative">
+        <div class="absolute -top-10 -left-10 w-20 h-20 bg-yellow-300 rounded-full blur-xl opacity-50 animate-pulse"></div>
+        <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter relative z-10">
+            <span class="text-red-500">Quiz</span>Mon
+        </h1>
+        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 2.2 Skill Select</div>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center border-4 border-slate-800">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" class="w-24 h-24 mx-auto pixel-art animate-bounce" alt="Pikachu">
+        <p class="text-slate-500 text-sm mb-6 font-medium">
+            수학 퀴즈 배틀 RPG<br>
+            <span class="text-xs text-slate-400">(정답 범위 0~20)</span>
+        </p>
+        <button id="startButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg text-lg transition-colors border-b-4 border-red-700 active:border-b-0 active:translate-y-1">
+            모험 시작하기
+        </button>
+    </div>
+</section>
+
+<section id="lobbyScreen" class="view flex-col items-center justify-start p-4 min-h-screen overflow-y-auto">
+    <div class="w-full max-w-md flex flex-col gap-5 mt-4">
+        <div class="flex justify-between items-end px-2">
+            <h2 class="text-3xl font-black text-slate-800">LOBBY</h2>
+            <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-sm font-bold flex items-center gap-1">
+                <span class="text-yellow-500">P</span>
+                <span id="pointsTextLobby">0</span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+            <button id="lobbyCodexBtn" class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-3 hover:border-emerald-400 transition-colors group">
+                <div class="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100 transition-colors">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-10 h-10 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-lg text-slate-700">포켓몬 도감</div>
+                    <div class="text-xs text-slate-400">파트너 선택 & 모험</div>
+                </div>
+            </button>
+
+            <button id="lobbyGachaBtn" class="bg-white p-5 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-3 hover:border-indigo-400 transition-colors group">
+                <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100 transition-colors">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-10 h-10 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-lg text-slate-700">몬스터 뽑기</div>
+                    <div class="text-xs text-slate-400">새로운 동료 영입</div>
+                </div>
+            </button>
+        </div>
+
+        <div class="bg-slate-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <div class="text-xs text-slate-400 mb-1">현재 파트너</div>
+                    <div id="lobbyPartnerName" class="font-bold text-xl">파트너 없음</div>
+                    <div id="lobbyPartnerStat" class="text-xs text-slate-400 mt-1">도감에서 선택하세요</div>
+                    <div class="w-32 h-1.5 bg-slate-600 rounded-full mt-2 overflow-hidden">
+                        <div id="lobbyExpBar" class="h-full bg-sky-400 w-0 transition-all"></div>
+                    </div>
+                </div>
+                <img id="lobbyPartnerImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="w-16 h-16 pixel-art bg-slate-700 rounded-full">
+            </div>
+            <div class="absolute -right-4 -bottom-4 w-24 h-24 bg-white opacity-5 rounded-full"></div>
+        </div>
+    </div>
+</section>
+
+<section id="codexScreen" class="view flex-col items-center h-screen bg-slate-50">
+    <div class="w-full max-w-3xl flex flex-col h-full">
+        <div class="flex-none p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10">
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    도감
+                    <span class="text-xs font-normal text-slate-400 bg-slate-100 px-2 py-0.5 rounded-full" id="collectionRate">0/300</span>
+                </h2>
+            </div>
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-bold text-sky-600 bg-sky-50 px-2 py-1 rounded">
+                  <span id="pointsTextCodex">0</span> P
+                </span>
+                <button id="codexToLobbyBtn" class="text-xs font-bold px-3 py-2 rounded-lg bg-slate-100 text-slate-600 hover:bg-slate-200">
+                    나가기
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-none p-4 bg-white border-t border-slate-200 order-last">
+            <div class="flex items-center gap-3">
+                <div class="flex-1">
+                    <div class="text-xs text-slate-400">선택된 파트너</div>
+                    <div id="partnerInfo" class="font-bold text-slate-800 text-sm truncate">없음</div>
+                </div>
+                <button id="startAdventureBtn" disabled class="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 disabled:text-slate-500 text-white font-bold py-3 px-6 rounded-xl shadow-md transition-all text-sm w-32">
+                    모험 시작
+                </button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 bg-slate-50">
+            <div id="codexGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pb-4">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="battleScreen" class="view flex-col items-center justify-between h-screen bg-gradient-to-b from-sky-200 to-sky-100 relative overflow-hidden">
+    <div class="absolute bottom-0 w-full h-1/3 bg-emerald-600 rounded-t-[50%] scale-150 translate-y-12 border-t-8 border-emerald-700 opacity-90"></div>
+
+    <div class="w-full max-w-md p-4 flex justify-between items-start z-10">
+        <button id="battleBackBtn" class="bg-white/80 backdrop-blur text-slate-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">
+            &larr; 도주
+        </button>
+        <div class="bg-black/40 backdrop-blur text-white px-4 py-1.5 rounded-full text-xs font-bold">
+            STAGE <span id="battleStageText" class="text-yellow-300 text-base ml-1">1</span>
+        </div>
+    </div>
+
+    <div class="w-full max-w-md flex-1 relative flex flex-col justify-center px-4 z-10 gap-8">
+        <div class="flex flex-col items-end relative">
+            <div class="bg-white/90 p-2 rounded-xl shadow-md mb-2 w-40 transform translate-x-2">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span id="enemyName" class="font-bold text-sm text-slate-800">야생몬</span>
+                    <span id="enemyLevel" class="text-[10px] text-slate-500">Lv.1</span>
+                </div>
+                <div id="enemyTypeBadge" class="text-[9px] text-white px-1.5 py-0.5 rounded mb-1 inline-block bg-gray-400">TYPE</div>
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div id="enemyHpBar" class="h-full bg-red-500 transition-all duration-500" style="width: 100%"></div>
+                </div>
+            </div>
+            <img id="enemyImg" src="" class="w-32 h-32 pixel-art animate-bounce-slow drop-shadow-xl filter grayscale-0">
+        </div>
+
+        <div class="flex flex-col items-start relative mt-4">
+            <img id="playerImg" src="" class="w-40 h-40 pixel-art drop-shadow-2xl scale-x-[-1]">
+            <div class="bg-white/90 p-3 rounded-xl shadow-md w-44 -mt-4 z-20 transform -translate-x-2 border-l-4 border-emerald-500">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span id="playerName" class="font-bold text-sm text-slate-800">나의몬</span>
+                    <span id="playerLevel" class="text-[10px] text-slate-500">Lv.1</span>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-500 mb-0.5">
+                    <span>HP</span>
+                    <span id="playerHpText">0/0</span>
+                </div>
+                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden">
+                    <div id="playerHpBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 100%"></div>
+                </div>
+                <div class="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden">
+                    <div id="playerExpBar" class="h-full bg-sky-400 transition-all" style="width: 0%"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="w-full max-w-md bg-white rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] p-5 z-20">
+        <div id="battleLog" class="text-xs text-slate-500 mb-3 h-6 overflow-y-hidden text-center italic">
+            전투가 시작되었습니다.
+        </div>
+        <div id="moveButtons" class="grid grid-cols-2 gap-3"></div>
+    </div>
+</section>
+
+<div id="quizModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
+        <div class="bg-slate-800 p-4 text-white flex justify-between items-center">
+            <h3 class="font-bold text-lg">📝 수학 퀴즈</h3>
+            <span class="text-xs bg-slate-700 px-2 py-1 rounded text-yellow-300">정답 시 공격</span>
+        </div>
+        <div class="p-6">
+            <div class="text-center mb-6">
+                <p class="text-3xl font-black text-slate-800 tracking-wider" id="quizQuestion">?</p>
+            </div>
+            <div id="quizChoices" class="grid grid-cols-2 gap-3"></div>
+        </div>
+        <div class="bg-slate-50 p-3 text-center border-t">
+            <button id="quizCancel" class="text-xs text-slate-400 hover:text-slate-600 underline">포기하기</button>
+        </div>
+    </div>
+</div>
+
+<div id="rewardModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center">
+        <h3 class="text-2xl font-black text-slate-800 mb-2">VICTORY!</h3>
+        <div class="text-xs text-sky-600 font-bold mb-4 bg-sky-50 inline-block px-3 py-1 rounded-full">
+            EXP <span id="rewardXpVal">0</span> 획득!
+        </div>
+        <p class="text-sm text-slate-500 mb-2" id="rewardTitle">전투 승리 보상을 선택하세요.</p>
+        <div class="grid grid-cols-1 gap-3" id="rewardButtons"></div>
+    </div>
+</div>
+
+<div id="gachaModal" class="fixed inset-0 bg-slate-900 z-50 hidden flex-col items-center justify-center">
+    <div class="w-full max-w-lg p-6 flex flex-col h-full md:h-auto">
+        <div class="flex justify-between items-center mb-6 text-white">
+            <div><h3 class="text-2xl font-bold">몬스터 소환</h3><p class="text-sm opacity-70" id="gachaPointDisplay">포인트: 0P</p></div>
+            <button id="gachaClose" class="bg-white/20 hover:bg-white/30 rounded-full p-2"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        </div>
+        <div id="gachaScene" class="flex-1 bg-slate-800 rounded-2xl border border-slate-700 p-4 overflow-y-auto mb-4 min-h-[300px] flex items-center justify-center relative">
+            <div id="gachaPlaceholder" class="text-center text-slate-500">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-24 h-24 mx-auto mb-4 opacity-20 grayscale"><p>버튼을 눌러 소환하세요</p>
+            </div>
+            <div id="gachaResultsGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 w-full hidden"></div>
+        </div>
+        <div class="flex gap-3">
+            <button id="gacha1Btn" class="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-xl shadow-lg border-b-4 border-indigo-800 active:border-b-0 active:translate-y-1">100P 소환</button>
+            <button id="gacha10Btn" class="flex-1 bg-purple-600 hover:bg-purple-500 text-white font-bold py-4 rounded-xl shadow-lg border-b-4 border-purple-800 active:border-b-0 active:translate-y-1">1000P 10회</button>
+        </div>
+    </div>
+</div>
+
+<div id="messageModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[60] p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-5 text-center">
+        <h3 id="messageTitle" class="text-lg font-bold text-slate-800 mb-2">알림</h3>
+        <p id="messageBody" class="text-sm text-slate-600 mb-4 break-keep"></p>
+        <button id="messageOk" class="w-full py-2.5 rounded-lg bg-slate-800 text-white text-sm font-bold">확인</button>
+    </div>
+</div>
+
+<script>
+    /* =========================================
+     * DATA: Pokemon & Moves
+     * ========================================= */
+    const POKE_NAMES_STR = "이상해씨,이상해풀,이상해꽃,파이리,리자드,리자몽,꼬부기,어니부기,거북왕,캐터피,단데기,버터플,뿔충이,딱충이,독침붕,구구,피죤,피죤투,꼬렛,레트라,깨비참,깨비드릴조,아보,아보크,피카츄,라이츄,모래두지,고지,니드런♀,니드리나,니드퀸,니드런♂,니드리노,니드킹,삐삐,픽시,식스테일,나인테일,푸린,푸크린,주뱃,골뱃,뚜벅쵸,냄새꼬,라플레시아,파라스,파라섹트,콘팡,도나리,디그다,닥트리오,나옹,페르시온,고라파덕,골덕,망키,성원숭,가디,윈디,발챙이,슈륙챙이,강챙이,캐이시,윤겔라,후딘,알통몬,근육몬,괴력몬,모다피,우츠동,우츠보트,왕눈해,독파리,꼬마돌,데구리,딱구리,포니타,날쌩마,야돈,야도란,코일,레어코일,파오리,두두,두트리오,쥬쥬,쥬레곤,질퍽이,질뻐기,셀러,파르셀,고오스,고우스트,팬텀,롱스톤,슬리프,슬리퍼,크랩,킹크랩,찌리리공,붐볼,아라리,나시,탕구리,텅구리,시라소몬,홍수몬,내루미,또가스,또도가스,뿔카노,코뿌리,럭키,덩쿠리,캥카,쏘드라,시드라,콘치,왕콘치,별가사리,아쿠스타,마임맨,스턱,루주라,에레브,마그마,쁘사이저,켄타로스,잉어킹,갸라도스,라프라스,메타몽,이브이,샤미드,쥬피썬더,부스터,폴리곤,암나이트,암스타,투구,투구푸스,프테라,잠만보,프리져,썬더,파이어,미뇽,신뇽,망나뇽,뮤츠,뮤";
+    const POKE_NAMES = POKE_NAMES_STR.split(",");
+
+    const TYPE_DATA = {
+        "풀": { color: "bg-green-500", weak: ["불꽃", "독", "얼음", "비행", "벌레"], resist: ["물", "전기", "풀", "땅"] },
+        "불꽃": { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철", "페어리"] },
+        "물": { color: "bg-blue-500", weak: ["전기", "풀"], resist: ["불꽃", "물", "얼음", "강철"] },
+        "전기": { color: "bg-yellow-400", weak: ["땅"], resist: ["전기", "비행", "강철"] },
+        "노말": { color: "bg-stone-400", weak: ["격투"], resist: [] },
+        "에스퍼": { color: "bg-pink-400", weak: ["벌레", "고스트", "악"], resist: ["격투", "에스퍼"] },
+        "격투": { color: "bg-orange-600", weak: ["비행", "에스퍼", "페어리"], resist: ["벌레", "바위", "악"] },
+        "독": { color: "bg-purple-500", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레", "페어리"] },
+    };
+    const TYPE_KEYS = Object.keys(TYPE_DATA);
+
+    const MOVE_POOL = {
+        "풀": [
+            {n:"덩굴채찍", p:45, a:100, t:1}, {n:"잎날가르기", p:55, a:95, t:1}, {n:"흡수", p:20, a:100, t:1},
+            {n:"씨폭탄", p:80, a:100, t:2}, {n:"에너지볼", p:90, a:100, t:2}, {n:"기가드레인", p:75, a:100, t:2},
+            {n:"솔라빔", p:120, a:100, t:3}, {n:"리프스톰", p:130, a:90, t:3}
+        ],
+        "불꽃": [
+            {n:"불꽃세례", p:40, a:100, t:1}, {n:"회오리불꽃", p:35, a:85, t:1}, {n:"니트로차지", p:50, a:100, t:1},
+            {n:"불꽃펀치", p:75, a:100, t:2}, {n:"화염방사", p:90, a:100, t:2}, {n:"열풍", p:95, a:90, t:2},
+            {n:"불대문자", p:110, a:85, t:3}, {n:"오버히트", p:130, a:90, t:3}
+        ],
+        "물": [
+            {n:"물대포", p:40, a:100, t:1}, {n:"거품광선", p:65, a:100, t:1}, {n:"물의파동", p:60, a:100, t:1},
+            {n:"아쿠아테일", p:90, a:90, t:2}, {n:"파도타기", p:90, a:100, t:2}, {n:"열탕", p:80, a:100, t:2},
+            {n:"하이드로펌프", p:110, a:80, t:3}, {n:"하이드로캐논", p:150, a:90, t:3}
+        ],
+        "전기": [
+            {n:"전기쇼크", p:40, a:100, t:1}, {n:"전광석화", p:40, a:100, t:1}, {n:"스파크", p:65, a:100, t:1},
+            {n:"10만볼트", p:90, a:100, t:2}, {n:"번개펀치", p:75, a:100, t:2}, {n:"방전", p:80, a:100, t:2},
+            {n:"번개", p:110, a:70, t:3}, {n:"전자포", p:120, a:50, t:3}
+        ],
+        "노말": [
+            {n:"몸통박치기", p:40, a:100, t:1}, {n:"할퀴기", p:40, a:100, t:1}, {n:"막치기", p:40, a:100, t:1},
+            {n:"베어가르기", p:70, a:100, t:2}, {n:"누르기", p:85, a:100, t:2}, {n:"은혜갚기", p:102, a:100, t:2},
+            {n:"파괴광선", p:150, a:90, t:3}, {n:"기가임팩트", p:150, a:90, t:3}
+        ],
+        "에스퍼": [
+            {n:"염동력", p:50, a:100, t:1}, {n:"환상빔", p:65, a:100, t:1}, {n:"하트스탬프", p:60, a:100, t:1},
+            {n:"사이코키네시스", p:90, a:100, t:2}, {n:"사념의박치기", p:80, a:90, t:2}, {n:"사이코쇼크", p:80, a:100, t:2},
+            {n:"미래예지", p:120, a:100, t:3}, {n:"꿈먹기", p:100, a:100, t:3}
+        ],
+        "격투": [
+            {n:"안다리걸기", p:60, a:100, t:1}, {n:"바위깨기", p:40, a:100, t:1}, {n:"발경", p:60, a:100, t:1},
+            {n:"지옥의바퀴", p:80, a:80, t:2}, {n:"깨트리기", p:75, a:100, t:2}, {n:"폭발펀치", p:100, a:50, t:2},
+            {n:"인파이트", p:120, a:100, t:3}, {n:"기합구슬", p:120, a:70, t:3}
+        ],
+        "독": [
+            {n:"독침", p:15, a:100, t:1}, {n:"용해액", p:40, a:100, t:1}, {n:"스모그", p:30, a:70, t:1},
+            {n:"독찌르기", p:80, a:100, t:2}, {n:"오물폭탄", p:90, a:100, t:2}, {n:"크로스포이즌", p:70, a:100, t:2},
+            {n:"더스트슈트", p:120, a:80, t:3}, {n:"오물웨이브", p:95, a:100, t:3}
+        ]
+    };
+
+    const LEGENDARY_IDS = [144,145,146,150,151];
+
+    function getPokeInfo(id) {
+        if (id > 151 && id <= 300) id = (id % 151) + 1;
+        const name = POKE_NAMES[id - 1] || `No.${id}`;
+        let rarity = "C";
+        if (LEGENDARY_IDS.includes(id)) rarity = "SR";
+        else if (id % 10 === 0 || [3,6,9,130,131,143,149].includes(id)) rarity = "R";
+
+        let typeIdx = 4; // 기본 노말
+        if ([1,2,3,43,44,45,69,70,71,102,103,114].includes(id)) typeIdx = 0; // 풀
+        else if ([4,5,6,37,38,58,59,77,78,126,136,146].includes(id)) typeIdx = 1; // 불꽃
+        else if ([7,8,9,54,55,60,61,62,86,87,90,91,98,99,116,117,118,119,120,121,129,130,131,134].includes(id)) typeIdx = 2; // 물
+        else if ([25,26,81,82,100,101,125,135,145].includes(id)) typeIdx = 3; // 전기
+        else if ([63,64,65,96,97,122,124,150,151].includes(id)) typeIdx = 5; // 에스퍼
+        else if ([56,57,66,67,68,106,107].includes(id)) typeIdx = 6; // 격투
+        else if ([13,14,15,23,24,29,30,31,32,33,34,41,42,88,89,109,110].includes(id)) typeIdx = 7; // 독
+
+        const typeName = TYPE_KEYS[typeIdx];
+        return {
+            id, name, rarity,
+            type: { name: typeName, ...TYPE_DATA[typeName] },
+            sprite: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`
+        };
+    }
+
+    function getRandomMoves(typeName, maxTier = 3) {
+        const pool = MOVE_POOL[typeName] || MOVE_POOL["노말"];
+        const filtered = pool.filter(m => m.t <= maxTier);
+        if (filtered.length < 2) return filtered.concat(filtered);
+        const moves = [];
+        const idx1 = Math.floor(Math.random() * filtered.length);
+        let idx2 = Math.floor(Math.random() * filtered.length);
+        while(idx1 === idx2 && filtered.length > 1) idx2 = Math.floor(Math.random() * filtered.length);
+        return [filtered[idx1], filtered[idx2]];
+    }
+
+    /* =========================================
+     * SYSTEM CONSTANTS & STATE
+     * ========================================= */
+    const GACHA_COST = 100;
+    const LS_KEY = { POINTS: "qz_points_v2", OWNED: "qz_owned_v2", PARTNER: "qz_partner_v2", MON_DB: "qz_mon_db_v2" };
+
+    const views = {
+        title: document.getElementById("titleScreen"),
+        lobby: document.getElementById("lobbyScreen"),
+        codex: document.getElementById("codexScreen"),
+        battle: document.getElementById("battleScreen"),
+    };
+
+    function getPoints() { return parseInt(localStorage.getItem(LS_KEY.POINTS) || "500", 10); }
+    function setPoints(n) { localStorage.setItem(LS_KEY.POINTS, Math.max(0, n)); updatePointsUI(); }
+    function addPoints(n) { setPoints(getPoints() + n); }
+
+    function getOwned() { try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.OWNED) || "[]")); } catch { return new Set(); } }
+    function saveOwned(set) { localStorage.setItem(LS_KEY.OWNED, JSON.stringify([...set])); }
+
+    function getPartnerId() { return parseInt(localStorage.getItem(LS_KEY.PARTNER) || "0"); }
+    function setPartnerId(id) { localStorage.setItem(LS_KEY.PARTNER, id); updateLobbyPartner(); }
+
+    function getMonDb() { try { return JSON.parse(localStorage.getItem(LS_KEY.MON_DB) || "{}"); } catch { return {}; } }
+    function saveMonDb(db) { localStorage.setItem(LS_KEY.MON_DB, JSON.stringify(db)); }
+
+    function getMonStatus(id) {
+        const db = getMonDb();
+        if (!db[id]) {
+            const info = getPokeInfo(id);
+            let baseStat = 20;
+            if (info.rarity === 'R') baseStat = 30;
+            if (info.rarity === 'SR') baseStat = 50;
+
+            db[id] = {
+                id,
+                level: 1,
+                xp: 0,
+                maxHp: baseStat * 4,
+                hp: baseStat * 4,
+                atk: baseStat,
+                moves: getRandomMoves(info.type.name, 1)
+            };
+            saveMonDb(db);
+        }
+        return db[id];
+    }
+
+    function getMaxXp(level) { return level * 100; }
+
+    function updatePointsUI() {
+        const p = getPoints();
+        document.getElementById("pointsTextLobby").textContent = p.toLocaleString();
+        document.getElementById("pointsTextCodex").textContent = p.toLocaleString();
+        document.getElementById("gachaPointDisplay").textContent = `보유 포인트: ${p.toLocaleString()}P`;
+    }
+
+    function updateLobbyPartner() {
+        const pid = getPartnerId();
+        const nameEl = document.getElementById("lobbyPartnerName");
+        const statEl = document.getElementById("lobbyPartnerStat");
+        const imgEl = document.getElementById("lobbyPartnerImg");
+        const barEl = document.getElementById("lobbyExpBar");
+
+        if (pid > 0) {
+            const info = getPokeInfo(pid);
+            const stat = getMonStatus(pid);
+            nameEl.textContent = info.name;
+            statEl.textContent = `Lv.${stat.level} / HP ${Math.ceil(stat.hp)}/${stat.maxHp}`;
+            imgEl.src = info.sprite;
+            const xpP = Math.min(100, (stat.xp / getMaxXp(stat.level)) * 100);
+            barEl.style.width = `${xpP}%`;
+        } else {
+            nameEl.textContent = "파트너 없음";
+            statEl.textContent = "도감에서 선택하세요";
+            imgEl.src = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
+            barEl.style.width = "0%";
+        }
+    }
+
+    function showView(name) {
+        Object.values(views).forEach(v => v.classList.remove("active"));
+        views[name].classList.add("active");
+        if(name === 'lobby') updateLobbyPartner();
+    }
+
+    function renderCodex() {
+        const grid = document.getElementById("codexGrid");
+        grid.innerHTML = "";
+        const owned = getOwned();
+        const pid = getPartnerId();
+        let ownedCount = 0;
+
+        for (let i = 1; i <= 151; i++) {
+            const info = getPokeInfo(i);
+            const isOwned = owned.has(i);
+            if(isOwned) ownedCount++;
+            const isPartner = pid === i;
+            const card = document.createElement("div");
+            card.className = `poke-card relative rounded-xl p-2 flex flex-col items-center bg-white cursor-pointer select-none overflow-hidden`;
+            card.classList.add(`rarity-${info.rarity}`);
+            if (isPartner) card.classList.add("ring-2", "ring-emerald-500", "ring-offset-2");
+            if (!isOwned) card.classList.add("opacity-60", "grayscale");
+            card.innerHTML = `
+        <div class="absolute top-1 left-1 text-[9px] font-bold text-slate-400">#${String(i).padStart(3,'0')}</div>
+        <div class="absolute top-1 right-1 w-2 h-2 rounded-full ${info.type.color}"></div>
+        <div class="mt-2 w-16 h-16 flex items-center justify-center">
+          ${isOwned ? `<img src="${info.sprite}" loading="lazy" class="w-full h-full pixel-art object-contain">` : `<span class="text-2xl opacity-20">?</span>`}
+        </div>
+        <div class="text-[11px] font-bold text-slate-700 truncate w-full text-center mt-1">${isOwned ? info.name : "???"}</div>
+        ${info.rarity !== 'C' && isOwned ? `<span class="absolute bottom-1 right-1 text-[8px] font-black ${info.rarity === 'SR' ? 'text-amber-500' : 'text-blue-500'}">${info.rarity}</span>` : ''}
+      `;
+            card.onclick = () => {
+                if (!isOwned) { showAlert("미보유", "가챠를 통해 먼저 획득해야 합니다."); return; }
+                setPartnerId(i); renderCodex();
+            };
+            grid.appendChild(card);
+        }
+        document.getElementById("collectionRate").textContent = `${ownedCount}/151`;
+        if (pid > 0) {
+            const pInfo = getPokeInfo(pid);
+            document.getElementById("partnerInfo").textContent = `#${pid} ${pInfo.name}`;
+            document.getElementById("startAdventureBtn").disabled = false;
+        }
+    }
+
+    /* =========================================
+     * MATH QUIZ LOGIC (0~20)
+     * ========================================= */
+    function generateMathQuestion() {
+        const type = Math.floor(Math.random() * 4);
+        let qStr = "", ans = 0;
+        let safe = 0;
+        while(safe < 100) {
+            safe++;
+            if (type === 0) { // +
+                const a = Math.floor(Math.random() * 21);
+                const b = Math.floor(Math.random() * (21 - a));
+                ans = a + b; qStr = `${a} + ${b} = ?`;
+            } else if (type === 1) { // -
+                const a = Math.floor(Math.random() * 21);
+                const b = Math.floor(Math.random() * (a + 1));
+                ans = a - b; qStr = `${a} - ${b} = ?`;
+            } else if (type === 2) { // □
+                const target = Math.floor(Math.random() * 21);
+                const a = Math.floor(Math.random() * (target + 1));
+                ans = target - a; qStr = `${a} + □ = ${target}`;
+            } else { // 3 nums
+                const a = Math.floor(Math.random() * 10);
+                const b = Math.floor(Math.random() * 10);
+                if (a+b > 20) continue;
+                const c = Math.floor(Math.random() * (21 - a - b));
+                ans = a + b + c; qStr = `${a} + ${b} + ${c} = ?`;
+            }
+            break;
+        }
+        const choices = new Set([ans]);
+        while (choices.size < 4) {
+            const diff = Math.floor(Math.random() * 9) - 4;
+            const fake = ans + diff;
+            if (fake >= 0 && fake <= 25 && fake !== ans) choices.add(fake);
+        }
+        return { q: qStr, choices: Array.from(choices).sort(() => Math.random() - 0.5), ans: ans };
+    }
+
+    /* =========================================
+     * BATTLE SYSTEM
+     * ========================================= */
+    let battleState = null;
+    let quizCallback = null;
+
+    function getEffectiveness(atkType, defType) {
+        if (!TYPE_DATA[atkType]) return 1.0;
+        const data = TYPE_DATA[defType];
+        if (!data) return 1.0;
+        if (data.weak.includes(atkType)) return 1.5;
+        if (data.resist.includes(atkType)) return 0.8;
+        return 1.0;
+    }
+
+    function initAdventure() {
+        const pid = getPartnerId();
+        if (!pid) return;
+        const pStat = getMonStatus(pid);
+        const pInfo = getPokeInfo(pid);
+
+        if(pStat.hp <= 0) {
+            showAlert("출전 불가", "파트너의 체력이 없습니다. 회복이 필요합니다.");
+            if (pStat.hp <= 0 && getPoints() < 100) {
+                pStat.hp = pStat.maxHp;
+                const db = getMonDb(); db[pid] = pStat; saveMonDb(db);
+                showAlert("구조대 지원", "포인트 부족으로 무료 치료되었습니다!");
+            } else { return; }
+        }
+
+        battleState = { stage: 1, player: { ...pStat, name: pInfo.name, sprite: pInfo.sprite, type: pInfo.type.name }, turn: 0 };
+        startBattleStage();
+        showView("battle");
+    }
+
+    function startBattleStage() {
+        const { stage, player } = battleState;
+        let enemyId = Math.floor(Math.random() * 151) + 1;
+        const eInfo = getPokeInfo(enemyId);
+
+        const eLevel = stage + Math.floor(player.level * 0.5);
+        const eMaxHp = (30 + eLevel * 5) * (eInfo.rarity === 'SR' ? 1.5 : 1);
+        const eAtk = (5 + eLevel * 1.5);
+        const eMoves = getRandomMoves(eInfo.type.name, 1);
+
+        battleState.enemy = {
+            id: enemyId, name: eInfo.name, sprite: eInfo.sprite, type: eInfo.type.name,
+            maxHp: eMaxHp, hp: eMaxHp, atk: eAtk, level: eLevel,
+            move: eMoves[0]
+        };
+
+        updateBattleUI();
+        logBattle(`야생의 ${eInfo.name} (Lv.${eLevel}) 등장!`);
+    }
+
+    function updateBattleUI() {
+        const { player, enemy } = battleState;
+        document.getElementById("battleStageText").textContent = battleState.stage;
+
+        document.getElementById("playerName").textContent = player.name;
+        document.getElementById("playerLevel").textContent = `Lv.${player.level}`;
+        document.getElementById("playerImg").src = player.sprite;
+        document.getElementById("playerHpText").textContent = `${Math.ceil(player.hp)}/${player.maxHp}`;
+        document.getElementById("playerHpBar").style.width = `${Math.max(0, (player.hp/player.maxHp)*100)}%`;
+        const pXpMax = getMaxXp(player.level);
+        document.getElementById("playerExpBar").style.width = `${Math.min(100, (player.xp/pXpMax)*100)}%`;
+
+        document.getElementById("enemyName").textContent = enemy.name;
+        document.getElementById("enemyLevel").textContent = `Lv.${enemy.level}`;
+        document.getElementById("enemyImg").src = enemy.sprite;
+        document.getElementById("enemyHpBar").style.width = `${Math.max(0, (enemy.hp/enemy.maxHp)*100)}%`;
+        const eTypeInfo = TYPE_DATA[enemy.type];
+        const typeBadge = document.getElementById("enemyTypeBadge");
+        typeBadge.textContent = enemy.type;
+        typeBadge.className = `text-[9px] text-white px-1.5 py-0.5 rounded mb-1 inline-block ${eTypeInfo.color}`;
+
+        const btnArea = document.getElementById("moveButtons");
+        btnArea.innerHTML = "";
+
+        player.moves.forEach(m => {
+            const btn = document.createElement("button");
+            let tierColor = "border-slate-200 bg-white";
+            if(m.t === 2) tierColor = "border-blue-200 bg-blue-50";
+            if(m.t === 3) tierColor = "border-yellow-300 bg-yellow-50";
+
+            btn.className = `${tierColor} hover:brightness-95 border-b-4 active:border-b-0 active:translate-y-1 text-slate-800 py-3 rounded-xl font-bold text-sm shadow-sm transition-all flex flex-col items-center justify-center gap-1`;
+            btn.innerHTML = `<span>${m.n}</span><div class="flex gap-1 text-[10px] text-slate-500"><span class="bg-slate-100 px-1 rounded">위력 ${m.p}</span><span class="bg-slate-100 px-1 rounded ${m.a < 100 ? 'text-red-500':''}">명중 ${m.a}</span></div>`;
+            btn.onclick = () => handlePlayerMove(m);
+            btnArea.appendChild(btn);
+        });
+    }
+
+    function logBattle(msg, type = "normal") {
+        const log = document.getElementById("battleLog");
+        log.textContent = msg;
+        if (type === "critical") log.className = "text-xs text-red-500 font-bold mb-3 h-6 text-center animate-pulse";
+        else if (type === "weak") log.className = "text-xs text-blue-500 font-bold mb-3 h-6 text-center";
+        else log.className = "text-xs text-slate-500 mb-3 h-6 text-center italic";
+    }
+
+    function playAnim(elementId, animClass) {
+        const el = document.getElementById(elementId);
+        el.classList.remove(animClass);
+        void el.offsetWidth;
+        el.classList.add(animClass);
+        setTimeout(() => el.classList.remove(animClass), 500);
+    }
+
+    function handlePlayerMove(move) {
+        openQuiz((isCorrect) => {
+            if (!isCorrect) {
+                logBattle("문제를 틀려서 공격이 빗나갔다!");
+                setTimeout(enemyTurn, 800);
+                return;
+            }
+            playAnim("playerImg", "animate-attack-player");
+            const roll = Math.random() * 100;
+            const isHit = roll <= move.a;
+            const accMult = isHit ? 2.0 : 0.5;
+            const eff = getEffectiveness(battleState.player.type, battleState.enemy.type);
+            let dmg = Math.floor((battleState.player.atk * move.p / 40) * eff * accMult);
+            dmg = Math.floor(dmg * (0.9 + Math.random() * 0.2));
+
+            setTimeout(() => {
+                battleState.enemy.hp -= dmg;
+                playAnim("enemyImg", "animate-damage");
+                let logMsg = "", logType = "normal";
+                if (isHit) {
+                    if (eff > 1.0) { logMsg = `[명중! 급소!] 효과가 굉장했다! (${dmg})`; logType = "critical"; }
+                    else logMsg = `[명중!] 강력한 공격! (${dmg})`;
+                } else {
+                    logMsg = `빗맞음... 데미지가 반감됨 (${dmg})`; logType = "weak";
+                }
+                logBattle(logMsg, logType);
+                updateBattleUI();
+                if (battleState.enemy.hp <= 0) setTimeout(handleWin, 800);
+                else setTimeout(enemyTurn, 1000);
+            }, 250);
+        });
+    }
+
+    function enemyTurn() {
+        if (battleState.enemy.hp <= 0) return;
+        const move = battleState.enemy.move;
+        playAnim("enemyImg", "animate-attack-enemy");
+        const eff = getEffectiveness(battleState.enemy.type, battleState.player.type);
+        let dmg = Math.floor((battleState.enemy.atk * move.p / 50) * eff);
+
+        if (Math.random() * 100 > move.a) { setTimeout(() => logBattle(`적의 공격이 빗나갔다!`), 300); return; }
+
+        setTimeout(() => {
+            playAnim("playerImg", "animate-damage");
+            battleState.player.hp -= dmg;
+            logBattle(`적의 ${move.n}! (${dmg} 피해)`);
+            updateBattleUI();
+            if (battleState.player.hp <= 0) setTimeout(handleDefeat, 800);
+        }, 250);
+    }
+
+    function handleWin() {
+        const gainedXp = 30 + (battleState.stage * 10);
+        const gainedPoints = 30 + (battleState.stage * 5);
+
+        battleState.player.xp += gainedXp;
+        addPoints(gainedPoints);
+
+        let levelUpMsg = "";
+        const maxXp = getMaxXp(battleState.player.level);
+        if (battleState.player.xp >= maxXp) {
+            battleState.player.level++; battleState.player.xp -= maxXp;
+            battleState.player.maxHp += 10; battleState.player.hp += 10; battleState.player.atk += 3;
+            levelUpMsg = " & 레벨 업!";
+        }
+        const lostHp = battleState.player.maxHp - battleState.player.hp;
+        if (lostHp > 0) battleState.player.hp += Math.floor(lostHp * 0.5);
+
+        const db = getMonDb(); db[battleState.player.id] = { ...battleState.player }; saveMonDb(db);
+
+        document.getElementById("rewardXpVal").textContent = `${gainedXp}${levelUpMsg}`;
+        document.getElementById("rewardTitle").textContent = "전투 승리 보상을 선택하세요.";
+
+        const modal = document.getElementById("rewardModal");
+        const grid = document.getElementById("rewardButtons");
+        grid.innerHTML = "";
+
+        const choices = [
+            { t: "재화 획득", d: "포인트 +100 P", f: () => { addPoints(100); nextStage(); } },
+            {
+                t: "기술 머신", d: "스킬 1개를 선택하여 강화/교체",
+                f: () => {
+                    // 기술 선택 UI로 변경
+                    document.getElementById("rewardTitle").textContent = "교체할 스킬 슬롯을 선택하세요.";
+                    grid.innerHTML = "";
+                    battleState.player.moves.forEach((m, idx) => {
+                        const btn = document.createElement("button");
+                        let tColor = "bg-white border-slate-200";
+                        if(m.t === 2) tColor = "bg-blue-50 border-blue-200";
+                        if(m.t === 3) tColor = "bg-yellow-50 border-yellow-300";
+
+                        btn.className = `w-full py-4 ${tColor} border rounded-xl flex flex-col items-center justify-center gap-1 hover:brightness-95`;
+                        btn.innerHTML = `<span class="font-bold text-slate-800">${m.n}</span><span class="text-xs text-slate-500">위력 ${m.p} / 명중 ${m.a} (Tier ${m.t})</span><span class="text-[10px] text-red-500 font-bold mt-1">클릭 시 교체</span>`;
+
+                        btn.onclick = () => {
+                            // 새 스킬 뽑기 (중복 방지)
+                            const otherMove = battleState.player.moves[idx === 0 ? 1 : 0];
+                            let candidates, newMove;
+                            do {
+                                candidates = getRandomMoves(battleState.player.type, 3);
+                                newMove = candidates[0];
+                            } while(newMove.n === otherMove.n || newMove.n === m.n); // 기존과 동일하거나 옆 슬롯과 동일하면 다시
+
+                            battleState.player.moves[idx] = newMove;
+                            const db = getMonDb(); db[battleState.player.id] = battleState.player; saveMonDb(db);
+                            showAlert("기술 습득!", `[${newMove.n}] 기술을 배웠습니다!`, nextStage);
+                        };
+                        grid.appendChild(btn);
+                    });
+                }
+            },
+            { t: "완전 회복", d: "HP 100% 회복", f: () => {
+                    battleState.player.hp = battleState.player.maxHp;
+                    const db = getMonDb(); db[battleState.player.id] = battleState.player; saveMonDb(db);
+                    nextStage();
+                }
+            }
+        ];
+
+        choices.forEach(c => {
+            const btn = document.createElement("button");
+            btn.className = "w-full py-4 bg-slate-100 hover:bg-indigo-50 border border-slate-200 hover:border-indigo-200 rounded-xl flex flex-col items-center justify-center gap-1 transition-colors";
+            btn.innerHTML = `<span class="font-bold text-slate-800 text-lg">${c.t}</span><span class="text-xs text-slate-500">${c.d}</span>`;
+            btn.onclick = () => { if(c.t !== "기술 머신") modal.classList.add("hidden"); c.f(); };
+            grid.appendChild(btn);
+        });
+
+        modal.classList.remove("hidden");
+    }
+
+    function nextStage() { battleState.stage++; startBattleStage(); }
+    function handleDefeat() {
+        battleState.player.hp = 1;
+        const db = getMonDb(); db[battleState.player.id] = battleState.player; saveMonDb(db);
+        showAlert("전투 패배", "눈앞이 깜깜해졌다... (체력 1로 귀환)", () => showView("lobby"));
+    }
+
+    function openQuiz(cb) {
+        quizCallback = cb;
+        const qModal = document.getElementById("quizModal");
+        const qText = document.getElementById("quizQuestion");
+        const qGrid = document.getElementById("quizChoices");
+        const qData = generateMathQuestion();
+        qText.textContent = qData.q; qGrid.innerHTML = "";
+        qData.choices.forEach(val => {
+            const btn = document.createElement("button");
+            btn.className = "bg-slate-100 hover:bg-sky-100 border-2 border-slate-200 hover:border-sky-300 text-slate-800 font-bold py-4 rounded-xl text-lg transition-colors";
+            btn.textContent = val;
+            btn.onclick = () => { qModal.classList.add("hidden"); if (quizCallback) quizCallback(val === qData.ans); };
+            qGrid.appendChild(btn);
+        });
+        qModal.classList.remove("hidden");
+    }
+
+    document.getElementById("quizCancel").onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(false); };
+
+    function playGacha(count) {
+        const cost = count * GACHA_COST;
+        if (getPoints() < cost) { showAlert("포인트 부족", "포인트가 부족합니다."); return; }
+        setPoints(getPoints() - cost);
+        document.getElementById("gachaPlaceholder").classList.add("hidden");
+        const resGrid = document.getElementById("gachaResultsGrid");
+        resGrid.classList.remove("hidden"); resGrid.innerHTML = "";
+        const owned = getOwned();
+        for(let k=0; k<count; k++) {
+            let pickId = Math.floor(Math.random() * 151) + 1;
+            const pInfo = getPokeInfo(pickId);
+            const isNew = !owned.has(pickId); owned.add(pickId);
+            const div = document.createElement("div");
+            div.className = "flex flex-col items-center p-2 bg-slate-700 rounded-xl animate-[bounce_0.5s]";
+            div.innerHTML = `<div class="w-14 h-14 bg-slate-600 rounded-full flex items-center justify-center mb-2 relative"><img src="${pInfo.sprite}" class="w-10 h-10 pixel-art">${isNew ? '<span class="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] px-1 rounded-sm font-bold">NEW</span>' : ''}</div><div class="text-[9px] text-white font-bold truncate w-full text-center">${pInfo.name}</div>`;
+            resGrid.appendChild(div);
+        }
+        saveOwned(owned); updatePointsUI();
+    }
+
+    function showAlert(title, body, onOk) {
+        document.getElementById("messageTitle").textContent = title;
+        document.getElementById("messageBody").textContent = body;
+        const modal = document.getElementById("messageModal");
+        modal.classList.remove("hidden");
+        document.getElementById("messageOk").onclick = () => { modal.classList.add("hidden"); if(onOk) onOk(); };
+    }
+
+    window.onload = () => {
+        if (!localStorage.getItem(LS_KEY.POINTS)) setPoints(500);
+        updatePointsUI(); updateLobbyPartner();
+        document.getElementById("startButton").onclick = () => showView("lobby");
+        document.getElementById("lobbyCodexBtn").onclick = () => { renderCodex(); showView("codex"); };
+        document.getElementById("lobbyGachaBtn").onclick = () => { document.getElementById("gachaModal").classList.remove("hidden"); };
+        document.getElementById("codexToLobbyBtn").onclick = () => showView("lobby");
+        document.getElementById("startAdventureBtn").onclick = initAdventure;
+        document.getElementById("battleBackBtn").onclick = () => { if(confirm("전투를 포기하시겠습니까?")) showView("lobby"); };
+        document.getElementById("gachaClose").onclick = () => document.getElementById("gachaModal").classList.add("hidden");
+        document.getElementById("gacha1Btn").onclick = () => playGacha(1);
+        document.getElementById("gacha10Btn").onclick = () => playGacha(10);
+    };
+</script>
+</body>
+</html>
