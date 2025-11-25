@@ -263,6 +263,7 @@
             border-radius: 25px; padding: 25px; text-align: center;
             box-shadow: 0 20px 50px rgba(0,0,0,0.2);
             border: 4px solid #bae6fd;
+            position: relative;
         }
         .poke-img-lg { width: 140px; height: 140px; image-rendering: pixelated; margin: 0 auto; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
 
@@ -298,27 +299,37 @@
             height: 160px;
             margin-top: 10px;
             overflow: hidden;
+            z-index: 120;
         }
+
+        /* 🔧 여기 블록 수정 */
         .throw-ball-img {
             position: absolute;
             left: 50%;
-            bottom: 0; /* 바닥 기준 */
+            bottom: 0;                     /* 바닥 기준 */
             width: 80px;
-            height: 80px;
-            transform: translate(-50%, 160px) scale(0.9); /* 화면 아래에서 시작 */
+            height: 96px;                  /* ← 80 * 1.2 : 세로 1.2배 */
+            transform: translate(-50%, 160px) scale(0.9);
             image-rendering: pixelated;
+            z-index: 130;                   /* ← 포켓몬보다 위 레이어 */
         }
 
-        /* 바닥 → 포켓몬 위치까지 ↑ (이전보다 약 4배 높이) */
+        /* 포켓몬 이미지는 아래 레이어로 */
+        #throw-poke-img {
+            position: relative;
+            z-index: 110;
+        }
+
+        /* 바닥 → 포켓몬 위치까지 ↑ : 위쪽이 안 잘리는 최대값 -64px */
         @keyframes ballThrowUp {
-            0%   { transform: translate(-50%, 160px) scale(0.9); }
-            100% { transform: translate(-50%, -80px) scale(1); }
+            0%   { transform: translate(-50%, 160px); }
+            100% { transform: translate(-50%, -64px); }
         }
 
-        /* 포켓몬 맞춘 뒤, 바닥으로 툭 떨어지는 구간 */
+        /* 그 위치에서 바닥으로 툭 떨어지기 */
         @keyframes ballDrop {
-            0%   { transform: translate(-50%, -80px) scale(1); }
-            100% { transform: translate(-50%,   0px) scale(1); }
+            0%   { transform: translate(-50%, -64px); }
+            100% { transform: translate(-50%, 0px); }
         }
 
         /* 바닥에서 3번 흔들리며 살짝 어두워지는 구간 */
@@ -334,15 +345,35 @@
         .ball-drop     { animation: ballDrop     0.25s ease-in  forwards; }
         .ball-shake    { animation: ballShake    0.40s ease-in-out 0s 3 forwards; }
 
-        /* 포켓몬이 볼에 빨려 들어가는 연출 */
-        @keyframes pokeShrink {
-            0%   { transform: scale(1);   opacity: 1; }
-            100% { transform: scale(0.0); opacity: 0; }
+        /* 포켓몬이 아래로 내려오면서 볼 안으로 빨려 들어가는 연출 */
+        @keyframes pokeDescendShrink {
+            0% {
+                transform: translateY(0px) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(60px) scale(0);
+                opacity: 0;
+            }
         }
-        .poke-shrink { animation: pokeShrink 0.30s ease-in forwards; }
-        .poke-hidden { opacity: 0; }
 
+        /* 새 애니메이션 클래스 */
+        .poke-descend-shrink {
+            animation: pokeDescendShrink 0.35s ease-in forwards;
+        }
 
+        .poke-hidden {
+            opacity: 0;
+        }
+
+        
+        .ball-opt img {
+            width: 40px;
+            height: 40px;              /* 정사각형 캔버스 */
+            image-rendering: pixelated;
+            display: block;
+            margin: 0 auto 4px;
+        }
 
     </style>
 </head>
@@ -949,14 +980,19 @@
 
         ballImg.onanimationend = (e) => {
             if (e.animationName === "ballThrowUp") {
-                // 포켓몬에 도달 → 볼 열림 & 포켓몬 축소 시작
+                // 볼이 위에 도달 → 열리고, 포켓몬이 아래로 내려오며 빨려 들어감
                 ballImg.src = openSprite;
 
-                pokeImg.classList.remove("poke-shrink", "poke-hidden");
-                void pokeImg.offsetWidth;
-                pokeImg.classList.add("poke-shrink");
+                // 이전 상태 리셋
+                pokeImg.classList.remove("poke-descend-shrink", "poke-hidden");
+                pokeImg.style.transform = "";
+                pokeImg.style.opacity = "1";
+                void pokeImg.offsetWidth; // 리플로우
 
-                // 포켓몬 축소 완료 후, open → opening → closed 역순 재생
+                // 내려오면서 축소 애니메이션 시작
+                pokeImg.classList.add("poke-descend-shrink");
+
+                // 포켓몬 애니 끝난 뒤 open → opening → closed 역순 재생
                 pokeImg.onanimationend = () => {
                     pokeImg.classList.add("poke-hidden");
 
@@ -973,7 +1009,8 @@
                         }, 80);
                     }, 80);
                 };
-            } else if (e.animationName === "ballDrop") {
+
+        } else if (e.animationName === "ballDrop") {
                 ballImg.classList.remove("ball-drop");
                 void ballImg.offsetWidth;
                 ballImg.classList.add("ball-shake");
