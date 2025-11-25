@@ -1,0 +1,885 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>포켓몬 맞춤법 탐험대</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <style>
+        /* 폰트: 귀여운 'Jua' 폰트 사용 */
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        /* --- 기본 설정 및 스크롤바 숨김 --- */
+        * { box-sizing: border-box; user-select: none; -webkit-tap-highlight-color: transparent; }
+
+        /* 스크롤바 숨기기 (모든 브라우저) */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
+        body {
+            margin: 0;
+            font-family: 'Jua', sans-serif;
+            background: linear-gradient(180deg, #bae6fd 0%, #e0f2fe 100%); /* 화사한 하늘색 배경 */
+            color: #334155;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .app-container {
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            background: rgba(255, 255, 255, 0.4); /* 반투명 흰색 */
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+
+        /* --- 공통 유틸 --- */
+        .hidden { display: none !important; }
+        .view {
+            flex: 1;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            position: absolute;
+            top: 0; left: 0;
+            transition: opacity 0.3s;
+        }
+
+        /* 버튼 공통 스타일 (입체감) */
+        .btn-3d {
+            border: none;
+            border-radius: 20px;
+            font-family: 'Jua', sans-serif;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 6px 0 rgba(0,0,0,0.15); /* 그림자 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            color: white;
+        }
+        .btn-3d:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 rgba(0,0,0,0.15);
+        }
+
+        /* --- 1. 로비 화면 --- */
+        #view-lobby {
+            justify-content: center;
+            gap: 25px;
+        }
+        .lobby-title {
+            font-size: 42px;
+            color: #0284c7; /* 진한 파랑 */
+            text-shadow: 3px 3px 0 #fff;
+            margin-bottom: 10px;
+            text-align: center;
+            line-height: 1.2;
+        }
+        .lobby-stats {
+            background: #fff;
+            padding: 10px 25px;
+            border-radius: 30px;
+            font-size: 20px;
+            color: #f59e0b;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 2px solid #fef3c7;
+        }
+
+        .menu-btn { width: 100%; max-width: 280px; height: 75px; font-size: 26px; gap: 12px; }
+        .btn-explore { background: #4ade80; color: #064e3b; } /* 밝은 초록 */
+        .btn-shop { background: #60a5fa; color: #1e3a8a; } /* 밝은 파랑 */
+        .btn-dex { background: #fbbf24; color: #78350f; } /* 밝은 노랑 */
+
+        /* --- 2. 게임(탐험) 화면 --- */
+        #view-game { padding: 15px; padding-bottom: 30px; background: #ecfccb; /* 연두색 배경 */ }
+
+        .game-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            background: #fff;
+            padding: 12px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .stat-badge { font-size: 18px; font-weight: bold; color: #57534e; }
+        .stat-badge span { font-size: 24px; margin-left: 5px; }
+
+        /* 그리드 (맵) */
+        .grid-container {
+            width: 100%;
+            max-width: 400px;
+            aspect-ratio: 1/1;
+            position: relative;
+            background: #86efac; /* 풀색 */
+            border-radius: 20px;
+            overflow: hidden;
+            border: 4px solid #fff;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            margin-bottom: 15px;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(9, 1fr);
+            grid-template-rows: repeat(9, 1fr);
+            width: 100%; height: 100%;
+        }
+        .tile {
+            position: relative;
+            background-size: cover;
+        }
+        /* 타일 구분선 살짝 */
+        .tile::before {
+            content:''; position: absolute; inset:0;
+            border: 0.5px solid rgba(255,255,255,0.2);
+        }
+
+        /* 실루엣 효과 */
+        .tile.silhouette::after {
+            content: ""; position: absolute;
+            width: 200%; height: 200%;
+            top: -50%; left: -50%;
+            background-size: contain; background-position: center; background-repeat: no-repeat;
+            filter: brightness(0) invert(1) drop-shadow(0 0 5px rgba(255,255,255,0.8));
+            opacity: 0.9;
+            animation: bounce 1.5s infinite;
+            z-index: 5;
+        }
+        @keyframes bounce { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-8px)} }
+
+        #player {
+            position: absolute; top:0; left:0;
+            width: calc(100%/9); height: calc(100%/9);
+            z-index: 10;
+            transition: transform 0.2s linear;
+        }
+        .player-img {
+            width: 100%; height: 100%;
+            background: url('./png/character.png') no-repeat;
+            background-size: 1200% 100%;
+            image-rendering: pixelated;
+            filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2)); /* 캐릭터 그림자 */
+        }
+
+        /* 컨트롤러 */
+        .d-pad {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            gap: 8px;
+            margin-top: auto;
+        }
+        .d-btn {
+            width: 70px; height: 65px;
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 15px;
+            color: #64748b; font-size: 30px;
+            box-shadow: 0 4px 0 #cbd5e1;
+            cursor: pointer;
+        }
+        .d-btn:active { transform: translateY(4px); box-shadow: none; background: #f1f5f9; }
+        .d-btn.up { grid-column: 2; }
+        .d-btn.left { grid-column: 1; grid-row: 2; }
+        .d-btn.down { grid-column: 2; grid-row: 2; }
+        .d-btn.right { grid-column: 3; grid-row: 2; }
+
+        /* --- 3. 결과 화면 --- */
+        #view-result { text-align: center; justify-content: center; background: rgba(255,255,255,0.9); }
+        .result-card {
+            background: #fff;
+            border-radius: 30px;
+            padding: 30px;
+            width: 90%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border: 4px solid #bae6fd;
+        }
+        .result-list {
+            display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
+            margin: 20px 0;
+            max-height: 200px; overflow-y: auto;
+            background: #f8fafc; padding: 10px; border-radius: 15px;
+        }
+        .result-poke img { width: 60px; height: 60px; background: #fff; border-radius: 50%; border: 2px solid #e2e8f0; }
+
+        /* --- 4. 상점 화면 --- */
+        #view-shop { background: #fdf4ff; /* 연한 핑크 배경 */ }
+        .shop-header { display: flex; align-items: center; width: 100%; margin-bottom: 20px; }
+        .shop-section { width: 100%; margin-bottom: 25px; }
+        .shop-section h3 {
+            color: #db2777; font-size: 20px; margin-bottom: 10px;
+            background: #fff; display: inline-block; padding: 5px 15px; border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+        .shop-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .shop-item {
+            background: #fff; padding: 15px; border-radius: 20px;
+            text-align: center; border: 2px solid #fce7f3;
+            display: flex; flex-direction: column; justify-content: space-between;
+            box-shadow: 0 4px 0 #fbcfe8;
+        }
+        .shop-price { color: #f59e0b; font-weight: bold; font-size: 18px; margin: 8px 0; }
+        .buy-btn {
+            background: #3b82f6; color: white; border: none; padding: 10px;
+            border-radius: 12px; cursor: pointer; font-family: inherit; font-size: 16px;
+            box-shadow: 0 3px 0 #2563eb;
+        }
+        .buy-btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* --- 5. 도감 화면 --- */
+        #view-dex { background: #fffbeb; /* 연한 노랑 */ }
+
+        /* 모달 (팝업) */
+        .modal-overlay {
+            position: fixed; inset: 0; background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(3px);
+            z-index: 50; display: flex; justify-content: center; align-items: center;
+        }
+        .modal-box {
+            background: #fff; width: 90%; max-width: 340px;
+            border-radius: 25px; padding: 25px; text-align: center;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+            border: 4px solid #bae6fd;
+        }
+        .poke-img-lg { width: 140px; height: 140px; image-rendering: pixelated; margin: 0 auto; filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2)); }
+
+        .ball-select { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px; }
+        .ball-opt {
+            background: #f8fafc; border: 2px solid #cbd5e1; color: #334155;
+            padding: 12px; border-radius: 15px; font-size: 15px; font-family: inherit; cursor: pointer;
+        }
+        .ball-opt:active { background: #e2e8f0; }
+        .ball-opt:disabled { opacity: 0.5; cursor: not-allowed; }
+
+        .back-btn {
+            background: #fff; border: 2px solid #cbd5e1;
+            font-size: 24px; cursor: pointer; border-radius: 50%;
+            width: 45px; height: 45px; margin-right: 15px;
+            box-shadow: 0 3px 0 #cbd5e1;
+        }
+        .back-btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* 퀴즈 버튼 */
+        .quiz-btn {
+            padding: 15px; background: #fff; border: 2px solid #cbd5e1;
+            color: #334155; border-radius: 15px; font-size: 20px;
+            font-family: inherit; cursor: pointer; width: 100%;
+            box-shadow: 0 4px 0 #cbd5e1; transition: 0.1s;
+        }
+        .quiz-btn:active { transform: translateY(4px); box-shadow: none; background: #f1f5f9; }
+
+    </style>
+</head>
+<body>
+
+<div class="app-container">
+
+    <div id="view-lobby" class="view">
+        <h1 class="lobby-title">Pokémon<br>맞춤법 탐험대</h1>
+
+        <div class="lobby-stats">
+            보유 포인트 💰 <span id="lobby-points">0</span>
+        </div>
+
+        <button class="btn-3d menu-btn btn-explore" onclick="startExploration()">
+            🧭 탐험 떠나기
+        </button>
+        <button class="btn-3d menu-btn btn-shop" onclick="switchView('view-shop')">
+            🛒 상점 가기
+        </button>
+        <button class="btn-3d menu-btn btn-dex" onclick="switchView('view-dex')">
+            📖 포켓몬 도감
+        </button>
+    </div>
+
+    <div id="view-game" class="view hidden">
+        <div class="game-header">
+            <div class="stat-badge">남은 걸음 👣 <span id="game-steps" style="color:#ef4444">30</span></div>
+            <div class="stat-badge">볼 개수 🔴 <span id="game-balls" style="color:#3b82f6">10</span></div>
+        </div>
+
+        <div class="grid-container">
+            <div id="grid" class="grid"></div>
+            <div id="player"><div class="player-img" id="playerSprite"></div></div>
+        </div>
+
+        <div style="text-align:center; color:#57534e; font-size:16px; margin-bottom:10px; background:#fff; padding:5px 15px; border-radius:15px;">
+            방향키를 눌러서 포켓몬을 찾아보세요!
+        </div>
+
+        <div class="d-pad">
+            <button class="d-btn up" onclick="move('up')">▲</button>
+            <button class="d-btn left" onclick="move('left')">◀</button>
+            <button class="d-btn down" onclick="move('down')">▼</button>
+            <button class="d-btn right" onclick="move('right')">▶</button>
+        </div>
+    </div>
+
+    <div id="view-result" class="view hidden">
+        <div class="result-card">
+            <h2 style="margin:0; font-size:32px; color:#334155;">탐험 끝!</h2>
+            <p style="color:#64748b; font-size:18px; margin-top:5px;" id="end-reason">발걸음을 모두 사용했어요</p>
+
+            <div style="background:#fef3c7; padding:15px; border-radius:20px; margin:20px 0; border:2px solid #fcd34d;">
+                <div style="font-size:16px; color:#92400e;">획득한 포인트</div>
+                <div style="font-size:40px; color:#d97706; font-weight:bold;">+<span id="result-points">0</span></div>
+            </div>
+
+            <p style="text-align:left; margin-bottom:5px; font-weight:bold; color:#475569;">이번에 잡은 포켓몬:</p>
+            <div class="result-list" id="result-list">
+            </div>
+
+            <button class="btn-3d btn-explore" style="width:100%; height:60px; margin-top:10px;" onclick="switchView('view-lobby')">
+                로비로 돌아가기
+            </button>
+        </div>
+    </div>
+
+    <div id="view-shop" class="view hidden">
+        <div class="shop-header">
+            <button class="back-btn" onclick="switchView('view-lobby')">🔙</button>
+            <h2 style="margin:0; font-size:24px; color:#86198f;">상점</h2>
+        </div>
+        <div style="width:100%; text-align:right; margin-bottom:10px; font-size:18px;">
+            내 지갑: <span class="highlight" id="shop-points" style="font-weight:bold; color:#d97706;">0</span> P
+        </div>
+
+        <div class="shop-section">
+            <h3>🔴 몬스터볼 구매</h3>
+            <div class="shop-grid">
+                <div class="shop-item">
+                    <div>몬스터볼</div><div class="shop-price">50 P</div>
+                    <button class="buy-btn" onclick="buyItem('ball', 'monster', 50)">구매하기</button>
+                </div>
+                <div class="shop-item">
+                    <div>슈퍼볼</div><div class="shop-price">100 P</div>
+                    <button class="buy-btn" onclick="buyItem('ball', 'super', 100)">구매하기</button>
+                </div>
+                <div class="shop-item">
+                    <div>하이퍼볼</div><div class="shop-price">150 P</div>
+                    <button class="buy-btn" onclick="buyItem('ball', 'hyper', 150)">구매하기</button>
+                </div>
+                <div class="shop-item">
+                    <div>마스터볼</div><div class="shop-price">300 P</div>
+                    <button class="buy-btn" onclick="buyItem('ball', 'master', 300)">구매하기</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="shop-section">
+            <h3>⚡ 능력 강화하기</h3>
+            <div class="shop-grid">
+                <div class="shop-item">
+                    <div>👟 튼튼한 신발<br><span style="font-size:12px; color:#94a3b8;" id="lv-steps">Lv.0</span></div>
+                    <div class="shop-price">500 P</div>
+                    <div style="font-size:13px; color:#64748b; margin-bottom:4px;">발걸음 +10</div>
+                    <button class="buy-btn" onclick="buyUpgrade('maxSteps', 500)">강화하기</button>
+                </div>
+                <div class="shop-item">
+                    <div>🎒 넉넉한 가방<br><span style="font-size:12px; color:#94a3b8;" id="lv-balls">Lv.0</span></div>
+                    <div class="shop-price">500 P</div>
+                    <div style="font-size:13px; color:#64748b; margin-bottom:4px;">시작 볼 +2</div>
+                    <button class="buy-btn" onclick="buyUpgrade('startBalls', 500)">강화하기</button>
+                </div>
+                <div class="shop-item">
+                    <div>🍀 행운의 부적<br><span style="font-size:12px; color:#94a3b8;" id="lv-rate">Lv.0</span></div>
+                    <div class="shop-price">800 P</div>
+                    <div style="font-size:13px; color:#64748b; margin-bottom:4px;">포획률 +10%</div>
+                    <button class="buy-btn" onclick="buyUpgrade('catchRate', 800)">강화하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="view-dex" class="view hidden">
+        <div class="shop-header">
+            <button class="back-btn" onclick="switchView('view-lobby')">🔙</button>
+            <h2 style="margin:0; font-size:24px; color:#92400e;">포켓몬 도감</h2>
+        </div>
+        <p style="font-size:18px; margin-bottom:15px;">
+            모은 포켓몬: <span id="dex-count" style="font-weight:bold; color:#d97706;">0</span> / 151
+        </p>
+        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; padding-bottom:50px;" id="dex-grid"></div>
+    </div>
+
+</div>
+
+<div id="modal-layer" class="modal-overlay hidden">
+
+    <div id="modal-encounter" class="modal-box hidden">
+        <h3 style="color:#ef4444; font-size:24px; margin:0 0 10px 0;">야생의 포켓몬!</h3>
+        <img id="enc-img" src="" class="poke-img-lg" />
+        <h2 id="enc-name" style="font-size:28px; margin:10px 0;">???</h2>
+        <p style="font-size:16px; color:#f59e0b; font-weight:bold; margin:0;">성공 확률: <span id="enc-rate"></span>%</p>
+
+        <div class="ball-select">
+            <button class="ball-opt" id="btn-use-monster" onclick="tryCatch('monster')">
+                🔴 몬스터볼<br>x<span id="qty-monster">0</span>
+            </button>
+            <button class="ball-opt" id="btn-use-super" onclick="tryCatch('super')">
+                🔵 슈퍼볼<br>x<span id="qty-super">0</span>
+            </button>
+            <button class="ball-opt" id="btn-use-hyper" onclick="tryCatch('hyper')">
+                🟡 하이퍼볼<br>x<span id="qty-hyper">0</span>
+            </button>
+            <button class="ball-opt" id="btn-use-master" onclick="tryCatch('master')">
+                🟣 마스터볼<br>x<span id="qty-master">0</span>
+            </button>
+        </div>
+        <button style="margin-top:20px; background:#94a3b8; padding:12px; border:none; color:white; border-radius:15px; width:100%; font-size:18px; font-family:inherit; cursor:pointer;" onclick="runAway()">
+            🏃 도망가기
+        </button>
+    </div>
+
+    <div id="modal-quiz" class="modal-box hidden">
+        <h3 style="color:#0ea5e9; font-size:24px; margin-top:0;">맞춤법 퀴즈</h3>
+        <p id="quiz-txt" style="font-size:22px; margin:20px 0; font-weight:bold; color:#334155; word-break: keep-all;"></p>
+        <div id="quiz-opts" style="display:flex; flex-direction:column; gap:12px;"></div>
+    </div>
+
+    <div id="modal-msg" class="modal-box hidden">
+        <h2 id="msg-title" style="font-size:32px; margin:10px 0;">결과</h2>
+        <img id="msg-img" src="" style="width:100px; height:100px; image-rendering:pixelated;" />
+        <p id="msg-desc" style="font-size:18px; color:#475569; margin:15px 0; line-height:1.4;"></p>
+        <button onclick="closeMsgModal()" style="background:#4ade80; padding:15px; width:100%; border:none; color:#064e3b; border-radius:15px; font-weight:bold; font-size:20px; cursor:pointer;">확인</button>
+    </div>
+</div>
+
+<script>
+    // --- 데이터 및 상태 ---
+    const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
+    const QUIZ_URL = "./quiz/quiz.json"; // 요청하신 경로
+
+    // 영구 데이터
+    let user = {
+        points: 0,
+        inventory: { monster: 0, super: 0, hyper: 0, master: 0 },
+        dex: new Set(),
+        upgrades: { maxSteps: 0, startBalls: 0, catchRate: 0 }
+    };
+
+    // 세션 데이터
+    let session = {
+        active: false,
+        steps: 0,
+        caught: [],
+        earnedPoints: 0
+    };
+
+    // 게임 런타임 변수
+    let player = { x: 4, y: 4 };
+    let tileMap = [];
+    let currentPokemon = null;
+    let silhouettePos = { x: -1, y: -1 };
+    let isMoving = false;
+    let quizList = [];
+    let selectedBall = null;
+    let currentQuiz = null;
+
+    // --- 초기화 ---
+    async function init() {
+        await loadQuiz();
+        updateLobbyUI();
+    }
+
+    // 퀴즈 파일 로드 및 랜덤 셔플
+    async function loadQuiz() {
+        try {
+            const res = await fetch(QUIZ_URL);
+            const data = await res.json();
+            let qArr = data.questions || [];
+
+            // Fisher-Yates Shuffle (랜덤 섞기)
+            for (let i = qArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [qArr[i], qArr[j]] = [qArr[j], qArr[i]];
+            }
+
+            quizList = qArr;
+            console.log("퀴즈 로드 완료:", quizList.length, "개");
+        } catch(e) {
+            console.error("퀴즈 로드 실패", e);
+            // 더미 데이터
+            quizList = [{prompt:"'나무'의 올바른 표기는?", choices:["나무","나모"], answerIndex:0}];
+        }
+    }
+
+    // --- 뷰 관리 ---
+    function switchView(viewId) {
+        document.querySelectorAll('.view').forEach(el => el.classList.add('hidden'));
+        document.getElementById(viewId).classList.remove('hidden');
+
+        if(viewId === 'view-shop') updateShopUI();
+        if(viewId === 'view-dex') renderDex();
+        if(viewId === 'view-lobby') updateLobbyUI();
+    }
+
+    function updateLobbyUI() {
+        document.getElementById('lobby-points').textContent = user.points;
+    }
+
+    // --- 탐험 시작 ---
+    function startExploration() {
+        const baseSteps = 30 + (user.upgrades.maxSteps * 10);
+        const bonusBalls = 10 + (user.upgrades.startBalls * 2);
+
+        session = {
+            active: true,
+            steps: baseSteps,
+            caught: [],
+            earnedPoints: 0
+        };
+
+        // 이번 탐험용 무료 볼 지급
+        user.inventory.monster += bonusBalls;
+
+        generateMap();
+        player = { x: 4, y: 4 };
+        updatePlayerPos();
+        updateGameHeader();
+        switchView('view-game');
+
+        // 실루엣 초기화 후 스폰
+        removeSilhouette();
+        spawnPokemon();
+    }
+
+    function endExploration(reason) {
+        session.active = false;
+
+        const reasonText = reason === 'steps' ? "발걸음을 모두 사용했어요!" : "포켓볼이 다 떨어졌어요!";
+        document.getElementById('end-reason').textContent = reasonText;
+        document.getElementById('result-points').textContent = session.earnedPoints;
+
+        const listEl = document.getElementById('result-list');
+        listEl.innerHTML = "";
+        if(session.caught.length === 0) listEl.innerHTML = "<p style='width:100%; text-align:center; font-size:14px; color:#94a3b8;'>아무것도 못 잡았어요...</p>";
+
+        session.caught.forEach(p => {
+            const div = document.createElement('div');
+            div.className = 'result-poke';
+            div.innerHTML = `<img src="${p.sprite}">`;
+            listEl.appendChild(div);
+        });
+
+        switchView('view-result');
+    }
+
+    // --- 게임 로직 ---
+    function generateMap() {
+        const grid = document.getElementById('grid');
+        grid.innerHTML = "";
+        tileMap = [];
+        for(let y=0; y<9; y++){
+            let row = [];
+            for(let x=0; x<9; x++){
+                const t = Math.floor(Math.random()*4);
+                row.push(t);
+                const div = document.createElement('div');
+                div.className = 'tile';
+                div.style.backgroundImage = `url('${TILE_IMGS[t]}')`;
+                div.dataset.x = x; div.dataset.y = y;
+                grid.appendChild(div);
+            }
+            tileMap.push(row);
+        }
+    }
+
+    function move(dir) {
+        if(!session.active || isMoving) return;
+
+        let nx = player.x, ny = player.y;
+        if(dir === 'up') ny--;
+        if(dir === 'down') ny++;
+        if(dir === 'left') nx--;
+        if(dir === 'right') nx++;
+
+        if(nx < 0 || nx >= 9 || ny < 0 || ny >= 9) return;
+
+        isMoving = true;
+        player.x = nx; player.y = ny;
+        session.steps--;
+
+        const frames = { up:[6,7,8], down:[0,1,2], left:[9,10,11], right:[3,4,5] };
+        animateSprite(frames[dir] || frames.down);
+        updatePlayerPos();
+        updateGameHeader();
+
+        setTimeout(() => {
+            isMoving = false;
+            if(session.steps <= 0) {
+                endExploration('steps');
+                return;
+            }
+            if(player.x === silhouettePos.x && player.y === silhouettePos.y) {
+                startEncounter();
+            }
+        }, 300);
+    }
+
+    function updateGameHeader() {
+        document.getElementById('game-steps').textContent = session.steps;
+        const totalBalls = user.inventory.monster + user.inventory.super + user.inventory.hyper + user.inventory.master;
+        document.getElementById('game-balls').textContent = totalBalls;
+    }
+
+    function animateSprite(frames) {
+        let idx = 0;
+        const interval = setInterval(() => {
+            const frame = frames[idx % 3];
+            const pct = (frame / 11) * 100;
+            document.getElementById('playerSprite').style.backgroundPosition = `${pct}% 50%`;
+            idx++;
+        }, 100);
+        setTimeout(() => clearInterval(interval), 300);
+    }
+
+    function updatePlayerPos() {
+        document.getElementById('player').style.transform = `translate(${player.x*100}%, ${player.y*100}%)`;
+    }
+
+    // --- 스폰 및 인카운터 ---
+
+    // 실루엣 제거 함수 (버그 수정용)
+    function removeSilhouette() {
+        document.querySelectorAll('.tile').forEach(t => {
+            t.classList.remove('silhouette');
+            const styleTag = t.querySelector('style');
+            if(styleTag) styleTag.remove();
+        });
+        silhouettePos = { x: -1, y: -1 };
+    }
+
+    async function spawnPokemon() {
+        // 기존 실루엣 확실히 제거
+        removeSilhouette();
+
+        let x, y;
+        do {
+            x = Math.floor(Math.random()*9);
+            y = Math.floor(Math.random()*9);
+        } while(x === player.x && y === player.y);
+
+        silhouettePos = {x, y};
+        currentPokemon = null;
+
+        const targetTile = document.querySelector(`.tile[data-x="${x}"][data-y="${y}"]`);
+        if(targetTile) targetTile.classList.add('silhouette');
+
+        // 랜덤 ID
+        const id = Math.floor(Math.random()*151)+1;
+        try {
+            const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+            const data = await res.json();
+            const name = data.names.find(n=>n.language.name==='ko')?.name || data.name;
+            const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+
+            currentPokemon = { id, name, rate: data.capture_rate, sprite };
+
+            const style = document.createElement('style');
+            style.innerHTML = `.tile[data-x="${x}"][data-y="${y}"].silhouette::after { background-image: url("${sprite}"); }`;
+            targetTile.appendChild(style);
+
+        } catch(e) {
+            console.error(e);
+        }
+    }
+
+    function startEncounter() {
+        if(!currentPokemon) return;
+
+        const total = user.inventory.monster + user.inventory.super + user.inventory.hyper + user.inventory.master;
+        if(total <= 0) {
+            endExploration('balls');
+            return;
+        }
+
+        document.getElementById('modal-layer').classList.remove('hidden');
+        document.getElementById('modal-encounter').classList.remove('hidden');
+
+        document.getElementById('enc-img').src = currentPokemon.sprite;
+        document.getElementById('enc-name').textContent = currentPokemon.name;
+
+        let baseRate = (currentPokemon.rate / 255);
+        baseRate += (user.upgrades.catchRate * 0.1);
+        if(baseRate > 0.95) baseRate = 0.95;
+        document.getElementById('enc-rate').textContent = Math.floor(baseRate*100);
+
+        updateBallBtns();
+    }
+
+    function updateBallBtns() {
+        ['monster','super','hyper','master'].forEach(type => {
+            const qty = user.inventory[type];
+            document.getElementById(`qty-${type}`).textContent = qty;
+            document.getElementById(`btn-use-${type}`).disabled = (qty <= 0);
+        });
+    }
+
+    function tryCatch(ballType) {
+        if(user.inventory[ballType] <= 0) return;
+        selectedBall = ballType;
+
+        document.getElementById('modal-encounter').classList.add('hidden');
+        document.getElementById('modal-quiz').classList.remove('hidden');
+
+        // 퀴즈 랜덤 선택 (로딩 시 섞어뒀으므로 순차적 혹은 재랜덤)
+        currentQuiz = quizList[Math.floor(Math.random()*quizList.length)];
+
+        document.getElementById('quiz-txt').textContent = currentQuiz.prompt;
+
+        const optsDiv = document.getElementById('quiz-opts');
+        optsDiv.innerHTML = "";
+
+        // 보기 생성
+        currentQuiz.choices.forEach((c, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'quiz-btn';
+            btn.textContent = c;
+            btn.onclick = () => solveQuiz(idx === currentQuiz.answerIndex);
+            optsDiv.appendChild(btn);
+        });
+    }
+
+    function solveQuiz(isCorrect) {
+        user.inventory[selectedBall]--;
+        updateGameHeader();
+
+        let rate = currentPokemon.rate / 255;
+        const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
+        const quizBonus = isCorrect ? 1.5 : 0.5;
+        const upgradeBonus = 1 + (user.upgrades.catchRate * 0.1);
+
+        let p = rate * ballBonus * quizBonus * upgradeBonus;
+        if(selectedBall === 'master') p = 1;
+
+        const success = Math.random() < p;
+
+        document.getElementById('modal-quiz').classList.add('hidden');
+        document.getElementById('modal-msg').classList.remove('hidden');
+        document.getElementById('msg-img').src = currentPokemon.sprite;
+
+        const titleEl = document.getElementById('msg-title');
+        const descEl = document.getElementById('msg-desc');
+
+        if(success) {
+            titleEl.textContent = "잡았다!";
+            titleEl.style.color = "#4ade80";
+
+            let pts = 100;
+            if(user.dex.has(currentPokemon.id)) {
+                pts = 50;
+                descEl.innerHTML = `${currentPokemon.name}!<br><span style='font-size:14px; color:#94a3b8;'>또 잡았네요 (+50P)</span>`;
+            } else {
+                user.dex.add(currentPokemon.id);
+                descEl.innerHTML = `${currentPokemon.name}!<br><span style='font-size:14px; color:#f59e0b;'>새로운 친구! (+100P)</span>`;
+            }
+
+            user.points += pts;
+            session.earnedPoints += pts;
+            session.caught.push({ name: currentPokemon.name, sprite: currentPokemon.sprite });
+
+        } else {
+            titleEl.textContent = "놓쳤다...";
+            titleEl.style.color = "#f87171";
+            descEl.textContent = `${currentPokemon.name}이(가) 도망갔어요.`;
+        }
+
+        descEl.innerHTML += isCorrect ? "<br><br>⭕ 정답입니다!" : "<br><br>❌ 틀렸어요...";
+    }
+
+    function closeMsgModal() {
+        document.getElementById('modal-layer').classList.add('hidden');
+        document.getElementById('modal-msg').classList.add('hidden');
+
+        // 실루엣 제거 (버그 수정: 확실하게 제거)
+        removeSilhouette();
+
+        // 볼 확인
+        const total = user.inventory.monster + user.inventory.super + user.inventory.hyper + user.inventory.master;
+        if(total <= 0) {
+            endExploration('balls');
+        } else {
+            spawnPokemon();
+        }
+    }
+
+    function runAway() {
+        document.getElementById('modal-layer').classList.add('hidden');
+        document.getElementById('modal-encounter').classList.add('hidden');
+
+        removeSilhouette();
+        spawnPokemon();
+    }
+
+    // --- 상점 기능 ---
+    function updateShopUI() {
+        document.getElementById('shop-points').textContent = user.points;
+        document.getElementById('lv-steps').textContent = `Lv.${user.upgrades.maxSteps}`;
+        document.getElementById('lv-balls').textContent = `Lv.${user.upgrades.startBalls}`;
+        document.getElementById('lv-rate').textContent = `Lv.${user.upgrades.catchRate}`;
+    }
+
+    function buyItem(cat, type, cost) {
+        if(user.points < cost) {
+            alert("포인트가 부족해요!");
+            return;
+        }
+        user.points -= cost;
+        user.inventory[type]++;
+        updateShopUI();
+        // alert 생략: 버튼 눌리는 느낌으로 대체하거나 간단한 토스트 메시지 좋음
+    }
+
+    function buyUpgrade(key, cost) {
+        if(user.points < cost) {
+            alert("포인트가 부족해요!");
+            return;
+        }
+        user.points -= cost;
+        user.upgrades[key]++;
+        updateShopUI();
+    }
+
+    // --- 도감 렌더링 ---
+    function renderDex() {
+        document.getElementById('dex-count').textContent = user.dex.size;
+        const grid = document.getElementById('dex-grid');
+        grid.innerHTML = "";
+
+        for(let i=1; i<=151; i++) {
+            const d = document.createElement('div');
+            // 도감 스타일 예쁘게
+            d.style.cssText = "aspect-ratio:1; background:#fff; border-radius:15px; display:flex; justify-content:center; align-items:center; border:2px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);";
+
+            if(user.dex.has(i)) {
+                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png" style="width:80%; image-rendering:pixelated;">`;
+                d.style.borderColor = "#4ade80";
+                d.style.background = "#f0fdf4";
+            } else {
+                d.textContent = i;
+                d.style.color = "#cbd5e1";
+                d.style.fontSize = "14px";
+                d.style.fontWeight = "bold";
+            }
+            grid.appendChild(d);
+        }
+    }
+
+    init();
+</script>
+</body>
+</html>
