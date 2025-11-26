@@ -384,6 +384,40 @@
         { id: 'rest', name: '잠자기', type: 'def', power: 70, acc: 100, rarity: 3, desc: '체력을 크게 회복' },
 
         { id: 'headbutt', name: '박치기', type: 'atk', power: 60, acc: 90, rarity: 2, desc: '강력한 박치기' }
+        // 🔹 상태이상 / 흡수 계열 (새로 추가)
+        {
+            id: 'burn_strike',
+            name: '화염펀치',
+            type: 'eff',
+            power: 30,
+            acc: 95,
+            rarity: 2,
+            effect: 'burn',          // 화상
+            effectChance: 1.0,
+            desc: '뜨거운 불꽃으로 상대를 화상 상태로 만든다'
+        },
+        {
+            id: 'poison_sting',
+            name: '독침',
+            type: 'eff',
+            power: 25,
+            acc: 95,
+            rarity: 2,
+            effect: 'poison',        // 독
+            effectChance: 1.0,
+            desc: '상대를 독 상태로 만든다'
+        },
+        {
+            id: 'drain_leaf',
+            name: '기가드레인',
+            type: 'eff',
+            power: 35,
+            acc: 100,
+            rarity: 3,
+            effect: 'drain',         // 흡수
+            drainRatio: 0.5,         // 입힌 피해의 50% 회복
+            desc: '입힌 피해의 절반만큼 체력을 회복한다'
+        },
     ];
 
     const POKEMON_DB = {
@@ -412,12 +446,15 @@
             pokemon: { name: "", stage: 0, stats: { atk:0, def:0, skl:0, hp:100 }, skills: [] },
             week: 1,
             schedule: [null, null, null],
-            // 🔹 총 정답 수 + 총 문제 수 둘 다 저장
             player: { totalCorrect: 0, totalQuestions: 0 },
             combo: 0,
             pendingSkill: null,
-            // 🔹 마지막 엔딩 요약 데이터를 기억해 두기
             lastSummary: null,
+
+            // 🔹 주차 시작 직전 백업(포켓몬/정답 수 등)
+            backupBeforeWeek: null,
+            // 🔹 같은 주차 경기에서 몇 번 졌는지
+            currentRoundLosses: 0,
         },
 
         // 🔹 관전 모드 여부 (교사용 토너먼트일 때 true)
@@ -573,12 +610,33 @@
         },
 
         startWeek: function() {
-            if(this.state.schedule.includes(null)) { alert("계획표를 채워주세요!"); return; }
+            if (this.state.schedule.includes(null)) {
+                alert("계획표를 채워주세요!");
+                return;
+            }
+
+            // 🔹 학생 모드에서만: 주차 시작 직전에 백업 저장
+            if (!this.spectatorMode) {
+                this.state.backupBeforeWeek = {
+                    week: this.state.week,
+                    // 포켓몬 상태 전체 깊은 복사 (스킬/스탯/진화 단계 포함)
+                    pokemon: JSON.parse(JSON.stringify(this.state.pokemon)),
+                    // 정답 누적도 함께 저장 (원하면 제외 가능)
+                    playerTotals: {
+                        totalCorrect: this.state.player.totalCorrect,
+                        totalQuestions: this.state.player.totalQuestions,
+                    },
+                };
+                // 새로운 주차 시작이므로 패배 카운트 초기화
+                this.state.currentRoundLosses = 0;
+            }
+
             this.queue = [...this.state.schedule];
             this.sessionRes = { atk:0, def:0, skl:0 };
             this.state.combo = 0;
             this.nextSession();
         },
+
 
         nextSession: function() {
             if(this.queue.length === 0) { this.finishWeek(); return; }
@@ -859,21 +917,32 @@
                 eAtk = Math.floor(pStats.atk * baseRatio);
             }
 
+            const playerSpd = pStats.spd ?? 10;
+            const enemySpdBase = r?.difficultyRatio ?? 1.0;
+            const enemySpd = Math.max(5, Math.floor(playerSpd * enemySpdBase));
+
             this.battle = {
                 player: {
                     hp: pStats.hp,
                     maxHp: pStats.hp,
                     atk: pStats.atk,
                     def: pStats.def,
+                    spd: playerSpd,
                 },
                 enemy: {
                     hp: eHp,
                     maxHp: eHp,
                     atk: eAtk,
                     name: r?.enemyName ?? "상대",
+                    spd: enemySpd,
+                },
+                status: {
+                    player: { burn: 0, poison: 0 },
+                    enemy: { burn: 0, poison: 0 },
                 },
                 turn: true, // true: player, false: enemy
             };
+
 
             const db = POKEMON_DB[this.state.starter];
             document.getElementById('battle-player-sprite').src =
@@ -895,56 +964,181 @@
 
         runAutoBattle: async function() {
             const b = this.battle;
+            if (!b) return;
 
-            // Player Turn
-            const useSkill = Math.random() < 0.5; // 50% 확률로 스킬 사용
-            let skill = null;
-            if(useSkill && this.state.pokemon.skills.length > 0) {
-                const sId = this.state.pokemon.skills[Math.floor(Math.random() * this.state.pokemon.skills.length)];
-                skill = this.getSkillObj(sId);
-            }
+            // 🔹 턴 시작 시 상태이상 데미지 (화상/독)
+            const applyDot = (whoKey, label) => {
+                if (!b.status || !b.status[whoKey]) return;
+                const st = b.status[whoKey];
+                const target = whoKey === 'player' ? b.player : b.enemy;
 
-            if(skill) {
-                this.logBattle(`[발동] ${this.state.pokemon.name}의 ${skill.name}!`);
-                this.showSkillTrigger(skill.name);
-                await this.animAttack('player');
+                if (st.burn && st.burn > 0) {
+                    const dot = Math.max(1, Math.floor(target.maxHp * 0.05));
+                    target.hp -= dot;
+                    this.logBattle(`${label}는 화상으로 ${dot}의 피해를 입었다!`);
+                    st.burn--;
+                }
+                if (st.poison && st.poison > 0) {
+                    const dot = Math.max(1, Math.floor(target.maxHp * 0.06));
+                    target.hp -= dot;
+                    this.logBattle(`${label}는 독으로 ${dot}의 피해를 입었다!`);
+                    st.poison--;
+                }
+            };
 
-                if(skill.type === 'def') {
-                    b.player.hp = Math.min(b.player.maxHp, b.player.hp + skill.power);
-                    this.logBattle(`>> 체력을 회복했다!`);
-                    this.updateBattleUI();
+            applyDot('player', this.state.pokemon.name);
+            applyDot('enemy', b.enemy.name);
+            this.updateBattleUI();
+
+            if (b.player.hp <= 0) { this.battleWin(false); return; }
+            if (b.enemy.hp <= 0) { this.battleWin(true); return; }
+
+            // 🔹 SPD 기반 선공 결정
+            const playerSpd = this.state.pokemon.stats.spd ?? 10;
+            const enemySpd = b.enemy.spd ?? playerSpd;
+            const playerFirst = playerSpd >= enemySpd;
+
+            // 🔹 데미지 공식 (공격력 + 위력 + 약간의 랜덤)
+            const calcDamage = (atk, power) => {
+                const base = power + atk * 0.4;
+                const rand = 0.9 + Math.random() * 0.2;
+                return Math.max(1, Math.floor(base * rand));
+            };
+
+            // 🔹 플레이어 턴
+            const doPlayerTurn = async () => {
+                const useSkill =
+                    Math.random() < 0.6 && this.state.pokemon.skills.length > 0;
+                let skill = null;
+                if (useSkill && this.state.pokemon.skills.length > 0) {
+                    const sId =
+                        this.state.pokemon.skills[
+                            Math.floor(Math.random() * this.state.pokemon.skills.length)
+                            ];
+                    skill = this.getSkillObj(sId);
+                }
+
+                if (skill) {
+                    const acc = skill.acc ?? 100;
+                    const hitRoll = Math.random() * 100;
+
+                    this.logBattle(`[발동] ${this.state.pokemon.name}의 ${skill.name}!`);
+                    this.showSkillTrigger(skill.name);
+                    await this.animAttack('player');
+
+                    if (hitRoll > acc) {
+                        this.logBattle(`하지만 공격이 빗나갔다!`);
+                        await this.animHit('enemy');
+                        return;
+                    }
+
+                    if (skill.type === 'def') {
+                        const heal = skill.power;
+                        b.player.hp = Math.min(b.player.maxHp, b.player.hp + heal);
+                        this.logBattle(`>> 체력을 ${heal} 회복했다!`);
+                    } else {
+                        const dmg = calcDamage(b.player.atk, skill.power);
+                        b.enemy.hp -= dmg;
+                        this.showDmgText('enemy', dmg);
+                        await this.animHit('enemy');
+
+                        // 🔸 특수(eff) 스킬 추가 효과 처리
+                        if (skill.type === 'eff' && b.status && b.status.enemy) {
+                            if (skill.effect === 'drain') {
+                                const ratio = skill.drainRatio ?? 0.5;
+                                const healAmt = Math.max(
+                                    1,
+                                    Math.floor(dmg * ratio),
+                                );
+                                b.player.hp = Math.min(
+                                    b.player.maxHp,
+                                    b.player.hp + healAmt,
+                                );
+                                this.logBattle(
+                                    `>> 입힌 피해의 일부를 흡수하여 ${healAmt} 회복했다!`,
+                                );
+                            } else if (skill.effect === 'burn') {
+                                const chance = skill.effectChance ?? 1.0;
+                                if (Math.random() < chance) {
+                                    b.status.enemy.burn = Math.max(
+                                        b.status.enemy.burn || 0,
+                                        3,
+                                    );
+                                    this.logBattle(`>> 상대가 화상 상태가 되었다!`);
+                                }
+                            } else if (skill.effect === 'poison') {
+                                const chance = skill.effectChance ?? 1.0;
+                                if (Math.random() < chance) {
+                                    b.status.enemy.poison = Math.max(
+                                        b.status.enemy.poison || 0,
+                                        3,
+                                    );
+                                    this.logBattle(`>> 상대가 독 상태가 되었다!`);
+                                }
+                            }
+                        }
+                    }
                 } else {
-                    let dmg = Math.floor((b.player.atk * 0.5 + skill.power) * (0.9 + Math.random()*0.2));
+                    this.logBattle(`${this.state.pokemon.name}의 기본 공격!`);
+                    await this.animAttack('player');
+                    const dmg = calcDamage(b.player.atk, 10);
                     b.enemy.hp -= dmg;
                     this.showDmgText('enemy', dmg);
                     await this.animHit('enemy');
                 }
+
+                this.updateBattleUI();
+            };
+
+            // 🔹 적 턴 (단순 물리 공격 + 방어 보정)
+            const doEnemyTurn = async () => {
+                this.logBattle(`${b.enemy.name}의 공격!`);
+                await this.animAttack('enemy');
+
+                let eDmg = Math.floor(
+                    (b.enemy.atk * 0.5 + 20) * (0.85 + Math.random() * 0.3),
+                );
+                eDmg = Math.max(
+                    1,
+                    eDmg - Math.floor(this.state.pokemon.stats.def * 0.3),
+                );
+
+                b.player.hp -= eDmg;
+                this.showDmgText('player', eDmg);
+                await this.animHit('player');
+                this.updateBattleUI();
+            };
+
+            // 🔹 선공/후공 순서대로 턴 진행
+            if (playerFirst) {
+                await doPlayerTurn();
+                if (b.enemy.hp <= 0) {
+                    this.battleWin(true);
+                    return;
+                }
+
+                await this.wait(700);
+                await doEnemyTurn();
+                if (b.player.hp <= 0) {
+                    this.battleWin(false);
+                    return;
+                }
             } else {
-                this.logBattle(`${this.state.pokemon.name}의 공격!`);
-                await this.animAttack('player');
-                let dmg = Math.floor(b.player.atk * (0.9 + Math.random()*0.2));
-                b.enemy.hp -= dmg;
-                this.showDmgText('enemy', dmg);
-                await this.animHit('enemy');
+                await doEnemyTurn();
+                if (b.player.hp <= 0) {
+                    this.battleWin(false);
+                    return;
+                }
+
+                await this.wait(700);
+                await doPlayerTurn();
+                if (b.enemy.hp <= 0) {
+                    this.battleWin(true);
+                    return;
+                }
             }
-            this.updateBattleUI();
 
-            if(b.enemy.hp <= 0) { this.battleWin(true); return; }
-
-            await this.wait(1000);
-
-            // Enemy Turn
-            this.logBattle(`${b.enemy.name}의 공격!`);
-            await this.animAttack('enemy');
-            let eDmg = Math.floor(b.enemy.atk * (0.8 + Math.random()*0.4));
-            eDmg = Math.max(1, eDmg - Math.floor(b.player.def * 0.2));
-            b.player.hp -= eDmg;
-            this.showDmgText('player', eDmg);
-            await this.animHit('player');
-            this.updateBattleUI();
-
-            if(b.player.hp <= 0) { this.battleWin(false); return; }
-
+            // 다음 라운드
             setTimeout(() => this.runAutoBattle(), 1000);
         },
 
@@ -1044,18 +1238,48 @@
                     return;
                 }
 
+                // --- 학생 모드 패배 처리 ---
+
+                // 1) 결승에서 진 경우: 주차 롤백 대신 그냥 엔딩/리셋 흐름
                 if (this.state.week === 8) {
-                    // 결승에서 졌을 때는 루프 돌지 않고 메인으로 복귀
                     alert("아쉽지만 결승에서 졌어요! 훈련을 더 해서 다시 도전해 보자!");
                     this.renderMain();
                     this.showScreen('screen-main');
-                } else {
-                    // 중간 라운드는 지금처럼 다시 도전
-                    alert("다시 도전하세요!");
-                    this.initBattleReal();
+                    return;
                 }
+
+                // 2) 중간 라운드 패배: 백업이 있으면 해당 주차 시작 전으로 롤백
+                if (
+                    this.state.backupBeforeWeek &&
+                    this.state.backupBeforeWeek.week === this.state.week
+                ) {
+                    this.state.pokemon = JSON.parse(
+                        JSON.stringify(this.state.backupBeforeWeek.pokemon),
+                    );
+                    this.state.player.totalCorrect =
+                        this.state.backupBeforeWeek.playerTotals.totalCorrect;
+                    this.state.player.totalQuestions =
+                        this.state.backupBeforeWeek.playerTotals.totalQuestions;
+                }
+
+                // 3) 패배 카운트 증가
+                this.state.currentRoundLosses =
+                    (this.state.currentRoundLosses || 0) + 1;
+
+                // 4) 2번 패배 시: 이번 육성 종료(엔딩)
+                if (this.state.currentRoundLosses >= 2) {
+                    alert("두 번이나 졌어요! 이번 모험은 여기까지 하고, 다음에 더 강해져서 다시 도전해 보자!");
+                    this.showEnding(); // 👉 현재 스탯/정답 수 기준으로 '도전자' 엔딩 등
+                    return;
+                }
+
+                // 5) 첫 패배: 주차 롤백 + 다시 훈련 화면으로
+                alert("이번 주 경기는 패배했어요. 훈련을 다시 계획해 볼까요?");
+                this.renderMain();
+                this.showScreen('screen-main');
             }
         },
+
 
 
 
