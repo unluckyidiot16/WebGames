@@ -55,6 +55,13 @@
             z-index: 9999;
         }
 
+        /* 모바일에서 하단 브라우저 바에 버튼이 가려지지 않도록 여유 공간 추가 */
+        @media (max-width: 768px) {
+            .mobile-bottom-guard {
+                /* 기본 32px + 안전 영역(아이폰 홈 인디케이터 등) */
+                padding-bottom: max(32px, env(safe-area-inset-bottom, 0px) + 24px);
+            }
+        }
 
 
         /* 전투 애니메이션 */
@@ -186,7 +193,7 @@
             </div>
         </div>
 
-        <div class="p-6 bg-white border-t border-gray-100 rounded-t-3xl shadow-[0_-5px_15px_rgba(0,0,0,0.05)]">
+        <div class="p-6 bg-white border-t border-gray-100 rounded-t-3xl shadow-[0_-5px_15px_rgba(0,0,0,0.05)] mobile-bottom-guard">
             <h4 class="text-lg game-font font-bold text-gray-700 mb-4">훈련 과목 선택</h4>
             <div class="flex gap-3 mb-4">
                 <button onclick="Game.toggleSchedule(0)" id="sched-0" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">?</button>
