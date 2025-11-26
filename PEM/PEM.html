@@ -37,6 +37,25 @@
             height: 100vh;
         }
 
+        /* 전체화면 API 미지원 기기(iOS 등)용 fallback */
+        body.fullscreen-fallback {
+            padding: 0;
+            margin: 0;
+            background-color: #000;
+        }
+
+        .fullscreen-fallback-card {
+            position: fixed;
+            inset: 0;
+            margin: 0;
+            border-radius: 0;
+            max-width: none;
+            width: 100vw;
+            height: 100vh;
+            z-index: 9999;
+        }
+
+
 
         /* 전투 애니메이션 */
         .anim-attack-right { animation: lungeRight 0.2s forwards; }
@@ -408,20 +427,41 @@
             const root = document.documentElement;
             const card = document.getElementById('game-container');
 
-            const enterFs = root.requestFullscreen
-                || root.webkitRequestFullscreen
-                || root.msRequestFullscreen;
+            if (!card) return;
 
-            const exitFs = document.exitFullscreen
-                || document.webkitExitFullscreen
-                || document.msExitFullscreen;
+            // 브라우저 전체화면 지원 여부 체크
+            const enterFs =
+                root.requestFullscreen ||
+                root.webkitRequestFullscreen ||
+                root.msRequestFullscreen;
 
-            if (!document.fullscreenElement) {
-                if (enterFs) enterFs.call(root);
-                if (card) card.classList.add('fullscreen-active');
+            const exitFs =
+                document.exitFullscreen ||
+                document.webkitExitFullscreen ||
+                document.msExitFullscreen;
+
+            const supportsFullscreen = !!enterFs && !!exitFs;
+
+            if (supportsFullscreen) {
+                // ✅ PC 등 Fullscreen API 지원 브라우저
+                if (!document.fullscreenElement) {
+                    enterFs.call(root);
+                    card.classList.add('fullscreen-active');
+                } else {
+                    exitFs.call(document);
+                    card.classList.remove('fullscreen-active');
+                }
             } else {
-                if (exitFs) exitFs.call(document);
-                if (card) card.classList.remove('fullscreen-active');
+                // ✅ iOS Safari 등: CSS 기반 "가짜 전체화면" 토글
+                const isFallbackOn = card.classList.contains('fullscreen-fallback-card');
+
+                if (!isFallbackOn) {
+                    document.body.classList.add('fullscreen-fallback');
+                    card.classList.add('fullscreen-fallback-card');
+                } else {
+                    document.body.classList.remove('fullscreen-fallback');
+                    card.classList.remove('fullscreen-fallback-card');
+                }
             }
         },
 
