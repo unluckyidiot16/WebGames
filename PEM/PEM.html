@@ -487,14 +487,6 @@
         { week: 8, name: "결승전", enemyId: 150, enemyName: "뮤츠", difficultyRatio: 1.2 }
     ];
 
-    const PEM_ROOM_ID =
-        urlParams.get("roomId") || null;
-    const PEM_STUDENT_ID =
-        urlParams.get("studentId") ||
-        urlParams.get("student_id") ||
-        urlParams.get("studentKey") ||
-        null;
-
     // 🔹 로컬 저장소 키 (방 + 학생 기준으로 분리)
     const PEM_SAVE_KEY =
         PEM_ROOM_ID && PEM_STUDENT_ID
