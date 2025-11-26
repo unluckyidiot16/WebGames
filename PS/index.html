@@ -333,6 +333,60 @@
         .rarity-badge {
             display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: bold; margin-bottom: 5px; color: white;
         }
+        /* --- [추가됨] 로비 파트너 포켓몬 스타일 --- */
+        .lobby-partner-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: -1; /* 버튼들 뒤에 배치 */
+            opacity: 0.8; /* 배경처럼 은은하게 */
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lobby-partner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated; /* 도트 깨짐 방지 */
+            animation: floating 3s ease-in-out infinite;
+            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
+        }
+
+        @keyframes floating {
+            0%, 100% { transform: translateY(0) scale(1); }
+            50% { transform: translateY(-15px) scale(1.05); }
+        }
+
+        /* --- [추가됨] 도감 선택 효과 --- */
+        .dex-item {
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+        .dex-item:active { transform: scale(0.95); }
+        .dex-item.selected-partner {
+            border: 3px solid #f59e0b !important;
+            background: #fffbeb !important;
+            box-shadow: 0 0 15px #f59e0b;
+            position: relative;
+        }
+        .dex-item.selected-partner::after {
+            content: '👑';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            font-size: 24px;
+            background: #fff;
+            border-radius: 50%;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        
     </style>
 </head>
 <body>
@@ -340,8 +394,13 @@
 <div class="app-container">
 
     <div id="view-lobby" class="view">
+        <div id="lobby-partner" class="lobby-partner-container hidden">
+            <img id="lobby-partner-img" class="lobby-partner-img" src="" />
+        </div>
+
         <h1 class="lobby-title">Pokémon<br>맞춤법 탐험대<br><span style="font-size:20px; color:#f59e0b;">(모바일 최적화)</span></h1>
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
+
         <button class="btn-3d menu-btn btn-explore" onclick="startExploration()">🧭 탐험 떠나기</button>
         <button class="btn-3d menu-btn btn-shop" onclick="switchView('view-shop')">🛒 상점 가기</button>
         <button class="btn-3d menu-btn btn-dex" onclick="switchView('view-dex')">📖 포켓몬 도감</button>
@@ -489,7 +548,13 @@
     const BALL_OPEN_SPRITES = { monster: "./png/pb_open.png", super: "./png/gb_open.png", hyper: "./png/ub_open.png", master: "./png/mb_open.png" };
     const BALL_OPENING_SPRITES = { monster: "./png/pb_opening.png", super: "./png/gb_opening.png", hyper: "./png/ub_opening.png", master: "./png/mb_opening.png" };
 
-    let user = { points: 0, inventory: { monster: 0, super: 0, hyper: 0, master: 0 }, dex: new Set(), upgrades: { maxSteps: 0, startBalls: 0, catchRate: 0 } };
+    let user = {
+        points: 0,
+        inventory: { monster: 0, super: 0, hyper: 0, master: 0 },
+        dex: new Set(),
+        upgrades: { maxSteps: 0, startBalls: 0, catchRate: 0 },
+        partnerId: null // [추가됨] 파트너 포켓몬 ID 저장
+    };
     let session = { active: false, steps: 0, caught: [], earnedPoints: 0 };
     let player = { x: 4, y: 4 };
     let tileMap = [];
@@ -529,10 +594,36 @@
         if(viewId === 'view-lobby') updateLobbyUI();
     }
 
-    function updateLobbyUI() {
-        document.getElementById('lobby-points').textContent = user.points;
+    // [추가됨] 파트너 설정 함수
+    function setPartner(id) {
+        if(user.partnerId === id) {
+            // 이미 파트너라면 해제
+            user.partnerId = null;
+            alert("파트너 설정이 해제되었습니다.");
+        } else {
+            // 새로운 파트너 설정
+            user.partnerId = id;
+            alert("로비 파트너로 설정되었습니다!");
+        }
+        renderDex(); // 도감 UI 갱신 (왕관 표시)
     }
 
+    // [수정됨] 로비 UI 업데이트 함수
+    function updateLobbyUI() {
+        document.getElementById('lobby-points').textContent = user.points;
+
+        // 파트너 이미지 처리
+        const partnerContainer = document.getElementById('lobby-partner');
+        const partnerImg = document.getElementById('lobby-partner-img');
+
+        if (user.partnerId) {
+            partnerContainer.classList.remove('hidden');
+            partnerImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${user.partnerId}.png`;
+        } else {
+            partnerContainer.classList.add('hidden');
+            partnerImg.src = "";
+        }
+    }
     function startExploration() {
         const baseSteps = 30 + (user.upgrades.maxSteps * 10);
         const bonusBalls = 10 + (user.upgrades.startBalls * 2);
@@ -889,14 +980,34 @@
         document.getElementById('dex-total').textContent = MAX_POKEMON_ID;
         const grid = document.getElementById('dex-grid');
         grid.innerHTML = "";
+
+        // 도감 설명 텍스트 추가
+        const hint = document.createElement('p');
+        hint.style.cssText = "grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 14px; margin-bottom: 10px;";
+        hint.textContent = "포켓몬을 터치하여 로비 파트너로 설정해보세요! 👑";
+        grid.appendChild(hint);
+
         for(let i=1; i<=MAX_POKEMON_ID; i++) {
             const d = document.createElement('div');
-            d.style.cssText = "aspect-ratio:1; background:#fff; border-radius:15px; display:flex; justify-content:center; align-items:center; border:2px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05);";
+            d.className = 'dex-item'; // CSS 클래스 추가
+            d.style.cssText = "aspect-ratio:1; background:#fff; border-radius:15px; display:flex; justify-content:center; align-items:center; border:2px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative;";
+
             if(user.dex.has(i)) {
                 d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png" style="width:80%; image-rendering:pixelated;" loading="lazy">`;
-                d.style.borderColor = "#4ade80"; d.style.background = "#f0fdf4";
+                d.style.borderColor = "#4ade80";
+                d.style.background = "#f0fdf4";
+
+                // [추가됨] 파트너 선택 기능
+                if(user.partnerId === i) {
+                    d.classList.add('selected-partner');
+                }
+                d.onclick = () => setPartner(i);
+
             } else {
-                d.textContent = i; d.style.color = "#cbd5e1"; d.style.fontSize = "14px"; d.style.fontWeight = "bold";
+                d.textContent = i;
+                d.style.color = "#cbd5e1";
+                d.style.fontSize = "14px";
+                d.style.fontWeight = "bold";
             }
             grid.appendChild(d);
         }
