@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 맞춤법 탐험대 (밸런스 패치 ver)</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>포켓몬 맞춤법 탐험대 (모바일 최적화 ver)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
@@ -29,6 +29,8 @@
             width: 100%;
             max-width: 480px;
             height: 100vh;
+            /* 모바일 브라우저 높이 이슈 대응 */
+            height: 100dvh;
             background: rgba(255, 255, 255, 0.4);
             position: relative;
             overflow: hidden;
@@ -47,6 +49,8 @@
             flex-direction: column;
             align-items: center;
             padding: 20px;
+            /* 하단 패딩 넉넉하게 */
+            padding-bottom: 40px;
             overflow-y: auto;
             position: absolute;
             top: 0; left: 0;
@@ -98,7 +102,12 @@
         .btn-dex { background: #fbbf24; color: #78350f; }
 
         /* --- 게임(탐험) 화면 --- */
-        #view-game { padding: 15px; padding-bottom: 30px; background: #ecfccb; }
+        #view-game {
+            padding: 15px;
+            /* 하단 공간 확보 */
+            padding-bottom: 50px;
+            background: #ecfccb;
+        }
         .game-header {
             width: 100%;
             display: flex;
@@ -138,7 +147,7 @@
             border: 0.5px solid rgba(255,255,255,0.2);
         }
 
-        /* 실루엣 효과 (레어도는 색상으로 힌트) */
+        /* 실루엣 효과 */
         .tile.silhouette .silhouette-img {
             position: absolute;
             width: 200%;
@@ -153,8 +162,6 @@
             z-index: 5;
             pointer-events: none;
         }
-
-        /* 전설 등장 시 실루엣 효과 변경 (붉은 오라) */
         .tile.silhouette.legendary .silhouette-img {
             filter: brightness(0) drop-shadow(0 0 8px #ef4444);
         }
@@ -178,11 +185,16 @@
             filter: drop-shadow(0 4px 2px rgba(0,0,0,0.2));
         }
 
+        /* --- [수정됨] 컨트롤러 (방향키) --- */
         .d-pad {
             display: grid;
             grid-template-columns: repeat(3, 70px);
             gap: 8px;
+            /* 화면 하단부로 밀어내기 */
             margin-top: auto;
+            /* 하단 패딩 추가하여 클릭 영역 확보 */
+            margin-bottom: 20px;
+            padding-bottom: env(safe-area-inset-bottom); /* 아이폰 홈 바 대응 */
         }
         .d-btn {
             width: 70px; height: 65px;
@@ -192,6 +204,8 @@
             color: #64748b; font-size: 30px;
             box-shadow: 0 4px 0 #cbd5e1;
             cursor: pointer;
+            /* 터치 반응 속도 개선 */
+            touch-action: manipulation;
         }
         .d-btn:active { transform: translateY(4px); box-shadow: none; background: #f1f5f9; }
         .d-btn.up { grid-column: 2; }
@@ -326,7 +340,7 @@
 <div class="app-container">
 
     <div id="view-lobby" class="view">
-        <h1 class="lobby-title">Pokémon<br>맞춤법 탐험대<br><span style="font-size:20px; color:#f59e0b;">(밸런스 조정판)</span></h1>
+        <h1 class="lobby-title">Pokémon<br>맞춤법 탐험대<br><span style="font-size:20px; color:#f59e0b;">(모바일 최적화)</span></h1>
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
         <button class="btn-3d menu-btn btn-explore" onclick="startExploration()">🧭 탐험 떠나기</button>
         <button class="btn-3d menu-btn btn-shop" onclick="switchView('view-shop')">🛒 상점 가기</button>
@@ -345,6 +359,7 @@
         <div style="text-align:center; color:#57534e; font-size:16px; margin-bottom:10px; background:#fff; padding:5px 15px; border-radius:15px;">
             방향키를 눌러서 포켓몬을 찾아보세요!
         </div>
+
         <div class="d-pad">
             <button class="d-btn up" onclick="move('up')">▲</button>
             <button class="d-btn left" onclick="move('left')">◀</button>
@@ -449,7 +464,6 @@
     const MAX_POKEMON_ID = 1025;
 
     // --- [중요] 희귀 포켓몬 리스트 ---
-    // 전설/환상 (주요 포켓몬만 리스트업, 나머지는 범위로 포함되거나 랜덤에서 획득 가능)
     const LEGENDARY_IDS = [
         144,145,146,150,151, // 1세대
         243,244,245,249,250,251, // 2세대
@@ -462,7 +476,6 @@
         1007,1008,1017,1024,1025 // 9세대
     ];
 
-    // 인기/레어 (스타팅, 인기몬)
     const RARE_IDS = [
         1,4,7, 25, 133, 143, 149, // 1세대 (피카츄, 이브이, 망나뇽 등)
         152,155,158, 212, 248, // 2세대 (핫삼, 마기라스)
@@ -621,10 +634,9 @@
         silhouettePos = { x: -1, y: -1 };
     }
 
-    // --- [수정됨] 확률 기반 ID 추출 함수 ---
+    // --- 확률 기반 ID 추출 함수 ---
     function getWeightedRandomId() {
         const roll = Math.random();
-        // 2% 확률로 전설, 13% 확률로 레어, 나머지 85% 일반
         if(roll < 0.02) {
             return { id: LEGENDARY_IDS[Math.floor(Math.random() * LEGENDARY_IDS.length)], rarity: 'legendary' };
         } else if (roll < 0.15) {
@@ -656,7 +668,7 @@
 
             if (targetTile) {
                 targetTile.classList.add("silhouette");
-                if(rarity === 'legendary') targetTile.classList.add("legendary"); // 전설이면 붉은 오라
+                if(rarity === 'legendary') targetTile.classList.add("legendary");
 
                 const oldImg = targetTile.querySelector(".silhouette-img");
                 if (oldImg) oldImg.remove();
@@ -678,7 +690,6 @@
         document.getElementById('enc-img').src = currentPokemon.sprite;
         document.getElementById('enc-name').textContent = currentPokemon.name;
 
-        // 배지 표시
         const badgeArea = document.getElementById('enc-badge-area');
         badgeArea.innerHTML = "";
         if(currentPokemon.rarity === 'legendary') {
@@ -687,19 +698,14 @@
             badgeArea.innerHTML = `<span class="rarity-badge" style="background:#3b82f6;">✨ 희귀</span>`;
         }
 
-        // --- [수정됨] 표기용 확률 대폭 상향 ---
-        // 기존: rate / 255 -> 수정: (rate / 255) * 2.5 (최대 2.5배 뻥튀기)
         let baseRate = (currentPokemon.rate / 255);
         if (!baseRate) baseRate = 0.1;
 
-        // 밸런스 패치: 기본 확률 2.5배 적용
-        baseRate = baseRate * 2.5;
-
-        // 업그레이드 반영
+        baseRate = baseRate * 2.5; // 밸런스 패치
         baseRate += (user.upgrades.catchRate * 0.1);
 
         if(baseRate > 0.95) baseRate = 0.95;
-        if(baseRate < 0.1) baseRate = 0.1; // 최소 10% 보장
+        if(baseRate < 0.1) baseRate = 0.1;
 
         document.getElementById('enc-rate').textContent = Math.floor(baseRate*100);
         updateBallBtns();
@@ -738,16 +744,13 @@
         let rate = currentPokemon.rate / 255;
         if(!rate) rate = 0.1;
 
-        // --- [수정됨] 실제 포획 계산식 대폭 완화 ---
-        // 기본 rate에 2.5배 보정 + 퀴즈 맞추면 1.5배 + 볼 보정
         const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
-        const quizBonus = isCorrect ? 1.5 : 0.8; // 틀려도 0.8배 (기존 0.5에서 상향)
+        const quizBonus = isCorrect ? 1.5 : 0.8;
         const upgradeBonus = 1 + (user.upgrades.catchRate * 0.1);
-        const balancePatchMultiplier = 2.5; // 전체 확률 2.5배 
+        const balancePatchMultiplier = 2.5;
 
         let p = rate * ballBonus * quizBonus * upgradeBonus * balancePatchMultiplier;
 
-        // 최소 확률 보장 (볼 아까우니까)
         if (p < 0.15 && isCorrect) p = 0.15;
 
         if(selectedBall === 'master') p = 1;
@@ -759,7 +762,6 @@
             titleText = "잡았다!";
             titleColor = "#4ade80";
             let pts = 100;
-            // 희귀도에 따른 추가 점수
             if(currentPokemon.rarity === 'legendary') pts = 500;
             else if(currentPokemon.rarity === 'rare') pts = 200;
 
