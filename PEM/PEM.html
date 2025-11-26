@@ -29,6 +29,15 @@
             100% { transform: scale(1.0); opacity: 1; }
         }
 
+        /* 전체화면 모드일 때 살짝 여백 줄이기 (선택사항) */
+        .fullscreen-active {
+            border-radius: 0;
+            max-width: none;
+            width: 100%;
+            height: 100vh;
+        }
+
+
         /* 전투 애니메이션 */
         .anim-attack-right { animation: lungeRight 0.2s forwards; }
         @keyframes lungeRight { 0% { transform: translateX(0); } 50% { transform: translateX(80px) scale(1.1); } 100% { transform: translateX(0); } }
@@ -74,6 +83,16 @@
 
 <div id="game-container" class="game-card relative min-h-[800px] flex flex-col">
 
+    <!-- 🔹 전체 화면 토글 버튼 (교사/학생 공통) -->
+    <button
+            id="fullscreen-btn"
+            type="button"
+            class="absolute top-3 right-3 z-[80] px-3 py-1 rounded-full bg-black/40 text-white text-xs font-semibold flex items-center gap-1 hover:bg-black/60 transition"
+            onclick="Game.toggleFullscreen()"
+    >
+        ⛶ 전체 화면
+    </button>
+    
     <div id="screen-title" class="screen active flex-col items-center justify-center h-full absolute inset-0 bg-pastel-blue z-50">
         <h1 class="text-4xl font-bold text-indigo-600 mb-2 game-font text-center drop-shadow-sm">포켓 수학<br>토너먼트 V8</h1>
         <p class="text-gray-500 mb-10 game-font text-lg">전략적 육성 & 오토 배틀</p>
@@ -318,6 +337,18 @@
 
 <script>
     // --- 데이터 ---
+
+    // PEM.html?roomId=...&studentId=... 형태로 들어온 값 사용
+    const urlParams = new URLSearchParams(window.location.search);
+    const PEM_ROOM_ID =
+        urlParams.get("roomId") || null;
+    const PEM_STUDENT_ID =
+        urlParams.get("studentId") ||
+        urlParams.get("student_id") ||
+        urlParams.get("studentKey") ||
+        null;
+
+
     const SKILLS_DB = [
         // type: atk(공격), def(방어/회복), eff(특수)
         { id: 'tackle', name: '몸통박치기', type: 'atk', power: 20, acc: 95, rarity: 1, desc: '기본적인 공격 기술' },
@@ -373,6 +404,26 @@
         // 🔹 관전 모드 여부 (교사용 토너먼트일 때 true)
         spectatorMode: false,
 
+        toggleFullscreen: function() {
+            const root = document.documentElement;
+            const card = document.getElementById('game-container');
+
+            const enterFs = root.requestFullscreen
+                || root.webkitRequestFullscreen
+                || root.msRequestFullscreen;
+
+            const exitFs = document.exitFullscreen
+                || document.webkitExitFullscreen
+                || document.msExitFullscreen;
+
+            if (!document.fullscreenElement) {
+                if (enterFs) enterFs.call(root);
+                if (card) card.classList.add('fullscreen-active');
+            } else {
+                if (exitFs) exitFs.call(document);
+                if (card) card.classList.remove('fullscreen-active');
+            }
+        },
 
 
         init: function() { this.showScreen('screen-title'); },
@@ -900,21 +951,72 @@
             this.lastWin = win;
         },
 
+        // PEM_RUN_COMPLETE 근처의 script 안, Game 객체 안에 보조 함수 하나 추가
+        notifySpectatorResult: function (result) {
+            // 관전 모드에서만 부모(교실 화면)로 결과 보내기
+            if (this.spectatorMode && window.parent && window.parent !== window) {
+                window.parent.postMessage(
+                    {
+                        type: "PEM_SPECTATOR_RESULT",
+                        payload: {
+                            result,            // "player" | "enemy"
+                            week: this.state.week,
+                        },
+                    },
+                    "*",
+                );
+            }
+        },
+
         endBattle: function() {
-            if(this.lastWin) {
-                if(this.state.week === 8) {
-                    // 🔹 마지막 주 승리 → 엔딩 + 요약 데이터 생성
+            const overlay = document.getElementById('battle-result-overlay');
+
+            if (this.lastWin) {
+                // 🔹 관전 모드(교사 토너먼트)인 경우: 그냥 오버레이만 닫고 종료
+                if (this.spectatorMode) {
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                    }
+                    this.logBattle("경기가 끝났습니다! (승리)");
+                    return;
+                }
+
+                // 🔹 학생 모드 – 승리
+                if (this.state.week === 8) {
+                    // 결승 승리 → 엔딩으로
                     this.showEnding();
                 } else {
+                    // 다음 주차로
                     this.state.week++;
                     this.renderMain();
                     this.showScreen('screen-main');
                 }
             } else {
-                alert("다시 도전하세요!");
-                this.initBattleReal();
+                // 🔹 패배한 경우
+                if (this.spectatorMode) {
+                    // 관전 모드: 다음 경기 편성은 교사 쪽에서 다시 보냄
+                    if (overlay) {
+                        overlay.classList.add('hidden');
+                        overlay.classList.remove('flex');
+                    }
+                    this.logBattle("경기가 끝났습니다! (패배)");
+                    return;
+                }
+
+                if (this.state.week === 8) {
+                    // 결승에서 졌을 때는 루프 돌지 않고 메인으로 복귀
+                    alert("아쉽지만 결승에서 졌어요! 훈련을 더 해서 다시 도전해 보자!");
+                    this.renderMain();
+                    this.showScreen('screen-main');
+                } else {
+                    // 중간 라운드는 지금처럼 다시 도전
+                    alert("다시 도전하세요!");
+                    this.initBattleReal();
+                }
             }
         },
+
 
 
         // 🔹 엔딩 화면 진입 + 요약 데이터 생성
@@ -955,6 +1057,11 @@
             const summary = {
                 runId: `pem-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
                 version: "pem-v1",
+
+                // 🔹 어디 방/어느 학생인지 식별용
+                roomId: PEM_ROOM_ID,
+                studentId: PEM_STUDENT_ID,
+
                 starter: this.state.starter,      // "grass" | "fire" | "water"
                 pokemonName: pk.name,
                 stage: pk.stage,
@@ -969,6 +1076,7 @@
                 weekReached: this.state.week,
                 endedAt: new Date().toISOString(),
             };
+
 
             // 🔹 나중에 버튼에서 재사용할 수 있도록 보관
             this.state.lastSummary = summary;
