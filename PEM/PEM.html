@@ -370,18 +370,27 @@
             lastSummary: null,
         },
 
+        // 🔹 관전 모드 여부 (교사용 토너먼트일 때 true)
+        spectatorMode: false,
+
+
 
         init: function() { this.showScreen('screen-title'); },
-
+        
         startNewGame: function() {
             this.state.week = 1;
             this.state.pokemon.stage = 0;
             this.state.pokemon.skills = [];
             this.state.player.totalCorrect = 0;
-            this.state.player.totalQuestions = 0; // 🔹 추가
-            this.state.lastSummary = null;        // 🔹 추가
+            this.state.player.totalQuestions = 0;
+            this.state.lastSummary = null;
+
+            // 🔹 학생 모험 시작 시에는 관전 모드 끄기
+            this.spectatorMode = false;
+
             this.showScreen('screen-select');
         },
+
 
 
         chooseStarter: function(type) {
@@ -665,6 +674,74 @@
             document.getElementById('bracket-player-img').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${db.stages[this.state.pokemon.stage]}.png`;
         },
 
+
+        /**
+         * 🔹 교사용 관전 모드 진입
+         *
+         * config = {
+         *   player: { starter, pokemonName, stage, stats: { atk,def,skl,hp } },
+         *   enemy:  { starter, pokemonName, stage, stats: { atk,def,skl,hp } },
+         *   meta?:  { title?: string, week?: number }
+         * }
+         *
+         * TeacherRoomLivePage에서 iframe.postMessage로 넘긴 payload 그대로 받는다.
+         */
+        startSpectatorBattle: function(config) {
+            const player = config?.player || {};
+            const enemy  = config?.enemy  || {};
+            const meta   = config?.meta   || {};
+
+            // 👀 관전 모드 ON
+            this.spectatorMode = true;
+
+            // 1) 플레이어(왼쪽) 설정
+            this.state.starter = player.starter || "grass";
+            const playerDb = POKEMON_DB[this.state.starter];
+
+            this.state.pokemon.name =
+                player.pokemonName || (playerDb ? playerDb.name : "플레이어");
+            this.state.pokemon.stage =
+                typeof player.stage === "number" ? player.stage : 0;
+
+            this.state.pokemon.stats = {
+                atk: player.stats?.atk ?? (playerDb?.stats.atk ?? 10),
+                def: player.stats?.def ?? (playerDb?.stats.def ?? 10),
+                skl: player.stats?.skl ?? (playerDb?.stats.skl ?? 10),
+                hp:  player.stats?.hp  ?? 100,
+            };
+            // 스킬은 기존 학생용 그대로 두거나, 필요하다면 나중에 payload에 추가해서 세팅
+
+            // 관전용 week (레벨 표시에만 사용)
+            this.state.week = typeof meta.week === "number" ? meta.week : 8;
+
+            // 2) 상대(오른쪽) 스프라이트 ID 계산
+            const enemyStarter = enemy.starter || "fire";
+            const enemyStage   = typeof enemy.stage === "number" ? enemy.stage : 0;
+            const enemyDb      = POKEMON_DB[enemyStarter];
+            const enemySpriteId =
+                enemyDb?.stages?.[enemyStage] ?? TOURNAMENT_ROUNDS[0].enemyId;
+
+            // 3) currentRound에 관전용 정보 세팅
+            this.currentRound = {
+                week: this.state.week,
+                name: meta.title || "클래스 토너먼트",
+                enemyId: enemySpriteId,
+                enemyName: enemy.pokemonName || enemy.name || "상대",
+                difficultyRatio: 1.0,
+
+                // 👇 관전 모드에서 사용할 적 스탯
+                enemyHp: enemy.stats?.hp  ?? 100,
+                enemyAtk: enemy.stats?.atk ?? 20,
+            };
+
+            // 4) 메인 화면도 최신 스탯으로 업데이트(선택사항이지만 보기 좋음)
+            this.renderMain();
+
+            // 5) 브래킷 화면으로 전환 (기존 버튼 "경기장 입장!"이 initBattleReal 호출)
+            this.showBracket(this.currentRound);
+        },
+
+
         // --- 자동 전투 시스템 ---
         initBattleReal: function() {
             this.showScreen('screen-battle');
@@ -674,22 +751,48 @@
             const r = this.currentRound;
             const pStats = this.state.pokemon.stats;
 
-            const eHp = Math.floor(pStats.hp * 1.2 * r.difficultyRatio);
-            const eAtk = Math.floor(pStats.atk * r.difficultyRatio);
+            // 🔹 관전 모드면 currentRound.enemyHp / enemyAtk 사용
+            let eHp, eAtk;
+            if (
+                this.spectatorMode &&
+                r &&
+                typeof r.enemyHp === "number" &&
+                typeof r.enemyAtk === "number"
+            ) {
+                eHp = r.enemyHp;
+                eAtk = r.enemyAtk;
+            } else {
+                // 기존 로직: 플레이어 스탯 + difficultyRatio 기반으로 적 능력치 계산
+                const baseRatio = r?.difficultyRatio ?? 1.0;
+                eHp = Math.floor(pStats.hp * 1.2 * baseRatio);
+                eAtk = Math.floor(pStats.atk * baseRatio);
+            }
 
             this.battle = {
-                player: { hp: pStats.hp, maxHp: pStats.hp, atk: pStats.atk, def: pStats.def },
-                enemy: { hp: eHp, maxHp: eHp, atk: eAtk, name: r.enemyName },
-                turn: true // true: player, false: enemy
+                player: {
+                    hp: pStats.hp,
+                    maxHp: pStats.hp,
+                    atk: pStats.atk,
+                    def: pStats.def,
+                },
+                enemy: {
+                    hp: eHp,
+                    maxHp: eHp,
+                    atk: eAtk,
+                    name: r?.enemyName ?? "상대",
+                },
+                turn: true, // true: player, false: enemy
             };
 
             const db = POKEMON_DB[this.state.starter];
-            document.getElementById('battle-player-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${db.stages[this.state.pokemon.stage]}.png`;
+            document.getElementById('battle-player-sprite').src =
+                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/back/${db.stages[this.state.pokemon.stage]}.png`;
             document.getElementById('battle-player-name').innerText = this.state.pokemon.name;
-            document.getElementById('player-level').innerText = this.state.week*2;
-            document.getElementById('enemy-sprite').src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${r.enemyId}.png`;
+            document.getElementById('player-level').innerText = this.state.week * 2;
+            document.getElementById('enemy-sprite').src =
+                `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${r.enemyId}.png`;
             document.getElementById('enemy-name').innerText = r.enemyName;
-            document.getElementById('enemy-level').innerText = this.state.week*2+1;
+            document.getElementById('enemy-level').innerText = this.state.week * 2 + 1;
 
             this.updateBattleUI();
             this.logBattle(`야생의 ${r.enemyName}(이)가 나타났다!`);
@@ -697,6 +800,7 @@
             // 2초 뒤 자동 전투 시작
             setTimeout(() => this.runAutoBattle(), 2000);
         },
+
 
         runAutoBattle: async function() {
             const b = this.battle;
@@ -922,6 +1026,20 @@
     };
 
     Game.init();
+
+    // 🔹 교사용 토너먼트 관전: 부모(TeacherRoomLivePage)에서 오는 메시지 처리
+    window.addEventListener("message", (event) => {
+        const data = event.data;
+        if (!data || typeof data !== "object") return;
+
+        if (data.type === "PEM_START_SPECTATOR_BATTLE") {
+            try {
+                Game.startSpectatorBattle(data.payload || {});
+            } catch (err) {
+                console.error("[PEM] startSpectatorBattle error", err);
+            }
+        }
+    });
 </script>
 </body>
 </html>
