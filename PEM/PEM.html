@@ -293,7 +293,27 @@
                     <div class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
                     <span class="text-sm font-bold text-gray-500">AUTO BATTLE</span>
                 </div>
-            </div>
+
+                <!-- 🔹 관전용 속도 조절 (기본 숨김) -->
+                <div id="spectator-speed-controls"
+                     class="hidden items-center gap-1 text-[11px] font-semibold text-gray-500">
+                    <span class="mr-1">속도</span>
+                    <button type="button"
+                            data-speed="1"
+                            class="px-2 py-0.5 rounded-full bg-indigo-500 text-white border border-indigo-500">
+                        1x
+                    </button>
+                    <button type="button"
+                            data-speed="2"
+                            class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                        2x
+                    </button>
+                    <button type="button"
+                            data-speed="4"
+                            class="px-2 py-0.5 rounded-full bg-gray-100 text-gray-600 border border-gray-200">
+                        4x
+                    </button>
+                </div>
             <div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 shadow-inner overflow-hidden relative">
                 <div id="battle-log" class="text-center font-bold text-gray-700 leading-relaxed mt-4">
                     전투 준비 중...
@@ -467,6 +487,35 @@
         // 🔹 관전 모드 여부 (교사용 토너먼트일 때 true)
         spectatorMode: false,
 
+        // 🔹 관전 모드 배틀 속도 (배율) – 1 / 2 / 4
+        spectatorSpeed: 1,
+
+        setSpectatorSpeed: function(multiplier) {
+            this.spectatorSpeed = multiplier || 1;
+            const box = document.getElementById('spectator-speed-controls');
+            if (!box) return;
+
+            const buttons = box.querySelectorAll('button[data-speed]');
+            buttons.forEach((btn) => {
+                const val = Number(btn.getAttribute('data-speed') || '1');
+                if (val === this.spectatorSpeed) {
+                    btn.classList.add('bg-indigo-500', 'text-white', 'border-indigo-500');
+                    btn.classList.remove('bg-gray-100', 'text-gray-600', 'border-gray-200');
+                } else {
+                    btn.classList.remove('bg-indigo-500', 'text-white', 'border-indigo-500');
+                    btn.classList.add('bg-gray-100', 'text-gray-600', 'border-gray-200');
+                }
+            });
+        },
+
+        // 관전 모드일 때만 딜레이를 배율로 나눠줌
+        getBattleDelay: function(ms) {
+            if (!this.spectatorMode) return ms;
+            const mult = this.spectatorSpeed || 1;
+            return Math.max(60, Math.floor(ms / mult));
+        },
+
+
         toggleFullscreen: function() {
             const root = document.documentElement;
             const card = document.getElementById('game-container');
@@ -522,6 +571,12 @@
 
             // 🔹 학생 모험 시작 시에는 관전 모드 끄기
             this.spectatorMode = false;
+
+            this.spectatorSpeed = 1;
+            const speedBox = document.getElementById('spectator-speed-controls');
+            if (speedBox) {
+                speedBox.classList.add('hidden');
+            }
 
             this.showScreen('screen-select');
         },
@@ -850,6 +905,14 @@
             // 👀 관전 모드 ON
             this.spectatorMode = true;
 
+            const speedBox = document.getElementById('spectator-speed-controls');
+            if (speedBox) {
+                speedBox.classList.remove('hidden');
+            }
+            if (!this.spectatorSpeed) this.spectatorSpeed = 1;
+            this.setSpectatorSpeed(this.spectatorSpeed);
+
+
             // 1) 플레이어(왼쪽) 설정
             this.state.starter = player.starter || "grass";
             const playerDb = POKEMON_DB[this.state.starter];
@@ -965,7 +1028,8 @@
             this.logBattle(`야생의 ${r.enemyName}(이)가 나타났다!`);
 
             // 2초 뒤 자동 전투 시작
-            setTimeout(() => this.runAutoBattle(), 2000);
+            const firstDelay = this.getBattleDelay ? this.getBattleDelay(2000) : 2000;
+            setTimeout(() => this.runAutoBattle(), firstDelay);
         },
 
 
@@ -1146,8 +1210,10 @@
             }
 
             // 다음 라운드
-            setTimeout(() => this.runAutoBattle(), 1000);
+            const nextDelay = this.getBattleDelay ? this.getBattleDelay(1000) : 1000;
+            setTimeout(() => this.runAutoBattle(), nextDelay);
         },
+
 
         showSkillTrigger: function(name) {
             const el = document.getElementById('skill-trigger-overlay');
@@ -1397,7 +1463,13 @@
                 setTimeout(()=>{ el.classList.remove('anim-hit'); r(); }, 400);
             });
         },
-        wait: function(ms) { return new Promise(r => setTimeout(r, ms)); },
+        wait: function(ms) {
+            const delay = typeof this.getBattleDelay === "function"
+                ? this.getBattleDelay(ms)
+                : ms;
+            return new Promise((r) => setTimeout(r, delay));
+        },
+
         showScreen: function(id) {
             document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
             document.getElementById(id).classList.add('active');
@@ -1405,6 +1477,18 @@
     };
 
     Game.init();
+
+    // 🔹 관전 속도 버튼 핸들러 등록
+    (function () {
+        const box = document.getElementById('spectator-speed-controls');
+        if (!box) return;
+        box.querySelectorAll('button[data-speed]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const speed = Number(btn.getAttribute('data-speed') || '1');
+                Game.setSpectatorSpeed(speed);
+            });
+        });
+    })();
 
     // 🔹 교사용 토너먼트 관전: 부모(TeacherRoomLivePage)에서 오는 메시지 처리
     window.addEventListener("message", (event) => {
