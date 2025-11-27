@@ -1025,13 +1025,82 @@
 
 
         // --- 자동 전투 시스템 ---
-        initBattleReal: function() {
-            this.showScreen('screen-battle');
-            document.getElementById('battle-result-overlay').classList.add('hidden');
-            document.getElementById('battle-result-overlay').classList.remove('flex');
+        initBattleReal: function () {
+            // 0) 전투 스크린 DOM 체크
+            const battleScreen = document.getElementById("screen-battle");
+            if (!battleScreen) {
+                console.error("[PEM] initBattleReal: screen-battle 엘리먼트가 없음");
+                alert("전투 화면을 찾지 못했어요. 페이지를 새로고침해 주세요.");
+                return;
+            }
 
+            // 1) 현재 라운드/스탯 방어
             const r = this.currentRound;
+            if (!r) {
+                console.error("[PEM] initBattleReal: currentRound가 비어 있음");
+                alert("경기 정보가 없습니다. 다시 시도해 주세요.");
+                // 안전하게 메인 화면으로 복귀
+                this.showScreen("screen-main");
+                return;
+            }
+
             const pStats = this.state.pokemon.stats;
+            if (!pStats) {
+                console.error("[PEM] initBattleReal: pokemon.stats가 비어 있음");
+                alert("포켓몬 정보가 없습니다. 처음부터 다시 시작해 주세요.");
+                this.showScreen("screen-title");
+                return;
+            }
+
+            // 2) 실제로 전투 화면으로 전환
+            this.showScreen("screen-battle");
+
+            const overlay = document.getElementById("battle-result-overlay");
+            if (overlay) {
+                overlay.classList.add("hidden");
+                overlay.classList.remove("flex");
+            }
+
+            // 🔹 관전 모드면 currentRound.enemyHp / enemyAtk 사용
+            let eHp, eAtk;
+            if (
+                this.spectatorMode &&
+                typeof r.enemyHp === "number" &&
+                typeof r.enemyAtk === "number"
+            ) {
+                eHp = r.enemyHp;
+                eAtk = r.enemyAtk;
+            } else {
+                const baseRatio = r.difficultyRatio ?? 1.0;
+                eHp = Math.floor(pStats.hp * 1.2 * baseRatio);
+                eAtk = Math.floor(pStats.atk * baseRatio);
+            }
+
+            const playerSpd = pStats.spd ?? 10;
+            const enemySpdBase = r.difficultyRatio ?? 1.0;
+            const enemySpd = Math.max(5, Math.floor(playerSpd * enemySpdBase));
+
+            this.battle = {
+                player: {
+                    hp: pStats.hp,
+                    maxHp: pStats.hp,
+                    atk: pStats.atk,
+                    def: pStats.def,
+                    spd: playerSpd,
+                },
+                enemy: {
+                    hp: eHp,
+                    maxHp: eHp,
+                    atk: eAtk,
+                    name: r.enemyName ?? "상대",
+                    spd: enemySpd,
+                },
+                status: {
+                    player: { burn: 0, poison: 0 },
+                    enemy: { burn: 0, poison: 0 },
+                },
+                turn: true,
+            };
 
             // 🔹 관전 모드면 currentRound.enemyHp / enemyAtk 사용
             let eHp, eAtk;
@@ -1598,10 +1667,26 @@
         },
 
 
-        showScreen: function(id) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
+        showScreen: function (id) {
+            // 모든 스크린 비활성화
+            document.querySelectorAll(".screen").forEach((s) =>
+                s.classList.remove("active"),
+            );
+
+            const target = document.getElementById(id);
+            if (!target) {
+                console.error("[PEM] showScreen: id를 찾을 수 없음:", id);
+                // 최소한 아무 것도 안 보이는 상황은 막기 위해 타이틀로 복귀
+                const fallback = document.getElementById("screen-title");
+                if (fallback) {
+                    fallback.classList.add("active");
+                }
+                return;
+            }
+
+            target.classList.add("active");
         }
+
     };
 
     Game.init();

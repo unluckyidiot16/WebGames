@@ -15,27 +15,57 @@ const POKE_API_BASE = "https://pokeapi.co/api/v2";
 const IMG_BASE_ART = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork";
 const IMG_BASE_SPRITE = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
 
-// 문제 데이터 (국어/수학) - 변경 없음
-const QUIZ_DATA = {
-korean: [
-{ q: "밥을 ____ 먹었다.", a: "맛있게", wrong: ["맛잇게", "마싯게", "맛있개"] },
-{ q: "설거지 / 설겆이", a: "설거지", wrong: ["설겆이"] },
-{ q: "가방을 ____.", a: "메다", wrong: ["매다"] },
-{ q: "학교 / 학꾜", a: "학교", wrong: ["학꾜"] },
-{ q: "떡볶이 / 떡복이", a: "떡볶이", wrong: ["떡복이"] },
-{ q: "숲속 / 숩속", a: "숲속", wrong: ["숩속"] },
-{ q: "선생님 / 선생님", a: "선생님", wrong: ["선생님"] }, // 오타 수정: 보기가 같아서 논리만 유지
-{ q: "구름 / 구룸", a: "구름", wrong: ["구룸"] },
-],
-math: [
-{ q: "3 + 5 = ?", a: "8", wrong: ["7", "9", "6"] },
-{ q: "10 - 4 = ?", a: "6", wrong: ["5", "7", "4"] },
-{ q: "7 □ 9 (더 큰 수는?)", a: "9", wrong: ["7"] },
-{ q: "2 + 2 + 2 = ?", a: "6", wrong: ["4", "8", "5"] },
-{ q: "15 - 5 = ?", a: "10", wrong: ["11", "9", "5"] },
-{ q: "20 - 10 = ?", a: "10", wrong: ["20", "0", "15"] },
-]
+// 🔹 국어 JSON 경로
+const KOREAN_QUIZ_PATH = "/quiz/ko-spell-g1-missing-001.json";
+
+// 🔹 배열 셔플
+function shuffleArray(arr) {
+return [...arr].sort(() => Math.random() - 0.5);
+}
+
+// 🔹 ko-spell-g1-missing-001.json 한 문제를 내부 포맷으로 정규화
+function normalizeKoreanItem(item) {
+const q =
+item.q ||
+item.question ||
+item.prompt ||
+item.text;
+
+let options =
+item.options ||
+item.choices ||
+item.choice ||
+[];
+
+// 예: choices + answerIndex 형태일 수도 있으니 대응
+let answer =
+item.a ||
+item.answer ||
+item.correct ||
+null;
+
+if (!answer && typeof item.answerIndex === "number" && options[item.answerIndex] != null) {
+answer = options[item.answerIndex];
+}
+if (!answer && typeof item.answer_index === "number" && options[item.answer_index] != null) {
+answer = options[item.answer_index];
+}
+
+if (!q || !answer) return null;
+
+if (!options || !options.length) {
+// wrong + answer 형태일 경우
+const wrong = item.wrong || [];
+options = [...wrong, answer];
+}
+
+return {
+q,
+answer: String(answer),
+options: shuffleArray(options.map(String)),
 };
+}
+
 
 // 상점 아이템
 const SHOP_ITEMS = [
@@ -44,6 +74,7 @@ const SHOP_ITEMS = [
 { id: 'lucky_charm', name: "행운부적", price: 50, type: 'buff', effect: 'lucky', duration: 3, icon: "🍀" },
 { id: 'repel', name: "벌레기피제", price: 30, type: 'buff', effect: 'repel', duration: 3, icon: "🌫️" },
 ];
+
 
 /**
 * ------------------------------------------------------------------
@@ -116,6 +147,9 @@ const [buffs, setBuffs] = useState({ lucky: 0, repel: 0 });
 
 const [exportSent, setExportSent] = useState(false);
 
+// 🔹 국어 문제 풀
+const [koreanPool, setKoreanPool] = useState([]);
+const [koreanLoaded, setKoreanLoaded] = useState(false);    
 
 // 로딩 상태
 const [isLoading, setIsLoading] = useState(false);
@@ -138,6 +172,25 @@ setBuffs(parsed.buffs || { lucky: 0, repel: 0 });
 setScreen('main');
 }
 }, []);
+
+useEffect(() => {
+// 국어 JSON 로드
+fetch(KOREAN_QUIZ_PATH)
+.then((res) => res.json())
+.then((data) => {
+const normalized = (Array.isArray(data) ? data : data.items || [])
+.map(normalizeKoreanItem)
+.filter(Boolean);
+setKoreanPool(normalized);
+setKoreanLoaded(true);
+})
+.catch((err) => {
+console.error("Failed to load korean quiz json", err);
+setKoreanPool([]);
+setKoreanLoaded(false);
+});
+}, []);
+
 
 useEffect(() => {
 if (user.name && pokemons.length > 0) {
