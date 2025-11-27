@@ -118,7 +118,7 @@
     >
         ⛶ 전체 화면
     </button>
-    
+
     <div id="screen-title" class="screen active flex-col items-center justify-center h-full absolute inset-0 bg-pastel-blue z-50">
         <h1 class="text-4xl font-bold text-indigo-600 mb-2 game-font text-center drop-shadow-sm">포켓 수학<br>토너먼트 V8</h1>
         <p class="text-gray-500 mb-10 game-font text-lg">전략적 육성 & 오토 배틀</p>
@@ -183,70 +183,81 @@
                                 <span class="text-sm font-bold text-green-500 mb-1">방어 (DEF)</span>
                                 <span class="text-2xl font-bold text-gray-700 game-font" id="stat-def">0</span>
                             </div>
+                        </div>
+
+                        <div class="flex flex-col justify-center space-y-4 pl-2">
+                            <div class="text-xs font-bold text-gray-400 mb-1 text-center">학습 능력치</div>
                             <div class="flex flex-col items-center">
-                                <span class="text-sm font-bold text-purple-500 mb-1">기술 (SKL)</span>
+                                <span class="text-sm font-bold text-purple-500 mb-1">스킬 보유</span>
                                 <span class="text-2xl font-bold text-gray-700 game-font" id="stat-skl">0</span>
                             </div>
-                        </div>
-
-                        <div class="flex flex-col">
-                            <div class="text-xs font-bold text-gray-400 mb-2 text-center">장착 스킬 (4칸)</div>
-                            <div class="grid grid-cols-2 gap-2 h-full content-center" id="main-skill-grid">
+                            <div class="grid grid-cols-2 gap-1 mt-2 px-2" id="main-skill-grid">
+                                <div class="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50/50">
+                                    <span class="text-gray-300 text-xl">+</span>
+                                </div>
+                                <div class="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50/50">
+                                    <span class="text-gray-300 text-xl">+</span>
+                                </div>
+                                <div class="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50/50">
+                                    <span class="text-gray-300 text-xl">+</span>
+                                </div>
+                                <div class="aspect-square rounded-xl border-2 border-dashed border-gray-300 flex items-center justify-center bg-gray-50/50">
+                                    <span class="text-gray-300 text-xl">+</span>
+                                </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+            </div>
 
+            <div class="px-6 w-full">
+                <div class="border-t border-gray-100 pt-4">
+                    <div class="text-sm font-bold text-gray-600 mb-3 text-center">이번 주 훈련 계획표</div>
+                    <div class="flex gap-2">
+                        <button id="sched-0" onclick="Game.toggleSchedule(0)" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">
+                            <span class="text-3xl text-gray-300">?</span>
+                        </button>
+                        <button id="sched-1" onclick="Game.toggleSchedule(1)" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">
+                            <span class="text-3xl text-gray-300">?</span>
+                        </button>
+                        <button id="sched-2" onclick="Game.toggleSchedule(2)" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">
+                            <span class="text-3xl text-gray-300">?</span>
+                        </button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="p-6 bg-white border-t border-gray-100 rounded-t-3xl shadow-[0_-5px_15px_rgba(0,0,0,0.05)] mobile-bottom-guard">
-            <h4 class="text-lg game-font font-bold text-gray-700 mb-4">훈련 과목 선택</h4>
-            <div class="flex gap-3 mb-4">
-                <button onclick="Game.toggleSchedule(0)" id="sched-0" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">?</button>
-                <button onclick="Game.toggleSchedule(1)" id="sched-1" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">?</button>
-                <button onclick="Game.toggleSchedule(2)" id="sched-2" class="flex-1 aspect-square rounded-2xl bg-gray-50 border-2 border-dashed border-gray-300 flex flex-col items-center justify-center hover:bg-gray-100 transition">?</button>
-            </div>
-            <button onclick="Game.startWeek()" class="w-full bg-indigo-500 text-white text-lg game-font font-bold py-4 rounded-2xl shadow-md active:scale-95 transition">훈련 시작!</button>
+        <div class="px-6 pb-8 flex-none mobile-bottom-guard">
+            <button onclick="Game.startWeek()" class="w-full bg-gradient-to-r from-indigo-500 to-indigo-600 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold py-5 rounded-2xl shadow-lg transform transition hover:scale-105 text-xl game-font">
+                훈련 시작!
+            </button>
         </div>
     </div>
 
-    <div id="screen-quiz" class="screen flex-col h-full bg-indigo-600 text-white relative z-50 p-6">
-        <div class="flex justify-between items-center mb-2">
-            <span id="quiz-subject-badge" class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold text-yellow-300">수학 훈련</span>
-            <span class="text-xl font-bold game-font" id="quiz-progress">1/3</span>
+    <div id="screen-quiz" class="screen flex-col h-full bg-gradient-to-br from-purple-500 to-blue-500 text-white z-40 relative">
+        <div class="p-6 flex items-center justify-between">
+            <span class="bg-white/20 px-4 py-1 rounded-full text-sm font-bold" id="quiz-subject-badge">수학</span>
+            <span class="text-3xl font-bold" id="quiz-progress">1/3</span>
         </div>
-        <div class="w-full h-4 bg-indigo-900 rounded-full mb-6 overflow-hidden border border-indigo-400">
-            <div id="quiz-timer-bar" class="h-full bg-yellow-400 transition-all duration-100 ease-linear" style="width: 100%"></div>
+        <div id="quiz-combo-container" class="absolute top-6 left-1/2 transform -translate-x-1/2 hidden">
+            <div class="bg-yellow-400 text-yellow-900 px-6 py-2 rounded-full font-bold text-xl game-font shadow-lg" id="quiz-combo-text">2 COMBO!</div>
         </div>
-        <div id="quiz-combo-container" class="absolute top-20 right-6 text-right hidden z-10 pointer-events-none">
-            <div class="text-5xl font-bold text-yellow-300 game-font drop-shadow-md combo-pop" id="quiz-combo-text">COMBO!</div>
+        <div class="flex-1 flex items-center justify-center px-6">
+            <h2 class="text-4xl md:text-5xl font-bold text-center game-font drop-shadow-lg" id="quiz-question">문제</h2>
         </div>
-        <div class="flex-1 flex flex-col items-center justify-center">
-            <div class="w-full bg-white text-gray-800 p-8 rounded-3xl mb-8 shadow-xl text-center relative">
-                <h2 id="quiz-question" class="text-4xl font-bold game-font mt-2 leading-relaxed">?</h2>
+        <div class="p-6 pb-8">
+            <div class="grid grid-cols-2 gap-3 mb-6" id="quiz-choices"></div>
+            <div class="h-2 bg-white/30 rounded-full overflow-hidden">
+                <div id="quiz-timer-bar" class="h-full bg-yellow-400 transition-all duration-100" style="width:100%"></div>
             </div>
-            <div id="quiz-choices" class="grid grid-cols-2 gap-4 w-full"></div>
         </div>
     </div>
 
-    <div id="screen-result" class="screen flex-col h-full bg-pastel-green p-6 justify-center z-50 items-center">
-        <h2 class="text-3xl font-bold game-font text-green-800 mb-2">훈련 완료!</h2>
-        <div class="bg-white rounded-2xl p-6 w-full shadow-lg mb-6">
-            <!-- 🔹 추가: 결과 화면 포켓몬 이미지 -->
-            <img
-                    id="result-poke-img"
-                    src=""
-                    class="w-24 h-24 mx-auto mb-4 drop-shadow"
-                    alt="훈련 결과 포켓몬"
-            />
-
-            <div
-                    class="font-bold text-xl text-center text-gray-700 game-font mb-4"
-                    id="result-message"
-            >
-                결과
-            </div>
+    <div id="screen-result" class="screen flex-col h-full bg-pastel-green p-6 justify-center">
+        <div class="bg-white rounded-3xl p-6 shadow-2xl">
+            <img id="result-poke-img" src="" class="w-32 h-32 mx-auto mb-4">
+            <h2 class="text-2xl font-bold text-center text-green-800 mb-4 game-font" id="result-message">훈련 완료!</h2>
             <div class="space-y-3" id="result-stats-list"></div>
         </div>
         <button onclick="Game.checkSkillAcquisition()" class="w-full bg-green-600 text-white font-bold py-4 rounded-2xl shadow-lg game-font text-lg">다음으로</button>
@@ -335,6 +346,7 @@
                         4x
                     </button>
                 </div>
+            </div>
             <div class="flex-1 bg-gray-50 rounded-2xl p-4 border border-gray-100 shadow-inner overflow-hidden relative">
                 <div id="battle-log" class="text-center font-bold text-gray-700 leading-relaxed mt-4">
                     전투 준비 중...
@@ -596,7 +608,7 @@
                 if (btn) btn.classList.remove('hidden');
             }
         },
-        
+
         startNewGame: function() {
             this.clearSave(); // 이전 진행 삭제 (새 모험)
 
@@ -1025,82 +1037,13 @@
 
 
         // --- 자동 전투 시스템 ---
-        initBattleReal: function () {
-            // 0) 전투 스크린 DOM 체크
-            const battleScreen = document.getElementById("screen-battle");
-            if (!battleScreen) {
-                console.error("[PEM] initBattleReal: screen-battle 엘리먼트가 없음");
-                alert("전투 화면을 찾지 못했어요. 페이지를 새로고침해 주세요.");
-                return;
-            }
+        initBattleReal: function() {
+            this.showScreen('screen-battle');
+            document.getElementById('battle-result-overlay').classList.add('hidden');
+            document.getElementById('battle-result-overlay').classList.remove('flex');
 
-            // 1) 현재 라운드/스탯 방어
             const r = this.currentRound;
-            if (!r) {
-                console.error("[PEM] initBattleReal: currentRound가 비어 있음");
-                alert("경기 정보가 없습니다. 다시 시도해 주세요.");
-                // 안전하게 메인 화면으로 복귀
-                this.showScreen("screen-main");
-                return;
-            }
-
             const pStats = this.state.pokemon.stats;
-            if (!pStats) {
-                console.error("[PEM] initBattleReal: pokemon.stats가 비어 있음");
-                alert("포켓몬 정보가 없습니다. 처음부터 다시 시작해 주세요.");
-                this.showScreen("screen-title");
-                return;
-            }
-
-            // 2) 실제로 전투 화면으로 전환
-            this.showScreen("screen-battle");
-
-            const overlay = document.getElementById("battle-result-overlay");
-            if (overlay) {
-                overlay.classList.add("hidden");
-                overlay.classList.remove("flex");
-            }
-
-            // 🔹 관전 모드면 currentRound.enemyHp / enemyAtk 사용
-            let eHp, eAtk;
-            if (
-                this.spectatorMode &&
-                typeof r.enemyHp === "number" &&
-                typeof r.enemyAtk === "number"
-            ) {
-                eHp = r.enemyHp;
-                eAtk = r.enemyAtk;
-            } else {
-                const baseRatio = r.difficultyRatio ?? 1.0;
-                eHp = Math.floor(pStats.hp * 1.2 * baseRatio);
-                eAtk = Math.floor(pStats.atk * baseRatio);
-            }
-
-            const playerSpd = pStats.spd ?? 10;
-            const enemySpdBase = r.difficultyRatio ?? 1.0;
-            const enemySpd = Math.max(5, Math.floor(playerSpd * enemySpdBase));
-
-            this.battle = {
-                player: {
-                    hp: pStats.hp,
-                    maxHp: pStats.hp,
-                    atk: pStats.atk,
-                    def: pStats.def,
-                    spd: playerSpd,
-                },
-                enemy: {
-                    hp: eHp,
-                    maxHp: eHp,
-                    atk: eAtk,
-                    name: r.enemyName ?? "상대",
-                    spd: enemySpd,
-                },
-                status: {
-                    player: { burn: 0, poison: 0 },
-                    enemy: { burn: 0, poison: 0 },
-                },
-                turn: true,
-            };
 
             // 🔹 관전 모드면 currentRound.enemyHp / enemyAtk 사용
             let eHp, eAtk;
@@ -1518,7 +1461,7 @@
             const rate = totalQuestions > 0 ? totalCorrect / totalQuestions : 0;
             let rank = "도전자";
             if (rate >= 0.9) rank = "전설의 트레이너";
-            else if (rate >= 0.7) rank = "챔피언 후보";
+            else if (rate >= 0.7) rank = "짐 리더";
             else if (rate >= 0.5) rank = "성장 중인 트레이너";
 
             const rankEl = document.getElementById('ending-rank');
@@ -1667,26 +1610,10 @@
         },
 
 
-        showScreen: function (id) {
-            // 모든 스크린 비활성화
-            document.querySelectorAll(".screen").forEach((s) =>
-                s.classList.remove("active"),
-            );
-
-            const target = document.getElementById(id);
-            if (!target) {
-                console.error("[PEM] showScreen: id를 찾을 수 없음:", id);
-                // 최소한 아무 것도 안 보이는 상황은 막기 위해 타이틀로 복귀
-                const fallback = document.getElementById("screen-title");
-                if (fallback) {
-                    fallback.classList.add("active");
-                }
-                return;
-            }
-
-            target.classList.add("active");
+        showScreen: function(id) {
+            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
         }
-
     };
 
     Game.init();
