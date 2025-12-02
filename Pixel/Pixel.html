@@ -707,25 +707,118 @@
         return q;
     }
     // ✅ 기본 풀백: 구구단 2단~9단 곱셈 문제
-    function generateMathQuestion(){
-        const a = Math.floor(Math.random() * 8) + 2;  // 2~9단
-        const b = Math.floor(Math.random() * 9) + 1;  // ×1~×9
-        const op = '×';
-        const ans = a * b;
+    // function generateMathQuestion(){
+    //     const a = Math.floor(Math.random() * 8) + 2;  // 2~9단
+    //     const b = Math.floor(Math.random() * 9) + 1;  // ×1~×9
+    //     const op = '×';
+    //     const ans = a * b;
+    //
+    //     const choices = new Set([ans]);
+    //     // 정답 주변의 비슷한 값들로 4지선다 구성
+    //     while (choices.size < 4){
+    //         const delta = Math.floor(Math.random() * 7) - 3; // -3 ~ +3
+    //         const fake = ans + (delta === 0 ? 4 : delta);    // 0 피하기
+    //         if (fake > 0) choices.add(fake);
+    //     }
+    //     const arr = Array.from(choices);
+    //     shuffleInPlace(arr);
+    //     return {
+    //         question: `${a} ${op} ${b} = ?`,
+    //         choices: arr,
+    //         correctIndex: arr.indexOf(ans),
+    //     };
+    // }
 
-        const choices = new Set([ans]);
-        // 정답 주변의 비슷한 값들로 4지선다 구성
-        while (choices.size < 4){
-            const delta = Math.floor(Math.random() * 7) - 3; // -3 ~ +3
-            const fake = ans + (delta === 0 ? 4 : delta);    // 0 피하기
-            if (fake > 0) choices.add(fake);
+    // ✅ 기본 풀백: 소수의 덧셈/뺄셈 (A+B=C, A-B=C)
+    // - A, B, C 모두 0 이상
+    // - ? 자리에 A, B, C 중 하나가 들어가도록 무작위 출제
+    function generateMathQuestion() {
+        // 0.0 ~ 9.9 범위의 소수 (소수 첫째 자리)
+        const rand0to99 = () => Math.floor(Math.random() * 100); // 0 ~ 99
+        const toDec = (x) => Number((x / 10).toFixed(1));
+        const fmt = (n) => (Number.isInteger(n) ? String(n) : n.toFixed(1));
+
+        let A, B, C, op;
+
+        if (Math.random() < 0.5) {
+            // ----- 덧셈: A + B = C -----
+            op = '+';
+            A = toDec(rand0to99());
+            B = toDec(rand0to99());
+            C = Number((A + B).toFixed(1)); // C >= 0
+        } else {
+            // ----- 뺄셈: A - B = C -----
+            // B, C 를 먼저 뽑고 A = B + C 로 만들어서 항상 A >= B, C >= 0 유지
+            op = '-';
+            const bRaw = rand0to99();
+            const cRaw = rand0to99();
+            B = toDec(bRaw);
+            C = toDec(cRaw);
+            A = Number((B + C).toFixed(1)); // A = B + C >= 0
         }
-        const arr = Array.from(choices);
-        shuffleInPlace(arr);
+
+        // 이제 A, B, C 모두 0 이상 보장
+        const vars = ['A', 'B', 'C'];
+        const unknown = vars[Math.floor(Math.random() * vars.length)];
+
+        let question, answer;
+
+        if (unknown === 'C') {
+            // A + B = ?  /  A - B = ?
+            question = `${fmt(A)} ${op} ${fmt(B)} = ?`;
+            answer = C;
+        } else if (unknown === 'A') {
+            // ? + B = C  /  ? - B = C
+            question = `? ${op} ${fmt(B)} = ${fmt(C)}`;
+            answer = A;
+        } else {
+            // A + ? = C  /  A - ? = C
+            question = `${fmt(A)} ${op} ? = ${fmt(C)}`;
+            answer = B;
+        }
+
+        // ----- 보기(선지) 생성: 정답 포함 4개, 모두 0 이상 -----
+        const choicesSet = new Set();
+        const pushVal = (v) => {
+            choicesSet.add(Number(v.toFixed(1))); // 소수 첫째 자리 고정
+        };
+
+        pushVal(answer);
+
+        // 정답 주변의 값들로 오답 생성
+        const deltas = [-2, -1.5, -1, -0.5, -0.3, -0.2, -0.1, 0.1, 0.2, 0.3, 0.5, 1, 1.5, 2];
+
+        let attempts = 0;
+        while (choicesSet.size < 4 && attempts < 100) {
+            const delta = deltas[Math.floor(Math.random() * deltas.length)];
+            const candidate = Number((answer + delta).toFixed(1));
+            attempts++;
+
+            if (candidate < 0) continue; // 0 미만이면 버림
+            if (Math.abs(candidate - answer) < 0.0001) continue; // 정답과 같은 값은 제외
+
+            pushVal(candidate);
+        }
+
+        // 혹시 모자라면 0~20 사이 랜덤 소수로 채우기 (그래도 0 이상만)
+        while (choicesSet.size < 4) {
+            const candidate = Number((Math.random() * 20).toFixed(1));
+            if (candidate >= 0 && Math.abs(candidate - answer) > 0.0001) {
+                pushVal(candidate);
+            }
+        }
+
+        const choices = Array.from(choicesSet);
+        shuffleInPlace(choices);
+
+        const correctIndex = choices.findIndex(
+            (v) => Math.abs(v - answer) < 0.0001
+        );
+
         return {
-            question: `${a} ${op} ${b} = ?`,
-            choices: arr,
-            correctIndex: arr.indexOf(ans),
+            question,
+            choices: choices.map((v) => fmt(v)), // 보기 문자열로 표현
+            correctIndex,
         };
     }
 
