@@ -887,10 +887,15 @@
     }
 
 
+    /* =========================
+         퀴즈 진행 (방어 로직 추가됨)
+      ========================= */
+    let quizLock = false; // 버튼 중복/광클 방지용 잠금 플래그
+
     function askNextQuestion(){
         if (!quizSession) return;
 
-        // 모든 문제를 다 푼 경우
+        // 1. 모든 문제를 다 푼 경우 (종료 처리)
         if (quizSession.idx >= quizSession.total){
             const baseMsg = `정답 ${quizSession.correct}/${quizSession.total}개!  연속 보너스 포함 +${quizSession.score}P`;
 
@@ -909,66 +914,99 @@
             return;
         }
 
+        // 2. 문제 세팅
         const q = pullQuestion();
         quizTitle.textContent = (quizMode === 'challenge') ? '도전 퀴즈' : '퀴즈 도전';
         updateQuizSubText();
         quizQuestion.textContent = q.question;
         quizChoices.innerHTML = '';
+
+        // [방어 로직 1] 문제 로딩 직후 '생각 시간' 강제 (1초간 클릭 불가)
+        quizLock = true;
+
         q.choices.forEach((c, i)=>{
             const btn = document.createElement('button');
-            btn.className = 'bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-2 px-4 rounded-lg shadow';
+            // 초기 스타일: 회색조(opacity-60), 커서 금지 등 비활성 느낌 주기
+            btn.className = 'bg-emerald-500 text-white font-bold py-3 px-4 rounded-lg shadow transition-all duration-200 opacity-60 cursor-not-allowed transform scale-95';
             btn.textContent = c;
+
             btn.addEventListener('click', ()=>{
-                if (!quizSession) return;
+                // 잠금 상태면 클릭 무시
+                if (quizLock) return;
+
+                // 클릭 즉시 잠금 (중복 클릭 방지)
+                quizLock = true;
+
                 if (i === q.correctIndex){
+                    // --- 정답인 경우 ---
+                    // 시각적 피드백: 초록색 강조 + 흔들림 없음
+                    btn.className = 'bg-green-600 text-white font-bold py-3 px-4 rounded-lg shadow ring-4 ring-green-300 scale-105';
+
                     quizSession.correct++;
                     quizSession.streak++;
                     quizSession.maxStreak = Math.max(quizSession.maxStreak, quizSession.streak);
                     const mult = Math.min(STREAK_MAX_MULT, 1 + (quizSession.streak - 1) * STREAK_STEP);
-                    const gain = Math.round(QUIZ_REWARD * mult) * REWARD_MULTIPLIER;  // ✅ 5배
+                    const gain = Math.round(QUIZ_REWARD * mult) * REWARD_MULTIPLIER;
                     quizSession.score += gain;
+
+                    // 정답은 짧은 딜레이(0.5초) 후 다음 문제
+                    setTimeout(() => {
+                        quizSession.idx++;
+                        askNextQuestion();
+                    }, 500);
+
                 } else {
+                    // --- 오답인 경우 ---
+                    // [방어 로직 2] 찍기 방지: 틀리면 3초간 락을 걸어버림 (시간 손해)
+
+                    // 시각적 피드백: 빨간색 + 흔들림 애니메이션
+                    btn.className = 'bg-rose-600 text-white font-bold py-3 px-4 rounded-lg shadow ring-4 ring-rose-300 shake';
+
                     quizSession.streak = 0;
                     quizSession.wrong++;
 
+                    // 오답 메시지 표시 (버튼에 직접 표시하거나 서브 텍스트 활용)
+                    const originalText = btn.textContent;
+                    btn.textContent = "❌ 오답 (3초 대기)";
+
+                    // 도전 모드 실패 체크
                     if (quizMode === 'challenge' && quizSession.wrong >= MAX_WRONG){
-                        finishQuiz(
-                            '도전 실패',
-                            `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`,
-                            { fromChallenge:true, success:false },
-                        );
+                        setTimeout(() => {
+                            finishQuiz('도전 실패', `오답 ${MAX_WRONG}회로 종료되었습니다.`, { fromChallenge:true, success:false });
+                        }, 1000);
                         return;
                     }
                     if (quizSession.wrong >= MAX_WRONG){
-                        finishQuiz(
-                            '퀴즈 종료',
-                            `오답 ${MAX_WRONG}회로 종료되었습니다. 누적 보상 +${quizSession.score}P`,
-                        );
+                        setTimeout(() => {
+                            finishQuiz('퀴즈 종료', `오답 ${MAX_WRONG}회로 종료되었습니다.`);
+                        }, 1000);
                         return;
                     }
+
+                    // 3초 페널티 대기
+                    setTimeout(() => {
+                        quizSession.idx++;
+                        askNextQuestion(); // 3초 후 다음 문제로
+                    }, 3000);
                 }
-                quizSession.idx++;
-                quizModal.style.display='none';
-                askNextQuestion();
             });
             quizChoices.appendChild(btn);
         });
+
         quizModal.style.display='flex';
+
+        // [타이머] 1초가 지나면 버튼 활성화 (찍기 방지 해제)
+        setTimeout(() => {
+            // 아직 사용자가 답을 안 골랐을 때만 잠금 해제
+            // (1초 안에 사용자가 어떻게든 클릭 이벤트를 뚫는 경우 방지)
+            const btns = quizChoices.querySelectorAll('button');
+            btns.forEach(b => {
+                // 활성 스타일로 변경 (원래 색상, 커서 포인터, 크기 복구)
+                b.className = 'bg-emerald-500 hover:bg-emerald-600 text-white font-bold py-3 px-4 rounded-lg shadow transform hover:scale-105 transition-all cursor-pointer';
+            });
+            quizLock = false;
+        }, 1200); // 1.2초 대기 (문제 읽을 시간)
     }
-
-    quizCancel.addEventListener('click', ()=>{
-        if (!quizSession){
-            quizModal.style.display='none';
-            return;
-        }
-        const fromChallenge = (quizMode === 'challenge');
-        finishQuiz(
-            fromChallenge ? '도전 종료' : '퀴즈 종료',
-            `중도 종료: 정답 ${quizSession.correct}/${quizSession.idx}개 · +${quizSession.score}P 적립`,
-            { fromChallenge, success:false },
-        );
-    });
-
     function finishQuiz(title, msg, opts = {}){
         if (!quizSession){
             showModal(title, msg);
