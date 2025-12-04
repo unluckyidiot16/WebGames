@@ -248,10 +248,11 @@
        설정값
     ========================= */
     // 도감: 로컬 png/ 먼저 탐색 → 실패 시 원격 폴백 (이제 스캔 안함, 바로 개수만큼 생성)
-    const CODEX_PNG_BASE = './PNG/';
+    // ✅ 수정됨: 대소문자 구분 없이 소문자 'png/' 폴더 사용 (GitHub Pages 호환성)
+    const CODEX_PNG_BASE = './png/';
 
     const HIDDEN_IMAGE_BASE = 'https://unluckyidiot16.github.io/WebGames/Pixel/Hidden/';
-    
+
     // ⚠️ 중요: 여기에 실제 업로드한 이미지 파일의 개수를 적어주세요.
     const MAX_NORMAL_IMAGES = 350; // 예: 1.png ~ 100.png 까지 있다면 300
     const MAX_HIDDEN_IMAGES = 40;  // 예: 1.png ~ 20.png 까지 있다면 40
