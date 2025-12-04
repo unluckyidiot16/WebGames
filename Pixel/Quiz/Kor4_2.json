@@ -5,7 +5,7 @@
     "title": "초등 4학년 국어 - 온라인 대화와 예절 (1차 30문제)",
     "subject": "KOREAN",
     "grade": "4",
-    "description": "초등학교 4학년 국어 단원 ‘온라인 대화의 특징과 예절’을 다루는 객관식 퀴즈 30문제입니다."
+    "description": "초등학교 4학년 국어 단원 ‘온라인 대화의 특징과 예절’을 다루는 객관식 퀴즈 60문제입니다."
   },
   "questions": [
     {
@@ -427,17 +427,7 @@
       "answerIndex": 2,
       "difficulty": 1,
       "tags": ["국어", "4학년", "온라인 예절", "정리"]
-    }
-  ],
-  "type": "quizpack",
-  "version": "v1",
-  "pack": {
-    "title": "초등 4학년 국어 - 온라인 대화와 예절 (2차 30문제)",
-    "subject": "KOREAN",
-    "grade": "4",
-    "description": "초등학교 4학년 국어 단원 '온라인 대화의 장점과 단점, 예절, 다양한 대화 방식'을 다루는 객관식 퀴즈 30문제입니다."
-  },
-  "questions": [
+    },
     {
       "id": "KOR4_ONCHAT-031",
       "index": 30,
