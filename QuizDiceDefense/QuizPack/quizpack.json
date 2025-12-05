@@ -1,1302 +1,712 @@
-[
-  {
-    "question": "다음을 읽고, 나라의 favorite subject를 고르세요.\n\nNara: My favorite subject is art.",
-    "options": [
-      "art",
-      "math",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음을 읽고, 에디의 favorite subject를 고르세요.\n\nEddie: My favorite subject is science.",
-    "options": [
-      "Korean",
-      "science",
-      "music",
-      "art"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음을 읽고, 하나의 favorite subject를 고르세요.\n\nHana: My favorite subject is math.",
-    "options": [
-      "art",
-      "music",
-      "math",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음을 읽고, 진우의 favorite subject를 고르세요.\n\nJinwoo: My favorite subject is Korean.",
-    "options": [
-      "English",
-      "Korean",
-      "math",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음을 읽고, 케빈의 favorite subject를 고르세요.\n\nKevin: My favorite subject is music.",
-    "options": [
-      "art",
-      "science",
-      "music",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음을 읽고, 빈칸에 알맞은 과목을 고르세요.\n\nMy favorite subject is ______.\n(나는 미술을 가장 좋아해.)",
-    "options": [
-      "art",
-      "math",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음을 읽고, 빈칸에 알맞은 과목을 고르세요.\n\nMy favorite subject is _____.\n(나는 과학을 가장 좋아해.)",
-    "options": [
-      "Korean",
-      "music",
-      "art",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "다음을 읽고, 민수의 favorite subject를 고르세요.\n\nMinsu: My favorite subject is Korean.",
-    "options": [
-      "Korean",
-      "math",
-      "art",
-      "music"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음을 읽고, 수지의 favorite subject를 고르세요.\n\nSuji: My favorite subject is math.",
-    "options": [
-      "science",
-      "music",
-      "math",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음을 읽고, 유리의 favorite subject를 고르세요.\n\nYuri: My favorite subject is music.",
-    "options": [
-      "art",
-      "music",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English.\n(나는 영어로 말하는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "listen",
-      "draw",
-      "study"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ music.\n(나는 음악 듣는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "listen to",
-      "study",
-      "draw"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ pictures.\n(나는 그림 그리기를 좋아해.)",
-    "options": [
-      "study",
-      "speak",
-      "draw",
-      "listen"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ math.\n(나는 수학 공부하는 것을 좋아해.)",
-    "options": [
-      "study",
-      "listen",
-      "draw",
-      "sing"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ Korean.\n(나는 한국어로 말하는 것을 좋아해.)",
-    "options": [
-      "listen",
-      "draw",
-      "speak",
-      "study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ songs.\n(나는 노래 듣는 것을 좋아해.)",
-    "options": [
-      "study",
-      "listen to",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English songs.\n(나는 영어 노래를 듣는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "study",
-      "listen to",
-      "draw"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ today.\n(나는 오늘 공부하는 것을 좋아해.)",
-    "options": [
-      "study",
-      "listen",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nHana likes to ______ art.\n(하나는 미술로 그림 그리는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "draw",
-      "listen",
-      "study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nKevin likes to ______ music in class.\n(케빈은 수업에서 음악 듣는 것을 좋아해.)",
-    "options": [
-      "study",
-      "draw",
-      "listen to",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nJinwoo likes to ______ science.\n(진우는 과학 공부하는 것을 좋아해.)",
-    "options": [
-      "speak",
-      "listen",
-      "study",
-      "draw"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nEddie likes to ______ Korean.\n(에디는 한국어로 말하는 것을 좋아해.)",
-    "options": [
-      "draw",
-      "speak",
-      "listen",
-      "study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nNara likes to ______ pictures in art class.\n(나라는 미술 시간에 그림 그리기를 좋아해.)",
-    "options": [
-      "listen to",
-      "draw",
-      "study",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nI like to ______ English every day.\n(나는 매일 영어를 공부하는 것을 좋아해.)",
-    "options": [
-      "listen to",
-      "study",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "빈칸에 알맞은 말을 고르세요.\n\nWe like to ______ songs in music class.\n(우리는 음악 시간에 노래를 듣는 것을 좋아해.)",
-    "options": [
-      "listen to",
-      "study",
-      "draw",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 말의 뜻으로 알맞은 것을 고르세요.\n\nKevin: What is your favorite subject?\nHana: My favorite subject is math.\n\n밑줄 친 subject의 뜻은?",
-    "options": [
-      "과목",
-      "운동",
-      "노래",
-      "그림"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 질문에 알맞은 답을 고르세요.\n\nKevin: What is your favorite subject?\nEddie: My favorite subject is science.\n\n에디가 가장 좋아하는 것은?",
-    "options": [
-      "미술 시간",
-      "수학 문제",
-      "과학 시간",
-      "음악 시간"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 진우가 좋아하는 선생님을 고르세요.\n\nJinwoo: I like the P.E. teacher, Mr. Wilson. He is very kind.\n\n진우가 좋아하는 선생님은?",
-    "options": [
-      "music teacher",
-      "P.E. teacher",
-      "art teacher",
-      "math teacher"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nHana: I don’t like P.E.\nJinwoo: What’s your favorite , Hana?\nHana: My favorite subject is math.",
-    "options": [
-      "song",
-      "sport",
-      "subject",
-      "teacher"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 kind의 의미로 알맞은 것을 고르세요.\n\nJinwoo: I like the P.E. teacher, Mr. Wilson.\nHe is very kind.",
-    "options": [
-      "친절한",
-      "빠른",
-      "재미있는",
-      "조용한"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nMr. Wilson: ______ up! We will play soccer today.",
-    "options": [
-      "Listen",
-      "Speak",
-      "Draw",
-      "Study"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 오늘 할 활동을 고르세요.\n\nMr. Wilson: Listen up! We will play soccer today.",
-    "options": [
-      "play baseball",
-      "play soccer",
-      "study math",
-      "sing a song"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 나라가 좋아하는 활동을 고르세요.\n\nNara: Wow! You draw very well.\nEddie: Thanks. I like to draw.\nNara: I like to play sports.\n\n나라가 좋아하는 것은?",
-    "options": [
-      "그림 그리기",
-      "스포츠 하기",
-      "노래 부르기",
-      "수학 공부하기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 에디가 좋아하는 활동을 고르세요.\n\nNara: Wow! You draw very well.\nEddie: Thanks. I like to draw.",
-    "options": [
-      "노래 듣기",
-      "영어 말하기",
-      "그림 그리기",
-      "야구 하기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 speak의 뜻으로 알맞은 것을 고르세요.\n\nKevin: I like to speak English.",
-    "options": [
-      "듣다",
-      "말하다",
-      "그리다",
-      "공부하다"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / your / What / subject / is / ?",
-    "options": [
-      "What is your favorite subject?",
-      "What subject is your favorite?",
-      "Your favorite subject what is?",
-      "Is what your favorite subject?"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nMy / subject / favorite / art / is / .",
-    "options": [
-      "My subject favorite is art.",
-      "My favorite art is subject.",
-      "My favorite subject is art.",
-      "Art is my favorite subject is."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nlike / I / English / speak / to / .",
-    "options": [
-      "I like to speak English.",
-      "I like speak to English.",
-      "Like I to speak English.",
-      "English I like to speak."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nsong / favorite / My / is / 'Lemon Tree' / .",
-    "options": [
-      "My favorite song is 'Lemon Tree'.",
-      "Song favorite my is 'Lemon Tree'.",
-      "My is favorite song 'Lemon Tree'.",
-      "'Lemon Tree' is my favorite song is."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nmusic / listen / to / like / I / to / .",
-    "options": [
-      "I like to listen to music.",
-      "I like listen to to music.",
-      "To music I like listen to.",
-      "Music I to like listen to."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nsport / is / favorite / My / basketball / .",
-    "options": [
-      "My basketball favorite sport is.",
-      "My favorite sport is basketball.",
-      "Sport is my favorite basketball.",
-      "Basketball sport is my favorite."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / subject / My / Korean / is / .",
-    "options": [
-      "My favorite subject is Korean.",
-      "Subject Korean my favorite is.",
-      "My subject Korean is favorite.",
-      "Korean is subject my favorite."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nfavorite / art / My / is / subject / .",
-    "options": [
-      "My favorite subject is art.",
-      "Art is my favorite subject.",
-      "My art favorite subject is.",
-      "Favorite subject my is art is."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nlike / to / I / draw / .",
-    "options": [
-      "I like draw to.",
-      "I to like draw.",
-      "Like draw I to.",
-      "I like to draw."
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nstudy / math / to / like / I / to / .",
-    "options": [
-      "I like to study math.",
-      "I study like to math.",
-      "Math I like to study.",
-      "Study math I like to."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\ntoday / we / soccer / play / will / .",
-    "options": [
-      "We will play soccer today.",
-      "We will today play soccer.",
-      "Today soccer we will play.",
-      "Soccer will we play today."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nFun Art Class\nDraw and paint\nEvery Friday",
-    "options": [
-      "music",
-      "art",
-      "science",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nScience Time\nEasy experiments\nJoin us today",
-    "options": [
-      "math",
-      "art",
-      "science",
-      "music"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nMath Club\nWe like to study numbers\nAfter school",
-    "options": [
-      "science",
-      "math",
-      "Korean",
-      "P.E."
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nMusic Class\nListen to songs\nSing together",
-    "options": [
-      "art",
-      "music",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목에 대한 광고인지 고르세요.\n\nKorean Class\nSpeak and read Korean\nHave fun",
-    "options": [
-      "Korean",
-      "English",
-      "science",
-      "music"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 활동을 하는지 고르세요.\n\nArt Club\nWe like to draw pictures.\nCome and join us!",
-    "options": [
-      "그림 그리기",
-      "노래 부르기",
-      "야구 하기",
-      "수학 문제 풀기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 활동을 하는지 고르세요.\n\nMusic Club\nWe like to listen to music.\nLet’s sing a song!",
-    "options": [
-      "야구 하기",
-      "음악 듣기",
-      "그림 그리기",
-      "달리기"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 과목을 공부하는지 고르세요.\n\nScience Club\nWe study plants and animals.",
-    "options": [
-      "music",
-      "art",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 오늘 무엇을 하는지 고르세요.\n\nP.E. Class Today\nWe will play soccer.",
-    "options": [
-      "야구",
-      "테니스",
-      "축구",
-      "농구"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 빈칸에 알맞은 말을 고르세요.\n\n Class\nWe like to listen to songs.\nMy favorite subject is ______.",
-    "options": [
-      "Music / music",
-      "Art / art",
-      "Math / math",
-      "Science / science"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 학생이 이 수업을 가장 좋아할지 고르세요.\n\nArt Class\nWe draw and paint.\n\n누가 이 수업을 가장 좋아할까요?",
-    "options": [
-      "I like to study math.",
-      "I like to draw pictures.",
-      "I like to play soccer.",
-      "I like to listen to music."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 안내문을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in science class,\nwe will study the stars.\nScience is my favorite ______.",
-    "options": [
-      "sport",
-      "song",
-      "subject",
-      "teacher"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 안내문을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in music class,\nwe will listen to a new ______.",
-    "options": [
-      "song",
-      "subject",
-      "sport",
-      "math"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "다음 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWe read a Korean story.\nWe speak Korean in class.",
-    "options": [
-      "music",
-      "Korean",
-      "science",
-      "art"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 과목은 미술이야."",
-    "options": [
-      "My favorite subject is art.",
-      "My favorite subject is music.",
-      "My favorite sport is art.",
-      "My favorite song is art."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 과목은 수학이야."",
-    "options": [
-      "My favorite subject is math.",
-      "My favorite sport is math.",
-      "My favorite subject is music.",
-      "My favorite song is math."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 영어로 이야기하는 것을 좋아해."",
-    "options": [
-      "I like English.",
-      "I like to speak English.",
-      "I like to listen English.",
-      "I like to draw English."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 음악 듣는 것을 좋아해."",
-    "options": [
-      "I like to speak music.",
-      "I like to listen to music.",
-      "I like to study music.",
-      "I like to draw music."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 노래는 'Lemon Tree'야."",
-    "options": [
-      "My favorite song is 'Lemon Tree'.",
-      "My favorite subject is 'Lemon Tree'.",
-      "My favorite sport is 'Lemon Tree'.",
-      "My favorite art is 'Lemon Tree'."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 그림 그리기를 좋아해."",
-    "options": [
-      "I like to draw.",
-      "I like to speak.",
-      "I like to study.",
-      "I like to listen."
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 과학 공부하는 것을 좋아해."",
-    "options": [
-      "I like to draw science.",
-      "I like to study science.",
-      "I like to listen science.",
-      "I like to speak science."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 운동은 농구야."",
-    "options": [
-      "My favorite subject is basketball.",
-      "My favorite sport is basketball.",
-      "My favorite song is basketball.",
-      "My favorite art is basketball."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 오늘 수학 공부하는 것을 좋아해."",
-    "options": [
-      "I like to today study math.",
-      "I like study math today.",
-      "I like to study math today.",
-      "I study math today like to."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"내가 가장 좋아하는 과목은 과학이야."",
-    "options": [
-      "My favorite sport is science.",
-      "My favorite subject is science.",
-      "My favorite song is science.",
-      "My favorite science is subject."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 노래 듣는 것을 좋아해."",
-    "options": [
-      "I like to listen to songs.",
-      "I like to speak songs.",
-      "I like to draw songs.",
-      "I like to study songs."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 한국어로 말하는 것을 좋아해."",
-    "options": [
-      "I like to listen Korean.",
-      "I like to speak Korean.",
-      "I like to draw Korean.",
-      "I like to study Korean."
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 오늘 음악 듣는 것을 좋아해."",
-    "options": [
-      "I like to listen to music today.",
-      "I today like listen to music.",
-      "I like listen to music today.",
-      "Today I like to study music."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n"나는 오늘 과학 공부하는 것을 좋아해."",
-    "options": [
-      "I like to study science today.",
-      "I like study today science.",
-      "I today like to science study.",
-      "I like to today science study."
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 말에 알맞은 것을 고르세요.\n\nKevin: What is your favorite sport?\nJinwoo: My favorite sport is ______.",
-    "options": [
-      "math",
-      "art",
-      "basketball",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 질문에 알맞은 답을 고르세요.\n\nHana: What is your favorite subject?\nKevin: My favorite subject is music.\n\n케빈이 가장 좋아하는 과목은?",
-    "options": [
-      "music",
-      "math",
-      "science",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nJinwoo: What is your favorite subject, Nara?\nNara: My favorite subject is ______. I like to draw pictures.",
-    "options": [
-      "Korean",
-      "music",
-      "art",
-      "science"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "대화를 읽고, 밑줄 친 today의 뜻으로 알맞은 것을 고르세요.\n\nMr. Wilson: We will play soccer today.",
-    "options": [
-      "어제",
-      "오늘",
-      "내일",
-      "항상"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "대화를 읽고, 오늘 수업을 고르세요.\n\nTeacher: Today, we will listen to a new song.\nStudents: Great! We like music class.\n\n오늘 하는 수업은?",
-    "options": [
-      "art class",
-      "music class",
-      "science class",
-      "math class"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to study math.\nMy favorite subject is ______.",
-    "options": [
-      "art",
-      "music",
-      "math",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to listen to music.\nMy favorite subject is ______.",
-    "options": [
-      "music",
-      "Korean",
-      "science",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to speak Korean.\nMy favorite subject is ______.",
-    "options": [
-      "Korean",
-      "art",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to draw pictures.\nMy favorite subject is ______.",
-    "options": [
-      "math",
-      "art",
-      "music",
-      "science"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 말을 고르세요.\n\nI like to study science.\nMy favorite subject is ______.",
-    "options": [
-      "art",
-      "music",
-      "science",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 운동에 대한 광고인지 고르세요.\n\nFun Sports Day\nLet’s play soccer together!\nToday after school",
-    "options": [
-      "baseball",
-      "soccer",
-      "basketball",
-      "tennis"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "다음 광고를 읽고, 어떤 운동에 대한 광고인지 고르세요.\n\nBasketball Club\nWe like to play basketball.\nJoin us today!",
-    "options": [
-      "soccer",
-      "basketball",
-      "tennis",
-      "baseball"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in art class,\nI will ______ a picture.",
-    "options": [
-      "listen",
-      "draw",
-      "study",
-      "speak"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 빈칸에 알맞은 말을 고르세요.\n\nToday in Korean class,\nI will ______ Korean with my friend.",
-    "options": [
-      "draw",
-      "speak",
-      "listen to",
-      "study to"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is science.\nI like to study stars and plants.",
-    "options": [
-      "I Like Sports",
-      "I Like Science",
-      "I Like Music",
-      "I Like Art"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is music.\nI like to listen to songs.",
-    "options": [
-      "I Like Art",
-      "I Like Music",
-      "I Like Math",
-      "I Like Science"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is art.\nI like to draw pictures.",
-    "options": [
-      "I Like Art",
-      "I Like Sports",
-      "I Like Korean",
-      "I Like Music"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is math.\nI like to study numbers.",
-    "options": [
-      "I Like Music",
-      "I Like Science",
-      "I Like Math",
-      "I Like Art"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite subject is Korean.\nI like to speak Korean with my friends.",
-    "options": [
-      "I Like Korean",
-      "I Like Art",
-      "I Like English",
-      "I Like Music"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "짧은 글을 읽고, 알맞은 제목을 고르세요.\n\nMy favorite sport is baseball.\nI like to play catch with my dad.",
-    "options": [
-      "I Like Music",
-      "I Like Baseball",
-      "I Like Art",
-      "I Like Math"
-    ],
-    "difficulty": "medium",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe study numbers.\nMath is fun!",
-    "options": [
-      "music",
-      "Korean",
-      "art",
-      "math"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe draw and color.\nIt is my favorite subject.",
-    "options": [
-      "science",
-      "art",
-      "music",
-      "Korean"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 1
-  },
-  {
-    "question": "교실 안내문을 읽고, 어떤 과목 시간인지 고르세요.\n\nWelcome to our class!\nWe listen to many songs.\nMusic is my favorite subject.",
-    "options": [
-      "music",
-      "math",
-      "science",
-      "art"
-    ],
-    "difficulty": "easy",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 0
-  },
-  {
-    "question": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) My favorite ______ is science.\n(2) My favorite ______ is art.\n(3) My favorite ______ is music.",
-    "options": [
-      "sport",
-      "song",
-      "subject",
-      "teacher"
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  },
-  {
-    "question": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I like to ______ English.\n(2) I like to ______ Korean.\n(3) I like to ______ music in class.",
-    "options": [
-      "study",
-      "draw",
-      "listen to",
-      "speak"
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 3
-  },
-  {
-    "question": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I like to ______ music.\n(2) I like to ______ songs.\n(3) I like to ______ English songs.",
-    "options": [
-      "speak",
-      "draw",
-      "listen to",
-      "study"
-    ],
-    "difficulty": "hard",
-    "reward": 50,
-    "time": 10,
-    "answerIndex": 2
-  }
-]
+{
+  "type": "quizpack",
+  "version": "v1",
+  "pack": {
+    "title": "초등 4학년 사회 - 다양한 환경과 삶의 모습 (1차 40문제)",
+    "subject": "SOCIAL",
+    "grade": "4",
+    "description": "초등학교 4학년 2학기 사회 3단원 '다양한 환경과 삶의 모습'을 다루는 객관식 퀴즈 40문제입니다."
+  },
+  "questions": [
+    {
+      "id": "SOC4_ENV-001",
+      "index": 0,
+      "prompt": "‘환경’에 대한 설명으로 가장 알맞은 것은?",
+      "options": [
+        "사람이 살지 않는 곳만을 말한다.",
+        "우리 주변을 둘러싸고 있는 모든 것을 말한다.",
+        "집 안에서만 볼 수 있는 것만을 말한다.",
+        "산과 강 같은 자연만을 말한다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "다양한 환경과 삶의 모습", "기본 개념"]
+    },
+    {
+      "id": "SOC4_ENV-002",
+      "index": 1,
+      "prompt": "다음 중 ‘자연환경’에 해당하는 것은?",
+      "options": [
+        "아파트",
+        "자동차",
+        "산과 강",
+        "학교 건물"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "자연환경", "분류"]
+    },
+    {
+      "id": "SOC4_ENV-003",
+      "index": 2,
+      "prompt": "다음 중 ‘인문 환경’에 해당하는 것은?",
+      "options": [
+        "바다와 섬",
+        "풍차, 다리, 도로",
+        "강과 호수",
+        "산과 숲"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "인문환경", "분류"]
+    },
+    {
+      "id": "SOC4_ENV-004",
+      "index": 3,
+      "prompt": "우리 생활에 영향을 주는 환경의 예로 알맞지 않은 것은?",
+      "options": [
+        "기후에 따라 옷차림이 달라진다.",
+        "지형에 따라 농사짓는 방법이 달라진다.",
+        "환경과 상관없이 어디서나 같은 집에 산다.",
+        "해안인지 내륙인지에 따라 직업이 달라질 수 있다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "환경과 생활", "판단"]
+    },
+    {
+      "id": "SOC4_ENV-005",
+      "index": 4,
+      "prompt": "다음 중 산지(산간) 지역의 생활 모습에 대한 설명으로 알맞은 것은?",
+      "options": [
+        "넓은 평야에서 기계로 농사를 짓는다.",
+        "바다에서 고기를 잡는 일을 많이 한다.",
+        "경사가 가파른 곳이 많아 계단식 논을 만들기도 한다.",
+        "큰 공장이 많아 공업이 발달해 있다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "산지", "생활 모습"]
+    },
+    {
+      "id": "SOC4_ENV-006",
+      "index": 5,
+      "prompt": "평야 지역의 특징으로 가장 알맞은 것은?",
+      "options": [
+        "땅이 넓고 평평하여 논과 밭이 많이 있다.",
+        "산이 많고 경사가 가파르다.",
+        "바다와 가까워 어업이 발달한다.",
+        "섬이 많아 배를 자주 타야 한다."
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "평야", "생활 모습"]
+    },
+    {
+      "id": "SOC4_ENV-007",
+      "index": 6,
+      "prompt": "해안 지역에서 볼 수 있는 모습으로 알맞은 것은?",
+      "options": [
+        "계단식 논이 많이 있다.",
+        "바다와 인접해 있어 어항과 등대가 보인다.",
+        "높은 산이 많아 산악 마을이 형성된다.",
+        "대부분 공장 지대만 모여 있다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "해안", "생활 모습"]
+    },
+    {
+      "id": "SOC4_ENV-008",
+      "index": 7,
+      "prompt": "도시 지역의 생활 모습에 대한 설명으로 옳은 것은?",
+      "options": [
+        "집이 서로 멀리 떨어져 있어 이웃을 만나기 어렵다.",
+        "논과 밭이 대부분이라 농사만 짓는다.",
+        "고층 건물과 도로, 지하철 등이 발달해 있다.",
+        "바다 가까이에만 도시가 만들어진다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "생활 모습"]
+    },
+    {
+      "id": "SOC4_ENV-009",
+      "index": 8,
+      "prompt": "농촌 지역 생활의 특징으로 옳은 것은?",
+      "options": [
+        "공장에서 물건을 만드는 사람이 많다.",
+        "논과 밭에서 작물을 재배하는 사람이 많다.",
+        "배를 타고 나가서 고기를 잡는 사람이 많다.",
+        "은행과 회사에서 일하는 사람이 대부분이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "농촌", "직업"]
+    },
+    {
+      "id": "SOC4_ENV-010",
+      "index": 9,
+      "prompt": "어촌 지역의 대표적인 직업으로 알맞은 것은?",
+      "options": [
+        "광부",
+        "어부",
+        "은행원",
+        "버스 기사"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "어촌", "직업"]
+    },
+    {
+      "id": "SOC4_ENV-011",
+      "index": 10,
+      "prompt": "공업 지역에서 흔히 볼 수 있는 모습으로 알맞은 것은?",
+      "options": [
+        "논과 밭이 넓게 펼쳐져 있다.",
+        "수상가옥이 많이 있다.",
+        "공장과 창고가 많이 모여 있다.",
+        "어선이 많이 정박해 있다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "공업 지역", "생활 모습"]
+    },
+    {
+      "id": "SOC4_ENV-012",
+      "index": 11,
+      "prompt": "다음 중 자연환경에 잘 적응한 생활 모습이라고 보기 어려운 것은?",
+      "options": [
+        "눈이 많이 오는 지역에서 눈길에 미끄러지지 않는 신발을 신는다.",
+        "홍수가 잦은 지역에서 집 바닥을 높게 짓는다.",
+        "비가 거의 오지 않는 사막에서 물을 아껴 쓴다.",
+        "여름에도 두꺼운 외투를 입어 더위를 참는다."
+      ],
+      "answerIndex": 3,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "환경 적응", "판단"]
+    },
+    {
+      "id": "SOC4_ENV-013",
+      "index": 12,
+      "prompt": "사람들이 사는 집의 모양이 지역마다 다른 가장 큰 이유는?",
+      "options": [
+        "사람들이 좋아하는 색이 다르기 때문이다.",
+        "기후와 지형 등 환경이 다르기 때문이다.",
+        "집을 짓는 나무 종류가 같기 때문이다.",
+        "정부에서 모양을 정해 주기 때문이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "주거 형태", "환경과 생활"]
+    },
+    {
+      "id": "SOC4_ENV-014",
+      "index": 13,
+      "prompt": "눈이 많이 내리는 지역의 집 특징으로 알맞은 것은?",
+      "options": [
+        "지붕을 평평하게 만들어 눈이 쌓이게 한다.",
+        "지붕을 비스듬하게 만들어 눈이 잘 미끄러져 내려가게 한다.",
+        "지붕을 아주 낮게 만들어 눈을 막는다.",
+        "지붕을 완전히 없애서 눈이 쌓이지 않게 한다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "기후", "주거"]
+    },
+    {
+      "id": "SOC4_ENV-015",
+      "index": 14,
+      "prompt": "기후에 따른 옷차림을 바르게 설명한 것은?",
+      "options": [
+        "추운 지방에서는 반팔과 반바지를 많이 입는다.",
+        "더운 지방에서는 두꺼운 외투를 입고 다닌다.",
+        "비가 많이 오는 날에는 우산이나 우비를 사용한다.",
+        "눈 오는 날에는 샌들을 신고 다닌다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "기후", "옷차림"]
+    },
+    {
+      "id": "SOC4_ENV-016",
+      "index": 15,
+      "prompt": "우리나라 남부 지방에서 많이 먹는 음식으로, 따뜻한 기후와 관련이 깊은 것은?",
+      "options": [
+        "냉면",
+        "감귤",
+        "김치찌개",
+        "설렁탕"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "음식", "지역 특징"]
+    },
+    {
+      "id": "SOC4_ENV-017",
+      "index": 16,
+      "prompt": "교통이 발달하면 나타나는 변화로 옳은 것은?",
+      "options": [
+        "멀리 있는 지역과 교류하기 어려워진다.",
+        "사람과 물자의 이동이 더 빨라지고 편리해진다.",
+        "도시와 농촌의 연결이 끊어진다.",
+        "길이 없어져서 걸어 다니기만 해야 한다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "교통", "생활 변화"]
+    },
+    {
+      "id": "SOC4_ENV-018",
+      "index": 17,
+      "prompt": "다음 중 관광 산업이 발달하기 쉬운 지역의 특징으로 가장 알맞은 것은?",
+      "options": [
+        "볼거리가 거의 없고 교통이 불편하다.",
+        "자연경관이 아름답거나 특별한 문화유산이 있다.",
+        "공장만 모여 있는 지역이다.",
+        "사람이 거의 살지 않는 사막이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "관광", "지역 특징"]
+    },
+    {
+      "id": "SOC4_ENV-019",
+      "index": 18,
+      "prompt": "사람들이 자연환경에 ‘적응’하여 살아가는 예로 옳은 것은?",
+      "options": [
+        "산을 깎아 평지를 만든 뒤 농사를 짓는다.",
+        "비가 자주 오는 지역에 우비를 준비해 다닌다.",
+        "강을 메워 도로를 만든다.",
+        "숲을 모두 베어내고 공장을 세운다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "환경 적응", "실생활"]
+    },
+    {
+      "id": "SOC4_ENV-020",
+      "index": 19,
+      "prompt": "자연환경을 보호해야 하는 이유로 가장 알맞은 것은?",
+      "options": [
+        "관광객이 줄어들기 때문이다.",
+        "자연환경이 우리 생활과 생태계에 큰 영향을 주기 때문이다.",
+        "공업 생산량이 줄어들기 때문이다.",
+        "도시의 건물이 높아지기 때문이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "환경 보호", "이유"]
+    },
+    {
+      "id": "SOC4_ENV-021",
+      "index": 20,
+      "prompt": "사막 지역과 추운 지방 사람들의 옷차림을 비교한 설명으로 옳은 것은?",
+      "options": [
+        "둘 다 두꺼운 옷을 입는다.",
+        "사막에서는 두꺼운 외투를, 추운 지방에서는 얇은 옷을 입는다.",
+        "사막에서는 몸을 햇빛과 모래바람에서 보호하는 옷을, 추운 지방에서는 보온성이 좋은 옷을 입는다.",
+        "환경과 상관없이 세계 어디서나 같은 옷을 입는다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "세계 환경", "옷차림"]
+    },
+    {
+      "id": "SOC4_ENV-022",
+      "index": 21,
+      "prompt": "강이 많은 지역에서 발달하기 쉬운 교통수단은?",
+      "options": [
+        "지하철",
+        "배를 이용한 수상 교통",
+        "비행기",
+        "케이블카"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "교통", "자연환경"]
+    },
+    {
+      "id": "SOC4_ENV-023",
+      "index": 22,
+      "prompt": "홍수가 자주 나는 지역의 주거 모습으로 알맞은 것은?",
+      "options": [
+        "지붕 위에 물탱크를 올린다.",
+        "집 바닥을 땅과 가깝게 낮게 만든다.",
+        "집 바닥을 높게 하거나 기둥 위에 집을 짓는다.",
+        "창문을 아주 크게 만든다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "홍수", "주거환경"]
+    },
+    {
+      "id": "SOC4_ENV-024",
+      "index": 23,
+      "prompt": "기후와 농작물의 관계를 바르게 설명한 것은?",
+      "options": [
+        "추운 지방에서는 바나나와 같은 열대 과일만 자란다.",
+        "따뜻하고 비가 적당히 오는 지역에서는 벼를 재배하기 좋다.",
+        "사막에서는 물이 많아 벼농사를 많이 한다.",
+        "어떤 기후에서도 모든 작물이 똑같이 잘 자란다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "기후", "농업"]
+    },
+    {
+      "id": "SOC4_ENV-025",
+      "index": 24,
+      "prompt": "높은 산지에서 여름에도 시원한 기후를 이용하여 재배하는 농작물은?",
+      "options": [
+        "고랭지 채소",
+        "바나나",
+        "벼",
+        "오렌지"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "산지", "농업"]
+    },
+    {
+      "id": "SOC4_ENV-026",
+      "index": 25,
+      "prompt": "경사가 심한 산지에서 논농사를 짓기 위해 만든 것은?",
+      "options": [
+        "비닐하우스",
+        "수상가옥",
+        "계단식 논",
+        "고층 건물"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "산지", "계단식 논"]
+    },
+    {
+      "id": "SOC4_ENV-027",
+      "index": 26,
+      "prompt": "도시의 기온이 주변보다 더 높게 나타나는 현상을 무엇이라고 하는가?",
+      "options": [
+        "온실 효과",
+        "열섬 현상",
+        "지진 현상",
+        "증기 현상"
+      ],
+      "answerIndex": 1,
+      "difficulty": 3,
+      "tags": ["사회", "4학년", "도시 환경", "열섬 현상"]
+    },
+    {
+      "id": "SOC4_ENV-028",
+      "index": 27,
+      "prompt": "환경을 생각한 교통수단을 실천하는 방법으로 알맞은 것은?",
+      "options": [
+        "혼자 탈 수 있는 자동차만 이용한다.",
+        "가까운 거리는 걷거나 자전거를 탄다.",
+        "항상 비행기를 이용하여 이동한다.",
+        "목적지와 상관없이 자동차 시동을 켜 두고 다닌다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "환경 보호", "교통"]
+    },
+    {
+      "id": "SOC4_ENV-029",
+      "index": 28,
+      "prompt": "기후 변화로 인해 우리 생활에 나타날 수 있는 일로 옳지 않은 것은?",
+      "options": [
+        "폭우와 폭설 같은 이상 기후가 늘어난다.",
+        "해수면이 상승하여 해안 지역이 물에 잠길 수 있다.",
+        "계절 구분이 더 분명해져 농사가 쉬워진다.",
+        "더위와 추위가 심해져 건강에 문제가 생길 수 있다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "기후 변화", "영향"]
+    },
+    {
+      "id": "SOC4_ENV-030",
+      "index": 29,
+      "prompt": "지구 온난화를 줄이기 위한 실천으로 가장 알맞은 것은?",
+      "options": [
+        "전기를 마음껏 사용한다.",
+        "가까운 거리도 항상 자동차를 이용한다.",
+        "분리수거와 재활용을 실천한다.",
+        "에어컨을 항상 켜 두고 창문을 연다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "기후 변화", "실천"]
+    },
+    {
+      "id": "SOC4_ENV-031",
+      "index": 30,
+      "prompt": "기후 변화의 주요 원인으로 알려진 기체를 무엇이라고 하는가?",
+      "options": [
+        "산소",
+        "질소",
+        "온실가스",
+        "수소"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "온실가스", "기후 변화"]
+    },
+    {
+      "id": "SOC4_ENV-032",
+      "index": 31,
+      "prompt": "북극과 남극의 빙하가 녹으면 나타날 수 있는 일로 알맞은 것은?",
+      "options": [
+        "해수면이 낮아져 새로운 땅이 생긴다.",
+        "해수면이 높아져 해안 지역이 침수될 위험이 커진다.",
+        "사막이 줄어들어 비가 많이 온다.",
+        "지구의 공기가 더 맑아진다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 3,
+      "tags": ["사회", "4학년", "기후 변화", "빙하"]
+    },
+    {
+      "id": "SOC4_ENV-033",
+      "index": 32,
+      "prompt": "이상 기후의 예로 보기 어려운 것은?",
+      "options": [
+        "한겨울에 갑자기 여름처럼 더워지는 현상",
+        "짧은 시간에 매우 많은 비가 내리는 현상",
+        "매년 같은 시기에 비슷한 양의 비가 내리는 현상",
+        "여름에 눈이 오는 현상"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "이상 기후", "판단"]
+    },
+    {
+      "id": "SOC4_ENV-034",
+      "index": 33,
+      "prompt": "우리 고장의 환경과 생활 모습을 조사하기 위한 방법으로 옳은 것은?",
+      "options": [
+        "인터넷으로 다른 나라 도시를 검색한다.",
+        "주변 사람들을 인터뷰하거나 직접 사진을 찍어 본다.",
+        "과거의 교과서만 읽어 본다.",
+        "지도는 전혀 사용하지 않는다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "탐구 활동", "우리 고장"]
+    },
+    {
+      "id": "SOC4_ENV-035",
+      "index": 34,
+      "prompt": "세계 여러 지역 사람들의 생활 모습을 비교한 설명으로 옳은 것은?",
+      "options": [
+        "모든 지역에서 같은 집, 같은 옷, 같은 음식을 사용한다.",
+        "환경이 달라져도 생활 모습은 환경과 상관없다.",
+        "환경에 따라 집과 옷, 음식, 직업 등이 다양하게 나타난다.",
+        "추운 지역 사람들은 집 밖에서만 생활한다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "세계 환경", "생활 비교"]
+    },
+    {
+      "id": "SOC4_ENV-036",
+      "index": 35,
+      "prompt": "다른 지역의 문화를 이해하고 존중해야 하는 이유로 알맞은 것은?",
+      "options": [
+        "우리 문화가 항상 더 뛰어나기 때문이다.",
+        "서로의 차이를 인정하고 평화로운 관계를 유지하기 위해서이다.",
+        "다른 문화를 모두 똑같이 만들기 위해서이다.",
+        "다른 문화를 없애기 위해서이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "문화 이해", "태도"]
+    },
+    {
+      "id": "SOC4_ENV-037",
+      "index": 36,
+      "prompt": "인터넷과 통신 기술의 발달로 나타난 변화로 옳은 것은?",
+      "options": [
+        "멀리 있는 사람과는 연락할 수 없게 되었다.",
+        "세계 여러 지역 사람들과 쉽게 소통할 수 있게 되었다.",
+        "지도와 사진을 전혀 사용할 수 없게 되었다.",
+        "정보를 나눌 수 있는 방법이 사라졌다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "정보화 사회", "소통"]
+    },
+    {
+      "id": "SOC4_ENV-038",
+      "index": 37,
+      "prompt": "자연환경을 파괴하지 않으면서 이용하는 방법으로 알맞지 않은 것은?",
+      "options": [
+        "산에 오를 때 정해진 길로 다닌다.",
+        "쓰레기를 되가져와 분리수거한다.",
+        "나뭇가지를 꺾어 캠프파이어를 크게 피운다.",
+        "습지와 갯벌의 생물을 함부로 잡지 않는다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "환경 보호", "실천"]
+    },
+    {
+      "id": "SOC4_ENV-039",
+      "index": 38,
+      "prompt": "다음 중 우리 생활이 환경에 영향을 주는 예로 알맞은 것은?",
+      "options": [
+        "나무를 심어 동물의 서식지가 늘어났다.",
+        "쓰레기를 함부로 버려 강이 더 깨끗해졌다.",
+        "자동차를 많이 사용해 공기가 더 맑아졌다.",
+        "공장을 지어 숲이 더 넓어졌다."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "인간과 환경", "상호 작용"]
+    },
+    {
+      "id": "SOC4_ENV-040",
+      "index": 39,
+      "prompt": "단원 ‘다양한 환경과 삶의 모습’에서 배운 내용으로 가장 알맞은 정리는?",
+      "options": [
+        "환경은 우리 생활과 관계가 없고, 생활은 모두 똑같다.",
+        "환경은 자연환경만을 말하며 인문 환경은 중요하지 않다.",
+        "환경에 따라 사람들의 삶의 모습이 다양하게 나타나며, 서로를 이해하고 환경을 지키려는 노력이 필요하다.",
+        "환경을 지키기 위해서는 어떤 활동도 하면 안 된다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "단원 정리", "핵심 개념"]
+    },
+    {
+      "id": "SOC4_ENV-041",
+      "index": 40,
+      "prompt": "도시에 대한 정의로 가장 알맞은 것은?",
+      "options": [
+        "사람이 거의 살지 않는 곳으로, 농사를 짓는 곳이다.",
+        "바다와 강이 만나 물고기가 많이 사는 곳이다.",
+        "많은 사람이 모여 살고 있고 사회·정치·경제 활동의 중심이 되는 곳이다.",
+        "산과 숲이 많은 자연 그대로의 모습이 남아 있는 곳이다."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "정의"]
+    },
+    {
+      "id": "SOC4_ENV-042",
+      "index": 41,
+      "prompt": "다음 중 도시의 특징으로 가장 알맞은 것은?",
+      "options": [
+        "높은 건물이 거의 없고, 논과 밭이 넓게 펼쳐져 있다.",
+        "많은 사람이 모여 살며, 높은 건물과 여러 공공기관이 모여 있다.",
+        "집들이 서로 멀리 떨어져 있어 이웃을 만나기 어렵다.",
+        "바다와 가까워 어선과 등대가 많이 보인다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "특징"]
+    },
+    {
+      "id": "SOC4_ENV-043",
+      "index": 42,
+      "prompt": "다음 중 도시에서 흔히 볼 수 있는 모습이 아닌 것은?",
+      "options": [
+        "높은 아파트와 빌라가 많이 모여 있다.",
+        "대형 할인점과 다양한 상점이 모여 있다.",
+        "크고 작은 도로에 자동차가 많이 다닌다.",
+        "계단식 논이 산비탈에 줄줄이 만들어져 있다."
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "비교"]
+    },
+    {
+      "id": "SOC4_ENV-044",
+      "index": 43,
+      "prompt": "도시의 교통에 대한 설명으로 가장 알맞은 것은?",
+      "options": [
+        "주로 나룻배를 이용해 이동한다.",
+        "다양한 교통수단이 발달하여 버스, 지하철, 택시 등을 이용할 수 있다.",
+        "산길만 있어 자동차가 다니기 어렵다.",
+        "눈길을 걸어서만 이동할 수 있다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "교통"]
+    },
+    {
+      "id": "SOC4_ENV-045",
+      "index": 44,
+      "prompt": "도시의 주거 형태 특징으로 알맞은 것은?",
+      "options": [
+        "한 동네에 한 채의 집만 있다.",
+        "아파트, 빌라 등 여러 세대가 함께 사는 높은 주택이 많다.",
+        "주로 나무로 지은 초가집이 넓게 퍼져 있다.",
+        "배 위에 지은 수상가옥이 대부분이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "주거 형태"]
+    },
+    {
+      "id": "SOC4_ENV-046",
+      "index": 45,
+      "prompt": "다음 중 도시에서 볼 수 있는 문화 시설에 해당하는 것은?",
+      "options": [
+        "논과 밭",
+        "어선과 어항",
+        "박물관과 공연장",
+        "계단식 논"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "문화 시설"]
+    },
+    {
+      "id": "SOC4_ENV-047",
+      "index": 46,
+      "prompt": "도시에 있는 공공기관의 예로 가장 알맞은 것은?",
+      "options": [
+        "시청과 교육청",
+        "축사와 비닐하우스",
+        "어판장과 등대",
+        "광산과 탄광"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "공공기관"]
+    },
+    {
+      "id": "SOC4_ENV-048",
+      "index": 47,
+      "prompt": "다음 중 도시의 생활 모습을 바르게 설명한 것은?",
+      "options": [
+        "거리 곳곳에 사람이 적고, 집들이 서로 멀리 떨어져 있다.",
+        "대형 할인점과 여러 상점이 모여 있어 물건을 사기 편리하다.",
+        "농사를 짓는 사람만 모여 사는 곳이다.",
+        "배를 타고 나가 고기를 잡는 사람이 대부분이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": ["사회", "4학년", "도시", "생활 모습"]
+    },
+    {
+      "id": "SOC4_ENV-049",
+      "index": 48,
+      "prompt": "도시와 농촌의 생활 모습을 비교한 설명으로 옳은 것은?",
+      "options": [
+        "도시와 농촌 모두 높은 아파트만 있다.",
+        "도시는 많은 사람이 모여 살고, 농촌은 논과 밭이 넓게 펼쳐져 있다.",
+        "농촌에는 도로와 교통수단이 전혀 없다.",
+        "농촌은 사회·정치·경제 활동의 중심이 되는 곳이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "도시", "농촌 비교"]
+    },
+    {
+      "id": "SOC4_ENV-050",
+      "index": 49,
+      "prompt": "다음 중 도시의 특징을 모두 포함하여 바르게 정리한 것은?",
+      "options": [
+        "사람이 거의 살지 않고, 농사만 짓는 곳이다.",
+        "많은 사람이 모여 살며, 높은 건물과 다양한 교통수단, 문화시설과 공공기관 등이 모여 있는 곳이다.",
+        "바다와 강이 만나서 어선이 많이 다니는 곳이다.",
+        "산이 많고 계단식 논이 발달한 곳이다."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": ["사회", "4학년", "도시", "정의와 특징"]
+    }
+  ]
+}
