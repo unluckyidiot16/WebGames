@@ -1,0 +1,1146 @@
+{
+  "type": "quizpack",
+  "version": "v1",
+  "pack": {
+    "title": "Eng4_Actions",
+    "subject": "영어",
+    "grade": "4",
+    "description": "4학년 영어 현재진행형 및 동작 표현"
+  },
+  "questions": [
+    {
+      "id": "10000000-0000-0000-0000-000000000001",
+      "index": 0,
+      "prompt": "밑줄 친 cooking의 뜻으로 알맞은 것을 고르세요.\n\nMom is <u>cooking</u> in the kitchen.",
+      "options": [
+        "청소하기",
+        "요리하기",
+        "그림 그리기",
+        "책 읽기"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000002",
+      "index": 1,
+      "prompt": "밑줄 친 reading의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>reading</u> a book.",
+      "options": [
+        "TV 보기",
+        "요리하기",
+        "책 읽기",
+        "청소하기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000003",
+      "index": 2,
+      "prompt": "밑줄 친 watching의 뜻으로 알맞은 것을 고르세요.\n\nDad is <u>watching</u> TV.",
+      "options": [
+        "보기",
+        "만들기",
+        "그리기",
+        "청소하기"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000004",
+      "index": 3,
+      "prompt": "밑줄 친 drawing의 뜻으로 알맞은 것을 고르세요.\n\nShe is <u>drawing</u> a picture.",
+      "options": [
+        "요리하기",
+        "읽기",
+        "청소하기",
+        "그리기"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000005",
+      "index": 4,
+      "prompt": "밑줄 친 cleaning의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>cleaning</u> my room.",
+      "options": [
+        "청소하기",
+        "요리하기",
+        "그림 그리기",
+        "TV 보기"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000006",
+      "index": 5,
+      "prompt": "밑줄 친 making의 뜻으로 알맞은 것을 고르세요.\n\nHe is <u>making</u> a robot.",
+      "options": [
+        "읽기",
+        "보기",
+        "만들기",
+        "청소하기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000007",
+      "index": 6,
+      "prompt": "밑줄 친 picture의 뜻으로 알맞은 것을 고르세요.\n\nI am drawing a <u>picture</u>.",
+      "options": [
+        "로봇",
+        "책",
+        "방",
+        "그림"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000008",
+      "index": 7,
+      "prompt": "밑줄 친 book의 뜻으로 알맞은 것을 고르세요.\n\nShe is reading a <u>book</u>.",
+      "options": [
+        "그림",
+        "책",
+        "로봇",
+        "텔레비전"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000009",
+      "index": 8,
+      "prompt": "밑줄 친 robot의 뜻으로 알맞은 것을 고르세요.\n\nHe is making a <u>robot</u>.",
+      "options": [
+        "책",
+        "그림",
+        "로봇",
+        "방"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000010",
+      "index": 9,
+      "prompt": "밑줄 친 room의 뜻으로 알맞은 것을 고르세요.\n\nI am cleaning my <u>room</u>.",
+      "options": [
+        "텔레비전",
+        "그림",
+        "방",
+        "책"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000011",
+      "index": 10,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n음식을 만드는 것입니다.",
+      "options": [
+        "reading",
+        "cooking",
+        "cleaning",
+        "watching"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000012",
+      "index": 11,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n책을 읽는 것입니다.",
+      "options": [
+        "drawing",
+        "cooking",
+        "reading",
+        "making"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000013",
+      "index": 12,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n그림을 그리는 것입니다.",
+      "options": [
+        "drawing",
+        "reading",
+        "cooking",
+        "cleaning"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000014",
+      "index": 13,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n방을 깨끗하게 하는 것입니다.",
+      "options": [
+        "cooking",
+        "watching",
+        "reading",
+        "cleaning"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000015",
+      "index": 14,
+      "prompt": "대화를 읽고, 밑줄 친 말의 뜻으로 알맞은 것을 고르세요.\n\nA: <u>What are you doing?</u>\nB: I'm reading a book.",
+      "options": [
+        "너는 누구니?",
+        "뭐 하고 있니?",
+        "어디에 있니?",
+        "무엇을 좋아하니?"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000016",
+      "index": 15,
+      "prompt": "대화를 읽고, 민수가 하고 있는 것을 고르세요.\n\nA: What are you doing, Minsu?\nMinsu: I'm watching TV.",
+      "options": [
+        "책 읽기",
+        "요리하기",
+        "TV 보기",
+        "청소하기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000017",
+      "index": 16,
+      "prompt": "대화를 읽고, 지호가 하고 있는 것을 고르세요.\n\nA: What are you doing?\nJiho: I'm drawing a picture.",
+      "options": [
+        "로봇 만들기",
+        "그림 그리기",
+        "책 읽기",
+        "방 청소하기"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000018",
+      "index": 17,
+      "prompt": "대화를 읽고, 수아가 하고 있는 것을 고르세요.\n\nA: What are you doing, Sua?\nSua: I'm cleaning my room.",
+      "options": [
+        "요리하기",
+        "TV 보기",
+        "책 읽기",
+        "방 청소하기"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000019",
+      "index": 18,
+      "prompt": "대화를 읽고, 준호가 하고 있는 것을 고르세요.\n\nA: What are you doing?\nJunho: I'm making a robot.",
+      "options": [
+        "로봇 만들기",
+        "그림 그리기",
+        "요리하기",
+        "TV 보기"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000020",
+      "index": 19,
+      "prompt": "대화를 읽고, 엄마가 하고 있는 것을 고르세요.\n\nA: What are you doing, Mom?\nMom: I'm cooking.",
+      "options": [
+        "청소하기",
+        "책 읽기",
+        "요리하기",
+        "그림 그리기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000021",
+      "index": 20,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm ______ TV.\n(나는 TV를 보고 있어.)",
+      "options": [
+        "reading",
+        "watching",
+        "drawing",
+        "cleaning"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000022",
+      "index": 21,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm ______ a book.\n(나는 책을 읽고 있어.)",
+      "options": [
+        "watching",
+        "cooking",
+        "reading",
+        "making"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000023",
+      "index": 22,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm ______ a picture.\n(나는 그림을 그리고 있어.)",
+      "options": [
+        "drawing",
+        "reading",
+        "cooking",
+        "cleaning"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000024",
+      "index": 23,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm ______ a robot.\n(나는 로봇을 만들고 있어.)",
+      "options": [
+        "reading",
+        "watching",
+        "drawing",
+        "making"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000025",
+      "index": 24,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm ______ the room.\n(나는 방을 청소하고 있어.)",
+      "options": [
+        "cooking",
+        "watching",
+        "cleaning",
+        "drawing"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000026",
+      "index": 25,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm ______.\n(나는 요리하고 있어.)",
+      "options": [
+        "cooking",
+        "reading",
+        "watching",
+        "drawing"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000027",
+      "index": 26,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 TV를 보고 있어.",
+      "options": [
+        "I'm reading a book.",
+        "I'm watching TV.",
+        "I'm drawing a picture.",
+        "I'm cleaning the room."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000028",
+      "index": 27,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 책을 읽고 있어.",
+      "options": [
+        "I'm cooking.",
+        "I'm watching TV.",
+        "I'm reading a book.",
+        "I'm making a robot."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000029",
+      "index": 28,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 그림을 그리고 있어.",
+      "options": [
+        "I'm drawing a picture.",
+        "I'm reading a book.",
+        "I'm cooking.",
+        "I'm watching TV."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000030",
+      "index": 29,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 로봇을 만들고 있어.",
+      "options": [
+        "I'm cleaning the room.",
+        "I'm drawing a picture.",
+        "I'm making a robot.",
+        "I'm cooking."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000031",
+      "index": 30,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 방을 청소하고 있어.",
+      "options": [
+        "I'm watching TV.",
+        "I'm cleaning the room.",
+        "I'm reading a book.",
+        "I'm cooking."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000032",
+      "index": 31,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 요리하고 있어.",
+      "options": [
+        "I'm reading a book.",
+        "I'm drawing a picture.",
+        "I'm cooking.",
+        "I'm making a robot."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000033",
+      "index": 32,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n뭐 하고 있니?",
+      "options": [
+        "Where are you?",
+        "Who are you?",
+        "What are you doing?",
+        "How are you?"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000034",
+      "index": 33,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nyou / are / doing / What / ?",
+      "options": [
+        "What doing are you?",
+        "You are what doing?",
+        "What are you doing?",
+        "Are you what doing?"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000035",
+      "index": 34,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nwatching / I'm / TV / .",
+      "options": [
+        "I'm watching TV.",
+        "Watching I'm TV.",
+        "TV I'm watching.",
+        "I'm TV watching."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000036",
+      "index": 35,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nreading / a / I'm / book / .",
+      "options": [
+        "Reading I'm a book.",
+        "I'm a reading book.",
+        "I'm reading a book.",
+        "A book I'm reading."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000037",
+      "index": 36,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\ndrawing / I'm / a / picture / .",
+      "options": [
+        "I'm a drawing picture.",
+        "Drawing I'm a picture.",
+        "I'm drawing a picture.",
+        "A picture I'm drawing."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000038",
+      "index": 37,
+      "prompt": "다음 낱말을 알맞게 배열한 문장을 고르세요.\n\nmaking / I'm / robot / a / .",
+      "options": [
+        "Making I'm a robot.",
+        "I'm making a robot.",
+        "I'm a making robot.",
+        "Robot a I'm making."
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000039",
+      "index": 38,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\ncoo_ing",
+      "options": [
+        "c",
+        "k",
+        "g",
+        "p"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000040",
+      "index": 39,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nrea_ing",
+      "options": [
+        "t",
+        "k",
+        "d",
+        "p"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000041",
+      "index": 40,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nwat_hing",
+      "options": [
+        "s",
+        "c",
+        "k",
+        "t"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000042",
+      "index": 41,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\ndra_ing",
+      "options": [
+        "v",
+        "w",
+        "u",
+        "n"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000043",
+      "index": 42,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nclea_ing",
+      "options": [
+        "m",
+        "n",
+        "r",
+        "t"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000044",
+      "index": 43,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nmak_ng",
+      "options": [
+        "e",
+        "a",
+        "i",
+        "o"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000045",
+      "index": 44,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\npict_re",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "u"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000046",
+      "index": 45,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nro_ot",
+      "options": [
+        "b",
+        "d",
+        "p",
+        "t"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000047",
+      "index": 46,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nbo_k",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000048",
+      "index": 47,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nro_m",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000049",
+      "index": 48,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n요리하기",
+      "options": [
+        "coking",
+        "cooking",
+        "coocing",
+        "cocking"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000050",
+      "index": 49,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n읽기",
+      "options": [
+        "reeding",
+        "reding",
+        "reading",
+        "reeding"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000051",
+      "index": 50,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n보기",
+      "options": [
+        "waching",
+        "whatching",
+        "watching",
+        "watcing"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000052",
+      "index": 51,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n그리기",
+      "options": [
+        "drawing",
+        "drowing",
+        "drawwing",
+        "draing"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000053",
+      "index": 52,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n청소하기",
+      "options": [
+        "cleening",
+        "clening",
+        "cleaning",
+        "cleanning"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000054",
+      "index": 53,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n만들기",
+      "options": [
+        "makeing",
+        "making",
+        "macking",
+        "makking"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000055",
+      "index": 54,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n그림",
+      "options": [
+        "pictur",
+        "pictuer",
+        "picture",
+        "pichure"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000056",
+      "index": 55,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n로봇",
+      "options": [
+        "robbot",
+        "roboat",
+        "robat",
+        "robot"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000057",
+      "index": 56,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n책",
+      "options": [
+        "boock",
+        "book",
+        "bock",
+        "bokk"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000058",
+      "index": 57,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n방",
+      "options": [
+        "rom",
+        "roome",
+        "room",
+        "ruum"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000059",
+      "index": 58,
+      "prompt": "짧은 글을 읽고, 민수가 하고 있는 일을 고르세요.\n\nHi, I'm Minsu.\nI'm watching TV now.",
+      "options": [
+        "책 읽기",
+        "TV 보기",
+        "요리하기",
+        "그림 그리기"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000060",
+      "index": 59,
+      "prompt": "짧은 글을 읽고, 수아가 하고 있는 일을 고르세요.\n\nHi, I'm Sua.\nI'm reading a book now.",
+      "options": [
+        "TV 보기",
+        "로봇 만들기",
+        "책 읽기",
+        "방 청소하기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000061",
+      "index": 60,
+      "prompt": "짧은 글을 읽고, 지호가 하고 있는 일을 고르세요.\n\nHi, I'm Jiho.\nI'm drawing a picture now.",
+      "options": [
+        "그림 그리기",
+        "요리하기",
+        "책 읽기",
+        "청소하기"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000062",
+      "index": 61,
+      "prompt": "짧은 글을 읽고, 준호가 하고 있는 일을 고르세요.\n\nHi, I'm Junho.\nI'm making a robot now.",
+      "options": [
+        "TV 보기",
+        "책 읽기",
+        "로봇 만들기",
+        "그림 그리기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000063",
+      "index": 62,
+      "prompt": "짧은 글을 읽고, 엄마가 하고 있는 일을 고르세요.\n\nMom is in the kitchen.\nShe is cooking now.",
+      "options": [
+        "청소하기",
+        "요리하기",
+        "TV 보기",
+        "책 읽기"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000064",
+      "index": 63,
+      "prompt": "짧은 글을 읽고, 유리가 하고 있는 일을 고르세요.\n\nHi, I'm Yuri.\nI'm cleaning my room now.",
+      "options": [
+        "그림 그리기",
+        "요리하기",
+        "방 청소하기",
+        "로봇 만들기"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000065",
+      "index": 64,
+      "prompt": "다음 중 올바른 문장을 고르세요.",
+      "options": [
+        "I watching TV.",
+        "I'm watch TV.",
+        "I am watching TV.",
+        "I am watch TV."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000066",
+      "index": 65,
+      "prompt": "다음 중 올바른 문장을 고르세요.",
+      "options": [
+        "I'm reading a book.",
+        "I reading a book.",
+        "I'm read a book.",
+        "I am read a book."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000067",
+      "index": 66,
+      "prompt": "다음 중 올바른 문장을 고르세요.",
+      "options": [
+        "What you are doing?",
+        "What are doing you?",
+        "What are you doing?",
+        "What doing are you?"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000068",
+      "index": 67,
+      "prompt": "상황에 알맞은 표현을 고르세요.\n\n민수가 스케치북에 색연필로 그림을 그리고 있습니다. 민수에게 무엇을 하고 있는지 물어보려면?",
+      "options": [
+        "Where are you?",
+        "What are you doing?",
+        "How are you?",
+        "Who are you?"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000069",
+      "index": 68,
+      "prompt": "상황에 알맞은 표현을 고르세요.\n\n엄마가 부엌에서 음식을 만들고 있습니다. 엄마가 무엇을 하고 있는지 표현하면?",
+      "options": [
+        "Mom is reading a book.",
+        "Mom is watching TV.",
+        "Mom is cooking.",
+        "Mom is cleaning."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000070",
+      "index": 69,
+      "prompt": "상황에 알맞은 표현을 고르세요.\n\n지호가 소파에 앉아 리모컨을 들고 화면을 보고 있습니다. 지호가 무엇을 하고 있는지 표현하면?",
+      "options": [
+        "Jiho is reading a book.",
+        "Jiho is making a robot.",
+        "Jiho is cooking.",
+        "Jiho is watching TV."
+      ],
+      "answerIndex": 3,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000071",
+      "index": 70,
+      "prompt": "상황에 알맞은 표현을 고르세요.\n\n수아가 빗자루로 자기 방을 깨끗하게 하고 있습니다. 수아가 무엇을 하고 있는지 표현하면?",
+      "options": [
+        "Sua is cleaning her room.",
+        "Sua is drawing a picture.",
+        "Sua is cooking.",
+        "Sua is reading a book."
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000072",
+      "index": 71,
+      "prompt": "상황에 알맞은 표현을 고르세요.\n\n준호가 레고 블록으로 로봇을 조립하고 있습니다. 준호가 무엇을 하고 있는지 표현하면?",
+      "options": [
+        "Junho is watching TV.",
+        "Junho is reading a book.",
+        "Junho is making a robot.",
+        "Junho is cooking."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000073",
+      "index": 72,
+      "prompt": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I'm ______ TV.\n(2) She is ______ a movie.\n(3) He is ______ a video.",
+      "options": [
+        "reading",
+        "cooking",
+        "watching",
+        "cleaning"
+      ],
+      "answerIndex": 2,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000074",
+      "index": 73,
+      "prompt": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I'm ______ a picture.\n(2) She is ______ a house.\n(3) He is ______ a tree.",
+      "options": [
+        "watching",
+        "drawing",
+        "cooking",
+        "reading"
+      ],
+      "answerIndex": 1,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000075",
+      "index": 74,
+      "prompt": "문장을 읽고, 빈칸에 공통으로 들어갈 알맞은 말을 고르세요.\n\n(1) I'm ______ a book.\n(2) She is ______ a story.\n(3) He is ______ a comic.",
+      "options": [
+        "watching",
+        "cooking",
+        "drawing",
+        "reading"
+      ],
+      "answerIndex": 3,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000076",
+      "index": 75,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: ______ drawing a picture.",
+      "options": [
+        "I",
+        "I'm",
+        "You",
+        "You're"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000077",
+      "index": 76,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nA: ______ are you doing?\nB: I'm cooking.",
+      "options": [
+        "Where",
+        "Who",
+        "What",
+        "How"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000078",
+      "index": 77,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm reading a ______.",
+      "options": [
+        "TV",
+        "robot",
+        "room",
+        "book"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000079",
+      "index": 78,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm making a ______.",
+      "options": [
+        "book",
+        "TV",
+        "robot",
+        "picture"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000080",
+      "index": 79,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm drawing a ______.",
+      "options": [
+        "book",
+        "picture",
+        "robot",
+        "room"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10000000-0000-0000-0000-000000000081",
+      "index": 80,
+      "prompt": "대화를 읽고, 빈칸에 알맞은 말을 고르세요.\n\nA: What are you doing?\nB: I'm cleaning the ______.",
+      "options": [
+        "book",
+        "picture",
+        "robot",
+        "room"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    }
+  ]
+}
