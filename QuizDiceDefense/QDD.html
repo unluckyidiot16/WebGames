@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>다이스 랜덤 퀴즈 디펜스 (v3.3b)</title>
     <link rel="preload"
-          href="https://unluckyidiot16.github.io/assets-common/QuizDiceDefense/QuizPack/quizpack.json?v=20251112"
+          href="https://unluckyidiot16.github.io/WebGames/QuizDiceDefense/QuizPack/quizpack.json?v=20251112"
           as="fetch"
           crossorigin="anonymous">
     <style>
@@ -2296,7 +2296,7 @@
         } else {
             // 기본: /assets-common/QuizDiceDefense/QuizPack/{파일명}.json
             const origin = window.location.origin;
-            const basePath = "/assets-common/QuizDiceDefense/QuizPack/";
+            const basePath = "/WebGames/QuizDiceDefense/QuizPack/";
             const fileName = (packParam && packParam.trim()) || "quizpack"; // 기본은 quizpack
             QUIZ_PACK_BASE = `${origin}${basePath}${fileName}.json`;
         }
