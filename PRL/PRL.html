@@ -820,32 +820,33 @@
     }
 
     function generateMath() {
-        // 100~999 사이의 세자리수 피제수 생성
-        const dividend = Math.floor(Math.random() * 900) + 100;
-        // 10~99 사이의 두자리수 제수 생성
-        const divisor = Math.floor(Math.random() * 90) + 10;
+        // 첫 번째 숫자 (단)는 3~9 (2단 제외)
+        // Math.random() * 7 은 0.0 ~ 6.99... 이므로, + 3 하면 3.0 ~ 9.99...
+        const n1 = Math.floor(Math.random() * 7) + 3;
 
-        const quotient = Math.floor(dividend / divisor); // 몫
-        const remainder = dividend % divisor;          // 나머지
+        // 두 번째 숫자 (곱해지는 수)는 1~9
+        // Math.random() * 9 는 0.0 ~ 8.99... 이므로, + 1 하면 1.0 ~ 9.99...
+        const n2 = Math.floor(Math.random() * 9) + 1;
 
-        const isQuotientQ = Math.random() < 0.5; // 몫을 물을지 나머지를 물을지 결정
-        let q = "", a = 0;
-
-        if (isQuotientQ) {
-            q = `${dividend} ÷ ${divisor} 의 몫은?`;
-            a = quotient;
-        } else {
-            q = `${dividend} ÷ ${divisor} 의 나머지는?`;
-            a = remainder;
-        }
+        const a = n1 * n2;
+        const q = `${n1} × ${n2} = ?`;
 
         // 정답을 포함한 4개의 선택지 생성
         const s = new Set([a]);
         while (s.size < 4) {
-            // 정답 근처의 오답 생성 (자연수 범위 유지)
-            let offset = Math.floor(Math.random() * 11) - 5; // -5 ~ +5
+            // 정답 근처의 오답 생성 (-4 ~ +4 범위에서 0 제외)
+            let offset;
+            do {
+                // Math.floor(Math.random() * 9) - 4 는 -4부터 4까지의 정수를 생성
+                offset = Math.floor(Math.random() * 9) - 4;
+            } while (offset === 0);
+
             let f = a + offset;
-            if (f >= 0 && f !== a) s.add(f);
+
+            // 정답이 아니며, 결과가 0보다 큰 경우만 선택지로 추가
+            if (f > 0 && f !== a) {
+                s.add(f);
+            }
         }
 
         // 무작위로 섞인 선택지 반환
