@@ -820,15 +820,40 @@
     }
 
     function generateMath() {
-        const r=(n)=>Math.floor(Math.random()*(n+1));
-        const t = Math.floor(Math.random()*5); let q="",a=0;
-        if(t===0){const n1=r(20),n2=r(20-n1);a=n1+n2;q=`${n1}+${n2}=?`;}
-        else if(t===1){const n1=r(20),n2=r(n1);a=n1-n2;q=`${n1}-${n2}=?`;}
-        else if(t===2){const n1=r(10),n2=r(10),max=20-n1-n2;const n3=r(Math.max(0,max));a=n1+n2+n3;q=`${n1}+${n2}+${n3}=?`;}
-        else if(t===3){const n1=r(20),n2=r(n1),n3=r(n1-n2);a=n1-n2-n3;q=`${n1}-${n2}-${n3}=?`;}
-        else{const n1=r(20),n2=r(n1),cur=n1-n2,n3=r(20-cur);a=cur+n3;q=`${n1}-${n2}+${n3}=?`;}
-        const s=new Set([a]); while(s.size<4){const f=a+(r(9)-4);if(f>=0&&f<=25&&f!==a)s.add(f);}
-        return {q,a,choices:Array.from(s).sort(()=>Math.random()-0.5)};
+        // 100~999 사이의 세자리수 피제수 생성
+        const dividend = Math.floor(Math.random() * 900) + 100;
+        // 10~99 사이의 두자리수 제수 생성
+        const divisor = Math.floor(Math.random() * 90) + 10;
+
+        const quotient = Math.floor(dividend / divisor); // 몫
+        const remainder = dividend % divisor;          // 나머지
+
+        const isQuotientQ = Math.random() < 0.5; // 몫을 물을지 나머지를 물을지 결정
+        let q = "", a = 0;
+
+        if (isQuotientQ) {
+            q = `${dividend} ÷ ${divisor} 의 몫은?`;
+            a = quotient;
+        } else {
+            q = `${dividend} ÷ ${divisor} 의 나머지는?`;
+            a = remainder;
+        }
+
+        // 정답을 포함한 4개의 선택지 생성
+        const s = new Set([a]);
+        while (s.size < 4) {
+            // 정답 근처의 오답 생성 (자연수 범위 유지)
+            let offset = Math.floor(Math.random() * 11) - 5; // -5 ~ +5
+            let f = a + offset;
+            if (f >= 0 && f !== a) s.add(f);
+        }
+
+        // 무작위로 섞인 선택지 반환
+        return {
+            q,
+            a,
+            choices: Array.from(s).sort(() => Math.random() - 0.5)
+        };
     }
 
     function playGacha(type) {
