@@ -1,0 +1,2827 @@
+{
+  "type": "quizpack",
+  "version": "v1",
+  "pack": {
+    "id": "98a69d27-1bc6-4697-a8d3-263ad6bc4236",
+    "title": "Eng4_Vocabulary",
+    "subject": "영어",
+    "grade": "4",
+    "description": "4학년 영어 어휘"
+  },
+  "questions": [
+    {
+      "id": "14e84043-339e-4c58-8937-7ab99c02b613",
+      "index": 0,
+      "prompt": "밑줄 친 morning의 뜻으로 알맞은 것을 고르세요.\n\nGood <u>morning</u>!",
+      "options": [
+        "저녁",
+        "아침",
+        "오후",
+        "밤"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "5e9fe4f0-61c4-49da-b05f-a8a65158fd24",
+      "index": 1,
+      "prompt": "밑줄 친 afternoon의 뜻으로 알맞은 것을 고르세요.\n\nGood <u>afternoon</u>!",
+      "options": [
+        "아침",
+        "밤",
+        "오후",
+        "저녁"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "3d79b711-ce97-4ea6-b8fc-f16315f0bbeb",
+      "index": 2,
+      "prompt": "밑줄 친 evening의 뜻으로 알맞은 것을 고르세요.\n\nGood <u>evening</u>!",
+      "options": [
+        "아침",
+        "오후",
+        "저녁",
+        "밤"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a7d6c3db-cc2a-4b9b-8426-4331515090e1",
+      "index": 3,
+      "prompt": "밑줄 친 night의 뜻으로 알맞은 것을 고르세요.\n\nGood <u>night</u>!",
+      "options": [
+        "아침",
+        "오후",
+        "저녁",
+        "밤"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "2112827b-482b-49c0-967c-00c6d542b8ed",
+      "index": 4,
+      "prompt": "밑줄 친 family의 뜻으로 알맞은 것을 고르세요.\n\nThis is my <u>family</u>.",
+      "options": [
+        "친구",
+        "가족",
+        "선생님",
+        "이름"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "fea6ac40-ac39-46ba-ae59-7f72c599b967",
+      "index": 5,
+      "prompt": "밑줄 친 father의 뜻으로 알맞은 것을 고르세요.\n\nThis is my <u>father</u>.",
+      "options": [
+        "어머니",
+        "할머니",
+        "아버지",
+        "할아버지"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "21946fd8-b16d-4e03-a5c6-5d65be6b98ec",
+      "index": 6,
+      "prompt": "밑줄 친 mother의 뜻으로 알맞은 것을 고르세요.\n\nThis is my <u>mother</u>.",
+      "options": [
+        "아버지",
+        "어머니",
+        "할머니",
+        "친구"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "2689e7c7-0cf3-40c3-880a-da09c8ca2b2d",
+      "index": 7,
+      "prompt": "밑줄 친 grandfather의 뜻으로 알맞은 것을 고르세요.\n\nThis is my <u>grandfather</u>.",
+      "options": [
+        "할머니",
+        "아버지",
+        "할아버지",
+        "선생님"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "220bc1b8-6b1a-4455-8612-7f8ce904ff7d",
+      "index": 8,
+      "prompt": "밑줄 친 grandmother의 뜻으로 알맞은 것을 고르세요.\n\nThis is my <u>grandmother</u>.",
+      "options": [
+        "할아버지",
+        "어머니",
+        "친구",
+        "할머니"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "8f03231b-9aa9-4816-8b6b-e47f189dea6a",
+      "index": 9,
+      "prompt": "밑줄 친 friend의 뜻으로 알맞은 것을 고르세요.\n\nShe is my <u>friend</u>.",
+      "options": [
+        "가족",
+        "선생님",
+        "친구",
+        "어머니"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ae942d5e-9c3f-447f-a853-e8a5c6c20400",
+      "index": 10,
+      "prompt": "밑줄 친 teacher의 뜻으로 알맞은 것을 고르세요.\n\nHe is my <u>teacher</u>.",
+      "options": [
+        "친구",
+        "아버지",
+        "가족",
+        "선생님"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "44766f93-1bd3-41ec-bbda-b3509672fb18",
+      "index": 11,
+      "prompt": "밑줄 친 name의 뜻으로 알맞은 것을 고르세요.\n\nMy <u>name</u> is Minsu.",
+      "options": [
+        "가족",
+        "이름",
+        "친구",
+        "나이"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c022b2f8-96f8-411c-afe0-314d8415c080",
+      "index": 12,
+      "prompt": "밑줄 친 happy의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>happy</u>.",
+      "options": [
+        "슬픈",
+        "화난",
+        "행복한",
+        "배고픈"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "0da9104d-2e59-42b3-9718-d77cc7b51120",
+      "index": 13,
+      "prompt": "밑줄 친 sad의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>sad</u>.",
+      "options": [
+        "행복한",
+        "슬픈",
+        "화난",
+        "피곤한"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "bb7c7982-1c07-4994-ab4f-553e14f35144",
+      "index": 14,
+      "prompt": "밑줄 친 angry의 뜻으로 알맞은 것을 고르세요.\n\nHe is <u>angry</u>.",
+      "options": [
+        "행복한",
+        "슬픈",
+        "화난",
+        "목마른"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "27bb609f-a654-46e0-829d-a51394fdc8af",
+      "index": 15,
+      "prompt": "밑줄 친 hungry의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>hungry</u>.",
+      "options": [
+        "목마른",
+        "배고픈",
+        "피곤한",
+        "화난"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "8d9dffcf-3621-4cd9-8f69-414475689647",
+      "index": 16,
+      "prompt": "밑줄 친 thirsty의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>thirsty</u>.",
+      "options": [
+        "배고픈",
+        "피곤한",
+        "목마른",
+        "슬픈"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "168d4859-e787-459c-b72e-caadb950aabe",
+      "index": 17,
+      "prompt": "밑줄 친 tired의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>tired</u>.",
+      "options": [
+        "행복한",
+        "피곤한",
+        "화난",
+        "배고픈"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "f2ac6366-9536-40c7-96f6-119243066661",
+      "index": 18,
+      "prompt": "밑줄 친 birthday의 뜻으로 알맞은 것을 고르세요.\n\nHappy <u>birthday</u>!",
+      "options": [
+        "아침",
+        "생일",
+        "저녁",
+        "하루"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "88041f16-cb38-44ab-8efe-c0e947886267",
+      "index": 19,
+      "prompt": "밑줄 친 breakfast의 뜻으로 알맞은 것을 고르세요.\n\nI eat <u>breakfast</u>.",
+      "options": [
+        "점심",
+        "저녁 식사",
+        "아침 식사",
+        "간식"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "9ddcd810-f7bc-43db-9f39-20bd43e45a00",
+      "index": 20,
+      "prompt": "밑줄 친 lunch의 뜻으로 알맞은 것을 고르세요.\n\nI eat <u>lunch</u>.",
+      "options": [
+        "아침 식사",
+        "점심",
+        "저녁 식사",
+        "간식"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "4ec259f3-4cf0-4abc-8a39-01d2ef2e0a47",
+      "index": 21,
+      "prompt": "밑줄 친 dinner의 뜻으로 알맞은 것을 고르세요.\n\nI eat <u>dinner</u>.",
+      "options": [
+        "아침 식사",
+        "점심",
+        "저녁 식사",
+        "간식"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "10d6c76c-7118-4d3d-a4d2-2db0dd6d96e6",
+      "index": 22,
+      "prompt": "밑줄 친 school의 뜻으로 알맞은 것을 고르세요.\n\nI go to <u>school</u>.",
+      "options": [
+        "집",
+        "학교",
+        "공원",
+        "병원"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "63ecbd2e-2a71-4d0d-a07a-4c2bb11ff787",
+      "index": 23,
+      "prompt": "밑줄 친 home의 뜻으로 알맞은 것을 고르세요.\n\nI go <u>home</u>.",
+      "options": [
+        "학교",
+        "공원",
+        "집",
+        "가게"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "0a21b813-828d-4490-b535-f316b37314ea",
+      "index": 24,
+      "prompt": "밑줄 친 time의 뜻으로 알맞은 것을 고르세요.\n\nWhat <u>time</u> is it?",
+      "options": [
+        "날씨",
+        "시간",
+        "이름",
+        "나이"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1fd738c4-7888-44dd-839e-6f5f34059240",
+      "index": 25,
+      "prompt": "밑줄 친 desk의 뜻으로 알맞은 것을 고르세요.\n\nThere is a <u>desk</u>.",
+      "options": [
+        "의자",
+        "소파",
+        "침대",
+        "책상"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "058c3b63-c363-40ed-9328-e2132e9e85e4",
+      "index": 26,
+      "prompt": "밑줄 친 chair의 뜻으로 알맞은 것을 고르세요.\n\nThere is a <u>chair</u>.",
+      "options": [
+        "의자",
+        "책상",
+        "탁자",
+        "침대"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c414900d-9206-4f0b-8849-465de1dcfa7e",
+      "index": 27,
+      "prompt": "밑줄 친 table의 뜻으로 알맞은 것을 고르세요.\n\nThere is a <u>table</u>.",
+      "options": [
+        "의자",
+        "침대",
+        "탁자",
+        "소파"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b411b30c-4c9c-4626-839f-126154439356",
+      "index": 28,
+      "prompt": "밑줄 친 sofa의 뜻으로 알맞은 것을 고르세요.\n\nThere is a <u>sofa</u>.",
+      "options": [
+        "책상",
+        "소파",
+        "침대",
+        "의자"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "4862a10e-e028-412f-b103-009df6f14e80",
+      "index": 29,
+      "prompt": "밑줄 친 bed의 뜻으로 알맞은 것을 고르세요.\n\nThere is a <u>bed</u>.",
+      "options": [
+        "탁자",
+        "의자",
+        "소파",
+        "침대"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "23deb11d-3965-47ff-8c80-4aaefbd2b139",
+      "index": 30,
+      "prompt": "밑줄 친 ball의 뜻으로 알맞은 것을 고르세요.\n\nI have a <u>ball</u>.",
+      "options": [
+        "인형",
+        "공",
+        "자전거",
+        "로봇"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "6e884434-f98c-4cbb-bc9e-f45a1496ed56",
+      "index": 31,
+      "prompt": "밑줄 친 doll의 뜻으로 알맞은 것을 고르세요.\n\nI have a <u>doll</u>.",
+      "options": [
+        "공",
+        "자전거",
+        "인형",
+        "지도"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a5594785-806f-426c-83c6-1884cc293d07",
+      "index": 32,
+      "prompt": "밑줄 친 bike의 뜻으로 알맞은 것을 고르세요.\n\nI ride a <u>bike</u>.",
+      "options": [
+        "공",
+        "자전거",
+        "인형",
+        "헬멧"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1ff2995f-7029-46de-905b-5821facc4380",
+      "index": 33,
+      "prompt": "밑줄 친 helmet의 뜻으로 알맞은 것을 고르세요.\n\nWear a <u>helmet</u>.",
+      "options": [
+        "신발",
+        "재킷",
+        "헬멧",
+        "스카프"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c5c0ce70-324b-41b6-beb0-f0d4dbde5577",
+      "index": 34,
+      "prompt": "밑줄 친 shoe의 뜻으로 알맞은 것을 고르세요.\n\nI wear <u>shoes</u>.",
+      "options": [
+        "양말",
+        "신발",
+        "재킷",
+        "티셔츠"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "8b5b3300-0199-4b67-b347-a76f5983b35f",
+      "index": 35,
+      "prompt": "밑줄 친 sock의 뜻으로 알맞은 것을 고르세요.\n\nI wear <u>socks</u>.",
+      "options": [
+        "신발",
+        "양말",
+        "스카프",
+        "스웨터"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "f91ed51a-b00c-46b2-a5a2-b71baf4e0fe9",
+      "index": 36,
+      "prompt": "밑줄 친 sweater의 뜻으로 알맞은 것을 고르세요.\n\nI wear a <u>sweater</u>.",
+      "options": [
+        "스카프",
+        "티셔츠",
+        "스웨터",
+        "재킷"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "4a9de037-f330-4993-bfc0-7f8a32ab45bc",
+      "index": 37,
+      "prompt": "밑줄 친 scarf의 뜻으로 알맞은 것을 고르세요.\n\nI wear a <u>scarf</u>.",
+      "options": [
+        "스카프",
+        "양말",
+        "신발",
+        "스웨터"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b4767032-5286-4f59-99f2-1614c0e2da55",
+      "index": 38,
+      "prompt": "밑줄 친 soccer의 뜻으로 알맞은 것을 고르세요.\n\nI play <u>soccer</u>.",
+      "options": [
+        "야구",
+        "농구",
+        "축구",
+        "테니스"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "78d11f7d-258b-4ad7-869a-1ed9689b3198",
+      "index": 39,
+      "prompt": "밑줄 친 baseball의 뜻으로 알맞은 것을 고르세요.\n\nI play <u>baseball</u>.",
+      "options": [
+        "축구",
+        "야구",
+        "농구",
+        "배드민턴"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ce63ca5a-eaaf-4851-8c7f-b92c9fdd98cd",
+      "index": 40,
+      "prompt": "밑줄 친 basketball의 뜻으로 알맞은 것을 고르세요.\n\nI play <u>basketball</u>.",
+      "options": [
+        "야구",
+        "축구",
+        "농구",
+        "피구"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "f5a93b55-79b9-41a4-8d8f-c8864e20dbcf",
+      "index": 41,
+      "prompt": "밑줄 친 tennis의 뜻으로 알맞은 것을 고르세요.\n\nI play <u>tennis</u>.",
+      "options": [
+        "축구",
+        "테니스",
+        "야구",
+        "농구"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c7774c61-c170-4598-ab3f-4bb7dc4e3f33",
+      "index": 42,
+      "prompt": "밑줄 친 badminton의 뜻으로 알맞은 것을 고르세요.\n\nI play <u>badminton</u>.",
+      "options": [
+        "배드민턴",
+        "축구",
+        "야구",
+        "피구"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "510efddd-f5fc-49b2-a3af-9593ec004fab",
+      "index": 43,
+      "prompt": "밑줄 친 dodgeball의 뜻으로 알맞은 것을 고르세요.\n\nWe play <u>dodgeball</u>.",
+      "options": [
+        "농구",
+        "야구",
+        "피구",
+        "축구"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "3108d81a-cd67-4fc2-9272-e891485f8b81",
+      "index": 44,
+      "prompt": "밑줄 친 piano의 뜻으로 알맞은 것을 고르세요.\n\nI play the <u>piano</u>.",
+      "options": [
+        "축구",
+        "피아노",
+        "컴퓨터",
+        "공"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "13e2eb5d-411f-4006-abbd-c38d4960a890",
+      "index": 45,
+      "prompt": "밑줄 친 computer의 뜻으로 알맞은 것을 고르세요.\n\nI use a <u>computer</u>.",
+      "options": [
+        "피아노",
+        "책상",
+        "컴퓨터",
+        "의자"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "bd576604-4673-4f3f-9deb-3fa28c6868bd",
+      "index": 46,
+      "prompt": "밑줄 친 map의 뜻으로 알맞은 것을 고르세요.\n\nI have a <u>map</u>.",
+      "options": [
+        "인형",
+        "공",
+        "지도",
+        "그림"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c8c5e2a6-753e-44a7-82ce-62e02229d97b",
+      "index": 47,
+      "prompt": "밑줄 친 egg의 뜻으로 알맞은 것을 고르세요.\n\nI eat an <u>egg</u>.",
+      "options": [
+        "쿠키",
+        "달걀",
+        "스파게티",
+        "빵"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "52535e77-0c50-4336-bc4d-64d163f4329d",
+      "index": 48,
+      "prompt": "밑줄 친 cookie의 뜻으로 알맞은 것을 고르세요.\n\nI eat a <u>cookie</u>.",
+      "options": [
+        "달걀",
+        "쿠키",
+        "스파게티",
+        "빵"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "141fb905-c3bf-41f7-b615-0d7e08f4521f",
+      "index": 49,
+      "prompt": "밑줄 친 spaghetti의 뜻으로 알맞은 것을 고르세요.\n\nI like <u>spaghetti</u>.",
+      "options": [
+        "쿠키",
+        "달걀",
+        "스파게티",
+        "빵"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "89b91c01-c68a-4962-a3a5-8b38091cd152",
+      "index": 50,
+      "prompt": "밑줄 친 today의 뜻으로 알맞은 것을 고르세요.\n\nWhat day is it <u>today</u>?",
+      "options": [
+        "내일",
+        "어제",
+        "오늘",
+        "매일"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "23dac1be-dbcc-4c74-b0a4-9e12aae25695",
+      "index": 51,
+      "prompt": "밑줄 친 day의 뜻으로 알맞은 것을 고르세요.\n\nHave a nice <u>day</u>!",
+      "options": [
+        "밤",
+        "하루, 날",
+        "아침",
+        "저녁"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "500bc7b8-518e-4022-be08-d544a71ef0ab",
+      "index": 52,
+      "prompt": "밑줄 친 lesson의 뜻으로 알맞은 것을 고르세요.\n\nI have a piano <u>lesson</u>.",
+      "options": [
+        "수업, 레슨",
+        "숙제",
+        "게임",
+        "공"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "324415ec-cc6a-4b42-a559-610b60855861",
+      "index": 53,
+      "prompt": "밑줄 친 busy의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>busy</u>.",
+      "options": [
+        "피곤한",
+        "행복한",
+        "바쁜",
+        "배고픈"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "00f6be9a-c640-4432-946d-d8dd2d5c6a8a",
+      "index": 54,
+      "prompt": "밑줄 친 play의 뜻으로 알맞은 것을 고르세요.\n\nI <u>play</u> soccer.",
+      "options": [
+        "먹다",
+        "놀다, (운동을) 하다",
+        "보다",
+        "읽다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ad59b728-c911-47de-8d43-cb8037edf09a",
+      "index": 55,
+      "prompt": "밑줄 친 eat의 뜻으로 알맞은 것을 고르세요.\n\nI <u>eat</u> breakfast.",
+      "options": [
+        "놀다",
+        "보다",
+        "먹다",
+        "만들다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "3692ea75-2cc4-45b2-a9f7-198b8969d904",
+      "index": 56,
+      "prompt": "밑줄 친 watch의 뜻으로 알맞은 것을 고르세요.\n\nI <u>watch</u> TV.",
+      "options": [
+        "먹다",
+        "보다",
+        "만들다",
+        "읽다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a7851821-2141-453e-8e5b-77d6f340eb35",
+      "index": 57,
+      "prompt": "밑줄 친 read의 뜻으로 알맞은 것을 고르세요.\n\nI <u>read</u> a book.",
+      "options": [
+        "보다",
+        "만들다",
+        "먹다",
+        "읽다"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "86445b69-63b3-4098-ab05-99a04f05fe71",
+      "index": 58,
+      "prompt": "밑줄 친 draw의 뜻으로 알맞은 것을 고르세요.\n\nI <u>draw</u> a picture.",
+      "options": [
+        "읽다",
+        "그리다",
+        "만들다",
+        "청소하다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "9b78f159-9993-494a-a14f-d72ccf2c4cd0",
+      "index": 59,
+      "prompt": "밑줄 친 clean의 뜻으로 알맞은 것을 고르세요.\n\nI <u>clean</u> my room.",
+      "options": [
+        "그리다",
+        "읽다",
+        "청소하다",
+        "만들다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ac9c9a80-b818-4aa8-9082-b8c20b0336ee",
+      "index": 60,
+      "prompt": "밑줄 친 make의 뜻으로 알맞은 것을 고르세요.\n\nI <u>make</u> a robot.",
+      "options": [
+        "읽다",
+        "보다",
+        "그리다",
+        "만들다"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "5ab32111-102e-45ac-b1e6-6d61d8c3f5c1",
+      "index": 61,
+      "prompt": "밑줄 친 cook의 뜻으로 알맞은 것을 고르세요.\n\nI <u>cook</u> dinner.",
+      "options": [
+        "요리하다",
+        "먹다",
+        "보다",
+        "청소하다"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "eca3cf59-7b6c-4502-b2a9-b265a82efd05",
+      "index": 62,
+      "prompt": "밑줄 친 help의 뜻으로 알맞은 것을 고르세요.\n\nCan you <u>help</u> me?",
+      "options": [
+        "보다",
+        "만나다",
+        "돕다",
+        "찾다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "66ee36fa-d31c-495e-a7ae-4fd140642040",
+      "index": 63,
+      "prompt": "밑줄 친 meet의 뜻으로 알맞은 것을 고르세요.\n\nNice to <u>meet</u> you.",
+      "options": [
+        "돕다",
+        "만나다",
+        "보다",
+        "찾다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "73eedc58-102d-4f30-9fe0-1fae50e4eb5b",
+      "index": 64,
+      "prompt": "밑줄 친 find의 뜻으로 알맞은 것을 고르세요.\n\nI <u>find</u> my ball.",
+      "options": [
+        "만들다",
+        "찾다",
+        "돕다",
+        "만나다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "063d3989-272c-4412-bfc4-2a2212c6393c",
+      "index": 65,
+      "prompt": "밑줄 친 love의 뜻으로 알맞은 것을 고르세요.\n\nI <u>love</u> you.",
+      "options": [
+        "만나다",
+        "좋아하다",
+        "사랑하다",
+        "돕다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ad57d3f7-7f7d-4981-8347-bc1fd1fa4c0b",
+      "index": 66,
+      "prompt": "밑줄 친 want의 뜻으로 알맞은 것을 고르세요.\n\nI <u>want</u> a bike.",
+      "options": [
+        "사랑하다",
+        "원하다",
+        "만들다",
+        "찾다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "bb02b3c9-a21a-4a8d-b32e-2f32ec0863c1",
+      "index": 67,
+      "prompt": "밑줄 친 know의 뜻으로 알맞은 것을 고르세요.\n\nI <u>know</u> her.",
+      "options": [
+        "만나다",
+        "원하다",
+        "알다",
+        "찾다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b5d27a6e-7966-467c-9a8f-0dc93f85d013",
+      "index": 68,
+      "prompt": "밑줄 친 see의 뜻으로 알맞은 것을 고르세요.\n\nI <u>see</u> you.",
+      "options": [
+        "보다",
+        "듣다",
+        "만나다",
+        "알다"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c897d633-812c-4554-beaf-f7917aa6f180",
+      "index": 69,
+      "prompt": "밑줄 친 catch의 뜻으로 알맞은 것을 고르세요.\n\nI <u>catch</u> the ball.",
+      "options": [
+        "던지다",
+        "잡다",
+        "차다",
+        "치다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "57038911-8f50-40d0-a895-858c07671509",
+      "index": 70,
+      "prompt": "밑줄 친 push의 뜻으로 알맞은 것을 고르세요.\n\nDon't <u>push</u>.",
+      "options": [
+        "밀다",
+        "당기다",
+        "만지다",
+        "잡다"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c649113e-715f-418d-89a0-91f95a18b8d7",
+      "index": 71,
+      "prompt": "밑줄 친 touch의 뜻으로 알맞은 것을 고르세요.\n\nDon't <u>touch</u>.",
+      "options": [
+        "밀다",
+        "당기다",
+        "만지다",
+        "잡다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "9829f0d6-7585-442f-8c6a-59e5891c0487",
+      "index": 72,
+      "prompt": "밑줄 친 enter의 뜻으로 알맞은 것을 고르세요.\n\nDon't <u>enter</u>.",
+      "options": [
+        "밀다",
+        "들어가다",
+        "만지다",
+        "뛰다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "71ded1bc-0d39-4391-8d22-c70649d853f4",
+      "index": 73,
+      "prompt": "밑줄 친 hit의 뜻으로 알맞은 것을 고르세요.\n\nI <u>hit</u> the ball.",
+      "options": [
+        "잡다",
+        "던지다",
+        "치다",
+        "차다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "941d516f-d285-4b8e-bab0-00a8d1a791b1",
+      "index": 74,
+      "prompt": "밑줄 친 mix의 뜻으로 알맞은 것을 고르세요.\n\n<u>Mix</u> the eggs.",
+      "options": [
+        "자르다",
+        "섞다",
+        "굽다",
+        "끓이다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "7b9665f1-3385-4876-b331-ecab42e982a9",
+      "index": 75,
+      "prompt": "밑줄 친 cut의 뜻으로 알맞은 것을 고르세요.\n\n<u>Cut</u> the paper.",
+      "options": [
+        "섞다",
+        "자르다",
+        "접다",
+        "붙이다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a9dff5d6-6ddc-424e-a1cd-65319345ee42",
+      "index": 76,
+      "prompt": "밑줄 친 hop의 뜻으로 알맞은 것을 고르세요.\n\nI can <u>hop</u>.",
+      "options": [
+        "달리다",
+        "깡충 뛰다",
+        "걷다",
+        "멈추다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a39f918a-6a4a-46bb-b4fe-a83462ae5e13",
+      "index": 77,
+      "prompt": "밑줄 친 hug의 뜻으로 알맞은 것을 고르세요.\n\nI <u>hug</u> my mom.",
+      "options": [
+        "만나다",
+        "안다",
+        "보다",
+        "돕다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ea146fc9-8395-4fa2-91c3-e3aaab49c18a",
+      "index": 78,
+      "prompt": "밑줄 친 in의 뜻으로 알맞은 것을 고르세요.\n\nThe ball is <u>in</u> the box.",
+      "options": [
+        "위에",
+        "아래에",
+        "안에",
+        "옆에"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "dd786eaa-4091-4a7b-9c27-0db4f258e009",
+      "index": 79,
+      "prompt": "밑줄 친 on의 뜻으로 알맞은 것을 고르세요.\n\nThe book is <u>on</u> the desk.",
+      "options": [
+        "안에",
+        "위에",
+        "아래에",
+        "뒤에"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "6d9b3826-26c8-4fdb-a007-92677ebb09ee",
+      "index": 80,
+      "prompt": "밑줄 친 under의 뜻으로 알맞은 것을 고르세요.\n\nThe cat is <u>under</u> the table.",
+      "options": [
+        "위에",
+        "안에",
+        "아래에",
+        "앞에"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "504c1bcb-2ca8-4a56-93c3-be92a1a53ed8",
+      "index": 81,
+      "prompt": "밑줄 친 where의 뜻으로 알맞은 것을 고르세요.\n\n<u>Where</u> is my bag?",
+      "options": [
+        "무엇",
+        "누구",
+        "어디",
+        "언제"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "66f62955-83ac-4e05-a380-e55fa60c5986",
+      "index": 82,
+      "prompt": "밑줄 친 beautiful의 뜻으로 알맞은 것을 고르세요.\n\nIt is <u>beautiful</u>.",
+      "options": [
+        "큰",
+        "작은",
+        "아름다운",
+        "높은"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "d927f604-673b-4c4e-ba6d-b982278ce50b",
+      "index": 83,
+      "prompt": "밑줄 친 great의 뜻으로 알맞은 것을 고르세요.\n\nThat's <u>great</u>!",
+      "options": [
+        "나쁜",
+        "멋진, 훌륭한",
+        "작은",
+        "슬픈"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "4dd11932-59b4-4d2a-bf7c-5906efe2caab",
+      "index": 84,
+      "prompt": "밑줄 친 nice의 뜻으로 알맞은 것을 고르세요.\n\nThat's <u>nice</u>!",
+      "options": [
+        "나쁜",
+        "슬픈",
+        "좋은, 멋진",
+        "작은"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "99fd4bb7-782f-4536-9791-b7bf65818c29",
+      "index": 85,
+      "prompt": "밑줄 친 pretty의 뜻으로 알맞은 것을 고르세요.\n\nShe is <u>pretty</u>.",
+      "options": [
+        "슬픈",
+        "예쁜",
+        "큰",
+        "작은"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "d4a21569-66df-493b-a18a-3b098f36f3f7",
+      "index": 86,
+      "prompt": "밑줄 친 bad의 뜻으로 알맞은 것을 고르세요.\n\nThat's <u>bad</u>.",
+      "options": [
+        "좋은",
+        "나쁜",
+        "멋진",
+        "예쁜"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "d47cebb9-91cd-4521-a72c-60a13753dd3c",
+      "index": 87,
+      "prompt": "밑줄 친 very의 뜻으로 알맞은 것을 고르세요.\n\nI am <u>very</u> happy.",
+      "options": [
+        "조금",
+        "아주, 매우",
+        "별로",
+        "가끔"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "6555408b-8c22-4d6a-9ae7-5d2beef27efe",
+      "index": 88,
+      "prompt": "밑줄 친 much의 뜻으로 알맞은 것을 고르세요.\n\nHow <u>much</u> is it?",
+      "options": [
+        "많은",
+        "적은",
+        "큰",
+        "작은"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "2efb7643-5aff-41e0-bede-f1363ec12440",
+      "index": 89,
+      "prompt": "밑줄 친 sure의 뜻으로 알맞은 것을 고르세요.\n\n<u>Sure</u>.",
+      "options": [
+        "아니요",
+        "물론이지",
+        "미안해",
+        "고마워"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "7584fcc2-1c22-4ccb-aed5-e8283d3cd97c",
+      "index": 90,
+      "prompt": "밑줄 친 well의 뜻으로 알맞은 것을 고르세요.\n\nI am doing <u>well</u>.",
+      "options": [
+        "나쁘게",
+        "잘",
+        "조금",
+        "많이"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "f75aa8f1-eb34-4c3f-8808-552cdba3ee15",
+      "index": 91,
+      "prompt": "밑줄 친 surprise의 뜻으로 알맞은 것을 고르세요.\n\nWhat a <u>surprise</u>!",
+      "options": [
+        "선물",
+        "놀람",
+        "생일",
+        "파티"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "065b18c2-4b1d-4d69-9419-1683812760ab",
+      "index": 92,
+      "prompt": "밑줄 친 everyone의 뜻으로 알맞은 것을 고르세요.\n\nHello, <u>everyone</u>!",
+      "options": [
+        "선생님",
+        "친구",
+        "모두, 여러분",
+        "가족"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b4ab2439-89af-4e16-8643-77842c664c3c",
+      "index": 93,
+      "prompt": "밑줄 친 show의 뜻으로 알맞은 것을 고르세요.\n\n<u>Show</u> me your book.",
+      "options": [
+        "주다",
+        "보여주다",
+        "빌려주다",
+        "만들다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "19d61028-b5f8-448c-b6ce-db39da87fe85",
+      "index": 94,
+      "prompt": "밑줄 친 sound의 뜻으로 알맞은 것을 고르세요.\n\nThat <u>sounds</u> good.",
+      "options": [
+        "보이다",
+        "들리다",
+        "느끼다",
+        "맛보다"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "06f13a02-8147-4f05-a347-76667946d73f",
+      "index": 95,
+      "prompt": "밑줄 친 magic의 뜻으로 알맞은 것을 고르세요.\n\nIt's <u>magic</u>!",
+      "options": [
+        "놀람",
+        "마법",
+        "비밀",
+        "선물"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "be9ec5ad-89f0-40db-9a54-8827f640a521",
+      "index": 96,
+      "prompt": "밑줄 친 parade의 뜻으로 알맞은 것을 고르세요.\n\nLet's watch the <u>parade</u>.",
+      "options": [
+        "공연",
+        "퍼레이드, 행진",
+        "게임",
+        "영화"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b343dacc-b917-4337-8019-8f179eb8b51e",
+      "index": 97,
+      "prompt": "밑줄 친 art의 뜻으로 알맞은 것을 고르세요.\n\nI like <u>art</u> class.",
+      "options": [
+        "음악",
+        "체육",
+        "미술",
+        "과학"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b8697655-23ed-40b1-bc69-9a5527d1d898",
+      "index": 98,
+      "prompt": "밑줄 친 class의 뜻으로 알맞은 것을 고르세요.\n\nI have art <u>class</u>.",
+      "options": [
+        "숙제",
+        "수업",
+        "학교",
+        "선생님"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a9839e2e-4f92-430a-b1ff-a8e87fdc2a9b",
+      "index": 99,
+      "prompt": "밑줄 친 pencil case의 뜻으로 알맞은 것을 고르세요.\n\nThis is my <u>pencil case</u>.",
+      "options": [
+        "지우개",
+        "필통",
+        "연필",
+        "가방"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "3fcb8f5c-16c8-449e-af50-2699b0d7ca5f",
+      "index": 100,
+      "prompt": "밑줄 친 jump rope의 뜻으로 알맞은 것을 고르세요.\n\nI play <u>jump rope</u>.",
+      "options": [
+        "피구",
+        "줄넘기",
+        "농구",
+        "축구"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c532e75f-4d85-47af-adf7-ab42e09c553a",
+      "index": 101,
+      "prompt": "밑줄 친 toy car의 뜻으로 알맞은 것을 고르세요.\n\nI have a <u>toy car</u>.",
+      "options": [
+        "인형",
+        "장난감 자동차",
+        "자전거",
+        "공"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "064f3fc9-b0c5-4e89-8fb5-977221a86543",
+      "index": 102,
+      "prompt": "밑줄 친 T-shirt의 뜻으로 알맞은 것을 고르세요.\n\nI wear a <u>T-shirt</u>.",
+      "options": [
+        "스웨터",
+        "티셔츠",
+        "재킷",
+        "스카프"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "d5c5e344-a14d-4f45-87ba-c69b5401cbcf",
+      "index": 103,
+      "prompt": "밑줄 친 thousand의 뜻으로 알맞은 것을 고르세요.\n\nOne <u>thousand</u> won.",
+      "options": [
+        "백",
+        "천",
+        "만",
+        "십"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "adde7a1e-1f3a-4b9f-a822-6a3e58821055",
+      "index": 104,
+      "prompt": "밑줄 친 hundred의 뜻으로 알맞은 것을 고르세요.\n\nOne <u>hundred</u> won.",
+      "options": [
+        "십",
+        "백",
+        "천",
+        "만"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "12aba87a-3c61-4ec2-8caf-5a06f0191e0c",
+      "index": 105,
+      "prompt": "밑줄 친 twelve의 뜻으로 알맞은 것을 고르세요.\n\nIt's <u>twelve</u> o'clock.",
+      "options": [
+        "10",
+        "11",
+        "12",
+        "20"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "fcc2ebc2-a258-4efa-9b59-368392b270da",
+      "index": 106,
+      "prompt": "밑줄 친 twenty의 뜻으로 알맞은 것을 고르세요.\n\nI have <u>twenty</u> pencils.",
+      "options": [
+        "12",
+        "20",
+        "30",
+        "2"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "3034a6ee-d25e-409e-a9bb-c149ff114c45",
+      "index": 107,
+      "prompt": "밑줄 친 thirty의 뜻으로 알맞은 것을 고르세요.\n\nIt's seven <u>thirty</u>.",
+      "options": [
+        "13",
+        "20",
+        "30",
+        "3"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "5d34dec0-1209-4585-9d1b-3ea6cae7b914",
+      "index": 108,
+      "prompt": "밑줄 친 o'clock의 뜻으로 알맞은 것을 고르세요.\n\nIt's seven <u>o'clock</u>.",
+      "options": [
+        "분",
+        "초",
+        "정각, 시",
+        "반"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "df4a0e3c-6b06-4766-8d31-221d2e72f7a5",
+      "index": 109,
+      "prompt": "밑줄 친 quiet의 뜻으로 알맞은 것을 고르세요.\n\nBe <u>quiet</u>.",
+      "options": [
+        "시끄러운",
+        "조용한",
+        "빠른",
+        "느린"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "adcab807-222c-49af-8839-4d383f8cc148",
+      "index": 110,
+      "prompt": "밑줄 친 line의 뜻으로 알맞은 것을 고르세요.\n\nStand in <u>line</u>.",
+      "options": [
+        "원",
+        "줄",
+        "네모",
+        "세모"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "2050736a-a02c-46ef-a4e7-38f4580c48d3",
+      "index": 111,
+      "prompt": "밑줄 친 net의 뜻으로 알맞은 것을 고르세요.\n\nThe ball is in the <u>net</u>.",
+      "options": [
+        "바구니",
+        "그물",
+        "상자",
+        "가방"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "09b50e72-cbad-48bc-8b83-1cfd0570a86d",
+      "index": 112,
+      "prompt": "밑줄 친 wet의 뜻으로 알맞은 것을 고르세요.\n\nMy shirt is <u>wet</u>.",
+      "options": [
+        "마른",
+        "젖은",
+        "깨끗한",
+        "더러운"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "52e7d822-e3ad-49d3-a818-bf48e401c9c0",
+      "index": 113,
+      "prompt": "밑줄 친 pot의 뜻으로 알맞은 것을 고르세요.\n\nThere is a <u>pot</u>.",
+      "options": [
+        "프라이팬",
+        "냄비",
+        "접시",
+        "컵"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "50b1590e-8821-402b-bf4e-bcb034075ce1",
+      "index": 114,
+      "prompt": "밑줄 친 top의 뜻으로 알맞은 것을 고르세요.\n\nIt's on the <u>top</u>.",
+      "options": [
+        "아래",
+        "옆",
+        "꼭대기, 위",
+        "안"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1a9101fb-7543-4e7f-8fa2-c2e2072c0204",
+      "index": 115,
+      "prompt": "밑줄 친 bug의 뜻으로 알맞은 것을 고르세요.\n\nI see a <u>bug</u>.",
+      "options": [
+        "새",
+        "벌레",
+        "물고기",
+        "고양이"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "376cc5a3-f077-4dff-b149-cfc45dfcbbfb",
+      "index": 116,
+      "prompt": "밑줄 친 nut의 뜻으로 알맞은 것을 고르세요.\n\nI eat a <u>nut</u>.",
+      "options": [
+        "사과",
+        "견과류",
+        "쿠키",
+        "빵"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "00c01867-cf82-4410-a6fd-8979e417b639",
+      "index": 117,
+      "prompt": "밑줄 친 pink의 뜻으로 알맞은 것을 고르세요.\n\nI like <u>pink</u>.",
+      "options": [
+        "파란색",
+        "노란색",
+        "분홍색",
+        "초록색"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "e7873f64-d53c-4825-a0b7-853cdeedc4bd",
+      "index": 118,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n아버지의 아버지입니다.",
+      "options": [
+        "father",
+        "mother",
+        "grandfather",
+        "grandmother"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "2c98a1e8-453e-4ef6-adad-40e098d68b6c",
+      "index": 119,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n어머니의 어머니입니다.",
+      "options": [
+        "father",
+        "mother",
+        "grandfather",
+        "grandmother"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "7a027d29-3673-4e54-96ef-8584ceecd2a0",
+      "index": 120,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n배가 고플 때의 상태입니다.",
+      "options": [
+        "thirsty",
+        "hungry",
+        "tired",
+        "angry"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "5a35ccc3-99a3-4235-b683-8c399a8b7dc6",
+      "index": 121,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n목이 마를 때의 상태입니다.",
+      "options": [
+        "hungry",
+        "thirsty",
+        "tired",
+        "sad"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "bf7481bd-b2d5-478d-bf23-1a65d170e167",
+      "index": 122,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n아침에 먹는 식사입니다.",
+      "options": [
+        "lunch",
+        "dinner",
+        "breakfast",
+        "snack"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1e2f638b-9a86-4465-8f09-5d4d9bf24364",
+      "index": 123,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n점심에 먹는 식사입니다.",
+      "options": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "snack"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "07762125-0235-411c-83f4-c6fcccd3febd",
+      "index": 124,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n저녁에 먹는 식사입니다.",
+      "options": [
+        "breakfast",
+        "lunch",
+        "dinner",
+        "snack"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "933af26f-f619-4be0-8c4b-181fd1af80d7",
+      "index": 125,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n앉을 때 사용하는 가구입니다.",
+      "options": [
+        "desk",
+        "table",
+        "chair",
+        "bed"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "d3ee2b44-b2ea-4f59-948f-f68141a3c046",
+      "index": 126,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n잠을 잘 때 사용하는 가구입니다.",
+      "options": [
+        "desk",
+        "chair",
+        "sofa",
+        "bed"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "53f60423-522b-459d-8fd0-30d3cc0f9ede",
+      "index": 127,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n발에 신는 것입니다.",
+      "options": [
+        "sock",
+        "shoe",
+        "scarf",
+        "sweater"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "34ce98aa-9c98-4579-ba5b-f9335f1c4ec3",
+      "index": 128,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n신발 안에 신는 것입니다.",
+      "options": [
+        "shoe",
+        "sock",
+        "helmet",
+        "scarf"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "efdf3048-a75e-4a8a-a367-04d99ed7f335",
+      "index": 129,
+      "prompt": "다음 설명에 알맞은 단어를 고르세요.\n\n자전거를 탈 때 머리에 쓰는 것입니다.",
+      "options": [
+        "hat",
+        "helmet",
+        "scarf",
+        "sock"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "4a3798d6-aad3-4ae0-8b74-3ee257f09393",
+      "index": 130,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nmor_ing",
+      "options": [
+        "e",
+        "i",
+        "n",
+        "a"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b870cddc-ea8d-4aef-9c71-69b5565bc450",
+      "index": 131,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\naftern_on",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b3eb2fc6-ed32-4684-8f2f-4982752e0b61",
+      "index": 132,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\neve_ing",
+      "options": [
+        "m",
+        "n",
+        "r",
+        "l"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "502eac4e-9631-40bf-9a57-7d9c27ad2f6b",
+      "index": 133,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nfam_ly",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a685c35b-4d0a-4054-a532-b1ee60ec3a9b",
+      "index": 134,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nfa_her",
+      "options": [
+        "d",
+        "t",
+        "v",
+        "s"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "745dcf97-a72c-4ae3-8a2c-51a495d0a7fd",
+      "index": 135,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nmot_er",
+      "options": [
+        "d",
+        "t",
+        "h",
+        "v"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1010bf57-88cc-4a37-bd45-a1946bb71a65",
+      "index": 136,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nfri_nd",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "5865fc3d-66a7-4e65-8b40-965a5e5a9fb1",
+      "index": 137,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nteac_er",
+      "options": [
+        "c",
+        "k",
+        "h",
+        "t"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a0693c61-d742-4f29-a867-50f2e75d4603",
+      "index": 138,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nhap_y",
+      "options": [
+        "e",
+        "i",
+        "p",
+        "a"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a7e0c38b-dc64-4484-828b-ee7c32f3471e",
+      "index": 139,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nhun_ry",
+      "options": [
+        "g",
+        "k",
+        "d",
+        "t"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "904f7b8f-7f26-43d3-9065-d1720d542afe",
+      "index": 140,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nthirs_y",
+      "options": [
+        "d",
+        "t",
+        "s",
+        "k"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "48132cb3-f68f-49d8-b93c-a2895c24a478",
+      "index": 141,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\ntir_d",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "cdb82691-e67b-47a8-9baf-3fb4f5ffee13",
+      "index": 142,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nang_y",
+      "options": [
+        "e",
+        "i",
+        "r",
+        "a"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "16b3e7e7-7d22-42c8-ac58-aac153dfb3d2",
+      "index": 143,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nbir_hday",
+      "options": [
+        "s",
+        "t",
+        "d",
+        "k"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "cb73e2a5-b00f-4ba7-bd46-b5bb66a20347",
+      "index": 144,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nbreakf_st",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1742162e-23c6-4c50-ada0-80f9eb24af40",
+      "index": 145,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\ndin_er",
+      "options": [
+        "e",
+        "i",
+        "n",
+        "a"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "eca8d72d-d757-40cf-94e0-c6890123c8b5",
+      "index": 146,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nsch_ol",
+      "options": [
+        "a",
+        "e",
+        "i",
+        "o"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "1766d6dd-fd76-4681-9ede-27c4610823a5",
+      "index": 147,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nso_cer",
+      "options": [
+        "c",
+        "k",
+        "s",
+        "g"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "0458650d-3d11-49d4-96c7-7399ae177cd9",
+      "index": 148,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nbaseb_ll",
+      "options": [
+        "e",
+        "a",
+        "i",
+        "o"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "453718ef-7e4a-4ba2-a97a-bc8973fc5c7e",
+      "index": 149,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nbasketb_ll",
+      "options": [
+        "e",
+        "a",
+        "i",
+        "o"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "4ff73a04-4f9e-4bb0-a694-091003514a7f",
+      "index": 150,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nten_is",
+      "options": [
+        "e",
+        "i",
+        "n",
+        "a"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "5cc90d7d-e003-4183-9598-2cacbba97990",
+      "index": 151,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\npia_o",
+      "options": [
+        "m",
+        "n",
+        "r",
+        "l"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "415b5f17-cdaf-449d-90de-fb69140d715b",
+      "index": 152,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\ncompu_er",
+      "options": [
+        "d",
+        "t",
+        "s",
+        "k"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "34071a95-5a5b-4a7d-8d7c-e4f4af87924e",
+      "index": 153,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nswea_er",
+      "options": [
+        "d",
+        "t",
+        "s",
+        "k"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "a955b528-f824-4979-a9e5-073d5f4b3269",
+      "index": 154,
+      "prompt": "다음 빈칸에 들어갈 알파벳을 고르세요.\n\nhel_et",
+      "options": [
+        "l",
+        "m",
+        "n",
+        "r"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b036c46b-16f6-4357-a6eb-0fce55ccc6ff",
+      "index": 155,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n아침",
+      "options": [
+        "mornig",
+        "morning",
+        "morining",
+        "moning"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "54536053-9712-4f33-a4fc-1505a80e9b42",
+      "index": 156,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n오후",
+      "options": [
+        "afternon",
+        "afternoon",
+        "aftenoon",
+        "afternnon"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "65dc4e44-62c7-4cce-a57a-8c23bb2f8dbb",
+      "index": 157,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n저녁",
+      "options": [
+        "evning",
+        "evenning",
+        "evening",
+        "evaning"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "9d1a1bd8-9033-4408-9787-9b41227ae8ab",
+      "index": 158,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n가족",
+      "options": [
+        "famly",
+        "famliy",
+        "family",
+        "familly"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "f83a1e95-131e-4743-838c-7fbfc3878ebe",
+      "index": 159,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n아버지",
+      "options": [
+        "father",
+        "fater",
+        "farther",
+        "fathar"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "c25431ff-b2bb-4817-a482-342bbfb7492a",
+      "index": 160,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n어머니",
+      "options": [
+        "mather",
+        "mothar",
+        "mother",
+        "muther"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "d04c187d-43be-4a60-81a7-40e43336058b",
+      "index": 161,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n친구",
+      "options": [
+        "freind",
+        "frend",
+        "friend",
+        "friand"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "b714c0d7-af56-4781-85a2-46c34ae659da",
+      "index": 162,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n선생님",
+      "options": [
+        "techer",
+        "teacher",
+        "teachar",
+        "teecher"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "57aa6aaf-e306-472e-8a85-8ed07242caa3",
+      "index": 163,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n행복한",
+      "options": [
+        "hapy",
+        "happpy",
+        "happy",
+        "hapie"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "734c71ef-62e7-43fc-9f87-0b04ddd2f717",
+      "index": 164,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n배고픈",
+      "options": [
+        "hungery",
+        "hungry",
+        "hungri",
+        "hungrry"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "6a622aa2-5b86-4772-b56b-d05be96a5a58",
+      "index": 165,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n목마른",
+      "options": [
+        "thirsty",
+        "thursty",
+        "thersty",
+        "thristy"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "d9028f5e-8301-4d79-8c60-638d0c44966c",
+      "index": 166,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n피곤한",
+      "options": [
+        "tierd",
+        "tired",
+        "tird",
+        "tyred"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "52384c01-d51e-47a4-8539-6cccd0a87ec9",
+      "index": 167,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n생일",
+      "options": [
+        "brithday",
+        "berthday",
+        "birthday",
+        "birtday"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "6d07a075-b2a7-4748-b138-32f58cf8adf0",
+      "index": 168,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n아침 식사",
+      "options": [
+        "brekfast",
+        "breakfast",
+        "brakfast",
+        "breakfest"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "310156ae-2129-4984-a0fc-7b358858ce83",
+      "index": 169,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n학교",
+      "options": [
+        "scool",
+        "shcool",
+        "school",
+        "schol"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "d9be09fd-4c87-490c-aeea-a372e332be93",
+      "index": 170,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n축구",
+      "options": [
+        "socer",
+        "soccer",
+        "soccar",
+        "socker"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "53defd55-9fa5-4d35-9144-da1eb3404069",
+      "index": 171,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n야구",
+      "options": [
+        "basball",
+        "baseball",
+        "basaball",
+        "basebal"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "8d7dffd3-d349-41d4-aeab-a3730ce3a522",
+      "index": 172,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n농구",
+      "options": [
+        "basketbal",
+        "baskerball",
+        "basketball",
+        "baskettball"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "972264f1-b660-4d31-bb98-3f5a7a334253",
+      "index": 173,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n컴퓨터",
+      "options": [
+        "computar",
+        "compuder",
+        "computer",
+        "comupter"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "146f3102-dcd6-49fa-98ac-3925f4f2b3ac",
+      "index": 174,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n피아노",
+      "options": [
+        "paino",
+        "piano",
+        "pino",
+        "pieno"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "7212c4d8-b4be-4b27-80ab-ced938f77e44",
+      "index": 175,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n스웨터",
+      "options": [
+        "sweater",
+        "sweter",
+        "sweatar",
+        "swetter"
+      ],
+      "answerIndex": 0,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "39bf57ea-9a9d-42aa-aadb-9c7ea2d3f6b3",
+      "index": 176,
+      "prompt": "다음 우리말에 알맞은 영어 단어의 철자를 고르세요.\n\n아름다운",
+      "options": [
+        "beautful",
+        "beutiful",
+        "beautiful",
+        "beautifull"
+      ],
+      "answerIndex": 2,
+      "difficulty": 3,
+      "tags": null
+    },
+    {
+      "id": "13257f7b-02b4-42e8-8f63-b0fe649bca48",
+      "index": 177,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: Good ______!\nB: Good morning!\n(아침 인사)",
+      "options": [
+        "afternoon",
+        "evening",
+        "night",
+        "morning"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "0afe154c-65ad-436b-968c-a2f9e919090f",
+      "index": 178,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: Good ______!\nB: Good afternoon!\n(오후 인사)",
+      "options": [
+        "morning",
+        "afternoon",
+        "evening",
+        "night"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ac2406ce-1c73-4f08-a63e-30611b887b01",
+      "index": 179,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nA: Good ______!\nB: Good night!\n(잠자리 인사)",
+      "options": [
+        "morning",
+        "afternoon",
+        "evening",
+        "night"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "e4ef1f1f-fa82-4f13-a2a8-2e754382e239",
+      "index": 180,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nNice to ______ you.\n(만나서 반가워.)",
+      "options": [
+        "see",
+        "meet",
+        "know",
+        "help"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "e85f221f-0a57-4ee8-88d7-afe0f7f55e03",
+      "index": 181,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI am ______.\n(나는 배가 고파.)",
+      "options": [
+        "thirsty",
+        "tired",
+        "hungry",
+        "angry"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "59c914ed-cfa0-4482-b719-e28a8631d9ab",
+      "index": 182,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI am ______.\n(나는 목이 말라.)",
+      "options": [
+        "hungry",
+        "thirsty",
+        "tired",
+        "sad"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "9c839da9-2778-4495-be4d-838ba93ac9d2",
+      "index": 183,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI am ______.\n(나는 피곤해.)",
+      "options": [
+        "happy",
+        "hungry",
+        "thirsty",
+        "tired"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "b31f919e-1511-462c-a13e-59050e5fd04d",
+      "index": 184,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI play ______.\n(나는 축구를 해.)",
+      "options": [
+        "piano",
+        "soccer",
+        "computer",
+        "TV"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "0e3e768b-3924-46da-b3b5-868f5a5dc408",
+      "index": 185,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nI play the ______.\n(나는 피아노를 쳐.)",
+      "options": [
+        "soccer",
+        "baseball",
+        "piano",
+        "tennis"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "8926d215-2f85-4ae9-94da-f1e09254c183",
+      "index": 186,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nThe book is ______ the desk.\n(책이 책상 위에 있어.)",
+      "options": [
+        "in",
+        "under",
+        "on",
+        "behind"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "a7d65a65-08ac-4057-a9cc-78d0faf25a33",
+      "index": 187,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nThe cat is ______ the box.\n(고양이가 상자 안에 있어.)",
+      "options": [
+        "on",
+        "in",
+        "under",
+        "behind"
+      ],
+      "answerIndex": 1,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "52957749-ac31-43a5-86db-46d1a72ee668",
+      "index": 188,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nThe ball is ______ the table.\n(공이 탁자 아래에 있어.)",
+      "options": [
+        "on",
+        "in",
+        "under",
+        "behind"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "7250951c-353d-4ec7-aff5-f9248d67de5e",
+      "index": 189,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\n______ is my bag?\n(내 가방이 어디에 있니?)",
+      "options": [
+        "What",
+        "Who",
+        "Where",
+        "How"
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "7d70c8df-faf5-4995-8a29-7635b20a61df",
+      "index": 190,
+      "prompt": "빈칸에 알맞은 말을 고르세요.\n\nCan you ______ me?\n(도와줄 수 있니?)",
+      "options": [
+        "meet",
+        "help",
+        "see",
+        "find"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ba28d14d-d458-4b32-8b9d-4b20f6e7cee1",
+      "index": 191,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 행복해.",
+      "options": [
+        "I am sad.",
+        "I am happy.",
+        "I am angry.",
+        "I am tired."
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "efb97172-c8a7-44f3-bed3-a7ab1d63b6e3",
+      "index": 192,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n만나서 반가워.",
+      "options": [
+        "Nice to see you.",
+        "Nice to help you.",
+        "Nice to meet you.",
+        "Nice to know you."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "ab796d7f-4c87-482e-8899-919902529f16",
+      "index": 193,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n생일 축하해!",
+      "options": [
+        "Happy day!",
+        "Happy birthday!",
+        "Good birthday!",
+        "Nice birthday!"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "0979eb03-b7f3-4109-8022-8604fb23cd7d",
+      "index": 194,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n나는 축구를 해.",
+      "options": [
+        "I watch soccer.",
+        "I like soccer.",
+        "I play soccer.",
+        "I see soccer."
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "8242eba3-34b8-486c-b3c9-43a46ad4a76d",
+      "index": 195,
+      "prompt": "우리말과 뜻이 같은 영어 문장을 고르세요.\n\n책이 책상 위에 있어.",
+      "options": [
+        "The book is in the desk.",
+        "The book is under the desk.",
+        "The book is on the desk.",
+        "The book is behind the desk."
+      ],
+      "answerIndex": 2,
+      "difficulty": 2,
+      "tags": null
+    },
+    {
+      "id": "ed7515a5-fd12-4a26-a7ef-9b97ded1a74b",
+      "index": 196,
+      "prompt": "대화를 읽고, 민수의 기분으로 알맞은 것을 고르세요.\n\nA: How are you, Minsu?\nMinsu: I am happy.",
+      "options": [
+        "슬프다",
+        "화났다",
+        "행복하다",
+        "피곤하다"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "8c4d673f-5994-4cec-b9ff-7230844a863a",
+      "index": 197,
+      "prompt": "대화를 읽고, 수아가 원하는 것을 고르세요.\n\nA: What do you want?\nSua: I want a bike.",
+      "options": [
+        "인형",
+        "공",
+        "자전거",
+        "헬멧"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "cf72d1e6-29be-46f0-b699-62c842de0c9e",
+      "index": 198,
+      "prompt": "대화를 읽고, 지호가 하는 운동을 고르세요.\n\nA: What do you play?\nJiho: I play baseball.",
+      "options": [
+        "축구",
+        "농구",
+        "야구",
+        "테니스"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "39cfab48-a98f-4aae-bd6f-986054d42687",
+      "index": 199,
+      "prompt": "짧은 글을 읽고, 민수의 가족 수를 고르세요.\n\nThis is my family.\nThere are four people: father, mother, my sister, and me.",
+      "options": [
+        "3명",
+        "4명",
+        "5명",
+        "6명"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    },
+    {
+      "id": "c3d359f7-fbd1-4821-ac00-b28ab225901d",
+      "index": 200,
+      "prompt": "짧은 글을 읽고, 고양이가 있는 곳을 고르세요.\n\nWhere is my cat?\nIt is under the bed.",
+      "options": [
+        "침대 위",
+        "침대 아래",
+        "침대 안",
+        "침대 옆"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": null
+    }
+  ]
+}
