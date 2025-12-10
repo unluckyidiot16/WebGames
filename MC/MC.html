@@ -37,16 +37,6 @@
         }
         .animate-pulse-red { animation: pulse-red 2s infinite; }
 
-        @keyframes shine {
-            0% { background-position: -100% 50%; }
-            100% { background-position: 200% 50%; }
-        }
-        .animate-shine {
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.5), transparent);
-            background-size: 200% 100%;
-            animation: shine 2s infinite;
-        }
-
         /* Pokedex Styles */
         .grayscale-filter { filter: grayscale(100%) contrast(1.2); opacity: 0.7; }
     </style>
@@ -109,8 +99,8 @@
     <!-- Bottom Controls/Info -->
     <div class="flex justify-end items-end w-full">
         <div class="text-right opacity-70 text-xs bg-black/30 p-2 rounded text-white">
-            <p>Move: 마우스 / Touch</p>
-            <p>Dash: 클릭 / Tap (에너지 소모)</p>
+            <p>Move: 마우스 / 터치 드래그</p>
+            <!-- Removed Dash info -->
         </div>
     </div>
 </div>
@@ -134,7 +124,7 @@
     <div class="mt-8 text-sm text-gray-500 bg-black/20 p-4 rounded-lg text-center">
         <p>🦠 플랑크톤(T0)부터 시작해 최상위 포식자가 되세요.</p>
         <p>⚠️ 나보다 큰 포식자를 피하세요.</p>
-        <p class="mt-2 text-red-400 font-bold">☠️ 동족이라도 5%만 크면 당신을 잡아먹습니다!</p>
+        <p class="mt-2 text-yellow-500">⚔️ 같은 종이라도 크기가 크면 먹을 수 있습니다!</p>
     </div>
 </div>
 
@@ -199,7 +189,7 @@
 
     // Species Database
     const SPECIES_DB = {
-        // T0: 플랑크톤/세포 (New)
+        // T0: 플랑크톤/세포
         'plankton': { id: 'plankton', name: '플랑크톤', tier: 0, type: 'producer', diet: '햇빛, 유기물', predators: '홍합, 갯지렁이', desc: '갯벌 생태계의 시작점입니다. 아주 작고 약해요.', color: '#86efac', scale: 0.6 },
 
         // T1: 1차 소비자
@@ -218,7 +208,7 @@
         'smallCrab': { id: 'smallCrab', name: '작은 게', tier: 2, type: 'predator', diet: '작은 무척추동물', predators: '낙지, 큰 물고기', desc: '재빠르게 움직이는 작은 게입니다.', color: '#f97316', scale: 1.0 },
         'chilge': { id: 'chilge', name: '칠게', tier: 2, type: 'predator', diet: '갯지렁이, 유기물', predators: '낙지, 새', desc: '갯벌에 구멍을 파고 사는 칠게입니다.', color: '#fb923c', scale: 1.1 },
         'jjangddungeo': { id: 'jjangddungeo', name: '짱뚱어', tier: 2, type: 'predator', diet: '갯지렁이, 작은 게', predators: '새', desc: '갯벌 위를 뛰어다니는 물고기입니다.', color: '#84cc16', scale: 1.2 },
-        'mangdungeo': { id: 'mangdungeo', name: '망둥어', tier: 2, type: 'predator', diet: '작은 갑각류', predators: '새, 큰 물고기', desc: '입이 큰 망둥어는 무엇이든 잘 먹어요.', color: '#65a30d', scale: 1.1 },
+        'mangdungeomangdungeo': { id: 'mangdungeomangdungeo', name: '망둥어', tier: 2, type: 'predator', diet: '작은 갑각류', predators: '새, 큰 물고기', desc: '입이 큰 망둥어는 무엇이든 잘 먹어요.', color: '#65a30d', scale: 1.1 },
 
         // T3: 3차 소비자 (Top Predator)
         'nakji': { id: 'nakji', name: '낙지', tier: 3, type: 'apex', diet: '게, 조개, 물고기', predators: '없음(최상위)', desc: '긴 다리로 먹이를 휘감는 갯벌의 사냥꾼.', color: '#dc2626', scale: 1.5 },
@@ -232,26 +222,22 @@
     const TIER_GROUPS = {
         0: ['plankton'],
         1: ['honghap', 'daewangjogae', 'smallScallop', 'bigSnail', 'mudSnail', 'ppulsora', 'slug_3751492', 'mudworm', 'smallWorm'],
-        2: ['nongge', 'smallCrab', 'chilge', 'jjangddungeo', 'mangdungeo'],
+        2: ['nongge', 'smallCrab', 'chilge', 'jjangddungeo', 'mangdungeomangdungeo'],
         3: ['nakji', 'muneo', 'sungeo', 'doyosae', 'galmaegi', 'waegari']
     };
-
-    // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
-    const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
 
     // Assets Loader
     const images = {};
     const loadImages = () => {
-        // Resources
         RESOURCES.forEach(r => {
             const img = new Image();
-            img.src = `${IMAGE_BASE_PATH}${r.id}.png`;   // ✅ 수정
+            img.src = `/png/${r.id}.png`;
             images[r.id] = img;
         });
-        // Species
         Object.values(SPECIES_DB).forEach(s => {
             const img = new Image();
-            img.src = `${IMAGE_BASE_PATH}${s.id}.png`;   // ✅ 수정
+            if(s.id === 'plankton') img.src = `/png/cell2.png`;
+            else img.src = `/png/${s.id}.png`;
             images[s.id] = img;
         });
     };
@@ -264,6 +250,7 @@
     const WORLD_SIZE = 3000;
 
     let animationFrameId = null;
+    let lastTime = 0; // For Delta Time
 
     let player = {
         x: WORLD_SIZE/2, y: WORLD_SIZE/2,
@@ -280,7 +267,7 @@
     };
 
     const mouse = { x: 0, y: 0, active: false };
-    let isBoosting = false;
+    // Removed isBoosting
 
     let foods = [];
     let enemies = [];
@@ -315,7 +302,6 @@
 
         document.getElementById('uiLayer').classList.remove('hidden');
 
-        // Always start T0 Plankton
         setPlayerSpecies('plankton');
 
         if (!hasPlayedBefore) {
@@ -337,7 +323,7 @@
         updateMaxEnergy();
 
         for(let i=0; i<300; i++) spawnFood();
-        for(let i=0; i<35; i++) spawnEnemy(); // Slightly more enemies
+        for(let i=0; i<35; i++) spawnEnemy();
 
         updateHUD();
     }
@@ -347,12 +333,11 @@
         const data = SPECIES_DB[id];
         player.tier = data.tier;
         player.baseRadius = (20 * (data.tier === 0 ? 0.8 : data.tier)) * data.scale;
-        // T0 starts smaller
         if(player.tier === 0) player.baseRadius = 15;
 
         player.radius = player.baseRadius;
         player.maxSpeed = 5 - (data.tier * 0.5);
-        if(player.tier === 0) player.maxSpeed = 5.5; // Plankton is fast
+        if(player.tier === 0) player.maxSpeed = 5.5;
 
         if(!unlockedSpecies.includes(id)) {
             unlockedSpecies.push(id);
@@ -367,9 +352,8 @@
     }
 
     function updateMaxEnergy() {
-        // Tier 3 needs more energy to clear
         player.maxEnergy = player.tier === 3 ? 200 : (player.tier * 50 + 30);
-        if(player.tier === 0) player.maxEnergy = 30; // Easy T0
+        if(player.tier === 0) player.maxEnergy = 30;
     }
 
     function spawnFood() {
@@ -393,8 +377,7 @@
 
     function spawnEnemy() {
         let possibleTiers = [];
-        // Adjusted spawn logic for T0 start
-        if(player.tier === 0) possibleTiers = [0, 0, 1]; // Rivals & Predators
+        if(player.tier === 0) possibleTiers = [0, 0, 1];
         else if(player.tier === 1) possibleTiers = [1, 1, 1, 2];
         else if(player.tier === 2) possibleTiers = [1, 2, 2, 3];
         else possibleTiers = [2, 3];
@@ -404,7 +387,6 @@
         const sId = group[Math.floor(Math.random() * group.length)];
         const data = SPECIES_DB[sId];
 
-        // 0.8x ~ 1.2x size variation
         const sizeVariance = 0.8 + Math.random() * 0.4;
         let baseR = (20 * (t===0 ? 0.8 : t)) * data.scale;
         if(t===0) baseR = 15;
@@ -458,14 +440,12 @@
         }
     }
 
-    // --- 4. Game Loop ---
+    // --- 4. Game Loop (Delta Time) ---
 
     function startGameLoop() {
-        if (animationFrameId) {
-            cancelAnimationFrame(animationFrameId);
-            animationFrameId = null;
-        }
-        gameLoop();
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        lastTime = 0;
+        requestAnimationFrame(gameLoop);
     }
 
     function stopGameLoop() {
@@ -475,13 +455,23 @@
         }
     }
 
-    function gameLoop() {
-        update();
+    function gameLoop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const deltaTime = timestamp - lastTime;
+        lastTime = timestamp;
+
+        // Cap delta time to prevent physics explosion on lag/tab switch (max 100ms)
+        const safeDelta = Math.min(deltaTime, 100);
+
+        // Normalize to 60 FPS (approx 16.67ms per frame)
+        const timeScale = safeDelta / 16.67;
+
+        update(timeScale);
         draw();
         animationFrameId = requestAnimationFrame(gameLoop);
     }
 
-    function update() {
+    function update(timeScale) {
         if (player.isDead) return;
 
         // Growth
@@ -495,14 +485,10 @@
         player.angle = angle;
 
         let currentSpeed = player.maxSpeed;
-        if (isBoosting && player.energy > 0) {
-            currentSpeed *= 1.5;
-            player.energy -= 0.1;
-            if (player.energy < 0) player.energy = 0;
-        }
+        // Removed Boosting Logic
 
-        player.x += Math.cos(angle) * currentSpeed;
-        player.y += Math.sin(angle) * currentSpeed;
+        player.x += Math.cos(angle) * currentSpeed * timeScale;
+        player.y += Math.sin(angle) * currentSpeed * timeScale;
 
         player.x = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.x));
         player.y = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.y));
@@ -513,7 +499,8 @@
         // Foods
         for (let i = foods.length - 1; i >= 0; i--) {
             const f = foods[i];
-            f.x += Math.cos(Date.now()/500 + i)*0.2;
+            // Apply timeScale to float animation drift
+            f.x += (Math.cos(Date.now()/500 + i)*0.2) * timeScale;
 
             const dist = Math.hypot(player.x - f.x, player.y - f.y);
             if (dist < player.radius + f.radius) {
@@ -548,25 +535,41 @@
                     else if (player.radius < e.radius / 1.05) isPlayerEdible = true;
                 }
 
+                let moveX = 0;
+                let moveY = 0;
+
                 if (isPlayerDangerous) {
-                    e.vx = -Math.cos(angleToP) * e.speed;
-                    e.vy = -Math.sin(angleToP) * e.speed;
+                    moveX = -Math.cos(angleToP) * e.speed;
+                    moveY = -Math.sin(angleToP) * e.speed;
                 } else if (isPlayerEdible) {
-                    e.vx = Math.cos(angleToP) * e.speed;
-                    e.vy = Math.sin(angleToP) * e.speed;
+                    moveX = Math.cos(angleToP) * e.speed;
+                    moveY = Math.sin(angleToP) * e.speed;
                 } else {
-                    e.vx += (Math.random()-0.5);
-                    e.vy += (Math.random()-0.5);
+                    // Random drift
+                    e.vx += (Math.random()-0.5) * 0.5 * timeScale;
+                    e.vy += (Math.random()-0.5) * 0.5 * timeScale;
+                    // Clamp velocity
+                    const maxV = 2;
+                    e.vx = Math.max(-maxV, Math.min(maxV, e.vx));
+                    e.vy = Math.max(-maxV, Math.min(maxV, e.vy));
+
+                    moveX = e.vx;
+                    moveY = e.vy;
                 }
+
+                e.x += moveX * timeScale;
+                e.y += moveY * timeScale;
+
             } else {
+                // Wander logic
                 if (Math.random() < 0.05) {
-                    e.vx = (Math.random() - 0.5) * e.speed * 2;
-                    e.vy = (Math.random() - 0.5) * e.speed * 2;
+                    e.vx = (Math.random() - 0.5) * e.speed;
+                    e.vy = (Math.random() - 0.5) * e.speed;
                 }
+                e.x += e.vx * timeScale;
+                e.y += e.vy * timeScale;
             }
 
-            e.x += e.vx;
-            e.y += e.vy;
             e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
             e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
 
@@ -594,7 +597,7 @@
                 } else {
                     // Bump
                     const angle = Math.atan2(player.y - e.y, player.x - e.x);
-                    const pushForce = 5;
+                    const pushForce = 5 * timeScale;
                     player.x += Math.cos(angle) * pushForce;
                     player.y += Math.sin(angle) * pushForce;
                     e.x -= Math.cos(angle) * pushForce;
@@ -607,9 +610,9 @@
 
         for(let i=particles.length-1; i>=0; i--) {
             let p = particles[i];
-            p.x += p.vx;
-            p.y += p.vy;
-            p.life -= 0.05;
+            p.x += p.vx * timeScale;
+            p.y += p.vy * timeScale;
+            p.life -= 0.05 * timeScale;
             if(p.life <= 0) particles.splice(i, 1);
         }
 
@@ -708,13 +711,12 @@
             ctx.fill();
         }
 
-        // Ring Logic Update for Intra-tier predation (5%)
+        // Ring Logic
         if (isPlayer) {
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(0,0,r+2,0,Math.PI*2); ctx.stroke();
         } else {
-            let ringColor = 'white';
             let isDangerous = false;
             let isEdible = false;
 
@@ -792,16 +794,15 @@
     }
 
     function gameClear() {
-        player.isDead = true; // Stop active play
+        player.isDead = true;
         stopGameLoop();
 
         document.getElementById('eventTitle').innerText = "생태계의 지배자!";
         document.getElementById('eventTitle').className = "text-5xl font-jua mb-6 text-yellow-400 relative z-10 drop-shadow-md";
 
-        // Adjust Icon layout for win
         setEventImage('eventPlayerImg', player.speciesId);
         document.getElementById('eventActionIcon').innerText = "👑";
-        document.getElementById('eventKillerImg').parentElement.classList.add('hidden'); // Hide killer slot
+        document.getElementById('eventKillerImg').parentElement.classList.add('hidden');
 
         document.getElementById('eventDesc').innerHTML =
             `<span class="text-yellow-300 font-bold text-xl">Game Clear!</span><br><br>` +
@@ -830,7 +831,6 @@
         }
     }
 
-    // Pokedex Logic
     function renderPokedex() {
         const grid = document.getElementById('pokedexGrid');
         grid.innerHTML = '';
@@ -850,7 +850,6 @@
 
             if (isUnlocked) {
                 card.classList.add('bg-slate-700', 'border-yellow-500/50');
-
                 let imgHTML = '';
                 const img = images[key];
                 if(img && img.complete && img.naturalHeight !== 0) {
@@ -858,21 +857,15 @@
                 } else {
                     imgHTML = `<div class="w-20 h-20 rounded-full mb-1 flex items-center justify-center font-bold text-white text-2xl shadow-inner" style="background-color:${data.color}">${data.name[0]}</div>`;
                 }
-
                 card.innerHTML = `
                         <div class="absolute top-0 left-0 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-br">PLAYED</div>
                         <div class="absolute top-2 right-2 text-xs bg-black/40 px-2 rounded text-gray-300 border border-white/10">T${data.tier}</div>
                         ${imgHTML}
                         <h3 class="font-jua text-xl text-yellow-400">${data.name}</h3>
                         <p class="text-xs text-center text-gray-200 h-10 overflow-hidden leading-tight">${data.desc}</p>
-                        <div class="w-full text-[10px] mt-2 bg-black/20 p-2 rounded border border-white/5">
-                            <div class="flex justify-between border-b border-white/10 pb-1 mb-1"><span class="text-green-400 font-bold">먹이</span> <span class="text-gray-300 text-right truncate w-20">${data.diet.split(',')[0]}</span></div>
-                            <div class="flex justify-between"><span class="text-red-400 font-bold">천적</span> <span class="text-gray-300 text-right truncate w-20">${data.predators.split(',')[0]}</span></div>
-                        </div>
                     `;
             } else if (isSeen) {
                 card.classList.add('bg-slate-800', 'border-gray-600');
-
                 let imgHTML = '';
                 const img = images[key];
                 if(img && img.complete && img.naturalHeight !== 0) {
@@ -880,19 +873,12 @@
                 } else {
                     imgHTML = `<div class="w-20 h-20 rounded-full mb-1 flex items-center justify-center font-bold text-gray-400 text-2xl bg-gray-700 shadow-inner">?</div>`;
                 }
-
                 card.innerHTML = `
                         <div class="absolute top-0 left-0 bg-gray-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-br">SEEN</div>
                         <div class="absolute top-2 right-2 text-xs bg-black/40 px-2 rounded text-gray-500 border border-white/5">T${data.tier}</div>
                         ${imgHTML}
                         <h3 class="font-jua text-xl text-gray-400">${data.name}</h3>
-                        <p class="text-xs text-center text-gray-500 h-10 flex items-center justify-center italic">
-                            아직 진화해보지<br>못한 생물입니다.
-                        </p>
-                        <div class="w-full text-[10px] mt-2 bg-black/10 p-2 rounded opacity-50">
-                            <div class="flex justify-between border-b border-white/5 pb-1 mb-1"><span class="text-green-700">먹이</span> <span>???</span></div>
-                            <div class="flex justify-between"><span class="text-red-700">천적</span> <span>???</span></div>
-                        </div>
+                        <p class="text-xs text-center text-gray-500 h-10 flex items-center justify-center italic">미진화</p>
                     `;
             } else {
                 card.classList.add('bg-slate-900', 'border-slate-800', 'opacity-60');
@@ -910,8 +896,6 @@
         document.getElementById('newPokedexBadge').classList.remove('hidden');
     }
 
-    // --- Event Listeners ---
-
     window.addEventListener('mousemove', (e) => {
         mouse.x = e.clientX;
         mouse.y = e.clientY;
@@ -922,11 +906,6 @@
         mouse.x = e.touches[0].clientX;
         mouse.y = e.touches[0].clientY;
     }, {passive: false});
-
-    window.addEventListener('mousedown', () => isBoosting = true);
-    window.addEventListener('mouseup', () => isBoosting = false);
-    window.addEventListener('touchstart', () => isBoosting = true);
-    window.addEventListener('touchend', () => isBoosting = false);
 
     document.getElementById('startBtn').addEventListener('click', () => {
         document.getElementById('startScreen').classList.add('hidden');
