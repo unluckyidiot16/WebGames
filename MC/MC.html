@@ -208,7 +208,7 @@
         'smallCrab': { id: 'smallCrab', name: '작은 게', tier: 2, type: 'predator', diet: '작은 무척추동물', predators: '낙지, 큰 물고기', desc: '재빠르게 움직이는 작은 게입니다.', color: '#f97316', scale: 1.0 },
         'chilge': { id: 'chilge', name: '칠게', tier: 2, type: 'predator', diet: '갯지렁이, 유기물', predators: '낙지, 새', desc: '갯벌에 구멍을 파고 사는 칠게입니다.', color: '#fb923c', scale: 1.1 },
         'jjangddungeo': { id: 'jjangddungeo', name: '짱뚱어', tier: 2, type: 'predator', diet: '갯지렁이, 작은 게', predators: '새', desc: '갯벌 위를 뛰어다니는 물고기입니다.', color: '#84cc16', scale: 1.2 },
-        'mangdungeomangdungeo': { id: 'mangdungeomangdungeo', name: '망둥어', tier: 2, type: 'predator', diet: '작은 갑각류', predators: '새, 큰 물고기', desc: '입이 큰 망둥어는 무엇이든 잘 먹어요.', color: '#65a30d', scale: 1.1 },
+        'mangdungeo': { id: 'mangdungeo', name: '망둥어', tier: 2, type: 'predator', diet: '작은 갑각류', predators: '새, 큰 물고기', desc: '입이 큰 망둥어는 무엇이든 잘 먹어요.', color: '#65a30d', scale: 1.1 },
 
         // T3: 3차 소비자 (Top Predator)
         'nakji': { id: 'nakji', name: '낙지', tier: 3, type: 'apex', diet: '게, 조개, 물고기', predators: '없음(최상위)', desc: '긴 다리로 먹이를 휘감는 갯벌의 사냥꾼.', color: '#dc2626', scale: 1.5 },
@@ -222,25 +222,30 @@
     const TIER_GROUPS = {
         0: ['plankton'],
         1: ['honghap', 'daewangjogae', 'smallScallop', 'bigSnail', 'mudSnail', 'ppulsora', 'slug_3751492', 'mudworm', 'smallWorm'],
-        2: ['nongge', 'smallCrab', 'chilge', 'jjangddungeo', 'mangdungeomangdungeo'],
+        2: ['nongge', 'smallCrab', 'chilge', 'jjangddungeo', 'mangdungeo'],
         3: ['nakji', 'muneo', 'sungeo', 'doyosae', 'galmaegi', 'waegari']
     };
+
+    // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
+    const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
 
     // Assets Loader
     const images = {};
     const loadImages = () => {
+        // Resources
         RESOURCES.forEach(r => {
             const img = new Image();
-            img.src = `/png/${r.id}.png`;
+            img.src = `${IMAGE_BASE_PATH}${r.id}.png`;   // ✅ 수정
             images[r.id] = img;
         });
+        // Species
         Object.values(SPECIES_DB).forEach(s => {
             const img = new Image();
-            if(s.id === 'plankton') img.src = `/png/cell2.png`;
-            else img.src = `/png/${s.id}.png`;
+            img.src = `${IMAGE_BASE_PATH}${s.id}.png`;   // ✅ 수정
             images[s.id] = img;
         });
     };
+
 
     // --- 2. Game State & Logic ---
 
