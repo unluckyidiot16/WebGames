@@ -36,6 +36,9 @@
             100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
         }
         .animate-pulse-red { animation: pulse-red 2s infinite; }
+
+        /* Pokedex Styles */
+        .grayscale-filter { filter: grayscale(100%) contrast(1.2); opacity: 0.7; }
     </style>
 </head>
 <body class="bg-slate-900 text-white w-full h-full fixed">
@@ -43,27 +46,27 @@
 <!-- Canvas Layer -->
 <canvas id="gameCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
 
-<!-- UI Layer -->
-<div id="uiLayer" class="absolute top-0 left-0 w-full h-full game-overlay flex flex-col justify-between p-4">
+<!-- UI Layer (In-Game) -->
+<div id="uiLayer" class="absolute top-0 left-0 w-full h-full game-overlay flex flex-col justify-between p-4 z-10 hidden">
 
     <!-- Top HUD: Energy & Evolution -->
     <div class="flex justify-between items-start w-full">
-        <div class="flex flex-col gap-2 w-1/3">
-            <div class="bg-black/50 p-2 rounded-lg border-2 border-slate-600 backdrop-blur-sm">
+        <div class="flex flex-col gap-2 w-1/3 min-w-[150px]">
+            <div class="bg-black/60 p-2 rounded-lg border-2 border-slate-600 backdrop-blur-sm">
                 <div class="flex justify-between text-xs text-gray-300 mb-1">
-                    <span id="currentSpeciesName" class="font-jua text-lg text-yellow-400">종 이름</span>
-                    <span id="tierLabel" class="text-xs bg-blue-600 px-2 py-0.5 rounded-full">T1</span>
+                    <span id="currentSpeciesName" class="font-jua text-lg text-yellow-400 drop-shadow">종 이름</span>
+                    <span id="tierLabel" class="text-xs bg-blue-600 px-2 py-0.5 rounded-full font-bold shadow">T1</span>
                 </div>
                 <!-- Energy Bar -->
-                <div class="w-full h-4 bg-gray-700 rounded-full overflow-hidden relative">
-                    <div id="energyBar" class="h-full bg-gradient-to-r from-green-400 to-emerald-600 transition-all duration-300" style="width: 0%"></div>
-                    <p class="absolute inset-0 text-center text-[10px] leading-4 font-bold drop-shadow-md">진화 에너지</p>
+                <div class="w-full h-4 bg-gray-700 rounded-full overflow-hidden relative border border-gray-600">
+                    <div id="energyBar" class="h-full bg-gradient-to-r from-green-400 to-emerald-600 transition-all duration-300 shadow-[0_0_10px_rgba(74,222,128,0.5)]" style="width: 0%"></div>
+                    <p class="absolute inset-0 text-center text-[10px] leading-4 font-bold drop-shadow-md text-white mix-blend-screen">진화 에너지</p>
                 </div>
             </div>
         </div>
 
         <!-- Food Chain Indicator (Right Top) -->
-        <div class="bg-black/60 p-3 rounded-xl border border-slate-500 backdrop-blur-md interactive max-w-md">
+        <div class="bg-black/60 p-3 rounded-xl border border-slate-500 backdrop-blur-md interactive max-w-md hidden sm:block">
             <h3 class="text-xs text-center text-gray-400 mb-2 font-bold">갯벌 먹이사슬 현황</h3>
             <div class="flex items-center justify-between gap-2 text-xs">
                 <!-- Resource -->
@@ -90,81 +93,83 @@
                     <span class="text-[10px]">3차 소비자</span>
                 </div>
             </div>
-            <div id="hud-message" class="mt-2 text-center text-yellow-300 text-xs font-bold animate-pulse hidden">
-                ⚠ 상위 포식자 주의!
-            </div>
         </div>
     </div>
 
     <!-- Bottom Controls/Info -->
-    <div class="flex justify-between items-end w-full">
-        <button id="pokedexBtn" class="interactive bg-slate-800 hover:bg-slate-700 border-2 border-slate-500 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110 group">
-            <span class="text-2xl">📖</span>
-            <span class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full w-5 h-5 flex items-center justify-center hidden" id="newPokedexBadge">N</span>
-        </button>
-        <div class="text-right opacity-70 text-xs">
+    <div class="flex justify-end items-end w-full">
+        <div class="text-right opacity-70 text-xs bg-black/30 p-2 rounded text-white">
             <p>Move: 마우스 / Touch</p>
             <p>Dash: 클릭 / Tap (에너지 소모)</p>
         </div>
     </div>
 </div>
 
-<!-- Start Screen Modal -->
-<div id="startScreen" class="absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center z-50 interactive">
-    <h1 class="text-6xl font-jua text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-4 drop-shadow-lg">MudChain</h1>
-    <p class="text-xl text-gray-300 mb-8 font-light">갯벌 생태계 먹이사슬 로그라이크</p>
+<!-- Start Screen Modal (Main Lobby) -->
+<div id="startScreen" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 interactive backdrop-blur-sm bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiZmZmYiLz48L3N2Zz4')]">
+    <h1 class="text-6xl font-jua text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-2 drop-shadow-lg">MudChain</h1>
+    <p class="text-xl text-gray-400 mb-8 font-light tracking-widest">갯벌 생태계 로그라이크</p>
 
-    <div class="bg-white/10 p-6 rounded-xl backdrop-blur-sm mb-8 max-w-md text-center">
-        <p class="mb-2">🌱 유기물을 먹고 성장하세요.</p>
-        <p class="mb-2">⚠️ 나보다 큰 포식자를 피하세요.</p>
-        <p class="mb-4">👑 최상위 포식자(3차 소비자)가 되어 갯벌을 지배하세요!</p>
-        <div class="text-sm text-yellow-300 bg-black/40 p-2 rounded">
-            💡 팁: 첫 플레이는 '갯지렁이'로 시작합니다.
-        </div>
+    <div class="flex flex-col gap-4 w-full max-w-xs">
+        <button id="startBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 px-8 rounded-xl text-xl shadow-[0_0_20px_rgba(37,99,235,0.4)] transform transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+            <span>▶</span> 생태계 진입하기
+        </button>
+
+        <button id="lobbyPokedexBtn" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg transform transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2 relative">
+            <span>📖</span> 생태 도감
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center hidden animate-bounce" id="newPokedexBadge">N</span>
+        </button>
     </div>
 
-    <button id="startBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 px-12 rounded-full text-xl shadow-xl transform transition hover:scale-105 active:scale-95">
-        생태계 진입하기
-    </button>
+    <div class="mt-8 text-sm text-gray-500 bg-black/20 p-4 rounded-lg text-center">
+        <p>🌱 유기물을 먹고 성장하세요.</p>
+        <p>⚠️ 나보다 큰 포식자를 피하세요.</p>
+    </div>
 </div>
 
-<!-- Death/Evolution Overlay -->
-<div id="eventOverlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-40 hidden interactive p-8 text-center">
-    <div id="eventContent" class="bg-slate-800 p-8 rounded-2xl border-4 border-slate-600 max-w-lg w-full shadow-2xl pop-in">
-        <h2 id="eventTitle" class="text-4xl font-jua mb-4 text-red-500">잡아먹혔습니다!</h2>
+<!-- Death/Evolution Overlay (Game Over) -->
+<div id="eventOverlay" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center z-40 hidden interactive p-8 text-center backdrop-blur-sm">
+    <div id="eventContent" class="bg-slate-800 p-8 rounded-2xl border-4 border-slate-600 max-w-lg w-full shadow-2xl pop-in relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none"></div>
 
-        <div class="flex justify-center items-center gap-4 mb-6">
+        <h2 id="eventTitle" class="text-4xl font-jua mb-6 text-red-500 relative z-10 drop-shadow-md">잡아먹혔습니다!</h2>
+
+        <div class="flex justify-center items-center gap-6 mb-8 relative z-10">
             <!-- Player Icon -->
-            <div class="flex flex-col items-center opacity-50">
-                <div id="eventPlayerImg" class="w-16 h-16 bg-gray-600 rounded-full mb-2 bg-cover bg-center border-2 border-gray-400"></div>
-                <span class="text-sm">나</span>
+            <div class="flex flex-col items-center opacity-60 scale-90">
+                <div id="eventPlayerImg" class="w-16 h-16 bg-gray-600 rounded-full mb-2 bg-cover bg-center border-2 border-gray-400 shadow-lg"></div>
+                <span class="text-sm text-gray-300">나</span>
             </div>
-            <span class="text-2xl text-red-500 font-bold">☠️</span>
+            <span class="text-3xl text-red-500 font-bold animate-pulse">☠️</span>
             <!-- Killer Icon -->
-            <div class="flex flex-col items-center scale-125">
-                <div id="eventKillerImg" class="w-20 h-20 bg-red-600 rounded-full mb-2 bg-cover bg-center border-4 border-red-500 shadow-red-500/50 shadow-lg"></div>
-                <span id="eventKillerName" class="text-sm font-bold text-red-400">포식자</span>
+            <div class="flex flex-col items-center scale-110">
+                <div id="eventKillerImg" class="w-24 h-24 bg-red-600 rounded-full mb-2 bg-cover bg-center border-4 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.6)]"></div>
+                <span id="eventKillerName" class="text-lg font-bold text-red-400">포식자</span>
             </div>
         </div>
 
-        <p id="eventDesc" class="text-lg text-gray-200 mb-6 bg-black/30 p-4 rounded-lg">
+        <p id="eventDesc" class="text-lg text-gray-200 mb-8 bg-black/40 p-5 rounded-xl border border-white/10 relative z-10">
             설명 텍스트가 들어갑니다.
         </p>
 
-        <button id="restartBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg transition">
-            다시 시작 (새로운 삶)
+        <button id="toMainBtn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded-xl text-xl transition shadow-lg hover:shadow-gray-500/30 relative z-10 flex items-center justify-center gap-2">
+            <span>🏠</span> 메인으로 (도감 확인)
         </button>
     </div>
 </div>
 
 <!-- Pokedex Modal -->
-<div id="pokedexModal" class="absolute inset-0 bg-slate-900/95 z-50 hidden interactive flex flex-col">
-    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
-        <h2 class="text-2xl font-jua text-yellow-400">갯벌 생태 도감</h2>
-        <button id="closePokedex" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+<div id="pokedexModal" class="absolute inset-0 bg-slate-900/95 z-50 hidden interactive flex flex-col backdrop-blur-md">
+    <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800 shadow-xl">
+        <div>
+            <h2 class="text-3xl font-jua text-yellow-400 mb-1">갯벌 생태 도감</h2>
+            <p class="text-xs text-gray-400">발견한 생물과 진화한 생물이 기록됩니다.</p>
+        </div>
+        <button id="closePokedex" class="text-gray-400 hover:text-white text-4xl w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition">&times;</button>
     </div>
-    <div class="flex-1 overflow-y-auto p-8">
-        <div id="pokedexGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiZmZmYiLz48L3N2Zz4')]">
+        <div id="pokedexGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
             <!-- Cards injected via JS -->
         </div>
     </div>
@@ -180,9 +185,6 @@
         { id: 'cell4', exp: 3, color: '#fb923c' }, // Large
         { id: 'cell5', exp: 3, color: '#f87171' }
     ];
-
-    // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
-    const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
 
     // Species Database
     const SPECIES_DB = {
@@ -219,6 +221,9 @@
         3: ['nakji', 'muneo', 'sungeo', 'doyosae', 'galmaegi', 'waegari']
     };
 
+    // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
+    const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
+    
     // Assets Loader
     const images = {};
     const loadImages = () => {
@@ -244,6 +249,9 @@
     let width, height;
     const WORLD_SIZE = 3000;
 
+    // Global Animation ID (Crucial for fixing speed bug)
+    let animationFrameId = null;
+
     // Player State
     let player = {
         x: WORLD_SIZE/2, y: WORLD_SIZE/2,
@@ -265,11 +273,21 @@
     // Entities
     let foods = [];
     let enemies = [];
-    let particles = []; // Death/Eat effects
+    let particles = [];
 
     // Storage
-    let unlockedSpecies = JSON.parse(localStorage.getItem('mudChain_unlocked')) || ['mudworm'];
-    let hasPlayedBefore = localStorage.getItem('mudChain_hasPlayed');
+    let unlockedSpecies = [];
+    let seenSpecies = [];
+    let hasPlayedBefore = false;
+
+    try {
+        unlockedSpecies = JSON.parse(localStorage.getItem('mudChain_unlocked')) || ['mudworm'];
+        seenSpecies = JSON.parse(localStorage.getItem('mudChain_seen')) || [];
+        hasPlayedBefore = localStorage.getItem('mudChain_hasPlayed') === 'true';
+    } catch (e) {
+        console.error("Storage Error", e);
+        unlockedSpecies = ['mudworm'];
+    }
 
     // Camera
     let camX = 0, camY = 0;
@@ -286,12 +304,14 @@
     function initGame() {
         loadImages();
 
-        // First time or restart?
+        // UI Setup
+        document.getElementById('uiLayer').classList.remove('hidden');
+
+        // Species Selection Logic
         if (!hasPlayedBefore) {
             setPlayerSpecies('mudworm');
             localStorage.setItem('mudChain_hasPlayed', 'true');
         } else {
-            // If T1, choose from unlocked T1 species
             const unlockedT1 = TIER_GROUPS[1].filter(id => unlockedSpecies.includes(id));
             const startId = unlockedT1.length > 0
                 ? unlockedT1[Math.floor(Math.random() * unlockedT1.length)]
@@ -300,7 +320,7 @@
         }
 
         resetWorld();
-        gameLoop();
+        startGameLoop();
     }
 
     function resetWorld() {
@@ -310,12 +330,10 @@
         player.y = Math.random() * WORLD_SIZE;
         player.energy = 0;
         player.isDead = false;
-        player.tier = SPECIES_DB[player.speciesId].tier; // Should be 1
+        player.tier = SPECIES_DB[player.speciesId].tier;
         updateMaxEnergy();
 
-        // Spawn initial food
         for(let i=0; i<300; i++) spawnFood();
-        // Spawn initial enemies
         for(let i=0; i<30; i++) spawnEnemy();
 
         updateHUD();
@@ -325,31 +343,31 @@
         player.speciesId = id;
         const data = SPECIES_DB[id];
         player.tier = data.tier;
-        // Radius scales with tier + slight variance based on species scale
         player.radius = (20 * data.tier) * data.scale;
-        player.maxSpeed = 5 - (data.tier * 0.5); // Higher tier = slightly slower base speed (more mass)
+        player.maxSpeed = 5 - (data.tier * 0.5);
 
-        // Unlock in pokedex
         if(!unlockedSpecies.includes(id)) {
             unlockedSpecies.push(id);
             localStorage.setItem('mudChain_unlocked', JSON.stringify(unlockedSpecies));
+            if(!seenSpecies.includes(id)) {
+                seenSpecies.push(id);
+                localStorage.setItem('mudChain_seen', JSON.stringify(seenSpecies));
+            }
             showBadge();
         }
-
         updateHUD();
     }
 
     function updateMaxEnergy() {
-        player.maxEnergy = player.tier * 50 + (player.tier === 3 ? 100 : 0); // T3 takes longer to "win"
+        player.maxEnergy = player.tier * 50 + (player.tier === 3 ? 100 : 0);
     }
 
     function spawnFood() {
         const r = Math.random();
-        // Higher tiers spawn less frequently
         let typeIdx = 0;
-        if (r > 0.9) typeIdx = Math.floor(Math.random() * 2) + 4; // 4,5
-        else if (r > 0.7) typeIdx = Math.floor(Math.random() * 2) + 2; // 2,3
-        else typeIdx = Math.floor(Math.random() * 2); // 0,1
+        if (r > 0.9) typeIdx = Math.floor(Math.random() * 2) + 4;
+        else if (r > 0.7) typeIdx = Math.floor(Math.random() * 2) + 2;
+        else typeIdx = Math.floor(Math.random() * 2);
 
         const res = RESOURCES[typeIdx];
         foods.push({
@@ -364,10 +382,6 @@
     }
 
     function spawnEnemy() {
-        // Determine tier based on player tier to keep difficulty balanced but scary
-        // T1 Player: Mostly T1 enemies, some T2.
-        // T2 Player: T1 food, T2 rivals, T3 predators.
-
         let possibleTiers = [];
         if(player.tier === 1) possibleTiers = [1, 1, 1, 2];
         else if(player.tier === 2) possibleTiers = [1, 2, 2, 3];
@@ -392,15 +406,14 @@
 
     function evolve() {
         if (player.tier >= 3) {
-            // Already apex, just heal or boost score? 
-            // Let's keep it maxed at T3 for MVP.
+            player.energy = 0;
+            createExplosion(player.x, player.y, 10, '#ffff00');
             return;
         }
 
         const nextTier = player.tier + 1;
         const candidates = TIER_GROUPS[nextTier];
 
-        // Priority: Unplayed species
         const unplayed = candidates.filter(id => !unlockedSpecies.includes(id));
         let nextId;
 
@@ -410,8 +423,7 @@
             nextId = candidates[Math.floor(Math.random() * candidates.length)];
         }
 
-        // Effect
-        createExplosion(player.x, player.y, 20, '#ffffff');
+        createExplosion(player.x, player.y, 30, '#ffffff');
         setPlayerSpecies(nextId);
         player.energy = 0;
         updateMaxEnergy();
@@ -421,18 +433,36 @@
         for(let i=0; i<count; i++) {
             particles.push({
                 x: x, y: y,
-                vx: (Math.random() - 0.5) * 10,
-                vy: (Math.random() - 0.5) * 10,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
                 life: 1.0,
                 color: color
             });
         }
     }
 
-    // --- 4. Game Loop ---
+    // --- 4. Game Loop (Fixed) ---
+
+    function startGameLoop() {
+        // Cancel any existing loop to prevent speedup bug
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+        gameLoop();
+    }
+
+    function stopGameLoop() {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+    }
 
     function gameLoop() {
+        update();
         draw();
+        animationFrameId = requestAnimationFrame(gameLoop);
     }
 
     function update() {
@@ -451,28 +481,22 @@
             if (player.energy < 0) player.energy = 0;
         }
 
-        // Simple ease-in movement
         player.x += Math.cos(angle) * currentSpeed;
         player.y += Math.sin(angle) * currentSpeed;
 
-        // World Bounds
         player.x = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.x));
         player.y = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.y));
 
-        // Camera follow
         camX = player.x - width / 2;
         camY = player.y - height / 2;
 
         // Update Foods
         for (let i = foods.length - 1; i >= 0; i--) {
             const f = foods[i];
-            // Simple float animation
             f.x += Math.cos(Date.now()/500 + i)*0.2;
 
             const dist = Math.hypot(player.x - f.x, player.y - f.y);
             if (dist < player.radius + f.radius) {
-                // Eat Food (T1 only effectively eats organic matter, but T2/T3 eat smaller stuff logic)
-                // MVP rule: Everyone can eat "Resources" (cell0-5) for small energy
                 player.energy += f.exp;
                 createExplosion(f.x, f.y, 3, f.color);
                 foods.splice(i, 1);
@@ -487,28 +511,21 @@
         // Update Enemies
         for (let i = enemies.length - 1; i >= 0; i--) {
             const e = enemies[i];
-
-            // AI Logic: Simple Random Walk + Chase
-            // If player is close and smaller, chase. If player is bigger, flee.
             const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
 
             if (distToPlayer < 400) {
                 const angleToP = Math.atan2(player.y - e.y, player.x - e.x);
                 if (e.tier > player.tier) {
-                    // Chase Player
                     e.vx = Math.cos(angleToP) * e.speed;
                     e.vy = Math.sin(angleToP) * e.speed;
                 } else if (e.tier < player.tier) {
-                    // Flee
                     e.vx = -Math.cos(angleToP) * e.speed;
                     e.vy = -Math.sin(angleToP) * e.speed;
                 } else {
-                    // Neutral/Random
                     e.vx += (Math.random()-0.5);
                     e.vy += (Math.random()-0.5);
                 }
             } else {
-                // Random wander
                 if (Math.random() < 0.05) {
                     e.vx = (Math.random() - 0.5) * e.speed * 2;
                     e.vy = (Math.random() - 0.5) * e.speed * 2;
@@ -520,20 +537,16 @@
             e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
             e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
 
-            // Collision with Player
             if (distToPlayer < player.radius + e.radius) {
                 if (player.tier > e.tier) {
-                    // Eat Enemy
-                    player.energy += 15 * e.tier; // Big boost
+                    player.energy += 15 * e.tier;
                     createExplosion(e.x, e.y, 10, e.color);
                     enemies.splice(i, 1);
                     spawnEnemy();
                     if (player.energy >= player.maxEnergy) evolve();
                 } else if (player.tier < e.tier) {
-                    // Die
                     die(e);
                 } else {
-                    // Bump (Same tier)
                     const angle = Math.atan2(player.y - e.y, player.x - e.x);
                     player.x += Math.cos(angle) * 5;
                     player.y += Math.sin(angle) * 5;
@@ -543,10 +556,8 @@
             }
         }
 
-        // Maintain Enemy Count
         if (enemies.length < 30) spawnEnemy();
 
-        // Particles
         for(let i=particles.length-1; i>=0; i--) {
             let p = particles[i];
             p.x += p.vx;
@@ -555,7 +566,7 @@
             if(p.life <= 0) particles.splice(i, 1);
         }
 
-        // HUD Update
+        // HUD
         const p = (player.energy / player.maxEnergy) * 100;
         document.getElementById('energyBar').style.width = `${p}%`;
         document.getElementById('currentSpeciesName').innerText = SPECIES_DB[player.speciesId].name;
@@ -563,8 +574,7 @@
     }
 
     function draw() {
-        // Clear
-        ctx.fillStyle = '#1e293b'; // Mud/Water dark blue-ish
+        ctx.fillStyle = '#1e293b';
         ctx.fillRect(0, 0, width, height);
 
         ctx.save();
@@ -578,7 +588,7 @@
         for(let y=0; y<=WORLD_SIZE; y+=100) { ctx.moveTo(0,y); ctx.lineTo(WORLD_SIZE, y); }
         ctx.stroke();
 
-        // Draw Food
+        // Foods
         foods.forEach(f => {
             ctx.save();
             ctx.translate(f.x, f.y);
@@ -586,7 +596,6 @@
             if (img && img.complete && img.naturalHeight !== 0) {
                 ctx.drawImage(img, -f.radius, -f.radius, f.radius*2, f.radius*2);
             } else {
-                // Fallback
                 ctx.fillStyle = f.color;
                 ctx.beginPath();
                 ctx.arc(0, 0, f.radius, 0, Math.PI*2);
@@ -599,12 +608,12 @@
             ctx.restore();
         });
 
-        // Draw Enemies
+        // Enemies
         enemies.forEach(e => {
             drawEntity(e, false);
         });
 
-        // Draw Player
+        // Player
         if (!player.isDead) {
             drawEntity(player, true);
         }
@@ -620,39 +629,31 @@
         });
 
         ctx.restore();
-
-        requestAnimationFrame(() => {
-            update();
-            draw();
-        });
     }
 
     function drawEntity(entity, isPlayer) {
         ctx.save();
         ctx.translate(entity.x, entity.y);
-        // ctx.rotate(entity.angle); // Rotate if sprites have direction
 
-        const data = isPlayer ? SPECIES_DB[entity.speciesId] : SPECIES_DB[entity.speciesId];
+        const data = SPECIES_DB[entity.speciesId];
         const img = images[entity.speciesId];
         const r = entity.radius;
 
-        // Name Tag
-        if (!isPlayer || true) {
-            ctx.fillStyle = 'white';
-            ctx.font = '10px "Noto Sans KR"';
-            ctx.textAlign = 'center';
-            ctx.fillText(data.name, 0, -r - 5);
-        }
+        ctx.fillStyle = 'white';
+        ctx.font = '10px "Noto Sans KR"';
+        ctx.textAlign = 'center';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=4;
+        ctx.fillText(data.name, 0, -r - 5);
+        ctx.shadowBlur=0;
 
         if (img && img.complete && img.naturalHeight !== 0) {
             ctx.drawImage(img, -r, -r, r*2, r*2);
         } else {
-            // Fallback Circle
             ctx.fillStyle = data.color || '#ccc';
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI*2);
             ctx.fill();
-            // Eyes for cuteness
             ctx.fillStyle = 'white';
             ctx.beginPath();
             ctx.arc(-r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
@@ -665,9 +666,7 @@
             ctx.fill();
         }
 
-        // Highlight ring for higher tier enemies (Danger)
         if (isPlayer) {
-            // Player glow
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(0,0,r+2,0,Math.PI*2); ctx.stroke();
@@ -678,7 +677,7 @@
             ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
             ctx.setLineDash([]);
         } else if (entity.tier < player.tier) {
-            ctx.strokeStyle = '#4ade80'; // Green ring (Food)
+            ctx.strokeStyle = '#4ade80';
             ctx.lineWidth = 1;
             ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
         }
@@ -689,35 +688,33 @@
     // --- 5. UI & Interaction Logic ---
 
     function updateHUD() {
-        // Reset Opacity
         ['hud-t0', 'hud-t1', 'hud-t2', 'hud-t3'].forEach(id => {
-            document.getElementById(id).style.opacity = '0.5';
-            document.getElementById(id).classList.remove('scale-110');
+            const el = document.getElementById(id);
+            if(el) {
+                el.style.opacity = '0.5';
+                el.classList.remove('scale-110');
+            }
         });
 
-        // Highlight current
         const cur = document.getElementById(`hud-t${player.tier}`);
         if(cur) {
             cur.style.opacity = '1';
             cur.classList.add('scale-110');
         }
-
-        // Check neighbors logic for arrows? (Simplified in static HTML for now, could animate arrows)
     }
 
     function die(killer) {
         player.isDead = true;
         const kData = SPECIES_DB[killer.speciesId];
 
-        // Open killer to pokedex logic could go here (discovery)
-        if(!unlockedSpecies.includes(killer.speciesId)) {
-            // "Seen" logic? For now, we just unlock it if you get killed by it to learn about it.
-            // Or maybe just partial unlock. Let's just show info.
+        if(!seenSpecies.includes(killer.speciesId)) {
+            seenSpecies.push(killer.speciesId);
+            localStorage.setItem('mudChain_seen', JSON.stringify(seenSpecies));
+            showBadge();
         }
 
         document.getElementById('eventTitle').innerText = "잡아먹혔습니다!";
 
-        // Set Images
         setEventImage('eventPlayerImg', player.speciesId);
         setEventImage('eventKillerImg', killer.speciesId);
 
@@ -754,7 +751,6 @@
         const grid = document.getElementById('pokedexGrid');
         grid.innerHTML = '';
 
-        // Sort by Tier then Name
         const sortedKeys = Object.keys(SPECIES_DB).sort((a,b) => {
             if (SPECIES_DB[a].tier !== SPECIES_DB[b].tier) return SPECIES_DB[a].tier - SPECIES_DB[b].tier;
             return a.localeCompare(b);
@@ -763,36 +759,63 @@
         sortedKeys.forEach(key => {
             const data = SPECIES_DB[key];
             const isUnlocked = unlockedSpecies.includes(key);
+            const isSeen = seenSpecies.includes(key);
 
             const card = document.createElement('div');
-            card.className = `bg-slate-700 rounded-lg p-4 flex flex-col items-center gap-2 border-2 ${isUnlocked ? 'border-slate-500' : 'border-slate-800 opacity-50'}`;
+            card.className = `rounded-xl p-4 flex flex-col items-center gap-3 border-2 transition-all hover:scale-105 duration-200 shadow-lg relative overflow-hidden`;
 
             if (isUnlocked) {
-                // Unlocked View
+                card.classList.add('bg-slate-700', 'border-yellow-500/50');
+
                 let imgHTML = '';
                 const img = images[key];
                 if(img && img.complete && img.naturalHeight !== 0) {
-                    imgHTML = `<img src="${img.src}" class="w-16 h-16 object-contain mb-2">`;
+                    imgHTML = `<img src="${img.src}" class="w-20 h-20 object-contain mb-1 drop-shadow-md">`;
                 } else {
-                    imgHTML = `<div class="w-16 h-16 rounded-full mb-2 flex items-center justify-center font-bold text-white text-xl" style="background-color:${data.color}">${data.name[0]}</div>`;
+                    imgHTML = `<div class="w-20 h-20 rounded-full mb-1 flex items-center justify-center font-bold text-white text-2xl shadow-inner" style="background-color:${data.color}">${data.name[0]}</div>`;
                 }
 
                 card.innerHTML = `
-                        <div class="absolute top-2 left-2 text-xs bg-black/50 px-2 rounded text-gray-300">T${data.tier}</div>
+                        <div class="absolute top-0 left-0 bg-yellow-500 text-black text-[10px] font-bold px-2 py-0.5 rounded-br">PLAYED</div>
+                        <div class="absolute top-2 right-2 text-xs bg-black/40 px-2 rounded text-gray-300 border border-white/10">T${data.tier}</div>
                         ${imgHTML}
                         <h3 class="font-jua text-xl text-yellow-400">${data.name}</h3>
-                        <p class="text-xs text-center text-gray-300 h-16 overflow-hidden text-ellipsis">${data.desc}</p>
-                        <div class="w-full text-[10px] mt-2 bg-black/20 p-2 rounded">
-                            <div class="flex justify-between"><span class="text-green-400">먹이:</span> <span>${data.diet.split(',')[0]}...</span></div>
-                            <div class="flex justify-between"><span class="text-red-400">천적:</span> <span>${data.predators.split(',')[0]}...</span></div>
+                        <p class="text-xs text-center text-gray-200 h-10 overflow-hidden leading-tight">${data.desc}</p>
+                        <div class="w-full text-[10px] mt-2 bg-black/20 p-2 rounded border border-white/5">
+                            <div class="flex justify-between border-b border-white/10 pb-1 mb-1"><span class="text-green-400 font-bold">먹이</span> <span class="text-gray-300 text-right truncate w-20">${data.diet.split(',')[0]}</span></div>
+                            <div class="flex justify-between"><span class="text-red-400 font-bold">천적</span> <span class="text-gray-300 text-right truncate w-20">${data.predators.split(',')[0]}</span></div>
+                        </div>
+                    `;
+            } else if (isSeen) {
+                card.classList.add('bg-slate-800', 'border-gray-600');
+
+                let imgHTML = '';
+                const img = images[key];
+                if(img && img.complete && img.naturalHeight !== 0) {
+                    imgHTML = `<img src="${img.src}" class="w-20 h-20 object-contain mb-1 grayscale-filter brightness-50">`;
+                } else {
+                    imgHTML = `<div class="w-20 h-20 rounded-full mb-1 flex items-center justify-center font-bold text-gray-400 text-2xl bg-gray-700 shadow-inner">?</div>`;
+                }
+
+                card.innerHTML = `
+                        <div class="absolute top-0 left-0 bg-gray-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-br">SEEN</div>
+                        <div class="absolute top-2 right-2 text-xs bg-black/40 px-2 rounded text-gray-500 border border-white/5">T${data.tier}</div>
+                        ${imgHTML}
+                        <h3 class="font-jua text-xl text-gray-400">${data.name}</h3>
+                        <p class="text-xs text-center text-gray-500 h-10 flex items-center justify-center italic">
+                            아직 진화해보지<br>못한 생물입니다.
+                        </p>
+                        <div class="w-full text-[10px] mt-2 bg-black/10 p-2 rounded opacity-50">
+                            <div class="flex justify-between border-b border-white/5 pb-1 mb-1"><span class="text-green-700">먹이</span> <span>???</span></div>
+                            <div class="flex justify-between"><span class="text-red-700">천적</span> <span>???</span></div>
                         </div>
                     `;
             } else {
-                // Locked View
+                card.classList.add('bg-slate-900', 'border-slate-800', 'opacity-60');
                 card.innerHTML = `
-                        <div class="w-16 h-16 bg-black/50 rounded-full mb-2 flex items-center justify-center text-3xl">?</div>
-                        <h3 class="font-jua text-xl text-gray-500">???</h3>
-                        <p class="text-xs text-center text-gray-600">아직 발견되지 않은 종입니다.</p>
+                        <div class="w-20 h-20 bg-black/50 rounded-full mb-1 flex items-center justify-center text-3xl text-slate-700 font-jua">?</div>
+                        <h3 class="font-jua text-xl text-gray-700">???</h3>
+                        <p class="text-xs text-center text-gray-700 mt-2">미발견</p>
                     `;
             }
             grid.appendChild(card);
@@ -826,13 +849,23 @@
         initGame();
     });
 
-    document.getElementById('restartBtn').addEventListener('click', () => {
+    // "메인으로" 버튼 (Return to Main)
+    document.getElementById('toMainBtn').addEventListener('click', () => {
+        // 1. Hide Overlay
         document.getElementById('eventOverlay').classList.add('hidden');
         document.getElementById('eventOverlay').classList.remove('flex');
-        initGame();
+
+        // 2. Stop Game Loop
+        stopGameLoop();
+
+        // 3. Hide In-Game UI
+        document.getElementById('uiLayer').classList.add('hidden');
+
+        // 4. Show Start Screen (Lobby)
+        document.getElementById('startScreen').classList.remove('hidden');
     });
 
-    document.getElementById('pokedexBtn').addEventListener('click', () => {
+    document.getElementById('lobbyPokedexBtn').addEventListener('click', () => {
         renderPokedex();
         document.getElementById('pokedexModal').classList.remove('hidden');
         document.getElementById('newPokedexBadge').classList.add('hidden');
