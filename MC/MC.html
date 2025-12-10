@@ -124,6 +124,7 @@
     <div class="mt-8 text-sm text-gray-500 bg-black/20 p-4 rounded-lg text-center">
         <p>🌱 유기물을 먹고 성장하세요.</p>
         <p>⚠️ 나보다 큰 포식자를 피하세요.</p>
+        <p class="mt-2 text-yellow-500">⚔️ 같은 종이라도 크기가 크면 먹을 수 있습니다!</p>
     </div>
 </div>
 
@@ -223,7 +224,8 @@
 
     // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
     const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
-    
+
+
     // Assets Loader
     const images = {};
     const loadImages = () => {
@@ -255,6 +257,7 @@
     // Player State
     let player = {
         x: WORLD_SIZE/2, y: WORLD_SIZE/2,
+        baseRadius: 20, // New: To calculate growth
         radius: 20,
         angle: 0,
         speed: 0,
@@ -330,6 +333,7 @@
         player.y = Math.random() * WORLD_SIZE;
         player.energy = 0;
         player.isDead = false;
+        // setPlayerSpecies handles tier/radius reset
         player.tier = SPECIES_DB[player.speciesId].tier;
         updateMaxEnergy();
 
@@ -343,7 +347,8 @@
         player.speciesId = id;
         const data = SPECIES_DB[id];
         player.tier = data.tier;
-        player.radius = (20 * data.tier) * data.scale;
+        player.baseRadius = (20 * data.tier) * data.scale;
+        player.radius = player.baseRadius; // Reset size
         player.maxSpeed = 5 - (data.tier * 0.5);
 
         if(!unlockedSpecies.includes(id)) {
@@ -392,12 +397,17 @@
         const sId = group[Math.floor(Math.random() * group.length)];
         const data = SPECIES_DB[sId];
 
+        // Random size variation for predation logic (0.8x to 1.2x)
+        const sizeVariance = 0.8 + Math.random() * 0.4;
+        const baseR = (20 * t) * data.scale;
+
         enemies.push({
             x: Math.random() * WORLD_SIZE,
             y: Math.random() * WORLD_SIZE,
             speciesId: sId,
             tier: t,
-            radius: (20 * t) * data.scale,
+            baseRadius: baseR,
+            radius: baseR * sizeVariance, // Actual radius
             speed: (Math.random() * 2) + 1,
             vx: 0, vy: 0,
             color: data.color
@@ -444,7 +454,6 @@
     // --- 4. Game Loop (Fixed) ---
 
     function startGameLoop() {
-        // Cancel any existing loop to prevent speedup bug
         if (animationFrameId) {
             cancelAnimationFrame(animationFrameId);
             animationFrameId = null;
@@ -467,6 +476,11 @@
 
     function update() {
         if (player.isDead) return;
+
+        // Player Size Update (Grow based on Energy)
+        // Grow up to 1.5x at max energy
+        const growthFactor = 1 + (player.energy / player.maxEnergy) * 0.5;
+        player.radius = player.baseRadius * growthFactor;
 
         // Player Movement
         const dx = mouse.x - width/2;
@@ -513,15 +527,32 @@
             const e = enemies[i];
             const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
 
+            // AI Logic
             if (distToPlayer < 400) {
                 const angleToP = Math.atan2(player.y - e.y, player.x - e.x);
-                if (e.tier > player.tier) {
-                    e.vx = Math.cos(angleToP) * e.speed;
-                    e.vy = Math.sin(angleToP) * e.speed;
-                } else if (e.tier < player.tier) {
+
+                // Danger Logic for AI
+                let isPlayerDangerous = false;
+                let isPlayerEdible = false;
+
+                if (player.tier > e.tier) isPlayerDangerous = true;
+                else if (player.tier < e.tier) isPlayerEdible = true;
+                else {
+                    // Same tier logic
+                    if (player.radius > e.radius * 1.2) isPlayerDangerous = true; // Player is 20% bigger
+                    else if (player.radius < e.radius / 1.2) isPlayerEdible = true; // Player is significantly smaller
+                }
+
+                if (isPlayerDangerous) {
+                    // Flee
                     e.vx = -Math.cos(angleToP) * e.speed;
                     e.vy = -Math.sin(angleToP) * e.speed;
+                } else if (isPlayerEdible) {
+                    // Chase
+                    e.vx = Math.cos(angleToP) * e.speed;
+                    e.vy = Math.sin(angleToP) * e.speed;
                 } else {
+                    // Neutral - Just wander or slight avoid
                     e.vx += (Math.random()-0.5);
                     e.vy += (Math.random()-0.5);
                 }
@@ -537,25 +568,41 @@
             e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
             e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
 
+            // Collision Logic
             if (distToPlayer < player.radius + e.radius) {
-                if (player.tier > e.tier) {
+                let playerWins = false;
+                let enemyWins = false;
+
+                if (player.tier > e.tier) playerWins = true;
+                else if (player.tier < e.tier) enemyWins = true;
+                else {
+                    // Same Tier Predation
+                    if (player.radius > e.radius * 1.2) playerWins = true;
+                    else if (e.radius > player.radius * 1.2) enemyWins = true;
+                    // Else bump
+                }
+
+                if (playerWins) {
                     player.energy += 15 * e.tier;
                     createExplosion(e.x, e.y, 10, e.color);
                     enemies.splice(i, 1);
                     spawnEnemy();
                     if (player.energy >= player.maxEnergy) evolve();
-                } else if (player.tier < e.tier) {
+                } else if (enemyWins) {
                     die(e);
                 } else {
+                    // Bump (Physics push)
                     const angle = Math.atan2(player.y - e.y, player.x - e.x);
-                    player.x += Math.cos(angle) * 5;
-                    player.y += Math.sin(angle) * 5;
-                    e.x -= Math.cos(angle) * 5;
-                    e.y -= Math.sin(angle) * 5;
+                    const pushForce = 5;
+                    player.x += Math.cos(angle) * pushForce;
+                    player.y += Math.sin(angle) * pushForce;
+                    e.x -= Math.cos(angle) * pushForce;
+                    e.y -= Math.sin(angle) * pushForce;
                 }
             }
         }
 
+        // Maintain Enemy Count (Cap Check)
         if (enemies.length < 30) spawnEnemy();
 
         for(let i=particles.length-1; i>=0; i--) {
@@ -666,20 +713,40 @@
             ctx.fill();
         }
 
+        // Ring Logic Update for Intra-tier predation
         if (isPlayer) {
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 2;
             ctx.beginPath(); ctx.arc(0,0,r+2,0,Math.PI*2); ctx.stroke();
-        } else if (entity.tier > player.tier) {
-            ctx.strokeStyle = 'red';
-            ctx.lineWidth = 3;
-            ctx.setLineDash([5, 5]);
-            ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
-            ctx.setLineDash([]);
-        } else if (entity.tier < player.tier) {
-            ctx.strokeStyle = '#4ade80';
-            ctx.lineWidth = 1;
-            ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+        } else {
+            let ringColor = 'white';
+            let isDangerous = false;
+            let isEdible = false;
+
+            if (player.tier > entity.tier) isEdible = true;
+            else if (player.tier < entity.tier) isDangerous = true;
+            else {
+                // Same Tier
+                if (player.radius > entity.radius * 1.2) isEdible = true;
+                else if (entity.radius > player.radius * 1.2) isDangerous = true;
+            }
+
+            if (isDangerous) {
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (isEdible) {
+                ctx.strokeStyle = '#4ade80';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+            } else {
+                // Neutral (Same tier, similar size)
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+            }
         }
 
         ctx.restore();
