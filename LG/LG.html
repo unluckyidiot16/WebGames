@@ -129,6 +129,20 @@
         }
     };
 
+    // 💰 자금/게임오버 관련 한도
+    const LIMITS = {
+        minMoney: -2000 // -2000만원까지 대출, 이 값에 도달하면 게임 오버
+    };
+
+    // 🎲 시작 자금 범위 (0만원 ~ 1000만원 사이 랜덤)
+    const START_MONEY_MIN = 0;
+    const START_MONEY_MAX = 1000;
+
+    function getRandomStartMoney() {
+        return Math.floor(Math.random() * (START_MONEY_MAX - START_MONEY_MIN + 1)) + START_MONEY_MIN;
+    }
+
+
     // --- DOM 요소 ---
     const ui = {
         age: document.getElementById('age-display'),
@@ -189,19 +203,60 @@
     }
 
     function changeStat(type, amount) {
+        if (gameState.isGameOver) return;
+
         gameState.stats[type] = Math.min(100, Math.max(0, gameState.stats[type] + amount));
         let icon = type === 'mental' ? '🧠' : (type === 'health' ? '💊' : '🍙');
         let sign = amount >= 0 ? '+' : '';
         showToast(`${icon} ${sign}${amount}`);
         updateUI();
+
+        // 변화 후 즉시 게임 오버 조건 체크
+        checkGameOver();
     }
 
     function changeMoney(amount) {
+        if (gameState.isGameOver) return;
+
         gameState.money += amount;
         let sign = amount >= 0 ? '+' : '';
         showToast(`💸 ${sign}${amount}만원`);
         updateUI();
+
+        // 변화 후 즉시 게임 오버 조건 체크
+        checkGameOver();
     }
+
+    function checkGameOver() {
+        if (gameState.isGameOver) return true;
+
+        // 멘탈 0
+        if (gameState.stats.mental <= 0) {
+            endGame("정신력이 바닥났습니다. (멘탈 0)");
+            return true;
+        }
+
+        // 체력 0
+        if (gameState.stats.health <= 0) {
+            endGame("건강 악화로 쓰러졌습니다. (건강 0)");
+            return true;
+        }
+
+        // 배고픔 0
+        if (gameState.stats.hunger <= 0) {
+            endGame("극심한 허기 상태입니다. (배고픔 0)");
+            return true;
+        }
+
+        // 자금 -2000만원 이하
+        if (gameState.money <= LIMITS.minMoney) {
+            endGame(`대출 한도를 초과했습니다. (자금 ${gameState.money.toLocaleString()}만원)`);
+            return true;
+        }
+
+        return false;
+    }
+
 
     function setStory(title, desc) {
         ui.story.innerHTML = `
@@ -217,20 +272,35 @@
             btn.className = "w-full py-3 px-4 bg-white border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 text-slate-800 rounded-lg font-bold shadow-sm transition flex flex-col items-center justify-center gap-1 mb-2";
 
             let html = `<span class="text-base">${opt.text}</span>`;
-            if(opt.sub) html += `<span class="text-xs text-gray-400 font-normal">${opt.sub}</span>`;
+            if (opt.sub) html += `<span class="text-xs text-gray-400 font-normal">${opt.sub}</span>`;
 
             btn.innerHTML = html;
             btn.onclick = () => {
-                if(opt.cost && gameState.money < opt.cost) {
-                    showToast("돈이 부족합니다!");
-                    return;
+                // 💰 비용이 있는 선택지일 때만 처리
+                if (opt.cost) {
+                    // 이 선택을 했을 때 예상 자금
+                    const nextMoney = gameState.money - opt.cost;
+
+                    // 🔻 이 선택으로 -2000 아래로 떨어지면 선택 불가
+                    if (nextMoney < LIMITS.minMoney) {
+                        showToast("이 선택을 하면 대출 한도를 초과합니다!");
+                        return;
+                    }
+
+                    // 💸 실제로 돈 차감 (음수로 진입 가능)
+                    changeMoney(-opt.cost);
+
+                    // 여기서 바로 -2000이 되면 checkGameOver()에 의해 엔딩 처리
+                    if (gameState.isGameOver) return;
                 }
-                if(opt.cost) changeMoney(-opt.cost);
+
+                // 비용 처리 끝나고 실제 액션 수행
                 opt.action();
             };
             ui.choices.appendChild(btn);
         });
     }
+
 
     // --- 🎲 d20 & 히든 스탯 시스템 ---
     function rollD20() {
@@ -991,15 +1061,8 @@
             gameState.turnInYear = 0;
             processAnnualEvent();
 
-            // 게임 오버 조건 체크
-            if (gameState.stats.health <= 0) {
-                endGame("건강 악화로 쓰러졌습니다. (건강 0)");
-                return;
-            }
-            if (gameState.money < -5000) {
-                endGame("감당할 수 없는 빚더미에 앉았습니다. (파산)");
-                return;
-            }
+            // 연말 정산 후 게임 오버 조건 한 번 더 체크
+            if (checkGameOver()) return;
 
             gameState.age++;
             if (gameState.age > gameState.maxAge) {
@@ -1011,6 +1074,7 @@
         updateUI();
         showPhaseForCurrentAge();
     }
+
 
     // --- 엔딩 ---
     function endGame(reason) {
@@ -1053,7 +1117,11 @@
     // --- 시작 버튼 ---
     document.querySelector('button').onclick = () => {
         gameState.age = 19;
-        gameState.money = 0;
+
+        // 🎲 시작 자금 랜덤 지급
+        const startMoney = getRandomStartMoney();
+        gameState.money = startMoney;
+
         gameState.stats = { mental: 80, health: 80, hunger: 80 };
         gameState.job = '고3 학생';
         gameState.history = [];
@@ -1072,6 +1140,7 @@
         ui.log.classList.add('hidden');
 
         updateUI();
+        showToast(`초기 자금 ${startMoney.toLocaleString()}만원으로 시작합니다.`);
         initGame();
     };
 
