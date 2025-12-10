@@ -1,0 +1,1082 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>인생 요약: 19세부터 30세까지</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .stat-bar-bg { background-color: #e5e7eb; border-radius: 9999px; height: 12px; overflow: hidden; }
+        .stat-bar-fill { height: 100%; transition: width 0.5s ease-in-out; }
+        .fade-in { animation: fadeIn 0.5s ease-in; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; z-index: 50; transition: opacity 0.5s; }
+    </style>
+</head>
+<body class="bg-gray-100 text-gray-800 h-screen flex flex-col overflow-hidden">
+
+<!-- 게임 컨테이너 -->
+<div class="max-w-md mx-auto w-full h-full bg-white shadow-xl flex flex-col relative">
+
+    <!-- 상단: 상태창 -->
+    <header class="p-4 bg-slate-800 text-white shrink-0">
+        <div class="flex justify-between items-center mb-2">
+            <div>
+                <span class="text-xl font-bold" id="age-display">19세</span>
+                <span class="text-sm text-gray-300 ml-2" id="job-display">고3 수험생</span>
+            </div>
+            <div class="font-mono text-yellow-400 font-bold" id="money-display">💸 0만원</div>
+        </div>
+
+        <div class="grid grid-cols-1 gap-2 text-xs">
+            <div class="flex items-center">
+                <span class="w-6 mr-1">🧠</span>
+                <div class="w-full stat-bar-bg"><div id="mental-bar" class="stat-bar-fill bg-blue-500" style="width: 80%"></div></div>
+            </div>
+            <div class="flex items-center">
+                <span class="w-6 mr-1">💊</span>
+                <div class="w-full stat-bar-bg"><div id="health-bar" class="stat-bar-fill bg-green-500" style="width: 80%"></div></div>
+            </div>
+            <div class="flex items-center">
+                <span class="w-6 mr-1">🍙</span>
+                <div class="w-full stat-bar-bg"><div id="hunger-bar" class="stat-bar-fill bg-orange-400" style="width: 80%"></div></div>
+            </div>
+        </div>
+    </header>
+
+    <!-- 중앙: 메인 콘텐츠 (스크롤 가능) -->
+    <main id="game-screen" class="flex-1 overflow-y-auto p-4 flex flex-col">
+        <!-- 텍스트 영역 -->
+        <div id="story-area" class="mb-6 fade-in">
+            <h1 class="text-2xl font-bold mb-4 text-slate-800">인생 시뮬레이션 시작</h1>
+            <p class="text-gray-600 leading-relaxed">
+                당신은 현재 19세, 고등학교 3학년입니다.<br>
+                수능이 코앞으로 다가왔습니다.<br>
+                당신의 선택이 30세까지의 인생을 결정합니다.
+            </p>
+        </div>
+
+        <!-- 이벤트 결과/로그 영역 -->
+        <div id="log-area" class="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm text-gray-500 mb-4 h-32 overflow-y-auto hidden">
+        </div>
+
+        <div class="flex-1"></div> <!-- 공간 채우기 -->
+
+        <!-- 선택지 버튼 영역 -->
+        <div id="choices-area" class="grid grid-cols-1 gap-3 mt-4">
+            <button class="w-full py-3 px-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg font-bold shadow transition transform active:scale-95">
+                게임 시작
+            </button>
+        </div>
+    </main>
+</div>
+
+<!-- 엔딩 모달 -->
+<div id="ending-modal" class="fixed inset-0 bg-black bg-opacity-90 z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-white rounded-lg p-6 max-w-sm w-full text-center fade-in overflow-y-auto max-h-[90vh]">
+        <h2 class="text-2xl font-bold mb-2">🎉 30세 인생 결산 🎉</h2>
+        <div id="ending-content" class="text-left space-y-4 text-sm mb-6">
+            <!-- 엔딩 내용 -->
+        </div>
+        <button onclick="location.reload()" class="w-full py-3 bg-slate-800 text-white rounded font-bold">다시 태어나기</button>
+    </div>
+</div>
+
+<script>
+    // --- 게임 데이터 및 상태 ---
+    const gameState = {
+        age: 19,
+        maxAge: 30,
+        money: 0, // 만원 단위
+        stats: {
+            mental: 80, // 0~100
+            health: 80, // 0~100
+            hunger: 80  // 0~100
+        },
+        job: '고3 학생',
+        jobTier: 0, // 직업 등급 (수입 관련)
+        location: '본가', // 본가, 서울자취
+        degree: '고졸', // 고졸, 대학재학, 대졸
+        university: null, // null, '의대', '명문대', '지방대'
+        history: [],
+        isGameOver: false,
+
+        // 히든 스탯
+        spec: 0,             // 이력서/스펙(학점, 자격증 등)
+        careerPath: null,    // 'study' | 'job' | 'creative' | 'social' ...
+        careerSkill: 0,      // 해당 진로 적성 레벨
+        isMarried: false,
+
+        // 1년 = 4회 행동
+        turnsPerYear: 4,
+        turnInYear: 0 // 0~3 (0이면 "1/4 행동" 상태)
+    };
+
+    // --- 상수 및 설정 ---
+    const SETTINGS = {
+        rent: { '본가': 0, '서울자취': 600 }, // 연간 주거비 (만원)
+        foodCost: 300, // 연간 식비 기초
+        salary: {
+            '백수': 0,
+            '알바': 1200,
+            '유튜버': 0, // 별도 계산
+            '중소기업': 2800,
+            '대기업': 4500,
+            '전문직': 8000,
+            '공무원': 3200
+        }
+    };
+
+    // --- DOM 요소 ---
+    const ui = {
+        age: document.getElementById('age-display'),
+        job: document.getElementById('job-display'),
+        money: document.getElementById('money-display'),
+        mentalBar: document.getElementById('mental-bar'),
+        healthBar: document.getElementById('health-bar'),
+        hungerBar: document.getElementById('hunger-bar'),
+        story: document.getElementById('story-area'),
+        choices: document.getElementById('choices-area'),
+        log: document.getElementById('log-area'),
+        endingModal: document.getElementById('ending-modal'),
+        endingContent: document.getElementById('ending-content')
+    };
+
+    // --- 유틸리티 함수 ---
+    function updateUI() {
+        const turnLabel = (gameState.age >= 20 && !gameState.isGameOver)
+            ? ` · 행동 ${gameState.turnInYear + 1}/${gameState.turnsPerYear}`
+            : '';
+        ui.age.innerText = `${gameState.age}세${turnLabel}`;
+        ui.job.innerText = `${gameState.location} / ${gameState.job}`;
+        ui.money.innerText = `💸 ${gameState.money.toLocaleString()}만원`;
+
+        ui.mentalBar.style.width = `${gameState.stats.mental}%`;
+        ui.mentalBar.className = `stat-bar-fill ${getStatColor(gameState.stats.mental)}`;
+
+        ui.healthBar.style.width = `${gameState.stats.health}%`;
+        ui.healthBar.className = `stat-bar-fill ${getStatColor(gameState.stats.health)}`;
+
+        ui.hungerBar.style.width = `${gameState.stats.hunger}%`;
+        ui.hungerBar.className = `stat-bar-fill ${getStatColor(gameState.stats.hunger, true)}`;
+    }
+
+    function getStatColor(value, isHunger = false) {
+        if (value <= 20) return 'bg-red-500';
+        if (value <= 50) return 'bg-yellow-500';
+        return isHunger ? 'bg-orange-400' : (value > 80 ? 'bg-green-500' : 'bg-blue-500');
+    }
+
+    function addLog(text) {
+        ui.log.classList.remove('hidden');
+        const p = document.createElement('p');
+        p.innerText = `- ${text}`;
+        ui.log.prepend(p);
+        gameState.history.push(`${gameState.age}세: ${text}`);
+    }
+
+    function showToast(msg) {
+        const toast = document.createElement('div');
+        toast.className = 'toast fade-in';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 500);
+        }, 2000);
+    }
+
+    function changeStat(type, amount) {
+        gameState.stats[type] = Math.min(100, Math.max(0, gameState.stats[type] + amount));
+        let icon = type === 'mental' ? '🧠' : (type === 'health' ? '💊' : '🍙');
+        let sign = amount >= 0 ? '+' : '';
+        showToast(`${icon} ${sign}${amount}`);
+        updateUI();
+    }
+
+    function changeMoney(amount) {
+        gameState.money += amount;
+        let sign = amount >= 0 ? '+' : '';
+        showToast(`💸 ${sign}${amount}만원`);
+        updateUI();
+    }
+
+    function setStory(title, desc) {
+        ui.story.innerHTML = `
+            <h2 class="text-xl font-bold mb-3 text-indigo-900">${title}</h2>
+            <p class="text-gray-700 leading-relaxed whitespace-pre-line">${desc}</p>
+        `;
+    }
+
+    function setChoices(options) {
+        ui.choices.innerHTML = '';
+        options.forEach(opt => {
+            const btn = document.createElement('button');
+            btn.className = "w-full py-3 px-4 bg-white border-2 border-slate-200 hover:border-indigo-500 hover:bg-indigo-50 text-slate-800 rounded-lg font-bold shadow-sm transition flex flex-col items-center justify-center gap-1 mb-2";
+
+            let html = `<span class="text-base">${opt.text}</span>`;
+            if(opt.sub) html += `<span class="text-xs text-gray-400 font-normal">${opt.sub}</span>`;
+
+            btn.innerHTML = html;
+            btn.onclick = () => {
+                if(opt.cost && gameState.money < opt.cost) {
+                    showToast("돈이 부족합니다!");
+                    return;
+                }
+                if(opt.cost) changeMoney(-opt.cost);
+                opt.action();
+            };
+            ui.choices.appendChild(btn);
+        });
+    }
+
+    // --- 🎲 d20 & 히든 스탯 시스템 ---
+    function rollD20() {
+        return Math.floor(Math.random() * 20) + 1;
+    }
+
+    function getCareerBonus(tag) {
+        if (!tag) return 0;
+        if (!gameState.careerPath) return 0;
+        return gameState.careerPath === tag ? (gameState.careerSkill || 0) * 2 : 0;
+    }
+
+    function rollCheck({ dc, tag, description }) {
+        const d20 = rollD20();
+        const bonus = getCareerBonus(tag);
+        const total = d20 + bonus;
+        addLog(`${description} (d20=${d20}, 보너스=${bonus}, 합계=${total} / 목표 ${dc})`);
+        return { success: total >= dc, roll: d20, bonus, total, dc, tag };
+    }
+
+    function applyCareerGrowth(tag, success) {
+        if (!tag) return;
+        if (!gameState.careerPath) {
+            gameState.careerPath = tag;
+        }
+        if (success && gameState.careerPath === tag) {
+            gameState.careerSkill = (gameState.careerSkill || 0) + 1;
+            addLog(`진로 관련 경험이 쌓였습니다. (히든 적성 Lv.${gameState.careerSkill})`);
+        }
+    }
+
+    function resolveChoice({ dc, tag, description, onSuccess, onFail }) {
+        const result = rollCheck({ dc, tag, description });
+        if (result.success) {
+            showToast("✅ 성공!");
+            applyCareerGrowth(tag, true);
+            onSuccess && onSuccess(result);
+        } else {
+            showToast("❌ 실패...");
+            applyCareerGrowth(tag, false);
+            onFail && onFail(result);
+        }
+    }
+
+    function getAdjustedDc(baseDc) {
+        let dc = baseDc;
+        if (gameState.university === '의대') dc -= 4;
+        else if (gameState.university === '명문대') dc -= 2;
+
+        if (gameState.spec) {
+            dc -= Math.min(3, gameState.spec);
+        }
+
+        return Math.max(8, dc);
+    }
+
+    // --- 연말 정산 (1년에 1번만 실행) ---
+    function processAnnualEvent() {
+        addLog(`${gameState.age}세의 1년이 지나갔습니다.`);
+
+        // 1. 주거비 및 식비
+        const rent = SETTINGS.rent[gameState.location];
+        const food = SETTINGS.foodCost;
+        let costMsg = `생활비 지출 (식비 ${food}`;
+        if (rent > 0) costMsg += `, 월세 ${rent}`;
+        costMsg += `)`;
+
+        changeMoney(-(rent + food));
+        addLog(costMsg);
+
+        // 2. 배고픔 체크
+        if (gameState.stats.hunger < 30) {
+            changeStat('health', -10);
+            changeStat('mental', -10);
+            addLog("배고픔에 시달려 건강과 멘탈이 나빠집니다.");
+        }
+        gameState.stats.hunger = 50;
+
+        // 3. 직업 수입 (학생/취준생/재수생 제외)
+        if (
+            gameState.job !== '대학생' &&
+            gameState.job !== '고3 학생' &&
+            gameState.job !== '취준생' &&
+            gameState.job !== '재수생'
+        ) {
+            let income = 0;
+            if (gameState.job === '유튜버') {
+                const d20 = rollD20();
+                const bonus = getCareerBonus('creative');
+                const total = d20 + bonus;
+                addLog(`올해 유튜브 성과를 굴립니다. (d20=${d20}, 보너스=${bonus}, 합계=${total})`);
+
+                if (total >= 20) {
+                    income = 4000 + gameState.jobTier * 1500;
+                    gameState.jobTier++;
+                    addLog("영상이 대박! 채널이 크게 성장했습니다. (티어 상승)");
+                } else if (total >= 13) {
+                    income = 2000 + gameState.jobTier * 800;
+                    addLog("꾸준한 조회수가 나왔습니다.");
+                } else {
+                    income = 300;
+                    changeStat('mental', -10);
+                    addLog("조회수가 바닥을 쳤습니다... 광고비만 깔짝 들어옵니다.");
+                }
+            } else {
+                income = SETTINGS.salary[gameState.job] || SETTINGS.salary['알바'];
+            }
+            changeMoney(income);
+            addLog(`${gameState.job} 수입: +${income}만원`);
+        }
+
+        updateUI();
+    }
+
+    // --- 나이에 따른 페이즈 분기 ---
+    function showPhaseForCurrentAge() {
+        if (gameState.isGameOver) return;
+
+        if (gameState.age <= 19) {
+            initGame();
+            return;
+        }
+
+        if (gameState.age <= 26) {
+            phaseUniversityEra();
+        } else {
+            phaseSocietyEra();
+        }
+    }
+
+    // --- 프롤로그: 19세 (수능/진로) ---
+    function initGame() {
+        setStory(
+            "19세, 선택의 시간",
+            "수능이 얼마 남지 않았습니다.\n어떻게 하시겠습니까?"
+        );
+        setChoices([
+            {
+                text: "수능에 목숨 건다",
+                sub: "멘탈/건강 감소, 명문대 확률↑, 히든: 공부 성향",
+                action: () => runSuneung(true)
+            },
+            {
+                text: "적당히 공부한다",
+                sub: "밸런스 유지, 일반대 목표",
+                action: () => runSuneung(false)
+            },
+            {
+                text: "수능 안 본다",
+                sub: "바로 사회생활 시작 (유튜버/알바)",
+                action: () => skipSuneung()
+            }
+        ]);
+        updateUI();
+    }
+
+    function runSuneung(isHard) {
+        if (isHard) {
+            changeStat('mental', -30);
+            changeStat('health', -20);
+        } else {
+            changeStat('mental', -10);
+        }
+
+        if (!gameState.careerPath) {
+            gameState.careerPath = 'study';
+        }
+
+        const d20 = rollD20();
+        const bonus = isHard ? 6 : 0;
+        const score = d20 * 5 + bonus;
+        addLog(`수능 결과를 굴렸습니다. (d20=${d20}, 보너스=${bonus}, 환산 점수=${Math.floor(score)})`);
+
+        let uniResult = '';
+        if (score >= 110) uniResult = '의대';
+        else if (score >= 90) uniResult = '명문대';
+        else if (score >= 50) uniResult = '지방대';
+        else uniResult = '재수';
+
+        setStory(
+            "수능 성적 발표",
+            `노력과 운의 결과...\n[${uniResult}] 합격권입니다!`
+        );
+
+        let choices = [];
+        if (uniResult === '재수') {
+            choices.push({
+                text: "재수 학원 등록",
+                sub: "1년 더 공부 (비용 500만원)",
+                cost: 500,
+                action: () => {
+                    gameState.job = '재수생';
+                    addLog("재수를 선택했습니다.");
+                    startAdultLoop();
+                }
+            });
+            choices.push({
+                text: "성적 맞춰 아무 대학이나 간다",
+                sub: "지방대 입학",
+                action: () => {
+                    gameState.university = '지방대';
+                    gameState.job = '대학생';
+                    gameState.degree = '대학재학';
+                    addLog("지방대에 입학했습니다.");
+                    startAdultLoop();
+                }
+            });
+        } else {
+            choices.push({
+                text: `${uniResult} 입학`,
+                sub: "등록금 납부 필요 (500만원)",
+                cost: 500,
+                action: () => {
+                    gameState.university = uniResult;
+                    gameState.job = '대학생';
+                    gameState.degree = '대학재학';
+                    addLog(`${uniResult}에 입학했습니다.`);
+                    startAdultLoop();
+                }
+            });
+        }
+        choices.push({
+            text: "대학 포기하고 알바 시작",
+            sub: "등록금 아끼고 돈 벌기",
+            action: () => {
+                gameState.job = '알바';
+                gameState.degree = '고졸';
+                addLog("대학 진학을 포기하고 알바 전선에 뛰어들었습니다.");
+                gameState.careerPath = 'job';
+                gameState.careerSkill = 1;
+                startAdultLoop();
+            }
+        });
+
+        setChoices(choices);
+    }
+
+    function skipSuneung() {
+        setStory(
+            "자신의 길을 찾아서",
+            "수능 점수보다 중요한 것이 있습니다.\n어떤 길을 선택하시겠습니까?"
+        );
+        setChoices([
+            {
+                text: "유튜브 크리에이터 도전",
+                sub: "초기 비용 200, 대박 아니면 쪽박 (히든: 크리에이티브 성향)",
+                cost: 200,
+                action: () => {
+                    gameState.job = '유튜버';
+                    gameState.jobTier = 1;
+                    gameState.careerPath = 'creative';
+                    gameState.careerSkill = 1;
+                    addLog("유튜브 채널을 개설했습니다. (히든: 크리에이터 성향 Lv.1)");
+                    startAdultLoop();
+                }
+            },
+            {
+                text: "알바 후 창업 목표",
+                sub: "착실하게 시드머니 모으기 (히든: 사업/실무 성향)",
+                action: () => {
+                    gameState.job = '알바';
+                    gameState.degree = '고졸';
+                    gameState.careerPath = 'job';
+                    gameState.careerSkill = 1;
+                    addLog("아르바이트를 시작했습니다. (히든: 실무 성향 Lv.1)");
+                    startAdultLoop();
+                }
+            }
+        ]);
+    }
+
+    function startAdultLoop() {
+        gameState.age = 20;
+        gameState.turnInYear = 0;
+        updateUI();
+        showPhaseForCurrentAge();
+    }
+
+    // --- 20~26세: 대학/초년생 시기 ---
+    function phaseUniversityEra() {
+        const isStudent = gameState.job === '대학생';
+
+        let title = `${gameState.age}세, `;
+        title += isStudent ? "캠퍼스 라이프" : "치열한 사회생활";
+
+        let desc = isStudent
+            ? `${gameState.university} 재학 중입니다. 올해는 무엇에 집중할까요?`
+            : `${gameState.job} 생활 중입니다. 올해의 목표는?`;
+
+        let options = [];
+
+        if (isStudent) {
+            options.push({
+                text: "학점 관리 (공부 올인)",
+                sub: "취업 스펙↑, 멘탈↓, d20 판정",
+                action: () => {
+                    resolveChoice({
+                        dc: 11,
+                        tag: "study",
+                        description: "학점 관리를 위해 공부에 올인합니다.",
+                        onSuccess: () => {
+                            changeStat('mental', -10);
+                            addLog("도서관에서 살았습니다. 학점 A+를 받았습니다.");
+                            gameState.spec = (gameState.spec || 0) + 2;
+                        },
+                        onFail: () => {
+                            changeStat('mental', -20);
+                            addLog("열심히 했지만 기대만큼 성적이 나오지 않았습니다.");
+                            gameState.spec = (gameState.spec || 0) + 1;
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+            options.push({
+                text: "알바와 학업 병행",
+                sub: "돈+200, 체력/멘탈↓, 성공 시 스펙 조금↑",
+                action: () => {
+                    resolveChoice({
+                        dc: 13,
+                        tag: "job",
+                        description: "학업과 알바를 함께 해냅니다.",
+                        onSuccess: () => {
+                            changeMoney(200);
+                            changeStat('mental', -10);
+                            changeStat('health', -10);
+                            addLog("알바와 학업을 잘 병행했습니다.");
+                            gameState.spec = (gameState.spec || 0) + 1;
+                        },
+                        onFail: () => {
+                            changeMoney(100);
+                            changeStat('mental', -20);
+                            changeStat('health', -15);
+                            addLog("너무 바빠서 둘 다 애매하게 되었습니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+            options.push({
+                text: "낭만 즐기기 (동아리/연애)",
+                sub: "멘탈 회복, 돈-100, 연애운은 d20",
+                cost: 100,
+                action: () => {
+                    resolveChoice({
+                        dc: 9,
+                        tag: "social",
+                        description: "동아리/연애에 몰두합니다.",
+                        onSuccess: () => {
+                            changeStat('mental', 25);
+                            addLog("좋은 사람들을 만나며 즐거운 시간을 보냈습니다.");
+                        },
+                        onFail: () => {
+                            changeStat('mental', 5);
+                            addLog("썸이 흐지부지되거나 동아리 내 갈등을 겪었습니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+            options.push({
+                text: "휴학 후 인턴 경험",
+                sub: "1년 휴학, 스펙↑, 비용 200, d20",
+                cost: 200,
+                action: () => {
+                    resolveChoice({
+                        dc: 12,
+                        tag: "job",
+                        description: "현장에서 인턴으로 실무를 배웁니다.",
+                        onSuccess: () => {
+                            changeStat('mental', -5);
+                            changeStat('health', -5);
+                            addLog("인턴십에서 실무 경험을 쌓았습니다. 취업에 도움이 될 것 같습니다.");
+                            gameState.spec = (gameState.spec || 0) + 2;
+                        },
+                        onFail: () => {
+                            changeStat('mental', -10);
+                            addLog("인턴 자리가 생각보다 잡무뿐이라 크게 도움은 되지 않았습니다.");
+                            gameState.spec = (gameState.spec || 0) + 1;
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+            options.push({
+                text: "창업 동아리/프로젝트",
+                sub: "창업 스킬, 실패 시 멘탈↓, 성공 시 수입/경험",
+                cost: 100,
+                action: () => {
+                    resolveChoice({
+                        dc: 15,
+                        tag: "creative",
+                        description: "친구들과 사이드 프로젝트/창업을 시도합니다.",
+                        onSuccess: () => {
+                            changeStat('mental', 10);
+                            changeMoney(300);
+                            addLog("작은 서비스가 히트하여 소액의 수익과 경험을 얻었습니다.");
+                        },
+                        onFail: () => {
+                            changeStat('mental', -15);
+                            addLog("프로젝트가 흐지부지되며 멘탈에 상처를 받았습니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+
+            if (gameState.age >= 24) {
+                options = [{
+                    text: "졸업 및 취업 준비",
+                    sub: "이제 학생 신분을 벗어납니다.",
+                    action: () => {
+                        gameState.job = '취준생';
+                        gameState.degree = '대졸';
+                        addLog(`${gameState.university} 졸업. 취준생이 되었습니다.`);
+                        advanceTurn();
+                    }
+                }];
+            }
+        } else {
+            // 비대학생 (알바, 유튜버, 재수생 등)
+            options.push({
+                text: "죽어라 일하기/공부하기",
+                sub: "수입 또는 실력 증가, 건강/멘탈↓",
+                action: () => {
+                    const isYoutuber = gameState.job === '유튜버';
+                    const tag = isYoutuber ? 'creative' : 'job';
+                    const dc = isYoutuber ? 14 : 11;
+                    resolveChoice({
+                        dc,
+                        tag,
+                        description: `${gameState.job}로 미친 듯이 달립니다.`,
+                        onSuccess: () => {
+                            changeStat('health', -15);
+                            changeStat('mental', -10);
+                            const extraIncome = isYoutuber ? 400 : 300;
+                            changeMoney(extraIncome);
+                            addLog("열심히 한 만큼 결과가 따라왔습니다.");
+                            if (isYoutuber) {
+                                gameState.jobTier++;
+                                addLog("채널 규모가 한 단계 성장했습니다!");
+                            }
+                        },
+                        onFail: () => {
+                            changeStat('health', -20);
+                            changeStat('mental', -10);
+                            changeMoney(200);
+                            addLog("열심히 했지만 생각만큼 성과가 나오지 않았습니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+            options.push({
+                text: "자기계발/휴식",
+                sub: "멘탈/건강 회복, 비용 100, 실행력은 d20",
+                action: () => {
+                    resolveChoice({
+                        dc: 9,
+                        tag: "study",
+                        description: "자기계발과 휴식의 균형을 잡습니다.",
+                        onSuccess: () => {
+                            changeStat('mental', 25);
+                            changeStat('health', 10);
+                            changeMoney(-100);
+                            addLog("몸과 마음이 한결 가벼워졌습니다.");
+                        },
+                        onFail: () => {
+                            changeStat('mental', 10);
+                            changeMoney(-100);
+                            addLog("계획만 세우고 제대로 실행하지 못했습니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+
+            if (gameState.degree === '고졸') {
+                options.push({
+                    text: "야간대/방통대 입학 도전",
+                    sub: "일하면서 학위 준비, d20 판정",
+                    cost: 300,
+                    action: () => {
+                        resolveChoice({
+                            dc: 11,
+                            tag: "study",
+                            description: "야간대/방통대 입학 시험에 도전합니다.",
+                            onSuccess: () => {
+                                gameState.degree = '대학재학';
+                                gameState.job = '대학생';
+                                addLog("야간대/방통대 입학에 성공했습니다. 바쁜 삶이 시작됩니다.");
+                            },
+                            onFail: () => {
+                                changeStat('mental', -10);
+                                addLog("입학에 실패했습니다. 다음 기회를 노립니다.");
+                            }
+                        });
+                        advanceTurn();
+                    }
+                });
+            }
+
+            options.push({
+                text: "기술/자격증 공부",
+                sub: "코딩, 미용, 요리 등 실무형 기술 습득",
+                cost: 150,
+                action: () => {
+                    resolveChoice({
+                        dc: 12,
+                        tag: "job",
+                        description: "자격증 시험에 도전합니다.",
+                        onSuccess: () => {
+                            changeStat('mental', -5);
+                            addLog("자격증을 취득했습니다. 스펙이 소폭 상승합니다.");
+                            gameState.spec = (gameState.spec || 0) + 1;
+                        },
+                        onFail: () => {
+                            changeStat('mental', -15);
+                            addLog("시험에 떨어졌습니다. 아쉽지만 경험은 남았습니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+        }
+
+        setStory(title, desc);
+        setChoices(options);
+    }
+
+    // --- 27~30세: 취업/정착 시기 ---
+    function phaseSocietyEra() {
+        if (gameState.job === '취준생') {
+            setStory(
+                `${gameState.age}세, 취업 전쟁`,
+                "이제 직장을 구해야 합니다.\n어디에 지원하시겠습니까?"
+            );
+
+            setChoices([
+                {
+                    text: "대기업/전문직 지원",
+                    sub: "높은 연봉, 높은 경쟁률 (d20 판정)",
+                    action: () => jobInterview('대기업', 18)
+                },
+                {
+                    text: "중소기업 지원",
+                    sub: "빠른 취업, 적당한 연봉 (d20 판정)",
+                    action: () => jobInterview('중소기업', 14)
+                },
+                {
+                    text: "공무원 시험 준비",
+                    sub: "1년 공부, 합격 시 안정적인 삶",
+                    action: () => {
+                        const dc = getAdjustedDc(17);
+                        resolveChoice({
+                            dc,
+                            tag: "study",
+                            description: "공무원 시험에 도전합니다.",
+                            onSuccess: () => {
+                                gameState.job = '공무원';
+                                addLog("공무원 시험에 합격했습니다!");
+                            },
+                            onFail: () => {
+                                changeStat('mental', -20);
+                                addLog("공무원 시험에 떨어졌습니다. 1년이 날아갔습니다.");
+                            }
+                        });
+                        advanceTurn();
+                    }
+                }
+            ]);
+            return;
+        }
+
+        let title = `${gameState.age}세, 사회생활`;
+        let desc = `직업: ${gameState.job}\n현재 자산: ${gameState.money}만원\n`;
+
+        if (gameState.location === '본가') {
+            desc += "현재 본가에 살고 있습니다. 서울로 독립할까요?";
+        } else {
+            desc += "서울에서 자취 중입니다. 높은 물가에 허덕이는 중...";
+        }
+
+        let options = [];
+
+        options.push({
+            text: "업무 집중 (승진 도전)",
+            sub: "스트레스↑, 성공 시 연봉/보너스↑",
+            action: () => {
+                resolveChoice({
+                    dc: 13,
+                    tag: "job",
+                    description: "올해 승진을 노리며 업무에 올인합니다.",
+                    onSuccess: () => {
+                        changeStat('mental', -15);
+                        changeStat('health', -10);
+                        changeMoney(400);
+                        addLog("성과를 인정받아 연봉과 보너스가 올랐습니다.");
+                    },
+                    onFail: () => {
+                        changeStat('mental', -25);
+                        changeStat('health', -15);
+                        changeMoney(200);
+                        addLog("열심히 했지만 승진에는 실패했습니다. 체력과 멘탈만 닳았습니다.");
+                    }
+                });
+                advanceTurn();
+            }
+        });
+
+        options.push({
+            text: "워라밸 중시",
+            sub: "멘탈 관리, 커리어는 제자리",
+            action: () => {
+                resolveChoice({
+                    dc: 8,
+                    tag: "social",
+                    description: "일과 삶의 균형을 맞춰봅니다.",
+                    onSuccess: () => {
+                        changeStat('mental', 20);
+                        addLog("취미 생활과 인간관계를 잘 유지했습니다.");
+                    },
+                    onFail: () => {
+                        changeStat('mental', 5);
+                        addLog("일이 생각보다 많아 충분히 쉬지 못했습니다.");
+                    }
+                });
+                advanceTurn();
+            }
+        });
+
+        if (gameState.location === '본가') {
+            options.push({
+                text: "서울로 독립 (이사)",
+                sub: "자유↑, 월세 발생(연 600)",
+                cost: 1000,
+                action: () => {
+                    resolveChoice({
+                        dc: 10,
+                        tag: "social",
+                        description: "서울 생활에 적응할 수 있을까요?",
+                        onSuccess: () => {
+                            gameState.location = '서울자취';
+                            changeStat('mental', 30);
+                            addLog("서울로 독립했습니다! 자유와 설렘이 가득합니다.");
+                        },
+                        onFail: () => {
+                            gameState.location = '서울자취';
+                            changeStat('mental', 10);
+                            addLog("서울로 이사했지만 외로움과 높은 물가에 고생합니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+        } else {
+            options.push({
+                text: "본가로 귀환 (낙향)",
+                sub: "월세 절약, 잔소리↑",
+                action: () => {
+                    resolveChoice({
+                        dc: 9,
+                        tag: "social",
+                        description: "본가 생활에 적응합니다.",
+                        onSuccess: () => {
+                            gameState.location = '본가';
+                            addLog("본가 생활에 적응하며 가족과의 시간을 보냅니다.");
+                        },
+                        onFail: () => {
+                            gameState.location = '본가';
+                            changeStat('mental', -5);
+                            addLog("잔소리와 간섭이 스트레스로 다가옵니다.");
+                        }
+                    });
+                    advanceTurn();
+                }
+            });
+        }
+
+        if (gameState.age === 29) {
+            title = "29세, 중대 결정";
+            desc = "결혼 적령기입니다. 모아둔 돈을 결혼에 쓰시겠습니까?";
+            options = [
+                {
+                    text: "결혼 한다 (자금 소모)",
+                    sub: "비용 5000, d20으로 프러포즈/준비 판정",
+                    action: () => {
+                        if (gameState.money < 3000) {
+                            showToast("결혼 자금이 부족해 거절당했습니다...");
+                            changeStat('mental', -30);
+                            addLog("자금 부족으로 결혼이 무산되었습니다.");
+                            advanceTurn();
+                            return;
+                        }
+                        resolveChoice({
+                            dc: 12,
+                            tag: "social",
+                            description: "결혼 준비와 프러포즈를 진행합니다.",
+                            onSuccess: () => {
+                                changeMoney(-5000);
+                                changeStat('mental', 40);
+                                gameState.isMarried = true;
+                                addLog("결혼에 성공했습니다! 새로운 가정이 시작됩니다.");
+                            },
+                            onFail: () => {
+                                changeMoney(-1000);
+                                changeStat('mental', -40);
+                                addLog("관계가 틀어지며 결혼에 실패했습니다...");
+                            }
+                        });
+                        advanceTurn();
+                    }
+                },
+                {
+                    text: "비혼 유지",
+                    sub: "자유로운 삶, 외로움?",
+                    action: () => {
+                        addLog("화려한 싱글 라이프를 선택했습니다.");
+                        advanceTurn();
+                    }
+                }
+            ];
+        }
+
+        setStory(title, desc);
+        setChoices(options);
+    }
+
+    function jobInterview(targetJob, baseDc) {
+        const dc = getAdjustedDc(baseDc);
+        resolveChoice({
+            dc,
+            tag: "study",
+            description: `${targetJob} 면접에 도전합니다.`,
+            onSuccess: () => {
+                gameState.job = targetJob;
+                if (targetJob === '대기업' || targetJob === '전문직') {
+                    changeMoney(1000);
+                }
+                addLog(`${targetJob}에 최종 합격했습니다!`);
+            },
+            onFail: () => {
+                changeStat('mental', -20);
+                addLog(`${targetJob} 면접에서 탈락했습니다...`);
+            }
+        });
+        advanceTurn();
+    }
+
+    // --- 1년 내 4회 행동 관리 ---
+    function advanceTurn() {
+        if (gameState.isGameOver) return;
+
+        gameState.turnInYear++;
+
+        if (gameState.turnInYear >= gameState.turnsPerYear) {
+            // 연말
+            gameState.turnInYear = 0;
+            processAnnualEvent();
+
+            // 게임 오버 조건 체크
+            if (gameState.stats.health <= 0) {
+                endGame("건강 악화로 쓰러졌습니다. (건강 0)");
+                return;
+            }
+            if (gameState.money < -5000) {
+                endGame("감당할 수 없는 빚더미에 앉았습니다. (파산)");
+                return;
+            }
+
+            gameState.age++;
+            if (gameState.age > gameState.maxAge) {
+                endGame("30세가 되었습니다.");
+                return;
+            }
+        }
+
+        updateUI();
+        showPhaseForCurrentAge();
+    }
+
+    // --- 엔딩 ---
+    function endGame(reason) {
+        gameState.isGameOver = true;
+        ui.endingModal.classList.remove('hidden');
+
+        let endTitle = "평범한 시민";
+        if (gameState.money > 20000) endTitle = "자수성가 부자";
+        else if (gameState.money < -2000) endTitle = "신용불량자";
+
+        if ((gameState.job === '의사' || gameState.job === '대기업' || gameState.job === '전문직')) {
+            endTitle += " 엘리트";
+        }
+        if (gameState.job === '유튜버' && gameState.jobTier > 2) endTitle = "백만 유튜버";
+        if (gameState.stats.mental < 30) endTitle = "번아웃 온 " + endTitle;
+        if (gameState.isMarried) endTitle = "가정을 이룬 " + endTitle;
+        if (gameState.careerSkill >= 3) endTitle += " (장인 정신)";
+
+        let html = `
+            <p class="text-xl font-bold text-indigo-600 mb-4">"${endTitle}"</p>
+            <div class="bg-gray-100 p-4 rounded text-left space-y-2">
+                <p><strong>종료 사유:</strong> ${reason}</p>
+                <p><strong>최종 자산:</strong> ${gameState.money.toLocaleString()}만원</p>
+                <p><strong>최종 직업:</strong> ${gameState.job}</p>
+                <p><strong>최종 멘탈:</strong> ${gameState.stats.mental}</p>
+                <p><strong>거주지:</strong> ${gameState.location}</p>
+                <p><strong>결혼 여부:</strong> ${gameState.isMarried ? '기혼' : '미혼'}</p>
+                <p><strong>히든 진로 적성:</strong> ${gameState.careerPath || '미정'} / Lv.${gameState.careerSkill}</p>
+            </div>
+            <div class="mt-4">
+                <p class="font-bold mb-2">인생 주요 기록:</p>
+                <ul class="list-disc pl-5 text-gray-600 text-xs">
+                    ${gameState.history.slice(-5).map(h => `<li>${h}</li>`).join('')}
+                </ul>
+            </div>
+        `;
+        ui.endingContent.innerHTML = html;
+    }
+
+    // --- 시작 버튼 ---
+    document.querySelector('button').onclick = () => {
+        gameState.age = 19;
+        gameState.money = 0;
+        gameState.stats = { mental: 80, health: 80, hunger: 80 };
+        gameState.job = '고3 학생';
+        gameState.history = [];
+        gameState.location = '본가';
+        gameState.isGameOver = false;
+        gameState.university = null;
+        gameState.degree = '고졸';
+        gameState.jobTier = 0;
+        gameState.spec = 0;
+        gameState.careerPath = null;
+        gameState.careerSkill = 0;
+        gameState.isMarried = false;
+        gameState.turnInYear = 0;
+
+        ui.log.innerHTML = '';
+        ui.log.classList.add('hidden');
+
+        updateUI();
+        initGame();
+    };
+
+    // 초기 UI 렌더링
+    updateUI();
+</script>
+</body>
+</html>

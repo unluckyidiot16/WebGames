@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>MudChain: 갯벌 먹이사슬 로그라이크</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        body { font-family: 'Noto Sans KR', sans-serif; overflow: hidden; user-select: none; }
+        .font-jua { font-family: 'Jua', sans-serif; }
+
+        canvas { display: block; touch-action: none; }
+
+        /* Custom Scrollbar for Pokedex */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .game-overlay { pointer-events: none; }
+        .interactive { pointer-events: auto; }
+
+        /* Animation for Evolution/Death */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+        .animate-pulse-red { animation: pulse-red 2s infinite; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white w-full h-full fixed">
+
+<!-- Canvas Layer -->
+<canvas id="gameCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+
+<!-- UI Layer -->
+<div id="uiLayer" class="absolute top-0 left-0 w-full h-full game-overlay flex flex-col justify-between p-4">
+
+    <!-- Top HUD: Energy & Evolution -->
+    <div class="flex justify-between items-start w-full">
+        <div class="flex flex-col gap-2 w-1/3">
+            <div class="bg-black/50 p-2 rounded-lg border-2 border-slate-600 backdrop-blur-sm">
+                <div class="flex justify-between text-xs text-gray-300 mb-1">
+                    <span id="currentSpeciesName" class="font-jua text-lg text-yellow-400">종 이름</span>
+                    <span id="tierLabel" class="text-xs bg-blue-600 px-2 py-0.5 rounded-full">T1</span>
+                </div>
+                <!-- Energy Bar -->
+                <div class="w-full h-4 bg-gray-700 rounded-full overflow-hidden relative">
+                    <div id="energyBar" class="h-full bg-gradient-to-r from-green-400 to-emerald-600 transition-all duration-300" style="width: 0%"></div>
+                    <p class="absolute inset-0 text-center text-[10px] leading-4 font-bold drop-shadow-md">진화 에너지</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Chain Indicator (Right Top) -->
+        <div class="bg-black/60 p-3 rounded-xl border border-slate-500 backdrop-blur-md interactive max-w-md">
+            <h3 class="text-xs text-center text-gray-400 mb-2 font-bold">갯벌 먹이사슬 현황</h3>
+            <div class="flex items-center justify-between gap-2 text-xs">
+                <!-- Resource -->
+                <div id="hud-t0" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-8 h-8 rounded-full bg-green-200 border-2 border-green-500 mb-1 flex items-center justify-center text-green-800 font-bold">🌱</div>
+                    <span class="text-[10px]">유기물</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <!-- T1 -->
+                <div id="hud-t1" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-10 h-10 rounded-full bg-blue-200 border-2 border-blue-500 mb-1 flex items-center justify-center text-blue-800 font-bold">🐚</div>
+                    <span class="text-[10px]">1차 소비자</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <!-- T2 -->
+                <div id="hud-t2" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-12 h-12 rounded-full bg-orange-200 border-2 border-orange-500 mb-1 flex items-center justify-center text-orange-800 font-bold">🦀</div>
+                    <span class="text-[10px]">2차 소비자</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <!-- T3 -->
+                <div id="hud-t3" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-14 h-14 rounded-full bg-red-200 border-2 border-red-500 mb-1 flex items-center justify-center text-red-800 font-bold">🦅</div>
+                    <span class="text-[10px]">3차 소비자</span>
+                </div>
+            </div>
+            <div id="hud-message" class="mt-2 text-center text-yellow-300 text-xs font-bold animate-pulse hidden">
+                ⚠ 상위 포식자 주의!
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Controls/Info -->
+    <div class="flex justify-between items-end w-full">
+        <button id="pokedexBtn" class="interactive bg-slate-800 hover:bg-slate-700 border-2 border-slate-500 text-white rounded-full p-4 shadow-lg transition-transform hover:scale-110 group">
+            <span class="text-2xl">📖</span>
+            <span class="absolute -top-2 -right-2 bg-red-500 text-xs rounded-full w-5 h-5 flex items-center justify-center hidden" id="newPokedexBadge">N</span>
+        </button>
+        <div class="text-right opacity-70 text-xs">
+            <p>Move: 마우스 / Touch</p>
+            <p>Dash: 클릭 / Tap (에너지 소모)</p>
+        </div>
+    </div>
+</div>
+
+<!-- Start Screen Modal -->
+<div id="startScreen" class="absolute inset-0 bg-slate-900/90 flex flex-col items-center justify-center z-50 interactive">
+    <h1 class="text-6xl font-jua text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-4 drop-shadow-lg">MudChain</h1>
+    <p class="text-xl text-gray-300 mb-8 font-light">갯벌 생태계 먹이사슬 로그라이크</p>
+
+    <div class="bg-white/10 p-6 rounded-xl backdrop-blur-sm mb-8 max-w-md text-center">
+        <p class="mb-2">🌱 유기물을 먹고 성장하세요.</p>
+        <p class="mb-2">⚠️ 나보다 큰 포식자를 피하세요.</p>
+        <p class="mb-4">👑 최상위 포식자(3차 소비자)가 되어 갯벌을 지배하세요!</p>
+        <div class="text-sm text-yellow-300 bg-black/40 p-2 rounded">
+            💡 팁: 첫 플레이는 '갯지렁이'로 시작합니다.
+        </div>
+    </div>
+
+    <button id="startBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 px-12 rounded-full text-xl shadow-xl transform transition hover:scale-105 active:scale-95">
+        생태계 진입하기
+    </button>
+</div>
+
+<!-- Death/Evolution Overlay -->
+<div id="eventOverlay" class="absolute inset-0 bg-black/80 flex flex-col items-center justify-center z-40 hidden interactive p-8 text-center">
+    <div id="eventContent" class="bg-slate-800 p-8 rounded-2xl border-4 border-slate-600 max-w-lg w-full shadow-2xl pop-in">
+        <h2 id="eventTitle" class="text-4xl font-jua mb-4 text-red-500">잡아먹혔습니다!</h2>
+
+        <div class="flex justify-center items-center gap-4 mb-6">
+            <!-- Player Icon -->
+            <div class="flex flex-col items-center opacity-50">
+                <div id="eventPlayerImg" class="w-16 h-16 bg-gray-600 rounded-full mb-2 bg-cover bg-center border-2 border-gray-400"></div>
+                <span class="text-sm">나</span>
+            </div>
+            <span class="text-2xl text-red-500 font-bold">☠️</span>
+            <!-- Killer Icon -->
+            <div class="flex flex-col items-center scale-125">
+                <div id="eventKillerImg" class="w-20 h-20 bg-red-600 rounded-full mb-2 bg-cover bg-center border-4 border-red-500 shadow-red-500/50 shadow-lg"></div>
+                <span id="eventKillerName" class="text-sm font-bold text-red-400">포식자</span>
+            </div>
+        </div>
+
+        <p id="eventDesc" class="text-lg text-gray-200 mb-6 bg-black/30 p-4 rounded-lg">
+            설명 텍스트가 들어갑니다.
+        </p>
+
+        <button id="restartBtn" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 px-6 rounded-lg text-lg transition">
+            다시 시작 (새로운 삶)
+        </button>
+    </div>
+</div>
+
+<!-- Pokedex Modal -->
+<div id="pokedexModal" class="absolute inset-0 bg-slate-900/95 z-50 hidden interactive flex flex-col">
+    <div class="p-4 border-b border-slate-700 flex justify-between items-center bg-slate-800">
+        <h2 class="text-2xl font-jua text-yellow-400">갯벌 생태 도감</h2>
+        <button id="closePokedex" class="text-gray-400 hover:text-white text-3xl">&times;</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-8">
+        <div id="pokedexGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Cards injected via JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. Game Data & Configuration ---
+    const RESOURCES = [
+        { id: 'cell0', exp: 1, color: '#a3e635' }, // Small
+        { id: 'cell1', exp: 1, color: '#bef264' },
+        { id: 'cell2', exp: 2, color: '#facc15' }, // Medium
+        { id: 'cell3', exp: 2, color: '#fbbf24' },
+        { id: 'cell4', exp: 3, color: '#fb923c' }, // Large
+        { id: 'cell5', exp: 3, color: '#f87171' }
+    ];
+
+    // Species Database
+    const SPECIES_DB = {
+        // T1: 1차 소비자
+        'honghap': { id: 'honghap', name: '홍합', tier: 1, type: 'consumer', diet: '유기물', predators: '게, 새', desc: '바위에 붙어사는 홍합은 플랑크톤을 걸러 먹어요.', color: '#3b82f6', scale: 0.8 },
+        'daewangjogae': { id: 'daewangjogae', name: '대왕조개', tier: 1, type: 'consumer', diet: '유기물', predators: '게, 낙지', desc: '거대한 껍데기를 가진 조개입니다.', color: '#60a5fa', scale: 1.0 },
+        'smallScallop': { id: 'smallScallop', name: '작은 가리비', tier: 1, type: 'consumer', diet: '유기물', predators: '게, 고둥', desc: '헤엄칠 수 있는 작은 조개입니다.', color: '#93c5fd', scale: 0.7 },
+        'bigSnail': { id: 'bigSnail', name: '큰 고둥', tier: 1, type: 'consumer', diet: '유기물, 작은 생물', predators: '게', desc: '단단한 껍데기로 몸을 보호합니다.', color: '#a855f7', scale: 0.9 },
+        'mudSnail': { id: 'mudSnail', name: '갯고둥', tier: 1, type: 'consumer', diet: '유기물', predators: '농게, 망둥어', desc: '갯벌 바닥을 기어 다니며 청소부 역할을 해요.', color: '#d8b4fe', scale: 0.7 },
+        'ppulsora': { id: 'ppulsora', name: '뿔소라', tier: 1, type: 'consumer', diet: '해조류', predators: '문어', desc: '뾰족한 뿔이 달린 소라입니다.', color: '#c084fc', scale: 0.9 },
+        'slug_3751492': { id: 'slug_3751492', name: '군소', tier: 1, type: 'consumer', diet: '해조류', predators: '게', desc: '바다의 달팽이라 불리는 군소입니다.', color: '#e879f9', scale: 0.8 },
+        'mudworm': { id: 'mudworm', name: '갯지렁이', tier: 1, type: 'consumer', diet: '유기물, 퇴적물', predators: '게, 새, 물고기', desc: '갯벌의 흙을 정화하는 중요한 친구예요.', color: '#fca5a5', scale: 0.7 }, // Default Starter
+        'smallWorm': { id: 'smallWorm', name: '작은 벌레', tier: 1, type: 'consumer', diet: '유기물', predators: '거의 모든 포식자', desc: '아주 작고 약한 갯벌 생명체입니다.', color: '#fda4af', scale: 0.5 },
+
+        // T2: 2차 소비자
+        'nongge': { id: 'nongge', name: '농게', tier: 2, type: 'predator', diet: '갯지렁이, 작은 조개', predators: '낙지, 새', desc: '한쪽 집게발이 유난히 큰 농게입니다.', color: '#ea580c', scale: 1.2 },
+        'smallCrab': { id: 'smallCrab', name: '작은 게', tier: 2, type: 'predator', diet: '작은 무척추동물', predators: '낙지, 큰 물고기', desc: '재빠르게 움직이는 작은 게입니다.', color: '#f97316', scale: 1.0 },
+        'chilge': { id: 'chilge', name: '칠게', tier: 2, type: 'predator', diet: '갯지렁이, 유기물', predators: '낙지, 새', desc: '갯벌에 구멍을 파고 사는 칠게입니다.', color: '#fb923c', scale: 1.1 },
+        'jjangddungeo': { id: 'jjangddungeo', name: '짱뚱어', tier: 2, type: 'predator', diet: '갯지렁이, 작은 게', predators: '새', desc: '갯벌 위를 뛰어다니는 물고기입니다.', color: '#84cc16', scale: 1.2 },
+        'mangdungeomangdungeo': { id: 'mangdungeomangdungeo', name: '망둥어', tier: 2, type: 'predator', diet: '작은 갑각류', predators: '새, 큰 물고기', desc: '입이 큰 망둥어는 무엇이든 잘 먹어요.', color: '#65a30d', scale: 1.1 },
+
+        // T3: 3차 소비자 (Top Predator)
+        'nakji': { id: 'nakji', name: '낙지', tier: 3, type: 'apex', diet: '게, 조개, 물고기', predators: '없음(최상위)', desc: '긴 다리로 먹이를 휘감는 갯벌의 사냥꾼.', color: '#dc2626', scale: 1.5 },
+        'muneo': { id: 'muneo', name: '문어', tier: 3, type: 'apex', diet: '게, 조개', predators: '없음', desc: '지능이 높고 힘이 센 바다의 현자입니다.', color: '#b91c1c', scale: 1.6 },
+        'sungeo': { id: 'sungeo', name: '숭어', tier: 3, type: 'apex', diet: '작은 물고기', predators: '없음', desc: '재빠르게 헤엄치는 은빛 숭어입니다.', color: '#991b1b', scale: 1.4 },
+        'doyosae': { id: 'doyosae', name: '도요새', tier: 3, type: 'apex', diet: '조개, 게, 갯지렁이', predators: '없음', desc: '긴 부리로 갯벌 깊숙한 곳의 먹이를 찾아요.', color: '#7f1d1d', scale: 1.8 },
+        'galmaegi': { id: 'galmaegi', name: '갈매기', tier: 3, type: 'apex', diet: '물고기, 게', predators: '없음', desc: '하늘에서 갯벌을 감시하는 사냥꾼.', color: '#ef4444', scale: 1.7 },
+        'waegari': { id: 'waegari', name: '왜가리', tier: 3, type: 'apex', diet: '물고기, 양서류', predators: '없음', desc: '인내심 있게 기다렸다가 순식간에 낚아챕니다.', color: '#f87171', scale: 2.0 }
+    };
+
+    const TIER_GROUPS = {
+        1: ['honghap', 'daewangjogae', 'smallScallop', 'bigSnail', 'mudSnail', 'ppulsora', 'slug_3751492', 'mudworm', 'smallWorm'],
+        2: ['nongge', 'smallCrab', 'chilge', 'jjangddungeo', 'mangdungeomangdungeo'],
+        3: ['nakji', 'muneo', 'sungeo', 'doyosae', 'galmaegi', 'waegari']
+    };
+
+    // Assets Loader
+    const images = {};
+    const loadImages = () => {
+        // Resources
+        RESOURCES.forEach(r => {
+            const img = new Image();
+            img.src = `/png/${r.id}.png`;
+            images[r.id] = img;
+        });
+        // Species
+        Object.values(SPECIES_DB).forEach(s => {
+            const img = new Image();
+            img.src = `/png/${s.id}.png`;
+            images[s.id] = img;
+        });
+    };
+
+    // --- 2. Game State & Logic ---
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const WORLD_SIZE = 3000;
+
+    // Player State
+    let player = {
+        x: WORLD_SIZE/2, y: WORLD_SIZE/2,
+        radius: 20,
+        angle: 0,
+        speed: 0,
+        maxSpeed: 4,
+        tier: 1,
+        speciesId: 'mudworm', // Default start
+        energy: 0,
+        maxEnergy: 50,
+        isDead: false
+    };
+
+    // Input
+    const mouse = { x: 0, y: 0, active: false };
+    let isBoosting = false;
+
+    // Entities
+    let foods = [];
+    let enemies = [];
+    let particles = []; // Death/Eat effects
+
+    // Storage
+    let unlockedSpecies = JSON.parse(localStorage.getItem('mudChain_unlocked')) || ['mudworm'];
+    let hasPlayedBefore = localStorage.getItem('mudChain_hasPlayed');
+
+    // Camera
+    let camX = 0, camY = 0;
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- 3. Core Functions ---
+
+    function initGame() {
+        loadImages();
+
+        // First time or restart?
+        if (!hasPlayedBefore) {
+            setPlayerSpecies('mudworm');
+            localStorage.setItem('mudChain_hasPlayed', 'true');
+        } else {
+            // If T1, choose from unlocked T1 species
+            const unlockedT1 = TIER_GROUPS[1].filter(id => unlockedSpecies.includes(id));
+            const startId = unlockedT1.length > 0
+                ? unlockedT1[Math.floor(Math.random() * unlockedT1.length)]
+                : 'mudworm';
+            setPlayerSpecies(startId);
+        }
+
+        resetWorld();
+        gameLoop();
+    }
+
+    function resetWorld() {
+        foods = [];
+        enemies = [];
+        player.x = Math.random() * WORLD_SIZE;
+        player.y = Math.random() * WORLD_SIZE;
+        player.energy = 0;
+        player.isDead = false;
+        player.tier = SPECIES_DB[player.speciesId].tier; // Should be 1
+        updateMaxEnergy();
+
+        // Spawn initial food
+        for(let i=0; i<300; i++) spawnFood();
+        // Spawn initial enemies
+        for(let i=0; i<30; i++) spawnEnemy();
+
+        updateHUD();
+    }
+
+    function setPlayerSpecies(id) {
+        player.speciesId = id;
+        const data = SPECIES_DB[id];
+        player.tier = data.tier;
+        // Radius scales with tier + slight variance based on species scale
+        player.radius = (20 * data.tier) * data.scale;
+        player.maxSpeed = 5 - (data.tier * 0.5); // Higher tier = slightly slower base speed (more mass)
+
+        // Unlock in pokedex
+        if(!unlockedSpecies.includes(id)) {
+            unlockedSpecies.push(id);
+            localStorage.setItem('mudChain_unlocked', JSON.stringify(unlockedSpecies));
+            showBadge();
+        }
+
+        updateHUD();
+    }
+
+    function updateMaxEnergy() {
+        player.maxEnergy = player.tier * 50 + (player.tier === 3 ? 100 : 0); // T3 takes longer to "win"
+    }
+
+    function spawnFood() {
+        const r = Math.random();
+        // Higher tiers spawn less frequently
+        let typeIdx = 0;
+        if (r > 0.9) typeIdx = Math.floor(Math.random() * 2) + 4; // 4,5
+        else if (r > 0.7) typeIdx = Math.floor(Math.random() * 2) + 2; // 2,3
+        else typeIdx = Math.floor(Math.random() * 2); // 0,1
+
+        const res = RESOURCES[typeIdx];
+        foods.push({
+            x: Math.random() * WORLD_SIZE,
+            y: Math.random() * WORLD_SIZE,
+            id: res.id,
+            exp: res.exp,
+            color: res.color,
+            radius: 5 + (typeIdx * 1.5),
+            angle: Math.random() * Math.PI * 2
+        });
+    }
+
+    function spawnEnemy() {
+        // Determine tier based on player tier to keep difficulty balanced but scary
+        // T1 Player: Mostly T1 enemies, some T2.
+        // T2 Player: T1 food, T2 rivals, T3 predators.
+
+        let possibleTiers = [];
+        if(player.tier === 1) possibleTiers = [1, 1, 1, 2];
+        else if(player.tier === 2) possibleTiers = [1, 2, 2, 3];
+        else possibleTiers = [2, 3];
+
+        const t = possibleTiers[Math.floor(Math.random() * possibleTiers.length)];
+        const group = TIER_GROUPS[t];
+        const sId = group[Math.floor(Math.random() * group.length)];
+        const data = SPECIES_DB[sId];
+
+        enemies.push({
+            x: Math.random() * WORLD_SIZE,
+            y: Math.random() * WORLD_SIZE,
+            speciesId: sId,
+            tier: t,
+            radius: (20 * t) * data.scale,
+            speed: (Math.random() * 2) + 1,
+            vx: 0, vy: 0,
+            color: data.color
+        });
+    }
+
+    function evolve() {
+        if (player.tier >= 3) {
+            // Already apex, just heal or boost score? 
+            // Let's keep it maxed at T3 for MVP.
+            return;
+        }
+
+        const nextTier = player.tier + 1;
+        const candidates = TIER_GROUPS[nextTier];
+
+        // Priority: Unplayed species
+        const unplayed = candidates.filter(id => !unlockedSpecies.includes(id));
+        let nextId;
+
+        if (unplayed.length > 0) {
+            nextId = unplayed[Math.floor(Math.random() * unplayed.length)];
+        } else {
+            nextId = candidates[Math.floor(Math.random() * candidates.length)];
+        }
+
+        // Effect
+        createExplosion(player.x, player.y, 20, '#ffffff');
+        setPlayerSpecies(nextId);
+        player.energy = 0;
+        updateMaxEnergy();
+    }
+
+    function createExplosion(x, y, count, color) {
+        for(let i=0; i<count; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 10,
+                vy: (Math.random() - 0.5) * 10,
+                life: 1.0,
+                color: color
+            });
+        }
+    }
+
+    // --- 4. Game Loop ---
+
+    function gameLoop() {
+        draw();
+    }
+
+    function update() {
+        if (player.isDead) return;
+
+        // Player Movement
+        const dx = mouse.x - width/2;
+        const dy = mouse.y - height/2;
+        const angle = Math.atan2(dy, dx);
+        player.angle = angle;
+
+        let currentSpeed = player.maxSpeed;
+        if (isBoosting && player.energy > 0) {
+            currentSpeed *= 1.5;
+            player.energy -= 0.1;
+            if (player.energy < 0) player.energy = 0;
+        }
+
+        // Simple ease-in movement
+        player.x += Math.cos(angle) * currentSpeed;
+        player.y += Math.sin(angle) * currentSpeed;
+
+        // World Bounds
+        player.x = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.x));
+        player.y = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.y));
+
+        // Camera follow
+        camX = player.x - width / 2;
+        camY = player.y - height / 2;
+
+        // Update Foods
+        for (let i = foods.length - 1; i >= 0; i--) {
+            const f = foods[i];
+            // Simple float animation
+            f.x += Math.cos(Date.now()/500 + i)*0.2;
+
+            const dist = Math.hypot(player.x - f.x, player.y - f.y);
+            if (dist < player.radius + f.radius) {
+                // Eat Food (T1 only effectively eats organic matter, but T2/T3 eat smaller stuff logic)
+                // MVP rule: Everyone can eat "Resources" (cell0-5) for small energy
+                player.energy += f.exp;
+                createExplosion(f.x, f.y, 3, f.color);
+                foods.splice(i, 1);
+                spawnFood();
+
+                if (player.energy >= player.maxEnergy) {
+                    evolve();
+                }
+            }
+        }
+
+        // Update Enemies
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+
+            // AI Logic: Simple Random Walk + Chase
+            // If player is close and smaller, chase. If player is bigger, flee.
+            const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
+
+            if (distToPlayer < 400) {
+                const angleToP = Math.atan2(player.y - e.y, player.x - e.x);
+                if (e.tier > player.tier) {
+                    // Chase Player
+                    e.vx = Math.cos(angleToP) * e.speed;
+                    e.vy = Math.sin(angleToP) * e.speed;
+                } else if (e.tier < player.tier) {
+                    // Flee
+                    e.vx = -Math.cos(angleToP) * e.speed;
+                    e.vy = -Math.sin(angleToP) * e.speed;
+                } else {
+                    // Neutral/Random
+                    e.vx += (Math.random()-0.5);
+                    e.vy += (Math.random()-0.5);
+                }
+            } else {
+                // Random wander
+                if (Math.random() < 0.05) {
+                    e.vx = (Math.random() - 0.5) * e.speed * 2;
+                    e.vy = (Math.random() - 0.5) * e.speed * 2;
+                }
+            }
+
+            e.x += e.vx;
+            e.y += e.vy;
+            e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
+            e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
+
+            // Collision with Player
+            if (distToPlayer < player.radius + e.radius) {
+                if (player.tier > e.tier) {
+                    // Eat Enemy
+                    player.energy += 15 * e.tier; // Big boost
+                    createExplosion(e.x, e.y, 10, e.color);
+                    enemies.splice(i, 1);
+                    spawnEnemy();
+                    if (player.energy >= player.maxEnergy) evolve();
+                } else if (player.tier < e.tier) {
+                    // Die
+                    die(e);
+                } else {
+                    // Bump (Same tier)
+                    const angle = Math.atan2(player.y - e.y, player.x - e.x);
+                    player.x += Math.cos(angle) * 5;
+                    player.y += Math.sin(angle) * 5;
+                    e.x -= Math.cos(angle) * 5;
+                    e.y -= Math.sin(angle) * 5;
+                }
+            }
+        }
+
+        // Maintain Enemy Count
+        if (enemies.length < 30) spawnEnemy();
+
+        // Particles
+        for(let i=particles.length-1; i>=0; i--) {
+            let p = particles[i];
+            p.x += p.vx;
+            p.y += p.vy;
+            p.life -= 0.05;
+            if(p.life <= 0) particles.splice(i, 1);
+        }
+
+        // HUD Update
+        const p = (player.energy / player.maxEnergy) * 100;
+        document.getElementById('energyBar').style.width = `${p}%`;
+        document.getElementById('currentSpeciesName').innerText = SPECIES_DB[player.speciesId].name;
+        document.getElementById('tierLabel').innerText = `T${player.tier}`;
+    }
+
+    function draw() {
+        // Clear
+        ctx.fillStyle = '#1e293b'; // Mud/Water dark blue-ish
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(-camX, -camY);
+
+        // Draw Grid
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for(let x=0; x<=WORLD_SIZE; x+=100) { ctx.moveTo(x,0); ctx.lineTo(x, WORLD_SIZE); }
+        for(let y=0; y<=WORLD_SIZE; y+=100) { ctx.moveTo(0,y); ctx.lineTo(WORLD_SIZE, y); }
+        ctx.stroke();
+
+        // Draw Food
+        foods.forEach(f => {
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            const img = images[f.id];
+            if (img && img.complete && img.naturalHeight !== 0) {
+                ctx.drawImage(img, -f.radius, -f.radius, f.radius*2, f.radius*2);
+            } else {
+                // Fallback
+                ctx.fillStyle = f.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, f.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(-f.radius*0.3, -f.radius*0.3, f.radius*0.3, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.restore();
+        });
+
+        // Draw Enemies
+        enemies.forEach(e => {
+            drawEntity(e, false);
+        });
+
+        // Draw Player
+        if (!player.isDead) {
+            drawEntity(player, true);
+        }
+
+        // Particles
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        });
+
+        ctx.restore();
+
+        requestAnimationFrame(() => {
+            update();
+            draw();
+        });
+    }
+
+    function drawEntity(entity, isPlayer) {
+        ctx.save();
+        ctx.translate(entity.x, entity.y);
+        // ctx.rotate(entity.angle); // Rotate if sprites have direction
+
+        const data = isPlayer ? SPECIES_DB[entity.speciesId] : SPECIES_DB[entity.speciesId];
+        const img = images[entity.speciesId];
+        const r = entity.radius;
+
+        // Name Tag
+        if (!isPlayer || true) {
+            ctx.fillStyle = 'white';
+            ctx.font = '10px "Noto Sans KR"';
+            ctx.textAlign = 'center';
+            ctx.fillText(data.name, 0, -r - 5);
+        }
+
+        if (img && img.complete && img.naturalHeight !== 0) {
+            ctx.drawImage(img, -r, -r, r*2, r*2);
+        } else {
+            // Fallback Circle
+            ctx.fillStyle = data.color || '#ccc';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI*2);
+            ctx.fill();
+            // Eyes for cuteness
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(-r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
+            ctx.arc(r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(-r*0.3, -r*0.1, r*0.1, 0, Math.PI*2);
+            ctx.arc(r*0.3, -r*0.1, r*0.1, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Highlight ring for higher tier enemies (Danger)
+        if (isPlayer) {
+            // Player glow
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0,0,r+2,0,Math.PI*2); ctx.stroke();
+        } else if (entity.tier > player.tier) {
+            ctx.strokeStyle = 'red';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+            ctx.setLineDash([]);
+        } else if (entity.tier < player.tier) {
+            ctx.strokeStyle = '#4ade80'; // Green ring (Food)
+            ctx.lineWidth = 1;
+            ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+
+    // --- 5. UI & Interaction Logic ---
+
+    function updateHUD() {
+        // Reset Opacity
+        ['hud-t0', 'hud-t1', 'hud-t2', 'hud-t3'].forEach(id => {
+            document.getElementById(id).style.opacity = '0.5';
+            document.getElementById(id).classList.remove('scale-110');
+        });
+
+        // Highlight current
+        const cur = document.getElementById(`hud-t${player.tier}`);
+        if(cur) {
+            cur.style.opacity = '1';
+            cur.classList.add('scale-110');
+        }
+
+        // Check neighbors logic for arrows? (Simplified in static HTML for now, could animate arrows)
+    }
+
+    function die(killer) {
+        player.isDead = true;
+        const kData = SPECIES_DB[killer.speciesId];
+
+        // Open killer to pokedex logic could go here (discovery)
+        if(!unlockedSpecies.includes(killer.speciesId)) {
+            // "Seen" logic? For now, we just unlock it if you get killed by it to learn about it.
+            // Or maybe just partial unlock. Let's just show info.
+        }
+
+        document.getElementById('eventTitle').innerText = "잡아먹혔습니다!";
+
+        // Set Images
+        setEventImage('eventPlayerImg', player.speciesId);
+        setEventImage('eventKillerImg', killer.speciesId);
+
+        document.getElementById('eventKillerName').innerText = kData.name;
+        document.getElementById('eventDesc').innerHTML =
+            `<span class="text-yellow-400 font-bold">${kData.name}</span> 특징:<br>"${kData.desc}"<br><br>` +
+            `<span class="text-sm text-gray-400">주식: ${kData.diet}</span>`;
+
+        document.getElementById('eventOverlay').classList.remove('hidden');
+        document.getElementById('eventOverlay').classList.add('flex');
+    }
+
+    function setEventImage(elId, speciesId) {
+        const el = document.getElementById(elId);
+        el.innerHTML = '';
+        const img = images[speciesId];
+        if (img && img.complete && img.naturalHeight !== 0) {
+            el.style.backgroundImage = `url(${img.src})`;
+            el.style.backgroundColor = 'transparent';
+        } else {
+            el.style.backgroundImage = 'none';
+            el.style.backgroundColor = SPECIES_DB[speciesId].color;
+            el.innerText = SPECIES_DB[speciesId].name[0];
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.style.color = 'white';
+            el.style.fontWeight = 'bold';
+        }
+    }
+
+    // Pokedex Logic
+    function renderPokedex() {
+        const grid = document.getElementById('pokedexGrid');
+        grid.innerHTML = '';
+
+        // Sort by Tier then Name
+        const sortedKeys = Object.keys(SPECIES_DB).sort((a,b) => {
+            if (SPECIES_DB[a].tier !== SPECIES_DB[b].tier) return SPECIES_DB[a].tier - SPECIES_DB[b].tier;
+            return a.localeCompare(b);
+        });
+
+        sortedKeys.forEach(key => {
+            const data = SPECIES_DB[key];
+            const isUnlocked = unlockedSpecies.includes(key);
+
+            const card = document.createElement('div');
+            card.className = `bg-slate-700 rounded-lg p-4 flex flex-col items-center gap-2 border-2 ${isUnlocked ? 'border-slate-500' : 'border-slate-800 opacity-50'}`;
+
+            if (isUnlocked) {
+                // Unlocked View
+                let imgHTML = '';
+                const img = images[key];
+                if(img && img.complete && img.naturalHeight !== 0) {
+                    imgHTML = `<img src="${img.src}" class="w-16 h-16 object-contain mb-2">`;
+                } else {
+                    imgHTML = `<div class="w-16 h-16 rounded-full mb-2 flex items-center justify-center font-bold text-white text-xl" style="background-color:${data.color}">${data.name[0]}</div>`;
+                }
+
+                card.innerHTML = `
+                        <div class="absolute top-2 left-2 text-xs bg-black/50 px-2 rounded text-gray-300">T${data.tier}</div>
+                        ${imgHTML}
+                        <h3 class="font-jua text-xl text-yellow-400">${data.name}</h3>
+                        <p class="text-xs text-center text-gray-300 h-16 overflow-hidden text-ellipsis">${data.desc}</p>
+                        <div class="w-full text-[10px] mt-2 bg-black/20 p-2 rounded">
+                            <div class="flex justify-between"><span class="text-green-400">먹이:</span> <span>${data.diet.split(',')[0]}...</span></div>
+                            <div class="flex justify-between"><span class="text-red-400">천적:</span> <span>${data.predators.split(',')[0]}...</span></div>
+                        </div>
+                    `;
+            } else {
+                // Locked View
+                card.innerHTML = `
+                        <div class="w-16 h-16 bg-black/50 rounded-full mb-2 flex items-center justify-center text-3xl">?</div>
+                        <h3 class="font-jua text-xl text-gray-500">???</h3>
+                        <p class="text-xs text-center text-gray-600">아직 발견되지 않은 종입니다.</p>
+                    `;
+            }
+            grid.appendChild(card);
+        });
+    }
+
+    function showBadge() {
+        document.getElementById('newPokedexBadge').classList.remove('hidden');
+    }
+
+    // --- Event Listeners ---
+
+    window.addEventListener('mousemove', (e) => {
+        mouse.x = e.clientX;
+        mouse.y = e.clientY;
+    });
+
+    window.addEventListener('touchmove', (e) => {
+        e.preventDefault();
+        mouse.x = e.touches[0].clientX;
+        mouse.y = e.touches[0].clientY;
+    }, {passive: false});
+
+    window.addEventListener('mousedown', () => isBoosting = true);
+    window.addEventListener('mouseup', () => isBoosting = false);
+    window.addEventListener('touchstart', () => isBoosting = true);
+    window.addEventListener('touchend', () => isBoosting = false);
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        document.getElementById('startScreen').classList.add('hidden');
+        initGame();
+    });
+
+    document.getElementById('restartBtn').addEventListener('click', () => {
+        document.getElementById('eventOverlay').classList.add('hidden');
+        document.getElementById('eventOverlay').classList.remove('flex');
+        initGame();
+    });
+
+    document.getElementById('pokedexBtn').addEventListener('click', () => {
+        renderPokedex();
+        document.getElementById('pokedexModal').classList.remove('hidden');
+        document.getElementById('newPokedexBadge').classList.add('hidden');
+    });
+
+    document.getElementById('closePokedex').addEventListener('click', () => {
+        document.getElementById('pokedexModal').classList.add('hidden');
+    });
+
+    // Initial Load
+    loadImages();
+
+</script>
+</body>
+</html>
