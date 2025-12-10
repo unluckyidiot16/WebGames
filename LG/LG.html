@@ -15,10 +15,10 @@
         .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; z-index: 50; transition: opacity 0.5s; }
     </style>
 </head>
-<body class="bg-gray-100 text-gray-800 h-screen flex flex-col overflow-hidden">
+<body class="bg-gray-100 text-gray-800 min-h-screen flex flex-col">
 
 <!-- 게임 컨테이너 -->
-<div class="max-w-md mx-auto w-full h-full bg-white shadow-xl flex flex-col relative">
+<div class="max-w-md mx-auto w-full bg-white shadow-xl flex flex-col relative">
 
     <!-- 상단: 상태창 -->
     <header class="p-4 bg-slate-800 text-white shrink-0">
@@ -47,7 +47,7 @@
     </header>
 
     <!-- 중앙: 메인 콘텐츠 (스크롤 가능) -->
-    <main id="game-screen" class="flex-1 overflow-y-auto p-4 flex flex-col">
+    <main id="game-screen" class="flex-1 p-4 flex flex-col pb-24">
         <!-- 텍스트 영역 -->
         <div id="story-area" class="mb-6 fade-in">
             <h1 class="text-2xl font-bold mb-4 text-slate-800">인생 시뮬레이션 시작</h1>
