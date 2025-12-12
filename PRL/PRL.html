@@ -5,7 +5,7 @@
     <title>QuizMon: Ver 7.1 Fix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; touch-action: manipulation; }
         .view { display: none; }
@@ -741,44 +741,91 @@
     }
 
 
-    // 👻 내 QR 탭 업데이트 (요약 + QR 생성)
     function refreshGhostMyPane() {
-        const summaryEl = document.getElementById("ghostMySummary");
-        const canvas = document.getElementById("ghostQrCanvas");
-        if (!summaryEl || !canvas) return;
+        const canvas = document.getElementById("ghostMyQrCanvas");
+        const label = document.getElementById("ghostMyQrLabel");
+        const rawInput = document.getElementById("ghostMyCodeInput");
 
-        const payload = buildGhostPayload();
-
-        if (!payload) {
-            // buildGhostPayload 쪽에서 alert를 이미 띄웠으므로,
-            // 여기서는 안내만 살짝 정리
-            summaryEl.textContent = "공유할 고스트 기록이 없습니다.";
-            const ctx = canvas.getContext("2d");
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (!canvas || !label || !rawInput) {
+            console.warn("[Ghost QR] QR UI 요소를 찾을 수 없습니다.");
             return;
         }
 
-        const { ghost, encoded } = payload;
-
-        summaryEl.textContent =
-            `명예의 전당 최고 기록: ${ghost.name} Lv.${ghost.level}` +
-            (ghost.bestStage ? ` · 스테이지 ${ghost.bestStage}` : "") +
-            " 기록을 고스트로 공유합니다.";
-
-        if (window.QRCode && typeof QRCode.toCanvas === "function") {
-            QRCode.toCanvas(
-                canvas,
-                encoded,
-                { width: 220, margin: 1 },
-                (err) => {
-                    if (err) console.error("[Ghost QR] 생성 오류", err);
-                },
-            );
-        } else {
-            console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.");
+        const raw = rawInput.value || "";
+        if (!raw) {
+            label.textContent = "먼저 내 코드(텍스트)를 생성해 주세요.";
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            return;
         }
+
+        // 🔐 UTF-8 안전한 Base64 인코딩
+        function encodeUtf8Base64(str) {
+            const utf8 = encodeURIComponent(str).replace(
+                /%([0-9A-F]{2})/g,
+                (_, p1) => String.fromCharCode(parseInt(p1, 16))
+            );
+            return btoa(utf8);
+        }
+
+        const payload = {
+            v: 1,
+            type: "ghost-run",
+            data: raw,
+            ts: Date.now(),
+        };
+
+        let encoded;
+        try {
+            encoded = "PRL1:" + encodeUtf8Base64(JSON.stringify(payload));
+        } catch (e) {
+            console.error("[Ghost QR] JSON 인코딩 에러", e);
+            label.textContent = "QR 데이터 인코딩 에러";
+            return;
+        }
+
+        // ✅ QR 라이브러리 찾기 (여러 이름 허용)
+        const QRLib =
+            window.QRCode ||           // qrcode 1.5.x 브라우저 빌드
+            window.qrcode ||           // 혹시 소문자로 노출된 경우
+            window.QRcode;             // 오타/다른 빌드 대응
+
+        if (!QRLib || typeof QRLib.toCanvas !== "function") {
+            console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.", QRLib);
+            label.textContent = "QR 라이브러리 로드 실패";
+            return;
+        }
+
+        // 🎯 실제 QR 그리기
+        QRLib.toCanvas(
+            canvas,
+            encoded,
+            {
+                width: 220,
+                margin: 1,
+                errorCorrectionLevel: "M",
+            },
+            function (error) {
+                if (error) {
+                    console.error("[Ghost QR] QR 생성 에러", error);
+                    label.textContent = "QR 생성 에러";
+                    return;
+                }
+                label.textContent = "내 유령 러닝 코드 (QR)";
+            }
+        );
     }
 
+    // 페이지 로드 시 자동 갱신하고 싶으면:
+    window.addEventListener("load", () => {
+        try {
+            refreshGhostMyPane();
+        } catch (e) {
+            console.error("[Ghost QR] 초기화 중 에러", e);
+        }
+    });
 
     // 👻 고스트 모달 탭 전환
     function switchGhostTab(mode) {
