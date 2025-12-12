@@ -466,6 +466,9 @@
         CHAR_DATA: "qz_c_prog_v72" // [추가] 캐릭터별 성장 데이터 저장 키
     };
 
+    // 👻 고스트 QR이 항상 이 주소로 연결되도록 고정
+    const GHOST_ROOT_URL = "https://unluckyidiot16.github.io/WebGames/PRL/PRL.html";
+
     // [추가] 캐릭터 성장 데이터 가져오기
     function getCharData() {
         try { return JSON.parse(localStorage.getItem(LS_KEY.CHAR_DATA) || "{}"); }
@@ -507,8 +510,37 @@
     function getDupes() { try { return JSON.parse(localStorage.getItem(LS_KEY.DUPES) || "{}"); } catch { return {}; } }
     function saveDupes(d) { localStorage.setItem(LS_KEY.DUPES, JSON.stringify(d)); }
     function getStarterId() { return parseInt(localStorage.getItem(LS_KEY.PARTNER) || "0"); }
-    function setStarterId(id) { localStorage.setItem(LS_KEY.PARTNER, id); updateLobbyPartner(); }
-    function getHoF() { try { return JSON.parse(localStorage.getItem(LS_KEY.HOF) || "[]"); } catch { return []; } }
+    function setStarterId(id) {
+        localStorage.setItem(LS_KEY.PARTNER, id);
+        updateLobbyPartner();
+
+        // 고스트 초대가 대기 중이면 바로 물어보기
+        if (window.__pendingGhost) {
+            const g = window.__pendingGhost;
+            window.__pendingGhost = null;
+
+            if (confirm(`고스트 ${g.name} (Lv.${g.level}) 초대가 있습니다.\n지금 바로 도전할까요?`)) {
+                startGhostBattle(g);
+            }
+        }
+    }
+
+    function getHoF() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY.HOF) || "[]"); }
+        catch { return []; }
+    }
+
+    // ⭐ 명예의 전당 중 "일반 모험" 최고 기록 1개 반환
+    function getBestAdventureRecord() {
+        const list = getHoF();
+        const adv = list.filter(r => !r.kind || r.kind === "adventure");
+
+        if (!adv.length) return null;
+
+        adv.sort((a, b) => (b.stage || 0) - (a.stage || 0));
+        return adv[0];  // 스테이지 가장 높은 기록
+    }
+
     // 변경 후: 모드(kind) 포함 + 정렬 안전하게
     function addHoF(record) {
         const list = getHoF();
@@ -531,32 +563,57 @@
 
     // 👻 고스트 배틀용: 내 스타터 정보를 QR에 담기
     function buildGhostPayload() {
-        const pid = getStarterId();
-        if (!pid) {
-            showAlert("스타터 없음", "먼저 스타터를 선택해 주세요.");
-            return null;
+        const best = getBestAdventureRecord();
+
+        let pid;        // 사용할 포켓몬 ID
+        let level;      // 고스트 레벨
+        let bestStage;  // 명예의 전당 기준 스테이지
+        let xp = 0;
+
+        if (best && best.speciesId) {
+            // ✅ 명예의 전당 기록 우선 사용
+            pid = best.speciesId;
+            level = best.level || 1;
+            bestStage = best.stage || 0;
+
+            // 로컬에 성장 데이터가 더 있으면 살짝 보정
+            const charData = getCharData()[pid];
+            if (charData && typeof charData.level === "number") {
+                level = Math.max(level, charData.level);
+            }
+            if (charData && typeof charData.xp === "number") {
+                xp = charData.xp;
+            }
+        } else {
+            // 🔁 아직 HoF가 없다면 기존 "스타터 기반" 로직으로 fallback
+            const starterId = getStarterId();
+            if (!starterId) {
+                showAlert("공유할 기록 없음", "먼저 모험을 플레이해서 명예의 전당 기록을 남기거나, 스타터를 선택해 주세요.");
+                return null;
+            }
+
+            pid = starterId;
+            const dupes = getDupes()[pid] || 0;
+            const charData = getCharData()[pid];
+
+            level = 1 + dupes;
+            if (charData) {
+                if (typeof charData.level === "number") level = charData.level;
+                if (typeof charData.xp === "number") xp = charData.xp;
+            }
+
+            // 이 경우엔 이름 기준으로 최고 스테이지를 다시 계산
+            const infoTmp = getPokeInfo(pid);
+            const hofList = getHoF();
+            bestStage = 0;
+            hofList.forEach((rec) => {
+                if (rec.name === infoTmp.name && rec.stage > bestStage) {
+                    bestStage = rec.stage;
+                }
+            });
         }
 
         const info = getPokeInfo(pid);
-        const charData = getCharData()[pid];
-        const dupes = getDupes()[pid] || 0;
-
-        let level = 1 + dupes;
-        let xp = 0;
-
-        if (charData) {
-            if (typeof charData.level === "number") level = charData.level;
-            if (typeof charData.xp === "number") xp = charData.xp;
-        }
-
-        // 같은 이름의 포켓몬 중 최고 스테이지 기록 (없으면 0)
-        const hofList = getHoF();
-        let bestStage = 0;
-        hofList.forEach((rec) => {
-            if (rec.name === info.name && rec.stage > bestStage) {
-                bestStage = rec.stage;
-            }
-        });
 
         const ghost = {
             v: 1,
@@ -569,31 +626,116 @@
             ts: Date.now(),
         };
 
-        const encoded = "QZMGHOST|" + btoa(JSON.stringify(ghost));
-        return { ghost, encoded };
+        const token = btoa(JSON.stringify(ghost));
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
+
+        return { ghost, encoded: url };
     }
+
+    function buildGhostPayloadFromHofRecord(rec) {
+        if (!rec || !rec.speciesId) {
+            // 이전 버전에서 저장된 기록에는 speciesId가 없을 수 있음
+            console.warn("[Ghost QR] HoF 기록에 speciesId가 없습니다.", rec);
+            return null;
+        }
+
+        const pid = rec.speciesId;
+        const info = getPokeInfo(pid);
+        if (!info) {
+            console.warn("[Ghost QR] HoF 기록용 포켓몬 정보를 찾지 못했습니다.", rec);
+            return null;
+        }
+
+        const level =
+            typeof rec.level === "number" && rec.level > 0
+                ? rec.level
+                : 1;
+        const xp = 0;
+        const bestStage = rec.stage || 0;
+
+        const ghost = {
+            v: 1,
+            game: "QuizMonPRL",
+            speciesId: pid,
+            name: rec.name || info.name,
+            level,
+            xp,
+            bestStage,
+            ts: Date.now(),
+        };
+
+        const token = btoa(JSON.stringify(ghost));
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
+        return { ghost, encoded: url };
+    }
+
+    function openGhostModalFromHof(rec) {
+        if (!rec) return;
+
+        const payload = buildGhostPayloadFromHofRecord(rec);
+        if (!payload) {
+            alert(
+                "이 기록에는 포켓몬 정보가 없어 QR을 만들 수 없습니다.\n" +
+                "새 버전에서 다시 플레이하면 공유 가능한 기록이 저장됩니다."
+            );
+            return;
+        }
+
+        const { ghost, encoded } = payload;
+
+        const modal = document.getElementById("ghostModal");
+        const summaryEl = document.getElementById("ghostMySummary");
+        const canvas = document.getElementById("ghostQrCanvas");
+        if (!modal || !summaryEl || !canvas) return;
+
+        // 내 QR 탭으로 전환
+        switchGhostTab("my");
+
+        // 설명 텍스트를 “명예의 전당 기록 공유” 버전으로 교체
+        summaryEl.textContent =
+            `명예의 전당 기록: ${ghost.name} Lv.${ghost.level} ` +
+            `(최종 스테이지 ${rec.stage || "-"}). 이 기록을 고스트로 공유합니다.`;
+
+        if (window.QRCode && typeof QRCode.toCanvas === "function") {
+            QRCode.toCanvas(
+                canvas,
+                encoded,
+                { width: 220, margin: 1 },
+                (err) => {
+                    if (err) console.error("[Ghost QR] 생성 오류", err);
+                },
+            );
+        } else {
+            console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.");
+        }
+
+        modal.classList.remove("hidden");
+    }
+
 
     // 👻 내 QR 탭 업데이트 (요약 + QR 생성)
     function refreshGhostMyPane() {
         const summaryEl = document.getElementById("ghostMySummary");
         const canvas = document.getElementById("ghostQrCanvas");
-
         if (!summaryEl || !canvas) return;
 
-        const pid = getStarterId();
-        if (!pid) {
-            summaryEl.textContent = "스타터가 없습니다. 먼저 스타터를 하나 선택해 주세요.";
+        const payload = buildGhostPayload();
+
+        if (!payload) {
+            // buildGhostPayload 쪽에서 alert를 이미 띄웠으므로,
+            // 여기서는 안내만 살짝 정리
+            summaryEl.textContent = "공유할 고스트 기록이 없습니다.";
             const ctx = canvas.getContext("2d");
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             return;
         }
 
-        const info = getPokeInfo(pid);
-        const payload = buildGhostPayload();
-        if (!payload) return;
-
         const { ghost, encoded } = payload;
-        summaryEl.textContent = `${ghost.name} Lv.${ghost.level} (최고 스테이지 ${ghost.bestStage || "-"}). 이 정보를 QR로 공유합니다.`;
+
+        summaryEl.textContent =
+            `명예의 전당 최고 기록: ${ghost.name} Lv.${ghost.level}` +
+            (ghost.bestStage ? ` · 스테이지 ${ghost.bestStage}` : "") +
+            " 기록을 고스트로 공유합니다.";
 
         if (window.QRCode && typeof QRCode.toCanvas === "function") {
             QRCode.toCanvas(
@@ -608,6 +750,7 @@
             console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.");
         }
     }
+
 
     // 👻 고스트 모달 탭 전환
     function switchGhostTab(mode) {
@@ -745,6 +888,44 @@
         }
     }
 
+    // 👻 문자열에서 고스트 정보 꺼내기
+    function parseGhostFromData(data) {
+        if (typeof data !== "string") return null;
+
+        try {
+            // 1) 새 포맷: URL 에 ?ghost= 가 붙어 있는 형태
+            if (data.startsWith("http")) {
+                const url = new URL(data);
+                const token = url.searchParams.get("ghost");
+                if (token) {
+                    const json = atob(decodeURIComponent(token));
+                    return JSON.parse(json);
+                }
+            }
+
+            // 2) 예전 포맷: "QZMGHOST|base64" 형태도 그대로 지원
+            if (data.startsWith("QZMGHOST|")) {
+                const raw = data.split("|")[1];
+                const json = atob(raw);
+                return JSON.parse(json);
+            }
+
+            return null;
+        } catch (err) {
+            console.error("[Ghost Payload] parse error", err);
+            return null;
+        }
+    }
+
+    function handleGhostPayload(data) {
+        const ghost = parseGhostFromData(data);
+        if (!ghost) {
+            showAlert("인식 실패", "퀴즈몬 고스트 QR 코드가 아닙니다.");
+            return;
+        }
+        startGhostBattle(ghost);
+    }
+
     function updateResUI() {
         const p = getPoints().toLocaleString(), t = getTickets().toLocaleString();
         document.getElementById("pointsTextLobby").textContent = p;
@@ -806,9 +987,12 @@
             return;
         }
 
-        const normal = list.filter(r => !r.kind || r.kind === "adventure")
+        const normal = list
+            .filter((r) => !r.kind || r.kind === "adventure")
             .sort((a, b) => (b.stage || 0) - (a.stage || 0));
-        const ghost  = list.filter(r => r.kind === "ghost")
+
+        const ghost = list
+            .filter((r) => r.kind === "ghost")
             .sort((a, b) => (b.ts || 0) - (a.ts || 0));
 
         // 🟡 일반 모험 기록
@@ -821,19 +1005,35 @@
             normal.forEach((rec, idx) => {
                 const div = document.createElement("div");
                 div.className = "hof-item border-2 rounded-xl p-3 flex items-center gap-3 relative";
-                div.innerHTML =
-                    `<div class="font-black text-2xl w-8 text-center text-slate-400 italic">#${idx+1}</div>
-                     <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-slate-200">
-                     <div class="flex-1">
-                       <div class="font-bold text-slate-800">
-                         ${rec.name}
-                         <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
-                       </div>
-                       <div class="text-xs text-slate-600">
-                         최종 스테이지:
-                         <span class="text-red-500 font-bold text-base">${rec.stage}</span>
-                       </div>
-                     </div>`;
+                div.innerHTML = `
+                <div class="font-black text-2xl w-8 text-center text-slate-400 italic">#${idx + 1}</div>
+                <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-slate-200">
+                <div class="flex-1">
+                    <div class="font-bold text-slate-800">
+                        ${rec.name}
+                        <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
+                    </div>
+                    <div class="text-xs text-slate-600">
+                        최종 스테이지:
+                        <span class="text-red-500 font-bold text-base">${rec.stage}</span>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="hof-export-btn absolute right-3 top-3 text-[10px] px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200"
+                >
+                    QR
+                </button>
+            `;
+
+                const btn = div.querySelector(".hof-export-btn");
+                if (btn) {
+                    btn.addEventListener("click", (ev) => {
+                        ev.stopPropagation();
+                        openGhostModalFromHof(rec);   // ✅ 이 기록을 고스트 QR로 공유
+                    });
+                }
+
                 container.appendChild(div);
             });
         }
@@ -848,27 +1048,29 @@
             ghost.forEach((rec, idx) => {
                 const div = document.createElement("div");
                 div.className = "hof-item border-2 border-purple-300 rounded-xl p-3 flex items-center gap-3 relative bg-purple-50/40";
-                div.innerHTML =
-                    `<div class="font-black text-2xl w-8 text-center text-purple-400 italic">#${idx+1}</div>
-                     <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-purple-200">
-                     <div class="flex-1">
-                       <div class="font-bold text-slate-800">
-                         ${rec.name}
-                         <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
-                       </div>
-                       <div class="text-xs text-slate-600">
-                         상대:
-                         <span class="font-bold text-purple-600">${rec.ghostName || "알 수 없음"}</span>
-                         <span class="text-[11px] text-slate-500 ml-1">Lv.${rec.ghostLevel || "?"}</span>
-                       </div>
-                       <div class="text-[11px] text-slate-500 mt-0.5">
-                         기록 스테이지: <span class="font-semibold">${rec.stage ?? "-"}</span>
-                       </div>
-                     </div>`;
+                div.innerHTML = `
+                <div class="font-black text-2xl w-8 text-center text-purple-400 italic">#${idx + 1}</div>
+                <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-purple-200">
+                <div class="flex-1">
+                    <div class="font-bold text-slate-800">
+                        ${rec.name}
+                        <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
+                    </div>
+                    <div class="text-xs text-slate-600">
+                        상대:
+                        <span class="font-bold text-purple-600">${rec.ghostName || "알 수 없음"}</span>
+                        <span class="text-[11px] text-slate-500 ml-1">Lv.${rec.ghostLevel || "?"}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">
+                        기록 스테이지: <span class="font-semibold">${rec.stage ?? "-"}</span>
+                    </div>
+                </div>
+            `;
                 container.appendChild(div);
             });
         }
     }
+
 
     /* =========================================
      * BATTLE SYSTEM (Updated)
@@ -1238,10 +1440,12 @@
         if (isGhost) {
             addHoF({
                 kind: "ghost",
+                speciesId: battleState.player.id,       // 추가
+                level: battleState.player.level,        // 추가
                 name: battleState.player.name,
                 sprite: battleState.player.sprite,
                 stage: battleState.stage,               // 참고용
-                ghostName: battleState.enemy.name,      // 누구를 이겼는지
+                ghostName: battleState.enemy.name,
                 ghostLevel: battleState.enemy.level,
                 date: new Date().toLocaleDateString(),
             });
@@ -1256,6 +1460,19 @@
             document.getElementById("lobbyScreen").classList.add("active");
             updateResUI();
             return;
+        }else {
+            // ✅ 여기만 이렇게 수정
+            addHoF({
+                kind: "adventure",
+                speciesId: battleState.player.id,       // 추가
+                level: battleState.player.level,        // 추가
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                stage: battleState.stage,
+                date: new Date().toLocaleDateString(),
+            });
+
+            alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
         }
 
         // 👇 여기부터는 기존 '모험 모드' 보상 모달 유지
@@ -1321,14 +1538,17 @@
                 `다시 도전해 보세요!`
             );
         } else {
-            // 일반 모험은 기존처럼 HoF에 스테이지 기록
+            // 일반 모험은 HoF에 기록 + 종/레벨 정보까지 같이 저장
             addHoF({
                 kind: "adventure",
                 name: battleState.player.name,
                 sprite: battleState.player.sprite,
+                speciesId: battleState.player.id,      // ✅ 어떤 포켓몬인지
+                level: battleState.player.level,       // ✅ 몇 레벨이었는지
                 stage: battleState.stage,
                 date: new Date().toLocaleDateString(),
             });
+
             alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
         }
 
@@ -1469,6 +1689,16 @@
         const ghostScanStopBtn = document.getElementById("ghostScanStopBtn");
         if (ghostScanStartBtn) ghostScanStartBtn.onclick = () => startGhostScan();
         if (ghostScanStopBtn) ghostScanStopBtn.onclick = () => stopGhostScan();
+
+        const urlGhost = parseGhostFromData(window.location.href);
+        if (urlGhost) {
+            // 일단 전역에 보관해 두고, 스타터를 고른 순간 물어보도록 함
+            window.__pendingGhost = urlGhost;
+            alert(
+                "고스트 배틀 초대 링크입니다!\n" +
+                "먼저 스타터를 선택하면, 바로 이 고스트에게 도전할 수 있어요."
+            );
+        }
     };
 </script>
 </body>
