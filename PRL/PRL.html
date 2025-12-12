@@ -34,6 +34,8 @@
         .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800 select-none">
 
@@ -72,18 +74,47 @@
 
         <div class="grid grid-cols-2 gap-3">
             <button id="lobbyCodexBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-emerald-400 transition-colors group">
-                <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-8 h-8 pixel-art opacity-80"></div>
-                <div class="text-center"><div class="font-bold text-slate-700">스타터 선택</div><div class="text-[10px] text-slate-400">모험 준비</div></div>
+                <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-8 h-8 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-slate-700">스타터 선택</div>
+                    <div class="text-[10px] text-slate-400">모험 준비</div>
+                </div>
             </button>
+
             <button id="lobbyGachaBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-indigo-400 transition-colors group">
-                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100"><img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-8 h-8 pixel-art opacity-80"></div>
-                <div class="text-center"><div class="font-bold text-slate-700">몬스터 소환</div><div class="text-[10px] text-slate-400">동료 영입</div></div>
+                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-8 h-8 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-slate-700">몬스터 소환</div>
+                    <div class="text-[10px] text-slate-400">동료 영입</div>
+                </div>
             </button>
-            <button id="lobbyHofBtn" class="col-span-2 bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-yellow-400 transition-colors group">
-                <div class="w-10 h-10 bg-yellow-50 rounded-full flex items-center justify-center group-hover:bg-yellow-100"><span class="text-xl">🏆</span></div>
-                <div class="text-left"><div class="font-bold text-slate-700">명예의 전당</div><div class="text-[10px] text-slate-400">역대 최고 기록 보기</div></div>
+
+            <button id="lobbyHofBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-yellow-400 transition-colors group">
+                <div class="w-10 h-10 bg-yellow-50 rounded-full flex items-center justify-center group-hover:bg-yellow-100">
+                    <span class="text-xl">🏆</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">명예의 전당</div>
+                    <div class="text-[10px] text-slate-400">역대 최고 기록 보기</div>
+                </div>
+            </button>
+
+            <!-- 👻 고스트 배틀 버튼 추가 -->
+            <button id="lobbyGhostBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-purple-400 transition-colors group">
+                <div class="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center group-hover:bg-purple-100">
+                    <span class="text-xl">👻</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">친구와 배틀</div>
+                    <div class="text-[10px] text-slate-400">QR 공유 / 스캔 대결</div>
+                </div>
             </button>
         </div>
+
 
         <div class="bg-slate-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden mt-2">
             <div class="relative z-10 flex justify-between items-center">
@@ -183,6 +214,77 @@
         <p class="text-center text-[10px] text-slate-400">* 중복 획득 시 시작 경험치(잠재력)가 상승합니다.</p>
     </div>
 </div>
+
+<!-- 👻 고스트 배틀 모달 -->
+<div id="ghostModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[55] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800">👻 고스트 배틀</h3>
+            <button id="ghostClose" class="text-slate-400 text-xs font-bold">닫기</button>
+        </div>
+
+        <!-- 탭 버튼 -->
+        <div class="flex gap-2 px-4 pt-3">
+            <button
+                    id="ghostTabMyBtn"
+                    class="flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-800 text-white"
+            >
+                내 QR 공유
+            </button>
+            <button
+                    id="ghostTabScanBtn"
+                    class="flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-100 text-slate-500"
+            >
+                스캔해서 도전
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 text-slate-800 text-sm">
+            <!-- 내 QR 탭 -->
+            <div id="ghostMyPane">
+                <p id="ghostMySummary" class="text-[11px] text-slate-500 mb-3 break-keep">
+                    현재 스타터 정보를 QR 코드로 만들어서 다른 기기에서 스캔하면,
+                    내 포켓몬과 고스트 배틀을 할 수 있습니다.
+                </p>
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 flex flex-col items-center justify-center py-4">
+                    <canvas id="ghostQrCanvas" class="bg-white rounded-xl p-2"></canvas>
+                    <p class="mt-2 text-[10px] text-slate-400 text-center leading-relaxed">
+                        다른 기기에서 이 QR을 카메라로 비추면<br />
+                        내 포켓몬과의 고스트 배틀이 시작됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 스캔 탭 -->
+            <div id="ghostScanPane" class="hidden">
+                <p class="text-[11px] text-slate-500 mb-2 break-keep">
+                    카메라 사용을 허용한 뒤, 친구의 폰에 띄워진 고스트 QR을 비춰 보세요.
+                </p>
+                <div class="bg-black rounded-2xl overflow-hidden mb-2">
+                    <video id="ghostVideo" class="w-full h-48 object-cover bg-black"></video>
+                </div>
+                <p id="ghostScanStatus" class="text-[11px] text-slate-500 mb-3">
+                    대기 중...
+                </p>
+                <button
+                        id="ghostScanStartBtn"
+                        class="w-full py-2.5 rounded-xl bg-slate-800 text-white text-xs font-bold"
+                >
+                    스캔 시작
+                </button>
+                <button
+                        id="ghostScanStopBtn"
+                        class="w-full py-2 mt-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold"
+                >
+                    스캔 종료
+                </button>
+                <!-- 비표시용 캔버스 (프레임 캡쳐용) -->
+                <canvas id="ghostScanCanvas" class="hidden"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <div id="quizModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="bg-slate-800 p-4 text-white flex justify-between items-center"><h3 class="font-bold text-lg">📝 수학 퀴즈</h3><span class="text-xs bg-slate-700 px-2 py-1 rounded text-yellow-300">정답 시 공격</span></div><div class="p-6"><div class="text-center mb-6"><p class="text-3xl font-black text-slate-800 tracking-wider" id="quizQuestion">?</p></div><div id="quizChoices" class="grid grid-cols-2 gap-3"></div></div><div class="bg-slate-50 p-3 text-center border-t"><button id="quizCancel" class="text-xs text-slate-400 underline">포기하기</button></div></div></div>
 <div id="rewardModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"><h3 class="text-2xl font-black text-slate-800 mb-2">VICTORY!</h3><div class="text-xs text-sky-600 font-bold mb-4 bg-sky-50 inline-block px-3 py-1 rounded-full">EXP <span id="rewardXpVal">0</span> 획득!</div><p class="text-sm text-slate-500 mb-2" id="rewardTitle">보상을 선택하세요</p><div class="grid grid-cols-1 gap-3" id="rewardButtons"></div></div></div>
@@ -391,6 +493,9 @@
     let battleState = null;
     let quizCallback = null;
 
+    let ghostScanStream = null;
+    let ghostScanFrameId = null;
+    
     function getPoints() { return parseInt(localStorage.getItem(LS_KEY.POINTS) || "1000", 10); }
     function setPoints(n) { localStorage.setItem(LS_KEY.POINTS, Math.max(0, n)); updateResUI(); }
     function addPoints(n) { setPoints(getPoints() + n); }
@@ -404,9 +509,240 @@
     function getStarterId() { return parseInt(localStorage.getItem(LS_KEY.PARTNER) || "0"); }
     function setStarterId(id) { localStorage.setItem(LS_KEY.PARTNER, id); updateLobbyPartner(); }
     function getHoF() { try { return JSON.parse(localStorage.getItem(LS_KEY.HOF) || "[]"); } catch { return []; } }
+    // 변경 후: 모드(kind) 포함 + 정렬 안전하게
     function addHoF(record) {
-        const list = getHoF(); list.push(record); list.sort((a,b) => b.stage - a.stage);
-        localStorage.setItem(LS_KEY.HOF, JSON.stringify(list.slice(0, 5)));
+        const list = getHoF();
+
+        const enriched = {
+            kind: record.kind || "adventure",   // 기본은 일반 모험
+            ts: record.ts || Date.now(),        // 타임스탬프(정렬용)
+            ...record,
+        };
+
+        list.push(enriched);
+
+        // 기본 정렬 기준: 스테이지 높은 순 (없으면 0)
+        list.sort((a, b) => (b.stage || 0) - (a.stage || 0));
+
+        // 필요시 10개 정도까지 저장
+        localStorage.setItem(LS_KEY.HOF, JSON.stringify(list.slice(0, 10)));
+    }
+
+
+    // 👻 고스트 배틀용: 내 스타터 정보를 QR에 담기
+    function buildGhostPayload() {
+        const pid = getStarterId();
+        if (!pid) {
+            showAlert("스타터 없음", "먼저 스타터를 선택해 주세요.");
+            return null;
+        }
+
+        const info = getPokeInfo(pid);
+        const charData = getCharData()[pid];
+        const dupes = getDupes()[pid] || 0;
+
+        let level = 1 + dupes;
+        let xp = 0;
+
+        if (charData) {
+            if (typeof charData.level === "number") level = charData.level;
+            if (typeof charData.xp === "number") xp = charData.xp;
+        }
+
+        // 같은 이름의 포켓몬 중 최고 스테이지 기록 (없으면 0)
+        const hofList = getHoF();
+        let bestStage = 0;
+        hofList.forEach((rec) => {
+            if (rec.name === info.name && rec.stage > bestStage) {
+                bestStage = rec.stage;
+            }
+        });
+
+        const ghost = {
+            v: 1,
+            game: "QuizMonPRL",
+            speciesId: pid,
+            name: info.name,
+            level,
+            xp,
+            bestStage,
+            ts: Date.now(),
+        };
+
+        const encoded = "QZMGHOST|" + btoa(JSON.stringify(ghost));
+        return { ghost, encoded };
+    }
+
+    // 👻 내 QR 탭 업데이트 (요약 + QR 생성)
+    function refreshGhostMyPane() {
+        const summaryEl = document.getElementById("ghostMySummary");
+        const canvas = document.getElementById("ghostQrCanvas");
+
+        if (!summaryEl || !canvas) return;
+
+        const pid = getStarterId();
+        if (!pid) {
+            summaryEl.textContent = "스타터가 없습니다. 먼저 스타터를 하나 선택해 주세요.";
+            const ctx = canvas.getContext("2d");
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            return;
+        }
+
+        const info = getPokeInfo(pid);
+        const payload = buildGhostPayload();
+        if (!payload) return;
+
+        const { ghost, encoded } = payload;
+        summaryEl.textContent = `${ghost.name} Lv.${ghost.level} (최고 스테이지 ${ghost.bestStage || "-"}). 이 정보를 QR로 공유합니다.`;
+
+        if (window.QRCode && typeof QRCode.toCanvas === "function") {
+            QRCode.toCanvas(
+                canvas,
+                encoded,
+                { width: 220, margin: 1 },
+                (err) => {
+                    if (err) console.error("[Ghost QR] 생성 오류", err);
+                },
+            );
+        } else {
+            console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.");
+        }
+    }
+
+    // 👻 고스트 모달 탭 전환
+    function switchGhostTab(mode) {
+        const myPane = document.getElementById("ghostMyPane");
+        const scanPane = document.getElementById("ghostScanPane");
+        const myBtn = document.getElementById("ghostTabMyBtn");
+        const scanBtn = document.getElementById("ghostTabScanBtn");
+        if (!myPane || !scanPane || !myBtn || !scanBtn) return;
+
+        if (mode === "scan") {
+            myPane.classList.add("hidden");
+            scanPane.classList.remove("hidden");
+            myBtn.classList.remove("bg-slate-800", "text-white");
+            scanBtn.classList.add("bg-slate-800", "text-white");
+        } else {
+            myPane.classList.remove("hidden");
+            scanPane.classList.add("hidden");
+            scanBtn.classList.remove("bg-slate-800", "text-white");
+            myBtn.classList.add("bg-slate-800", "text-white");
+            stopGhostScan();
+        }
+    }
+
+    function openGhostModal() {
+        const modal = document.getElementById("ghostModal");
+        if (!modal) return;
+        modal.classList.remove("hidden");
+        switchGhostTab("my");
+        refreshGhostMyPane();
+    }
+
+    function closeGhostModal() {
+        const modal = document.getElementById("ghostModal");
+        if (!modal) return;
+        stopGhostScan();
+        modal.classList.add("hidden");
+    }
+
+    // 👻 카메라 스캔 종료
+    function stopGhostScan() {
+        if (ghostScanFrameId) {
+            cancelAnimationFrame(ghostScanFrameId);
+            ghostScanFrameId = null;
+        }
+        if (ghostScanStream) {
+            ghostScanStream.getTracks().forEach((t) => t.stop());
+            ghostScanStream = null;
+        }
+        const video = document.getElementById("ghostVideo");
+        if (video) {
+            video.srcObject = null;
+        }
+    }
+
+    // 👻 카메라 스캔 시작
+    async function startGhostScan() {
+        const statusEl = document.getElementById("ghostScanStatus");
+        const video = document.getElementById("ghostVideo");
+
+        if (!statusEl || !video) return;
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            statusEl.textContent = "이 브라우저에서는 카메라 사용을 지원하지 않습니다.";
+            return;
+        }
+
+        try {
+            statusEl.textContent = "카메라 준비 중...";
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+            });
+            ghostScanStream = stream;
+            video.srcObject = stream;
+            video.setAttribute("playsinline", "true");
+            await video.play();
+            statusEl.textContent = "QR 코드에 카메라를 가져가 주세요.";
+            ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+        } catch (err) {
+            console.error("[Ghost Scan] 카메라 오류", err);
+            statusEl.textContent = "카메라 접근 실패: " + (err.message || err);
+        }
+    }
+
+    // 👻 프레임마다 QR 코드를 찾는 루프
+    function tickGhostScan() {
+        const video = document.getElementById("ghostVideo");
+        const canvas = document.getElementById("ghostScanCanvas");
+        const statusEl = document.getElementById("ghostScanStatus");
+
+        if (!video || !canvas || !statusEl || !ghostScanStream) return;
+
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+
+        if (!w || !h) {
+            ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+            return;
+        }
+
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+
+        if (typeof jsQR === "function") {
+            const code = jsQR(imageData.data, w, h);
+            if (code && code.data) {
+                statusEl.textContent = "QR 인식 완료!";
+                handleGhostPayload(code.data);
+                stopGhostScan();
+                return;
+            }
+        } else {
+            console.warn("[Ghost Scan] jsQR 라이브러리를 찾을 수 없습니다.");
+        }
+
+        ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+    }
+
+    // 👻 QR에 담긴 문자열 해석
+    function handleGhostPayload(data) {
+        try {
+            if (typeof data !== "string" || !data.startsWith("QZMGHOST|")) {
+                showAlert("인식 실패", "퀴즈몬 고스트 QR 코드가 아닙니다.");
+                return;
+            }
+            const raw = data.split("|")[1];
+            const json = atob(raw);
+            const ghost = JSON.parse(json);
+            startGhostBattle(ghost);
+        } catch (e) {
+            console.error("[Ghost Payload] 오류", e);
+            showAlert("오류", "QR 데이터 해석 중 문제가 발생했습니다.");
+        }
     }
 
     function updateResUI() {
@@ -461,14 +797,77 @@
     }
 
     function renderHoF() {
-        const list = getHoF(), container = document.getElementById("hofList"); container.innerHTML = "";
-        if(list.length === 0) { container.innerHTML = '<p class="text-center text-slate-400 py-10">기록이 없습니다.</p>'; return; }
-        list.forEach((rec, idx) => {
-            const div = document.createElement("div");
-            div.className = "hof-item border-2 rounded-xl p-3 flex items-center gap-3 relative";
-            div.innerHTML = `<div class="font-black text-2xl w-8 text-center text-slate-400 italic">#${idx+1}</div><img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-slate-200"><div class="flex-1"><div class="font-bold text-slate-800">${rec.name} <span class="text-xs font-normal text-slate-500">(${rec.date})</span></div><div class="text-xs text-slate-600">최종 스테이지: <span class="text-red-500 font-bold text-base">${rec.stage}</span></div></div>`;
-            container.appendChild(div);
-        });
+        const list = getHoF();
+        const container = document.getElementById("hofList");
+        container.innerHTML = "";
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-400 py-10">기록이 없습니다.</p>';
+            return;
+        }
+
+        const normal = list.filter(r => !r.kind || r.kind === "adventure")
+            .sort((a, b) => (b.stage || 0) - (a.stage || 0));
+        const ghost  = list.filter(r => r.kind === "ghost")
+            .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+        // 🟡 일반 모험 기록
+        if (normal.length > 0) {
+            const header = document.createElement("div");
+            header.className = "text-xs font-bold text-slate-500 mt-1 mb-2 flex items-center gap-1";
+            header.innerHTML = '<span>🌟 일반 모험 기록</span>';
+            container.appendChild(header);
+
+            normal.forEach((rec, idx) => {
+                const div = document.createElement("div");
+                div.className = "hof-item border-2 rounded-xl p-3 flex items-center gap-3 relative";
+                div.innerHTML =
+                    `<div class="font-black text-2xl w-8 text-center text-slate-400 italic">#${idx+1}</div>
+                     <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-slate-200">
+                     <div class="flex-1">
+                       <div class="font-bold text-slate-800">
+                         ${rec.name}
+                         <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
+                       </div>
+                       <div class="text-xs text-slate-600">
+                         최종 스테이지:
+                         <span class="text-red-500 font-bold text-base">${rec.stage}</span>
+                       </div>
+                     </div>`;
+                container.appendChild(div);
+            });
+        }
+
+        // 👻 고스트 승리 기록
+        if (ghost.length > 0) {
+            const header = document.createElement("div");
+            header.className = "text-xs font-bold text-slate-500 mt-4 mb-2 flex items-center gap-1";
+            header.innerHTML = '<span>👻 고스트 승리 기록</span>';
+            container.appendChild(header);
+
+            ghost.forEach((rec, idx) => {
+                const div = document.createElement("div");
+                div.className = "hof-item border-2 border-purple-300 rounded-xl p-3 flex items-center gap-3 relative bg-purple-50/40";
+                div.innerHTML =
+                    `<div class="font-black text-2xl w-8 text-center text-purple-400 italic">#${idx+1}</div>
+                     <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-purple-200">
+                     <div class="flex-1">
+                       <div class="font-bold text-slate-800">
+                         ${rec.name}
+                         <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
+                       </div>
+                       <div class="text-xs text-slate-600">
+                         상대:
+                         <span class="font-bold text-purple-600">${rec.ghostName || "알 수 없음"}</span>
+                         <span class="text-[11px] text-slate-500 ml-1">Lv.${rec.ghostLevel || "?"}</span>
+                       </div>
+                       <div class="text-[11px] text-slate-500 mt-0.5">
+                         기록 스테이지: <span class="font-semibold">${rec.stage ?? "-"}</span>
+                       </div>
+                     </div>`;
+                container.appendChild(div);
+            });
+        }
     }
 
     /* =========================================
@@ -497,7 +896,8 @@
         const startMoves = getRandomMoves(info.type.name, 2, 'C');
 
         battleState = {
-            stage: 1, // 스테이지는 1부터 다시 시작
+            mode: "adventure",
+            stage: 1,
             player: {
                 id: pid, name: info.name, sprite: info.sprite, type: info.type.name,
                 level: level, xp: xp,
@@ -508,10 +908,90 @@
             },
             cooldowns: [0, 0]
         };
+
         startBattleStage();
         document.getElementById("titleScreen").classList.remove("active");
         document.getElementById("codexScreen").classList.remove("active");
         document.getElementById("battleScreen").classList.add("active");
+    }
+
+    // 👻 고스트 배틀: 내 스타터 vs QR에서 읽은 고스트
+    function startGhostBattle(ghost) {
+        const pid = getStarterId();
+        if (!pid) {
+            showAlert("스타터 없음", "먼저 내 스타터를 하나 선택해 주세요.");
+            return;
+        }
+
+        const myInfo = getPokeInfo(pid);
+        const myCharData = getCharData()[pid];
+        const myDupes = getDupes()[pid] || 0;
+
+        let myLevel = 1 + myDupes;
+        let myXp = 0;
+        if (myCharData) {
+            if (typeof myCharData.level === "number") myLevel = myCharData.level;
+            if (typeof myCharData.xp === "number") myXp = myCharData.xp;
+        }
+
+        const myStats = calcStats(myInfo.base, myLevel);
+        // 내 쪽은 SR 등급까지 기술 2개 랜덤
+        const myMoves = getRandomMoves(myInfo.type.name, 2, "SR");
+
+        const enemyInfo = getPokeInfo(ghost.speciesId || ghost.id || 1);
+        const enemyLevel = ghost.level || 1;
+        const enemyStats = calcStats(enemyInfo.base, enemyLevel);
+        // 상대는 UR까지 1개 기술 랜덤
+        const enemyMoves = getRandomMoves(enemyInfo.type.name, 1, "UR");
+
+        battleState = {
+            mode: "ghost",
+            stage: 1,
+            player: {
+                id: pid,
+                name: myInfo.name,
+                sprite: myInfo.sprite,
+                type: myInfo.type.name,
+                level: myLevel,
+                xp: myXp,
+                maxHp: myStats.maxHp,
+                hp: myStats.maxHp,
+                atk: myStats.atk,
+                def: myStats.def,
+                spa: myStats.spa,
+                spd: myStats.spd,
+                spe: myStats.spe,
+                base: myInfo.base,
+                moves: myMoves,
+            },
+            enemy: {
+                id: enemyInfo.id,
+                name: ghost.name || enemyInfo.name,
+                sprite: enemyInfo.sprite,
+                type: ghost.type || enemyInfo.type.name,
+                level: enemyLevel,
+                maxHp: enemyStats.maxHp,
+                hp: enemyStats.maxHp,
+                atk: enemyStats.atk,
+                def: enemyStats.def,
+                spa: enemyStats.spa,
+                spd: enemyStats.spd,
+                spe: enemyStats.spe,
+                move: enemyMoves[0],
+                isBoss: true,
+            },
+            cooldowns: [0, 0],
+        };
+
+        // 화면 전환
+        closeGhostModal();
+        document.getElementById("titleScreen").classList.remove("active");
+        document.getElementById("lobbyScreen").classList.remove("active");
+        document.getElementById("codexScreen").classList.remove("active");
+        document.getElementById("battleScreen").classList.add("active");
+
+        updateBattleUI();
+        logBattle(`QR 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 도전!`, "critical");
     }
 
     function startBattleStage() {
@@ -719,7 +1199,13 @@
     }
 
     function handleWin() {
-        if(battleState.enemy.isBoss) { addTickets(1); alert("✨ 전설 승리! [황금 티켓] 획득!"); }
+        const isGhost = battleState.mode === "ghost";
+
+        if(battleState.enemy.isBoss) {
+            addTickets(1);
+            alert("✨ 전설 승리! [황금 티켓] 획득!");
+        }
+
         const s = battleState.stage;
         const pt = Math.floor(50 + (s * 10) + (s * s * 0.5));
         const xp = 50 + (s * 10);
@@ -745,25 +1231,56 @@
             lvUp = true;
         }
 
-        // [추가] 승리할 때마다 레벨/XP 진행상황 영구 저장
+        // 진행도 저장(공통)
         saveCurrentPlayerProgress();
 
+        // 👻 고스트 모드 전용 처리
+        if (isGhost) {
+            addHoF({
+                kind: "ghost",
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                stage: battleState.stage,               // 참고용
+                ghostName: battleState.enemy.name,      // 누구를 이겼는지
+                ghostLevel: battleState.enemy.level,
+                date: new Date().toLocaleDateString(),
+            });
+
+            alert(
+                `고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 승리!\n` +
+                `+${pt} P / EXP ${xp}${lvUp ? " (레벨 업!)" : ""}`
+            );
+
+            // 고스트는 한 판 승부 느낌으로 바로 로비 복귀
+            document.getElementById("battleScreen").classList.remove("active");
+            document.getElementById("lobbyScreen").classList.add("active");
+            updateResUI();
+            return;
+        }
+
+        // 👇 여기부터는 기존 '모험 모드' 보상 모달 유지
         document.getElementById("rewardXpVal").textContent = `${xp}${lvUp?' & Level Up!':''}`;
         const grid = document.getElementById("rewardButtons"); grid.innerHTML = "";
         const isFullSlots = battleState.player.moves.length >= 4;
 
-        [{ t: `포인트 +${pt} P`, d: "가챠 재화", f: () => { nextStage(); }},
-            { t: "완전 회복", d: "HP 100%", f: () => { battleState.player.hp = battleState.player.maxHp; nextStage(); }},
-            { t: "기술 머신", d: isFullSlots ? "스킬 1개 교체" : "스킬 추가 습득", f: () => { if(isFullSlots) showSkillReplaceUI(); else addNewSkill(); }}]
-            .forEach(r => {
-                const btn = document.createElement("button");
-                btn.className = "w-full py-3 bg-slate-100 hover:bg-indigo-50 border rounded-xl flex justify-between px-4 items-center";
-                btn.innerHTML = `<span class="font-bold text-sm">${r.t}</span><span class="text-xs text-slate-500">${r.d}</span>`;
-                btn.onclick = () => { if(r.t !== "기술 머신") document.getElementById("rewardModal").classList.add("hidden"); r.f(); };
-                grid.appendChild(btn);
-            });
+        [
+            { t: `포인트 +${pt} P`, d: "가챠 재화", f: () => { nextStage(); } },
+            { t: "완전 회복", d: "HP 100%", f: () => { battleState.player.hp = battleState.player.maxHp; nextStage(); } },
+            { t: "기술 머신", d: isFullSlots ? "스킬 1개 교체" : "스킬 추가 습득", f: () => { if(isFullSlots) showSkillReplaceUI(); else addNewSkill(); } }
+        ].forEach(r => {
+            const btn = document.createElement("button");
+            btn.className = "w-full py-3 bg-slate-100 hover:bg-indigo-50 border rounded-xl flex justify-between px-4 items-center";
+            btn.innerHTML = `<span class="font-bold text-sm">${r.t}</span><span class="text-xs text-slate-500">${r.d}</span>`;
+            btn.onclick = () => {
+                if(r.t !== "기술 머신") document.getElementById("rewardModal").classList.add("hidden");
+                r.f();
+            };
+            grid.appendChild(btn);
+        });
+
         document.getElementById("rewardModal").classList.remove("hidden");
     }
+
 
     function addNewSkill() {
         const newMove = getRandomMoves(battleState.player.type, 1)[0];
@@ -797,12 +1314,29 @@
 
     function nextStage() { battleState.stage++; startBattleStage(); }
     function handleDefeat() {
-        addHoF({ name: battleState.player.name, sprite: battleState.player.sprite, stage: battleState.stage, date: new Date().toLocaleDateString() });
-        alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
+        if (battleState.mode === "ghost") {
+            // 고스트 패배는 기록만 안 남기고 안내만
+            alert(
+                `패배... 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 졌습니다.\n` +
+                `다시 도전해 보세요!`
+            );
+        } else {
+            // 일반 모험은 기존처럼 HoF에 스테이지 기록
+            addHoF({
+                kind: "adventure",
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                stage: battleState.stage,
+                date: new Date().toLocaleDateString(),
+            });
+            alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
+        }
+
         document.getElementById("battleScreen").classList.remove("active");
         document.getElementById("lobbyScreen").classList.add("active");
         updateResUI();
     }
+
 
     function openQuiz(cb) {
         quizCallback = cb;
@@ -914,6 +1448,27 @@
         document.getElementById("quizCancel").onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(false); };
         document.getElementById("lobbyHofBtn").onclick = () => { renderHoF(); document.getElementById("hofModal").classList.remove("hidden"); };
         document.getElementById("hofClose").onclick = () => document.getElementById("hofModal").classList.add("hidden");
+
+        // 👻 고스트 배틀 버튼
+        const ghostBtn = document.getElementById("lobbyGhostBtn");
+        if (ghostBtn) {
+            ghostBtn.onclick = () => openGhostModal();
+        }
+
+        const ghostClose = document.getElementById("ghostClose");
+        if (ghostClose) {
+            ghostClose.onclick = () => closeGhostModal();
+        }
+
+        const ghostTabMyBtn = document.getElementById("ghostTabMyBtn");
+        const ghostTabScanBtn = document.getElementById("ghostTabScanBtn");
+        if (ghostTabMyBtn) ghostTabMyBtn.onclick = () => switchGhostTab("my");
+        if (ghostTabScanBtn) ghostTabScanBtn.onclick = () => switchGhostTab("scan");
+
+        const ghostScanStartBtn = document.getElementById("ghostScanStartBtn");
+        const ghostScanStopBtn = document.getElementById("ghostScanStopBtn");
+        if (ghostScanStartBtn) ghostScanStartBtn.onclick = () => startGhostScan();
+        if (ghostScanStopBtn) ghostScanStopBtn.onclick = () => stopGhostScan();
     };
 </script>
 </body>
