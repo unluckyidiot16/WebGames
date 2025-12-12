@@ -871,23 +871,6 @@
         ghostScanFrameId = requestAnimationFrame(tickGhostScan);
     }
 
-    // 👻 QR에 담긴 문자열 해석
-    function handleGhostPayload(data) {
-        try {
-            if (typeof data !== "string" || !data.startsWith("QZMGHOST|")) {
-                showAlert("인식 실패", "퀴즈몬 고스트 QR 코드가 아닙니다.");
-                return;
-            }
-            const raw = data.split("|")[1];
-            const json = atob(raw);
-            const ghost = JSON.parse(json);
-            startGhostBattle(ghost);
-        } catch (e) {
-            console.error("[Ghost Payload] 오류", e);
-            showAlert("오류", "QR 데이터 해석 중 문제가 발생했습니다.");
-        }
-    }
-
     // 👻 문자열에서 고스트 정보 꺼내기
     function parseGhostFromData(data) {
         if (typeof data !== "string") return null;
@@ -1403,7 +1386,7 @@
     function handleWin() {
         const isGhost = battleState.mode === "ghost";
 
-        if(battleState.enemy.isBoss) {
+        if (battleState.enemy.isBoss) {
             addTickets(1);
             alert("✨ 전설 승리! [황금 티켓] 획득!");
         }
@@ -1412,84 +1395,97 @@
         const pt = Math.floor(50 + (s * 10) + (s * s * 0.5));
         const xp = 50 + (s * 10);
 
-        addPoints(pt);
+        // ✅ 공통: EXP만 먼저 지급
         battleState.player.xp += xp;
 
         let lvUp = false;
-        if(battleState.player.xp >= battleState.player.level * 100) {
+        if (battleState.player.xp >= battleState.player.level * 100) {
             battleState.player.xp -= battleState.player.level * 100;
             battleState.player.level++;
 
-            // 레벨업 시 스탯 재계산
             const newStats = calcStats(battleState.player.base, battleState.player.level);
             battleState.player.maxHp = newStats.maxHp;
-            battleState.player.atk = newStats.atk;
-            battleState.player.def = newStats.def;
-            battleState.player.spa = newStats.spa;
-            battleState.player.spd = newStats.spd;
-            battleState.player.spe = newStats.spe;
+            battleState.player.atk    = newStats.atk;
+            battleState.player.def    = newStats.def;
+            battleState.player.spa    = newStats.spa;
+            battleState.player.spd    = newStats.spd;
+            battleState.player.spe    = newStats.spe;
+            battleState.player.hp     = battleState.player.maxHp;
 
-            battleState.player.hp = battleState.player.maxHp;
             lvUp = true;
         }
 
-        // 진행도 저장(공통)
         saveCurrentPlayerProgress();
 
-        // 👻 고스트 모드 전용 처리
+        // 👻 고스트 모드 승리 처리
         if (isGhost) {
+            // 고스트 승리 기록
             addHoF({
                 kind: "ghost",
-                speciesId: battleState.player.id,       // 추가
-                level: battleState.player.level,        // 추가
+                speciesId: battleState.player.id,
+                level: battleState.player.level,
                 name: battleState.player.name,
                 sprite: battleState.player.sprite,
-                stage: battleState.stage,               // 참고용
+                stage: battleState.stage, // 참고용
                 ghostName: battleState.enemy.name,
                 ghostLevel: battleState.enemy.level,
                 date: new Date().toLocaleDateString(),
             });
+
+            // 고스트는 포인트도 바로 지급
+            addPoints(pt);
 
             alert(
                 `고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 승리!\n` +
                 `+${pt} P / EXP ${xp}${lvUp ? " (레벨 업!)" : ""}`
             );
 
-            // 고스트는 한 판 승부 느낌으로 바로 로비 복귀
             document.getElementById("battleScreen").classList.remove("active");
             document.getElementById("lobbyScreen").classList.add("active");
             updateResUI();
             return;
-        }else {
-            // ✅ 여기만 이렇게 수정
-            addHoF({
-                kind: "adventure",
-                speciesId: battleState.player.id,       // 추가
-                level: battleState.player.level,        // 추가
-                name: battleState.player.name,
-                sprite: battleState.player.sprite,
-                stage: battleState.stage,
-                date: new Date().toLocaleDateString(),
-            });
-
-            alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
         }
 
-        // 👇 여기부터는 기존 '모험 모드' 보상 모달 유지
-        document.getElementById("rewardXpVal").textContent = `${xp}${lvUp?' & Level Up!':''}`;
-        const grid = document.getElementById("rewardButtons"); grid.innerHTML = "";
+        // 🟢 일반 모험: 여기서는 "게임 오버" 안 뜨고, 보상 선택만
+        document.getElementById("rewardXpVal").textContent = `${xp}${lvUp ? ' & Level Up!' : ''}`;
+        const grid = document.getElementById("rewardButtons");
+        grid.innerHTML = "";
         const isFullSlots = battleState.player.moves.length >= 4;
 
         [
-            { t: `포인트 +${pt} P`, d: "가챠 재화", f: () => { nextStage(); } },
-            { t: "완전 회복", d: "HP 100%", f: () => { battleState.player.hp = battleState.player.maxHp; nextStage(); } },
-            { t: "기술 머신", d: isFullSlots ? "스킬 1개 교체" : "스킬 추가 습득", f: () => { if(isFullSlots) showSkillReplaceUI(); else addNewSkill(); } }
-        ].forEach(r => {
+            {
+                t: `포인트 +${pt} P`,
+                d: "가챠 재화",
+                f: () => {
+                    addPoints(pt);      // ✅ 여기서만 포인트 지급
+                    nextStage();
+                },
+            },
+            {
+                t: "완전 회복",
+                d: "HP 100%",
+                f: () => {
+                    battleState.player.hp = battleState.player.maxHp;
+                    nextStage();
+                },
+            },
+            {
+                t: "기술 머신",
+                d: isFullSlots ? "스킬 1개 교체" : "스킬 추가 습득",
+                f: () => {
+                    if (isFullSlots) showSkillReplaceUI();
+                    else addNewSkill();
+                },
+            },
+        ].forEach((r) => {
             const btn = document.createElement("button");
-            btn.className = "w-full py-3 bg-slate-100 hover:bg-indigo-50 border rounded-xl flex justify-between px-4 items-center";
+            btn.className =
+                "w-full py-3 bg-slate-100 hover:bg-indigo-50 border rounded-xl flex justify-between px-4 items-center";
             btn.innerHTML = `<span class="font-bold text-sm">${r.t}</span><span class="text-xs text-slate-500">${r.d}</span>`;
             btn.onclick = () => {
-                if(r.t !== "기술 머신") document.getElementById("rewardModal").classList.add("hidden");
+                if (r.t !== "기술 머신") {
+                    document.getElementById("rewardModal").classList.add("hidden");
+                }
                 r.f();
             };
             grid.appendChild(btn);
@@ -1497,6 +1493,7 @@
 
         document.getElementById("rewardModal").classList.remove("hidden");
     }
+
 
 
     function addNewSkill() {
@@ -1532,19 +1529,17 @@
     function nextStage() { battleState.stage++; startBattleStage(); }
     function handleDefeat() {
         if (battleState.mode === "ghost") {
-            // 고스트 패배는 기록만 안 남기고 안내만
             alert(
                 `패배... 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 졌습니다.\n` +
                 `다시 도전해 보세요!`
             );
         } else {
-            // 일반 모험은 HoF에 기록 + 종/레벨 정보까지 같이 저장
             addHoF({
                 kind: "adventure",
                 name: battleState.player.name,
                 sprite: battleState.player.sprite,
-                speciesId: battleState.player.id,      // ✅ 어떤 포켓몬인지
-                level: battleState.player.level,       // ✅ 몇 레벨이었는지
+                speciesId: battleState.player.id,
+                level: battleState.player.level,
                 stage: battleState.stage,
                 date: new Date().toLocaleDateString(),
             });
@@ -1556,6 +1551,7 @@
         document.getElementById("lobbyScreen").classList.add("active");
         updateResUI();
     }
+
 
 
     function openQuiz(cb) {
