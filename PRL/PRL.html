@@ -5,6 +5,7 @@
     <title>QuizMon: Ver 7.1 Fix</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; touch-action: manipulation; }
         .view { display: none; }
@@ -452,6 +453,20 @@
         };
     }
 
+    // 🔐 UTF-8 안전 Base64 인코더/디코더 (한글 대응)
+    function toBase64UTF8(obj) {
+        const json = typeof obj === "string" ? obj : JSON.stringify(obj);
+        // JSON 문자열을 UTF-8로 변환 후 btoa
+        return btoa(unescape(encodeURIComponent(json)));
+    }
+
+    function fromBase64UTF8(b64) {
+        // atob 결과(바이너리 문자열)를 다시 UTF-8 문자열로 복원
+        const str = decodeURIComponent(escape(atob(b64)));
+        return str;
+    }
+
+
     /* =========================================
      * STATE & LOGIC
      * ========================================= */
@@ -561,59 +576,48 @@
     }
 
 
-    // 👻 고스트 배틀용: 내 스타터 정보를 QR에 담기
     function buildGhostPayload() {
         const best = getBestAdventureRecord();
+        const charData = getCharData();
 
-        let pid;        // 사용할 포켓몬 ID
-        let level;      // 고스트 레벨
-        let bestStage;  // 명예의 전당 기준 스테이지
-        let xp = 0;
-
-        if (best && best.speciesId) {
-            // ✅ 명예의 전당 기록 우선 사용
-            pid = best.speciesId;
-            level = best.level || 1;
-            bestStage = best.stage || 0;
-
-            // 로컬에 성장 데이터가 더 있으면 살짝 보정
-            const charData = getCharData()[pid];
-            if (charData && typeof charData.level === "number") {
-                level = Math.max(level, charData.level);
+        // 1) 먼저 명예의 전당 기록을 기반으로 QR 생성 시도
+        if (best) {
+            const payloadFromBest = buildGhostPayloadFromHofRecord(best);
+            if (payloadFromBest) {
+                return payloadFromBest;
             }
-            if (charData && typeof charData.xp === "number") {
-                xp = charData.xp;
-            }
-        } else {
-            // 🔁 아직 HoF가 없다면 기존 "스타터 기반" 로직으로 fallback
-            const starterId = getStarterId();
-            if (!starterId) {
-                showAlert("공유할 기록 없음", "먼저 모험을 플레이해서 명예의 전당 기록을 남기거나, 스타터를 선택해 주세요.");
-                return null;
-            }
-
-            pid = starterId;
-            const dupes = getDupes()[pid] || 0;
-            const charData = getCharData()[pid];
-
-            level = 1 + dupes;
-            if (charData) {
-                if (typeof charData.level === "number") level = charData.level;
-                if (typeof charData.xp === "number") xp = charData.xp;
-            }
-
-            // 이 경우엔 이름 기준으로 최고 스테이지를 다시 계산
-            const infoTmp = getPokeInfo(pid);
-            const hofList = getHoF();
-            bestStage = 0;
-            hofList.forEach((rec) => {
-                if (rec.name === infoTmp.name && rec.stage > bestStage) {
-                    bestStage = rec.stage;
-                }
-            });
         }
 
+        // 2) 명예의 전당 기록이 없거나(첫 플레이),
+        //    구버전 기록이라 speciesId를 복구하지 못한 경우
+        //    → 현재 스타터 기준으로 고스트 생성
+        const starterId = getStarterId();
+        if (!starterId) {
+            showAlert(
+                "공유할 기록 없음",
+                "먼저 스타터를 선택하고 모험을 한 번 이상 플레이해 주세요."
+            );
+            return null;
+        }
+
+        const pid = starterId;
         const info = getPokeInfo(pid);
+        const dupes = getDupes()[pid] || 0;
+        const cData = charData[pid] || {};
+
+        const level = Math.max(1 + dupes, cData.level || 1);
+        const xp = cData.xp || 0;
+
+        // 이름이 같은 명예의 전당 기록들 중 최고 스테이지 찾기
+        let bestStage = 0;
+        const hofList = getHoF();
+        hofList.forEach((rec) => {
+            if (rec.name === info.name &&
+                typeof rec.stage === "number" &&
+                rec.stage > bestStage) {
+                bestStage = rec.stage;
+            }
+        });
 
         const ghost = {
             v: 1,
@@ -626,20 +630,42 @@
             ts: Date.now(),
         };
 
-        const token = btoa(JSON.stringify(ghost));
+        const token = toBase64UTF8(ghost);
         const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
-
         return { ghost, encoded: url };
     }
 
+
     function buildGhostPayloadFromHofRecord(rec) {
-        if (!rec || !rec.speciesId) {
-            // 이전 버전에서 저장된 기록에는 speciesId가 없을 수 있음
-            console.warn("[Ghost QR] HoF 기록에 speciesId가 없습니다.", rec);
+        if (!rec) return null;
+
+        let pid = rec.speciesId;
+
+        // 1) speciesId가 없으면 sprite URL에서 추출 시도
+        if (!pid && rec.sprite) {
+            try {
+                const m = rec.sprite.match(/\/(\d+)\.(png|gif|jpg|jpeg)$/);
+                if (m) {
+                    pid = parseInt(m[1], 10);
+                }
+            } catch (e) {
+                console.warn("[Ghost QR] sprite에서 id 추출 실패", e);
+            }
+        }
+
+        // 2) 그래도 없으면 이름으로 검색 (완전 일치)
+        if (!pid && rec.name) {
+            const idx = POKE_NAMES.indexOf(rec.name);
+            if (idx >= 0) {
+                pid = idx + 1;
+            }
+        }
+
+        if (!pid) {
+            console.warn("[Ghost QR] HoF 기록에서 speciesId를 찾을 수 없습니다.", rec);
             return null;
         }
 
-        const pid = rec.speciesId;
         const info = getPokeInfo(pid);
         if (!info) {
             console.warn("[Ghost QR] HoF 기록용 포켓몬 정보를 찾지 못했습니다.", rec);
@@ -664,10 +690,12 @@
             ts: Date.now(),
         };
 
-        const token = btoa(JSON.stringify(ghost));
+        // ✅ 여기서도 UTF-8-safe 인코딩 사용
+        const token = toBase64UTF8(ghost);
         const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
         return { ghost, encoded: url };
     }
+
 
     function openGhostModalFromHof(rec) {
         if (!rec) return;
@@ -881,16 +909,17 @@
                 const url = new URL(data);
                 const token = url.searchParams.get("ghost");
                 if (token) {
-                    const json = atob(decodeURIComponent(token));
-                    return JSON.parse(json);
+                    const base64 = decodeURIComponent(token);
+                    const jsonStr = fromBase64UTF8(base64);  // ✅ 변경
+                    return JSON.parse(jsonStr);
                 }
             }
 
             // 2) 예전 포맷: "QZMGHOST|base64" 형태도 그대로 지원
             if (data.startsWith("QZMGHOST|")) {
                 const raw = data.split("|")[1];
-                const json = atob(raw);
-                return JSON.parse(json);
+                const jsonStr = fromBase64UTF8(raw);       // ✅ 변경
+                return JSON.parse(jsonStr);
             }
 
             return null;
@@ -899,6 +928,7 @@
             return null;
         }
     }
+
 
     function handleGhostPayload(data) {
         const ghost = parseGhostFromData(data);
