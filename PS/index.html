@@ -251,7 +251,11 @@
         .buy-btn:disabled { background: #94a3b8; box-shadow: none; transform: translateY(3px); cursor: not-allowed; }
 
         /* --- 도감 화면 --- */
-        #view-dex { background: #fffbeb; }
+        #view-dex {
+            background: #fffbeb;
+            /* 도감 전체 스크롤은 유지하되, 헤더 처리를 위해 패딩 조정 */
+            padding-top: 0;
+        }
         .back-btn {
             background: #fff; border: 2px solid #cbd5e1;
             font-size: 24px; cursor: pointer; border-radius: 50%;
@@ -260,11 +264,86 @@
         }
         .back-btn:active { transform: translateY(3px); box-shadow: none; }
 
+        /* Sticky Header Group: 헤더와 필터를 묶어서 상단 고정 */
+        .sticky-header-group {
+            position: sticky;
+            top: 0;
+            z-index: 100; /* 도감 그리드(z-index 기본값)보다 위로 올림 */
+            background: #fffbeb; /* 배경색을 맞춰서 뒤에 내용이 비치지 않게 함 */
+            width: 100%;
+            padding: 20px 20px 10px 20px; /* view 패딩을 여기로 가져옴 */
+            border-bottom: 2px solid rgba(0,0,0,0.05);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+
+        /* 필터 토글 버튼 */
+        .filter-toggle-btn {
+            width: 100%;
+            padding: 10px;
+            background: #fff;
+            border: 2px solid #cbd5e1;
+            border-radius: 15px;
+            color: #475569;
+            font-family: 'Jua', sans-serif;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .filter-toggle-btn:active { background: #f1f5f9; }
+
+        /* 필터 그리드 (3줄 배치) */
+        .filter-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr); /* 12개 버튼 / 3줄 = 4열 */
+            gap: 6px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 15px;
+            border: 2px solid #e2e8f0;
+            margin-bottom: 5px;
+        }
+
+        .filter-grid.collapsed {
+            display: none;
+        }
+
+        .filter-btn {
+            background: #f8fafc;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            padding: 8px 4px; /* 글자 크기에 맞춰 패딩 조정 */
+            font-family: 'Jua', sans-serif;
+            font-size: 13px; /* 3줄 배치 시 공간 확보를 위해 폰트 조정 */
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .filter-btn:active { transform: translateY(2px); }
+
+        .filter-btn.active {
+            background: #3b82f6;
+            color: white;
+            border-color: #2563eb;
+            font-weight: bold;
+        }
+
+        /* 도감 내용 영역 패딩 */
+        .dex-content-area {
+            width: 100%;
+            padding: 0 20px 50px 20px;
+        }
+
+
         /* --- 모달 --- */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(3px);
-            z-index: 50; display: flex; justify-content: center; align-items: center;
+            z-index: 150; /* 필터보다 더 위로 */
+            display: flex; justify-content: center; align-items: center;
         }
         .modal-box {
             background: #fff; width: 90%; max-width: 340px;
@@ -406,7 +485,7 @@
             <img id="lobby-partner-img" class="lobby-partner-img" src="" />
         </div>
 
-        <h1 class="lobby-title">Pokémon<br>맞춤법 탐험대<br><span style="font-size:20px; color:#f59e0b;">(수학/경제 ver)</span></h1>
+        <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;"></span></h1>
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
 
         <button class="btn-3d menu-btn btn-explore" onclick="startExploration()">🧭 탐험 떠나기</button>
@@ -471,7 +550,7 @@
             <div class="shop-grid">
                 <div class="shop-item"><div>👟 튼튼한 신발<br><span style="font-size:12px; color:#94a3b8;" id="lv-steps">Lv.0</span></div><div class="shop-price">500 P</div><button class="buy-btn" onclick="buyUpgrade('maxSteps', 500)">강화하기</button></div>
 
-                <div class="shop-item"><div>🗂️ 도감 확장<br><span style="font-size:12px; color:#94a3b8;" id="lv-dex">Lv.0</span></div><div class="shop-price">1000 P</div><button class="buy-btn" onclick="buyUpgrade('dexLimit', 1000)">확장하기</button></div>
+                <div class="shop-item"><div>🗂️ 도감 확장<br><span style="font-size:12px; color:#94a3b8;" id="lv-dex">Lv.0</span></div><div class="shop-price">100 P</div><button class="buy-btn" onclick="buyUpgrade('dexLimit', 100)">확장하기</button></div>
 
                 <div class="shop-item"><div>🍀 행운의 부적<br><span style="font-size:12px; color:#94a3b8;" id="lv-rate">Lv.0 (Max 10)</span></div><div class="shop-price">800 P</div><button class="buy-btn" id="btn-buy-rate" onclick="buyUpgrade('catchRate', 800)">강화하기</button></div>
             </div>
@@ -479,14 +558,26 @@
     </div>
 
     <div id="view-dex" class="view hidden">
-        <div class="shop-header">
-            <button class="back-btn" onclick="switchView('view-lobby')">🔙</button>
-            <h2 style="margin:0; font-size:24px; color:#92400e;">포켓몬 도감</h2>
+        <div class="sticky-header-group">
+            <div class="shop-header">
+                <button class="back-btn" onclick="switchView('view-lobby')">🔙</button>
+                <h2 style="margin:0; font-size:24px; color:#92400e;">포켓몬 도감</h2>
+            </div>
+
+            <button class="filter-toggle-btn" onclick="toggleFilterGrid()">
+                <span>🔍 필터 옵션</span>
+                <span id="toggle-icon">🔽</span>
+            </button>
+            <div id="dex-filter-container" class="filter-grid">
+            </div>
         </div>
-        <p style="font-size:18px; margin-bottom:15px;">
-            등록된 포켓몬: <span id="dex-count" style="font-weight:bold; color:#d97706;">0</span> / <span id="dex-limit-display">30</span>
-        </p>
-        <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%; padding-bottom:50px;" id="dex-grid"></div>
+
+        <div class="dex-content-area">
+            <p style="font-size:18px; margin:15px 0;">
+                등록된 포켓몬: <span id="dex-count" style="font-weight:bold; color:#d97706;">0</span> / <span id="dex-limit-display">30</span>
+            </p>
+            <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%;" id="dex-grid"></div>
+        </div>
     </div>
 
 </div>
@@ -579,11 +670,68 @@
     let currentQuiz = null;
     let lastCapture = null;
 
+    // 현재 선택된 필터값 저장 변수
+    let currentFilter = 'owned';
+    let isFilterCollapsed = false;
+
     async function init() {
         loadGame();
         await loadQuiz();
+        initDexFilter(); // 필터 버튼 초기화
         updateLobbyUI();
     }
+
+    // 도감 필터 버튼 생성 (3줄 배치)
+    function initDexFilter() {
+        const container = document.getElementById('dex-filter-container');
+        container.innerHTML = "";
+
+        // 1. 보유 중 버튼
+        createFilterBtn(container, 'owned', '✅ 보유');
+
+        // 2. 100단위 버튼 (11개)
+        for (let i = 0; i < 11; i++) {
+            const start = i * 100 + 1;
+            const end = (i + 1) * 100;
+            if (start > MAX_POKEMON_ID) break;
+
+            const label = `${start}~${end}`;
+            const value = `${start}-${end}`;
+            createFilterBtn(container, value, label);
+        }
+    }
+
+    function createFilterBtn(container, value, label) {
+        const btn = document.createElement('button');
+        btn.className = 'filter-btn';
+        if (value === currentFilter) btn.classList.add('active');
+        btn.textContent = label;
+        btn.onclick = (e) => {
+            currentFilter = value;
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            e.target.classList.add('active');
+            renderDex();
+            // 선택 후 자동으로 접으려면 아래 주석 해제
+            // toggleFilterGrid(true); 
+        };
+        container.appendChild(btn);
+    }
+
+    function toggleFilterGrid(forceClose = false) {
+        const grid = document.getElementById('dex-filter-container');
+        const icon = document.getElementById('toggle-icon');
+
+        if (forceClose || !isFilterCollapsed) {
+            grid.classList.add('collapsed');
+            icon.textContent = '◀'; // or ➕
+            isFilterCollapsed = true;
+        } else {
+            grid.classList.remove('collapsed');
+            icon.textContent = '🔽';
+            isFilterCollapsed = false;
+        }
+    }
+
 
     function saveGame() {
         try {
@@ -605,7 +753,7 @@
                     ...parsed,
                     dex: new Set(parsed.dex || [])
                 };
-                // 기존 데이터 마이그레이션 (startBalls가 있으면 dexLimit으로 초기화 또는 무시)
+                // 기존 데이터 마이그레이션
                 if(parsed.upgrades && parsed.upgrades.startBalls !== undefined && parsed.upgrades.dexLimit === undefined) {
                     user.upgrades.dexLimit = 0;
                     delete user.upgrades.startBalls;
@@ -623,10 +771,6 @@
 
     // --- [수학 문제 생성기] ---
     function generateMathQuiz() {
-        // 유형 0: g -> kg g
-        // 유형 1: kg g -> g
-        // 유형 2: ml -> L ml
-        // 유형 3: L ml -> ml
         const type = Math.floor(Math.random() * 4);
         let prompt = "", answer = "", choices = [];
 
@@ -675,15 +819,12 @@
             ];
         }
 
-        // 오답 셔플 (정답은 0번에 있음)
-        // Set을 이용해 중복 제거 후 섞기
         let choiceSet = new Set(choices);
         let finalChoices = Array.from(choiceSet);
         while(finalChoices.length < 4) {
-            finalChoices.push(`${totalSmall + Math.floor(Math.random()*100)*10}g`); // 더미 추가
+            finalChoices.push(`${totalSmall + Math.floor(Math.random()*100)*10}g`);
         }
 
-        // 셔플
         let answerIndex = 0;
         for (let i = finalChoices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
@@ -706,7 +847,6 @@
             let qArr = data.questions || [];
             if(qArr.length === 0) throw new Error("Empty quiz");
 
-            // 셔플
             for (let i = qArr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [qArr[i], qArr[j]] = [qArr[j], qArr[i]];
@@ -714,8 +854,6 @@
             quizList = qArr;
         } catch(e) {
             console.log("Quiz load failed or empty, using Math Generator fallback");
-            // 퀴즈 리스트를 비워두고, tryCatch 시점에 생성하도록 설정할 수도 있지만
-            // 구조상 여기서는 미리 100개 정도 만들어둠
             quizList = [];
             for(let i=0; i<50; i++) {
                 quizList.push(generateMathQuiz());
@@ -759,7 +897,6 @@
 
     function startExploration() {
         const baseSteps = 30 + (user.upgrades.maxSteps * 10);
-        // 기본 10개만 제공 (업그레이드 삭제됨)
         const bonusBalls = 10;
         session = { active: true, steps: baseSteps, caught: [], earnedPoints: 0 };
 
@@ -1116,14 +1253,11 @@
     function updateShopUI() {
         document.getElementById('shop-points').textContent = user.points;
         document.getElementById('lv-steps').textContent = `Lv.${user.upgrades.maxSteps}`;
-        // 도감 레벨 표시
         document.getElementById('lv-dex').textContent = `Lv.${user.upgrades.dexLimit} (현재 ${30 + user.upgrades.dexLimit * 10}마리)`;
 
-        // 행운의 부적 레벨 표시
         const rateLv = user.upgrades.catchRate;
         document.getElementById('lv-rate').textContent = `Lv.${rateLv} (확률 +${(rateLv * 0.5).toFixed(1)}%)`;
 
-        // 부적 만렙 체크
         const rateBtn = document.getElementById('btn-buy-rate');
         if(rateLv >= 10) {
             rateBtn.disabled = true;
@@ -1145,7 +1279,6 @@
     function buyUpgrade(key, cost) {
         if(user.points < cost) { alert("포인트가 부족해요!"); return; }
 
-        // 행운의 부적 만렙 체크
         if(key === 'catchRate' && user.upgrades.catchRate >= 10) {
             alert("이미 최고 레벨입니다!"); return;
         }
@@ -1160,7 +1293,6 @@
         const dexLimit = 30 + (user.upgrades.dexLimit * 10);
         document.getElementById('dex-count').textContent = user.dex.size;
         document.getElementById('dex-limit-display').textContent = dexLimit;
-        // document.getElementById('dex-total').textContent = MAX_POKEMON_ID; // 전체 표시는 생략하고 현재 용량 위주로
 
         const grid = document.getElementById('dex-grid');
         grid.innerHTML = "";
@@ -1170,23 +1302,60 @@
         hint.textContent = `도감 용량: ${dexLimit}마리 (상점에서 확장 가능)`;
         grid.appendChild(hint);
 
-        for(let i=1; i<=MAX_POKEMON_ID; i++) {
+        // 필터 처리 (변수 currentFilter 사용)
+        const filterVal = currentFilter;
+        let start = 1, end = MAX_POKEMON_ID;
+        let showOnlyOwned = false;
+
+        if (filterVal === 'owned') {
+            showOnlyOwned = true;
+        } else {
+            const parts = filterVal.split('-');
+            start = parseInt(parts[0]);
+            end = parseInt(parts[1]);
+        }
+
+        // 보유만 보기: 가지고 있는 포켓몬 ID만 순회
+        if (showOnlyOwned) {
+            const ownedIds = Array.from(user.dex).sort((a,b)=>a-b);
+            if (ownedIds.length === 0) {
+                const msg = document.createElement('div');
+                msg.textContent = "아직 잡은 포켓몬이 없어요!";
+                msg.style.cssText = "grid-column: 1/-1; text-align:center; color:#94a3b8; margin-top:20px;";
+                grid.appendChild(msg);
+                return;
+            }
+
+            ownedIds.forEach(id => {
+                createDexCard(id, true);
+            });
+
+        } else {
+            // 범위 보기: start ~ end 순회
+            for(let i=start; i<=end; i++) {
+                if(i > MAX_POKEMON_ID) break;
+                const has = user.dex.has(i);
+                createDexCard(i, has);
+            }
+        }
+
+        function createDexCard(id, has) {
             const d = document.createElement('div');
             d.className = 'dex-item';
             d.style.cssText = "aspect-ratio:1; background:#fff; border-radius:15px; display:flex; justify-content:center; align-items:center; border:2px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative;";
 
-            if(user.dex.has(i)) {
-                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${i}.png" style="width:80%; image-rendering:pixelated;" loading="lazy">`;
+            if(has) {
+                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" style="width:80%; image-rendering:pixelated;" loading="lazy">`;
                 d.style.borderColor = "#4ade80";
                 d.style.background = "#f0fdf4";
 
-                if(user.partnerId === i) {
+                if(user.partnerId === id) {
                     d.classList.add('selected-partner');
                 }
-                d.onclick = () => setPartner(i);
+                d.onclick = () => setPartner(id);
 
             } else {
-                d.textContent = i;
+                d.textContent = id;
                 d.style.color = "#cbd5e1";
                 d.style.fontSize = "14px";
                 d.style.fontWeight = "bold";
