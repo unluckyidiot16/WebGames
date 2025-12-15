@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>픽셀 & 수학 트레이닝 V3</title>
+    <title>픽셀 & 수학 트레이닝 V6 (Guaranteed Gacha)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: ui-sans-serif, system-ui; touch-action: manipulation; -webkit-user-select:none; user-select:none; oversizer-behavior: contain; }
@@ -58,6 +58,10 @@
         .rarity-R .rarity-tag { background:#60a5fa; }
         .rarity-SR .rarity-tag { background:#f59e0b; }
         .rarity-H .rarity-tag { background:#ec4899; }
+
+        /* 업적 아이템 스타일 */
+        .achievement-item { display:flex; align-items:center; justify-content:between; padding:12px; border:1px solid #e5e7eb; border-radius:12px; margin-bottom:8px; background:#fff; }
+        .achievement-item.claimed { background:#f3f4f6; opacity:0.7; }
     </style>
 </head>
 <body class="bg-gray-100 min-h-screen text-gray-800">
@@ -78,13 +82,28 @@
             <span class="text-xs text-gray-500 font-bold">MY POINT</span>
             <span class="text-2xl font-black text-indigo-600" id="lobbyPoints">0 P</span>
         </div>
-        <div class="flex flex-col text-right">
-            <span class="text-xs text-gray-500 font-bold">TICKET</span>
-            <span class="text-xl font-bold text-rose-500" id="lobbyCoupons">0</span>
+        <div class="flex gap-3 text-right">
+            <div class="flex flex-col items-end">
+                <span class="text-xs text-gray-400 font-bold">RARE</span>
+                <span class="text-lg font-bold text-amber-500" id="lobbyRareTickets">0장</span>
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="text-xs text-gray-400 font-bold">GUARANTEED</span>
+                <span class="text-lg font-bold text-purple-600" id="lobbyGuaranteedTickets">0장</span>
+            </div>
         </div>
     </header>
 
     <div class="grid grid-cols-1 gap-4 w-full max-w-lg pb-10">
+        <button id="achievementBtn" class="flex items-center p-4 bg-white rounded-2xl shadow-md border border-gray-100 hover:border-gray-300 transition relative">
+            <div class="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center text-xl mr-3">🏆</div>
+            <div class="text-left flex-1">
+                <h2 class="text-lg font-bold text-gray-800">업적 & 보상</h2>
+                <p class="text-xs text-gray-400">보상: <span class="text-purple-600 font-bold">확정 뽑기 티켓</span></p>
+            </div>
+            <div id="achievementBadge" class="hidden absolute top-4 right-4 bg-red-500 text-white text-[10px] font-bold px-2 py-0.5 rounded-full animate-bounce">N</div>
+        </button>
+
         <button id="goBookBtn" class="flex items-center p-5 bg-white rounded-2xl shadow-md border border-gray-100 hover:border-gray-300 transition group">
             <div class="w-12 h-12 bg-blue-50 rounded-full flex items-center justify-center text-2xl mr-4">🎨</div>
             <div class="text-left">
@@ -96,7 +115,7 @@
         <div class="bg-white rounded-2xl shadow-md border border-gray-100 p-5 mt-2">
             <h2 class="text-lg font-bold text-gray-800 mb-3 flex items-center">
                 <span class="mr-2">🧮</span>수학 트레이닝
-                <span class="ml-2 text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full">난이도 자동 증가</span>
+                <span class="ml-2 text-xs bg-indigo-100 text-indigo-600 px-2 py-1 rounded-full">콤보 시 레어티켓 지급</span>
             </h2>
             <div class="grid grid-cols-3 gap-3">
                 <button id="goMulBtn" class="flex flex-col items-center justify-center p-4 bg-orange-50 rounded-xl border border-orange-100 hover:bg-orange-100 transition">
@@ -119,9 +138,19 @@
                 <div class="w-8 h-8 bg-indigo-50 rounded-full flex items-center justify-center text-lg mr-2">🎁</div>
                 <h2 class="text-base font-bold text-indigo-700">픽셀 뽑기</h2>
             </div>
+            <div class="flex gap-2 mb-2">
+                <button id="gacha1Btn" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-2 rounded-xl transition text-xs">일반 1회(100P)</button>
+                <button id="gacha10Btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl transition shadow-lg text-xs">일반 10회(1000P)</button>
+            </div>
             <div class="flex gap-2">
-                <button id="gacha1Btn" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-2 rounded-xl transition text-sm">1회 (100P)</button>
-                <button id="gacha10Btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 rounded-xl transition shadow-lg text-sm">10회 (1,000P)</button>
+                <button id="rareGachaBtn" class="flex-1 bg-gradient-to-r from-amber-400 to-yellow-500 hover:from-amber-500 hover:to-yellow-600 text-white font-bold py-3 rounded-xl transition shadow-md text-xs flex flex-col items-center justify-center">
+                    <span>👑 레어 (R↑)</span>
+                    <span class="opacity-80 text-[10px]">레어티켓 1장</span>
+                </button>
+                <button id="guaranteedGachaBtn" class="flex-1 bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-md text-xs flex flex-col items-center justify-center">
+                    <span>💎 미보유 확정</span>
+                    <span class="opacity-80 text-[10px]">확정티켓 1장</span>
+                </button>
             </div>
         </div>
     </div>
@@ -188,8 +217,18 @@
 
         <div class="p-4 border-t flex justify-between items-center bg-white">
             <button id="exitPuzzleBtn" class="text-gray-400 hover:text-red-500 font-bold px-4 text-sm">그만하기</button>
-            <span class="text-xs text-gray-400">6문제마다 난이도가 올라갑니다</span>
+            <span class="text-xs text-gray-400">10콤보 단위로 레어 티켓이 지급됩니다!</span>
         </div>
+    </div>
+</div>
+
+<div id="achievementModal" class="modal">
+    <div class="modal-content max-w-lg w-full">
+        <div class="flex justify-between items-center mb-4">
+            <h2 class="text-2xl font-bold text-gray-800">업적 보상</h2>
+            <button id="closeAchievementBtn" class="text-gray-400 hover:text-gray-600 font-bold text-xl">✕</button>
+        </div>
+        <div id="achievementList" class="overflow-y-auto max-h-[60vh] text-left"></div>
     </div>
 </div>
 
@@ -226,61 +265,115 @@
         hiddenPath: 'https://unluckyidiot16.github.io/WebGames/Pixel/Hidden/',
         maxNormal: 350, maxHidden: 40,
         gachaCost: 100, puzzleReward: 30, puzzleComboBonus: 10,
-        puzzleTime: 60, // 수학 문제 생각할 시간 넉넉히
+        puzzleTime: 60,
     };
 
     const State = {
-        points: 0, coupons: 0, owned: new Set(), hiddenOwned: new Set(), colored: new Set(),
+        points: 0,
+        rareTickets: 0,
+        guaranteedTickets: 0, // [NEW] 확정 뽑기 티켓
+        maxComboRecord: 0,
+        owned: new Set(), hiddenOwned: new Set(), colored: new Set(),
+        claimedAchievements: new Set(),
         normalList: [], hiddenList: [],
         puzzle: {
-            mode: 'MUL', // MUL, DIV, FRAC
-            difficulty: 0, // 0~6: 곱셈, 0~2: 나눗셈/분수
-            mathCount: 0, // 난이도 상승 카운터
+            mode: 'MUL', difficulty: 0, mathCount: 0,
             score: 0, combo: 0, maxCombo: 0,
             timer: null, isPlaying: false, timeLeft: 0
         }
     };
 
-    const LS_KEY = { points: 'px_points', owned: 'px_owned', hidden: 'px_hidden', colored: 'px_colored', coupons: 'px_coupons', progress: 'px_prog_' };
+    const LS_KEY = {
+        points: 'px_points',
+        rareTickets: 'px_rare_tickets',
+        guaranteedTickets: 'px_guaranteed_tickets',
+        maxCombo: 'px_max_combo',
+        owned: 'px_owned', hidden: 'px_hidden', colored: 'px_colored',
+        achievements: 'px_achievements',
+        progress: 'px_prog_'
+    };
+
+    // --- 업적 데이터: 보상이 확정 티켓으로 변경됨 ---
+    const ACHIEVEMENTS = [
+        { id: 'combo_10', title: '초보 계산왕', desc: '최대 10콤보 달성', type: 'COMBO', target: 10, reward: 1 },
+        { id: 'combo_20', title: '숙련된 계산왕', desc: '최대 20콤보 달성', type: 'COMBO', target: 20, reward: 1 },
+        { id: 'combo_30', title: '엘리트 계산왕', desc: '최대 30콤보 달성', type: 'COMBO', target: 30, reward: 1 },
+        { id: 'combo_40', title: '마스터 계산왕', desc: '최대 40콤보 달성', type: 'COMBO', target: 40, reward: 1 },
+        { id: 'combo_50', title: '전설의 계산왕', desc: '최대 50콤보 달성', type: 'COMBO', target: 50, reward: 1 },
+        { id: 'col_10', title: '수집의 시작', desc: '도감 수집률 10% 달성', type: 'COLLECT', target: 10, reward: 1 },
+        { id: 'col_30', title: '본격적인 수집', desc: '도감 수집률 30% 달성', type: 'COLLECT', target: 30, reward: 1 },
+        { id: 'col_50', title: '도감의 절반', desc: '도감 수집률 50% 달성', type: 'COLLECT', target: 50, reward: 1 },
+        { id: 'col_80', title: '포켓몬 마스터', desc: '도감 수집률 80% 달성', type: 'COLLECT', target: 80, reward: 1 },
+        { id: 'col_100', title: '전설의 완성', desc: '도감 수집률 100% 달성', type: 'COLLECT', target: 100, reward: 1 },
+    ];
 
     function initGame() {
         loadSaveData();
         generateImageLists();
         bindEvents();
         updateUI();
+        AchievementSystem.check();
     }
     function loadSaveData() {
         State.points = parseInt(localStorage.getItem(LS_KEY.points) || '0');
-        State.coupons = parseInt(localStorage.getItem(LS_KEY.coupons) || '0');
+        State.rareTickets = parseInt(localStorage.getItem(LS_KEY.rareTickets) || '0');
+        State.guaranteedTickets = parseInt(localStorage.getItem(LS_KEY.guaranteedTickets) || '0');
+        State.maxComboRecord = parseInt(localStorage.getItem(LS_KEY.maxCombo) || '0');
         try { State.owned = new Set(JSON.parse(localStorage.getItem(LS_KEY.owned) || '[]')); } catch(e){ State.owned = new Set(); }
         try { State.hiddenOwned = new Set(JSON.parse(localStorage.getItem(LS_KEY.hidden) || '[]')); } catch(e){ State.hiddenOwned = new Set(); }
         try { State.colored = new Set(JSON.parse(localStorage.getItem(LS_KEY.colored) || '[]')); } catch(e){ State.colored = new Set(); }
+        try { State.claimedAchievements = new Set(JSON.parse(localStorage.getItem(LS_KEY.achievements) || '[]')); } catch(e){ State.claimedAchievements = new Set(); }
     }
     function saveData() {
         localStorage.setItem(LS_KEY.points, State.points);
-        localStorage.setItem(LS_KEY.coupons, State.coupons);
+        localStorage.setItem(LS_KEY.rareTickets, State.rareTickets);
+        localStorage.setItem(LS_KEY.guaranteedTickets, State.guaranteedTickets);
+        localStorage.setItem(LS_KEY.maxCombo, State.maxComboRecord);
         localStorage.setItem(LS_KEY.owned, JSON.stringify([...State.owned]));
         localStorage.setItem(LS_KEY.hidden, JSON.stringify([...State.hiddenOwned]));
         localStorage.setItem(LS_KEY.colored, JSON.stringify([...State.colored]));
+        localStorage.setItem(LS_KEY.achievements, JSON.stringify([...State.claimedAchievements]));
         updateUI();
+        AchievementSystem.check();
     }
     function generateImageLists() {
         for(let i=1; i<=CONFIG.maxNormal; i++) State.normalList.push({ id: i, url: `${CONFIG.basePath}${i}.png`, type: 'N' });
         for(let i=1; i<=CONFIG.maxHidden; i++) State.hiddenList.push({ id: i, url: `${CONFIG.hiddenPath}${i}.png`, type: 'H' });
     }
-    function getRarity(id) { return id > 200 ? 'SR' : id > 100 ? 'R' : 'C'; }
+
+    const LEGENDARY_IDS = new Set([144, 145, 146, 150, 243, 244, 245, 249, 250]);
+    const MYTHICAL_IDS  = new Set([151, 251]);
+    const POPULARITY_TOP5 = new Set([6, 94, 1, 25, 133, 197, 248, 249, 157, 212, 282, 330, 254, 257]);
+    const POPULARITY_TOP10 = new Set([...POPULARITY_TOP5, 149, 151, 150, 59, 131, 181, 196, 155, 245, 158, 258, 350]);
+    const POPULARITY_TOP30 = new Set([...POPULARITY_TOP10, 143, 38, 7, 9, 134, 89, 4, 132, 79, 34, 137, 37, 54, 26, 127, 135, 148, 3, 144, 81, 169, 162, 251, 152, 250, 160, 214, 177, 172, 229, 175, 195, 244, 156, 233, 194, 200, 213, 202, 230, 260, 304, 306, 303, 286, 255, 253, 252, 302, 272, 292, 262]);
+
+    const GACHA_RATES = { H: 0.001, SR: 0.05, R: 0.20, C: 0.749 };
+    const RARE_GACHA_RATES = { H: 0.02, SR: 0.28, R: 0.70, C: 0 };
+    const DUP_REFUND = { C: 30, R: 60, SR: 120, H: 300 };
+
+    function getRarity(id) {
+        if (MYTHICAL_IDS.has(id) || POPULARITY_TOP5.has(id)) return 'H';
+        if (LEGENDARY_IDS.has(id) || POPULARITY_TOP10.has(id)) return 'SR';
+        if (POPULARITY_TOP30.has(id)) return 'R';
+        if (id > 200) return 'SR';
+        if (id > 100) return 'R';
+        return 'C';
+    }
+
+    function updateUI() {
+        ['lobbyPoints', 'bookPoints'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = `${State.points.toLocaleString()} P`; });
+        const tickEl = document.getElementById('lobbyRareTickets'); if(tickEl) tickEl.textContent = `${State.rareTickets}장`;
+        const gTickEl = document.getElementById('lobbyGuaranteedTickets'); if(gTickEl) gTickEl.textContent = `${State.guaranteedTickets}장`;
+
+        const colEl = document.getElementById('collectionRate'); if(colEl) {
+            colEl.textContent = `${Math.floor((State.owned.size/State.normalList.length)*100)}%`;
+        }
+    }
     function showView(id) {
         document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
         document.getElementById(id).classList.add('active');
         if(id === 'bookScreen') renderBook();
         if(id === 'lobbyScreen') updateUI();
-    }
-    function updateUI() {
-        ['lobbyPoints', 'bookPoints'].forEach(id => { const el = document.getElementById(id); if(el) el.textContent = `${State.points.toLocaleString()} P`; });
-        const coupEl = document.getElementById('lobbyCoupons'); if(coupEl) coupEl.textContent = State.coupons;
-        const colEl = document.getElementById('collectionRate'); if(colEl) {
-            colEl.textContent = `${Math.floor((State.owned.size/State.normalList.length)*100)}%`;
-        }
     }
     function showMessage(title, msg, callback) {
         document.getElementById('msgTitle').textContent = title;
@@ -290,305 +383,196 @@
         document.getElementById('msgOkBtn').onclick = () => { modal.style.display = 'none'; if(callback) callback(); };
     }
 
-    /**
-     * ========================================================
-     * 수학 문제 생성 로직 (MathLogic)
-     * ========================================================
-     */
+    // --- 업적 시스템 ---
+    const AchievementSystem = {
+        check() {
+            let hasUnclaimed = false;
+            const collectionPct = Math.floor((State.owned.size / State.normalList.length) * 100);
+
+            ACHIEVEMENTS.forEach(ac => {
+                let passed = false;
+                if(ac.type === 'COMBO') passed = State.maxComboRecord >= ac.target;
+                if(ac.type === 'COLLECT') passed = collectionPct >= ac.target;
+                if(passed && !State.claimedAchievements.has(ac.id)) hasUnclaimed = true;
+            });
+
+            const badge = document.getElementById('achievementBadge');
+            if(hasUnclaimed) badge.classList.remove('hidden'); else badge.classList.add('hidden');
+        },
+        open() {
+            const list = document.getElementById('achievementList');
+            list.innerHTML = '';
+            const collectionPct = Math.floor((State.owned.size / State.normalList.length) * 100);
+
+            ACHIEVEMENTS.forEach(ac => {
+                const el = document.createElement('div');
+                let passed = false;
+                if(ac.type === 'COMBO') passed = State.maxComboRecord >= ac.target;
+                if(ac.type === 'COLLECT') passed = collectionPct >= ac.target;
+                const claimed = State.claimedAchievements.has(ac.id);
+
+                el.className = `achievement-item ${claimed ? 'claimed' : ''}`;
+
+                let btnHtml = '';
+                if(claimed) btnHtml = `<span class="text-sm font-bold text-gray-400">완료</span>`;
+                else if(passed) btnHtml = `<button onclick="AchievementSystem.claim('${ac.id}')" class="bg-purple-600 hover:bg-purple-700 text-white text-xs px-3 py-1.5 rounded-lg font-bold shadow-sm animate-pulse">확정티켓 받기</button>`;
+                else btnHtml = `<span class="text-xs text-gray-400 bg-gray-100 px-2 py-1 rounded">${ac.type==='COMBO' ? `${State.maxComboRecord}/${ac.target}` : `${collectionPct}%/${ac.target}%`}</span>`;
+
+                el.innerHTML = `
+                    <div class="flex items-center">
+                        <div class="text-2xl mr-3">${ac.type === 'COMBO' ? '🔥' : '📖'}</div>
+                        <div>
+                            <div class="font-bold text-gray-800 text-sm">${ac.title}</div>
+                            <div class="text-xs text-gray-500">${ac.desc}</div>
+                        </div>
+                    </div>
+                    <div>${btnHtml}</div>
+                `;
+                list.appendChild(el);
+            });
+            document.getElementById('achievementModal').style.display = 'flex';
+        },
+        claim(id) {
+            const ac = ACHIEVEMENTS.find(a => a.id === id);
+            if(!ac || State.claimedAchievements.has(id)) return;
+            State.claimedAchievements.add(id);
+            State.guaranteedTickets += ac.reward; // 확정 티켓 지급
+            saveData();
+            this.open();
+            updateUI();
+        }
+    };
+
+    // --- 수학 로직 ---
     const MathLogic = {
         rand(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; },
-
         makeOptions(answer, type, generatorFn) {
             let options = new Set([answer]);
             let safety = 0;
-            while(options.size < 4 && safety < 50) {
-                safety++;
-                let wrong = generatorFn();
-                if(wrong !== answer) options.add(wrong);
-            }
-            while(options.size < 4) {
-                if (typeof answer === 'number') options.add(answer + Math.floor(Math.random()*10) + 1);
-                else options.add(answer + " ");
-            }
+            while(options.size < 4 && safety < 50) { safety++; let wrong = generatorFn(); if(wrong !== answer) options.add(wrong); }
+            while(options.size < 4) { if (typeof answer === 'number') options.add(answer + Math.floor(Math.random()*10) + 1); else options.add(answer + " "); }
             return Array.from(options).sort(() => Math.random() - 0.5);
         },
-
         generate(mode, diff) {
             if (mode === 'MUL') return this.mul(diff);
             if (mode === 'DIV') return this.div(diff);
             if (mode === 'FRAC') return this.frac(diff);
         },
-
-        // 곱셈 7단계 난이도 (사용자 지정 패턴)
         mul(diff) {
             let a, b;
-
-            if (diff === 0) {
-                // 1단계: A00 X B (예: 200 x 3)
-                a = this.rand(1, 9) * 100;
-                b = this.rand(1, 9);
-            }
-            else if (diff === 1) {
-                // 2단계: C0 X D0 (예: 30 x 40)
-                a = this.rand(1, 9) * 10;
-                b = this.rand(1, 9) * 10;
-            }
-            else if (diff === 2) {
-                // 3단계: EF X G0 (예: 23 x 40)
-                a = this.rand(10, 99);
-                b = this.rand(1, 9) * 10;
-            }
-            else if (diff === 3) {
-                // 4단계: HI X JK (예: 23 x 45)
-                a = this.rand(10, 99);
-                b = this.rand(10, 99);
-            }
-            else if (diff === 4) {
-                // 5단계: LM0 X O0 (예: 120 x 30) -> LM은 10~99
-                a = this.rand(10, 99) * 10;
-                b = this.rand(1, 9) * 10;
-            }
-            else if (diff === 5) {
-                // 6단계: PQ0 X RS (예: 120 x 34)
-                a = this.rand(10, 99) * 10;
-                b = this.rand(10, 99);
-            }
-            else {
-                // 7단계: TUV X XY (예: 123 x 45)
-                a = this.rand(100, 999);
-                b = this.rand(10, 99);
-            }
-
+            if (diff === 0) { a = this.rand(1, 9) * 100; b = this.rand(1, 9); }
+            else if (diff === 1) { a = this.rand(1, 9) * 10; b = this.rand(1, 9) * 10; }
+            else if (diff === 2) { a = this.rand(10, 99); b = this.rand(1, 9) * 10; }
+            else if (diff === 3) { a = this.rand(10, 99); b = this.rand(10, 99); }
+            else if (diff === 4) { a = this.rand(10, 99) * 10; b = this.rand(1, 9) * 10; }
+            else if (diff === 5) { a = this.rand(10, 99) * 10; b = this.rand(10, 99); }
+            else { a = this.rand(100, 999); b = this.rand(10, 99); }
             let ans = a * b;
-            let qStr = `${a} × ${b} = ?`;
-
-            const choices = this.makeOptions(ans, 'NUM', () => {
-                let offset = (Math.random() > 0.5 ? 1 : -1) * (Math.random() > 0.5 ? 10 : 1);
-                if (Math.random() > 0.8) offset *= 10;
-                // 정답 근처의 오답 생성
-                return ans + offset * this.rand(1, 5);
-            });
-
-            return { q: qStr, choices, ans };
+            return { q: `${a} × ${b} = ?`, choices: this.makeOptions(ans, 'NUM', () => ans + (Math.random()>0.5?1:-1)*(Math.random()>0.5?10:1)*this.rand(1,5)), ans };
         },
-
         div(diff) {
             let a, b, qStr, ansStr;
-            // 나눗셈 기존 3단계 유지
-            if (diff === 0) { // 하: 두자리 / 한자리 (나머지 0)
-                b = this.rand(2, 9);
-                let q = this.rand(4, 11);
-                a = b * q;
-                while(a < 10) { q = this.rand(4, 11); a = b * q; }
-                ansStr = `${q}`;
-                qStr = `${a} ÷ ${b} = ?`;
-                const choices = this.makeOptions(ansStr, 'STR', () => String(q + this.rand(-3, 3) || 1));
-                return { q: qStr, choices, ans: ansStr };
-            } else if (diff === 1) { // 중: 두자리 / 한자리 (나머지 있음)
-                b = this.rand(2, 9);
-                a = this.rand(11, 99);
-                while (a % b === 0) a++;
-                let q = Math.floor(a / b);
-                let r = a % b;
-                ansStr = `${q} ··· ${r}`;
-                qStr = `${a} ÷ ${b} = ?`;
-                const choices = this.makeOptions(ansStr, 'STR', () => {
-                    let fq = q + this.rand(-2, 2); if(fq<0) fq=0;
-                    let fr = this.rand(1, b-1);
-                    return `${fq} ··· ${fr}`;
-                });
-                return { q: qStr, choices, ans: ansStr };
-            } else { // 상: 세자리 / 한자리
-                b = this.rand(2, 9);
-                let q = this.rand(12, 110);
-                a = b * q + this.rand(0, b-1);
-                q = Math.floor(a/b);
-                let r = a%b;
-                ansStr = r === 0 ? `${q}` : `${q} ··· ${r}`;
-                qStr = `${a} ÷ ${b} = ?`;
-                const choices = this.makeOptions(ansStr, 'STR', () => {
-                    let fq = q + this.rand(-5, 5); if(fq<1) fq=1;
-                    let fr = r === 0 ? 0 : this.rand(1, b-1);
-                    return fr===0 ? `${fq}` : `${fq} ··· ${fr}`;
-                });
-                return { q: qStr, choices, ans: ansStr };
-            }
+            if (diff === 0) { b = this.rand(2, 9); let q = this.rand(4, 11); a = b * q; while(a < 10) { q = this.rand(4, 11); a = b * q; } ansStr = `${q}`; qStr = `${a} ÷ ${b} = ?`; }
+            else if (diff === 1) { b = this.rand(2, 9); a = this.rand(11, 99); while (a % b === 0) a++; let q = Math.floor(a / b); let r = a % b; ansStr = `${q} ··· ${r}`; qStr = `${a} ÷ ${b} = ?`; }
+            else { b = this.rand(2, 9); let q = this.rand(12, 110); a = b * q + this.rand(0, b-1); q = Math.floor(a/b); let r = a%b; ansStr = r === 0 ? `${q}` : `${q} ··· ${r}`; qStr = `${a} ÷ ${b} = ?`; }
+            const choices = this.makeOptions(ansStr, 'STR', () => { let q=parseInt(ansStr.split(' ')[0])+this.rand(-3,3); if(q<1)q=1; return `${q} ··· ${this.rand(1,b-1)}`; });
+            return { q: qStr, choices, ans: ansStr };
         },
-
         frac(diff) {
-            // 분수 기존 3단계 유지
-            if (diff === 0) { // 하
-                let den = this.rand(2, 9);
-                let whole = this.rand(1, 4);
-                let num = this.rand(1, den - 1);
-                let top = whole * den + num;
-
-                let qStr = `${top}/${den}`;
-                let ansStr = `${whole}과 ${num}/${den}`;
-
-                const choices = this.makeOptions(ansStr, 'STR', () => {
-                    let w = whole + this.rand(-1, 2); if(w<1) w=1;
-                    let n = this.rand(1, den-1);
-                    return `${w}과 ${n}/${den}`;
-                });
-                return { q: `가분수 [ ${qStr} ]를\n대분수로 바꾸면?`, choices, ans: ansStr };
-
-            } else if (diff === 1) { // 중
-                let den = this.rand(3, 15);
-                let n1 = this.rand(1, den*2);
-                let n2 = n1;
-                while(n2 === n1) n2 = this.rand(1, den*2);
-
-                let qStr = `${n1}/${den} □ ${n2}/${den}`;
-                let ansStr = n1 > n2 ? '>' : '<';
-
-                return {
-                    q: `빈칸에 알맞은 기호는?\n${qStr}`,
-                    choices: ['>', '<', '=', '?'].sort(()=>Math.random()-0.5),
-                    ans: ansStr
-                };
-
-            } else { // 상
-                let den = this.rand(3, 12);
-                let n1 = this.rand(1, den-1);
-                let n2 = this.rand(1, den-1);
-                let sum = n1 + n2;
-
-                let qStr = `${n1}/${den} + ${n2}/${den} = ?`;
-                let ansStr = `${sum}/${den}`;
-
-                const choices = this.makeOptions(ansStr, 'STR', () => {
-                    let w = sum + this.rand(-2, 2); if(w<=0) w=1;
-                    return `${w}/${den}`;
-                });
-                return { q: qStr, choices, ans: ansStr };
+            if (diff === 0) {
+                let den = this.rand(2, 9); let whole = this.rand(1, 4); let num = this.rand(1, den - 1);
+                return { q: `가분수 [ ${whole*den+num}/${den} ]를\n대분수로 바꾸면?`, choices: this.makeOptions(`${whole}과 ${num}/${den}`, 'STR', ()=>`${whole+this.rand(-1,2)}과 ${this.rand(1,den-1)}/${den}`), ans: `${whole}과 ${num}/${den}` };
+            } else if (diff === 1) {
+                let den = this.rand(3, 15); let n1 = this.rand(1, den*2); let n2 = n1; while(n2===n1) n2=this.rand(1, den*2);
+                return { q: `빈칸에 알맞은 기호는?\n${n1}/${den} □ ${n2}/${den}`, choices: ['>', '<', '=', '?'].sort(()=>Math.random()-0.5), ans: n1>n2?'>':'<' };
+            } else {
+                let den = this.rand(3, 12); let n1 = this.rand(1, den-1); let n2 = this.rand(1, den-1); let sum = n1+n2;
+                return { q: `${n1}/${den} + ${n2}/${den} = ?`, choices: this.makeOptions(`${sum}/${den}`, 'STR', ()=>`${sum+this.rand(-2,2)}/${den}`), ans: `${sum}/${den}` };
             }
         }
     };
 
-    /**
-     * ========================================================
-     * 퍼즐 시스템 (수학 전용)
-     * ========================================================
-     */
+    // --- 퍼즐 시스템 ---
     const PuzzleSystem = {
         start(mode) {
-            State.puzzle.mode = mode;
-            State.puzzle.score = 0;
-            State.puzzle.combo = 0;
-            State.puzzle.maxCombo = 0;
-            State.puzzle.isPlaying = true;
-
-            State.puzzle.difficulty = 0;
-            State.puzzle.mathCount = 0;
-
-            // 헤더 설정
-            const header = document.getElementById('puzzleHeader');
+            State.puzzle.mode = mode; State.puzzle.score = 0; State.puzzle.combo = 0; State.puzzle.maxCombo = 0;
+            State.puzzle.isPlaying = true; State.puzzle.difficulty = 0; State.puzzle.mathCount = 0;
             const title = document.getElementById('puzzleTitle');
             const info = document.getElementById('puzzleLevelTag');
+            if (mode === 'MUL') { title.textContent = "✖️ 곱셈 트레이닝"; info.textContent = "난이도: 1단계"; }
+            else if (mode === 'DIV') { title.textContent = "➗ 나눗셈 트레이닝"; info.textContent = "난이도: 하"; }
+            else { title.textContent = "½ 분수 트레이닝"; info.textContent = "난이도: 하"; }
+            showView('puzzleModal'); this.nextLevel();
+        },
+        stop() {
+            State.puzzle.isPlaying = false; clearInterval(State.puzzle.timer);
+            showView('lobbyScreen');
 
-            if (mode === 'MUL') {
-                title.textContent = "✖️ 곱셈 트레이닝";
-                info.textContent = "난이도: 1단계";
-            } else if (mode === 'DIV') {
-                title.textContent = "➗ 나눗셈 트레이닝";
-                info.textContent = "난이도: 하";
-            } else {
-                title.textContent = "½ 분수 트레이닝";
-                info.textContent = "난이도: 하";
+            // 콤보 레어 티켓 보상 계산 (삼각수열: 10->1, 20->3, 30->6, 40->10...)
+            const comboStep = Math.floor(State.puzzle.maxCombo / 10);
+            const rareReward = (comboStep * (comboStep + 1)) / 2;
+
+            if (State.puzzle.maxCombo > State.maxComboRecord) {
+                State.maxComboRecord = State.puzzle.maxCombo;
             }
 
-            showView('puzzleModal');
-            this.nextLevel();
-        },
-
-        stop() {
-            State.puzzle.isPlaying = false;
-            clearInterval(State.puzzle.timer);
-            showView('lobbyScreen');
             let msg = `최종 콤보: ${State.puzzle.maxCombo}\n획득 포인트: ${State.puzzle.score} P`;
-            if(State.puzzle.score > 0) { State.points += State.puzzle.score; saveData(); showMessage('게임 종료', msg); }
-        },
+            if (rareReward > 0) {
+                State.rareTickets += rareReward;
+                msg += `\n\n🎉 콤보 보너스: 레어 티켓 +${rareReward}장!`;
+            }
 
+            showMessage("게임 종료", msg);
+
+            if(State.puzzle.score > 0) { State.points += State.puzzle.score; }
+            saveData();
+        },
         nextLevel() {
             if(!State.puzzle.isPlaying) return;
-
-            // 난이도 상승 로직
             State.puzzle.mathCount++;
-
             if (State.puzzle.mode === 'MUL') {
-                // 곱셈: 6문제마다 1단계씩 상승 (총 7단계: 인덱스 0~6)
-                // mathCount: 1~6 -> 0 (1단계)
-                // mathCount: 7~12 -> 1 (2단계) ...
                 let levelIndex = Math.floor((State.puzzle.mathCount - 1) / 6);
                 if (levelIndex > 6) levelIndex = 6;
                 State.puzzle.difficulty = levelIndex;
                 document.getElementById('puzzleLevelTag').textContent = `난이도: ${levelIndex + 1}단계`;
             } else {
-                // 나눗셈/분수: 기존 3단계 (하/중/상)
-                if (State.puzzle.mathCount > 12) State.puzzle.difficulty = 2; // 상
-                else if (State.puzzle.mathCount > 6) State.puzzle.difficulty = 1; // 중
-                else State.puzzle.difficulty = 0; // 하
-                const diffName = ['하','중','상'][State.puzzle.difficulty];
-                document.getElementById('puzzleLevelTag').textContent = `난이도: ${diffName}`;
+                if (State.puzzle.mathCount > 12) State.puzzle.difficulty = 2;
+                else if (State.puzzle.mathCount > 6) State.puzzle.difficulty = 1;
+                else State.puzzle.difficulty = 0;
+                document.getElementById('puzzleLevelTag').textContent = `난이도: ${['하','중','상'][State.puzzle.difficulty]}`;
             }
-
-            // 문제 데이터 생성
             const mathData = MathLogic.generate(State.puzzle.mode, State.puzzle.difficulty);
-
-            this.renderUI({
-                text: mathData.q,
-                choices: mathData.choices.map(c => ({ text: String(c), isCorrect: String(c) === String(mathData.ans) }))
-            });
+            this.renderUI({ text: mathData.q, choices: mathData.choices.map(c => ({ text: String(c), isCorrect: String(c) === String(mathData.ans) })) });
             this.startTimer();
         },
-
         startTimer() {
-            clearInterval(State.puzzle.timer);
-            State.puzzle.timeLeft = CONFIG.puzzleTime;
+            clearInterval(State.puzzle.timer); State.puzzle.timeLeft = CONFIG.puzzleTime;
             const bar = document.getElementById('puzzleTimerBar');
             bar.style.transition = 'none'; bar.style.width = '100%'; void bar.offsetWidth;
-            bar.style.transition = `width ${CONFIG.puzzleTime}s linear`;
-            bar.style.width = '0%';
+            bar.style.transition = `width ${CONFIG.puzzleTime}s linear`; bar.style.width = '0%';
             State.puzzle.timer = setInterval(() => {
                 State.puzzle.timeLeft -= 1;
                 if(State.puzzle.timeLeft < 0) { clearInterval(State.puzzle.timer); this.handleWrong('시간 초과!'); }
             }, 1000);
         },
-
         renderUI(data) {
             document.getElementById('puzzleCombo').textContent = `${State.puzzle.combo} Combo`;
-
-            const qMath = document.getElementById('mathQuestionArea');
-            const aContainer = document.getElementById('answerContainer');
-            aContainer.innerHTML = '';
-
-            // 수학 문제 표시
-            qMath.innerHTML = data.text.replace(/\n/g, '<br>');
-
-            // 정답 버튼 렌더링
+            document.getElementById('mathQuestionArea').innerHTML = data.text.replace(/\n/g, '<br>');
+            const ac = document.getElementById('answerContainer'); ac.innerHTML = '';
             data.choices.forEach((item) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'puzzle-box';
-                wrapper.style.aspectRatio = 'auto';
-                wrapper.style.padding = '20px';
-                wrapper.textContent = item.text;
-
+                const wrapper = document.createElement('div'); wrapper.className = 'puzzle-box';
+                wrapper.style.aspectRatio = 'auto'; wrapper.style.padding = '20px'; wrapper.textContent = item.text;
                 wrapper.onclick = () => this.checkAnswer(item, wrapper);
-                aContainer.appendChild(wrapper);
+                ac.appendChild(wrapper);
             });
         },
-
         checkAnswer(item, el) {
-            if(!State.puzzle.isPlaying) return;
-            clearInterval(State.puzzle.timer);
-
+            if(!State.puzzle.isPlaying) return; clearInterval(State.puzzle.timer);
             if(item.isCorrect) {
                 el.classList.add('selected'); el.style.backgroundColor = '#d1fae5';
                 State.puzzle.combo++;
                 if(State.puzzle.combo > State.puzzle.maxCombo) State.puzzle.maxCombo = State.puzzle.combo;
                 State.puzzle.score += (CONFIG.puzzleReward + (State.puzzle.combo * CONFIG.puzzleComboBonus));
-
                 setTimeout(() => this.nextLevel(), 400);
             } else {
                 el.classList.add('shake'); el.style.backgroundColor = '#fee2e2';
@@ -598,180 +582,107 @@
         handleWrong(msg) { showMessage('게임 오버', `${msg}\n최종 콤보: ${State.puzzle.maxCombo}`); this.stop(); }
     };
 
-    /**
-     * ========================================================
-     * 색칠 게임 로직 (복구됨)
-     * ========================================================
-     */
+    // --- 색칠 게임 ---
     const GAME_CONST = { CELL_SCALE: 15 };
-    let GameSession = {
-        imgWidth: 0, imgHeight: 0,
-        paletteMap: [null], numberGrid: [], completedGrid: [],
-        totalCells: 0, completedCells: 0, selectedColorIdx: 0,
-        quadrants: [], stageId: 0, zoomQuad: null
-    };
-
-    function initQuadGrid() {
-        const grid = document.getElementById('quadGrid');
-        grid.innerHTML = '';
-        GameSession.quadrants = [];
-        for(let i=0; i<4; i++) {
-            const wrap = document.createElement('div');
-            const c = document.createElement('canvas');
-            wrap.appendChild(c);
-            grid.appendChild(wrap);
-            const ctx = c.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-            const q = { id:i, canvas:c, ctx:ctx, x:0, y:0, w:0, h:0 };
-            c.onclick = () => openZoom(q);
-            GameSession.quadrants.push(q);
-        }
-    }
+    let GameSession = { imgWidth: 0, imgHeight: 0, paletteMap: [null], numberGrid: [], completedGrid: [], totalCells: 0, completedCells: 0, selectedColorIdx: 0, quadrants: [], stageId: 0, zoomQuad: null };
 
     async function startGame(item) {
-        const stageId = (item.type === 'H') ? -item.id : item.id;
-        GameSession.stageId = stageId;
-        showView('gameScreen');
-        document.getElementById('gameTitle').textContent = item.type === 'H' ? `Hidden ${item.id}` : `No.${item.id}`;
-        document.getElementById('loadingSpinner').style.display = 'block';
-        document.getElementById('quadGrid').style.opacity = '0';
+        GameSession.stageId = (item.type === 'H') ? -item.id : item.id;
+        showView('gameScreen'); document.getElementById('gameTitle').textContent = item.type === 'H' ? `Hidden ${item.id}` : `No.${item.id}`;
+        document.getElementById('loadingSpinner').style.display = 'block'; document.getElementById('quadGrid').style.opacity = '0';
         initQuadGrid();
         try {
-            await processImage(item.url);
-            restoreProgress(stageId);
-            updateGameProgressUI();
-            renderAllQuads();
-            renderPalette();
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('quadGrid').style.opacity = '1';
-        } catch(e) {
-            console.error(e);
-            if (e.name === 'SecurityError' || e.message.includes('tainted')) {
-                showMessage("실행 환경 오류", "로컬 파일 보안 문제. 웹 서버에서 실행해주세요.");
-            } else {
-                showMessage("오류", "이미지 처리 중 문제가 발생했습니다.");
-            }
-            showView('bookScreen');
+            await processImage(item.url); restoreProgress(GameSession.stageId); updateGameProgressUI(); renderAllQuads(); renderPalette();
+            document.getElementById('loadingSpinner').style.display = 'none'; document.getElementById('quadGrid').style.opacity = '1';
+        } catch(e) { showMessage("오류", "이미지 로드 실패"); showView('bookScreen'); }
+    }
+    function initQuadGrid() {
+        const grid = document.getElementById('quadGrid'); grid.innerHTML = ''; GameSession.quadrants = [];
+        for(let i=0; i<4; i++) {
+            const wrap = document.createElement('div'); const c = document.createElement('canvas');
+            wrap.appendChild(c); grid.appendChild(wrap);
+            const ctx = c.getContext('2d'); ctx.imageSmoothingEnabled = false;
+            const q = { id:i, canvas:c, ctx:ctx, x:0, y:0, w:0, h:0 };
+            c.onclick = () => openZoom(q); GameSession.quadrants.push(q);
         }
     }
-
     function processImage(url) {
         return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'Anonymous';
-            img.src = url;
+            const img = new Image(); img.crossOrigin = 'Anonymous'; img.src = url;
             img.onload = () => {
-                const w = img.width; const h = img.height;
-                GameSession.imgWidth = w; GameSession.imgHeight = h;
-                const cvs = document.createElement('canvas');
-                cvs.width = w; cvs.height = h;
-                const ctx = cvs.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                try {
-                    const data = ctx.getImageData(0,0,w,h).data;
-                    GameSession.numberGrid = []; GameSession.completedGrid = [];
-                    GameSession.paletteMap = [null];
-                    let paletteDict = {}; let colorCount = 1;
-                    GameSession.totalCells = 0; GameSession.completedCells = 0;
-                    for(let y=0; y<h; y++) {
-                        GameSession.numberGrid[y] = []; GameSession.completedGrid[y] = [];
-                        for(let x=0; x<w; x++) {
-                            const i = (y*w + x)*4; const a = data[i+3];
-                            if(a < 128) {
-                                GameSession.numberGrid[y][x] = 0; GameSession.completedGrid[y][x] = true;
-                            } else {
-                                const rgba = `rgba(${data[i]},${data[i+1]},${data[i+2]},${(a/255).toFixed(2)})`;
-                                if(!paletteDict[rgba]) { paletteDict[rgba] = colorCount; GameSession.paletteMap[colorCount] = rgba; colorCount++; }
-                                GameSession.numberGrid[y][x] = paletteDict[rgba]; GameSession.completedGrid[y][x] = false;
-                                GameSession.totalCells++;
-                            }
+                const w = img.width; const h = img.height; GameSession.imgWidth = w; GameSession.imgHeight = h;
+                const cvs = document.createElement('canvas'); cvs.width = w; cvs.height = h;
+                const ctx = cvs.getContext('2d'); ctx.drawImage(img, 0, 0);
+                const data = ctx.getImageData(0,0,w,h).data;
+                GameSession.numberGrid = []; GameSession.completedGrid = []; GameSession.paletteMap = [null];
+                let paletteDict = {}; let colorCount = 1; GameSession.totalCells = 0; GameSession.completedCells = 0;
+                for(let y=0; y<h; y++) {
+                    GameSession.numberGrid[y] = []; GameSession.completedGrid[y] = [];
+                    for(let x=0; x<w; x++) {
+                        const i = (y*w + x)*4;
+                        if(data[i+3] < 128) { GameSession.numberGrid[y][x] = 0; GameSession.completedGrid[y][x] = true; }
+                        else {
+                            const rgba = `rgba(${data[i]},${data[i+1]},${data[i+2]},${(data[i+3]/255).toFixed(2)})`;
+                            if(!paletteDict[rgba]) { paletteDict[rgba] = colorCount; GameSession.paletteMap[colorCount] = rgba; colorCount++; }
+                            GameSession.numberGrid[y][x] = paletteDict[rgba]; GameSession.completedGrid[y][x] = false; GameSession.totalCells++;
                         }
                     }
-                    const halfW = Math.floor(w/2); const halfH = Math.floor(h/2);
-                    const geoms = [{x:0, y:0, w:halfW, h:halfH},{x:halfW, y:0, w:w-halfW, h:halfH},{x:0, y:halfH, w:halfW, h:h-halfH},{x:halfW, y:halfH, w:w-halfW, h:h-halfH}];
-                    geoms.forEach((g, idx) => {
-                        const q = GameSession.quadrants[idx];
-                        q.x = g.x; q.y = g.y; q.w = g.w; q.h = g.h;
-                        q.canvas.width = g.w * GAME_CONST.CELL_SCALE;
-                        q.canvas.height = g.h * GAME_CONST.CELL_SCALE;
-                    });
-                    resolve();
-                } catch (err) { reject(err); }
+                }
+                const halfW = Math.floor(w/2); const halfH = Math.floor(h/2);
+                const geoms = [{x:0, y:0, w:halfW, h:halfH},{x:halfW, y:0, w:w-halfW, h:halfH},{x:0, y:halfH, w:halfW, h:h-halfH},{x:halfW, y:halfH, w:w-halfW, h:h-halfH}];
+                geoms.forEach((g, idx) => {
+                    const q = GameSession.quadrants[idx]; q.x=g.x; q.y=g.y; q.w=g.w; q.h=g.h;
+                    q.canvas.width = g.w * GAME_CONST.CELL_SCALE; q.canvas.height = g.h * GAME_CONST.CELL_SCALE;
+                });
+                resolve();
             };
-            img.onerror = () => reject(new Error("로드 실패"));
+            img.onerror = () => reject();
         });
     }
-
-    function renderAllQuads() { GameSession.quadrants.forEach(q => drawQuad(q)); }
     function drawQuad(q) {
-        const scale = GAME_CONST.CELL_SCALE;
-        const ctx = q.ctx;
-        ctx.clearRect(0, 0, q.canvas.width, q.canvas.height);
+        const scale = GAME_CONST.CELL_SCALE; const ctx = q.ctx; ctx.clearRect(0, 0, q.canvas.width, q.canvas.height);
         for(let y=0; y<q.h; y++) {
             for(let x=0; x<q.w; x++) {
-                const gy = q.y + y; const gx = q.x + x;
-                const idx = GameSession.numberGrid[gy][gx];
+                const gy = q.y + y; const gx = q.x + x; const idx = GameSession.numberGrid[gy][gx];
                 if(idx === 0) continue;
-                if(GameSession.completedGrid[gy][gx]) {
-                    ctx.fillStyle = GameSession.paletteMap[idx]; ctx.fillRect(x*scale, y*scale, scale, scale);
-                } else {
-                    ctx.fillStyle = '#fff'; ctx.fillRect(x*scale, y*scale, scale, scale);
-                    ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1; ctx.strokeRect(x*scale, y*scale, scale, scale);
-                    if(scale > 8) { ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(idx, x*scale+scale/2, y*scale+scale/2+1); }
-                }
+                if(GameSession.completedGrid[gy][gx]) { ctx.fillStyle = GameSession.paletteMap[idx]; ctx.fillRect(x*scale, y*scale, scale, scale); }
+                else { ctx.fillStyle = '#fff'; ctx.fillRect(x*scale, y*scale, scale, scale); ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1; ctx.strokeRect(x*scale, y*scale, scale, scale); if(scale > 8) { ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(idx, x*scale+scale/2, y*scale+scale/2+1); } }
             }
         }
     }
+    function renderAllQuads() { GameSession.quadrants.forEach(q => drawQuad(q)); }
     function renderPalette() {
-        const con = document.getElementById('paletteContainer');
-        con.innerHTML = '';
+        const con = document.getElementById('paletteContainer'); con.innerHTML = '';
         for(let i=1; i<GameSession.paletteMap.length; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'palette-button';
-            btn.style.backgroundColor = GameSession.paletteMap[i];
-            btn.textContent = i;
-            btn.onclick = () => selectPaletteColor(i);
-            con.appendChild(btn);
+            const btn = document.createElement('button'); btn.className = 'palette-button';
+            btn.style.backgroundColor = GameSession.paletteMap[i]; btn.textContent = i;
+            btn.onclick = () => selectPaletteColor(i); con.appendChild(btn);
         }
     }
     function selectPaletteColor(idx) {
         GameSession.selectedColorIdx = idx;
         [document.getElementById('paletteContainer'), document.getElementById('zoomPalette')].forEach(con => {
-            if(!con) return;
-            Array.from(con.children).forEach(b => {
-                if(parseInt(b.textContent) === idx) b.classList.add('selected'); else b.classList.remove('selected');
-            });
+            if(!con) return; Array.from(con.children).forEach(b => { if(parseInt(b.textContent) === idx) b.classList.add('selected'); else b.classList.remove('selected'); });
         });
     }
     function openZoom(q) {
-        GameSession.zoomQuad = q;
-        document.getElementById('zoomOverlay').style.display = 'flex';
-        const zCvs = document.getElementById('zoomCanvas');
-        const zScale = GAME_CONST.CELL_SCALE * 2;
+        GameSession.zoomQuad = q; document.getElementById('zoomOverlay').style.display = 'flex';
+        const zCvs = document.getElementById('zoomCanvas'); const zScale = GAME_CONST.CELL_SCALE * 2;
         zCvs.width = q.w * zScale; zCvs.height = q.h * zScale;
         drawZoomCanvas(zCvs, q, zScale);
-        const zp = document.getElementById('zoomPalette');
-        zp.innerHTML = document.getElementById('paletteContainer').innerHTML;
+        const zp = document.getElementById('zoomPalette'); zp.innerHTML = document.getElementById('paletteContainer').innerHTML;
         Array.from(zp.children).forEach((btn, i) => btn.onclick = () => selectPaletteColor(i+1));
         if(GameSession.selectedColorIdx) selectPaletteColor(GameSession.selectedColorIdx);
         zCvs.onclick = (e) => handleZoomClick(e, q, zScale);
     }
     function drawZoomCanvas(cvs, q, scale) {
-        const ctx = cvs.getContext('2d');
-        ctx.imageSmoothingEnabled = false;
-        ctx.clearRect(0,0,cvs.width,cvs.height);
+        const ctx = cvs.getContext('2d'); ctx.imageSmoothingEnabled = false; ctx.clearRect(0,0,cvs.width,cvs.height);
         for(let y=0; y<q.h; y++) {
             for(let x=0; x<q.w; x++) {
-                const gy = q.y + y; const gx = q.x + x;
-                const idx = GameSession.numberGrid[gy][gx];
+                const gy = q.y + y; const gx = q.x + x; const idx = GameSession.numberGrid[gy][gx];
                 if(idx === 0) continue;
-                if(GameSession.completedGrid[gy][gx]) {
-                    ctx.fillStyle = GameSession.paletteMap[idx]; ctx.fillRect(x*scale, y*scale, scale, scale);
-                } else {
-                    ctx.fillStyle = '#fff'; ctx.fillRect(x*scale, y*scale, scale, scale);
-                    ctx.strokeStyle = '#d1d5db'; ctx.strokeRect(x*scale, y*scale, scale, scale);
-                    ctx.fillStyle = '#6b7280'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(idx, x*scale+scale/2, y*scale+scale/2+1);
-                }
+                if(GameSession.completedGrid[gy][gx]) { ctx.fillStyle = GameSession.paletteMap[idx]; ctx.fillRect(x*scale, y*scale, scale, scale); }
+                else { ctx.fillStyle = '#fff'; ctx.fillRect(x*scale, y*scale, scale, scale); ctx.strokeStyle = '#d1d5db'; ctx.strokeRect(x*scale, y*scale, scale, scale); ctx.fillStyle = '#6b7280'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(idx, x*scale+scale/2, y*scale+scale/2+1); }
             }
         }
     }
@@ -785,8 +696,7 @@
             if(GameSession.completedGrid[gy][gx]) return;
             if(GameSession.numberGrid[gy][gx] === GameSession.selectedColorIdx) {
                 GameSession.completedGrid[gy][gx] = true; GameSession.completedCells++;
-                drawZoomCanvas(e.target, q, scale); drawQuad(q);
-                saveProgress(); updateGameProgressUI(); checkCompletion();
+                drawZoomCanvas(e.target, q, scale); drawQuad(q); saveProgress(); updateGameProgressUI(); checkCompletion();
             } else if (GameSession.numberGrid[gy][gx] !== 0) {
                 e.target.classList.add('shake'); setTimeout(()=>e.target.classList.remove('shake'),300);
             }
@@ -796,84 +706,165 @@
     function restoreProgress(stageId) {
         const saved = localStorage.getItem(LS_KEY.progress + stageId);
         if(saved) {
-            try { const grid = JSON.parse(saved);
-                if(grid.length===GameSession.imgHeight && grid[0].length===GameSession.imgWidth) {
-                    GameSession.completedGrid = grid;
-                    let done=0; for(let y=0;y<GameSession.imgHeight;y++) for(let x=0;x<GameSession.imgWidth;x++) if(GameSession.numberGrid[y][x]!==0 && GameSession.completedGrid[y][x]) done++;
-                    GameSession.completedCells=done;
-                }
-            } catch(e){}
+            try { const grid = JSON.parse(saved); if(grid.length===GameSession.imgHeight && grid[0].length===GameSession.imgWidth) { GameSession.completedGrid = grid; let done=0; for(let y=0;y<GameSession.imgHeight;y++) for(let x=0;x<GameSession.imgWidth;x++) if(GameSession.numberGrid[y][x]!==0 && GameSession.completedGrid[y][x]) done++; GameSession.completedCells=done; } } catch(e){}
         }
     }
     function updateGameProgressUI() {
         const pct = Math.floor((GameSession.completedCells / GameSession.totalCells) * 100) || 0;
         document.getElementById('gameProgress').textContent = `${pct}%`;
     }
+
     function checkCompletion() {
         if(GameSession.completedCells >= GameSession.totalCells) {
             if(!State.colored.has(GameSession.stageId)) {
                 State.colored.add(GameSession.stageId);
-                State.points += 500; State.coupons += 1; saveData();
-                showMessage("축하합니다!", "작품을 완성했습니다!\n500P와 도전 티켓 1장을 획득했습니다.");
+                State.points += 500;
+                showMessage("작품 완성!", "500P를 획득했습니다.\n(확정 티켓은 '업적' 메뉴에서 획득 가능)");
+                saveData();
             }
         }
     }
 
-    /**
-     * ========================================================
-     * 공통 기능 및 이벤트
-     * ========================================================
-     */
+    // --- 가챠 시스템 ---
     function renderBook() { const grid = document.getElementById('bookGrid'); grid.innerHTML=''; State.normalList.forEach(item => grid.appendChild(createCard(item, State.owned.has(item.id), State.colored.has(item.id), getRarity(item.id)))); State.hiddenList.forEach(item => { if(State.hiddenOwned.has(item.id)) grid.appendChild(createCard(item, true, State.colored.has(-item.id), 'H')); }); }
     function createCard(item, isOwned, isColored, rarity) { const div = document.createElement('div'); div.className = `card ${isColored ? 'colored rarity-'+rarity : ''}`; const img = document.createElement('img'); img.src = item.url; if(!isOwned) img.className = 'locked'; const label = document.createElement('div'); label.className = 'absolute bottom-0 w-full bg-white/90 text-center text-[10px] py-1 font-bold text-gray-600 truncate'; label.textContent = item.type==='H' ? `H-${item.id}` : `No.${item.id}`; div.appendChild(img); div.appendChild(label); if(isOwned) div.onclick = () => startGame(item); return div; }
-    function doGacha(count) { const cost = count * CONFIG.gachaCost; if(State.points < cost) { showMessage('포인트 부족', `${cost}P가 필요합니다.`); return; } State.points -= cost; runGacha(count); }
 
-    function runGacha(count) {
-        const results = [];
-        let refund = 0;
-        for(let i=0; i<count; i++) {
-            const rand = Math.random();
-            let rarity = 'C';
-            if(rand < 0.05) rarity = 'SR';
-            else if(rand < 0.25) rarity = 'R';
-            let pool = [];
-            if(rarity === 'C') pool = State.normalList.filter(x => x.id <= 100);
-            else if(rarity === 'R') pool = State.normalList.filter(x => x.id > 100 && x.id <= 200);
-            else pool = State.normalList.filter(x => x.id > 200);
-            if(!pool.length) pool = State.normalList;
-            const pick = pool[Math.floor(Math.random()*pool.length)];
-            let isNew = false;
-            if(State.owned.has(pick.id)) refund += 50;
-            else { State.owned.add(pick.id); isNew = true; }
-            results.push({...pick, isNew, rarity});
+    // 일반 가챠
+    function doGacha(count) {
+        const cost = count * CONFIG.gachaCost;
+        if(State.points < cost) { showMessage('포인트 부족', `${cost}P가 필요합니다.`); return; }
+        State.points -= cost;
+        runGachaAlgorithm(count, false);
+    }
+
+    // 레어 가챠 (R 이상만 등장)
+    function doRareGacha() {
+        if(State.rareTickets < 1) { showMessage('티켓 부족', '레어 티켓이 부족합니다.\n수학 문제를 풀어 콤보를 달성하세요!'); return; }
+        State.rareTickets -= 1;
+        runGachaAlgorithm(1, true);
+    }
+
+    // [NEW] 확정 가챠 (미보유 캐릭터 확정)
+    function doGuaranteedGacha() {
+        if(State.guaranteedTickets < 1) { showMessage('티켓 부족', '확정 티켓이 부족합니다.\n업적 보상으로 획득할 수 있습니다!'); return; }
+        State.guaranteedTickets -= 1;
+
+        // 미보유 목록 필터링
+        const unowned = State.normalList.filter(p => !State.owned.has(p.id));
+
+        let pick;
+        if(unowned.length === 0) {
+            // 이미 다 모았으면? -> 환급 + 레어티켓으로 대체
+            showMessage("알림", "모든 픽셀을 수집했습니다!\n레어 티켓 3장으로 대체됩니다.");
+            State.rareTickets += 3;
+            saveData();
+            return;
+        } else {
+            // 미보유 중 랜덤 하나 선택
+            pick = unowned[Math.floor(Math.random() * unowned.length)];
         }
-        if(refund > 0) State.points += refund;
+
+        State.owned.add(pick.id);
+        const rarity = getRarity(pick.id);
+
         saveData();
+
+        // 결과창 표시
         const grid = document.getElementById('gachaGrid');
         grid.innerHTML = '';
-        document.getElementById('gachaTitle').textContent = "획득 결과";
+        document.getElementById('gachaTitle').textContent = "💎 미보유 확정 획득 💎";
+        const d = document.createElement('div');
+        d.className = `card rarity-${rarity} relative animate-pulse border-2`;
+        d.innerHTML = `
+            <div class="rarity-tag">${rarity}</div>
+            <img class="w-full h-full object-contain" src="${pick.url}" alt="No.${pick.id}" />
+            <div class="text-center text-[11px] mt-1">No.${pick.id}</div>
+            <span class="absolute top-0 right-0 bg-red-500 text-white text-[9px] px-1">NEW</span>
+        `;
+        grid.appendChild(d);
+        document.getElementById('gachaSummary').textContent = "새로운 픽셀을 획득했습니다!";
+        document.getElementById('gachaModal').style.display = 'flex';
+    }
+
+    function runGachaAlgorithm(count, isRare) {
+        const results = [];
+        let refund = 0;
+
+        const pools = { C: [], R: [], SR: [], H: [] };
+        State.normalList.forEach(p => {
+            const r = getRarity(p.id);
+            if (isRare && r === 'C') return;
+            (pools[r] ?? pools.C).push(p);
+        });
+
+        const rates = isRare ? RARE_GACHA_RATES : GACHA_RATES;
+
+        for (let i = 0; i < count; i++) {
+            const rarity = rollRarityWithFallback(pools, rates);
+            const pool = pools[rarity];
+            const pick = pool[Math.floor(Math.random() * pool.length)];
+
+            let isNew = false;
+            if (State.owned.has(pick.id)) refund += (DUP_REFUND[rarity] ?? 50);
+            else { State.owned.add(pick.id); isNew = true; }
+
+            results.push({ ...pick, isNew, rarity });
+        }
+
+        if (refund > 0) State.points += refund;
+        saveData();
+
+        const grid = document.getElementById('gachaGrid');
+        grid.innerHTML = '';
+        document.getElementById('gachaTitle').textContent = isRare ? "✨ 레어 가챠 결과 ✨" : "획득 결과";
         results.forEach(r => {
             const d = document.createElement('div');
             d.className = `card rarity-${r.rarity} relative animate-pulse border-2`;
-            d.innerHTML = `<div class="rarity-tag">${r.rarity}</div><img src="${r.url}" class="bg-gray-100">${r.isNew?'<span class="absolute bottom-0 right-0 bg-red-500 text-white text-[9px] px-1">NEW</span>':''}`;
+            d.innerHTML = `
+                <div class="rarity-tag">${r.rarity}</div>
+                <img class="w-full h-full object-contain" src="${r.url}" alt="No.${r.id}" />
+                <div class="text-center text-[11px] mt-1">No.${r.id}</div>
+                ${r.isNew ? '<span class="absolute top-0 right-0 bg-red-500 text-white text-[9px] px-1">NEW</span>' : ''}
+            `;
             grid.appendChild(d);
         });
         document.getElementById('gachaSummary').textContent = `환급: ${refund}P`;
         document.getElementById('gachaModal').style.display = 'flex';
     }
 
+    function rollRarityWithFallback(pools, rates) {
+        const order = ['H', 'SR', 'R', 'C'];
+        let r = Math.random();
+        let cum = 0;
+        let chosen = 'C';
+        for (const k of order) {
+            cum += (rates[k] ?? 0);
+            if (r < cum) { chosen = k; break; }
+        }
+        const startIdx = order.indexOf(chosen);
+        for (let i = startIdx; i < order.length; i++) {
+            const k = order[i];
+            if (pools[k] && pools[k].length) return k;
+        }
+        for (let i = order.length - 1; i >= 0; i--) {
+            const k = order[i];
+            if (pools[k] && pools[k].length) return k;
+        }
+        return 'C';
+    }
+
     function bindEvents() {
         document.getElementById('startButton').onclick = () => showView('lobbyScreen');
         document.getElementById('goBookBtn').onclick = () => showView('bookScreen');
-
-        // 수학 버튼
         document.getElementById('goMulBtn').onclick = () => PuzzleSystem.start('MUL');
         document.getElementById('goDivBtn').onclick = () => PuzzleSystem.start('DIV');
         document.getElementById('goFracBtn').onclick = () => PuzzleSystem.start('FRAC');
 
-        // 공통
         document.getElementById('gacha1Btn').onclick = () => doGacha(1);
         document.getElementById('gacha10Btn').onclick = () => doGacha(10);
+        document.getElementById('rareGachaBtn').onclick = () => doRareGacha();
+        document.getElementById('guaranteedGachaBtn').onclick = () => doGuaranteedGacha();
+
         document.getElementById('quickGachaBtn').onclick = () => doGacha(10);
         document.getElementById('backToLobbyFromBook').onclick = () => showView('lobbyScreen');
         document.getElementById('exitGameBtn').onclick = () => { showView('bookScreen'); renderBook(); };
@@ -881,6 +872,9 @@
         document.getElementById('msgOkBtn').onclick = () => document.getElementById('msgModal').style.display = 'none';
         document.getElementById('gachaCloseBtn').onclick = () => document.getElementById('gachaModal').style.display = 'none';
         document.getElementById('zoomCloseBtn').onclick = () => document.getElementById('zoomOverlay').style.display = 'none';
+
+        document.getElementById('achievementBtn').onclick = () => AchievementSystem.open();
+        document.getElementById('closeAchievementBtn').onclick = () => document.getElementById('achievementModal').style.display = 'none';
     }
 
     window.onload = initGame;
