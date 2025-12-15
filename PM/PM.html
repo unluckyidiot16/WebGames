@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>픽셀 & 수학 트레이닝</title>
+    <title>픽셀 & 수학 트레이닝 V3</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: ui-sans-serif, system-ui; touch-action: manipulation; -webkit-user-select:none; user-select:none; oversizer-behavior: contain; }
@@ -234,7 +234,7 @@
         normalList: [], hiddenList: [],
         puzzle: {
             mode: 'MUL', // MUL, DIV, FRAC
-            difficulty: 0, // 0:하, 1:중, 2:상
+            difficulty: 0, // 0~6: 곱셈, 0~2: 나눗셈/분수
             mathCount: 0, // 난이도 상승 카운터
             score: 0, combo: 0, maxCombo: 0,
             timer: null, isPlaying: false, timeLeft: 0
@@ -319,28 +319,65 @@
             if (mode === 'FRAC') return this.frac(diff);
         },
 
+        // 곱셈 7단계 난이도 (사용자 지정 패턴)
         mul(diff) {
-            let a, b, qStr, ans;
-            if (diff === 0) { // 하: 세자리 x 한자리
-                a = this.rand(100, 999); b = this.rand(2, 9);
-            } else if (diff === 1) { // 중: 몇십 x 몇십
-                a = this.rand(2, 9) * 10; b = this.rand(2, 9) * 10;
-            } else { // 상: 몇십몇 x 몇십몇
-                a = this.rand(11, 99); b = this.rand(11, 99);
+            let a, b;
+
+            if (diff === 0) {
+                // 1단계: A00 X B (예: 200 x 3)
+                a = this.rand(1, 9) * 100;
+                b = this.rand(1, 9);
             }
-            ans = a * b;
-            qStr = `${a} × ${b} = ?`;
+            else if (diff === 1) {
+                // 2단계: C0 X D0 (예: 30 x 40)
+                a = this.rand(1, 9) * 10;
+                b = this.rand(1, 9) * 10;
+            }
+            else if (diff === 2) {
+                // 3단계: EF X G0 (예: 23 x 40)
+                a = this.rand(10, 99);
+                b = this.rand(1, 9) * 10;
+            }
+            else if (diff === 3) {
+                // 4단계: HI X JK (예: 23 x 45)
+                a = this.rand(10, 99);
+                b = this.rand(10, 99);
+            }
+            else if (diff === 4) {
+                // 5단계: LM0 X O0 (예: 120 x 30) -> LM은 10~99
+                a = this.rand(10, 99) * 10;
+                b = this.rand(1, 9) * 10;
+            }
+            else if (diff === 5) {
+                // 6단계: PQ0 X RS (예: 120 x 34)
+                a = this.rand(10, 99) * 10;
+                b = this.rand(10, 99);
+            }
+            else {
+                // 7단계: TUV X XY (예: 123 x 45)
+                a = this.rand(100, 999);
+                b = this.rand(10, 99);
+            }
+
+            let ans = a * b;
+            let qStr = `${a} × ${b} = ?`;
+
             const choices = this.makeOptions(ans, 'NUM', () => {
-                return ans + (Math.random()>0.5 ? 10 : -10) * this.rand(1,5);
+                let offset = (Math.random() > 0.5 ? 1 : -1) * (Math.random() > 0.5 ? 10 : 1);
+                if (Math.random() > 0.8) offset *= 10;
+                // 정답 근처의 오답 생성
+                return ans + offset * this.rand(1, 5);
             });
+
             return { q: qStr, choices, ans };
         },
 
         div(diff) {
             let a, b, qStr, ansStr;
+            // 나눗셈 기존 3단계 유지
             if (diff === 0) { // 하: 두자리 / 한자리 (나머지 0)
                 b = this.rand(2, 9);
-                let q = this.rand(4, 11); // 몫
+                let q = this.rand(4, 11);
                 a = b * q;
                 while(a < 10) { q = this.rand(4, 11); a = b * q; }
                 ansStr = `${q}`;
@@ -379,7 +416,8 @@
         },
 
         frac(diff) {
-            if (diff === 0) { // 하: 가분수 -> 대분수
+            // 분수 기존 3단계 유지
+            if (diff === 0) { // 하
                 let den = this.rand(2, 9);
                 let whole = this.rand(1, 4);
                 let num = this.rand(1, den - 1);
@@ -395,7 +433,7 @@
                 });
                 return { q: `가분수 [ ${qStr} ]를\n대분수로 바꾸면?`, choices, ans: ansStr };
 
-            } else if (diff === 1) { // 중: 분모가 같은 분수 크기 비교
+            } else if (diff === 1) { // 중
                 let den = this.rand(3, 15);
                 let n1 = this.rand(1, den*2);
                 let n2 = n1;
@@ -410,7 +448,7 @@
                     ans: ansStr
                 };
 
-            } else { // 상: 분모가 같은 분수의 덧셈
+            } else { // 상
                 let den = this.rand(3, 12);
                 let n1 = this.rand(1, den-1);
                 let n2 = this.rand(1, den-1);
@@ -441,7 +479,7 @@
             State.puzzle.maxCombo = 0;
             State.puzzle.isPlaying = true;
 
-            State.puzzle.difficulty = 0; // 초기 난이도 하
+            State.puzzle.difficulty = 0;
             State.puzzle.mathCount = 0;
 
             // 헤더 설정
@@ -449,8 +487,14 @@
             const title = document.getElementById('puzzleTitle');
             const info = document.getElementById('puzzleLevelTag');
 
-            if (['MUL', 'DIV', 'FRAC'].includes(mode)) {
-                title.textContent = mode === 'MUL' ? "✖️ 곱셈 트레이닝" : mode === 'DIV' ? "➗ 나눗셈 트레이닝" : "½ 분수 트레이닝";
+            if (mode === 'MUL') {
+                title.textContent = "✖️ 곱셈 트레이닝";
+                info.textContent = "난이도: 1단계";
+            } else if (mode === 'DIV') {
+                title.textContent = "➗ 나눗셈 트레이닝";
+                info.textContent = "난이도: 하";
+            } else {
+                title.textContent = "½ 분수 트레이닝";
                 info.textContent = "난이도: 하";
             }
 
@@ -471,12 +515,23 @@
 
             // 난이도 상승 로직
             State.puzzle.mathCount++;
-            if (State.puzzle.mathCount > 12) State.puzzle.difficulty = 2; // 상
-            else if (State.puzzle.mathCount > 6) State.puzzle.difficulty = 1; // 중
-            else State.puzzle.difficulty = 0; // 하
 
-            const diffName = ['하','중','상'][State.puzzle.difficulty];
-            document.getElementById('puzzleLevelTag').textContent = `난이도: ${diffName} (${State.puzzle.mathCount}단계)`;
+            if (State.puzzle.mode === 'MUL') {
+                // 곱셈: 6문제마다 1단계씩 상승 (총 7단계: 인덱스 0~6)
+                // mathCount: 1~6 -> 0 (1단계)
+                // mathCount: 7~12 -> 1 (2단계) ...
+                let levelIndex = Math.floor((State.puzzle.mathCount - 1) / 6);
+                if (levelIndex > 6) levelIndex = 6;
+                State.puzzle.difficulty = levelIndex;
+                document.getElementById('puzzleLevelTag').textContent = `난이도: ${levelIndex + 1}단계`;
+            } else {
+                // 나눗셈/분수: 기존 3단계 (하/중/상)
+                if (State.puzzle.mathCount > 12) State.puzzle.difficulty = 2; // 상
+                else if (State.puzzle.mathCount > 6) State.puzzle.difficulty = 1; // 중
+                else State.puzzle.difficulty = 0; // 하
+                const diffName = ['하','중','상'][State.puzzle.difficulty];
+                document.getElementById('puzzleLevelTag').textContent = `난이도: ${diffName}`;
+            }
 
             // 문제 데이터 생성
             const mathData = MathLogic.generate(State.puzzle.mode, State.puzzle.difficulty);
