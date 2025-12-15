@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>포켓몬 무게 변환 교실 (자연수 Ver)</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- Confetti -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&display=swap" rel="stylesheet">
+
+    <style>
+        body { font-family: 'Noto Sans KR', sans-serif; }
+
+        .pokemon-hidden {
+            filter: brightness(0) contrast(0);
+            transition: filter 1s ease-in-out;
+        }
+        .pokemon-reveal {
+            filter: brightness(1) contrast(1);
+        }
+
+        .poke-card { transition: transform 0.2s; }
+        .poke-card:hover { transform: translateY(-5px); }
+
+        ::-webkit-scrollbar { width: 8px; height: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        .roulette-number { font-variant-numeric: tabular-nums; }
+
+        /* 거대화 효과 애니메이션 */
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+        }
+        .dynamax-badge {
+            animation: pulse-red 2s infinite;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+
+<!-- 헤더 -->
+<header class="bg-red-600 text-white p-4 shadow-lg sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-3 cursor-pointer" onclick="app.goHome()">
+            <div class="w-10 h-10 bg-white rounded-full border-4 border-slate-800 relative overflow-hidden flex items-center justify-center">
+                <div class="absolute top-1/2 left-0 w-full h-1 bg-slate-800"></div>
+                <div class="w-3 h-3 bg-slate-800 rounded-full z-10"></div>
+            </div>
+            <h1 class="text-xl md:text-2xl font-bold">포켓몬 무게 교실 <span class="text-xs bg-yellow-400 text-red-900 px-2 py-0.5 rounded ml-2">자연수 학습</span></h1>
+        </div>
+        <div class="flex gap-2 text-sm">
+            <button onclick="app.setMode('student')" id="btn-mode-student" class="px-3 py-1 bg-red-800 hover:bg-yellow-500 rounded-full transition"><i class="fas fa-user mr-1"></i> 학생용</button>
+            <button onclick="app.setMode('teacher')" id="btn-mode-teacher" class="px-3 py-1 bg-red-800 hover:bg-yellow-500 rounded-full transition"><i class="fas fa-chalkboard-teacher mr-1"></i> 교사용</button>
+        </div>
+    </div>
+</header>
+
+<!-- 메인 컨텐츠 -->
+<main class="flex-grow p-4 max-w-7xl mx-auto w-full">
+
+    <!-- 1. 랜딩 페이지 -->
+    <div id="view-landing" class="flex flex-col items-center justify-center h-[70vh] gap-8 animate-fade-in">
+        <h2 class="text-3xl font-bold text-slate-700 text-center">오늘의 학습 모드를 선택하세요</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 w-full max-w-3xl">
+            <div onclick="app.setMode('student')" class="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl cursor-pointer transition transform hover:-translate-y-2 border-b-8 border-blue-500 flex flex-col items-center gap-4 group">
+                <div class="w-24 h-24 bg-blue-100 rounded-full flex items-center justify-center group-hover:bg-blue-200 transition">
+                    <i class="fas fa-user text-4xl text-blue-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold">개인 플레이</h3>
+                <p class="text-slate-500 text-center">포켓몬 무게(kg)를 보고<br>g 또는 t으로 바꿔보세요!</p>
+            </div>
+            <div onclick="app.setMode('teacher')" class="bg-white p-8 rounded-2xl shadow-xl hover:shadow-2xl cursor-pointer transition transform hover:-translate-y-2 border-b-8 border-green-500 flex flex-col items-center gap-4 group">
+                <div class="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center group-hover:bg-green-200 transition">
+                    <i class="fas fa-users text-4xl text-green-600"></i>
+                </div>
+                <h3 class="text-2xl font-bold">교사 전체 수업</h3>
+                <p class="text-slate-500 text-center">발표자 룰렛 추첨과<br>화면 공유용 문제 풀이</p>
+            </div>
+        </div>
+        <button onclick="app.resetData()" class="text-slate-400 text-sm hover:text-red-500 underline mt-4">데이터 초기화</button>
+    </div>
+
+    <!-- 2. 학생 모드 -->
+    <div id="view-student" class="hidden max-w-2xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-lg p-6 border-2 border-slate-200 relative overflow-hidden">
+            <!-- 다이맥스 배지 -->
+            <div id="student-badge" class="hidden absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full dynamax-badge z-20">
+                <i class="fas fa-cloud-bolt"></i> 거대화 포켓몬
+            </div>
+
+            <!-- 문제 표시 영역 -->
+            <div class="text-center mb-6 relative min-h-[250px] flex flex-col justify-center items-center">
+                <div id="student-loading" class="hidden absolute inset-0 bg-white bg-opacity-90 z-10 flex flex-col items-center justify-center">
+                    <i class="fas fa-spinner fa-spin text-4xl text-blue-500 mb-2"></i>
+                    <p>야생의 포켓몬을 찾는 중...</p>
+                </div>
+
+                <img id="student-poke-img" src="" alt="Pokemon" class="w-48 h-48 object-contain mx-auto pokemon-hidden mb-4 transition-all duration-500">
+
+                <div class="bg-slate-100 px-6 py-4 rounded-xl inline-block shadow-sm border border-slate-200">
+                    <p class="text-slate-500 text-sm font-bold mb-1">이 포켓몬의 무게는?</p>
+                    <p class="text-4xl font-black text-slate-800 tracking-tight"><span id="student-kg-val">0</span> <span class="text-blue-600">kg</span></p>
+                </div>
+            </div>
+
+            <!-- 입력 영역 (동적 변경) -->
+            <div id="student-input-area" class="space-y-4">
+                <p id="student-instruction" class="text-center font-bold text-lg text-slate-600 mb-2">지시문이 여기에 표시됩니다</p>
+
+                <!-- Case A: g 입력 -->
+                <div id="input-group-g" class="hidden">
+                    <div class="flex gap-4 items-center bg-green-50 p-4 rounded-xl border border-green-100">
+                        <input type="number" id="input-g-only" class="flex-1 p-3 border-2 border-green-200 rounded-lg text-2xl font-bold focus:outline-none focus:border-green-500 text-right" placeholder="?" inputmode="numeric">
+                        <span class="font-bold text-slate-500 text-xl w-8">g</span>
+                    </div>
+                </div>
+
+                <!-- Case B: t, kg 입력 -->
+                <div id="input-group-t-kg" class="hidden space-y-3">
+                    <div class="flex gap-2 items-center justify-center bg-orange-50 p-4 rounded-xl border border-orange-100">
+                        <input type="number" id="input-t" class="w-24 p-3 border-2 border-orange-200 rounded-lg text-2xl font-bold focus:outline-none focus:border-orange-500 text-right" placeholder="?" inputmode="numeric">
+                        <span class="font-bold text-slate-500 text-xl mr-2">t</span>
+
+                        <input type="number" id="input-rem-kg" class="w-32 p-3 border-2 border-blue-200 rounded-lg text-2xl font-bold focus:outline-none focus:border-blue-500 text-right" placeholder="?" inputmode="numeric">
+                        <span class="font-bold text-slate-500 text-xl">kg</span>
+                    </div>
+                </div>
+
+                <button onclick="app.checkAnswer()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-4 rounded-xl text-xl shadow-md transition transform active:scale-95 mt-4">
+                    정답 확인하기
+                </button>
+            </div>
+
+            <!-- 결과 영역 -->
+            <div id="student-result-area" class="hidden text-center space-y-4 mt-6">
+                <div id="student-feedback" class="text-2xl font-bold mb-4"></div>
+                <div class="bg-slate-100 p-4 rounded-lg text-left">
+                    <p class="text-sm text-slate-500 mb-1">정답:</p>
+                    <div id="student-correct-display" class="text-xl font-bold text-slate-800"></div>
+                </div>
+                <button onclick="app.loadNewPokemon()" class="w-full bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold py-4 rounded-xl text-xl shadow-md transition">
+                    다음 포켓몬 찾기 <i class="fas fa-arrow-right ml-2"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. 교사 모드 -->
+    <div id="view-teacher" class="hidden">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 h-full">
+
+            <!-- 룰렛 패널 (왼쪽) -->
+            <div class="lg:col-span-5 bg-white rounded-2xl shadow-lg border border-slate-200 flex flex-col overflow-hidden">
+                <div class="bg-indigo-600 text-white p-3 font-bold flex justify-between items-center">
+                    <span><i class="fas fa-dharmachakra mr-2"></i> 발표자 뽑기</span>
+                    <button onclick="app.toggleSettings()" class="text-xs bg-indigo-500 px-2 py-1 rounded hover:bg-indigo-400"><i class="fas fa-cog"></i> 설정</button>
+                </div>
+
+                <div id="roulette-settings" class="bg-indigo-50 p-3 text-sm border-b border-indigo-100 hidden">
+                    <div class="flex gap-2 items-center mb-2">
+                        <span>번호:</span>
+                        <input type="number" id="r-min" value="1" class="w-12 p-1 border rounded text-center"> ~
+                        <input type="number" id="r-max" value="30" class="w-12 p-1 border rounded text-center">
+                    </div>
+                    <div class="flex items-center gap-2 mb-2">
+                        <input type="checkbox" id="r-duplicate" class="w-4 h-4">
+                        <label for="r-duplicate">중복 방지</label>
+                    </div>
+                    <button onclick="app.resetHistory()" class="bg-red-100 text-red-600 px-2 py-1 rounded hover:bg-red-200 text-xs">히스토리 초기화</button>
+                </div>
+
+                <div class="flex-grow flex flex-col items-center justify-center p-6 bg-slate-50">
+                    <div id="roulette-display" class="text-9xl font-black text-indigo-600 mb-8 roulette-number drop-shadow-lg">--</div>
+                    <div class="flex gap-4 w-full">
+                        <button id="btn-spin" onclick="app.spinRoulette()" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 rounded-xl text-xl shadow-md transition">START</button>
+                        <button id="btn-stop" onclick="app.stopRoulette()" class="flex-1 bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl text-xl shadow-md transition hidden">STOP</button>
+                    </div>
+                </div>
+
+                <div class="p-3 bg-white border-t border-slate-200 h-32 overflow-y-auto">
+                    <h4 class="text-xs font-bold text-slate-400 uppercase mb-2">당첨 기록</h4>
+                    <div id="roulette-history" class="flex flex-wrap gap-2"></div>
+                </div>
+            </div>
+
+            <!-- 문제 패널 (오른쪽) -->
+            <div class="lg:col-span-7 bg-white rounded-2xl shadow-lg border border-slate-200 flex flex-col relative">
+                <div class="bg-emerald-600 text-white p-3 font-bold flex justify-between items-center">
+                    <span><i class="fas fa-question-circle mr-2"></i> 문제 출제</span>
+                    <div class="flex items-center gap-2 text-xs bg-emerald-700 px-2 py-1 rounded">
+                        <input type="checkbox" id="teacher-force-heavy" class="w-4 h-4 text-yellow-400 rounded focus:ring-0">
+                        <label for="teacher-force-heavy" class="cursor-pointer">강제 거대화 (1000kg↑)</label>
+                    </div>
+                </div>
+
+                <div class="flex-grow flex flex-col items-center justify-center p-6 relative min-h-[400px]">
+                    <div id="teacher-loading" class="hidden absolute inset-0 bg-white z-20 flex items-center justify-center">
+                        <i class="fas fa-spinner fa-spin text-3xl text-emerald-500"></i>
+                    </div>
+
+                    <!-- 거대화 배지 (교사용) -->
+                    <div id="teacher-badge" class="hidden absolute top-4 right-4 bg-red-600 text-white text-xs font-bold px-3 py-1 rounded-full dynamax-badge">
+                        <i class="fas fa-cloud-bolt"></i> 거대화
+                    </div>
+
+                    <div class="flex flex-col md:flex-row items-center gap-8 w-full justify-center">
+                        <div class="relative w-56 h-56 flex items-center justify-center">
+                            <img id="teacher-poke-img" src="" class="w-full h-full object-contain pokemon-hidden transition-all duration-700">
+                            <div id="teacher-poke-name" class="absolute bottom-0 bg-black bg-opacity-70 text-white px-3 py-1 rounded-full text-sm hidden">이름</div>
+                        </div>
+
+                        <div class="flex-1 w-full max-w-md">
+                            <div class="bg-slate-100 p-6 rounded-xl w-full text-center md:text-left mb-4 shadow-inner">
+                                <p class="text-slate-500 text-sm font-bold mb-1">문제 (kg)</p>
+                                <p class="text-5xl font-black text-slate-800"><span id="teacher-kg-val">0</span> kg</p>
+                            </div>
+
+                            <div id="teacher-answer-box" class="hidden bg-emerald-50 p-6 rounded-xl w-full border-2 border-emerald-200 animate-fade-in-up">
+                                <p class="text-emerald-800 font-bold mb-2 border-b border-emerald-200 pb-2">정답 변환:</p>
+                                <div id="teacher-ans-display" class="text-3xl font-black text-emerald-600">
+                                    <!-- 정답 텍스트 들어감 -->
+                                </div>
+                                <p id="teacher-ans-desc" class="text-sm text-emerald-600 mt-1 opacity-75">설명</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="p-4 bg-slate-50 border-t border-slate-200 flex gap-3">
+                    <button onclick="app.teacherNextProblem()" class="flex-1 bg-yellow-400 hover:bg-yellow-500 text-slate-900 font-bold py-3 rounded-lg shadow transition">
+                        <i class="fas fa-random mr-2"></i> 새 문제
+                    </button>
+                    <button onclick="app.teacherReveal()" id="btn-reveal" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 rounded-lg shadow transition disabled:opacity-50" disabled>
+                        <i class="fas fa-eye mr-2"></i> 정답 공개
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. 공통: 도감 -->
+    <div id="section-pokedex" class="mt-8 bg-white rounded-xl shadow-md border border-slate-200 p-4">
+        <div class="flex justify-between items-center mb-4 border-b border-slate-100 pb-2">
+            <h3 class="text-lg font-bold flex items-center gap-2 text-slate-700">
+                <i class="fas fa-book text-red-500"></i> 포켓몬 도감
+                <span class="text-sm font-normal text-slate-400" id="pokedex-count">(0 마리)</span>
+            </h3>
+        </div>
+        <div id="pokedex-grid" class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-2 max-h-48 overflow-y-auto pr-2"></div>
+    </div>
+</main>
+
+<script>
+    const app = {
+        mode: 'selection',
+        currentData: null,
+        pokedex: {},
+        history: [],
+        isSpinning: false,
+        rouletteInterval: null,
+
+        init: function() {
+            this.loadData();
+            this.renderPokedex();
+            this.updateView();
+        },
+
+        loadData: function() {
+            const savedDex = localStorage.getItem('poke-math-v2-pokedex');
+            const savedHist = localStorage.getItem('poke-math-v2-history');
+            if (savedDex) this.pokedex = JSON.parse(savedDex);
+            if (savedHist) this.history = JSON.parse(savedHist);
+            this.renderHistory();
+        },
+        saveData: function() {
+            localStorage.setItem('poke-math-v2-pokedex', JSON.stringify(this.pokedex));
+        },
+        saveHistory: function() {
+            localStorage.setItem('poke-math-v2-history', JSON.stringify(this.history));
+        },
+        resetData: function() {
+            if(confirm("모든 데이터를 초기화하시겠습니까?")) {
+                localStorage.removeItem('poke-math-v2-pokedex');
+                localStorage.removeItem('poke-math-v2-history');
+                location.reload();
+            }
+        },
+
+        setMode: function(mode) {
+            this.mode = mode;
+            this.updateView();
+            if (mode === 'student' && !this.currentData) this.loadNewPokemon();
+            if (mode === 'teacher' && !this.currentData) this.teacherNextProblem();
+        },
+        goHome: function() {
+            this.mode = 'selection';
+            this.updateView();
+        },
+        updateView: function() {
+            document.getElementById('view-landing').classList.add('hidden');
+            document.getElementById('view-student').classList.add('hidden');
+            document.getElementById('view-teacher').classList.add('hidden');
+            document.getElementById('section-pokedex').classList.remove('hidden');
+
+            document.getElementById('btn-mode-student').className = `px-3 py-1 rounded-full transition ${this.mode === 'student' ? 'bg-yellow-400 text-red-900 font-bold' : 'bg-red-800 hover:bg-yellow-500'}`;
+            document.getElementById('btn-mode-teacher').className = `px-3 py-1 rounded-full transition ${this.mode === 'teacher' ? 'bg-yellow-400 text-red-900 font-bold' : 'bg-red-800 hover:bg-yellow-500'}`;
+
+            if (this.mode === 'selection') {
+                document.getElementById('view-landing').classList.remove('hidden');
+                document.getElementById('section-pokedex').classList.add('hidden');
+            } else if (this.mode === 'student') document.getElementById('view-student').classList.remove('hidden');
+            else if (this.mode === 'teacher') document.getElementById('view-teacher').classList.remove('hidden');
+        },
+
+        // --- 핵심 로직: 포켓몬 데이터 생성 (자연수 & 조건부 변환) ---
+        fetchRandomPokemon: async function(forceHeavy = false) {
+            const id = Math.floor(Math.random() * 1000) + 1;
+            try {
+                const response = await fetch(`https://pokeapi.co/api/v2/pokemon/${id}`);
+                const data = await response.json();
+
+                // 기본 무게 (hg 단위) -> 1hg = 0.1kg
+                let weightHg = data.weight;
+
+                // 거대화 로직 (1000kg 이상 문제를 만들기 위해)
+                // 기본 확률 20% 혹은 교사 강제 설정
+                let isDynamax = forceHeavy || (Math.random() < 0.2);
+                let multiplier = 1;
+
+                if (isDynamax) {
+                    // 최소 1000kg(10000hg) 이상이 되도록 배율 조정
+                    // 만약 원래 10kg(100hg)라면 100배 필요.
+                    // 다양성을 위해 1000kg ~ 5000kg 사이가 나오도록 유도
+                    const targetKg = Math.floor(Math.random() * 4000) + 1000; // 1000 ~ 5000 kg
+                    const targetHg = targetKg * 10;
+                    weightHg = targetHg; // 덮어씌움 (가상 무게)
+                } else {
+                    // 일반 포켓몬인데 너무 가벼우면(1kg 미만) 최소 1kg로 보정 (자연수 문제 위해)
+                    if (weightHg < 10) weightHg = 10;
+                }
+
+                // kg 계산 (자연수)
+                // weightHg는 정수. kg = hg / 10. 나누어 떨어지지 않으면 반올림하여 정수화
+                const kg = Math.round(weightHg / 10);
+
+                // 문제 유형 결정
+                // 1000kg 미만 -> g으로 변환
+                // 1000kg 이상 -> t, kg으로 변환
+                const type = kg < 1000 ? 'light' : 'heavy';
+
+                // 정답 계산
+                let ans_g = null;
+                let ans_t = null;
+                let ans_rem_kg = null;
+
+                if (type === 'light') {
+                    ans_g = kg * 1000;
+                } else {
+                    ans_t = Math.floor(kg / 1000);
+                    ans_rem_kg = kg % 1000;
+                }
+
+                return {
+                    id: data.id,
+                    name: data.name,
+                    image: data.sprites.front_default || data.sprites.other['official-artwork'].front_default,
+                    kg: kg,
+                    type: type, // 'light' or 'heavy'
+                    ans_g: ans_g,
+                    ans_t: ans_t,
+                    ans_rem_kg: ans_rem_kg,
+                    isDynamax: isDynamax
+                };
+
+            } catch (e) {
+                console.error(e);
+                return null;
+            }
+        },
+
+        // --- 학생 모드 ---
+        loadNewPokemon: async function() {
+            // UI 초기화
+            const loadEl = document.getElementById('student-loading');
+            const imgEl = document.getElementById('student-poke-img');
+            const kgEl = document.getElementById('student-kg-val');
+            const badgeEl = document.getElementById('student-badge');
+
+            document.getElementById('student-input-area').classList.remove('hidden');
+            document.getElementById('student-result-area').classList.add('hidden');
+            imgEl.classList.add('pokemon-hidden');
+            imgEl.classList.remove('pokemon-reveal');
+
+            loadEl.classList.remove('hidden');
+
+            // 데이터 가져오기 (학생 모드는 랜덤)
+            this.currentData = await this.fetchRandomPokemon();
+            loadEl.classList.add('hidden');
+            if (!this.currentData) return;
+
+            // 데이터 바인딩
+            imgEl.src = this.currentData.image;
+            kgEl.innerText = this.currentData.kg.toLocaleString();
+
+            if (this.currentData.isDynamax) badgeEl.classList.remove('hidden');
+            else badgeEl.classList.add('hidden');
+
+            // 문제 유형에 따른 입력창 표시
+            const gGroup = document.getElementById('input-group-g');
+            const tGroup = document.getElementById('input-group-t-kg');
+            const instruction = document.getElementById('student-instruction');
+
+            document.getElementById('input-g-only').value = '';
+            document.getElementById('input-t').value = '';
+            document.getElementById('input-rem-kg').value = '';
+
+            if (this.currentData.type === 'light') {
+                instruction.innerText = "이 무게를 g 단위로 바꾸면?";
+                gGroup.classList.remove('hidden');
+                tGroup.classList.add('hidden');
+            } else {
+                instruction.innerText = "이 무게를 t과 kg 단위로 바꾸면?";
+                gGroup.classList.add('hidden');
+                tGroup.classList.remove('hidden');
+            }
+        },
+
+        checkAnswer: function() {
+            if (!this.currentData) return;
+
+            let isCorrect = false;
+            let userAnswerText = "";
+            let correctAnswerText = "";
+
+            if (this.currentData.type === 'light') {
+                // g 입력 체크
+                const inputG = parseInt(document.getElementById('input-g-only').value);
+                const correctG = this.currentData.ans_g;
+                isCorrect = (inputG === correctG);
+                userAnswerText = `${inputG || 0}g`;
+                correctAnswerText = `${correctG}g`;
+            } else {
+                // t, kg 입력 체크
+                const inputT = parseInt(document.getElementById('input-t').value);
+                const inputKg = parseInt(document.getElementById('input-rem-kg').value);
+                const correctT = this.currentData.ans_t;
+                const correctKg = this.currentData.ans_rem_kg;
+                isCorrect = (inputT === correctT && inputKg === correctKg);
+                userAnswerText = `${inputT || 0}t ${inputKg || 0}kg`;
+                correctAnswerText = `${correctT}t ${correctKg}kg`;
+            }
+
+            const resultArea = document.getElementById('student-result-area');
+            const inputArea = document.getElementById('student-input-area');
+            const feedback = document.getElementById('student-feedback');
+            const display = document.getElementById('student-correct-display');
+            const img = document.getElementById('student-poke-img');
+
+            inputArea.classList.add('hidden');
+            resultArea.classList.remove('hidden');
+            img.classList.remove('pokemon-hidden');
+            img.classList.add('pokemon-reveal');
+
+            display.innerText = correctAnswerText;
+
+            if (isCorrect) {
+                feedback.innerHTML = "<span class='text-green-600'>🎉 정답입니다!</span>";
+                this.addToPokedex(this.currentData);
+                confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+            } else {
+                feedback.innerHTML = `<span class='text-red-600'>💥 아쉬워요!</span><br><span class='text-sm text-slate-500'>입력: ${userAnswerText}</span>`;
+            }
+        },
+
+        // --- 교사 모드 ---
+        teacherNextProblem: async function() {
+            const forceHeavy = document.getElementById('teacher-force-heavy').checked;
+            const loading = document.getElementById('teacher-loading');
+            const img = document.getElementById('teacher-poke-img');
+            const badge = document.getElementById('teacher-badge');
+            const btnReveal = document.getElementById('btn-reveal');
+
+            loading.classList.remove('hidden');
+            document.getElementById('teacher-answer-box').classList.add('hidden');
+            document.getElementById('teacher-poke-name').classList.add('hidden');
+            img.classList.add('pokemon-hidden');
+            img.classList.remove('pokemon-reveal');
+            btnReveal.disabled = true;
+
+            this.currentData = await this.fetchRandomPokemon(forceHeavy);
+            loading.classList.add('hidden');
+            if (!this.currentData) return;
+
+            img.src = this.currentData.image;
+            document.getElementById('teacher-poke-name').innerText = this.currentData.name;
+            document.getElementById('teacher-kg-val').innerText = this.currentData.kg.toLocaleString();
+
+            if (this.currentData.isDynamax) badge.classList.remove('hidden');
+            else badge.classList.add('hidden');
+
+            btnReveal.disabled = false;
+        },
+
+        teacherReveal: function() {
+            const img = document.getElementById('teacher-poke-img');
+            const ansBox = document.getElementById('teacher-answer-box');
+            const ansDisplay = document.getElementById('teacher-ans-display');
+            const ansDesc = document.getElementById('teacher-ans-desc');
+
+            img.classList.remove('pokemon-hidden');
+            img.classList.add('pokemon-reveal');
+            document.getElementById('teacher-poke-name').classList.remove('hidden');
+            ansBox.classList.remove('hidden');
+
+            if (this.currentData.type === 'light') {
+                ansDisplay.innerText = `${this.currentData.ans_g.toLocaleString()} g`;
+                ansDesc.innerText = "1kg = 1000g 이므로 1000을 곱합니다.";
+            } else {
+                ansDisplay.innerText = `${this.currentData.ans_t}t ${this.currentData.ans_rem_kg}kg`;
+                ansDesc.innerText = "1000kg = 1t 이므로 몫이 t, 나머지가 kg이 됩니다.";
+            }
+
+            this.addToPokedex(this.currentData);
+        },
+
+        // --- 룰렛 (동일) ---
+        spinRoulette: function() {
+            if (this.isSpinning) return;
+            const min = parseInt(document.getElementById('r-min').value);
+            const max = parseInt(document.getElementById('r-max').value);
+            if (min >= max) { Swal.fire("설정 오류", "범위를 확인하세요", "error"); return; }
+
+            this.isSpinning = true;
+            document.getElementById('btn-spin').classList.add('hidden');
+            document.getElementById('btn-stop').classList.remove('hidden');
+
+            this.rouletteInterval = setInterval(() => {
+                document.getElementById('roulette-display').innerText = Math.floor(Math.random()*(max-min+1))+min;
+            }, 50);
+        },
+        stopRoulette: function() {
+            if (!this.isSpinning) return;
+            clearInterval(this.rouletteInterval);
+            this.isSpinning = false;
+            const min = parseInt(document.getElementById('r-min').value);
+            const max = parseInt(document.getElementById('r-max').value);
+            const isUnique = document.getElementById('r-duplicate').checked;
+
+            let finalNum;
+            let attempts = 0;
+            do {
+                finalNum = Math.floor(Math.random()*(max-min+1))+min;
+                attempts++;
+            } while (isUnique && this.history.includes(finalNum) && attempts < 100);
+
+            if (isUnique && this.history.includes(finalNum)) {
+                Swal.fire("알림", "모든 번호를 뽑았습니다.", "info");
+            } else {
+                document.getElementById('roulette-display').innerText = finalNum;
+                this.history.unshift(finalNum);
+                if (this.history.length > 20) this.history.pop();
+                this.saveHistory();
+                this.renderHistory();
+                confetti({ origin: { x: 0.25, y: 0.6 } });
+            }
+            document.getElementById('btn-spin').classList.remove('hidden');
+            document.getElementById('btn-stop').classList.add('hidden');
+        },
+        resetHistory: function() {
+            this.history = [];
+            this.saveHistory();
+            this.renderHistory();
+        },
+        renderHistory: function() {
+            document.getElementById('roulette-history').innerHTML = this.history.map(n => `<span class="bg-indigo-100 text-indigo-700 w-8 h-8 flex items-center justify-center rounded-full text-sm font-bold shadow-sm">${n}</span>`).join('');
+        },
+        toggleSettings: function() {
+            document.getElementById('roulette-settings').classList.toggle('hidden');
+        },
+
+        // --- 도감 ---
+        addToPokedex: function(data) {
+            if (!this.pokedex[data.id]) {
+                this.pokedex[data.id] = {
+                    id: data.id,
+                    name: data.name,
+                    image: data.image,
+                    weightText: data.type === 'light' ? `${data.kg}kg = ${data.ans_g}g` : `${data.kg}kg = ${data.ans_t}t ${data.ans_rem_kg}kg`,
+                    timestamp: Date.now()
+                };
+                this.saveData();
+                this.renderPokedex();
+                const Toast = Swal.mixin({ toast: true, position: 'bottom-end', showConfirmButton: false, timer: 3000 });
+                Toast.fire({ icon: 'success', title: '도감 등록 완료!' });
+            }
+        },
+        renderPokedex: function() {
+            const list = Object.values(this.pokedex).sort((a,b) => b.timestamp - a.timestamp);
+            document.getElementById('pokedex-count').innerText = `(${list.length} 마리)`;
+            document.getElementById('pokedex-grid').innerHTML = list.length === 0 ? '<div class="col-span-full text-center text-slate-400 py-4">도감이 비어있습니다.</div>' :
+                list.map(p => `
+                        <div onclick="app.showDetail(${p.id})" class="poke-card bg-slate-50 rounded-lg p-2 flex flex-col items-center cursor-pointer border hover:bg-white">
+                            <img src="${p.image}" class="w-12 h-12 object-contain">
+                            <span class="text-xs font-bold text-slate-600 mt-1">#${p.id}</span>
+                        </div>
+                    `).join('');
+        },
+        showDetail: function(id) {
+            const p = this.pokedex[id];
+            Swal.fire({
+                title: `#${p.id} ${p.name || ''}`,
+                html: `<img src="${p.image}" class="w-32 h-32 mx-auto mb-2"><div class="bg-slate-100 p-3 rounded font-bold">${p.weightText}</div>`,
+                confirmButtonText: '닫기'
+            });
+        }
+    };
+
+    app.init();
+</script>
+</body>
+</html>
