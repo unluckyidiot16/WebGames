@@ -76,14 +76,29 @@
 
         /* --- 로비 화면 --- */
         #view-lobby { justify-content: center; gap: 25px; }
+
+        /* 타이틀 래퍼 (파트너 이미지와 타이틀을 묶음) */
+        .title-wrapper {
+            position: relative;
+            width: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+
         .lobby-title {
             font-size: 42px;
             color: #0284c7;
             text-shadow: 3px 3px 0 #fff;
-            margin-bottom: 10px;
+            margin: 0;
             text-align: center;
             line-height: 1.2;
+            position: relative;
+            z-index: 2; /* 이미지보다 위에 오도록 */
         }
+
         .lobby-stats {
             background: #fff;
             padding: 10px 25px;
@@ -253,7 +268,6 @@
         /* --- 도감 화면 --- */
         #view-dex {
             background: #fffbeb;
-            /* 도감 전체 스크롤은 유지하되, 헤더 처리를 위해 패딩 조정 */
             padding-top: 0;
         }
         .back-btn {
@@ -271,7 +285,7 @@
             z-index: 100; /* 도감 그리드(z-index 기본값)보다 위로 올림 */
             background: #fffbeb; /* 배경색을 맞춰서 뒤에 내용이 비치지 않게 함 */
             width: 100%;
-            padding: 20px 20px 10px 20px; /* view 패딩을 여기로 가져옴 */
+            padding: 20px 20px 10px 20px;
             border-bottom: 2px solid rgba(0,0,0,0.05);
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
@@ -297,7 +311,7 @@
         /* 필터 그리드 (3줄 배치) */
         .filter-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr); /* 12개 버튼 / 3줄 = 4열 */
+            grid-template-columns: repeat(4, 1fr);
             gap: 6px;
             background: #fff;
             padding: 10px;
@@ -314,9 +328,9 @@
             background: #f8fafc;
             border: 1px solid #cbd5e1;
             border-radius: 10px;
-            padding: 8px 4px; /* 글자 크기에 맞춰 패딩 조정 */
+            padding: 8px 4px;
             font-family: 'Jua', sans-serif;
-            font-size: 13px; /* 3줄 배치 시 공간 확보를 위해 폰트 조정 */
+            font-size: 13px;
             color: #64748b;
             cursor: pointer;
             transition: all 0.2s;
@@ -337,12 +351,37 @@
             padding: 0 20px 50px 20px;
         }
 
+        /* 로비 파트너 포켓몬 위치 수정 (타이틀 뒤로) */
+        .lobby-partner-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 300px;
+            height: 300px;
+            z-index: 1; /* 글자(2)보다는 뒤에 */
+            opacity: 0.5; /* 투명도 조정 */
+            pointer-events: none;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .lobby-partner-img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            animation: floating 3s ease-in-out infinite;
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)); /* 하얀 후광 효과 */
+        }
+
 
         /* --- 모달 --- */
         .modal-overlay {
             position: fixed; inset: 0; background: rgba(0,0,0,0.6);
             backdrop-filter: blur(3px);
-            z-index: 150; /* 필터보다 더 위로 */
+            z-index: 150;
             display: flex; justify-content: center; align-items: center;
         }
         .modal-box {
@@ -407,30 +446,6 @@
         .rarity-badge {
             display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: bold; margin-bottom: 5px; color: white;
         }
-        /* 로비 파트너 포켓몬 스타일 */
-        .lobby-partner-container {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            z-index: -1;
-            opacity: 0.8;
-            pointer-events: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .lobby-partner-img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
-            image-rendering: pixelated;
-            animation: floating 3s ease-in-out infinite;
-            filter: drop-shadow(0 10px 10px rgba(0,0,0,0.1));
-        }
 
         @keyframes floating {
             0%, 100% { transform: translateY(0) scale(1); }
@@ -481,11 +496,14 @@
 
     <div id="view-lobby" class="view">
         <button class="reset-btn" onclick="resetGameData()">🔄 데이터 초기화</button>
-        <div id="lobby-partner" class="lobby-partner-container hidden">
-            <img id="lobby-partner-img" class="lobby-partner-img" src="" />
+
+        <div class="title-wrapper">
+            <div id="lobby-partner" class="lobby-partner-container hidden">
+                <img id="lobby-partner-img" class="lobby-partner-img" src="" />
+            </div>
+            <h1 class="lobby-title">Pokémon<br>맞춤법 탐험대<br><span style="font-size:20px; color:#f59e0b;">(수학/경제 ver)</span></h1>
         </div>
 
-        <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;"></span></h1>
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
 
         <button class="btn-3d menu-btn btn-explore" onclick="startExploration()">🧭 탐험 떠나기</button>
