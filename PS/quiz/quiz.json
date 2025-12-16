@@ -1,6474 +1,884 @@
 {
-  "packId": "ma3-kg-g-add-001",
-  "title": "초3 수학 무게의 덧셈 (kg과 g)",
-  "grade": 3,
-  "subject": "math",
-  "description": "초등 3학년 수학 - 무게의 덧셈 (kg과 g의 단위 변환 및 받아올림)",
   "questions": [
     {
-      "id": "ma3-kg-001",
-      "type": "calculation",
-      "prompt": "6kg 190g + 20kg 164g",
+      "prompt": "24kg 250g + 19kg 500g",
       "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "16kg 354g",
-        "25kg 354g",
-        "25kg 454g",
-        "26kg 354g"
+        "43kg 750g",
+        "33kg 750g",
+        "43kg 850g",
+        "44kg 200g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-002",
-      "type": "calculation",
-      "prompt": "17kg 783g + 25kg 768g",
+      "prompt": "46kg 600g + 5kg 600g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "52kg 200g",
+        "51kg 200g",
+        "52kg 300g",
+        "52kg 700g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "27kg 200g + 20kg 900g",
       "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "43kg 551g",
-        "33kg 551g",
-        "43kg 601g",
-        "44kg 551g"
+        "38kg 100g",
+        "47kg 100g",
+        "48kg 200g",
+        "48kg 100g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-003",
-      "type": "calculation",
-      "prompt": "31kg 552g + 10kg 692g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "9kg 800g + 11kg",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "52kg 244g",
-        "42kg 344g",
-        "42kg 244g",
-        "42kg 194g"
+        "20kg 800g",
+        "20kg 900g",
+        "30kg 800g",
+        "20kg 850g"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-004",
-      "type": "calculation",
-      "prompt": "17kg 771g + 7kg 96g",
+      "prompt": "50kg 300g + 18kg",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "69kg 200g",
+        "69kg 300g",
+        "68kg 300g",
+        "68kg 350g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "37kg 400g + 40kg 150g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "24kg 867g",
-        "23kg 967g",
-        "14kg 867g",
-        "34kg 867g"
+        "77kg 50g",
+        "77kg 550g",
+        "77kg 600g",
+        "78kg 300g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-005",
-      "type": "calculation",
-      "prompt": "32kg 314g + 18kg",
-      "promptExplain": "무게의 합을 구하세요.",
+      "prompt": "17kg 450g + 53kg 950g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "49kg 214g",
-        "50kg 314g",
-        "51kg 314g",
-        "50kg 264g"
+        "70kg 400g",
+        "61kg 400g",
+        "71kg 300g",
+        "71kg 400g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-006",
-      "type": "calculation",
-      "prompt": "19kg 66g + 25kg 255g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "44kg 221g",
-        "45kg 221g",
-        "44kg 321g",
-        "45kg 321g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-007",
-      "type": "calculation",
-      "prompt": "32kg 647g + 17kg 420g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "50kg 117g",
-        "40kg 67g",
-        "49kg 67g",
-        "50kg 67g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-008",
-      "type": "calculation",
-      "prompt": "9kg 444g + 17kg 660g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "26kg 204g",
-        "27kg 4g",
-        "27kg 104g",
-        "26kg 139g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-009",
-      "type": "calculation",
-      "prompt": "39kg 501g + 21kg 805g",
+      "prompt": "10kg 450g + 68kg 950g",
       "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "62kg 306g",
-        "61kg 306g",
-        "60kg 306g",
-        "62kg 206g"
+        "79kg 900g",
+        "78kg 400g",
+        "79kg 450g",
+        "79kg 400g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-010",
-      "type": "calculation",
-      "prompt": "20kg 250g + 39kg 750g",
+      "prompt": "2kg 800g + 21kg 850g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "24kg 700g",
+        "14kg 650g",
+        "24kg 650g",
+        "23kg 650g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "6kg 800g + 26kg",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "42kg 800g",
+        "32kg 900g",
+        "32kg 800g",
+        "31kg 800g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "25kg 900g + 52kg 750g",
       "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "70kg",
-        "60kg 100g",
-        "59kg",
-        "60kg"
+        "78kg 550g",
+        "78kg 650g",
+        "77kg 650g",
+        "78kg 150g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-011",
-      "type": "calculation",
-      "prompt": "50kg 350g + 18kg 650g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "69kg",
-        "69kg 50g",
-        "70kg 100g",
-        "68kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-012",
-      "type": "calculation",
-      "prompt": "24kg 532g + 26kg 528g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "51kg 10g",
-        "51kg 60g",
-        "41kg 60g",
-        "51kg 160g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-013",
-      "type": "calculation",
-      "prompt": "40kg 708g + 17kg 438g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "58kg 246g",
-        "68kg 146g",
-        "57kg 165g",
-        "58kg 146g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-014",
-      "type": "calculation",
-      "prompt": "43kg 650g + 35kg 350g",
+      "prompt": "39kg 150g + 49kg 850g",
       "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "78kg",
-        "79kg",
+        "89kg 50g",
+        "89kg",
+        "89kg 100g",
+        "90kg"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "17kg 650g + 35kg 550g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "53kg 700g",
+        "54kg 200g",
+        "53kg 200g",
+        "53kg 300g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "46kg 250g + 6kg 900g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "53kg 150g",
+        "52kg 150g",
+        "53kg 200g",
+        "53kg 50g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "45kg 350g + 13kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "58kg 700g",
+        "59kg 400g",
+        "58kg 650g",
+        "59kg 200g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "31kg 650g + 67kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "98kg 800g",
+        "98kg 750g",
+        "88kg 750g",
+        "98kg 650g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "46kg 100g + 30kg 650g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "76kg 850g",
+        "75kg 750g",
+        "66kg 750g",
+        "76kg 750g"
+      ],
+      "answerIndex": 3
+    },
+    {
+      "prompt": "20kg 800g + 15kg 400g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "36kg 200g",
+        "35kg 200g",
+        "26kg 200g",
+        "36kg 300g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "14kg 750g + 73kg",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "88kg 400g",
+        "87kg 750g",
+        "88kg 200g",
+        "77kg 750g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "17kg 50g + 66kg 750g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "83kg 700g",
+        "83kg 850g",
+        "82kg 800g",
+        "83kg 800g"
+      ],
+      "answerIndex": 3
+    },
+    {
+      "prompt": "46kg 100g + 19kg 100g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "66kg",
+        "65kg 250g",
+        "65kg 200g",
+        "66kg 400g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "49kg 700g + 7kg 400g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "57kg 100g",
+        "56kg 100g",
+        "47kg 100g",
+        "57kg 200g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "21kg 450g + 35kg 350g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "55kg 800g",
+        "57kg 300g",
+        "57kg",
+        "56kg 800g"
+      ],
+      "answerIndex": 3
+    },
+    {
+      "prompt": "36kg 800g + 32kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
         "69kg",
+        "69kg 500g",
+        "69kg 400g",
+        "68kg 500g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "24kg 100g + 60kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "85kg",
+        "85kg 300g",
+        "84kg 200g",
+        "84kg 700g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "32kg 750g + 25kg 50g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "57kg 800g",
+        "58kg 800g",
+        "58kg",
+        "57kg 700g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "47kg 500g + 15kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "73kg 400g",
+        "63kg 300g",
+        "62kg 400g",
+        "63kg 400g"
+      ],
+      "answerIndex": 3
+    },
+    {
+      "prompt": "40kg 150g + 38kg 900g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "79kg 100g",
+        "78kg 50g",
+        "89kg 50g",
         "79kg 50g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-015",
-      "type": "calculation",
-      "prompt": "27kg 250g + 24kg 750g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "42kg",
-        "52kg",
-        "51kg 23g",
-        "53kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-016",
-      "type": "calculation",
-      "prompt": "20kg 750g + 18kg 250g",
+      "prompt": "48kg 750g + 25kg 250g",
       "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "38kg",
-        "38kg 78g",
-        "40kg",
-        "39kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-017",
-      "type": "calculation",
-      "prompt": "42kg 294g + 37kg 321g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "78kg 715g",
-        "78kg 615g",
-        "79kg 565g",
-        "79kg 615g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-018",
-      "type": "calculation",
-      "prompt": "10kg 479g + 26kg 647g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "37kg 26g",
-        "37kg 126g",
-        "38kg 26g",
-        "37kg 176g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-019",
-      "type": "calculation",
-      "prompt": "30kg 250g + 10kg 750g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "31kg",
-        "41kg",
-        "41kg 50g",
-        "40kg 59g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-020",
-      "type": "calculation",
-      "prompt": "28kg 261g + 24kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "52kg 211g",
-        "52kg 261g",
-        "53kg 161g",
-        "52kg 311g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-021",
-      "type": "calculation",
-      "prompt": "14kg 328g + 14kg 669g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "38kg 997g",
-        "28kg 897g",
-        "28kg 997g",
-        "29kg 997g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-022",
-      "type": "calculation",
-      "prompt": "50kg 634g + 15kg 868g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "66kg 552g",
-        "66kg 502g",
-        "56kg 502g",
-        "66kg 452g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-023",
-      "type": "calculation",
-      "prompt": "40kg 201g + 18kg 180g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "58kg 381g",
-        "58kg 281g",
-        "68kg 381g",
-        "57kg 281g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-024",
-      "type": "calculation",
-      "prompt": "20kg 590g + 31kg 472g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "53kg 62g",
-        "52kg 62g",
-        "51kg 162g",
-        "51kg 133g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-025",
-      "type": "calculation",
-      "prompt": "35kg 163g + 17kg 285g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "52kg 448g",
-        "42kg 448g",
-        "52kg 548g",
-        "51kg 448g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-026",
-      "type": "calculation",
-      "prompt": "32kg 756g + 26kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "58kg 756g",
-        "59kg 656g",
-        "68kg 756g",
-        "59kg 756g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-027",
-      "type": "calculation",
-      "prompt": "43kg 272g + 27kg 210g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "70kg 432g",
-        "71kg 482g",
-        "70kg 482g",
-        "70kg 382g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-028",
-      "type": "calculation",
-      "prompt": "22kg 650g + 29kg 350g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "51kg 78g",
-        "52kg",
-        "53kg 100g",
-        "53kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-029",
-      "type": "calculation",
-      "prompt": "37kg 150g + 19kg 850g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "57kg 50g",
-        "57kg",
-        "56kg 13g",
-        "56kg 48g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-030",
-      "type": "calculation",
-      "prompt": "15kg 645g + 37kg 748g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "43kg 393g",
-        "52kg 393g",
-        "54kg 293g",
-        "53kg 393g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-031",
-      "type": "calculation",
-      "prompt": "59kg 836g + 7kg 516g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "67kg 302g",
-        "66kg 413g",
-        "67kg 352g",
-        "68kg 452g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-032",
-      "type": "calculation",
-      "prompt": "32kg 162g + 16kg 315g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "48kg 477g",
-        "49kg 477g",
-        "38kg 477g",
-        "58kg 477g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-033",
-      "type": "calculation",
-      "prompt": "57kg 786g + 33kg 566g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "92kg 452g",
-        "90kg 292g",
-        "91kg 352g",
-        "90kg 392g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-034",
-      "type": "calculation",
-      "prompt": "27kg 725g + 9kg 617g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "38kg 342g",
-        "37kg 292g",
-        "37kg 342g",
-        "37kg 442g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-035",
-      "type": "calculation",
-      "prompt": "23kg 532g + 31kg 726g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "56kg 258g",
-        "55kg 258g",
-        "54kg 173g",
-        "55kg 358g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-036",
-      "type": "calculation",
-      "prompt": "20kg 650g + 19kg 350g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "39kg 51g",
-        "40kg 100g",
-        "39kg 7g",
-        "40kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-037",
-      "type": "calculation",
-      "prompt": "25kg 150g + 18kg 850g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "54kg",
-        "45kg",
-        "44kg 100g",
-        "44kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-038",
-      "type": "calculation",
-      "prompt": "14kg 899g + 7kg 923g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "21kg 822g",
-        "22kg 772g",
-        "22kg 822g",
-        "12kg 822g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-039",
-      "type": "calculation",
-      "prompt": "18kg 526g + 27kg 312g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "45kg 738g",
-        "45kg 788g",
-        "46kg 838g",
-        "45kg 838g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-040",
-      "type": "calculation",
-      "prompt": "48kg 434g + 17kg 782g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "66kg 166g",
-        "65kg 216g",
-        "76kg 216g",
-        "66kg 216g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-041",
-      "type": "calculation",
-      "prompt": "32kg 727g + 16kg 120g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "58kg 847g",
-        "48kg 897g",
-        "49kg 847g",
-        "48kg 847g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-042",
-      "type": "calculation",
-      "prompt": "37kg 590g + 38kg 793g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "77kg 483g",
-        "76kg 483g",
-        "76kg 383g",
-        "75kg 394g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-043",
-      "type": "calculation",
-      "prompt": "39kg 791g + 29kg 603g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "69kg 394g",
-        "68kg 348g",
-        "79kg 394g",
-        "69kg 294g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-044",
-      "type": "calculation",
-      "prompt": "49kg 332g + 22kg 60g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "71kg 392g",
-        "72kg 492g",
-        "61kg 392g",
-        "71kg 342g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-045",
-      "type": "calculation",
-      "prompt": "45kg 150g + 12kg 850g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "58kg",
-        "59kg",
-        "57kg 77g",
-        "59kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-046",
-      "type": "calculation",
-      "prompt": "28kg 550g + 18kg 450g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "46kg",
-        "37kg",
-        "47kg",
-        "46kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-047",
-      "type": "calculation",
-      "prompt": "53kg 587g + 24kg 339g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "77kg 926g",
-        "77kg 826g",
-        "77kg 976g",
-        "67kg 926g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-048",
-      "type": "calculation",
-      "prompt": "41kg 195g + 35kg 295g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "76kg 390g",
-        "86kg 490g",
-        "76kg 490g",
-        "77kg 490g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-049",
-      "type": "calculation",
-      "prompt": "22kg 150g + 14kg 850g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "37kg",
-        "47kg",
-        "38kg",
-        "27kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-050",
-      "type": "calculation",
-      "prompt": "29kg 750g + 19kg 250g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "48kg",
-        "48kg 15g",
-        "50kg 100g",
-        "49kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-051",
-      "type": "calculation",
-      "prompt": "22kg 450g + 39kg 550g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "62kg",
-        "61kg 100g",
-        "61kg",
-        "52kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-052",
-      "type": "calculation",
-      "prompt": "34kg 205g + 30kg 189g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "64kg 394g",
-        "64kg 444g",
-        "65kg 394g",
-        "54kg 394g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-053",
-      "type": "calculation",
-      "prompt": "10kg 167g + 6kg 394g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "16kg 611g",
-        "17kg 561g",
-        "16kg 561g",
-        "16kg 461g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-054",
-      "type": "calculation",
-      "prompt": "35kg 228g + 31kg 220g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "66kg 348g",
-        "66kg 448g",
-        "67kg 548g",
-        "67kg 448g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-055",
-      "type": "calculation",
-      "prompt": "25kg 179g + 25kg 109g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "51kg 388g",
-        "51kg 288g",
-        "50kg 238g",
-        "50kg 288g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-056",
-      "type": "calculation",
-      "prompt": "44kg 150g + 16kg 850g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "60kg 100g",
-        "51kg",
-        "61kg 100g",
-        "61kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-057",
-      "type": "calculation",
-      "prompt": "17kg 736g + 12kg 471g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "29kg 230g",
-        "29kg 290g",
-        "30kg 207g",
-        "30kg 307g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-058",
-      "type": "calculation",
-      "prompt": "26kg 350g + 37kg 650g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "64kg",
-        "64kg 50g",
         "74kg",
-        "65kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-059",
-      "type": "calculation",
-      "prompt": "45kg 881g + 27kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "72kg 781g",
-        "72kg 881g",
-        "73kg 881g",
-        "71kg 981g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-060",
-      "type": "calculation",
-      "prompt": "42kg 750g + 22kg 250g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "65kg 50g",
-        "64kg 100g",
-        "55kg",
-        "65kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-061",
-      "type": "calculation",
-      "prompt": "14kg 259g + 14kg 88g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "28kg 447g",
-        "29kg 347g",
-        "28kg 397g",
-        "28kg 347g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-062",
-      "type": "calculation",
-      "prompt": "47kg 150g + 29kg 850g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "76kg 100g",
-        "67kg",
-        "87kg",
-        "77kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-063",
-      "type": "calculation",
-      "prompt": "24kg 450g + 26kg 550g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "50kg 44g",
-        "51kg",
-        "51kg 50g",
-        "50kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-064",
-      "type": "calculation",
-      "prompt": "40kg 550g + 24kg 450g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "66kg 100g",
-        "65kg 50g",
-        "65kg",
-        "66kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-065",
-      "type": "calculation",
-      "prompt": "27kg 638g + 14kg 766g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "42kg 304g",
-        "42kg 404g",
-        "43kg 504g",
-        "32kg 404g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-066",
-      "type": "calculation",
-      "prompt": "50kg 597g + 21kg 800g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "71kg 497g",
-        "72kg 397g",
-        "71kg 305g",
-        "71kg 297g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-067",
-      "type": "calculation",
-      "prompt": "30kg 865g + 23kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "53kg 865g",
-        "52kg 865g",
-        "54kg 865g",
-        "53kg 915g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-068",
-      "type": "calculation",
-      "prompt": "17kg 579g + 12kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "39kg 579g",
-        "30kg 679g",
-        "28kg 579g",
-        "29kg 579g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-069",
-      "type": "calculation",
-      "prompt": "53kg 866g + 18kg",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "72kg 766g",
-        "71kg 916g",
-        "70kg 966g",
-        "71kg 866g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-070",
-      "type": "calculation",
-      "prompt": "45kg 287g + 24kg 382g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "69kg 769g",
-        "70kg 669g",
-        "59kg 669g",
-        "69kg 669g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-071",
-      "type": "calculation",
-      "prompt": "34kg 650g + 31kg 350g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "65kg 67g",
-        "66kg 50g",
-        "66kg",
-        "76kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-072",
-      "type": "calculation",
-      "prompt": "34kg 450g + 37kg 550g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "82kg",
-        "62kg",
-        "73kg 100g",
-        "72kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-073",
-      "type": "calculation",
-      "prompt": "46kg 605g + 9kg 869g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "55kg 474g",
-        "57kg 474g",
-        "56kg 474g",
-        "56kg 424g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-074",
-      "type": "calculation",
-      "prompt": "17kg 838g + 6kg 346g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "34kg 184g",
-        "25kg 184g",
-        "24kg 184g",
-        "14kg 184g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-075",
-      "type": "calculation",
-      "prompt": "12kg 813g + 7kg 537g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "20kg 250g",
-        "20kg 350g",
-        "19kg 449g",
-        "19kg 378g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-076",
-      "type": "calculation",
-      "prompt": "40kg 150g + 11kg 850g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "51kg 75g",
-        "62kg",
-        "52kg",
-        "51kg 2g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-077",
-      "type": "calculation",
-      "prompt": "14kg 117g + 9kg 331g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "23kg 448g",
-        "24kg 448g",
-        "13kg 448g",
-        "23kg 498g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-078",
-      "type": "calculation",
-      "prompt": "30kg 850g + 22kg 150g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "53kg",
-        "63kg",
-        "52kg 86g",
-        "54kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-079",
-      "type": "calculation",
-      "prompt": "10kg 97g + 32kg 99g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "43kg 96g",
-        "42kg 246g",
-        "42kg 146g",
-        "42kg 196g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-080",
-      "type": "calculation",
-      "prompt": "23kg 357g + 24kg 230g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "47kg 587g",
-        "48kg 587g",
-        "46kg 587g",
-        "37kg 587g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-081",
-      "type": "calculation",
-      "prompt": "46kg 331g + 23kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "69kg 331g",
-        "69kg 381g",
-        "59kg 331g",
-        "69kg 281g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-082",
-      "type": "calculation",
-      "prompt": "10kg 285g + 14kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "24kg 285g",
-        "23kg 185g",
-        "24kg 335g",
-        "14kg 285g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-083",
-      "type": "calculation",
-      "prompt": "20kg 478g + 19kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "29kg 478g",
-        "40kg 378g",
-        "38kg 478g",
-        "39kg 478g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-084",
-      "type": "calculation",
-      "prompt": "39kg 850g + 23kg 150g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "64kg 100g",
-        "63kg 100g",
         "73kg",
-        "63kg"
+        "64kg",
+        "74kg 500g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-085",
-      "type": "calculation",
-      "prompt": "18kg 204g + 18kg 120g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "25kg 600g + 46kg 600g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
-        "36kg 424g",
-        "36kg 224g",
-        "36kg 324g",
-        "46kg 324g"
+        "72kg 300g",
+        "82kg 200g",
+        "71kg 200g",
+        "72kg 200g"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-086",
-      "type": "calculation",
-      "prompt": "50kg 285g + 21kg 622g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "49kg 600g + 26kg",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "72kg 807g",
-        "72kg 907g",
-        "81kg 907g",
-        "71kg 907g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-087",
-      "type": "calculation",
-      "prompt": "29kg 250g + 22kg 750g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "53kg",
-        "62kg",
-        "52kg 50g",
-        "52kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-088",
-      "type": "calculation",
-      "prompt": "31kg 898g + 15kg 230g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "47kg 228g",
-        "47kg 78g",
-        "46kg 28g",
-        "47kg 128g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-089",
-      "type": "calculation",
-      "prompt": "48kg 578g + 9kg 562g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "59kg 240g",
-        "58kg 190g",
-        "59kg 140g",
-        "58kg 140g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-090",
-      "type": "calculation",
-      "prompt": "47kg 157g + 21kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "69kg 157g",
-        "68kg 107g",
-        "68kg 257g",
-        "68kg 157g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-091",
-      "type": "calculation",
-      "prompt": "46kg 96g + 37kg 246g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "83kg 442g",
-        "84kg 342g",
-        "83kg 342g",
-        "83kg 292g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-092",
-      "type": "calculation",
-      "prompt": "55kg 186g + 26kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "81kg 186g",
-        "80kg 86g",
-        "82kg 186g",
-        "81kg 136g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-093",
-      "type": "calculation",
-      "prompt": "44kg 650g + 31kg 350g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "76kg 50g",
         "75kg 100g",
-        "76kg 100g",
-        "76kg"
+        "76kg 400g",
+        "75kg 600g",
+        "76kg 600g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-094",
-      "type": "calculation",
-      "prompt": "51kg 815g + 22kg",
+      "prompt": "10kg 900g + 76kg 50g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "85kg 950g",
+        "86kg 950g",
+        "86kg 850g",
+        "87kg"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "3kg 600g + 31kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "34kg 150g",
+        "34kg 650g",
+        "34kg 550g",
+        "35kg 650g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "22kg 900g + 59kg 50g",
       "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "73kg 915g",
-        "72kg 815g",
-        "74kg 715g",
-        "73kg 815g"
+        "82kg 100g",
+        "71kg 950g",
+        "81kg 950g",
+        "81kg 50g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-095",
-      "type": "calculation",
-      "prompt": "28kg 208g + 16kg 159g",
+      "prompt": "48kg 400g + 16kg 350g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "64kg 800g",
+        "64kg 750g",
+        "64kg 250g",
+        "74kg 750g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "15kg 800g + 28kg 150g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "44kg 200g",
+        "43kg 450g",
+        "43kg 950g",
+        "42kg 950g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "14kg 750g + 82kg 100g",
       "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "43kg 367g",
-        "44kg 467g",
-        "54kg 367g",
-        "44kg 367g"
+        "96kg 850g",
+        "96kg 350g",
+        "97kg 200g",
+        "97kg"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-096",
-      "type": "calculation",
-      "prompt": "13kg 661g + 17kg 207g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "1kg 150g + 25kg 250g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "29kg 868g",
-        "30kg 868g",
-        "40kg 868g",
-        "29kg 968g"
+        "27kg",
+        "26kg 400g",
+        "26kg 100g",
+        "26kg 450g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-097",
-      "type": "calculation",
-      "prompt": "23kg 820g + 28kg 852g",
+      "prompt": "30kg 650g + 21kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "51kg 850g",
+        "52kg 950g",
+        "51kg 950g",
+        "51kg 450g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "7kg 100g + 50kg 750g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "57kg 850g",
+        "57kg 900g",
+        "56kg 850g",
+        "58kg 300g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "6kg 650g + 28kg 450g",
       "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
-        "52kg 672g",
-        "52kg 772g",
-        "51kg 631g",
-        "52kg 622g"
+        "34kg 100g",
+        "35kg 100g",
+        "36kg 100g",
+        "35kg 600g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-098",
-      "type": "calculation",
-      "prompt": "59kg 491g + 26kg",
-      "promptExplain": "무게의 합을 구하세요.",
+      "prompt": "50kg 350g + 47kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "84kg 491g",
-        "85kg 441g",
-        "85kg 491g",
-        "85kg 541g"
+        "96kg 400g",
+        "97kg 400g",
+        "98kg",
+        "97kg 300g"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-099",
-      "type": "calculation",
-      "prompt": "11kg 778g + 32kg 578g",
+      "prompt": "4kg 250g + 38kg 900g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "43kg 650g",
+        "43kg 150g",
+        "44kg 150g",
+        "42kg 150g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "45kg 100g + 41kg 900g",
       "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "44kg 456g",
-        "44kg 356g",
-        "34kg 356g",
-        "54kg 356g"
+        "87kg 100g",
+        "88kg",
+        "86kg",
+        "87kg"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-100",
-      "type": "calculation",
-      "prompt": "48kg 650g + 39kg 350g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "prompt": "1kg 600g + 9kg 950g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "98kg",
-        "88kg 50g",
-        "89kg",
-        "88kg"
+        "11kg 550g",
+        "11kg 650g",
+        "10kg 550g",
+        "11kg 600g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-101",
-      "type": "calculation",
-      "prompt": "16kg 831g + 30kg",
+      "prompt": "26kg 800g + 50kg 150g",
       "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "46kg 831g",
-        "46kg 731g",
-        "46kg 931g",
-        "45kg 831g"
+        "76kg 950g",
+        "76kg",
+        "76kg 50g",
+        "77kg 950g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-102",
-      "type": "calculation",
-      "prompt": "5kg 131g + 5kg 312g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "20kg 443g",
-        "10kg 443g",
-        "10kg 493g",
-        "9kg 443g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-103",
-      "type": "calculation",
-      "prompt": "36kg 827g + 34kg 287g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "81kg 114g",
-        "71kg 114g",
-        "70kg 14g",
-        "71kg 64g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-104",
-      "type": "calculation",
-      "prompt": "46kg 713g + 16kg 424g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "53kg 137g",
-        "63kg 187g",
-        "62kg 157g",
-        "63kg 137g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-105",
-      "type": "calculation",
-      "prompt": "57kg 116g + 21kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "88kg 116g",
-        "78kg 166g",
-        "78kg 116g",
-        "77kg 116g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-106",
-      "type": "calculation",
-      "prompt": "39kg 856g + 35kg 840g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "75kg 696g",
-        "85kg 696g",
-        "75kg 796g",
-        "74kg 696g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-107",
-      "type": "calculation",
-      "prompt": "46kg 147g + 23kg 232g",
+      "prompt": "40kg 450g + 31kg 300g",
       "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "69kg 379g",
-        "69kg 479g",
-        "69kg 279g",
-        "79kg 379g"
+        "61kg 750g",
+        "72kg",
+        "81kg 750g",
+        "71kg 750g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-108",
-      "type": "calculation",
-      "prompt": "21kg 608g + 25kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "46kg 708g",
-        "46kg 608g",
-        "56kg 608g",
-        "46kg 558g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-109",
-      "type": "calculation",
-      "prompt": "52kg 402g + 19kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "72kg 402g",
-        "71kg 502g",
-        "71kg 452g",
-        "71kg 402g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-110",
-      "type": "calculation",
-      "prompt": "50kg 158g + 12kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "63kg 258g",
-        "62kg 108g",
-        "62kg 158g",
-        "52kg 158g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-111",
-      "type": "calculation",
-      "prompt": "33kg 685g + 29kg 945g",
+      "prompt": "33kg 700g + 13kg 900g",
       "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "64kg 730g",
-        "53kg 630g",
-        "63kg 730g",
-        "63kg 630g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-112",
-      "type": "calculation",
-      "prompt": "30kg 550g + 17kg 450g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
         "47kg 100g",
-        "48kg 50g",
-        "38kg",
-        "48kg"
+        "47kg 500g",
+        "47kg 600g",
+        "47kg 650g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-113",
-      "type": "calculation",
-      "prompt": "49kg 646g + 36kg 608g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "96kg 254g",
-        "87kg 254g",
-        "76kg 254g",
-        "86kg 254g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-114",
-      "type": "calculation",
-      "prompt": "40kg 327g + 23kg 203g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "62kg 530g",
-        "63kg 430g",
-        "63kg 530g",
-        "53kg 530g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-115",
-      "type": "calculation",
-      "prompt": "45kg 686g + 21kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "66kg 686g",
-        "66kg 636g",
-        "76kg 686g",
-        "67kg 686g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-116",
-      "type": "calculation",
-      "prompt": "46kg 250g + 14kg 750g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "51kg",
-        "60kg 19g",
-        "61kg",
-        "62kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-117",
-      "type": "calculation",
-      "prompt": "32kg 765g + 23kg 365g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "56kg 30g",
-        "56kg 80g",
-        "56kg 130g",
-        "57kg 30g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-118",
-      "type": "calculation",
-      "prompt": "10kg 73g + 21kg 383g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "32kg 556g",
-        "32kg 456g",
-        "31kg 456g",
-        "31kg 406g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-119",
-      "type": "calculation",
-      "prompt": "22kg 150g + 15kg 850g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "38kg",
-        "39kg",
-        "37kg 18g",
-        "37kg 6g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-120",
-      "type": "calculation",
-      "prompt": "24kg 650g + 26kg 350g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "51kg",
-        "51kg 100g",
-        "41kg",
-        "50kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-121",
-      "type": "calculation",
-      "prompt": "30kg 795g + 25kg 449g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "55kg 222g",
-        "56kg 294g",
-        "56kg 244g",
-        "57kg 244g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-122",
-      "type": "calculation",
-      "prompt": "34kg 296g + 11kg 647g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "46kg 943g",
-        "45kg 943g",
-        "45kg 843g",
-        "55kg 943g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-123",
-      "type": "calculation",
-      "prompt": "24kg 550g + 33kg 450g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "prompt": "49kg 500g + 18kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
         "68kg",
-        "58kg",
-        "58kg 50g",
-        "58kg 100g"
+        "68kg 400g",
+        "67kg 950g",
+        "66kg 950g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-124",
-      "type": "calculation",
-      "prompt": "30kg 241g + 26kg 335g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "57kg 576g",
-        "56kg 476g",
-        "56kg 526g",
-        "56kg 576g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-125",
-      "type": "calculation",
-      "prompt": "36kg 850g + 14kg 150g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "51kg",
-        "51kg 100g",
-        "51kg 50g",
-        "52kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-126",
-      "type": "calculation",
-      "prompt": "46kg 150g + 21kg 850g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "68kg",
-        "68kg 50g",
-        "67kg 49g",
-        "67kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-127",
-      "type": "calculation",
-      "prompt": "12kg 793g + 12kg 452g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "25kg 245g",
-        "35kg 245g",
-        "25kg 345g",
-        "26kg 245g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-128",
-      "type": "calculation",
-      "prompt": "43kg 606g + 40kg 610g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "84kg 216g",
-        "84kg 116g",
-        "85kg 316g",
-        "83kg 252g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-129",
-      "type": "calculation",
-      "prompt": "35kg 246g + 35kg 302g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "70kg 548g",
-        "70kg 648g",
-        "70kg 448g",
-        "71kg 548g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-130",
-      "type": "calculation",
-      "prompt": "55kg 788g + 13kg 344g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "68kg 120g",
-        "70kg 132g",
-        "79kg 132g",
-        "69kg 132g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-131",
-      "type": "calculation",
-      "prompt": "40kg 550g + 33kg 450g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "74kg 50g",
-        "73kg",
-        "74kg",
-        "75kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-132",
-      "type": "calculation",
-      "prompt": "13kg 551g + 31kg 668g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "45kg 219g",
-        "44kg 119g",
-        "46kg 119g",
-        "45kg 169g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-133",
-      "type": "calculation",
-      "prompt": "28kg 664g + 23kg 446g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "52kg 60g",
-        "53kg 110g",
-        "52kg 110g",
-        "42kg 110g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-134",
-      "type": "calculation",
-      "prompt": "28kg 519g + 5kg 683g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "34kg 302g",
-        "33kg 266g",
-        "34kg 202g",
-        "34kg 152g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-135",
-      "type": "calculation",
-      "prompt": "17kg 669g + 15kg 850g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "33kg 519g",
-        "34kg 419g",
-        "33kg 419g",
-        "43kg 519g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-136",
-      "type": "calculation",
-      "prompt": "25kg 138g + 17kg 735g",
+      "prompt": "36kg 550g + 35kg 300g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "43kg 873g",
-        "42kg 773g",
-        "32kg 873g",
-        "42kg 873g"
+        "61kg 850g",
+        "71kg 850g",
+        "70kg 850g",
+        "71kg 350g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-137",
-      "type": "calculation",
-      "prompt": "44kg 550g + 40kg 450g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "84kg 100g",
-        "85kg",
-        "84kg 75g",
-        "85kg 100g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-138",
-      "type": "calculation",
-      "prompt": "49kg 326g + 17kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "67kg 426g",
-        "66kg 326g",
-        "67kg 326g",
-        "67kg 226g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-139",
-      "type": "calculation",
-      "prompt": "50kg 420g + 7kg 627g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "48kg 47g",
-        "58kg 97g",
-        "59kg 47g",
-        "58kg 47g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-140",
-      "type": "calculation",
-      "prompt": "37kg 278g + 8kg 282g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "45kg 610g",
-        "45kg 560g",
-        "45kg 510g",
-        "46kg 560g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-141",
-      "type": "calculation",
-      "prompt": "10kg 863g + 16kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "26kg 813g",
-        "36kg 863g",
-        "26kg 763g",
-        "26kg 863g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-142",
-      "type": "calculation",
-      "prompt": "36kg 284g + 14kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "51kg 384g",
-        "51kg 284g",
-        "50kg 284g",
-        "40kg 284g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-143",
-      "type": "calculation",
-      "prompt": "13kg 795g + 12kg 904g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "27kg 799g",
-        "16kg 699g",
-        "26kg 699g",
-        "26kg 799g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-144",
-      "type": "calculation",
-      "prompt": "27kg 596g + 12kg 470g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "40kg 16g",
-        "40kg 66g",
-        "30kg 66g",
-        "39kg 66g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-145",
-      "type": "calculation",
-      "prompt": "30kg 274g + 19kg 326g",
+      "prompt": "24kg 850g + 15kg 100g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "50kg 600g",
-        "49kg 600g",
-        "49kg 650g",
-        "48kg 600g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-146",
-      "type": "calculation",
-      "prompt": "29kg 550g + 11kg 450g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "42kg",
-        "51kg",
-        "41kg",
-        "42kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-147",
-      "type": "calculation",
-      "prompt": "29kg 862g + 14kg 662g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "54kg 524g",
-        "44kg 474g",
-        "44kg 524g",
-        "43kg 566g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-148",
-      "type": "calculation",
-      "prompt": "51kg 180g + 24kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "75kg 130g",
-        "75kg 180g",
-        "85kg 180g",
-        "75kg 80g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-149",
-      "type": "calculation",
-      "prompt": "47kg 870g + 40kg 402g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "88kg 372g",
-        "88kg 272g",
-        "87kg 225g",
-        "78kg 272g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-150",
-      "type": "calculation",
-      "prompt": "48kg 860g + 18kg 596g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "67kg 456g",
-        "67kg 556g",
-        "66kg 492g",
-        "68kg 456g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-151",
-      "type": "calculation",
-      "prompt": "36kg 527g + 8kg 872g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "46kg 499g",
-        "45kg 499g",
-        "46kg 399g",
-        "45kg 399g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-152",
-      "type": "calculation",
-      "prompt": "21kg 333g + 31kg 201g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "52kg 534g",
-        "52kg 434g",
-        "51kg 534g",
-        "53kg 534g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-153",
-      "type": "calculation",
-      "prompt": "50kg 850g + 24kg 150g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "65kg",
-        "76kg",
-        "74kg",
-        "75kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-154",
-      "type": "calculation",
-      "prompt": "50kg 127g + 5kg 161g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "55kg 338g",
-        "55kg 188g",
-        "56kg 188g",
-        "55kg 288g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-155",
-      "type": "calculation",
-      "prompt": "38kg 190g + 39kg 196g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "76kg 386g",
-        "87kg 386g",
-        "77kg 386g",
-        "67kg 386g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-156",
-      "type": "calculation",
-      "prompt": "60kg 506g + 12kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "72kg 456g",
-        "72kg 506g",
-        "72kg 606g",
-        "73kg 506g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-157",
-      "type": "calculation",
-      "prompt": "30kg 244g + 29kg 332g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "59kg 576g",
-        "60kg 576g",
-        "49kg 576g",
-        "58kg 476g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-158",
-      "type": "calculation",
-      "prompt": "7kg 285g + 11kg 938g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "20kg 323g",
-        "19kg 223g",
-        "9kg 223g",
-        "20kg 123g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-159",
-      "type": "calculation",
-      "prompt": "14kg 820g + 31kg 779g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "46kg 599g",
-        "46kg 499g",
-        "45kg 518g",
-        "46kg 549g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-160",
-      "type": "calculation",
-      "prompt": "15kg 756g + 27kg 348g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "43kg 204g",
-        "42kg 104g",
-        "43kg 104g",
-        "53kg 104g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-161",
-      "type": "calculation",
-      "prompt": "27kg 650g + 27kg 350g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "65kg",
-        "55kg",
-        "54kg 10g",
-        "56kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-162",
-      "type": "calculation",
-      "prompt": "19kg 489g + 30kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "39kg 489g",
-        "50kg 489g",
-        "49kg 589g",
-        "49kg 489g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-163",
-      "type": "calculation",
-      "prompt": "16kg 235g + 12kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "29kg 235g",
-        "28kg 285g",
-        "18kg 235g",
-        "28kg 235g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-164",
-      "type": "calculation",
-      "prompt": "20kg 550g + 23kg 450g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "44kg",
-        "45kg",
-        "34kg",
-        "43kg 99g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-165",
-      "type": "calculation",
-      "prompt": "15kg 272g + 22kg 265g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "37kg 437g",
-        "37kg 537g",
-        "37kg 637g",
-        "47kg 537g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-166",
-      "type": "calculation",
-      "prompt": "13kg 205g + 5kg 252g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "18kg 357g",
-        "18kg 457g",
-        "17kg 557g",
-        "18kg 557g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-167",
-      "type": "calculation",
-      "prompt": "28kg 852g + 30kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "58kg 852g",
-        "58kg 802g",
-        "58kg 952g",
-        "59kg 852g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-168",
-      "type": "calculation",
-      "prompt": "17kg 656g + 22kg 234g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "40kg 890g",
-        "39kg 790g",
-        "39kg 890g",
-        "38kg 990g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-169",
-      "type": "calculation",
-      "prompt": "52kg 257g + 23kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "75kg 257g",
-        "85kg 257g",
-        "75kg 307g",
-        "76kg 257g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-170",
-      "type": "calculation",
-      "prompt": "54kg 649g + 29kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "83kg 649g",
-        "84kg 649g",
-        "82kg 649g",
-        "82kg 549g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-171",
-      "type": "calculation",
-      "prompt": "11kg 182g + 19kg 311g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "31kg 493g",
-        "30kg 493g",
-        "30kg 593g",
-        "29kg 593g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-172",
-      "type": "calculation",
-      "prompt": "23kg 262g + 10kg 109g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "33kg 371g",
-        "34kg 371g",
-        "32kg 471g",
-        "33kg 471g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-173",
-      "type": "calculation",
-      "prompt": "23kg 850g + 33kg 150g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "67kg",
-        "58kg 100g",
-        "47kg",
-        "57kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-174",
-      "type": "calculation",
-      "prompt": "43kg 589g + 40kg 542g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "83kg 90g",
-        "84kg 231g",
-        "84kg 131g",
-        "83kg 192g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-175",
-      "type": "calculation",
-      "prompt": "44kg 151g + 33kg 353g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "77kg 504g",
-        "78kg 504g",
-        "67kg 504g",
-        "76kg 404g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-176",
-      "type": "calculation",
-      "prompt": "23kg 550g + 31kg 450g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "55kg 50g",
-        "56kg 100g",
-        "54kg 35g",
-        "55kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-177",
-      "type": "calculation",
-      "prompt": "16kg 883g + 26kg 772g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "42kg 755g",
-        "33kg 655g",
-        "43kg 655g",
-        "43kg 555g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-178",
-      "type": "calculation",
-      "prompt": "42kg 698g + 31kg 493g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "74kg 241g",
-        "74kg 191g",
-        "73kg 138g",
-        "73kg 253g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-179",
-      "type": "calculation",
-      "prompt": "18kg 291g + 20kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "38kg 241g",
-        "38kg 191g",
-        "38kg 291g",
-        "39kg 291g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-180",
-      "type": "calculation",
-      "prompt": "37kg 718g + 20kg 468g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "59kg 286g",
-        "58kg 186g",
-        "57kg 186g",
-        "58kg 136g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-181",
-      "type": "calculation",
-      "prompt": "44kg 647g + 15kg 871g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "60kg 568g",
-        "60kg 618g",
-        "60kg 468g",
-        "60kg 518g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-182",
-      "type": "calculation",
-      "prompt": "23kg 450g + 19kg 550g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "43kg",
-        "53kg",
-        "33kg",
-        "43kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-183",
-      "type": "calculation",
-      "prompt": "49kg 571g + 18kg 895g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "68kg 466g",
-        "68kg 516g",
-        "67kg 466g",
-        "68kg 416g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-184",
-      "type": "calculation",
-      "prompt": "22kg 928g + 21kg 745g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "44kg 573g",
-        "34kg 673g",
-        "44kg 673g",
-        "43kg 588g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-185",
-      "type": "calculation",
-      "prompt": "35kg 750g + 14kg 891g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "50kg 641g",
-        "51kg 741g",
-        "49kg 656g",
-        "40kg 641g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-186",
-      "type": "calculation",
-      "prompt": "50kg 850g + 20kg 150g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "71kg",
-        "72kg",
-        "71kg 50g",
-        "70kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-187",
-      "type": "calculation",
-      "prompt": "31kg 660g + 28kg",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "49kg 660g",
-        "60kg 660g",
-        "59kg 660g",
-        "59kg 560g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-188",
-      "type": "calculation",
-      "prompt": "34kg 150g + 40kg 850g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "76kg",
-        "74kg 100g",
-        "75kg",
-        "85kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-189",
-      "type": "calculation",
-      "prompt": "30kg 370g + 24kg 169g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "55kg 539g",
-        "53kg 439g",
-        "54kg 539g",
-        "44kg 539g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-190",
-      "type": "calculation",
-      "prompt": "48kg 505g + 5kg 58g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "54kg 563g",
-        "54kg 463g",
-        "52kg 663g",
-        "53kg 563g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-191",
-      "type": "calculation",
-      "prompt": "11kg 210g + 28kg 203g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "39kg 413g",
-        "40kg 413g",
-        "29kg 413g",
-        "38kg 413g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-192",
-      "type": "calculation",
-      "prompt": "36kg 815g + 33kg 457g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "70kg 272g",
-        "69kg 272g",
-        "70kg 322g",
-        "60kg 272g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-193",
-      "type": "calculation",
-      "prompt": "27kg 830g + 10kg 474g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "37kg 404g",
-        "38kg 304g",
-        "37kg 304g",
-        "38kg 354g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-194",
-      "type": "calculation",
-      "prompt": "32kg 250g + 17kg 750g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "50kg 100g",
-        "50kg",
-        "51kg",
-        "49kg 63g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-195",
-      "type": "calculation",
-      "prompt": "6kg 350g + 9kg 57g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "15kg 407g",
-        "16kg 407g",
-        "15kg 307g",
-        "5kg 407g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-196",
-      "type": "calculation",
-      "prompt": "22kg 350g + 18kg 650g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "51kg",
-        "41kg",
-        "31kg",
-        "42kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-197",
-      "type": "calculation",
-      "prompt": "43kg 450g + 11kg 550g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "45kg",
-        "55kg",
-        "54kg 56g",
-        "54kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-198",
-      "type": "calculation",
-      "prompt": "50kg 650g + 26kg 350g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "77kg 100g",
-        "77kg",
-        "78kg",
-        "77kg 50g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-199",
-      "type": "calculation",
-      "prompt": "45kg 128g + 20kg 516g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "65kg 594g",
-        "65kg 694g",
-        "65kg 644g",
-        "75kg 644g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-200",
-      "type": "calculation",
-      "prompt": "48kg 790g + 8kg 283g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "47kg 73g",
-        "67kg 73g",
-        "57kg 73g",
-        "57kg 173g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-201",
-      "type": "calculation",
-      "prompt": "30kg 627g + 31kg 750g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "52kg 377g",
-        "62kg 277g",
-        "62kg 377g",
-        "62kg 427g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-202",
-      "type": "calculation",
-      "prompt": "34kg 194g + 24kg 217g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "58kg 411g",
-        "59kg 411g",
-        "68kg 411g",
-        "58kg 461g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-203",
-      "type": "calculation",
-      "prompt": "44kg 889g + 20kg 315g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "65kg 254g",
-        "55kg 204g",
-        "75kg 204g",
-        "65kg 204g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-204",
-      "type": "calculation",
-      "prompt": "16kg 310g + 26kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "32kg 310g",
-        "43kg 310g",
-        "43kg 210g",
-        "42kg 310g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-205",
-      "type": "calculation",
-      "prompt": "43kg 250g + 28kg 750g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "72kg",
-        "71kg 69g",
-        "71kg",
-        "62kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-206",
-      "type": "calculation",
-      "prompt": "30kg 563g + 18kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "48kg 563g",
-        "48kg 513g",
-        "49kg 563g",
-        "47kg 563g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-207",
-      "type": "calculation",
-      "prompt": "27kg 838g + 11kg 512g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "39kg 250g",
-        "39kg 350g",
-        "39kg 450g",
-        "29kg 350g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-208",
-      "type": "calculation",
-      "prompt": "19kg 193g + 17kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "36kg 143g",
-        "36kg 293g",
-        "36kg 193g",
-        "37kg 293g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-209",
-      "type": "calculation",
-      "prompt": "52kg 613g + 12kg 146g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "65kg 759g",
-        "64kg 759g",
-        "63kg 759g",
-        "54kg 759g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-210",
-      "type": "calculation",
-      "prompt": "6kg 83g + 17kg 380g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "23kg 363g",
-        "22kg 463g",
-        "24kg 463g",
-        "23kg 463g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-211",
-      "type": "calculation",
-      "prompt": "32kg 891g + 28kg 454g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "60kg 419g",
-        "60kg 289g",
-        "61kg 345g",
-        "60kg 252g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-212",
-      "type": "calculation",
-      "prompt": "38kg 252g + 11kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "50kg 252g",
-        "49kg 202g",
-        "49kg 252g",
-        "50kg 352g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-213",
-      "type": "calculation",
-      "prompt": "24kg 750g + 16kg 250g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "41kg",
-        "41kg 50g",
         "40kg 100g",
-        "42kg 100g"
+        "40kg 950g",
+        "29kg 950g",
+        "39kg 950g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-214",
-      "type": "calculation",
-      "prompt": "21kg 126g + 20kg",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "41kg 176g",
-        "41kg 76g",
-        "41kg 126g",
-        "51kg 126g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-215",
-      "type": "calculation",
-      "prompt": "27kg 773g + 8kg 501g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "36kg 274g",
-        "36kg 324g",
-        "35kg 274g",
-        "36kg 174g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-216",
-      "type": "calculation",
-      "prompt": "46kg 677g + 14kg",
+      "prompt": "12kg 300g + 51kg 100g",
       "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "61kg 677g",
-        "60kg 677g",
-        "60kg 627g",
-        "60kg 727g"
+        "64kg 400g",
+        "64kg",
+        "63kg 400g",
+        "63kg 300g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-217",
-      "type": "calculation",
-      "prompt": "19kg 358g + 19kg 60g",
+      "prompt": "42kg 450g + 24kg 450g",
       "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "48kg 418g",
-        "38kg 418g",
-        "38kg 468g",
-        "38kg 368g"
+        "66kg 900g",
+        "65kg 900g",
+        "67kg 900g",
+        "66kg"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 0
     },
     {
-      "id": "ma3-kg-218",
-      "type": "calculation",
-      "prompt": "6kg 125g + 14kg 106g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "20kg 231g",
-        "20kg 281g",
-        "21kg 131g",
-        "30kg 231g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-219",
-      "type": "calculation",
-      "prompt": "37kg 827g + 36kg 887g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "74kg 714g",
-        "73kg 814g",
-        "75kg 614g",
-        "74kg 614g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-220",
-      "type": "calculation",
-      "prompt": "10kg 859g + 30kg 772g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "41kg 681g",
-        "41kg 581g",
-        "31kg 631g",
-        "41kg 631g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-221",
-      "type": "calculation",
-      "prompt": "20kg 227g + 25kg 135g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "55kg 362g",
-        "44kg 462g",
-        "45kg 362g",
-        "46kg 362g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-222",
-      "type": "calculation",
-      "prompt": "60kg 210g + 10kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "70kg 210g",
-        "80kg 210g",
-        "71kg 110g",
-        "71kg 210g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-223",
-      "type": "calculation",
-      "prompt": "29kg 153g + 31kg 540g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "60kg 643g",
-        "61kg 693g",
-        "60kg 693g",
-        "50kg 693g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-224",
-      "type": "calculation",
-      "prompt": "9kg 225g + 15kg 242g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "24kg 567g",
-        "23kg 467g",
-        "24kg 417g",
-        "24kg 467g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-225",
-      "type": "calculation",
-      "prompt": "13kg 551g + 26kg 604g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "40kg 55g",
-        "41kg 155g",
-        "41kg 255g",
-        "40kg 155g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-226",
-      "type": "calculation",
-      "prompt": "13kg 684g + 5kg 803g",
+      "prompt": "41kg 550g + 12kg 500g",
       "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "9kg 487g",
-        "29kg 487g",
-        "19kg 487g",
-        "20kg 387g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-227",
-      "type": "calculation",
-      "prompt": "47kg 250g + 19kg 750g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "66kg 20g",
-        "66kg 69g",
-        "67kg",
-        "67kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-228",
-      "type": "calculation",
-      "prompt": "38kg 576g + 18kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "56kg 526g",
-        "55kg 576g",
-        "57kg 576g",
-        "56kg 576g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-229",
-      "type": "calculation",
-      "prompt": "19kg 616g + 6kg 910g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "25kg 563g",
-        "26kg 526g",
-        "25kg 559g",
-        "27kg 426g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-230",
-      "type": "calculation",
-      "prompt": "37kg 342g + 38kg 342g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "74kg 584g",
-        "76kg 684g",
-        "75kg 684g",
-        "74kg 684g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-231",
-      "type": "calculation",
-      "prompt": "22kg 750g + 16kg 250g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "39kg",
-        "38kg 100g",
-        "49kg",
-        "39kg 50g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-232",
-      "type": "calculation",
-      "prompt": "42kg 585g + 30kg 479g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "72kg 64g",
-        "73kg 14g",
-        "83kg 64g",
-        "73kg 64g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-233",
-      "type": "calculation",
-      "prompt": "27kg 948g + 18kg 320g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "45kg 335g",
-        "45kg 314g",
-        "46kg 318g",
-        "46kg 268g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-234",
-      "type": "calculation",
-      "prompt": "49kg 811g + 30kg 278g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "80kg 89g",
-        "81kg 189g",
-        "80kg 189g",
-        "79kg 73g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-235",
-      "type": "calculation",
-      "prompt": "18kg 653g + 33kg 725g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "52kg 378g",
-        "52kg 328g",
-        "52kg 478g",
-        "53kg 378g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-236",
-      "type": "calculation",
-      "prompt": "37kg 131g + 9kg 209g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "46kg 290g",
-        "45kg 340g",
-        "46kg 340g",
-        "47kg 240g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-237",
-      "type": "calculation",
-      "prompt": "21kg 650g + 32kg 350g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "55kg",
-        "54kg 50g",
         "54kg 100g",
-        "54kg"
+        "53kg 50g",
+        "64kg 50g",
+        "54kg 50g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-238",
-      "type": "calculation",
-      "prompt": "41kg 708g + 24kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "65kg 608g",
-        "65kg 708g",
-        "65kg 758g",
-        "66kg 708g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-239",
-      "type": "calculation",
-      "prompt": "29kg 75g + 15kg 342g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "43kg 317g",
-        "44kg 517g",
-        "43kg 417g",
-        "44kg 417g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-240",
-      "type": "calculation",
-      "prompt": "21kg 807g + 5kg 472g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "28kg 379g",
-        "27kg 279g",
-        "26kg 268g",
-        "27kg 379g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-241",
-      "type": "calculation",
-      "prompt": "53kg 633g + 29kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "82kg 583g",
-        "82kg 633g",
-        "92kg 633g",
-        "83kg 633g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-242",
-      "type": "calculation",
-      "prompt": "26kg 191g + 25kg 191g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "50kg 382g",
-        "51kg 482g",
-        "51kg 332g",
-        "51kg 382g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-243",
-      "type": "calculation",
-      "prompt": "11kg 835g + 36kg 517g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "47kg 252g",
-        "48kg 352g",
-        "48kg 452g",
-        "47kg 351g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-244",
-      "type": "calculation",
-      "prompt": "42kg 407g + 15kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "57kg 407g",
-        "56kg 507g",
-        "58kg 407g",
-        "67kg 407g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-245",
-      "type": "calculation",
-      "prompt": "32kg 614g + 24kg 866g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "56kg 410g",
-        "57kg 580g",
-        "56kg 393g",
-        "57kg 480g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-246",
-      "type": "calculation",
-      "prompt": "36kg 550g + 23kg 450g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "59kg",
-        "50kg",
-        "60kg",
-        "60kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-247",
-      "type": "calculation",
-      "prompt": "36kg 220g + 16kg 210g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "52kg 330g",
-        "52kg 430g",
-        "51kg 330g",
-        "53kg 430g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-248",
-      "type": "calculation",
-      "prompt": "13kg 364g + 32kg 374g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "46kg 738g",
-        "35kg 738g",
-        "45kg 738g",
-        "45kg 688g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-249",
-      "type": "calculation",
-      "prompt": "48kg 52g + 20kg 165g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "69kg 217g",
-        "67kg 217g",
-        "68kg 217g",
-        "69kg 317g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-250",
-      "type": "calculation",
-      "prompt": "28kg 566g + 26kg",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "54kg 616g",
-        "54kg 566g",
-        "55kg 566g",
-        "53kg 666g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-251",
-      "type": "calculation",
-      "prompt": "20kg 450g + 17kg 550g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "38kg",
-        "28kg",
-        "48kg",
-        "37kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-252",
-      "type": "calculation",
-      "prompt": "21kg 535g + 27kg 206g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "47kg 741g",
-        "48kg 741g",
-        "47kg 841g",
-        "48kg 841g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-253",
-      "type": "calculation",
-      "prompt": "17kg 208g + 25kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "42kg 108g",
-        "41kg 208g",
-        "42kg 208g",
-        "42kg 308g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-254",
-      "type": "calculation",
-      "prompt": "40kg 669g + 20kg 383g",
+      "prompt": "27kg 500g + 46kg 600g",
       "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "71kg 52g",
-        "60kg 52g",
-        "51kg 52g",
-        "61kg 52g"
+        "74kg 150g",
+        "74kg 100g",
+        "74kg",
+        "73kg 100g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-255",
-      "type": "calculation",
-      "prompt": "39kg 651g + 21kg 874g",
+      "prompt": "20kg 650g + 31kg",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "51kg 650g",
+        "52kg 200g",
+        "41kg 650g",
+        "52kg 650g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "26kg 100g + 9kg 700g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "35kg 800g",
+        "36kg 800g",
+        "36kg 100g",
+        "35kg 300g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "33kg 650g + 46kg 750g",
       "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "51kg 525g",
-        "61kg 525g",
-        "60kg 525g",
-        "61kg 625g"
+        "70kg 400g",
+        "80kg 400g",
+        "79kg 400g",
+        "90kg 400g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-256",
-      "type": "calculation",
-      "prompt": "5kg 120g + 15kg 218g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "20kg 438g",
-        "19kg 438g",
-        "20kg 338g",
-        "20kg 388g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-257",
-      "type": "calculation",
-      "prompt": "50kg 850g + 18kg 150g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "68kg 76g",
-        "68kg 7g",
-        "69kg",
-        "68kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-258",
-      "type": "calculation",
-      "prompt": "48kg 498g + 10kg 675g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "59kg 73g",
-        "58kg 272g",
-        "59kg 173g",
-        "58kg 273g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-259",
-      "type": "calculation",
-      "prompt": "9kg 183g + 25kg 56g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "34kg 239g",
-        "35kg 239g",
-        "33kg 339g",
-        "34kg 189g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-260",
-      "type": "calculation",
-      "prompt": "45kg 813g + 8kg 248g",
+      "prompt": "45kg 700g + 50kg 350g",
       "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "53kg 3g",
-        "64kg 61g",
-        "54kg 61g",
-        "53kg 161g"
+        "106kg 50g",
+        "96kg 50g",
+        "96kg 550g",
+        "95kg 50g"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-261",
-      "type": "calculation",
-      "prompt": "37kg 164g + 40kg 379g",
+      "prompt": "49kg 500g + 30kg 50g",
       "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "78kg 543g",
-        "76kg 543g",
-        "77kg 593g",
-        "77kg 543g"
+        "80kg 300g",
+        "79kg 600g",
+        "79kg 550g",
+        "78kg 550g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-262",
-      "type": "calculation",
-      "prompt": "36kg 384g + 6kg 102g",
+      "prompt": "24kg 350g + 15kg 450g",
       "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "42kg 486g",
-        "52kg 486g",
-        "32kg 486g",
-        "43kg 486g"
+        "40kg 200g",
+        "39kg 800g",
+        "40kg 400g",
+        "29kg 800g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-263",
-      "type": "calculation",
-      "prompt": "13kg 328g + 24kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "37kg 428g",
-        "27kg 328g",
-        "37kg 328g",
-        "38kg 428g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-264",
-      "type": "calculation",
-      "prompt": "45kg 634g + 21kg",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "76kg 634g",
-        "67kg 634g",
-        "66kg 634g",
-        "65kg 534g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-265",
-      "type": "calculation",
-      "prompt": "39kg 900g + 17kg 883g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "57kg 683g",
-        "57kg 783g",
-        "56kg 883g",
-        "56kg 694g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-266",
-      "type": "calculation",
-      "prompt": "38kg 74g + 40kg 271g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "77kg 245g",
-        "78kg 395g",
-        "78kg 295g",
-        "78kg 345g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-267",
-      "type": "calculation",
-      "prompt": "39kg 450g + 18kg 550g",
+      "prompt": "35kg 750g + 28kg 450g",
       "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "58kg",
-        "57kg",
-        "57kg 54g",
-        "58kg 100g"
+        "64kg 700g",
+        "64kg 200g",
+        "64kg 100g",
+        "63kg 200g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-268",
-      "type": "calculation",
-      "prompt": "23kg 819g + 23kg 934g",
+      "prompt": "46kg 550g + 25kg 200g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "71kg 650g",
+        "71kg 750g",
+        "71kg 800g",
+        "72kg 750g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "47kg 600g + 5kg 150g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "53kg 400g",
+        "52kg 750g",
+        "42kg 750g",
+        "52kg 850g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "17kg 550g + 27kg 550g",
       "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
-        "47kg 753g",
-        "47kg 803g",
-        "47kg 653g",
-        "46kg 853g"
+        "35kg 100g",
+        "55kg 100g",
+        "45kg 100g",
+        "44kg 100g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-269",
-      "type": "calculation",
-      "prompt": "38kg 104g + 6kg 245g",
+      "prompt": "18kg 800g + 75kg 400g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "84kg 200g",
+        "93kg 200g",
+        "94kg 200g",
+        "95kg 200g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "35kg 500g + 54kg 550g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "90kg 450g",
+        "89kg 50g",
+        "90kg 50g",
+        "90kg 550g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "14kg 750g + 8kg 200g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "44kg 349g",
-        "43kg 249g",
-        "43kg 349g",
-        "44kg 249g"
+        "23kg 200g",
+        "22kg 950g",
+        "21kg 950g",
+        "23kg 950g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-270",
-      "type": "calculation",
-      "prompt": "49kg 201g + 18kg 327g",
+      "prompt": "29kg 200g + 1kg 950g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "31kg 50g",
+        "41kg 150g",
+        "31kg 150g",
+        "30kg 150g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "9kg 350g + 17kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "26kg 700g",
+        "26kg 800g",
+        "27kg 800g",
+        "27kg"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "14kg 150g + 12kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "26kg 50g",
+        "17kg 50g",
+        "37kg 50g",
+        "27kg 50g"
+      ],
+      "answerIndex": 3
+    },
+    {
+      "prompt": "31kg 450g + 5kg 700g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "37kg 50g",
+        "37kg 150g",
+        "36kg 150g",
+        "37kg 250g"
+      ],
+      "answerIndex": 1
+    },
+    {
+      "prompt": "13kg + 54kg 950g",
       "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "68kg 528g",
-        "77kg 528g",
-        "67kg 528g",
-        "57kg 528g"
+        "57kg 950g",
+        "67kg 950g",
+        "67kg",
+        "67kg 450g"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-271",
-      "type": "calculation",
-      "prompt": "32kg 750g + 40kg 250g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "prompt": "14kg 500g + 73kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "87kg 950g",
+        "87kg 50g",
+        "88kg 200g",
+        "87kg 450g"
+      ],
+      "answerIndex": 0
+    },
+    {
+      "prompt": "13kg 600g + 34kg 600g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "58kg 200g",
+        "47kg 200g",
+        "48kg 200g",
+        "48kg 300g"
+      ],
+      "answerIndex": 2
+    },
+    {
+      "prompt": "40kg 450g + 42kg 650g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
         "83kg",
-        "72kg 100g",
-        "73kg",
-        "74kg"
+        "82kg 100g",
+        "83kg 100g",
+        "84kg 100g"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 2
     },
     {
-      "id": "ma3-kg-272",
-      "type": "calculation",
-      "prompt": "42kg 561g + 29kg 509g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "71kg 70g",
-        "71kg 41g",
-        "72kg 70g",
-        "72kg 120g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-273",
-      "type": "calculation",
-      "prompt": "12kg 578g + 25kg 777g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "48kg 355g",
-        "37kg 401g",
-        "38kg 405g",
-        "38kg 355g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-274",
-      "type": "calculation",
-      "prompt": "43kg 534g + 37kg 597g",
+      "prompt": "42kg 150g + 42kg 850g",
       "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "81kg 181g",
-        "91kg 131g",
-        "81kg 131g",
-        "80kg 170g"
+        "85kg 100g",
+        "86kg",
+        "95kg",
+        "85kg"
       ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
+      "answerIndex": 3
     },
     {
-      "id": "ma3-kg-275",
-      "type": "calculation",
-      "prompt": "28kg 323g + 29kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "57kg 373g",
-        "67kg 323g",
-        "57kg 323g",
-        "57kg 273g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-276",
-      "type": "calculation",
-      "prompt": "34kg 216g + 22kg",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "66kg 216g",
-        "56kg 266g",
-        "56kg 216g",
-        "56kg 316g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-277",
-      "type": "calculation",
-      "prompt": "42kg 184g + 13kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "54kg 284g",
-        "54kg 84g",
-        "54kg 184g",
-        "55kg 184g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-278",
-      "type": "calculation",
-      "prompt": "11kg 735g + 26kg 353g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "38kg 88g",
-        "28kg 88g",
-        "38kg 188g",
-        "38kg 38g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-279",
-      "type": "calculation",
-      "prompt": "11kg 498g + 13kg",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "23kg 398g",
-        "23kg 598g",
-        "24kg 448g",
-        "24kg 498g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-280",
-      "type": "calculation",
-      "prompt": "58kg 548g + 22kg",
+      "prompt": "35kg 600g + 15kg 250g",
       "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "80kg 548g",
-        "79kg 648g",
-        "81kg 548g",
-        "79kg 548g"
+        "60kg 850g",
+        "50kg 850g",
+        "50kg 750g",
+        "51kg 300g"
       ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
     },
     {
-      "id": "ma3-kg-281",
-      "type": "calculation",
-      "prompt": "29kg 846g + 28kg 215g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "58kg 11g",
-        "48kg 61g",
-        "68kg 61g",
-        "58kg 61g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-282",
-      "type": "calculation",
-      "prompt": "36kg 830g + 37kg 365g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "74kg 245g",
-        "73kg 195g",
-        "75kg 195g",
-        "74kg 195g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-283",
-      "type": "calculation",
-      "prompt": "17kg 347g + 36kg 219g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "53kg 566g",
-        "54kg 566g",
-        "53kg 466g",
-        "52kg 466g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-284",
-      "type": "calculation",
-      "prompt": "14kg 629g + 23kg 423g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "37kg 52g",
-        "38kg 52g",
-        "39kg 52g",
-        "38kg 152g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-285",
-      "type": "calculation",
-      "prompt": "34kg 850g + 21kg 150g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "55kg",
-        "56kg 50g",
-        "56kg",
-        "56kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-286",
-      "type": "calculation",
-      "prompt": "33kg 700g + 19kg 647g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "54kg 347g",
-        "52kg 340g",
-        "53kg 297g",
-        "53kg 347g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-287",
-      "type": "calculation",
-      "prompt": "13kg 506g + 10kg 233g",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "23kg 689g",
-        "13kg 739g",
-        "23kg 739g",
-        "24kg 839g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-288",
-      "type": "calculation",
-      "prompt": "24kg 143g + 16kg",
-      "promptExplain": "무게의 합을 구하세요.",
-      "choices": [
-        "40kg 193g",
-        "41kg 143g",
-        "40kg 143g",
-        "30kg 143g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-289",
-      "type": "calculation",
-      "prompt": "39kg 633g + 10kg 435g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "51kg 168g",
-        "50kg 118g",
-        "50kg 68g",
-        "50kg 18g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-290",
-      "type": "calculation",
-      "prompt": "41kg 593g + 29kg",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "60kg 593g",
-        "71kg 593g",
-        "69kg 593g",
-        "70kg 593g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-291",
-      "type": "calculation",
-      "prompt": "21kg 580g + 28kg 778g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "49kg 458g",
-        "50kg 358g",
-        "49kg 258g",
-        "49kg 342g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-292",
-      "type": "calculation",
-      "prompt": "20kg 450g + 11kg 550g",
-      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
-      "choices": [
-        "32kg 50g",
-        "31kg",
-        "22kg",
-        "32kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-293",
-      "type": "calculation",
-      "prompt": "38kg 810g + 35kg 733g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "74kg 543g",
-        "74kg 593g",
-        "73kg 543g",
-        "73kg 596g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-294",
-      "type": "calculation",
-      "prompt": "42kg 120g + 12kg 437g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
-      "choices": [
-        "55kg 557g",
-        "44kg 557g",
-        "54kg 557g",
-        "53kg 557g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-295",
-      "type": "calculation",
-      "prompt": "48kg 150g + 38kg 850g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "97kg",
-        "87kg",
-        "86kg 96g",
-        "88kg 100g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-296",
-      "type": "calculation",
-      "prompt": "26kg 744g + 19kg 391g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "46kg 35g",
-        "36kg 135g",
-        "46kg 235g",
-        "46kg 135g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-297",
-      "type": "calculation",
-      "prompt": "30kg 709g + 28kg 450g",
-      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
-      "choices": [
-        "59kg 159g",
-        "60kg 159g",
-        "60kg 259g",
-        "59kg 209g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-298",
-      "type": "calculation",
-      "prompt": "36kg 782g + 40kg 762g",
-      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
-      "choices": [
-        "77kg 544g",
-        "78kg 544g",
-        "77kg 594g",
-        "77kg 644g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g",
-        "받아올림"
-      ]
-    },
-    {
-      "id": "ma3-kg-299",
-      "type": "calculation",
-      "prompt": "19kg 278g + 15kg 101g",
-      "promptExplain": "같은 단위끼리 더해보세요.",
-      "choices": [
-        "34kg 379g",
-        "33kg 279g",
-        "35kg 379g",
-        "34kg 279g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-300",
-      "type": "calculation",
-      "prompt": "21kg 163g + 28kg 90g",
+      "prompt": "12kg 750g + 20kg 200g",
       "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "49kg 303g",
-        "50kg 353g",
-        "49kg 203g",
-        "49kg 253g"
+        "32kg 450g",
+        "32kg 950g",
+        "31kg 950g",
+        "33kg 950g"
       ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "덧셈",
-        "kg",
-        "g"
-      ]
+      "answerIndex": 1
+    },
+    {
+      "prompt": "20kg 750g + 64kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "84kg 900g",
+        "84kg 950g",
+        "85kg 400g",
+        "85kg"
+      ],
+      "answerIndex": 0
     }
   ]
 }
