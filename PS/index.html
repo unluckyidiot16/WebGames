@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 탐험대 (확률 버그 수정 ver)</title>
+    <title>포켓몬 탐험대 (문제팩 즉시갱신 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -530,7 +530,7 @@
             <div id="lobby-partner" class="lobby-partner-container hidden">
                 <img id="lobby-partner-img" class="lobby-partner-img" src="" />
             </div>
-            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(확률 버그 수정 ver)</span></h1>
+            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(문제팩 즉시갱신 ver)</span></h1>
         </div>
 
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
@@ -762,7 +762,15 @@
 
     async function loadQuizData() {
         try {
-            const res = await fetch('./quiz/quiz.json');
+            // [캐시 방지] 타임스탬프 + 헤더
+            const timestamp = new Date().getTime();
+            const res = await fetch(`./quiz/quiz.json?v=${timestamp}`, {
+                cache: "no-store",
+                headers: {
+                    'Pragma': 'no-cache',
+                    'Cache-Control': 'no-cache'
+                }
+            });
             if(!res.ok) throw new Error("JSON Fetch Failed");
             const data = await res.json();
             if(data && data.questions && data.questions.length > 0) {
@@ -1111,7 +1119,7 @@
         baseRate = baseRate * 2.5;
         baseRate += (user.upgrades.catchRate * 0.005);
 
-        // 95% 캡 적용 후 너프 (조우 화면용)
+        // [수정: 조우 화면 로직]
         if(baseRate > 0.95) baseRate = 0.95;
         if(baseRate < 0.05) baseRate = 0.05;
         baseRate = baseRate * 0.65;
@@ -1215,7 +1223,7 @@
         element.classList.add('pop-anim');
     }
 
-    // [버그 수정 핵심] 확률 계산 로직 분리 및 캡 적용
+    // [버그 수정: 퀴즈 화면 로직 싱크 맞춤]
     function calculateCatchProb() {
         let rate = currentPokemon.rate / 255;
         if (!rate) rate = 0.1;
@@ -1228,18 +1236,17 @@
         // 1. 기초 확률 계산
         let baseP = rate * ballBonus * upgradeBonus * balancePatchMultiplier;
 
-        // 2. [수정] 기초 확률을 먼저 95%로 제한 (조우 화면과 동일한 기준 적용)
+        // 2. [수정] 95% 캡 적용 (조우 화면과 동일)
         if (baseP > 0.95) baseP = 0.95;
         if (baseP < 0.05) baseP = 0.05;
 
-        // 3. 콤보 보너스 적용
+        // 3. 콤보 보너스
         const comboBonus = 1 + (currentCombo * 0.1);
         let finalP = baseP * comboBonus;
 
-        // 4. 최종 난이도 너프 적용
+        // 4. 난이도 너프 (65%)
         finalP = finalP * DIFFICULTY_NERF;
 
-        // 마스터볼 예외
         if (selectedBall === 'master') finalP = 1;
         if (finalP > 1) finalP = 1;
 
