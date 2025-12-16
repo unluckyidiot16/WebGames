@@ -600,6 +600,11 @@
                 <div class="shop-item"><div>🗂️ 도감 확장<br><span style="font-size:12px; color:#94a3b8;" id="lv-dex">Lv.0</span></div><div class="shop-price">100 P</div><button class="buy-btn" onclick="buyUpgrade('dexLimit', 100)">확장하기</button></div>
 
                 <div class="shop-item"><div>🍀 행운의 부적<br><span style="font-size:12px; color:#94a3b8;" id="lv-rate">Lv.0 (Max 10)</span></div><div class="shop-price">800 P</div><button class="buy-btn" id="btn-buy-rate" onclick="buyUpgrade('catchRate', 800)">강화하기</button></div>
+                <div>⏳ 시간 연장<br>
+                    <span style="font-size:12px; color:#94a3b8;" id="lv-timer">Lv.0</span>
+                </div>
+                <div class="shop-price">100 P</div>
+                <button class="buy-btn" id="btn-buy-timer" onclick="buyUpgrade('timerLevel', 300)">강화하기</button>
             </div>
         </div>
     </div>
@@ -727,7 +732,8 @@
         points: 0,
         inventory: { monster: 0, super: 0, hyper: 0, master: 0 },
         dex: new Set(),
-        upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0 },
+        // timerLevel 추가
+        upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0, timerLevel: 0 },
         partnerId: null
     };
     let session = { active: false, steps: 0, caught: [], earnedPoints: 0 };
@@ -854,6 +860,7 @@
                 user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
                 if(user.upgrades.startBalls !== undefined) delete user.upgrades.startBalls;
                 if(user.upgrades.dexLimit === undefined) user.upgrades.dexLimit = 0;
+                if(user.upgrades.timerLevel === undefined) user.upgrades.timerLevel = 0;
             }
         } catch(e) { console.error("Load failed", e); }
     }
@@ -1178,10 +1185,15 @@
         startQuizTimer();
     }
 
+    // [수정] startQuizTimer 함수
     function startQuizTimer() {
         if(quizTimerInterval) clearInterval(quizTimerInterval);
 
-        let timeLeft = QUIZ_TIME_LIMIT;
+        // 기본 200(20초) + 레벨당 10(1초) 추가
+        // 최대 20레벨이면 200 + 200 = 400(40초)가 됨
+        const maxTime = QUIZ_TIME_LIMIT + (user.upgrades.timerLevel * 10);
+
+        let timeLeft = maxTime; // 변경된 시간 적용
         const barFill = document.getElementById('quiz-timer-fill');
 
         barFill.style.width = '100%';
@@ -1189,7 +1201,8 @@
 
         quizTimerInterval = setInterval(() => {
             timeLeft--;
-            const percentage = (timeLeft / QUIZ_TIME_LIMIT) * 100;
+            // 비율 계산 시 분모도 maxTime으로 변경
+            const percentage = (timeLeft / maxTime) * 100;
             barFill.style.width = `${percentage}%`;
 
             if (timeLeft <= 0) {
@@ -1401,6 +1414,22 @@
         document.getElementById('shop-points').textContent = user.points;
         document.getElementById('lv-steps').textContent = `Lv.${user.upgrades.maxSteps}`;
         document.getElementById('lv-dex').textContent = `Lv.${user.upgrades.dexLimit} (현재 ${30 + user.upgrades.dexLimit * 10}마리)`;
+
+        // [추가] 타이머 UI 업데이트
+        const timerLv = user.upgrades.timerLevel;
+        // 현재 시간 계산: 기본 20초 + 레벨
+        const curSec = 20 + timerLv;
+        document.getElementById('lv-timer').textContent = `Lv.${timerLv} (현재 ${curSec}초)`;
+
+        const timerBtn = document.getElementById('btn-buy-timer');
+        if(timerLv >= 20) {
+            timerBtn.disabled = true;
+            timerBtn.textContent = "Max Level";
+        } else {
+            timerBtn.disabled = false;
+            timerBtn.textContent = "강화하기";
+        }
+
         const rateLv = user.upgrades.catchRate;
         document.getElementById('lv-rate').textContent = `Lv.${rateLv} (확률 +${(rateLv * 0.5).toFixed(1)}%)`;
         const rateBtn = document.getElementById('btn-buy-rate');
@@ -1421,11 +1450,19 @@
         updateShopUI();
     }
 
+    // [수정] buyUpgrade 함수
     function buyUpgrade(key, cost) {
         if(user.points < cost) { alert("포인트가 부족해요!"); return; }
+
+        // [추가] 타이머 레벨 최대치(20) 제한
+        if(key === 'timerLevel' && user.upgrades.timerLevel >= 20) {
+            alert("이미 시간을 최대로 늘렸어요! (40초)"); return;
+        }
+
         if(key === 'catchRate' && user.upgrades.catchRate >= 10) {
             alert("이미 최고 레벨입니다!"); return;
         }
+
         user.points -= cost;
         user.upgrades[key]++;
         saveGame();
