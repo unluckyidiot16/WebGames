@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 탐험대 (데이터 보존 ver)</title>
+    <title>포켓몬 탐험대 (키보드 & JSON 퀴즈 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -402,10 +402,16 @@
         .combo-badge { font-size: 18px; font-weight: bold; color: #2563eb; }
         .rate-badge { font-size: 18px; font-weight: bold; color: #d97706; }
 
-        .timer-badge {
-            background: #fee2e2; color: #ef4444;
-            padding: 5px 12px; border-radius: 20px; font-weight: bold;
-            font-size: 16px; border: 2px solid #fecaca;
+        /* 슬라이드 타이머 바 스타일 */
+        .timer-container {
+            width: 100%; height: 10px; background: #e2e8f0;
+            border-radius: 5px; margin: 15px 0 5px 0; overflow: hidden;
+            border: 1px solid #cbd5e1;
+        }
+        .timer-bar-fill {
+            height: 100%; width: 100%;
+            background: linear-gradient(90deg, #4ade80, #ef4444);
+            transition: width 0.1s linear;
         }
 
         .pop-anim {
@@ -425,6 +431,14 @@
             box-shadow: 0 3px 0 #f87171;
         }
         .stop-btn:active { transform: translateY(3px); box-shadow: none; }
+
+        /* 볼 정보 배지 스타일 */
+        .ball-info-badge {
+            background: #f1f5f9; border: 1px solid #cbd5e1;
+            padding: 8px 15px; border-radius: 20px;
+            margin-bottom: 15px; font-size: 14px; color: #475569;
+            display: inline-flex; align-items: center; gap: 8px;
+        }
 
 
         /* 애니메이션 영역 */
@@ -516,7 +530,7 @@
             <div id="lobby-partner" class="lobby-partner-container hidden">
                 <img id="lobby-partner-img" class="lobby-partner-img" src="" />
             </div>
-            <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;">(데이터 보존 ver)</span></h1>
+            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(맞춤법 패치 ver)</span></h1>
         </div>
 
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
@@ -536,7 +550,7 @@
             <div id="player"><div class="player-img" id="playerSprite"></div></div>
         </div>
         <div style="text-align:center; color:#57534e; font-size:16px; margin-bottom:10px; background:#fff; padding:5px 15px; border-radius:15px;">
-            방향키를 눌러서 포켓몬을 찾아보세요!
+            방향키로도 이동할 수 있어요!
         </div>
 
         <div class="d-pad">
@@ -635,12 +649,21 @@
     <div id="modal-quiz" class="modal-box hidden">
         <div class="combo-container">
             <div class="combo-badge">Combo: <span id="quiz-combo-val">0</span>/10</div>
-            <div class="timer-badge" id="quiz-timer">⏳ 10</div>
             <div class="rate-badge">확률: <span id="quiz-prob-val">0</span>%</div>
         </div>
 
-        <h3 style="color:#0ea5e9; font-size:24px; margin-top:0;">구구단 미션!</h3>
-        <p id="quiz-txt" style="font-size:32px; margin:20px 0; font-weight:bold; color:#334155;"></p>
+        <div class="timer-container">
+            <div id="quiz-timer-fill" class="timer-bar-fill"></div>
+        </div>
+
+        <div class="ball-info-badge" id="quiz-ball-info">
+            <img id="quiz-ball-img" src="" style="width:24px;height:24px;">
+            <span id="quiz-ball-text"></span>
+        </div>
+
+        <h3 style="color:#0ea5e9; font-size:24px; margin-top:0;">문제!</h3>
+        <p id="quiz-txt" style="font-size:32px; margin:10px 0; font-weight:bold; color:#334155;"></p>
+        <p id="quiz-desc" style="font-size:18px; color:#64748b; margin-top:-10px; margin-bottom:15px;"></p>
         <div id="quiz-opts" style="display:flex; flex-direction:column; gap:12px;"></div>
 
         <button class="stop-btn" onclick="finishComboAndThrow()">✋ 멈추고 지금 던지기!</button>
@@ -679,8 +702,8 @@
     const MAX_POKEMON_ID = 1025;
 
     // --- [중요] 데이터 버전 관리 ---
-    const SAVE_KEY = "poke_spell_game_data_v4"; // 현재 버전
-    const PREVIOUS_KEYS = ["poke_spell_game_data_v3", "poke_spell_game_data_v2"]; // 마이그레이션 대상
+    const SAVE_KEY = "poke_spell_game_data_v6"; // v6로 버전 업
+    const PREVIOUS_KEYS = ["poke_spell_game_data_v5", "poke_spell_game_data_v4", "poke_spell_game_data_v3", "poke_spell_game_data_v2"];
 
     // --- [중요] 희귀 포켓몬 리스트 ---
     const LEGENDARY_IDS = [
@@ -720,10 +743,11 @@
     let currentCombo = 0;
     const MAX_COMBO = 10;
     let lastCapture = null;
+    let externalQuizList = []; // 외부 퀴즈 저장
 
     // 타이머 관련
     let quizTimerInterval = null;
-    const QUIZ_TIME_LIMIT = 10; // 초
+    const QUIZ_TIME_LIMIT = 100; // 0.1초 단위 x 100 = 10초
 
     // 필터 변수
     let currentFilter = 'owned';
@@ -731,8 +755,28 @@
 
     async function init() {
         loadGame();
+        await loadQuizData(); // [추가] 퀴즈 데이터 로드
         initDexFilter();
         updateLobbyUI();
+    }
+
+    // [추가] 외부 JSON 퀴즈 로드
+    async function loadQuizData() {
+        try {
+            const res = await fetch('./quiz/quiz.json');
+            if(!res.ok) throw new Error("JSON Fetch Failed");
+            const data = await res.json();
+            if(data && data.questions && data.questions.length > 0) {
+                externalQuizList = data.questions;
+                console.log(`Loaded ${externalQuizList.length} questions from quiz.json`);
+            } else {
+                console.warn("Quiz JSON is empty. Using Fallback.");
+                externalQuizList = [];
+            }
+        } catch(e) {
+            console.warn("Quiz load error (using fallback):", e);
+            externalQuizList = [];
+        }
     }
 
     function initDexFilter() {
@@ -786,32 +830,23 @@
 
     function loadGame() {
         try {
-            // 1. 현재 버전 데이터 로드 시도
             let saved = localStorage.getItem(SAVE_KEY);
-
-            // 2. 현재 버전 데이터가 없으면 이전 버전에서 찾기 (마이그레이션)
             if (!saved) {
                 for (let oldKey of PREVIOUS_KEYS) {
                     const oldData = localStorage.getItem(oldKey);
                     if (oldData) {
                         console.log(`[Migration] Found old data in ${oldKey}. Migrating to ${SAVE_KEY}...`);
                         saved = oldData;
-                        // 데이터 마이그레이션 실행 (새 키에 저장)
                         localStorage.setItem(SAVE_KEY, saved);
-                        break; // 가장 최신 구버전을 찾으면 중단
+                        break;
                     }
                 }
             }
-
-            // 3. 데이터 파싱
             if(saved) {
                 const parsed = JSON.parse(saved);
                 user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
-                // 호환성 처리
                 if(user.upgrades.startBalls !== undefined) delete user.upgrades.startBalls;
                 if(user.upgrades.dexLimit === undefined) user.upgrades.dexLimit = 0;
-
-                console.log("Game loaded successfully!");
             }
         } catch(e) { console.error("Load failed", e); }
     }
@@ -823,7 +858,7 @@
         }
     }
 
-    // --- [구구단 문제 생성기] ---
+    // --- [구구단 폴백 생성기] ---
     function generateGuGuDan() {
         const num1 = Math.floor(Math.random() * 8) + 2;
         const num2 = Math.floor(Math.random() * 9) + 1;
@@ -846,8 +881,33 @@
 
         return {
             prompt: `${num1} × ${num2} = ?`,
+            promptExplain: "구구단을 외자!",
             choices: finalChoices,
             answerIndex: finalChoices.indexOf(ans)
+        };
+    }
+
+    // [추가] 외부 퀴즈 가져오기 및 셔플 로직
+    function getExternalQuiz() {
+        const rawQ = externalQuizList[Math.floor(Math.random() * externalQuizList.length)];
+
+        // 보기 섞기 (answerIndex 추적)
+        const originalChoices = rawQ.choices.map((val, idx) => ({ val: val, isAns: idx === rawQ.answerIndex }));
+
+        // Fisher-Yates Shuffle
+        for (let i = originalChoices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [originalChoices[i], originalChoices[j]] = [originalChoices[j], originalChoices[i]];
+        }
+
+        const shuffledChoices = originalChoices.map(obj => obj.val);
+        const newAnswerIndex = originalChoices.findIndex(obj => obj.isAns);
+
+        return {
+            prompt: rawQ.prompt,
+            promptExplain: rawQ.promptExplain,
+            choices: shuffledChoices,
+            answerIndex: newAnswerIndex
         };
     }
 
@@ -1061,6 +1121,8 @@
         if(baseRate > 0.95) baseRate = 0.95;
         if(baseRate < 0.05) baseRate = 0.05;
 
+        baseRate = baseRate * 0.65;
+
         document.getElementById('enc-rate').textContent = Math.floor(baseRate*100);
         updateBallBtns();
     }
@@ -1087,14 +1149,21 @@
     }
 
     function nextQuizStep() {
-        updateComboUI();
+        updateComboUI(); // [중요] 문제 화면 진입 시 확률 업데이트
         if(currentCombo >= MAX_COMBO) {
             finishComboAndThrow();
             return;
         }
 
-        currentQuiz = generateGuGuDan();
+        // [수정] 퀴즈 데이터 선택 로직
+        if(externalQuizList.length > 0) {
+            currentQuiz = getExternalQuiz();
+        } else {
+            currentQuiz = generateGuGuDan();
+        }
+
         document.getElementById('quiz-txt').textContent = currentQuiz.prompt;
+        document.getElementById('quiz-desc').textContent = currentQuiz.promptExplain || ""; // 설명 표시
 
         const optsDiv = document.getElementById('quiz-opts');
         optsDiv.innerHTML = "";
@@ -1111,17 +1180,23 @@
 
     function startQuizTimer() {
         if(quizTimerInterval) clearInterval(quizTimerInterval);
+
         let timeLeft = QUIZ_TIME_LIMIT;
-        document.getElementById('quiz-timer').textContent = `⏳ ${timeLeft}`;
+        const barFill = document.getElementById('quiz-timer-fill');
+
+        barFill.style.width = '100%';
+        barFill.style.background = 'linear-gradient(90deg, #4ade80, #ef4444)';
 
         quizTimerInterval = setInterval(() => {
             timeLeft--;
-            document.getElementById('quiz-timer').textContent = `⏳ ${timeLeft}`;
+            const percentage = (timeLeft / QUIZ_TIME_LIMIT) * 100;
+            barFill.style.width = `${percentage}%`;
+
             if (timeLeft <= 0) {
                 clearInterval(quizTimerInterval);
                 handleAnswer(false);
             }
-        }, 1000);
+        }, 100);
     }
 
     function updateComboUI() {
@@ -1131,6 +1206,13 @@
         const p = calculateCatchProb();
         comboEl.textContent = currentCombo;
         probEl.textContent = Math.floor(p * 100);
+
+        // [추가] 볼 정보 배지 업데이트
+        const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
+        const ballName = { monster:"몬스터볼", super:"슈퍼볼", hyper:"하이퍼볼", master:"마스터볼" }[selectedBall];
+
+        document.getElementById('quiz-ball-img').src = BALL_SPRITES[selectedBall];
+        document.getElementById('quiz-ball-text').textContent = `${ballName} (보너스 x${ballBonus === 255 ? 'MAX' : ballBonus})`;
 
         triggerPopAnim(comboEl);
         triggerPopAnim(probEl);
@@ -1419,6 +1501,27 @@
             endExploration('steps');
         }
     }
+
+    // [추가] 키보드 조작 이벤트 리스너
+    window.addEventListener('keydown', (e) => {
+        // 게임 뷰가 활성화되어 있고 이동 중이 아닐 때만 작동
+        const gameView = document.getElementById('view-game');
+        if (session.active && !isMoving && !gameView.classList.contains('hidden')) {
+            if (e.key === 'ArrowUp') {
+                move('up');
+                e.preventDefault(); // 스크롤 방지
+            } else if (e.key === 'ArrowDown') {
+                move('down');
+                e.preventDefault();
+            } else if (e.key === 'ArrowLeft') {
+                move('left');
+                e.preventDefault();
+            } else if (e.key === 'ArrowRight') {
+                move('right');
+                e.preventDefault();
+            }
+        }
+    });
 
     init();
 </script>
