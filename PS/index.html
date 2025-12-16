@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 탐험대 (구구단 콤보 ver)</title>
+    <title>포켓몬 탐험대 (데이터 보존 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -77,7 +77,6 @@
         /* --- 로비 화면 --- */
         #view-lobby { justify-content: center; gap: 25px; }
 
-        /* 타이틀 래퍼 (파트너 이미지와 타이틀을 묶음) */
         .title-wrapper {
             position: relative;
             width: 100%;
@@ -96,7 +95,7 @@
             text-align: center;
             line-height: 1.2;
             position: relative;
-            z-index: 2; /* 이미지보다 위에 오도록 */
+            z-index: 2;
         }
 
         .lobby-stats {
@@ -278,7 +277,6 @@
         }
         .back-btn:active { transform: translateY(3px); box-shadow: none; }
 
-        /* Sticky Header Group: 헤더와 필터를 묶어서 상단 고정 */
         .sticky-header-group {
             position: sticky;
             top: 0;
@@ -290,7 +288,6 @@
             box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
-        /* 필터 토글 버튼 */
         .filter-toggle-btn {
             width: 100%;
             padding: 10px;
@@ -308,7 +305,6 @@
         }
         .filter-toggle-btn:active { background: #f1f5f9; }
 
-        /* 필터 그리드 */
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -342,10 +338,8 @@
             font-weight: bold;
         }
 
-        /* 도감 내용 영역 */
         .dex-content-area { width: 100%; padding: 0 20px 50px 20px; }
 
-        /* 로비 파트너 포켓몬 */
         .lobby-partner-container {
             position: absolute;
             top: 50%; left: 50%;
@@ -408,7 +402,12 @@
         .combo-badge { font-size: 18px; font-weight: bold; color: #2563eb; }
         .rate-badge { font-size: 18px; font-weight: bold; color: #d97706; }
 
-        /* 팝 애니메이션 클래스 */
+        .timer-badge {
+            background: #fee2e2; color: #ef4444;
+            padding: 5px 12px; border-radius: 20px; font-weight: bold;
+            font-size: 16px; border: 2px solid #fecaca;
+        }
+
         .pop-anim {
             animation: popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             display: inline-block;
@@ -460,7 +459,6 @@
         .poke-descend-shrink { animation: pokeDescendShrink 0.35s ease-in forwards; }
         .poke-hidden { opacity: 0; }
 
-        /* 희귀도 배지 */
         .rarity-badge {
             display: inline-block; padding: 4px 10px; border-radius: 12px; font-size: 14px; font-weight: bold; margin-bottom: 5px; color: white;
         }
@@ -470,7 +468,6 @@
             50% { transform: translateY(-15px) scale(1.05); }
         }
 
-        /* 도감 선택 효과 */
         .dex-item {
             cursor: pointer;
             transition: transform 0.2s;
@@ -519,7 +516,7 @@
             <div id="lobby-partner" class="lobby-partner-container hidden">
                 <img id="lobby-partner-img" class="lobby-partner-img" src="" />
             </div>
-            <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;">(구구단 콤보 ver)</span></h1>
+            <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;">(데이터 보존 ver)</span></h1>
         </div>
 
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
@@ -638,6 +635,7 @@
     <div id="modal-quiz" class="modal-box hidden">
         <div class="combo-container">
             <div class="combo-badge">Combo: <span id="quiz-combo-val">0</span>/10</div>
+            <div class="timer-badge" id="quiz-timer">⏳ 10</div>
             <div class="rate-badge">확률: <span id="quiz-prob-val">0</span>%</div>
         </div>
 
@@ -661,33 +659,41 @@
         <p id="msg-desc" style="font-size:18px; color:#475569; margin:15px 0; line-height:1.4;"></p>
         <button onclick="closeMsgModal()" style="background:#4ade80; padding:15px; width:100%; border:none; color:#064e3b; border-radius:15px; font-weight:bold; font-size:20px; cursor:pointer;">확인</button>
     </div>
+
+    <div id="modal-step-buy" class="modal-box hidden">
+        <h3 style="color:#eab308; font-size:26px; margin-top:0;">발걸음 부족!</h3>
+        <p style="font-size:18px; color:#475569; margin:15px 0;">
+            더 이상 걸을 수 없어요 💦<br>
+            <span style="font-weight:bold; color:#d97706;">100포인트</span>로<br>
+            <span style="font-weight:bold; color:#16a34a;">10걸음</span>을 충전하시겠어요?
+        </p>
+        <div style="display:flex; gap:10px;">
+            <button onclick="endExploration('steps')" style="flex:1; background:#94a3b8; color:white; border:none; padding:12px; border-radius:15px; font-size:18px;">종료하기</button>
+            <button onclick="buySteps()" style="flex:1; background:#16a34a; color:white; border:none; padding:12px; border-radius:15px; font-size:18px;">충전하기</button>
+        </div>
+    </div>
 </div>
 
 <script>
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
     const MAX_POKEMON_ID = 1025;
-    const SAVE_KEY = "poke_spell_game_data_v3"; // 데이터 키 변경 (v3)
+
+    // --- [중요] 데이터 버전 관리 ---
+    const SAVE_KEY = "poke_spell_game_data_v4"; // 현재 버전
+    const PREVIOUS_KEYS = ["poke_spell_game_data_v3", "poke_spell_game_data_v2"]; // 마이그레이션 대상
 
     // --- [중요] 희귀 포켓몬 리스트 ---
     const LEGENDARY_IDS = [
-        144,145,146,150,151, // 1세대
-        243,244,245,249,250,251, // 2세대
-        382,383,384,385,386, // 3세대
-        483,484,487,491,492,493, // 4세대
-        643,644,646,649, // 5세대
-        716,717,718, // 6세대
-        785,786,787,788,800,801,802,807, // 7세대
-        888,889,890,891,892,898, // 8세대
-        1007,1008,1017,1024,1025 // 9세대
+        144,145,146,150,151, 243,244,245,249,250,251, 382,383,384,385,386,
+        483,484,487,491,492,493, 643,644,646,649, 716,717,718,
+        785,786,787,788,800,801,802,807, 888,889,890,891,892,898,
+        1007,1008,1017,1024,1025
     ];
 
     const RARE_IDS = [
-        1,4,7, 25, 133, 143, 149, // 1세대
-        152,155,158, 212, 248, // 2세대
-        252,255,258, 282, 373, 376, 445, 448, // 3~4세대
-        495,498,501, 635, 650, 653, // 5~6세대
-        722,725,728, 810,813,816, 887, // 7~8세대
-        906,909,912, 996, 997, 998 // 9세대
+        1,4,7, 25, 133, 143, 149, 152,155,158, 212, 248,
+        252,255,258, 282, 373, 376, 445, 448, 495,498,501, 635, 650, 653,
+        722,725,728, 810,813,816, 887, 906,909,912, 996, 997, 998
     ];
 
     const BALL_SPRITES = { monster: "./png/pb.png", super: "./png/gb.png", hyper: "./png/ub.png", master: "./png/mb.png" };
@@ -714,6 +720,10 @@
     let currentCombo = 0;
     const MAX_COMBO = 10;
     let lastCapture = null;
+
+    // 타이머 관련
+    let quizTimerInterval = null;
+    const QUIZ_TIME_LIMIT = 10; // 초
 
     // 필터 변수
     let currentFilter = 'owned';
@@ -776,13 +786,32 @@
 
     function loadGame() {
         try {
-            const saved = localStorage.getItem(SAVE_KEY);
+            // 1. 현재 버전 데이터 로드 시도
+            let saved = localStorage.getItem(SAVE_KEY);
+
+            // 2. 현재 버전 데이터가 없으면 이전 버전에서 찾기 (마이그레이션)
+            if (!saved) {
+                for (let oldKey of PREVIOUS_KEYS) {
+                    const oldData = localStorage.getItem(oldKey);
+                    if (oldData) {
+                        console.log(`[Migration] Found old data in ${oldKey}. Migrating to ${SAVE_KEY}...`);
+                        saved = oldData;
+                        // 데이터 마이그레이션 실행 (새 키에 저장)
+                        localStorage.setItem(SAVE_KEY, saved);
+                        break; // 가장 최신 구버전을 찾으면 중단
+                    }
+                }
+            }
+
+            // 3. 데이터 파싱
             if(saved) {
                 const parsed = JSON.parse(saved);
                 user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
-                // 마이그레이션: startBalls 삭제, dexLimit 보장
+                // 호환성 처리
                 if(user.upgrades.startBalls !== undefined) delete user.upgrades.startBalls;
                 if(user.upgrades.dexLimit === undefined) user.upgrades.dexLimit = 0;
+
+                console.log("Game loaded successfully!");
             }
         } catch(e) { console.error("Load failed", e); }
     }
@@ -796,27 +825,20 @@
 
     // --- [구구단 문제 생성기] ---
     function generateGuGuDan() {
-        // 2단 ~ 9단
         const num1 = Math.floor(Math.random() * 8) + 2;
         const num2 = Math.floor(Math.random() * 9) + 1;
         const ans = num1 * num2;
 
         let choices = new Set();
         choices.add(ans);
-
         while(choices.size < 4) {
-            // 오답 생성: 정답 근처의 값 혹은 다른 구구단 값
             let wrong;
-            if (Math.random() < 0.5) {
-                wrong = ans + (Math.floor(Math.random() * 10) - 5) * 2; // 근사값
-            } else {
-                wrong = (Math.floor(Math.random() * 8) + 2) * (Math.floor(Math.random() * 9) + 1);
-            }
+            if (Math.random() < 0.5) wrong = ans + (Math.floor(Math.random() * 10) - 5) * 2;
+            else wrong = (Math.floor(Math.random() * 8) + 2) * (Math.floor(Math.random() * 9) + 1);
             if (wrong > 0 && wrong !== ans) choices.add(wrong);
         }
 
         let finalChoices = Array.from(choices);
-        // 셔플
         for (let i = finalChoices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [finalChoices[i], finalChoices[j]] = [finalChoices[j], finalChoices[i]];
@@ -880,6 +902,11 @@
     }
 
     function endExploration(reason) {
+        if (reason === 'steps' && document.getElementById('modal-step-buy').classList.contains('hidden')) {
+            showStepBuyModal();
+            return;
+        }
+
         session.active = false;
         document.getElementById('end-reason').textContent = reason === 'steps' ? "발걸음을 모두 사용했어요!" : "포켓볼이 다 떨어졌어요!";
         document.getElementById('result-points').textContent = session.earnedPoints;
@@ -892,6 +919,10 @@
             div.innerHTML = `<img src="${p.sprite}">`;
             listEl.appendChild(div);
         });
+
+        document.getElementById('modal-layer').classList.add('hidden');
+        document.getElementById('modal-step-buy').classList.add('hidden');
+
         switchView('view-result');
         saveGame();
     }
@@ -1025,9 +1056,8 @@
 
         let baseRate = (currentPokemon.rate / 255);
         if (!baseRate) baseRate = 0.1;
-        baseRate = baseRate * 2.5; // 기본 배율
+        baseRate = baseRate * 2.5;
         baseRate += (user.upgrades.catchRate * 0.005);
-
         if(baseRate > 0.95) baseRate = 0.95;
         if(baseRate < 0.05) baseRate = 0.05;
 
@@ -1043,11 +1073,10 @@
         });
     }
 
-    // 퀴즈 시작 (콤보 초기화)
     function tryCatch(ballType) {
         if(user.inventory[ballType] <= 0) return;
         selectedBall = ballType;
-        user.inventory[selectedBall]--; // 볼 사용
+        user.inventory[selectedBall]--;
         updateGameHeader();
 
         document.getElementById('modal-encounter').classList.add('hidden');
@@ -1057,10 +1086,8 @@
         nextQuizStep();
     }
 
-    // 다음 퀴즈 문제 출제 및 UI 업데이트
     function nextQuizStep() {
         updateComboUI();
-
         if(currentCombo >= MAX_COMBO) {
             finishComboAndThrow();
             return;
@@ -1078,27 +1105,40 @@
             btn.onclick = () => handleAnswer(idx === currentQuiz.answerIndex);
             optsDiv.appendChild(btn);
         });
+
+        startQuizTimer();
     }
 
-    // 콤보 및 확률 UI 계산 및 표시 (POP 효과 포함)
+    function startQuizTimer() {
+        if(quizTimerInterval) clearInterval(quizTimerInterval);
+        let timeLeft = QUIZ_TIME_LIMIT;
+        document.getElementById('quiz-timer').textContent = `⏳ ${timeLeft}`;
+
+        quizTimerInterval = setInterval(() => {
+            timeLeft--;
+            document.getElementById('quiz-timer').textContent = `⏳ ${timeLeft}`;
+            if (timeLeft <= 0) {
+                clearInterval(quizTimerInterval);
+                handleAnswer(false);
+            }
+        }, 1000);
+    }
+
     function updateComboUI() {
         const comboEl = document.getElementById('quiz-combo-val');
         const probEl = document.getElementById('quiz-prob-val');
 
-        // 현재 예상 확률 계산
         const p = calculateCatchProb();
-
         comboEl.textContent = currentCombo;
         probEl.textContent = Math.floor(p * 100);
 
-        // POP 애니메이션
         triggerPopAnim(comboEl);
         triggerPopAnim(probEl);
     }
 
     function triggerPopAnim(element) {
         element.classList.remove('pop-anim');
-        void element.offsetWidth; // 리플로우 강제
+        void element.offsetWidth;
         element.classList.add('pop-anim');
     }
 
@@ -1109,12 +1149,10 @@
         const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
         const upgradeBonus = 1 + (user.upgrades.catchRate * 0.005);
         const balancePatchMultiplier = 2.5;
+        const comboBonus = 1 + (currentCombo * 0.1);
+        const DIFFICULTY_NERF = 0.65;
 
-        // 콤보 보너스: 콤보당 20% 증가 (최대 10콤보 = 3배)
-        // 틀려서 바로 던져지면 콤보0 = 보너스 없음
-        const comboBonus = 1 + (currentCombo * 0.2);
-
-        let p = rate * ballBonus * upgradeBonus * balancePatchMultiplier * comboBonus;
+        let p = rate * ballBonus * upgradeBonus * balancePatchMultiplier * comboBonus * DIFFICULTY_NERF;
 
         if(selectedBall === 'master') p = 1;
         if(p > 1) p = 1;
@@ -1123,18 +1161,20 @@
     }
 
     function handleAnswer(isCorrect) {
+        if(quizTimerInterval) clearInterval(quizTimerInterval);
+
         if (isCorrect) {
             currentCombo++;
             nextQuizStep();
         } else {
-            // 오답 시: 콤보 초기화 후 즉시 투척
             currentCombo = 0;
-            alert("틀렸습니다! 콤보가 초기화되어 볼이 던져집니다!");
+            alert("틀렸거나 시간이 초과되었습니다! 콤보가 초기화되어 볼이 던져집니다!");
             finishComboAndThrow(false);
         }
     }
 
     function finishComboAndThrow(isSuccessFlow = true) {
+        if(quizTimerInterval) clearInterval(quizTimerInterval);
         document.getElementById('modal-quiz').classList.add('hidden');
 
         const finalProb = calculateCatchProb();
@@ -1176,9 +1216,7 @@
         }
 
         saveGame();
-
-        // 결과 텍스트 상세화
-        descHtml += `<br><br><span style="font-size:14px; color:#64748b;">(최종 콤보: ${currentCombo}, 확률: ${Math.floor(finalProb*100)}%)</span>`;
+        descHtml += `<br><br><span style="font-size:14px; color:#64748b;">(콤보: ${currentCombo}, 확률: ${Math.floor(finalProb*100)}%)</span>`;
 
         lastCapture = { titleText, titleColor, descHtml };
         removeSilhouette();
@@ -1359,6 +1397,26 @@
                 d.style.fontWeight = "bold";
             }
             grid.appendChild(d);
+        }
+    }
+
+    function showStepBuyModal() {
+        document.getElementById('modal-layer').classList.remove('hidden');
+        document.getElementById('modal-step-buy').classList.remove('hidden');
+    }
+
+    function buySteps() {
+        if (user.points >= 100) {
+            user.points -= 100;
+            session.steps += 10;
+            saveGame();
+            updateGameHeader();
+            document.getElementById('modal-layer').classList.add('hidden');
+            document.getElementById('modal-step-buy').classList.add('hidden');
+            alert("10걸음이 충전되었습니다! 탐험을 계속하세요.");
+        } else {
+            alert("포인트가 부족합니다...");
+            endExploration('steps');
         }
     }
 
