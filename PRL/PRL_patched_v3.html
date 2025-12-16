@@ -330,160 +330,160 @@
 
     const LEGENDARY_IDS = [144,145,146,150,243,244,245,249,250];
     const MYTHICAL_IDS = [151, 251];
-    // 📊 밸런스 설정: 레어도에 따른 스탯 배율 정의 (PRL 동적 보정용)
-    const TIER_CONFIG = {
-        "C":   { mult: 0.6,  bonus: 0 },    // 일반
-        "R":   { mult: 0.8,  bonus: 5 },    // 희귀
-        "SR":  { mult: 1.0,  bonus: 10 },   // 기준점 (최종 진화체 급)
-        "SSR": { mult: 1.25, bonus: 15 },   // 600족/준전설 급
-        "UR":  { mult: 1.6,  bonus: 25 }    // 초전설/히든(귀여운 포켓몬) 급
-    };
+// 📊 밸런스 설정: 레어도에 따른 스탯 배율 정의 (PRL 동적 보정용)
+const TIER_CONFIG = {
+    "C":   { mult: 0.6,  bonus: 0 },    // 일반
+    "R":   { mult: 0.8,  bonus: 5 },    // 희귀
+    "SR":  { mult: 1.0,  bonus: 10 },   // 기준점 (최종 진화체 급)
+    "SSR": { mult: 1.25, bonus: 15 },   // 600족/준전설 급
+    "UR":  { mult: 1.6,  bonus: 25 }    // 초전설/히든(귀여운 포켓몬) 급
+};
 
-    // 💖 귀여운 포켓몬 리스트 (인기/밈 기반 Gen 1~2 선정)
-    // 이 리스트에 포함되면 '전설급(UR)' 스탯 보정 + '이로치(Shiny)' 속성 부여
-    const CUTE_IDS = [
-        25,  // 피카츄
-        133, // 이브이
-        175, // 토게피
-        39,  // 푸린
-        35,  // 삐삐
-        37,  // 식스테일
-        151, // 뮤 (환상 + 귀여움)
-        172, // 피츄
-        194, // 우파
-        216, // 깜지곰
-        147, // 미뇽
-        183, // 마릴
-        152, // 치코리타
-        155, // 브케인
-        158, // 리아코
-        251  // 세레비 (환상 + 귀여움)
-    ];
-    // =====================================================
-    // ✅ 타입(단일) 전체 지원 + (선택) PokeAPI 자동 보정 + UR 색상 도감 확장
-    // =====================================================
+// 💖 귀여운 포켓몬 리스트 (인기/밈 기반 Gen 1~2 선정)
+// 이 리스트에 포함되면 '전설급(UR)' 스탯 보정 + '이로치(Shiny)' 속성 부여
+const CUTE_IDS = [
+    25,  // 피카츄
+    133, // 이브이
+    175, // 토게피
+    39,  // 푸린
+    35,  // 삐삐
+    37,  // 식스테일
+    151, // 뮤 (환상 + 귀여움)
+    172, // 피츄
+    194, // 우파
+    216, // 깜지곰
+    147, // 미뇽
+    183, // 마릴
+    152, // 치코리타
+    155, // 브케인
+    158, // 리아코
+    251  // 세레비 (환상 + 귀여움)
+];
+// =====================================================
+// ✅ 타입(단일) 전체 지원 + (선택) PokeAPI 자동 보정 + UR 색상 도감 확장
+// =====================================================
 
-    const BASE_DEX_MAX = 251; // Gen1~2 기본 도감 범위
+const BASE_DEX_MAX = 251; // Gen1~2 기본 도감 범위
 
-    // 1) (선택) PokeAPI로 단일 타입 자동 보정 (캐시: localStorage)
-    //    - 이중 속성은 사용하지 않으므로 slot=1(첫 타입)만 채택
-    const ENABLE_POKEAPI_TYPE_PATCH = true;
-    const POKEAPI_TYPE_CACHE_KEY = "prl_pokeapi_primary_types_v1";
-    let POKEAPI_PRIMARY_TYPE = {};
-    try { POKEAPI_PRIMARY_TYPE = JSON.parse(localStorage.getItem(POKEAPI_TYPE_CACHE_KEY) || "{}"); }
-    catch { POKEAPI_PRIMARY_TYPE = {}; }
+// 1) (선택) PokeAPI로 단일 타입 자동 보정 (캐시: localStorage)
+//    - 이중 속성은 사용하지 않으므로 slot=1(첫 타입)만 채택
+const ENABLE_POKEAPI_TYPE_PATCH = true;
+const POKEAPI_TYPE_CACHE_KEY = "prl_pokeapi_primary_types_v1";
+let POKEAPI_PRIMARY_TYPE = {};
+try { POKEAPI_PRIMARY_TYPE = JSON.parse(localStorage.getItem(POKEAPI_TYPE_CACHE_KEY) || "{}"); }
+catch { POKEAPI_PRIMARY_TYPE = {}; }
 
-    const EN_TYPE_TO_KO = {
-        normal:"노말", fire:"불꽃", water:"물", electric:"전기", grass:"풀",
-        ice:"얼음", fighting:"격투", poison:"독", ground:"땅", flying:"비행",
-        psychic:"에스퍼", bug:"벌레", rock:"바위", ghost:"고스트", steel:"강철",
-        dark:"악", dragon:"드래곤",
-    };
+const EN_TYPE_TO_KO = {
+    normal:"노말", fire:"불꽃", water:"물", electric:"전기", grass:"풀",
+    ice:"얼음", fighting:"격투", poison:"독", ground:"땅", flying:"비행",
+    psychic:"에스퍼", bug:"벌레", rock:"바위", ghost:"고스트", steel:"강철",
+    dark:"악", dragon:"드래곤",
+};
 
-    const _pendingTypeFetch = new Set();
-    async function _fetchPrimaryTypeFromPokeApi(pid) {
-        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pid}`);
-        const j = await res.json();
-        const first = (j?.types || []).slice().sort((a,b)=> (a.slot||0) - (b.slot||0))[0];
-        const en = first?.type?.name;
-        return EN_TYPE_TO_KO[en] || "노말";
-    }
-    function ensurePokeApiType(pid) {
-        if (!ENABLE_POKEAPI_TYPE_PATCH) return;
-        if (POKEAPI_PRIMARY_TYPE[pid]) return;
-        if (_pendingTypeFetch.has(pid)) return;
+const _pendingTypeFetch = new Set();
+async function _fetchPrimaryTypeFromPokeApi(pid) {
+    const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pid}`);
+    const j = await res.json();
+    const first = (j?.types || []).slice().sort((a,b)=> (a.slot||0) - (b.slot||0))[0];
+    const en = first?.type?.name;
+    return EN_TYPE_TO_KO[en] || "노말";
+}
+function ensurePokeApiType(pid) {
+    if (!ENABLE_POKEAPI_TYPE_PATCH) return;
+    if (POKEAPI_PRIMARY_TYPE[pid]) return;
+    if (_pendingTypeFetch.has(pid)) return;
 
-        _pendingTypeFetch.add(pid);
-        _fetchPrimaryTypeFromPokeApi(pid).then((ko)=>{
-            POKEAPI_PRIMARY_TYPE[pid] = ko;
-            try { localStorage.setItem(POKEAPI_TYPE_CACHE_KEY, JSON.stringify(POKEAPI_PRIMARY_TYPE)); } catch {}
-            _pendingTypeFetch.delete(pid);
+    _pendingTypeFetch.add(pid);
+    _fetchPrimaryTypeFromPokeApi(pid).then((ko)=>{
+        POKEAPI_PRIMARY_TYPE[pid] = ko;
+        try { localStorage.setItem(POKEAPI_TYPE_CACHE_KEY, JSON.stringify(POKEAPI_PRIMARY_TYPE)); } catch {}
+        _pendingTypeFetch.delete(pid);
 
-            // 도감 화면이 열려 있으면 즉시 갱신
-            const codexEl = document.getElementById("codexScreen");
-            if (codexEl && codexEl.classList.contains("active")) {
-                renderCodex();
-            }
-        }).catch(()=> _pendingTypeFetch.delete(pid));
-    }
-
-    // 2) (대략) 단일 타입 수동 매핑: 없으면 노말.
-    //    - 정확도는 PokeAPI 자동 보정이 최종 담당.
-    const PRIMARY_TYPE_LISTS = {
-        "풀": [1,2,3,43,44,45,69,70,71,102,103,114,152,153,154,182,187,188,189,191,192,165,166],
-        "불꽃": [4,5,6,37,38,58,59,77,126,136,146,155,156,157,218,219,228,229,240,244,250],
-        "물": [7,8,9,54,55,60,61,62,86,87,90,91,98,99,116,117,118,119,120,121,129,130,131,134,158,159,160,170,171,183,184,186,194,195,211,223,224,226,245,249],
-        "전기": [25,26,81,82,100,101,125,135,145,172,179,180,181,239,243],
-        "에스퍼": [63,64,65,96,97,122,124,150,151,177,178,196,199,201,202,203,249,251],
-        "격투": [56,57,66,67,68,106,107,214,236,237],
-        "독": [13,14,15,23,24,29,30,31,32,33,34,41,42,88,89,109,110,167,168,169,211],
-
-        "얼음": [87,91,124,131,144,215,220,221,225,238],
-        "땅": [27,28,50,51,74,75,76,95,104,105,111,112,207,231,232,246,247],
-        "비행": [16,17,18,21,22,41,42,83,84,85,142,144,145,146,149,163,164,169,176,177,178,187,188,189,193,198,207,225,226,227,249,250],
-        "벌레": [10,11,12,13,14,15,46,47,48,49,123,127,165,166,167,168,193,204,205,212,213,214],
-        "바위": [74,75,76,95,111,112,138,139,140,141,142,185,246,247,248],
-        "고스트": [92,93,94,200],
-        "강철": [81,82,205,208,212,227],
-        "악": [197,198,215,228,229,248],
-        "드래곤": [147,148,149,230],
-    };
-
-    // 빠른 조회용: id -> typeName
-    const PRIMARY_TYPE_BY_ID = (() => {
-        const map = {};
-        for (const [t, arr] of Object.entries(PRIMARY_TYPE_LISTS)) {
-            for (const pid of arr) {
-                if (!map[pid]) map[pid] = t;
-            }
+        // 도감 화면이 열려 있으면 즉시 갱신
+        const codexEl = document.getElementById("codexScreen");
+        if (codexEl && codexEl.classList.contains("active")) {
+            renderCodex();
         }
-        return map;
-    })();
+    }).catch(()=> _pendingTypeFetch.delete(pid));
+}
 
-    // 3) 251번 이후: UR(전설급) "색상(샤이니)" 버전을 도감에 추가 (가챠로 뽑는 개념은 아님)
-    //    - 252부터 UR 샤이니 카드가 1장씩 추가됨
-    const UR_VARIANT_BASE_IDS = (() => {
-        // ✅ 251번 이후 "UR 색상(샤이니)" 도감 엔트리는 CUTE_IDS의 UR(샤이니) 버전만 노출
-        //    (요청: 다른 UR/전설/환상은 여기서 제외)
-        const out = [];
-        for (const pid of (CUTE_IDS || [])) {
-            if (typeof pid === "number" && pid >= 1 && pid <= BASE_DEX_MAX) out.push(pid);
+// 2) (대략) 단일 타입 수동 매핑: 없으면 노말.
+//    - 정확도는 PokeAPI 자동 보정이 최종 담당.
+const PRIMARY_TYPE_LISTS = {
+    "풀": [1,2,3,43,44,45,69,70,71,102,103,114,152,153,154,182,187,188,189,191,192,165,166],
+    "불꽃": [4,5,6,37,38,58,59,77,126,136,146,155,156,157,218,219,228,229,240,244,250],
+    "물": [7,8,9,54,55,60,61,62,86,87,90,91,98,99,116,117,118,119,120,121,129,130,131,134,158,159,160,170,171,183,184,186,194,195,211,223,224,226,245,249],
+    "전기": [25,26,81,82,100,101,125,135,145,172,179,180,181,239,243],
+    "에스퍼": [63,64,65,96,97,122,124,150,151,177,178,196,199,201,202,203,249,251],
+    "격투": [56,57,66,67,68,106,107,214,236,237],
+    "독": [13,14,15,23,24,29,30,31,32,33,34,41,42,88,89,109,110,167,168,169,211],
+
+    "얼음": [87,91,124,131,144,215,220,221,225,238],
+    "땅": [27,28,50,51,74,75,76,95,104,105,111,112,207,231,232,246,247],
+    "비행": [16,17,18,21,22,41,42,83,84,85,142,144,145,146,149,163,164,169,176,177,178,187,188,189,193,198,207,225,226,227,249,250],
+    "벌레": [10,11,12,13,14,15,46,47,48,49,123,127,165,166,167,168,193,204,205,212,213,214],
+    "바위": [74,75,76,95,111,112,138,139,140,141,142,185,246,247,248],
+    "고스트": [92,93,94,200],
+    "강철": [81,82,205,208,212,227],
+    "악": [197,198,215,228,229,248],
+    "드래곤": [147,148,149,230],
+};
+
+// 빠른 조회용: id -> typeName
+const PRIMARY_TYPE_BY_ID = (() => {
+    const map = {};
+    for (const [t, arr] of Object.entries(PRIMARY_TYPE_LISTS)) {
+        for (const pid of arr) {
+            if (!map[pid]) map[pid] = t;
         }
-        // 혹시 중복이 있으면 제거
-        return Array.from(new Set(out));
-    })();
-    const DEX_TOTAL = BASE_DEX_MAX + UR_VARIANT_BASE_IDS.length;
+    }
+    return map;
+})();
 
-    // 초기 표시(도감 총 수 반영)
-    try {
-        const _cr = document.getElementById("collectionRate");
-        if (_cr) _cr.textContent = `0/${DEX_TOTAL}`;
-    } catch {}
+// 3) 251번 이후: UR(전설급) "색상(샤이니)" 버전을 도감에 추가 (가챠로 뽑는 개념은 아님)
+//    - 252부터 UR 샤이니 카드가 1장씩 추가됨
+const UR_VARIANT_BASE_IDS = (() => {
+    // ✅ 251번 이후 "UR 색상(샤이니)" 도감 엔트리는 CUTE_IDS의 UR(샤이니) 버전만 노출
+    //    (요청: 다른 UR/전설/환상은 여기서 제외)
+    const out = [];
+    for (const pid of (CUTE_IDS || [])) {
+        if (typeof pid === "number" && pid >= 1 && pid <= BASE_DEX_MAX) out.push(pid);
+    }
+    // 혹시 중복이 있으면 제거
+    return Array.from(new Set(out));
+})();
+const DEX_TOTAL = BASE_DEX_MAX + UR_VARIANT_BASE_IDS.length;
+
+// 초기 표시(도감 총 수 반영)
+try {
+    const _cr = document.getElementById("collectionRate");
+    if (_cr) _cr.textContent = `0/${DEX_TOTAL}`;
+} catch {}
 
 
 
 
     // 타입별 데이터 및 상성
     const TYPE_DATA = {
-        // ✅ 단일 속성(Gen1~2) 전체 지원: 이중 속성은 사용하지 않되, 상성표/색상은 모두 정의
-        "노말":   { color: "bg-slate-400", weak: ["격투"], resist: [] },
-        "불꽃":   { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철"] },
-        "물":     { color: "bg-blue-500", weak: ["전기", "풀"], resist: ["불꽃", "물", "얼음", "강철"] },
-        "전기":   { color: "bg-yellow-400", weak: ["땅"], resist: ["전기", "비행", "강철"] },
-        "풀":     { color: "bg-green-500", weak: ["불꽃", "얼음", "독", "비행", "벌레"], resist: ["물", "전기", "풀", "땅"] },
-        "얼음":   { color: "bg-cyan-300", weak: ["불꽃", "격투", "바위", "강철"], resist: ["얼음"] },
-        "격투":   { color: "bg-orange-600", weak: ["비행", "에스퍼"], resist: ["벌레", "바위", "악"] },
-        "독":     { color: "bg-fuchsia-600", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레"] },
-        "땅":     { color: "bg-amber-700", weak: ["물", "풀", "얼음"], resist: ["독", "바위"] },
-        "비행":   { color: "bg-sky-400", weak: ["전기", "얼음", "바위"], resist: ["풀", "격투", "벌레"] },
-        "에스퍼": { color: "bg-pink-500", weak: ["벌레", "고스트", "악"], resist: ["격투", "에스퍼"] },
-        "벌레":   { color: "bg-lime-600", weak: ["불꽃", "비행", "바위"], resist: ["풀", "격투", "땅"] },
-        "바위":   { color: "bg-stone-500", weak: ["물", "풀", "격투", "땅", "강철"], resist: ["노말", "불꽃", "독", "비행"] },
-        "고스트": { color: "bg-indigo-700", weak: ["고스트", "악"], resist: ["독", "벌레"] },
-        "강철":   { color: "bg-slate-500", weak: ["불꽃", "격투", "땅"], resist: ["노말", "풀", "얼음", "비행", "에스퍼", "벌레", "바위", "고스트", "드래곤", "강철"] },
-        "악":     { color: "bg-zinc-800", weak: ["격투", "벌레"], resist: ["고스트", "악", "에스퍼"] },
-        "드래곤": { color: "bg-violet-600", weak: ["얼음", "드래곤"], resist: ["불꽃", "물", "전기", "풀"] },
-    };
+    // ✅ 단일 속성(Gen1~2) 전체 지원: 이중 속성은 사용하지 않되, 상성표/색상은 모두 정의
+    "노말":   { color: "bg-slate-400", weak: ["격투"], resist: [] },
+    "불꽃":   { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철"] },
+    "물":     { color: "bg-blue-500", weak: ["전기", "풀"], resist: ["불꽃", "물", "얼음", "강철"] },
+    "전기":   { color: "bg-yellow-400", weak: ["땅"], resist: ["전기", "비행", "강철"] },
+    "풀":     { color: "bg-green-500", weak: ["불꽃", "얼음", "독", "비행", "벌레"], resist: ["물", "전기", "풀", "땅"] },
+    "얼음":   { color: "bg-cyan-300", weak: ["불꽃", "격투", "바위", "강철"], resist: ["얼음"] },
+    "격투":   { color: "bg-orange-600", weak: ["비행", "에스퍼"], resist: ["벌레", "바위", "악"] },
+    "독":     { color: "bg-fuchsia-600", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레"] },
+    "땅":     { color: "bg-amber-700", weak: ["물", "풀", "얼음"], resist: ["독", "바위"] },
+    "비행":   { color: "bg-sky-400", weak: ["전기", "얼음", "바위"], resist: ["풀", "격투", "벌레"] },
+    "에스퍼": { color: "bg-pink-500", weak: ["벌레", "고스트", "악"], resist: ["격투", "에스퍼"] },
+    "벌레":   { color: "bg-lime-600", weak: ["불꽃", "비행", "바위"], resist: ["풀", "격투", "땅"] },
+    "바위":   { color: "bg-stone-500", weak: ["물", "풀", "격투", "땅", "강철"], resist: ["노말", "불꽃", "독", "비행"] },
+    "고스트": { color: "bg-indigo-700", weak: ["고스트", "악"], resist: ["독", "벌레"] },
+    "강철":   { color: "bg-slate-500", weak: ["불꽃", "격투", "땅"], resist: ["노말", "풀", "얼음", "비행", "에스퍼", "벌레", "바위", "고스트", "드래곤", "강철"] },
+    "악":     { color: "bg-zinc-800", weak: ["격투", "벌레"], resist: ["고스트", "악", "에스퍼"] },
+    "드래곤": { color: "bg-violet-600", weak: ["얼음", "드래곤"], resist: ["불꽃", "물", "전기", "풀"] },
+};
     const TYPE_KEYS = Object.keys(TYPE_DATA);
 
     // 물리/특수 분류
@@ -492,27 +492,27 @@
 
     // 기술 목록
     const RAW_MOVES = {
-        "노말": [ {n:"몸통박치기",p:40,a:100}, {n:"할퀴기",p:40,a:100}, {n:"메가톤펀치",p:80,a:85}, {n:"파괴광선",p:150,a:90} ],
+    "노말": [ {n:"몸통박치기",p:40,a:100}, {n:"할퀴기",p:40,a:100}, {n:"메가톤펀치",p:80,a:85}, {n:"파괴광선",p:150,a:90} ],
 
-        "풀":   [ {n:"덩굴채찍",p:45,a:100}, {n:"잎날가르기",p:55,a:95}, {n:"씨폭탄",p:80,a:100}, {n:"에너지볼",p:90,a:100}, {n:"솔라빔",p:120,a:100}, {n:"리프스톰",p:130,a:90} ],
-        "불꽃": [ {n:"불꽃세례",p:40,a:100}, {n:"불꽃펀치",p:75,a:100}, {n:"화염방사",p:90,a:100}, {n:"불대문자",p:110,a:85}, {n:"블레이즈킥",p:85,a:90}, {n:"폭렬화염",p:150,a:90} ],
-        "물":   [ {n:"물총",p:40,a:100}, {n:"거품광선",p:65,a:100}, {n:"파도타기",p:90,a:100}, {n:"하이드로펌프",p:110,a:80}, {n:"아쿠아테일",p:90,a:90}, {n:"하이드로캐논",p:150,a:90} ],
-        "전기": [ {n:"전기쇼크",p:40,a:100}, {n:"스파크",p:65,a:100}, {n:"번개",p:110,a:70}, {n:"10만볼트",p:90,a:100}, {n:"볼트태클",p:120,a:100}, {n:"라이트닝",p:150,a:90} ],
+    "풀":   [ {n:"덩굴채찍",p:45,a:100}, {n:"잎날가르기",p:55,a:95}, {n:"씨폭탄",p:80,a:100}, {n:"에너지볼",p:90,a:100}, {n:"솔라빔",p:120,a:100}, {n:"리프스톰",p:130,a:90} ],
+    "불꽃": [ {n:"불꽃세례",p:40,a:100}, {n:"불꽃펀치",p:75,a:100}, {n:"화염방사",p:90,a:100}, {n:"불대문자",p:110,a:85}, {n:"블레이즈킥",p:85,a:90}, {n:"폭렬화염",p:150,a:90} ],
+    "물":   [ {n:"물총",p:40,a:100}, {n:"거품광선",p:65,a:100}, {n:"파도타기",p:90,a:100}, {n:"하이드로펌프",p:110,a:80}, {n:"아쿠아테일",p:90,a:90}, {n:"하이드로캐논",p:150,a:90} ],
+    "전기": [ {n:"전기쇼크",p:40,a:100}, {n:"스파크",p:65,a:100}, {n:"번개",p:110,a:70}, {n:"10만볼트",p:90,a:100}, {n:"볼트태클",p:120,a:100}, {n:"라이트닝",p:150,a:90} ],
 
-        "얼음": [ {n:"냉동빔",p:90,a:100}, {n:"눈보라",p:110,a:70}, {n:"얼음뭉치",p:40,a:100}, {n:"얼음엄니",p:65,a:95}, {n:"냉동펀치",p:75,a:100} ],
-        "땅":   [ {n:"진흙뿌리기",p:20,a:100}, {n:"땅고르기",p:60,a:100}, {n:"지진",p:100,a:100}, {n:"대지의힘",p:90,a:100}, {n:"뼈다귀부메랑",p:50,a:90} ],
-        "비행": [ {n:"날개치기",p:60,a:100}, {n:"공중날기",p:90,a:95}, {n:"에어슬래시",p:75,a:95}, {n:"드릴부리",p:80,a:100}, {n:"폭풍",p:110,a:70} ],
-        "벌레": [ {n:"벌레먹기",p:60,a:100}, {n:"연속자르기",p:40,a:95}, {n:"메가혼",p:120,a:85}, {n:"시그널빔",p:75,a:100}, {n:"벌레의야단법석",p:90,a:100} ],
-        "바위": [ {n:"바위던지기",p:50,a:90}, {n:"암석봉인",p:60,a:95}, {n:"스톤에지",p:100,a:80}, {n:"록블래스트",p:25,a:90}, {n:"파워젬",p:80,a:100} ],
-        "고스트":[ {n:"섀도볼",p:80,a:100}, {n:"섀도펀치",p:60,a:100}, {n:"나이트헤드",p:70,a:100}, {n:"섀도클로",p:70,a:100}, {n:"섀도다이브",p:120,a:90} ],
-        "강철": [ {n:"메탈클로",p:50,a:95}, {n:"아이언헤드",p:80,a:100}, {n:"미러샷",p:65,a:85}, {n:"코멧펀치",p:90,a:90}, {n:"철벽타격",p:90,a:95} ],
-        "악":   [ {n:"깨물어부수기",p:60,a:100}, {n:"크런치",p:80,a:100}, {n:"악의파동",p:80,a:100}, {n:"기습",p:40,a:100}, {n:"속임수",p:95,a:100} ],
-        "드래곤":[ {n:"용의숨결",p:60,a:100}, {n:"용의파동",p:85,a:100}, {n:"드래곤클로",p:80,a:100}, {n:"역린",p:120,a:100}, {n:"용성군",p:130,a:90} ],
+    "얼음": [ {n:"냉동빔",p:90,a:100}, {n:"눈보라",p:110,a:70}, {n:"얼음뭉치",p:40,a:100}, {n:"얼음엄니",p:65,a:95}, {n:"냉동펀치",p:75,a:100} ],
+    "땅":   [ {n:"진흙뿌리기",p:20,a:100}, {n:"땅고르기",p:60,a:100}, {n:"지진",p:100,a:100}, {n:"대지의힘",p:90,a:100}, {n:"뼈다귀부메랑",p:50,a:90} ],
+    "비행": [ {n:"날개치기",p:60,a:100}, {n:"공중날기",p:90,a:95}, {n:"에어슬래시",p:75,a:95}, {n:"드릴부리",p:80,a:100}, {n:"폭풍",p:110,a:70} ],
+    "벌레": [ {n:"벌레먹기",p:60,a:100}, {n:"연속자르기",p:40,a:95}, {n:"메가혼",p:120,a:85}, {n:"시그널빔",p:75,a:100}, {n:"벌레의야단법석",p:90,a:100} ],
+    "바위": [ {n:"바위던지기",p:50,a:90}, {n:"암석봉인",p:60,a:95}, {n:"스톤에지",p:100,a:80}, {n:"록블래스트",p:25,a:90}, {n:"파워젬",p:80,a:100} ],
+    "고스트":[ {n:"섀도볼",p:80,a:100}, {n:"섀도펀치",p:60,a:100}, {n:"나이트헤드",p:70,a:100}, {n:"섀도클로",p:70,a:100}, {n:"섀도다이브",p:120,a:90} ],
+    "강철": [ {n:"메탈클로",p:50,a:95}, {n:"아이언헤드",p:80,a:100}, {n:"미러샷",p:65,a:85}, {n:"코멧펀치",p:90,a:90}, {n:"철벽타격",p:90,a:95} ],
+    "악":   [ {n:"깨물어부수기",p:60,a:100}, {n:"크런치",p:80,a:100}, {n:"악의파동",p:80,a:100}, {n:"기습",p:40,a:100}, {n:"속임수",p:95,a:100} ],
+    "드래곤":[ {n:"용의숨결",p:60,a:100}, {n:"용의파동",p:85,a:100}, {n:"드래곤클로",p:80,a:100}, {n:"역린",p:120,a:100}, {n:"용성군",p:130,a:90} ],
 
-        "에스퍼":[ {n:"염동력",p:50,a:100}, {n:"사이코키네시스",p:90,a:100}, {n:"사이코쇼크",p:80,a:100}, {n:"드림이터",p:100,a:100}, {n:"미래예지",p:120,a:100} ],
-        "격투": [ {n:"로킥",p:50,a:100}, {n:"카운터",p:60,a:100}, {n:"스카이업퍼",p:85,a:90}, {n:"인파이트",p:120,a:100}, {n:"폭발펀치",p:100,a:50} ],
-        "독":   [ {n:"독침",p:15,a:100}, {n:"독가스",p:40,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"크로스포이즌",p:70,a:100} ],
-    };
+    "에스퍼":[ {n:"염동력",p:50,a:100}, {n:"사이코키네시스",p:90,a:100}, {n:"사이코쇼크",p:80,a:100}, {n:"드림이터",p:100,a:100}, {n:"미래예지",p:120,a:100} ],
+    "격투": [ {n:"로킥",p:50,a:100}, {n:"카운터",p:60,a:100}, {n:"스카이업퍼",p:85,a:90}, {n:"인파이트",p:120,a:100}, {n:"폭발펀치",p:100,a:50} ],
+    "독":   [ {n:"독침",p:15,a:100}, {n:"독가스",p:40,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"크로스포이즌",p:70,a:100} ],
+};
 
     function calcMoveTier(m) {
         let t, c;
@@ -535,101 +535,101 @@
     // [수정] 랜덤 생성 함수 제거됨 -> DB 조회로 통합
 
     function getPokeInfo(id) {
-        id = Math.floor(Number(id) || 1);
-        if (id < 1) id = 1;
+    id = Math.floor(Number(id) || 1);
+    if (id < 1) id = 1;
 
-        const dexId = id;
-        let baseId = id;
-        let isVariant = false;
-        let forcedShiny = false;
+    const dexId = id;
+    let baseId = id;
+    let isVariant = false;
+    let forcedShiny = false;
 
-        // ✅ 251번 이후: UR 색상(샤이니) 도감 카드
-        if (dexId > BASE_DEX_MAX) {
-            const idx = dexId - (BASE_DEX_MAX + 1);
-            baseId = UR_VARIANT_BASE_IDS[idx] ?? (((dexId - 1) % BASE_DEX_MAX) + 1);
-            isVariant = true;
-            forcedShiny = true;
-        } else if (baseId > BASE_DEX_MAX) {
-            baseId = ((baseId - 1) % BASE_DEX_MAX) + 1;
-        }
-
-        const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
-        const name = isVariant ? `${nameBase} ✨` : nameBase;
-
-        // 1) 타입 결정 (단일): 수동 매핑 + (선택) PokeAPI 자동 보정
-        let typeName = PRIMARY_TYPE_BY_ID[baseId] || "노말";
-        const apiType = POKEAPI_PRIMARY_TYPE[baseId];
-        if (apiType && TYPE_DATA[apiType]) {
-            typeName = apiType;
-        } else {
-            // ⚠️ 도감 전체를 한번에 렌더링할 때 251개를 다 fetch 하지 않도록,
-            //    "수동 매핑이 없는 경우"에만 타입을 자동 보정합니다.
-            if (!PRIMARY_TYPE_BY_ID[baseId]) ensurePokeApiType(baseId);
-        }
-
-        // 2) 기본 종족값 가져오기 (비율 유지를 위해 사용)
-        const sData = ALL_STATS_DB[baseId - 1] || [45,45,45,45,45,45];
-        const rawBase = { hp:sData[0], a:sData[1], b:sData[2], sa:sData[3], sd:sData[4], s:sData[5] };
-        const bst = rawBase.hp + rawBase.a + rawBase.b + rawBase.sa + rawBase.sd + rawBase.s;
-
-        // 3) 레어도 판단 (BST 기준 + 전설/환상/귀여움 override)
-        let rarity = "C";
-        if (bst >= 580) rarity = "UR";
-        else if (bst >= 500) rarity = "SSR";
-        else if (bst >= 400) rarity = "SR";
-        else if (bst >= 300) rarity = "R";
-
-        const isLegendary = LEGENDARY_IDS.includes(baseId);
-        const isMythical = MYTHICAL_IDS.includes(baseId);
-
-        // 히든(=샤이니) 조건: 귀여움 ID
-        let isShiny = CUTE_IDS.includes(baseId);
-        let isHidden = CUTE_IDS.includes(baseId);
-
-        if (isLegendary || isMythical) rarity = "UR";
-        if (CUTE_IDS.includes(baseId)) rarity = "UR";
-
-        // ✅ 도감 색상 카드(variant)는 UR 고정 + 샤이니 강제, 히든은 아님
-        if (isVariant) {
-            rarity = "UR";
-            isShiny = true;
-            isHidden = false;
-        } else if (forcedShiny) {
-            isShiny = true;
-        }
-
-        // 4) BST 차이를 살리되, 티어별 목표 BST 기준으로 비율 조정
-        const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
-        const ratio = config.targetBst / Math.max(1, bst);
-
-        const finalBase = {
-            hp: Math.max(1, Math.floor(rawBase.hp * ratio) + config.bonus),
-            a:  Math.max(1, Math.floor(rawBase.a  * ratio) + config.bonus),
-            b:  Math.max(1, Math.floor(rawBase.b  * ratio) + config.bonus),
-            sa: Math.max(1, Math.floor(rawBase.sa * ratio) + config.bonus),
-            sd: Math.max(1, Math.floor(rawBase.sd * ratio) + config.bonus),
-            s:  Math.max(1, Math.floor(rawBase.s  * ratio) + config.bonus)
-        };
-
-        // 5) 이로치 여부에 따른 스프라이트 URL 결정
-        const baseUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
-        const spriteUrl = isShiny
-            ? `${baseUrl}/shiny/${baseId}.png`
-            : `${baseUrl}/${baseId}.png`;
-
-        return {
-            id: dexId,
-            baseId,
-            name,
-            rarity,
-            type: { name: typeName, ...TYPE_DATA[typeName] },
-            sprite: spriteUrl,
-            base: finalBase,
-            isShiny,
-            isHidden,
-            isVariant
-        };
+    // ✅ 251번 이후: UR 색상(샤이니) 도감 카드
+    if (dexId > BASE_DEX_MAX) {
+        const idx = dexId - (BASE_DEX_MAX + 1);
+        baseId = UR_VARIANT_BASE_IDS[idx] ?? (((dexId - 1) % BASE_DEX_MAX) + 1);
+        isVariant = true;
+        forcedShiny = true;
+    } else if (baseId > BASE_DEX_MAX) {
+        baseId = ((baseId - 1) % BASE_DEX_MAX) + 1;
     }
+
+    const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
+    const name = isVariant ? `${nameBase} ✨` : nameBase;
+
+    // 1) 타입 결정 (단일): 수동 매핑 + (선택) PokeAPI 자동 보정
+    let typeName = PRIMARY_TYPE_BY_ID[baseId] || "노말";
+    const apiType = POKEAPI_PRIMARY_TYPE[baseId];
+    if (apiType && TYPE_DATA[apiType]) {
+        typeName = apiType;
+    } else {
+        // ⚠️ 도감 전체를 한번에 렌더링할 때 251개를 다 fetch 하지 않도록,
+        //    "수동 매핑이 없는 경우"에만 타입을 자동 보정합니다.
+        if (!PRIMARY_TYPE_BY_ID[baseId]) ensurePokeApiType(baseId);
+    }
+
+    // 2) 기본 종족값 가져오기 (비율 유지를 위해 사용)
+    const sData = ALL_STATS_DB[baseId - 1] || [45,45,45,45,45,45];
+    const rawBase = { hp:sData[0], a:sData[1], b:sData[2], sa:sData[3], sd:sData[4], s:sData[5] };
+    const bst = rawBase.hp + rawBase.a + rawBase.b + rawBase.sa + rawBase.sd + rawBase.s;
+
+    // 3) 레어도 판단 (BST 기준 + 전설/환상/귀여움 override)
+    let rarity = "C";
+    if (bst >= 580) rarity = "UR";
+    else if (bst >= 500) rarity = "SSR";
+    else if (bst >= 400) rarity = "SR";
+    else if (bst >= 300) rarity = "R";
+
+    const isLegendary = LEGENDARY_IDS.includes(baseId);
+    const isMythical = MYTHICAL_IDS.includes(baseId);
+
+    // 히든(=샤이니) 조건: 귀여움 ID
+    let isShiny = CUTE_IDS.includes(baseId);
+    let isHidden = CUTE_IDS.includes(baseId);
+
+    if (isLegendary || isMythical) rarity = "UR";
+    if (CUTE_IDS.includes(baseId)) rarity = "UR";
+
+    // ✅ 도감 색상 카드(variant)는 UR 고정 + 샤이니 강제, 히든은 아님
+    if (isVariant) {
+        rarity = "UR";
+        isShiny = true;
+        isHidden = false;
+    } else if (forcedShiny) {
+        isShiny = true;
+    }
+
+    // 4) BST 차이를 살리되, 티어별 목표 BST 기준으로 비율 조정
+    const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
+    const ratio = config.targetBst / Math.max(1, bst);
+
+    const finalBase = {
+        hp: Math.max(1, Math.floor(rawBase.hp * ratio) + config.bonus),
+        a:  Math.max(1, Math.floor(rawBase.a  * ratio) + config.bonus),
+        b:  Math.max(1, Math.floor(rawBase.b  * ratio) + config.bonus),
+        sa: Math.max(1, Math.floor(rawBase.sa * ratio) + config.bonus),
+        sd: Math.max(1, Math.floor(rawBase.sd * ratio) + config.bonus),
+        s:  Math.max(1, Math.floor(rawBase.s  * ratio) + config.bonus)
+    };
+
+    // 5) 이로치 여부에 따른 스프라이트 URL 결정
+    const baseUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
+    const spriteUrl = isShiny
+        ? `${baseUrl}/shiny/${baseId}.png`
+        : `${baseUrl}/${baseId}.png`;
+
+    return {
+        id: dexId,
+        baseId,
+        name,
+        rarity,
+        type: { name: typeName, ...TYPE_DATA[typeName] },
+        sprite: spriteUrl,
+        base: finalBase,
+        isShiny,
+        isHidden,
+        isVariant
+    };
+}
 
 
     const TIER_ORDER = ['C', 'R', 'SR', 'SSR', 'UR'];
@@ -720,13 +720,13 @@
         };
         saveCharData(allData);
     }
-
+    
     let battleState = null;
     let quizCallback = null;
 
     let ghostScanStream = null;
     let ghostScanFrameId = null;
-
+    
     function getPoints() { return parseInt(localStorage.getItem(LS_KEY.POINTS) || "1000", 10); }
     function setPoints(n) { localStorage.setItem(LS_KEY.POINTS, Math.max(0, n)); updateResUI(); }
     function addPoints(n) { setPoints(getPoints() + n); }
@@ -1232,7 +1232,7 @@
         let count = 0;
         for (let i=1;i<=DEX_TOTAL;i++) {
             const info = getPokeInfo(i);
-            const ownedBase = owned.has(info.baseId);
+        const ownedBase = owned.has(info.baseId);
             if(ownedBase) count++;
             const el = document.createElement("div");
             el.className = `poke-card relative rounded-xl p-2 flex flex-col items-center cursor-pointer rarity-${info.rarity}`;
