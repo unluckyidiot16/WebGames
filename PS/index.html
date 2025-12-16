@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 탐험대 (키보드 & JSON 퀴즈 ver)</title>
+    <title>포켓몬 탐험대 (확률 버그 수정 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -530,7 +530,7 @@
             <div id="lobby-partner" class="lobby-partner-container hidden">
                 <img id="lobby-partner-img" class="lobby-partner-img" src="" />
             </div>
-            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(맞춤법 패치 ver)</span></h1>
+            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(확률 버그 수정 ver)</span></h1>
         </div>
 
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
@@ -702,7 +702,7 @@
     const MAX_POKEMON_ID = 1025;
 
     // --- [중요] 데이터 버전 관리 ---
-    const SAVE_KEY = "poke_spell_game_data_v6"; // v6로 버전 업
+    const SAVE_KEY = "poke_spell_game_data_v6";
     const PREVIOUS_KEYS = ["poke_spell_game_data_v5", "poke_spell_game_data_v4", "poke_spell_game_data_v3", "poke_spell_game_data_v2"];
 
     // --- [중요] 희귀 포켓몬 리스트 ---
@@ -755,12 +755,11 @@
 
     async function init() {
         loadGame();
-        await loadQuizData(); // [추가] 퀴즈 데이터 로드
+        await loadQuizData();
         initDexFilter();
         updateLobbyUI();
     }
 
-    // [추가] 외부 JSON 퀴즈 로드
     async function loadQuizData() {
         try {
             const res = await fetch('./quiz/quiz.json');
@@ -858,7 +857,6 @@
         }
     }
 
-    // --- [구구단 폴백 생성기] ---
     function generateGuGuDan() {
         const num1 = Math.floor(Math.random() * 8) + 2;
         const num2 = Math.floor(Math.random() * 9) + 1;
@@ -887,19 +885,13 @@
         };
     }
 
-    // [추가] 외부 퀴즈 가져오기 및 셔플 로직
     function getExternalQuiz() {
         const rawQ = externalQuizList[Math.floor(Math.random() * externalQuizList.length)];
-
-        // 보기 섞기 (answerIndex 추적)
         const originalChoices = rawQ.choices.map((val, idx) => ({ val: val, isAns: idx === rawQ.answerIndex }));
-
-        // Fisher-Yates Shuffle
         for (let i = originalChoices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [originalChoices[i], originalChoices[j]] = [originalChoices[j], originalChoices[i]];
         }
-
         const shuffledChoices = originalChoices.map(obj => obj.val);
         const newAnswerIndex = originalChoices.findIndex(obj => obj.isAns);
 
@@ -1118,9 +1110,10 @@
         if (!baseRate) baseRate = 0.1;
         baseRate = baseRate * 2.5;
         baseRate += (user.upgrades.catchRate * 0.005);
+
+        // 95% 캡 적용 후 너프 (조우 화면용)
         if(baseRate > 0.95) baseRate = 0.95;
         if(baseRate < 0.05) baseRate = 0.05;
-
         baseRate = baseRate * 0.65;
 
         document.getElementById('enc-rate').textContent = Math.floor(baseRate*100);
@@ -1149,13 +1142,12 @@
     }
 
     function nextQuizStep() {
-        updateComboUI(); // [중요] 문제 화면 진입 시 확률 업데이트
+        updateComboUI();
         if(currentCombo >= MAX_COMBO) {
             finishComboAndThrow();
             return;
         }
 
-        // [수정] 퀴즈 데이터 선택 로직
         if(externalQuizList.length > 0) {
             currentQuiz = getExternalQuiz();
         } else {
@@ -1163,7 +1155,7 @@
         }
 
         document.getElementById('quiz-txt').textContent = currentQuiz.prompt;
-        document.getElementById('quiz-desc').textContent = currentQuiz.promptExplain || ""; // 설명 표시
+        document.getElementById('quiz-desc').textContent = currentQuiz.promptExplain || "";
 
         const optsDiv = document.getElementById('quiz-opts');
         optsDiv.innerHTML = "";
@@ -1207,7 +1199,6 @@
         comboEl.textContent = currentCombo;
         probEl.textContent = Math.floor(p * 100);
 
-        // [추가] 볼 정보 배지 업데이트
         const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
         const ballName = { monster:"몬스터볼", super:"슈퍼볼", hyper:"하이퍼볼", master:"마스터볼" }[selectedBall];
 
@@ -1224,22 +1215,35 @@
         element.classList.add('pop-anim');
     }
 
+    // [버그 수정 핵심] 확률 계산 로직 분리 및 캡 적용
     function calculateCatchProb() {
         let rate = currentPokemon.rate / 255;
-        if(!rate) rate = 0.1;
+        if (!rate) rate = 0.1;
 
-        const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
+        const ballBonus = { monster: 1, super: 1.5, hyper: 2.0, master: 255 }[selectedBall];
         const upgradeBonus = 1 + (user.upgrades.catchRate * 0.005);
         const balancePatchMultiplier = 2.5;
-        const comboBonus = 1 + (currentCombo * 0.1);
         const DIFFICULTY_NERF = 0.65;
 
-        let p = rate * ballBonus * upgradeBonus * balancePatchMultiplier * comboBonus * DIFFICULTY_NERF;
+        // 1. 기초 확률 계산
+        let baseP = rate * ballBonus * upgradeBonus * balancePatchMultiplier;
 
-        if(selectedBall === 'master') p = 1;
-        if(p > 1) p = 1;
+        // 2. [수정] 기초 확률을 먼저 95%로 제한 (조우 화면과 동일한 기준 적용)
+        if (baseP > 0.95) baseP = 0.95;
+        if (baseP < 0.05) baseP = 0.05;
 
-        return p;
+        // 3. 콤보 보너스 적용
+        const comboBonus = 1 + (currentCombo * 0.1);
+        let finalP = baseP * comboBonus;
+
+        // 4. 최종 난이도 너프 적용
+        finalP = finalP * DIFFICULTY_NERF;
+
+        // 마스터볼 예외
+        if (selectedBall === 'master') finalP = 1;
+        if (finalP > 1) finalP = 1;
+
+        return finalP;
     }
 
     function handleAnswer(isCorrect) {
@@ -1502,14 +1506,12 @@
         }
     }
 
-    // [추가] 키보드 조작 이벤트 리스너
     window.addEventListener('keydown', (e) => {
-        // 게임 뷰가 활성화되어 있고 이동 중이 아닐 때만 작동
         const gameView = document.getElementById('view-game');
         if (session.active && !isMoving && !gameView.classList.contains('hidden')) {
             if (e.key === 'ArrowUp') {
                 move('up');
-                e.preventDefault(); // 스크롤 방지
+                e.preventDefault();
             } else if (e.key === 'ArrowDown') {
                 move('down');
                 e.preventDefault();
