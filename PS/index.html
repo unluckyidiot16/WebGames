@@ -1043,12 +1043,18 @@
         const rarity = spawnData.rarity;
 
         try {
+            // 1. API에서 이름과 포획률 정보 가져오기
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
             const data = await res.json();
             const name = data.names.find((n) => n.language.name === "ko")?.name || data.name;
-            const sprite = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
 
-            currentPokemon = { id, name, rate: data.capture_rate, sprite, rarity };
+            // 2. 이미지 소스 정의
+            // (1순위) 기본 픽셀 스프라이트
+            const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+            // (2순위) 공식 일러스트 (9세대 누락이 거의 없음)
+            const backupUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+
+            currentPokemon = { id, name, rate: data.capture_rate, sprite: spriteUrl, rarity };
 
             if (targetTile) {
                 targetTile.classList.add("silhouette");
@@ -1056,12 +1062,32 @@
 
                 const oldImg = targetTile.querySelector(".silhouette-img");
                 if (oldImg) oldImg.remove();
+
                 const img = document.createElement("img");
                 img.className = "silhouette-img";
-                img.src = sprite;
+
+                // [핵심 수정] 이미지 로드 실패 시 백업 로직
+                img.onerror = function() {
+                    // 1차 실패: 픽셀 아트가 없으면 공식 일러스트로 교체
+                    if (this.src === spriteUrl) {
+                        console.log(`픽셀 이미지 누락(${id}). 공식 일러스트로 대체합니다.`);
+                        this.src = backupUrl;
+                    }
+                    // 2차 실패: 공식 일러스트도 없으면 몬스터볼 아이콘으로 대체
+                    else if (this.src === backupUrl) {
+                        console.log(`이미지 완전 누락(${id}). 기본 아이콘 사용.`);
+                        this.src = "./png/pb.png";
+                        this.style.filter = "none"; // 실루엣 효과 해제 (선택사항)
+                    }
+                };
+
+                img.src = spriteUrl; // 이미지 로드 시작
                 targetTile.appendChild(img);
             }
-        } catch (e) { console.error(e); }
+        } catch (e) {
+            console.error("포켓몬 스폰 에러:", e);
+            // 에러 발생 시 재시도 하거나 무시
+        }
     }
 
     function startEncounter() {
