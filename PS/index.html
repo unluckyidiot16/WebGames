@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 탐험대 (수학/경제 패치 ver)</title>
+    <title>포켓몬 탐험대 (구구단 콤보 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -282,8 +282,8 @@
         .sticky-header-group {
             position: sticky;
             top: 0;
-            z-index: 100; /* 도감 그리드(z-index 기본값)보다 위로 올림 */
-            background: #fffbeb; /* 배경색을 맞춰서 뒤에 내용이 비치지 않게 함 */
+            z-index: 100;
+            background: #fffbeb;
             width: 100%;
             padding: 20px 20px 10px 20px;
             border-bottom: 2px solid rgba(0,0,0,0.05);
@@ -308,7 +308,7 @@
         }
         .filter-toggle-btn:active { background: #f1f5f9; }
 
-        /* 필터 그리드 (3줄 배치) */
+        /* 필터 그리드 */
         .filter-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -320,9 +320,7 @@
             margin-bottom: 5px;
         }
 
-        .filter-grid.collapsed {
-            display: none;
-        }
+        .filter-grid.collapsed { display: none; }
 
         .filter-btn {
             background: #f8fafc;
@@ -337,7 +335,6 @@
             white-space: nowrap;
         }
         .filter-btn:active { transform: translateY(2px); }
-
         .filter-btn.active {
             background: #3b82f6;
             color: white;
@@ -345,37 +342,28 @@
             font-weight: bold;
         }
 
-        /* 도감 내용 영역 패딩 */
-        .dex-content-area {
-            width: 100%;
-            padding: 0 20px 50px 20px;
-        }
+        /* 도감 내용 영역 */
+        .dex-content-area { width: 100%; padding: 0 20px 50px 20px; }
 
-        /* 로비 파트너 포켓몬 위치 수정 (타이틀 뒤로) */
+        /* 로비 파트너 포켓몬 */
         .lobby-partner-container {
             position: absolute;
-            top: 50%;
-            left: 50%;
+            top: 50%; left: 50%;
             transform: translate(-50%, -50%);
-            width: 300px;
-            height: 300px;
-            z-index: 1; /* 글자(2)보다는 뒤에 */
-            opacity: 0.5; /* 투명도 조정 */
+            width: 300px; height: 300px;
+            z-index: 1;
+            opacity: 0.5;
             pointer-events: none;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            display: flex; justify-content: center; align-items: center;
         }
 
         .lobby-partner-img {
-            width: 100%;
-            height: 100%;
+            width: 100%; height: 100%;
             object-fit: contain;
             image-rendering: pixelated;
             animation: floating 3s ease-in-out infinite;
-            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8)); /* 하얀 후광 효과 */
+            filter: drop-shadow(0 0 20px rgba(255,255,255,0.8));
         }
-
 
         /* --- 모달 --- */
         .modal-overlay {
@@ -409,6 +397,36 @@
             box-shadow: 0 4px 0 #cbd5e1; transition: 0.1s;
         }
         .quiz-btn:active { transform: translateY(4px); box-shadow: none; background: #f1f5f9; }
+
+        /* 콤보 UI 스타일 */
+        .combo-container {
+            display: flex; justify-content: space-between; align-items: center;
+            margin-bottom: 10px; padding: 10px;
+            background: #eff6ff; border-radius: 15px;
+            border: 2px solid #dbeafe;
+        }
+        .combo-badge { font-size: 18px; font-weight: bold; color: #2563eb; }
+        .rate-badge { font-size: 18px; font-weight: bold; color: #d97706; }
+
+        /* 팝 애니메이션 클래스 */
+        .pop-anim {
+            animation: popEffect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: inline-block;
+        }
+        @keyframes popEffect {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.6); color: #ef4444; }
+            100% { transform: scale(1); }
+        }
+
+        .stop-btn {
+            margin-top: 15px; background: #fca5a5; color: #991b1b;
+            border: none; padding: 10px; border-radius: 12px; width: 100%;
+            font-family: inherit; font-size: 16px; cursor: pointer;
+            box-shadow: 0 3px 0 #f87171;
+        }
+        .stop-btn:active { transform: translateY(3px); box-shadow: none; }
+
 
         /* 애니메이션 영역 */
         .throw-scene-area {
@@ -501,7 +519,7 @@
             <div id="lobby-partner" class="lobby-partner-container hidden">
                 <img id="lobby-partner-img" class="lobby-partner-img" src="" />
             </div>
-            <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;">(수학/경제 ver)</span></h1>
+            <h1 class="lobby-title">Pokémon<br>수학 탐험대<br><span style="font-size:20px; color:#f59e0b;">(구구단 콤보 ver)</span></h1>
         </div>
 
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
@@ -606,7 +624,7 @@
         <h3 style="color:#ef4444; font-size:24px; margin:0 0 10px 0;">야생의 포켓몬!</h3>
         <img id="enc-img" src="" class="poke-img-lg" />
         <h2 id="enc-name" style="font-size:28px; margin:10px 0;">???</h2>
-        <p style="font-size:16px; color:#f59e0b; font-weight:bold; margin:0;">포획 확률: <span id="enc-rate"></span>%</p>
+        <p style="font-size:16px; color:#f59e0b; font-weight:bold; margin:0;">기본 확률: <span id="enc-rate"></span>%</p>
 
         <div class="ball-select">
             <button class="ball-opt" id="btn-use-monster" onclick="tryCatch('monster')"><img src="./png/pb.png">몬스터볼<br>x<span id="qty-monster">0</span></button>
@@ -618,9 +636,16 @@
     </div>
 
     <div id="modal-quiz" class="modal-box hidden">
-        <h3 style="color:#0ea5e9; font-size:24px; margin-top:0;">퀴즈 미션</h3>
-        <p id="quiz-txt" style="font-size:22px; margin:20px 0; font-weight:bold; color:#334155; word-break: keep-all;"></p>
+        <div class="combo-container">
+            <div class="combo-badge">Combo: <span id="quiz-combo-val">0</span>/10</div>
+            <div class="rate-badge">확률: <span id="quiz-prob-val">0</span>%</div>
+        </div>
+
+        <h3 style="color:#0ea5e9; font-size:24px; margin-top:0;">구구단 미션!</h3>
+        <p id="quiz-txt" style="font-size:32px; margin:20px 0; font-weight:bold; color:#334155;"></p>
         <div id="quiz-opts" style="display:flex; flex-direction:column; gap:12px;"></div>
+
+        <button class="stop-btn" onclick="finishComboAndThrow()">✋ 멈추고 지금 던지기!</button>
     </div>
 
     <div id="modal-throw" class="modal-box hidden">
@@ -640,9 +665,8 @@
 
 <script>
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
-    const QUIZ_URL = "./quiz/quiz.json";
     const MAX_POKEMON_ID = 1025;
-    const SAVE_KEY = "poke_spell_game_data_v2"; // 데이터 키 버전 업
+    const SAVE_KEY = "poke_spell_game_data_v3"; // 데이터 키 변경 (v3)
 
     // --- [중요] 희귀 포켓몬 리스트 ---
     const LEGENDARY_IDS = [
@@ -658,12 +682,12 @@
     ];
 
     const RARE_IDS = [
-        1,4,7, 25, 133, 143, 149, // 1세대 (피카츄, 이브이, 망나뇽 등)
-        152,155,158, 212, 248, // 2세대 (핫삼, 마기라스)
-        252,255,258, 282, 373, 376, 445, 448, // 3~4세대 (보만다, 메타그로스, 한카리아스, 루카리오)
-        495,498,501, 635, 650, 653, // 5~6세대 (삼삼드래 등)
-        722,725,728, 810,813,816, 887, // 7~8세대 (드래펄트 등)
-        906,909,912, 996, 997, 998 // 9세대 (드닐레이브 등)
+        1,4,7, 25, 133, 143, 149, // 1세대
+        152,155,158, 212, 248, // 2세대
+        252,255,258, 282, 373, 376, 445, 448, // 3~4세대
+        495,498,501, 635, 650, 653, // 5~6세대
+        722,725,728, 810,813,816, 887, // 7~8세대
+        906,909,912, 996, 997, 998 // 9세대
     ];
 
     const BALL_SPRITES = { monster: "./png/pb.png", super: "./png/gb.png", hyper: "./png/ub.png", master: "./png/mb.png" };
@@ -674,7 +698,7 @@
         points: 0,
         inventory: { monster: 0, super: 0, hyper: 0, master: 0 },
         dex: new Set(),
-        upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0 }, // startBalls 삭제, dexLimit 추가
+        upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0 },
         partnerId: null
     };
     let session = { active: false, steps: 0, caught: [], earnedPoints: 0 };
@@ -683,36 +707,32 @@
     let currentPokemon = null;
     let silhouettePos = { x: -1, y: -1 };
     let isMoving = false;
-    let quizList = [];
+
+    // 퀴즈 관련 변수
     let selectedBall = null;
     let currentQuiz = null;
+    let currentCombo = 0;
+    const MAX_COMBO = 10;
     let lastCapture = null;
 
-    // 현재 선택된 필터값 저장 변수
+    // 필터 변수
     let currentFilter = 'owned';
     let isFilterCollapsed = false;
 
     async function init() {
         loadGame();
-        await loadQuiz();
-        initDexFilter(); // 필터 버튼 초기화
+        initDexFilter();
         updateLobbyUI();
     }
 
-    // 도감 필터 버튼 생성 (3줄 배치)
     function initDexFilter() {
         const container = document.getElementById('dex-filter-container');
         container.innerHTML = "";
-
-        // 1. 보유 중 버튼
         createFilterBtn(container, 'owned', '✅ 보유');
-
-        // 2. 100단위 버튼 (11개)
         for (let i = 0; i < 11; i++) {
             const start = i * 100 + 1;
             const end = (i + 1) * 100;
             if (start > MAX_POKEMON_ID) break;
-
             const label = `${start}~${end}`;
             const value = `${start}-${end}`;
             createFilterBtn(container, value, label);
@@ -729,8 +749,6 @@
             document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
             e.target.classList.add('active');
             renderDex();
-            // 선택 후 자동으로 접으려면 아래 주석 해제
-            // toggleFilterGrid(true); 
         };
         container.appendChild(btn);
     }
@@ -738,10 +756,9 @@
     function toggleFilterGrid(forceClose = false) {
         const grid = document.getElementById('dex-filter-container');
         const icon = document.getElementById('toggle-icon');
-
         if (forceClose || !isFilterCollapsed) {
             grid.classList.add('collapsed');
-            icon.textContent = '◀'; // or ➕
+            icon.textContent = '◀';
             isFilterCollapsed = true;
         } else {
             grid.classList.remove('collapsed');
@@ -750,13 +767,9 @@
         }
     }
 
-
     function saveGame() {
         try {
-            const data = {
-                ...user,
-                dex: Array.from(user.dex)
-            };
+            const data = { ...user, dex: Array.from(user.dex) };
             localStorage.setItem(SAVE_KEY, JSON.stringify(data));
         } catch(e) { console.error("Save failed", e); }
     }
@@ -766,117 +779,54 @@
             const saved = localStorage.getItem(SAVE_KEY);
             if(saved) {
                 const parsed = JSON.parse(saved);
-                user = {
-                    ...user,
-                    ...parsed,
-                    dex: new Set(parsed.dex || [])
-                };
-                // 기존 데이터 마이그레이션
-                if(parsed.upgrades && parsed.upgrades.startBalls !== undefined && parsed.upgrades.dexLimit === undefined) {
-                    user.upgrades.dexLimit = 0;
-                    delete user.upgrades.startBalls;
-                }
+                user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
+                // 마이그레이션: startBalls 삭제, dexLimit 보장
+                if(user.upgrades.startBalls !== undefined) delete user.upgrades.startBalls;
+                if(user.upgrades.dexLimit === undefined) user.upgrades.dexLimit = 0;
             }
         } catch(e) { console.error("Load failed", e); }
     }
 
     function resetGameData() {
-        if(confirm("모든 데이터를 초기화하시겠습니까? (되돌릴 수 없습니다)")) {
+        if(confirm("모든 데이터를 초기화하시겠습니까?")) {
             localStorage.removeItem(SAVE_KEY);
             location.reload();
         }
     }
 
-    // --- [수학 문제 생성기] ---
-    function generateMathQuiz() {
-        const type = Math.floor(Math.random() * 4);
-        let prompt = "", answer = "", choices = [];
+    // --- [구구단 문제 생성기] ---
+    function generateGuGuDan() {
+        // 2단 ~ 9단
+        const num1 = Math.floor(Math.random() * 8) + 2;
+        const num2 = Math.floor(Math.random() * 9) + 1;
+        const ans = num1 * num2;
 
-        let val1 = Math.floor(Math.random() * 9) + 1; // 1 ~ 9 (큰 단위)
-        let val2 = Math.floor(Math.random() * 900) + 50; // 50 ~ 950 (작은 단위)
-        // 10단위로 끊기
-        val2 = Math.floor(val2 / 10) * 10;
+        let choices = new Set();
+        choices.add(ans);
 
-        const totalSmall = val1 * 1000 + val2;
-
-        if (type === 0) { // 3500g -> 3kg 500g
-            prompt = `${totalSmall}g = □kg □g`;
-            answer = `${val1}kg ${val2}g`;
-            choices = [
-                `${val1}kg ${val2}g`,
-                `${val1}kg ${val2}0g`,
-                `${val1}0kg ${val2}g`,
-                `${val2}kg ${val1}00g`
-            ];
-        } else if (type === 1) { // 3kg 500g -> 3500g
-            prompt = `${val1}kg ${val2}g = □g`;
-            answer = `${totalSmall}g`;
-            choices = [
-                `${totalSmall}g`,
-                `${val1}${val2}0g`,
-                `${val1}0${val2}g`,
-                `${val2}${val1}g`
-            ];
-        } else if (type === 2) { // 3500mL -> 3L 500mL
-            prompt = `${totalSmall}mL = □L □mL`;
-            answer = `${val1}L ${val2}mL`;
-            choices = [
-                `${val1}L ${val2}mL`,
-                `${val1}L ${val2}0mL`,
-                `${val1}0L ${val2}mL`,
-                `${val2}L ${val1}00mL`
-            ];
-        } else { // 3L 500mL -> 3500mL
-            prompt = `${val1}L ${val2}mL = □mL`;
-            answer = `${totalSmall}mL`;
-            choices = [
-                `${totalSmall}mL`,
-                `${val1}${val2}0mL`,
-                `${val1}0${val2}mL`,
-                `${val2}${val1}mL`
-            ];
+        while(choices.size < 4) {
+            // 오답 생성: 정답 근처의 값 혹은 다른 구구단 값
+            let wrong;
+            if (Math.random() < 0.5) {
+                wrong = ans + (Math.floor(Math.random() * 10) - 5) * 2; // 근사값
+            } else {
+                wrong = (Math.floor(Math.random() * 8) + 2) * (Math.floor(Math.random() * 9) + 1);
+            }
+            if (wrong > 0 && wrong !== ans) choices.add(wrong);
         }
 
-        let choiceSet = new Set(choices);
-        let finalChoices = Array.from(choiceSet);
-        while(finalChoices.length < 4) {
-            finalChoices.push(`${totalSmall + Math.floor(Math.random()*100)*10}g`);
-        }
-
-        let answerIndex = 0;
+        let finalChoices = Array.from(choices);
+        // 셔플
         for (let i = finalChoices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [finalChoices[i], finalChoices[j]] = [finalChoices[j], finalChoices[i]];
         }
-        answerIndex = finalChoices.indexOf(answer);
 
         return {
-            prompt: prompt,
+            prompt: `${num1} × ${num2} = ?`,
             choices: finalChoices,
-            answerIndex: answerIndex
+            answerIndex: finalChoices.indexOf(ans)
         };
-    }
-
-    async function loadQuiz() {
-        try {
-            const res = await fetch(QUIZ_URL);
-            if(!res.ok) throw new Error("Network response was not ok");
-            const data = await res.json();
-            let qArr = data.questions || [];
-            if(qArr.length === 0) throw new Error("Empty quiz");
-
-            for (let i = qArr.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [qArr[i], qArr[j]] = [qArr[j], qArr[i]];
-            }
-            quizList = qArr;
-        } catch(e) {
-            console.log("Quiz load failed or empty, using Math Generator fallback");
-            quizList = [];
-            for(let i=0; i<50; i++) {
-                quizList.push(generateMathQuiz());
-            }
-        }
     }
 
     function switchView(viewId) {
@@ -903,7 +853,6 @@
         document.getElementById('lobby-points').textContent = user.points;
         const partnerContainer = document.getElementById('lobby-partner');
         const partnerImg = document.getElementById('lobby-partner-img');
-
         if (user.partnerId) {
             partnerContainer.classList.remove('hidden');
             partnerImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${user.partnerId}.png`;
@@ -917,12 +866,10 @@
         const baseSteps = 30 + (user.upgrades.maxSteps * 10);
         const bonusBalls = 10;
         session = { active: true, steps: baseSteps, caught: [], earnedPoints: 0 };
-
         if (user.inventory.monster < bonusBalls) {
             user.inventory.monster = bonusBalls;
             saveGame();
         }
-
         generateMap();
         player = { x: 4, y: 4 };
         updatePlayerPos();
@@ -1021,13 +968,9 @@
 
     function getWeightedRandomId() {
         const roll = Math.random();
-        if(roll < 0.02) {
-            return { id: LEGENDARY_IDS[Math.floor(Math.random() * LEGENDARY_IDS.length)], rarity: 'legendary' };
-        } else if (roll < 0.15) {
-            return { id: RARE_IDS[Math.floor(Math.random() * RARE_IDS.length)], rarity: 'rare' };
-        } else {
-            return { id: Math.floor(Math.random() * MAX_POKEMON_ID) + 1, rarity: 'common' };
-        }
+        if(roll < 0.02) return { id: LEGENDARY_IDS[Math.floor(Math.random() * LEGENDARY_IDS.length)], rarity: 'legendary' };
+        else if (roll < 0.15) return { id: RARE_IDS[Math.floor(Math.random() * RARE_IDS.length)], rarity: 'rare' };
+        else return { id: Math.floor(Math.random() * MAX_POKEMON_ID) + 1, rarity: 'common' };
     }
 
     async function spawnPokemon() {
@@ -1037,21 +980,15 @@
         silhouettePos = { x, y };
         currentPokemon = null;
         const targetTile = document.querySelector(`.tile[data-x="${x}"][data-y="${y}"]`);
-
         const spawnData = getWeightedRandomId();
         const id = spawnData.id;
         const rarity = spawnData.rarity;
 
         try {
-            // 1. API에서 이름과 포획률 정보 가져오기
             const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
             const data = await res.json();
             const name = data.names.find((n) => n.language.name === "ko")?.name || data.name;
-
-            // 2. 이미지 소스 정의
-            // (1순위) 기본 픽셀 스프라이트
             const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-            // (2순위) 공식 일러스트 (9세대 누락이 거의 없음)
             const backupUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
 
             currentPokemon = { id, name, rate: data.capture_rate, sprite: spriteUrl, rarity };
@@ -1059,35 +996,16 @@
             if (targetTile) {
                 targetTile.classList.add("silhouette");
                 if(rarity === 'legendary') targetTile.classList.add("legendary");
-
-                const oldImg = targetTile.querySelector(".silhouette-img");
-                if (oldImg) oldImg.remove();
-
                 const img = document.createElement("img");
                 img.className = "silhouette-img";
-
-                // [핵심 수정] 이미지 로드 실패 시 백업 로직
                 img.onerror = function() {
-                    // 1차 실패: 픽셀 아트가 없으면 공식 일러스트로 교체
-                    if (this.src === spriteUrl) {
-                        console.log(`픽셀 이미지 누락(${id}). 공식 일러스트로 대체합니다.`);
-                        this.src = backupUrl;
-                    }
-                    // 2차 실패: 공식 일러스트도 없으면 몬스터볼 아이콘으로 대체
-                    else if (this.src === backupUrl) {
-                        console.log(`이미지 완전 누락(${id}). 기본 아이콘 사용.`);
-                        this.src = "./png/pb.png";
-                        this.style.filter = "none"; // 실루엣 효과 해제 (선택사항)
-                    }
+                    if (this.src === spriteUrl) this.src = backupUrl;
+                    else if (this.src === backupUrl) { this.src = "./png/pb.png"; this.style.filter = "none"; }
                 };
-
-                img.src = spriteUrl; // 이미지 로드 시작
+                img.src = spriteUrl;
                 targetTile.appendChild(img);
             }
-        } catch (e) {
-            console.error("포켓몬 스폰 에러:", e);
-            // 에러 발생 시 재시도 하거나 무시
-        }
+        } catch (e) { console.error("Spawn Error", e); }
     }
 
     function startEncounter() {
@@ -1102,21 +1020,16 @@
 
         const badgeArea = document.getElementById('enc-badge-area');
         badgeArea.innerHTML = "";
-        if(currentPokemon.rarity === 'legendary') {
-            badgeArea.innerHTML = `<span class="rarity-badge" style="background:#ef4444;">🌟 전설/환상</span>`;
-        } else if (currentPokemon.rarity === 'rare') {
-            badgeArea.innerHTML = `<span class="rarity-badge" style="background:#3b82f6;">✨ 희귀</span>`;
-        }
+        if(currentPokemon.rarity === 'legendary') badgeArea.innerHTML = `<span class="rarity-badge" style="background:#ef4444;">🌟 전설/환상</span>`;
+        else if (currentPokemon.rarity === 'rare') badgeArea.innerHTML = `<span class="rarity-badge" style="background:#3b82f6;">✨ 희귀</span>`;
 
         let baseRate = (currentPokemon.rate / 255);
         if (!baseRate) baseRate = 0.1;
-
-        baseRate = baseRate * 2.5;
-        // [수정] 레벨당 0.5% (0.005)
+        baseRate = baseRate * 2.5; // 기본 배율
         baseRate += (user.upgrades.catchRate * 0.005);
 
         if(baseRate > 0.95) baseRate = 0.95;
-        if(baseRate < 0.1) baseRate = 0.1;
+        if(baseRate < 0.05) baseRate = 0.05;
 
         document.getElementById('enc-rate').textContent = Math.floor(baseRate*100);
         updateBallBtns();
@@ -1130,59 +1043,112 @@
         });
     }
 
+    // 퀴즈 시작 (콤보 초기화)
     function tryCatch(ballType) {
         if(user.inventory[ballType] <= 0) return;
         selectedBall = ballType;
+        user.inventory[selectedBall]--; // 볼 사용
+        updateGameHeader();
+
         document.getElementById('modal-encounter').classList.add('hidden');
         document.getElementById('modal-quiz').classList.remove('hidden');
 
-        // 퀴즈 선택 (수학 문제일 가능성이 높음)
-        // 리스트가 다 소진되면 새로 생성
-        if(quizList.length === 0) quizList.push(generateMathQuiz());
-        currentQuiz = quizList.shift();
-        if(!currentQuiz) currentQuiz = generateMathQuiz(); // 안전장치
+        currentCombo = 0;
+        nextQuizStep();
+    }
 
+    // 다음 퀴즈 문제 출제 및 UI 업데이트
+    function nextQuizStep() {
+        updateComboUI();
+
+        if(currentCombo >= MAX_COMBO) {
+            finishComboAndThrow();
+            return;
+        }
+
+        currentQuiz = generateGuGuDan();
         document.getElementById('quiz-txt').textContent = currentQuiz.prompt;
+
         const optsDiv = document.getElementById('quiz-opts');
         optsDiv.innerHTML = "";
         currentQuiz.choices.forEach((c, idx) => {
             const btn = document.createElement('button');
             btn.className = 'quiz-btn';
             btn.textContent = c;
-            btn.onclick = () => solveQuiz(idx === currentQuiz.answerIndex);
+            btn.onclick = () => handleAnswer(idx === currentQuiz.answerIndex);
             optsDiv.appendChild(btn);
         });
     }
 
-    function solveQuiz(isCorrect) {
-        user.inventory[selectedBall]--;
-        updateGameHeader();
+    // 콤보 및 확률 UI 계산 및 표시 (POP 효과 포함)
+    function updateComboUI() {
+        const comboEl = document.getElementById('quiz-combo-val');
+        const probEl = document.getElementById('quiz-prob-val');
 
+        // 현재 예상 확률 계산
+        const p = calculateCatchProb();
+
+        comboEl.textContent = currentCombo;
+        probEl.textContent = Math.floor(p * 100);
+
+        // POP 애니메이션
+        triggerPopAnim(comboEl);
+        triggerPopAnim(probEl);
+    }
+
+    function triggerPopAnim(element) {
+        element.classList.remove('pop-anim');
+        void element.offsetWidth; // 리플로우 강제
+        element.classList.add('pop-anim');
+    }
+
+    function calculateCatchProb() {
         let rate = currentPokemon.rate / 255;
         if(!rate) rate = 0.1;
 
         const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
-        const quizBonus = isCorrect ? 1.5 : 0.8;
-        // [수정] 0.5% 적용
         const upgradeBonus = 1 + (user.upgrades.catchRate * 0.005);
         const balancePatchMultiplier = 2.5;
 
-        let p = rate * ballBonus * quizBonus * upgradeBonus * balancePatchMultiplier;
+        // 콤보 보너스: 콤보당 20% 증가 (최대 10콤보 = 3배)
+        // 틀려서 바로 던져지면 콤보0 = 보너스 없음
+        const comboBonus = 1 + (currentCombo * 0.2);
 
-        if (p < 0.15 && isCorrect) p = 0.15;
+        let p = rate * ballBonus * upgradeBonus * balancePatchMultiplier * comboBonus;
+
         if(selectedBall === 'master') p = 1;
+        if(p > 1) p = 1;
 
-        const success = Math.random() < p;
+        return p;
+    }
+
+    function handleAnswer(isCorrect) {
+        if (isCorrect) {
+            currentCombo++;
+            nextQuizStep();
+        } else {
+            // 오답 시: 콤보 초기화 후 즉시 투척
+            currentCombo = 0;
+            alert("틀렸습니다! 콤보가 초기화되어 볼이 던져집니다!");
+            finishComboAndThrow(false);
+        }
+    }
+
+    function finishComboAndThrow(isSuccessFlow = true) {
+        document.getElementById('modal-quiz').classList.add('hidden');
+
+        const finalProb = calculateCatchProb();
+        const isCaught = Math.random() < finalProb;
+
         let titleText, titleColor, descHtml;
 
-        if(success) {
+        if(isCaught) {
             titleText = "잡았다!";
             titleColor = "#4ade80";
             let pts = 100;
             if(currentPokemon.rarity === 'legendary') pts = 500;
             else if(currentPokemon.rarity === 'rare') pts = 200;
 
-            // [추가] 도감 용량 체크
             const dexLimit = 30 + (user.upgrades.dexLimit * 10);
             const isNew = !user.dex.has(currentPokemon.id);
             const isFull = user.dex.size >= dexLimit;
@@ -1211,10 +1177,11 @@
 
         saveGame();
 
-        descHtml += isCorrect ? "<br><br>⭕ 정답입니다!" : "<br><br>❌ 틀렸어요...";
-        lastCapture = { success, isCorrect, titleText, titleColor, descHtml };
+        // 결과 텍스트 상세화
+        descHtml += `<br><br><span style="font-size:14px; color:#64748b;">(최종 콤보: ${currentCombo}, 확률: ${Math.floor(finalProb*100)}%)</span>`;
+
+        lastCapture = { titleText, titleColor, descHtml };
         removeSilhouette();
-        document.getElementById('modal-quiz').classList.add('hidden');
         showThrowAnimation();
     }
 
@@ -1223,19 +1190,24 @@
         const throwModal = document.getElementById("modal-throw");
         const pokeImg = document.getElementById("throw-poke-img");
         const ballImg = document.getElementById("throw-ball-img");
+
         layer.classList.remove("hidden");
         throwModal.classList.remove("hidden");
+
         pokeImg.src = currentPokemon.sprite;
         pokeImg.classList.remove("poke-descend-shrink", "poke-hidden");
         pokeImg.style.transform = "";
         pokeImg.style.opacity = "1";
+
         const closedSprite = BALL_SPRITES[selectedBall];
         const openSprite = BALL_OPEN_SPRITES[selectedBall];
         const openingSprite = BALL_OPENING_SPRITES[selectedBall];
+
         ballImg.src = closedSprite;
         ballImg.classList.remove("ball-throw-up", "ball-drop", "ball-shake");
         void ballImg.offsetWidth;
         ballImg.classList.add("ball-throw-up");
+
         ballImg.onanimationend = (e) => {
             if (e.animationName === "ballThrowUp") {
                 ballImg.src = openSprite;
@@ -1298,10 +1270,8 @@
         document.getElementById('shop-points').textContent = user.points;
         document.getElementById('lv-steps').textContent = `Lv.${user.upgrades.maxSteps}`;
         document.getElementById('lv-dex').textContent = `Lv.${user.upgrades.dexLimit} (현재 ${30 + user.upgrades.dexLimit * 10}마리)`;
-
         const rateLv = user.upgrades.catchRate;
         document.getElementById('lv-rate').textContent = `Lv.${rateLv} (확률 +${(rateLv * 0.5).toFixed(1)}%)`;
-
         const rateBtn = document.getElementById('btn-buy-rate');
         if(rateLv >= 10) {
             rateBtn.disabled = true;
@@ -1322,11 +1292,9 @@
 
     function buyUpgrade(key, cost) {
         if(user.points < cost) { alert("포인트가 부족해요!"); return; }
-
         if(key === 'catchRate' && user.upgrades.catchRate >= 10) {
             alert("이미 최고 레벨입니다!"); return;
         }
-
         user.points -= cost;
         user.upgrades[key]++;
         saveGame();
@@ -1340,26 +1308,22 @@
 
         const grid = document.getElementById('dex-grid');
         grid.innerHTML = "";
-
         const hint = document.createElement('p');
         hint.style.cssText = "grid-column: 1 / -1; text-align: center; color: #64748b; font-size: 14px; margin-bottom: 10px;";
         hint.textContent = `도감 용량: ${dexLimit}마리 (상점에서 확장 가능)`;
         grid.appendChild(hint);
 
-        // 필터 처리 (변수 currentFilter 사용)
         const filterVal = currentFilter;
         let start = 1, end = MAX_POKEMON_ID;
         let showOnlyOwned = false;
 
-        if (filterVal === 'owned') {
-            showOnlyOwned = true;
-        } else {
+        if (filterVal === 'owned') showOnlyOwned = true;
+        else {
             const parts = filterVal.split('-');
             start = parseInt(parts[0]);
             end = parseInt(parts[1]);
         }
 
-        // 보유만 보기: 가지고 있는 포켓몬 ID만 순회
         if (showOnlyOwned) {
             const ownedIds = Array.from(user.dex).sort((a,b)=>a-b);
             if (ownedIds.length === 0) {
@@ -1369,13 +1333,8 @@
                 grid.appendChild(msg);
                 return;
             }
-
-            ownedIds.forEach(id => {
-                createDexCard(id, true);
-            });
-
+            ownedIds.forEach(id => createDexCard(id, true));
         } else {
-            // 범위 보기: start ~ end 순회
             for(let i=start; i<=end; i++) {
                 if(i > MAX_POKEMON_ID) break;
                 const has = user.dex.has(i);
@@ -1387,19 +1346,12 @@
             const d = document.createElement('div');
             d.className = 'dex-item';
             d.style.cssText = "aspect-ratio:1; background:#fff; border-radius:15px; display:flex; justify-content:center; align-items:center; border:2px solid #e2e8f0; box-shadow: 0 2px 5px rgba(0,0,0,0.05); position: relative;";
-
             if(has) {
-                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" 
-    onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png'"
-    style="width:80%; image-rendering:pixelated;" loading="lazy">`;
+                d.innerHTML = `<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png" onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png'" style="width:80%; image-rendering:pixelated;" loading="lazy">`;
                 d.style.borderColor = "#4ade80";
                 d.style.background = "#f0fdf4";
-
-                if(user.partnerId === id) {
-                    d.classList.add('selected-partner');
-                }
+                if(user.partnerId === id) d.classList.add('selected-partner');
                 d.onclick = () => setPartner(id);
-
             } else {
                 d.textContent = id;
                 d.style.color = "#cbd5e1";
