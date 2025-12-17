@@ -69,9 +69,6 @@
                 </div>
                 <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-xs font-bold flex items-center gap-1">
                     <span class="text-blue-500">P</span><span id="pointsTextLobby">0</span>
-                    <button onclick="importFromClipboard()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 active:scale-95 transition-transform mb-2">
-                        📥 index 데이터(클립보드) 가져오기
-                    </button>
                 </div>
             </div>
         </div>
@@ -2201,108 +2198,62 @@
             alert("클립보드 접근이 차단되었거나 오류가 발생했습니다.\n브라우저 권한을 확인해주세요.");
         }
     }
-
-    async function importFromClipboard() {
-        try {
-            const text = await navigator.clipboard.readText();
-            if (!text) { alert("클립보드가 비어있습니다."); return; }
-
-            // 기존 디코딩 함수 사용
-            const raw = _b64UrlDecodeUtf8(text);
-            if (!raw) { alert("데이터 형식이 올바르지 않습니다."); return; }
-
-            const payload = JSON.parse(raw);
-            if (payload.source !== "index" || !Array.isArray(payload.dexIds)) {
-                alert("유효한 포켓몬 데이터가 아닙니다."); return;
-            }
-
-            const owned = getOwned();
-            let added = 0;
-            const BASE_DEX_MAX = 251;
-
-            for (const v of payload.dexIds) {
-                const pid = parseInt(v, 10);
-                if (pid > 0 && pid <= BASE_DEX_MAX && !owned.has(pid)) {
-                    owned.add(pid);
-                    added++;
-                }
-            }
-
-            if (added > 0) {
-                saveOwned(owned);
-                updateResUI();
-                renderCodex();
-                alert(`${added}마리의 포켓몬을 성공적으로 가져왔습니다!`);
-            } else {
-                alert("새로운 포켓몬이 없거나 이미 모두 보유 중입니다.");
-            }
-
-            // 파트너 설정 (선택 사항)
-            if (payload.partnerId && confirm("파트너 포켓몬도 설정하시겠습니까?")) {
-                setStarterId(payload.partnerId);
-            }
-
-        } catch (err) {
-            console.error(err);
-            alert("클립보드 접근 권한이 필요하거나 오류가 발생했습니다.");
-        }
-    }
     
 </script>
 <!-- 👻 고스트 배틀 QR 모달 -->
-<!--<div id="ghostModal"-->
-<!--     class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60">-->
-<!--    <div class="bg-slate-900 text-slate-100 rounded-xl shadow-xl w-full max-w-md mx-4 p-4 relative">-->
-<!--        &lt;!&ndash; 닫기 버튼 &ndash;&gt;-->
-<!--        <button type="button"-->
-<!--                onclick="closeGhostModal()"-->
-<!--                class="absolute right-3 top-3 text-slate-400 hover:text-white text-xl">-->
-<!--            ✕-->
-<!--        </button>-->
+<div id="ghostModal"
+     class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60">
+    <div class="bg-slate-900 text-slate-100 rounded-xl shadow-xl w-full max-w-md mx-4 p-4 relative">
+        <!-- 닫기 버튼 -->
+        <button type="button"
+                onclick="closeGhostModal()"
+                class="absolute right-3 top-3 text-slate-400 hover:text-white text-xl">
+            ✕
+        </button>
 
-<!--        <h2 class="text-lg font-bold mb-3">👻 고스트 배틀</h2>-->
+        <h2 class="text-lg font-bold mb-3">👻 고스트 배틀</h2>
 
-<!--        &lt;!&ndash; 탭 버튼 &ndash;&gt;-->
-<!--        <div class="flex gap-2 mb-3">-->
-<!--            <button id="ghostTabMy"-->
-<!--                    type="button"-->
-<!--                    class="flex-1 py-1.5 text-sm rounded-md bg-indigo-600 text-white"-->
-<!--                    onclick="switchGhostTab('my')">-->
-<!--                내 고스트 QR-->
-<!--            </button>-->
-<!--            <button id="ghostTabFriends"-->
-<!--                    type="button"-->
-<!--                    class="flex-1 py-1.5 text-sm rounded-md bg-slate-700 text-slate-200"-->
-<!--                    onclick="switchGhostTab('friends')">-->
-<!--                친구 고스트 목록-->
-<!--            </button>-->
-<!--        </div>-->
+        <!-- 탭 버튼 -->
+        <div class="flex gap-2 mb-3">
+            <button id="ghostTabMy"
+                    type="button"
+                    class="flex-1 py-1.5 text-sm rounded-md bg-indigo-600 text-white"
+                    onclick="switchGhostTab('my')">
+                내 고스트 QR
+            </button>
+            <button id="ghostTabFriends"
+                    type="button"
+                    class="flex-1 py-1.5 text-sm rounded-md bg-slate-700 text-slate-200"
+                    onclick="switchGhostTab('friends')">
+                친구 고스트 목록
+            </button>
+        </div>
 
-<!--        &lt;!&ndash; 내 고스트 탭 &ndash;&gt;-->
-<!--        <div id="ghostMyPane" class="space-y-3">-->
-<!--            <p id="ghostMySummary" class="text-xs text-slate-300">-->
-<!--                내 고스트 QR 정보를 불러오는 중입니다...-->
-<!--            </p>-->
-<!--            <div class="flex justify-center">-->
-<!--                &lt;!&ndash; ⬇⬇ 이 캔버스를 JS에서 찾고 있어 ⬇⬇ &ndash;&gt;-->
-<!--                <canvas id="ghostQrCanvas"-->
-<!--                        class="border border-slate-700 rounded-lg bg-white"-->
-<!--                        width="220" height="220">-->
-<!--                </canvas>-->
-<!--            </div>-->
-<!--        </div>-->
+        <!-- 내 고스트 탭 -->
+        <div id="ghostMyPane" class="space-y-3">
+            <p id="ghostMySummary" class="text-xs text-slate-300">
+                내 고스트 QR 정보를 불러오는 중입니다...
+            </p>
+            <div class="flex justify-center">
+                <!-- ⬇⬇ 이 캔버스를 JS에서 찾고 있어 ⬇⬇ -->
+                <canvas id="ghostQrCanvas"
+                        class="border border-slate-700 rounded-lg bg-white"
+                        width="220" height="220">
+                </canvas>
+            </div>
+        </div>
 
-<!--        &lt;!&ndash; 친구 고스트 탭 &ndash;&gt;-->
-<!--        <div id="ghostFriendsPane" class="hidden">-->
-<!--            <p class="text-xs text-slate-300 mb-2">-->
-<!--                (예정) 친구가 공유한 고스트와 대전할 수 있습니다.-->
-<!--            </p>-->
-<!--            <ul id="ghostFriendsList" class="space-y-1 text-sm">-->
-<!--                <li class="text-slate-400">아직 등록된 친구 고스트가 없습니다.</li>-->
-<!--            </ul>-->
-<!--        </div>-->
-<!--    </div>-->
-<!--</div>-->
+        <!-- 친구 고스트 탭 -->
+        <div id="ghostFriendsPane" class="hidden">
+            <p class="text-xs text-slate-300 mb-2">
+                (예정) 친구가 공유한 고스트와 대전할 수 있습니다.
+            </p>
+            <ul id="ghostFriendsList" class="space-y-1 text-sm">
+                <li class="text-slate-400">아직 등록된 친구 고스트가 없습니다.</li>
+            </ul>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>
