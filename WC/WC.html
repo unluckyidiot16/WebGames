@@ -39,17 +39,15 @@
 
         /* Pokedex Styles */
         .grayscale-filter { filter: grayscale(100%) contrast(1.2); opacity: 0.7; }
+        .unknown-species { filter: brightness(0) invert(0.5); opacity: 0.3; }
     </style>
 </head>
 <body class="bg-slate-900 text-white w-full h-full fixed">
 
-<!-- Canvas Layer -->
 <canvas id="gameCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
 
-<!-- UI Layer (In-Game) -->
 <div id="uiLayer" class="absolute top-0 left-0 w-full h-full game-overlay flex flex-col justify-between p-4 z-10 hidden">
 
-    <!-- Top HUD: Energy & Evolution -->
     <div class="flex justify-between items-start w-full">
         <div class="flex flex-col gap-2 w-1/3 min-w-[150px]">
             <div class="bg-black/60 p-2 rounded-lg border-2 border-slate-600 backdrop-blur-sm">
@@ -57,7 +55,6 @@
                     <span id="currentSpeciesName" class="font-jua text-lg text-yellow-400 drop-shadow">종 이름</span>
                     <span id="tierLabel" class="text-xs bg-blue-600 px-2 py-0.5 rounded-full font-bold shadow">T0</span>
                 </div>
-                <!-- Energy Bar -->
                 <div class="w-full h-4 bg-gray-700 rounded-full overflow-hidden relative border border-gray-600">
                     <div id="energyBar" class="h-full bg-gradient-to-r from-green-400 to-emerald-600 transition-all duration-300 shadow-[0_0_10px_rgba(74,222,128,0.5)]" style="width: 0%"></div>
                     <p class="absolute inset-0 text-center text-[10px] leading-4 font-bold drop-shadow-md text-white mix-blend-screen">면역 에너지</p>
@@ -65,67 +62,61 @@
             </div>
         </div>
 
-        <!-- Food Chain Indicator (Right Top) -->
         <div class="bg-black/60 p-3 rounded-xl border border-slate-500 backdrop-blur-md interactive max-w-md hidden sm:block">
             <h3 class="text-xs text-center text-gray-400 mb-2 font-bold">백혈구 성장 단계</h3>
             <div class="flex items-center justify-between gap-2 text-[10px]">
                 <div id="hud-t0" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
                     <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
-                        <img src="./png/cell0.png" class="w-full h-full object-contain" alt="cell0">
+                        <img src="./png/cell0.png" class="w-full h-full object-contain" alt="cell0" onerror="this.style.display='none'">
                     </div>
                     <span>Lv0</span>
                 </div>
                 <span class="text-gray-500">➜</span>
                 <div id="hud-t1" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
                     <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
-                        <img src="./png/cell1.png" class="w-full h-full object-contain" alt="cell1">
+                        <img src="./png/cell1.png" class="w-full h-full object-contain" alt="cell1" onerror="this.style.display='none'">
                     </div>
                     <span>Lv1</span>
                 </div>
                 <span class="text-gray-500">➜</span>
                 <div id="hud-t2" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
                     <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
-                        <img src="./png/cell2.png" class="w-full h-full object-contain" alt="cell2">
+                        <img src="./png/cell2.png" class="w-full h-full object-contain" alt="cell2" onerror="this.style.display='none'">
                     </div>
                     <span>Lv2</span>
                 </div>
                 <span class="text-gray-500">➜</span>
                 <div id="hud-t3" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
                     <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
-                        <img src="./png/cell3.png" class="w-full h-full object-contain" alt="cell3">
+                        <img src="./png/cell3.png" class="w-full h-full object-contain" alt="cell3" onerror="this.style.display='none'">
                     </div>
                     <span>Lv3</span>
                 </div>
                 <span class="text-gray-500">➜</span>
                 <div id="hud-t4" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
                     <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
-                        <img src="./png/cell4.png" class="w-full h-full object-contain" alt="cell4">
+                        <img src="./png/cell4.png" class="w-full h-full object-contain" alt="cell4" onerror="this.style.display='none'">
                     </div>
                     <span>Lv4</span>
                 </div>
                 <span class="text-gray-500">➜</span>
                 <div id="hud-t5" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
                     <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
-                        <img src="./png/cell5.png" class="w-full h-full object-contain" alt="cell5">
+                        <img src="./png/cell5.png" class="w-full h-full object-contain" alt="cell5" onerror="this.style.display='none'">
                     </div>
                     <span>Lv5</span>
                 </div>
             </div>
         </div>
-
-
     </div>
 
-    <!-- Bottom Controls/Info -->
     <div class="flex justify-end items-end w-full">
         <div class="text-right opacity-70 text-xs bg-black/30 p-2 rounded text-white">
             <p>Move: 마우스 / 터치 드래그</p>
-            <!-- Removed Dash info -->
         </div>
     </div>
 </div>
 
-<!-- Start Screen Modal (Main Lobby) -->
 <div id="startScreen" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 interactive backdrop-blur-sm bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiZmZmYiLz48L3N2Zz4')]">
     <h1 class="text-6xl font-jua text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-2 drop-shadow-lg">ImmuneChain</h1>
     <p class="text-xl text-gray-400 mb-8 font-light tracking-widest">몸 속 면역 로그라이크</p>
@@ -149,22 +140,18 @@
     </div>
 </div>
 
-<!-- Event Overlay (Death / Clear) -->
 <div id="eventOverlay" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center z-40 hidden interactive p-8 text-center backdrop-blur-sm">
     <div id="eventContent" class="bg-slate-800 p-8 rounded-2xl border-4 border-slate-600 max-w-lg w-full shadow-2xl pop-in relative overflow-hidden">
-        <!-- Background Decoration -->
         <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none"></div>
 
         <h2 id="eventTitle" class="text-4xl font-jua mb-6 text-red-500 relative z-10 drop-shadow-md">감염되었습니다!</h2>
 
         <div id="eventIcons" class="flex justify-center items-center gap-6 mb-8 relative z-10">
-            <!-- Player Icon -->
             <div class="flex flex-col items-center opacity-60 scale-90">
                 <div id="eventPlayerImg" class="w-16 h-16 bg-gray-600 rounded-full mb-2 bg-cover bg-center border-2 border-gray-400 shadow-lg"></div>
                 <span class="text-sm text-gray-300">나</span>
             </div>
             <span id="eventActionIcon" class="text-3xl text-red-500 font-bold animate-pulse">🦠</span>
-            <!-- Killer Icon -->
             <div class="flex flex-col items-center scale-110">
                 <div id="eventKillerImg" class="w-24 h-24 bg-red-600 rounded-full mb-2 bg-cover bg-center border-4 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.6)]"></div>
                 <span id="eventKillerName" class="text-lg font-bold text-red-400">바이러스</span>
@@ -181,7 +168,6 @@
     </div>
 </div>
 
-<!-- Pokedex Modal -->
 <div id="pokedexModal" class="absolute inset-0 bg-slate-900/95 z-50 hidden interactive flex flex-col backdrop-blur-md">
     <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800 shadow-xl">
         <div>
@@ -192,7 +178,6 @@
     </div>
     <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiZmZmYiLz48L3N2Zz4')]">
         <div id="pokedexGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
-            <!-- Cards injected via JS -->
         </div>
     </div>
 </div>
@@ -245,22 +230,24 @@
         5: ['virus5']
     };
 
-    // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
-    const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
+    const IMAGE_BASE_PATH = './png/';
 
     // Assets Loader
     const images = {};
     const loadImages = () => {
+        // 중복 로딩 방지: 이미 로딩되었으면 다시 실행 안 함
+        if (Object.keys(images).length > 0) return;
+
         // Resources
         RESOURCES.forEach(r => {
             const img = new Image();
-            img.src = `${IMAGE_BASE_PATH}${r.id}.png`;   // ✅ 수정
+            img.src = `${IMAGE_BASE_PATH}${r.id}.png`;
             images[r.id] = img;
         });
         // Species
         Object.values(SPECIES_DB).forEach(s => {
             const img = new Image();
-            img.src = `${IMAGE_BASE_PATH}${s.id}.png`;   // ✅ 수정
+            img.src = `${IMAGE_BASE_PATH}${s.id}.png`;
             images[s.id] = img;
         });
     };
@@ -291,7 +278,6 @@
     };
 
     const mouse = { x: 0, y: 0, active: false, lastPointer: 'mouse' };
-    // Removed isBoosting
 
     let foods = [];
     let enemies = [];
@@ -321,7 +307,6 @@
 
 
     // --- Input: Mouse / Touch ---
-    // Start centered so the player doesn't drift before the first input.
     mouse.x = width / 2;
     mouse.y = height / 2;
 
@@ -331,17 +316,13 @@
         mouse.y = clientY - rect.top;
     }
 
-    // Drag-to-move only (mobile friendly)
-    // ✅ 이동은 "드래그(누르고 움직이기)" 하는 동안에만 됩니다.
     function stopMovementToCenter() {
         mouse.x = width / 2;
         mouse.y = height / 2;
     }
 
     canvas.addEventListener('pointerdown', (e) => {
-        // 마우스는 왼쪽 버튼만 드래그로 인정
         if (e.pointerType === 'mouse' && e.button !== 0) return;
-
         mouse.active = true;
         mouse.lastPointer = e.pointerType || 'mouse';
         updateMouseFromClient(e.clientX, e.clientY);
@@ -364,12 +345,13 @@
     window.addEventListener('pointerup', endDrag, { passive: true });
     window.addEventListener('pointercancel', endDrag, { passive: true });
 
+
     // --- 3. Core Functions ---
 
     function initGame() {
-        loadImages();
+        // 이미지는 initGame 바깥이나 최초 1회만 로딩
+        // loadImages(); -> 중복 호출 방지를 위해 loadImages 내부에서 처리하거나 제거
 
-        // Center the input target at the start
         mouse.x = width / 2;
         mouse.y = height / 2;
         mouse.active = false;
@@ -407,14 +389,10 @@
         const data = SPECIES_DB[id];
         player.tier = data.tier;
 
-        // ✅ 초등 3학년용 간단 모델:
-        // "크기"는 실제 세포 크기가 아니라 "힘(면역 능력)"을 보기 쉽게 표시한 값이에요.
         player.baseRadius = (18 + (data.tier * 7)) * (data.scale ?? 1);
         if (player.tier === 0) player.baseRadius = 18 * (data.scale ?? 1);
 
         player.radius = player.baseRadius;
-
-        // 레벨이 높을수록 조금 느려지는 느낌(무거워짐 표현)
         player.maxSpeed = Math.max(2.8, 5.6 - (data.tier * 0.35));
         if (player.tier === 0) player.maxSpeed = 5.8;
 
@@ -431,7 +409,6 @@
     }
 
     function updateMaxEnergy() {
-        // Lv가 오를수록 다음 성장까지 필요한 면역 에너지가 늘어나요.
         player.maxEnergy = 25 + (player.tier * 35);
         if (player.tier === 0) player.maxEnergy = 25;
         if (player.tier === 5) player.maxEnergy = 220;
@@ -535,10 +512,8 @@
         const deltaTime = timestamp - lastTime;
         lastTime = timestamp;
 
-        // Cap delta time to prevent physics explosion on lag/tab switch (max 100ms)
+        // Cap delta time to prevent physics explosion
         const safeDelta = Math.min(deltaTime, 100);
-
-        // Normalize to 60 FPS (approx 16.67ms per frame)
         const timeScale = safeDelta / 16.67;
 
         update(timeScale);
@@ -547,73 +522,69 @@
     }
 
     function update(timeScale) {
-        if (player.isDead) return;
+        // 플레이어가 죽어도 배경(적, 파티클)은 계속 움직이도록 수정 (UX 개선)
+        const isDead = player.isDead;
 
-        // Growth
-        const growthFactor = 1 + (player.energy / player.maxEnergy) * 0.5;
-        player.radius = player.baseRadius * growthFactor;
+        if (!isDead) {
+            // Growth
+            const growthFactor = 1 + (player.energy / player.maxEnergy) * 0.5;
+            player.radius = player.baseRadius * growthFactor;
 
-        // Movement
-        const dx = mouse.x - width/2;
-        const dy = mouse.y - height/2;
-        const angle = Math.atan2(dy, dx);
-        player.angle = angle;
+            // Movement
+            const dx = mouse.x - width/2;
+            const dy = mouse.y - height/2;
+            const angle = Math.atan2(dy, dx);
+            player.angle = angle;
 
-        let currentSpeed = mouse.active ? player.maxSpeed : 0;
-        // Drag 중일 때만 이동 (터치/마우스 공통)
-        // Removed Boosting Logic
+            let currentSpeed = mouse.active ? player.maxSpeed : 0;
 
-        player.x += Math.cos(angle) * currentSpeed * timeScale;
-        player.y += Math.sin(angle) * currentSpeed * timeScale;
+            player.x += Math.cos(angle) * currentSpeed * timeScale;
+            player.y += Math.sin(angle) * currentSpeed * timeScale;
 
-        player.x = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.x));
-        player.y = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.y));
+            player.x = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.x));
+            player.y = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.y));
 
-        camX = player.x - width / 2;
-        camY = player.y - height / 2;
+            camX = player.x - width / 2;
+            camY = player.y - height / 2;
 
-        // Foods
-        for (let i = foods.length - 1; i >= 0; i--) {
-            const f = foods[i];
-            // Apply timeScale to float animation drift
-            f.x += (Math.cos(Date.now()/500 + i)*0.2) * timeScale;
+            // Foods
+            for (let i = foods.length - 1; i >= 0; i--) {
+                const f = foods[i];
+                f.x += (Math.cos(Date.now()/500 + i)*0.2) * timeScale;
 
-            const dist = Math.hypot(player.x - f.x, player.y - f.y);
-            if (dist < player.radius + f.radius) {
-                player.energy += f.exp;
-                createExplosion(f.x, f.y, 3, f.color);
-                foods.splice(i, 1);
-                spawnFood();
+                const dist = Math.hypot(player.x - f.x, player.y - f.y);
+                if (dist < player.radius + f.radius) {
+                    player.energy += f.exp;
+                    createExplosion(f.x, f.y, 3, f.color);
+                    foods.splice(i, 1);
+                    spawnFood();
 
-                if (player.energy >= player.maxEnergy) {
-                    evolve();
+                    if (player.energy >= player.maxEnergy) {
+                        evolve();
+                    }
                 }
             }
         }
 
-        // Enemies
+        // Enemies (항상 움직임)
         for (let i = enemies.length - 1; i >= 0; i--) {
             const e = enemies[i];
             const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
 
-            // AI Danger Logic (Threshold: 5% = 1.05)
-            if (distToPlayer < 400) {
+            // AI Logic
+            if (!isDead && distToPlayer < 400) {
                 const angleToP = Math.atan2(player.y - e.y, player.x - e.x);
-
                 let isPlayerDangerous = false;
                 let isPlayerEdible = false;
 
                 if (player.tier > e.tier) isPlayerDangerous = true;
                 else if (player.tier < e.tier) isPlayerEdible = true;
                 else {
-                    // Same Tier: 5% difference
                     if (player.radius > e.radius * 1.05) isPlayerDangerous = true;
                     else if (player.radius < e.radius / 1.05) isPlayerEdible = true;
                 }
 
-                let moveX = 0;
-                let moveY = 0;
-
+                let moveX = 0, moveY = 0;
                 if (isPlayerDangerous) {
                     moveX = -Math.cos(angleToP) * e.speed;
                     moveY = -Math.sin(angleToP) * e.speed;
@@ -621,23 +592,17 @@
                     moveX = Math.cos(angleToP) * e.speed;
                     moveY = Math.sin(angleToP) * e.speed;
                 } else {
-                    // Random drift
                     e.vx += (Math.random()-0.5) * 0.5 * timeScale;
                     e.vy += (Math.random()-0.5) * 0.5 * timeScale;
-                    // Clamp velocity
                     const maxV = 2;
                     e.vx = Math.max(-maxV, Math.min(maxV, e.vx));
                     e.vy = Math.max(-maxV, Math.min(maxV, e.vy));
-
-                    moveX = e.vx;
-                    moveY = e.vy;
+                    moveX = e.vx; moveY = e.vy;
                 }
-
                 e.x += moveX * timeScale;
                 e.y += moveY * timeScale;
-
             } else {
-                // Wander logic
+                // Wander or Idle
                 if (Math.random() < 0.05) {
                     e.vx = (Math.random() - 0.5) * e.speed;
                     e.vy = (Math.random() - 0.5) * e.speed;
@@ -649,15 +614,14 @@
             e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
             e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
 
-            // Collision Logic (Threshold 5%)
-            if (distToPlayer < player.radius + e.radius) {
+            // Collision (플레이어 생존 시에만)
+            if (!isDead && distToPlayer < player.radius + e.radius) {
                 let playerWins = false;
                 let enemyWins = false;
 
                 if (player.tier > e.tier) playerWins = true;
                 else if (player.tier < e.tier) enemyWins = true;
                 else {
-                    // Same Tier: Need 5% advantage
                     if (player.radius > e.radius * 1.05) playerWins = true;
                     else if (e.radius > player.radius * 1.05) enemyWins = true;
                 }
@@ -671,7 +635,6 @@
                 } else if (enemyWins) {
                     die(e);
                 } else {
-                    // Bump
                     const angle = Math.atan2(player.y - e.y, player.x - e.x);
                     const pushForce = 5 * timeScale;
                     player.x += Math.cos(angle) * pushForce;
@@ -692,11 +655,12 @@
             if(p.life <= 0) particles.splice(i, 1);
         }
 
-        // HUD
-        const p = Math.min((player.energy / player.maxEnergy) * 100, 100);
-        document.getElementById('energyBar').style.width = `${p}%`;
-        document.getElementById('currentSpeciesName').innerText = SPECIES_DB[player.speciesId].name;
-        document.getElementById('tierLabel').innerText = `Lv.${player.tier}`;
+        if (!isDead) {
+            const p = Math.min((player.energy / player.maxEnergy) * 100, 100);
+            document.getElementById('energyBar').style.width = `${p}%`;
+            document.getElementById('currentSpeciesName').innerText = SPECIES_DB[player.speciesId].name;
+            document.getElementById('tierLabel').innerText = `Lv.${player.tier}`;
+        }
     }
 
     function draw() {
@@ -723,10 +687,6 @@
                 ctx.fillStyle = f.color;
                 ctx.beginPath();
                 ctx.arc(0, 0, f.radius, 0, Math.PI*2);
-                ctx.fill();
-                ctx.fillStyle = 'rgba(255,255,255,0.3)';
-                ctx.beginPath();
-                ctx.arc(-f.radius*0.3, -f.radius*0.3, f.radius*0.3, 0, Math.PI*2);
                 ctx.fill();
             }
             ctx.restore();
@@ -775,19 +735,8 @@
             ctx.beginPath();
             ctx.arc(0, 0, r, 0, Math.PI*2);
             ctx.fill();
-            ctx.fillStyle = 'white';
-            ctx.beginPath();
-            ctx.arc(-r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
-            ctx.arc(r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
-            ctx.fill();
-            ctx.fillStyle = 'black';
-            ctx.beginPath();
-            ctx.arc(-r*0.3, -r*0.1, r*0.1, 0, Math.PI*2);
-            ctx.arc(r*0.3, -r*0.1, r*0.1, 0, Math.PI*2);
-            ctx.fill();
         }
 
-        // Ring Logic
         if (isPlayer) {
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 2;
@@ -799,7 +748,6 @@
             if (player.tier > entity.tier) isEdible = true;
             else if (player.tier < entity.tier) isDangerous = true;
             else {
-                // Same Tier
                 if (player.radius > entity.radius * 1.05) isEdible = true;
                 else if (entity.radius > player.radius * 1.05) isDangerous = true;
             }
@@ -820,7 +768,6 @@
                 ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
             }
         }
-
         ctx.restore();
     }
 
@@ -869,10 +816,9 @@
         document.getElementById('eventOverlay').classList.add('flex');
     }
 
-
     function gameClear() {
         player.isDead = true;
-        stopGameLoop();
+        // stopGameLoop(); // Keep loop running for particles
 
         document.getElementById('eventTitle').innerText = "면역 영웅!";
         document.getElementById('eventTitle').className = "text-5xl font-jua mb-6 text-emerald-300 relative z-10 drop-shadow-md";
@@ -890,6 +836,65 @@
         document.getElementById('eventOverlay').classList.add('flex');
     }
 
+    function setEventImage(elementId, speciesId) {
+        const el = document.getElementById(elementId);
+        const img = images[speciesId];
+        if (img && img.complete && img.naturalHeight !== 0) {
+            el.style.backgroundImage = `url('${img.src}')`;
+            el.style.backgroundColor = 'transparent';
+        } else {
+            el.style.backgroundImage = 'none';
+            el.style.backgroundColor = SPECIES_DB[speciesId].color;
+        }
+    }
+
+    function showBadge() {
+        document.getElementById('newPokedexBadge').classList.remove('hidden');
+    }
+
+    // --- Missing Functions Implementation ---
+
+    function renderPokedex() {
+        const grid = document.getElementById('pokedexGrid');
+        grid.innerHTML = '';
+
+        // All species: cells then viruses
+        const allKeys = Object.keys(SPECIES_DB);
+
+        allKeys.forEach(key => {
+            const data = SPECIES_DB[key];
+            const isUnlocked = unlockedSpecies.includes(key);
+            const isSeen = seenSpecies.includes(key);
+            const isKnown = isUnlocked || isSeen;
+
+            const card = document.createElement('div');
+            card.className = `bg-slate-700/80 rounded-xl p-4 flex flex-col items-center border ${isUnlocked ? 'border-yellow-400 shadow-[0_0_10px_rgba(250,204,21,0.3)]' : 'border-slate-600'}`;
+
+            let imgHtml = '';
+            const imgSrc = `${IMAGE_BASE_PATH}${key}.png`;
+
+            if (isKnown) {
+                imgHtml = `<img src="${imgSrc}" class="w-full h-full object-contain ${!isUnlocked && isSeen ? 'grayscale-filter' : ''}" onerror="this.style.display='none'">`;
+            } else {
+                // Unknown (Silhouette)
+                imgHtml = `<img src="${imgSrc}" class="w-full h-full object-contain unknown-species" onerror="this.style.display='none'">`;
+            }
+
+            card.innerHTML = `
+                <div class="w-20 h-20 mb-3 bg-slate-800 rounded-full flex items-center justify-center overflow-hidden border-2 ${isUnlocked ? 'border-blue-400' : 'border-slate-600'}">
+                    ${imgHtml}
+                </div>
+                <h3 class="font-jua text-lg mb-1 ${isUnlocked ? 'text-white' : 'text-gray-500'}">${isKnown ? data.name : '???'}</h3>
+                <span class="text-xs px-2 py-0.5 rounded-full ${isUnlocked ? 'bg-blue-600 text-white' : 'bg-slate-600 text-gray-400'} mb-2">
+                    ${data.type === 'immune' ? '백혈구' : '바이러스'} Lv.${data.tier}
+                </span>
+                <p class="text-xs text-gray-300 text-center leading-relaxed h-16 overflow-hidden">
+                    ${isKnown ? data.desc : '아직 발견하지 못한 미생물이에요.'}
+                </p>
+            `;
+            grid.appendChild(card);
+        });
+    }
 
     document.getElementById('startBtn').addEventListener('click', () => {
         document.getElementById('startScreen').classList.add('hidden');
@@ -914,6 +919,7 @@
         document.getElementById('pokedexModal').classList.add('hidden');
     });
 
+    // Start Loading Immediately
     loadImages();
 
 </script>
