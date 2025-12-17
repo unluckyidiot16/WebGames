@@ -538,6 +538,7 @@
         <button class="btn-3d menu-btn btn-explore" onclick="startExploration()">🧭 탐험 떠나기</button>
         <button class="btn-3d menu-btn btn-shop" onclick="switchView('view-shop')">🛒 상점 가기</button>
         <button class="btn-3d menu-btn btn-dex" onclick="switchView('view-dex')">📖 포켓몬 도감</button>
+        <button class="btn-3d menu-btn btn-pixel" onclick="goToPixel()">🎨 색칠하러 가기</button>
     </div>
 
     <div id="view-game" class="view hidden">
@@ -623,9 +624,10 @@
             <div class="shop-header">
                 <button class="back-btn" onclick="switchView('view-lobby')">🔙</button>
                 <h2 style="margin:0; font-size:24px; color:#92400e;">포켓몬 도감</h2>
-                <button class="btn-3d" style="margin-left:auto; background:#0ea5e9; padding:10px 14px; font-size:16px; border-radius:14px;" onclick="exportDexToPRL()">
-                    📤 내보내기
-                </button>
+                <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
+                    <button class="btn-3d" style="padding:10px 14px; font-size:16px; border-radius:14px;" onclick="goToPixel()">🎨 색칠하기</button>
+                    <button class="btn-3d" style="padding:10px 14px; font-size:16px; border-radius:14px;" onclick="exportDexToPRL()">📤 내보내기</button>
+                </div>
             </div>
 
             <button class="filter-toggle-btn" onclick="toggleFilterGrid()">
@@ -903,7 +905,10 @@
     const MAX_POKEMON_ID = 1025;
 
     // --- [중요] 데이터 버전 관리 ---
-    const SAVE_KEY = "poke_spell_game_data_v7"; // v7으로 업데이트 (인벤토리 구조 변경 때문)
+    const SAVE_KEY = "poke_spell_game_data_v7";
+    // Pixel(색칠)로 이동: index와 동일 오리진이면 localStorage를 자동 공유
+    const PIXEL_URL = new URL("../../Pixel/Pixel_patched_auto_link.html", location.href).href;
+    // v7으로 업데이트 (인벤토리 구조 변경 때문)
     const PREVIOUS_KEYS = ["poke_spell_game_data_v6", "poke_spell_game_data_v5", "poke_spell_game_data_v4"];
 
     // --- [중요] 희귀 포켓몬 리스트 ---
@@ -1076,6 +1081,16 @@
     }
 
     // [수정됨] 클립보드 복사 후 이동하는 방식으로 변경
+    // Pixel(색칠)로 이동
+    function goToPixel() {
+        const dexCount = Array.from(user.dex || []).length;
+        if (dexCount <= 0) {
+            const ok = confirm("아직 잡은 포켓몬이 없습니다.\n\n그래도 Pixel(색칠)로 이동할까요?");
+            if (!ok) return;
+        }
+        window.location.href = PIXEL_URL;
+    }
+
     async function exportDexToPRL() {
         const dexIds = Array.from(user.dex || []);
         const partnerId = user.partnerId ?? null;
