@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>포켓몬 탐험대 (문제팩 즉시갱신 ver)</title>
+    <title>포켓몬 탐험대 (스피드볼 추가 ver)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <style>
         /* 폰트: 귀여운 'Jua' 폰트 사용 */
@@ -530,7 +530,7 @@
             <div id="lobby-partner" class="lobby-partner-container hidden">
                 <img id="lobby-partner-img" class="lobby-partner-img" src="" />
             </div>
-            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(문제팩 즉시갱신 ver)</span></h1>
+            <h1 class="lobby-title">Pokémon<br>퀴즈 탐험대<br><span style="font-size:20px; color:#f59e0b;">(스피드볼 추가 ver)</span></h1>
         </div>
 
         <div class="lobby-stats">보유 포인트 💰 <span id="lobby-points">0</span></div>
@@ -586,9 +586,15 @@
         <div class="shop-section">
             <h3>🔴 몬스터볼 구매</h3>
             <div class="shop-grid">
-                <div class="shop-item"><div>몬스터볼</div><div class="shop-price">50 P</div><button class="buy-btn" onclick="buyItem('ball', 'monster', 50)">구매하기</button></div>
                 <div class="shop-item"><div>슈퍼볼</div><div class="shop-price">100 P</div><button class="buy-btn" onclick="buyItem('ball', 'super', 100)">구매하기</button></div>
                 <div class="shop-item"><div>하이퍼볼</div><div class="shop-price">150 P</div><button class="buy-btn" onclick="buyItem('ball', 'hyper', 150)">구매하기</button></div>
+
+                <div class="shop-item">
+                    <div>⚡ 스피드볼<br><span style="font-size:12px; color:#64748b;">(확률 10배 / 10초 제한)</span></div>
+                    <div class="shop-price">500 P</div>
+                    <button class="buy-btn" onclick="buyItem('ball', 'special', 500)">구매하기</button>
+                </div>
+
                 <div class="shop-item"><div>마스터볼</div><div class="shop-price">3000 P</div><button class="buy-btn" onclick="buyItem('ball', 'master', 3000)">구매하기</button></div>
             </div>
         </div>
@@ -600,11 +606,14 @@
                 <div class="shop-item"><div>🗂️ 도감 확장<br><span style="font-size:12px; color:#94a3b8;" id="lv-dex">Lv.0</span></div><div class="shop-price">100 P</div><button class="buy-btn" onclick="buyUpgrade('dexLimit', 100)">확장하기</button></div>
 
                 <div class="shop-item"><div>🍀 행운의 부적<br><span style="font-size:12px; color:#94a3b8;" id="lv-rate">Lv.0 (Max 10)</span></div><div class="shop-price">800 P</div><button class="buy-btn" id="btn-buy-rate" onclick="buyUpgrade('catchRate', 800)">강화하기</button></div>
-                <div>⏳ 시간 연장<br>
-                    <span style="font-size:12px; color:#94a3b8;" id="lv-timer">Lv.0</span>
+
+                <div class="shop-item">
+                    <div>⏳ 시간 연장<br>
+                        <span style="font-size:12px; color:#94a3b8;" id="lv-timer">Lv.0</span>
+                    </div>
+                    <div class="shop-price">100 P</div>
+                    <button class="buy-btn" id="btn-buy-timer" onclick="buyUpgrade('timerLevel', 300)">강화하기</button>
                 </div>
-                <div class="shop-price">100 P</div>
-                <button class="buy-btn" id="btn-buy-timer" onclick="buyUpgrade('timerLevel', 300)">강화하기</button>
             </div>
         </div>
     </div>
@@ -643,9 +652,13 @@
         <p style="font-size:16px; color:#f59e0b; font-weight:bold; margin:0;">기본 확률: <span id="enc-rate"></span>%</p>
 
         <div class="ball-select">
-            <button class="ball-opt" id="btn-use-monster" onclick="tryCatch('monster')"><img src="./png/pb.png">몬스터볼<br>x<span id="qty-monster">0</span></button>
             <button class="ball-opt" id="btn-use-super" onclick="tryCatch('super')"><img src="./png/gb.png">슈퍼볼<br>x<span id="qty-super">0</span></button>
             <button class="ball-opt" id="btn-use-hyper" onclick="tryCatch('hyper')"><img src="./png/ub.png">하이퍼볼<br>x<span id="qty-hyper">0</span></button>
+
+            <button class="ball-opt" id="btn-use-special" onclick="tryCatch('special')">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png">스피드볼<br>x<span id="qty-special">0</span>
+            </button>
+
             <button class="ball-opt" id="btn-use-master" onclick="tryCatch('master')"><img src="./png/mb.png">마스터볼<br>x<span id="qty-master">0</span></button>
         </div>
         <button style="margin-top:20px; background:#94a3b8; padding:12px; border:none; color:white; border-radius:15px; width:100%; font-size:18px; font-family:inherit; cursor:pointer;" onclick="runAway()">🏃 도망가기</button>
@@ -707,8 +720,8 @@
     const MAX_POKEMON_ID = 1025;
 
     // --- [중요] 데이터 버전 관리 ---
-    const SAVE_KEY = "poke_spell_game_data_v6";
-    const PREVIOUS_KEYS = ["poke_spell_game_data_v5", "poke_spell_game_data_v4", "poke_spell_game_data_v3", "poke_spell_game_data_v2"];
+    const SAVE_KEY = "poke_spell_game_data_v7"; // v7으로 업데이트 (인벤토리 구조 변경 때문)
+    const PREVIOUS_KEYS = ["poke_spell_game_data_v6", "poke_spell_game_data_v5", "poke_spell_game_data_v4"];
 
     // --- [중요] 희귀 포켓몬 리스트 ---
     const LEGENDARY_IDS = [
@@ -724,15 +737,34 @@
         722,725,728, 810,813,816, 887, 906,909,912, 996, 997, 998
     ];
 
-    const BALL_SPRITES = { monster: "./png/pb.png", super: "./png/gb.png", hyper: "./png/ub.png", master: "./png/mb.png" };
-    const BALL_OPEN_SPRITES = { monster: "./png/pb_open.png", super: "./png/gb_open.png", hyper: "./png/ub_open.png", master: "./png/mb_open.png" };
-    const BALL_OPENING_SPRITES = { monster: "./png/pb_opening.png", super: "./png/gb_opening.png", hyper: "./png/ub_opening.png", master: "./png/mb_opening.png" };
+    // [변경] 볼 스프라이트 목록 (monster 삭제, special 추가)
+    // special(스피드볼) 이미지는 마스터볼 이미지를 사용하지만 로직상 구분을 위해 special로 명명
+    const BALL_SPRITES = {
+        super: "./png/gb.png",
+        hyper: "./png/ub.png",
+        special: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+        master: "./png/mb.png"
+    };
+
+    // 오픈 애니메이션은 기존 리소스 활용 (스피드볼은 마스터볼 애니메이션 활용)
+    const BALL_OPEN_SPRITES = {
+        super: "./png/gb_open.png",
+        hyper: "./png/ub_open.png",
+        special: "./png/mb_open.png",
+        master: "./png/mb_open.png"
+    };
+    const BALL_OPENING_SPRITES = {
+        super: "./png/gb_opening.png",
+        hyper: "./png/ub_opening.png",
+        special: "./png/mb_opening.png",
+        master: "./png/mb_opening.png"
+    };
 
     let user = {
         points: 0,
-        inventory: { monster: 0, super: 0, hyper: 0, master: 0 },
+        // [변경] inventory 구조에서 monster 제거, special 추가
+        inventory: { super: 0, hyper: 0, special: 0, master: 0 },
         dex: new Set(),
-        // timerLevel 추가
         upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0, timerLevel: 0 },
         partnerId: null
     };
@@ -858,6 +890,14 @@
             if(saved) {
                 const parsed = JSON.parse(saved);
                 user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
+
+                // [마이그레이션] 인벤토리 구조 변경 대응 (monster -> super로 교체하거나 삭제)
+                if(user.inventory.monster !== undefined) {
+                    user.inventory.super += user.inventory.monster; // 기존 몬스터볼을 슈퍼볼로 통합 보상
+                    delete user.inventory.monster;
+                }
+                if(user.inventory.special === undefined) user.inventory.special = 0;
+
                 if(user.upgrades.startBalls !== undefined) delete user.upgrades.startBalls;
                 if(user.upgrades.dexLimit === undefined) user.upgrades.dexLimit = 0;
                 if(user.upgrades.timerLevel === undefined) user.upgrades.timerLevel = 0;
@@ -955,8 +995,9 @@
         const baseSteps = 30 + (user.upgrades.maxSteps * 10);
         const bonusBalls = 10;
         session = { active: true, steps: baseSteps, caught: [], earnedPoints: 0 };
-        if (user.inventory.monster < bonusBalls) {
-            user.inventory.monster = bonusBalls;
+        // [변경] 기본 볼 지급 로직: 슈퍼볼 10개 미만일 때 채워줌
+        if (user.inventory.super < bonusBalls) {
+            user.inventory.super = bonusBalls;
             saveGame();
         }
         generateMap();
@@ -1038,7 +1079,8 @@
 
     function updateGameHeader() {
         document.getElementById('game-steps').textContent = session.steps;
-        document.getElementById('game-balls').textContent = user.inventory.monster + user.inventory.super + user.inventory.hyper + user.inventory.master;
+        // [변경] 보유 볼 합계 계산 (monster 제외)
+        document.getElementById('game-balls').textContent = user.inventory.super + user.inventory.hyper + user.inventory.special + user.inventory.master;
     }
 
     function animateSprite(frames) {
@@ -1108,7 +1150,8 @@
 
     function startEncounter() {
         if(!currentPokemon) return;
-        if((user.inventory.monster + user.inventory.super + user.inventory.hyper + user.inventory.master) <= 0) {
+        // [변경] 볼 합계 체크
+        if((user.inventory.super + user.inventory.hyper + user.inventory.special + user.inventory.master) <= 0) {
             endExploration('balls'); return;
         }
         document.getElementById('modal-layer').classList.remove('hidden');
@@ -1126,7 +1169,6 @@
         baseRate = baseRate * 2.5;
         baseRate += (user.upgrades.catchRate * 0.005);
 
-        // [수정: 조우 화면 로직]
         if(baseRate > 0.95) baseRate = 0.95;
         if(baseRate < 0.05) baseRate = 0.05;
         baseRate = baseRate * 0.65;
@@ -1136,7 +1178,8 @@
     }
 
     function updateBallBtns() {
-        ['monster','super','hyper','master'].forEach(type => {
+        // [변경] 버튼 업데이트 로직 (super, hyper, special, master)
+        ['super','hyper','special','master'].forEach(type => {
             const qty = user.inventory[type];
             document.getElementById(`qty-${type}`).textContent = qty;
             document.getElementById(`btn-use-${type}`).disabled = (qty <= 0);
@@ -1185,15 +1228,18 @@
         startQuizTimer();
     }
 
-    // [수정] startQuizTimer 함수
+    // [중요 변경] startQuizTimer 함수: 스피드볼(special) 선택 시 시간 10초 고정
     function startQuizTimer() {
         if(quizTimerInterval) clearInterval(quizTimerInterval);
 
-        // 기본 200(20초) + 레벨당 10(1초) 추가
-        // 최대 20레벨이면 200 + 200 = 400(40초)가 됨
-        const maxTime = QUIZ_TIME_LIMIT + (user.upgrades.timerLevel * 10);
+        let maxTime;
+        if (selectedBall === 'special') {
+            maxTime = 100; // 10초 (고정)
+        } else {
+            maxTime = QUIZ_TIME_LIMIT + (user.upgrades.timerLevel * 10);
+        }
 
-        let timeLeft = maxTime; // 변경된 시간 적용
+        let timeLeft = maxTime;
         const barFill = document.getElementById('quiz-timer-fill');
 
         barFill.style.width = '100%';
@@ -1201,7 +1247,6 @@
 
         quizTimerInterval = setInterval(() => {
             timeLeft--;
-            // 비율 계산 시 분모도 maxTime으로 변경
             const percentage = (timeLeft / maxTime) * 100;
             barFill.style.width = `${percentage}%`;
 
@@ -1220,8 +1265,12 @@
         comboEl.textContent = currentCombo;
         probEl.textContent = Math.floor(p * 100);
 
-        const ballBonus = { monster:1, super:1.5, hyper:2.0, master:255 }[selectedBall];
-        const ballName = { monster:"몬스터볼", super:"슈퍼볼", hyper:"하이퍼볼", master:"마스터볼" }[selectedBall];
+        // [변경] 볼 보너스 표시 텍스트
+        let ballBonus, ballName;
+        if(selectedBall === 'super') { ballBonus = 1.5; ballName = "슈퍼볼"; }
+        else if(selectedBall === 'hyper') { ballBonus = 2.0; ballName = "하이퍼볼"; }
+        else if(selectedBall === 'special') { ballBonus = 10.0; ballName = "스피드볼"; } // 10배
+        else if(selectedBall === 'master') { ballBonus = 255; ballName = "마스터볼"; }
 
         document.getElementById('quiz-ball-img').src = BALL_SPRITES[selectedBall];
         document.getElementById('quiz-ball-text').textContent = `${ballName} (보너스 x${ballBonus === 255 ? 'MAX' : ballBonus})`;
@@ -1236,12 +1285,14 @@
         element.classList.add('pop-anim');
     }
 
-    // [버그 수정: 퀴즈 화면 로직 싱크 맞춤]
+    // [중요 변경] 획득 확률 계산 (스피드볼 로직 추가)
     function calculateCatchProb() {
         let rate = currentPokemon.rate / 255;
         if (!rate) rate = 0.1;
 
-        const ballBonus = { monster: 1, super: 1.5, hyper: 2.0, master: 255 }[selectedBall];
+        // [변경] 볼 보너스 매핑
+        const ballBonus = { super: 1.5, hyper: 2.0, special: 10.0, master: 255 }[selectedBall];
+
         const upgradeBonus = 1 + (user.upgrades.catchRate * 0.005);
         const balancePatchMultiplier = 2.5;
         const DIFFICULTY_NERF = 0.65;
@@ -1249,7 +1300,7 @@
         // 1. 기초 확률 계산
         let baseP = rate * ballBonus * upgradeBonus * balancePatchMultiplier;
 
-        // 2. [수정] 95% 캡 적용 (조우 화면과 동일)
+        // 2. 95% 캡 적용
         if (baseP > 0.95) baseP = 0.95;
         if (baseP < 0.05) baseP = 0.05;
 
@@ -1399,7 +1450,8 @@
         document.getElementById('modal-layer').classList.add('hidden');
         document.getElementById('modal-msg').classList.add('hidden');
         removeSilhouette();
-        if((user.inventory.monster + user.inventory.super + user.inventory.hyper + user.inventory.master) <= 0) endExploration('balls');
+        // [변경] 볼 합계 체크
+        if((user.inventory.super + user.inventory.hyper + user.inventory.special + user.inventory.master) <= 0) endExploration('balls');
         else spawnPokemon();
     }
 
@@ -1415,9 +1467,7 @@
         document.getElementById('lv-steps').textContent = `Lv.${user.upgrades.maxSteps}`;
         document.getElementById('lv-dex').textContent = `Lv.${user.upgrades.dexLimit} (현재 ${30 + user.upgrades.dexLimit * 10}마리)`;
 
-        // [추가] 타이머 UI 업데이트
         const timerLv = user.upgrades.timerLevel;
-        // 현재 시간 계산: 기본 20초 + 레벨
         const curSec = 20 + timerLv;
         document.getElementById('lv-timer').textContent = `Lv.${timerLv} (현재 ${curSec}초)`;
 
@@ -1450,11 +1500,9 @@
         updateShopUI();
     }
 
-    // [수정] buyUpgrade 함수
     function buyUpgrade(key, cost) {
         if(user.points < cost) { alert("포인트가 부족해요!"); return; }
 
-        // [추가] 타이머 레벨 최대치(20) 제한
         if(key === 'timerLevel' && user.upgrades.timerLevel >= 20) {
             alert("이미 시간을 최대로 늘렸어요! (40초)"); return;
         }
