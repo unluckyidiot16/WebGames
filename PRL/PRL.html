@@ -97,13 +97,13 @@
                 </div>
             </button>
 
-            <button id="lobbyGachaBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-indigo-400 transition-colors group">
-                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100">
-                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-8 h-8 pixel-art opacity-80">
+            <button id="lobbyGachaBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-sky-400 transition-colors group">
+                <div class="w-12 h-12 bg-sky-50 rounded-full flex items-center justify-center group-hover:bg-sky-100">
+                    <span class="text-2xl">🧭</span>
                 </div>
                 <div class="text-center">
-                    <div class="font-bold text-slate-700">몬스터 소환</div>
-                    <div class="text-[10px] text-slate-400">기본형만 등장</div>
+                    <div class="font-bold text-slate-700">탐험으로 이동</div>
+                    <div class="text-[10px] text-slate-400">포켓몬 잡으러 가기</div>
                 </div>
             </button>
 
@@ -706,6 +706,9 @@
     const GHOST_ROOT_URL = (location.origin && location.origin !== "null")
         ? `${location.origin}${location.pathname}`
         : "https://unluckyidiot16.github.io/WebGames/PRL/PRL.html";
+
+    // 현재 구조: /WebGames/PRL/PRL.html  ->  /WebGames/WC/index_patched.html
+    const INDEX_PATCHED_URL = new URL("../WC/index_patched.html", location.href).href;
 
     function getCharData() {
         try { return JSON.parse(localStorage.getItem(LS_KEY.CHAR_DATA) || "{}"); }
@@ -2150,7 +2153,7 @@
         document.getElementById("codexPrevBtn").onclick = codexPrevPage;
         document.getElementById("codexNextBtn").onclick = codexNextPage;
 
-        document.getElementById("lobbyGachaBtn").onclick = () => document.getElementById("gachaModal").classList.remove("hidden");
+        document.getElementById("lobbyGachaBtn").onclick = () => { window.location.href = INDEX_PATCHED_URL; };
         document.getElementById("gachaClose").onclick = () => document.getElementById("gachaModal").classList.add("hidden");
 
         document.getElementById("gacha1Btn").onclick = () => playGacha('normal');
