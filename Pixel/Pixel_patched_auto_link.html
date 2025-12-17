@@ -50,7 +50,7 @@
         @keyframes pulseGlow { 0%,100%{box-shadow:0 0 18px rgba(245,158,11,.9), 0 0 28px rgba(245,158,11,.5) inset} 50%{box-shadow:0 0 28px rgba(245,158,11,1), 0 0 40px rgba(245,158,11,.7) inset} }
         .rarity-R .rarity-tag { background:#60a5fa; } .rarity-R .ring { border-color:rgba(96,165,250,.9); box-shadow:0 0 14px rgba(96,165,250,.8) inset, 0 0 10px rgba(96,165,250,.6); }
         .rarity-SR .rarity-tag { background:#f59e0b; } .rarity-SR .ring { border-color:#f59e0b; animation:pulseGlow 1.2s ease-in-out infinite; }
-    
+
         /* 가챠 비활성화 (index 연동 사용) */
         #gachaModal, #gacha1Btn, #gacha10Btn, #gacha100Btn { display: none !important; }
     </style>
@@ -1567,6 +1567,49 @@
 
         showView('titleScreen');
     }
+    // ✅ index_patched에서 Pixel.html?poke=25 로 들어오면 자동으로 시작 + 해당 포켓몬 바로 열기
+    async function bootForAuto(){
+        // startButton 클릭과 동일한 부팅 루틴
+        if (!localStorage.getItem(LS_POINTS))  setPoints(0);
+        if (!localStorage.getItem(LS_OWNED))   saveOwnedSet(new Set());
+        if (!localStorage.getItem(LS_COUPONS)) setCoupons(0);
+        syncPointsUI();
+        syncCouponsUI();
+        await loadCodexImages();
+        await loadHiddenImages();
+        populateBook();
+        showView('lobbyScreen');
+    }
+
+    async function maybeAutoOpenFromQuery(){
+        try{
+            const sp = new URLSearchParams(location.search || '');
+            const v = sp.get('poke');
+            if (!v) return;
+
+            const id = parseInt(String(v), 10);
+            if (!Number.isFinite(id) || id <= 0) return;
+
+            await bootForAuto();
+
+            const owned = getOwnedSet();
+            if (!owned.has(id)){
+                showModal('잠김', '이 포켓몬은 아직 해금되지 않았어요.\n\n탐험에서 포켓몬을 잡으면 Pixel에서 색칠할 수 있어요!');
+                return;
+            }
+
+            if (id > IMAGE_LIST.length){
+                showModal('미지원', `No.${id} 이미지는 현재 Pixel 도감에 없습니다.\n(도감 이미지 개수: ${IMAGE_LIST.length})`);
+                return;
+            }
+
+            const it = IMAGE_LIST[id - 1];
+            startGame(it.url, id);
+        } catch(e){
+            console.error('[Pixel auto-open] failed', e);
+        }
+    }
+
     function checkCompletion(){
         if (completedCells === totalCells){
             updateAllQuads(false);
@@ -1585,6 +1628,7 @@
         }
     }
     bootBindings();
+    maybeAutoOpenFromQuery();
 </script>
 </body>
 </html>

@@ -1090,6 +1090,34 @@
         }
         window.location.href = PIXEL_URL;
     }
+    function openPixelForPokemon(pokeId) {
+        const id = parseInt(String(pokeId), 10);
+        if (!Number.isFinite(id) || id <= 0) return;
+        try {
+            const u = new URL(PIXEL_URL, location.href);
+            u.searchParams.set('poke', String(id));
+            window.location.href = u.href;
+        } catch (e) {
+            // fallback: naive concat
+            window.location.href = `${PIXEL_URL}${PIXEL_URL.includes('?') ? '&' : '?'}poke=${id}`;
+        }
+    }
+
+    // ✅ 도감(보유 포켓몬)에서 탭하면: 파트너로 지정 + Pixel에서 해당 포켓몬 바로 열기
+    function setPartnerAndOpenPixel(pokeId) {
+        const id = parseInt(String(pokeId), 10);
+        if (!Number.isFinite(id) || id <= 0) return;
+        if (!user.dex || !user.dex.has(id)) {
+            alert("아직 잡지 않은 포켓몬입니다.");
+            return;
+        }
+        user.partnerId = id;      // 토글 없이 '지정'만
+        saveGame();
+        updateLobbyUI();
+        renderDex();
+        openPixelForPokemon(id);
+    }
+
 
     async function exportDexToPRL() {
         const dexIds = Array.from(user.dex || []);
@@ -1241,9 +1269,21 @@
         if (user.partnerId) {
             partnerContainer.classList.remove('hidden');
             setImgWithFallback(partnerImg, buildSpriteCandidates(user.partnerId), './png/pb.png');
+            // 탭하면 파트너 해제 (Pixel 이동 방지용)
+            partnerContainer.onclick = () => {
+                const ok = confirm("파트너를 해제할까요?");
+                if (!ok) return;
+                user.partnerId = null;
+                saveGame();
+                updateLobbyUI();
+                renderDex();
+            };
+
         } else {
             partnerContainer.classList.add('hidden');
             partnerImg.src = "";
+            partnerContainer.onclick = null;
+
         }
     }
 
@@ -1858,7 +1898,8 @@
                 d.style.borderColor = "#4ade80";
                 d.style.background = "#f0fdf4";
                 if(user.partnerId === id) d.classList.add('selected-partner');
-                d.onclick = () => setPartner(id);
+                d.title = '탭하면 파트너로 설정되고 Pixel에서 색칠을 시작합니다.';
+                d.onclick = () => setPartnerAndOpenPixel(id);
             } else {
                 d.textContent = id;
                 d.style.color = "#cbd5e1";
