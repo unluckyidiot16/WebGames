@@ -290,7 +290,7 @@
         isDead: false
     };
 
-    const mouse = { x: 0, y: 0, active: false };
+    const mouse = { x: 0, y: 0, active: false, lastPointer: 'mouse' };
     // Removed isBoosting
 
     let foods = [];
@@ -319,10 +319,60 @@
     window.addEventListener('resize', resize);
     resize();
 
+
+    // --- Input: Mouse / Touch ---
+    // Start centered so the player doesn't drift before the first input.
+    mouse.x = width / 2;
+    mouse.y = height / 2;
+
+    function updateMouseFromClient(clientX, clientY) {
+        const rect = canvas.getBoundingClientRect();
+        mouse.x = clientX - rect.left;
+        mouse.y = clientY - rect.top;
+    }
+
+    // Drag-to-move only (mobile friendly)
+    // ✅ 이동은 "드래그(누르고 움직이기)" 하는 동안에만 됩니다.
+    function stopMovementToCenter() {
+        mouse.x = width / 2;
+        mouse.y = height / 2;
+    }
+
+    canvas.addEventListener('pointerdown', (e) => {
+        // 마우스는 왼쪽 버튼만 드래그로 인정
+        if (e.pointerType === 'mouse' && e.button !== 0) return;
+
+        mouse.active = true;
+        mouse.lastPointer = e.pointerType || 'mouse';
+        updateMouseFromClient(e.clientX, e.clientY);
+        try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    }, { passive: true });
+
+    window.addEventListener('pointermove', (e) => {
+        if (!mouse.active) return;
+        mouse.lastPointer = e.pointerType || mouse.lastPointer || 'mouse';
+        updateMouseFromClient(e.clientX, e.clientY);
+    }, { passive: true });
+
+    function endDrag(e) {
+        if (!mouse.active) return;
+        mouse.active = false;
+        stopMovementToCenter();
+        try { canvas.releasePointerCapture(e.pointerId); } catch (_) {}
+    }
+
+    window.addEventListener('pointerup', endDrag, { passive: true });
+    window.addEventListener('pointercancel', endDrag, { passive: true });
+
     // --- 3. Core Functions ---
 
     function initGame() {
         loadImages();
+
+        // Center the input target at the start
+        mouse.x = width / 2;
+        mouse.y = height / 2;
+        mouse.active = false;
 
         document.getElementById('uiLayer').classList.remove('hidden');
 
@@ -509,7 +559,8 @@
         const angle = Math.atan2(dy, dx);
         player.angle = angle;
 
-        let currentSpeed = player.maxSpeed;
+        let currentSpeed = mouse.active ? player.maxSpeed : 0;
+        // Drag 중일 때만 이동 (터치/마우스 공통)
         // Removed Boosting Logic
 
         player.x += Math.cos(angle) * currentSpeed * timeScale;
