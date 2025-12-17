@@ -1,0 +1,6768 @@
+{
+  "version": 1,
+  "generatedAt": "2025-12-17T01:48:13.545Z",
+  "range": {
+    "from": 1,
+    "to": 251
+  },
+  "pokemon": [
+    {
+      "id": 1,
+      "name_ko": "이상해씨",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        45,
+        49,
+        49,
+        65,
+        65,
+        45
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 49,
+        "def": 49,
+        "spa": 65,
+        "spd": 65,
+        "spe": 45
+      }
+    },
+    {
+      "id": 2,
+      "name_ko": "이상해풀",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        60,
+        62,
+        63,
+        80,
+        80,
+        60
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 62,
+        "def": 63,
+        "spa": 80,
+        "spd": 80,
+        "spe": 60
+      }
+    },
+    {
+      "id": 3,
+      "name_ko": "이상해꽃",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        80,
+        82,
+        83,
+        100,
+        100,
+        80
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 82,
+        "def": 83,
+        "spa": 100,
+        "spd": 100,
+        "spe": 80
+      }
+    },
+    {
+      "id": 4,
+      "name_ko": "파이리",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        39,
+        52,
+        43,
+        60,
+        50,
+        65
+      ],
+      "stats": {
+        "hp": 39,
+        "atk": 52,
+        "def": 43,
+        "spa": 60,
+        "spd": 50,
+        "spe": 65
+      }
+    },
+    {
+      "id": 5,
+      "name_ko": "리자드",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        58,
+        64,
+        58,
+        80,
+        65,
+        80
+      ],
+      "stats": {
+        "hp": 58,
+        "atk": 64,
+        "def": 58,
+        "spa": 80,
+        "spd": 65,
+        "spe": 80
+      }
+    },
+    {
+      "id": 6,
+      "name_ko": "리자몽",
+      "types_ko": [
+        "불꽃",
+        "비행"
+      ],
+      "types_en": [
+        "fire",
+        "flying"
+      ],
+      "stats_habdcs": [
+        78,
+        84,
+        78,
+        109,
+        85,
+        100
+      ],
+      "stats": {
+        "hp": 78,
+        "atk": 84,
+        "def": 78,
+        "spa": 109,
+        "spd": 85,
+        "spe": 100
+      }
+    },
+    {
+      "id": 7,
+      "name_ko": "꼬부기",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        44,
+        48,
+        65,
+        50,
+        64,
+        43
+      ],
+      "stats": {
+        "hp": 44,
+        "atk": 48,
+        "def": 65,
+        "spa": 50,
+        "spd": 64,
+        "spe": 43
+      }
+    },
+    {
+      "id": 8,
+      "name_ko": "어니부기",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        59,
+        63,
+        80,
+        65,
+        80,
+        58
+      ],
+      "stats": {
+        "hp": 59,
+        "atk": 63,
+        "def": 80,
+        "spa": 65,
+        "spd": 80,
+        "spe": 58
+      }
+    },
+    {
+      "id": 9,
+      "name_ko": "거북왕",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        79,
+        83,
+        100,
+        85,
+        105,
+        78
+      ],
+      "stats": {
+        "hp": 79,
+        "atk": 83,
+        "def": 100,
+        "spa": 85,
+        "spd": 105,
+        "spe": 78
+      }
+    },
+    {
+      "id": 10,
+      "name_ko": "캐터피",
+      "types_ko": [
+        "벌레"
+      ],
+      "types_en": [
+        "bug"
+      ],
+      "stats_habdcs": [
+        45,
+        30,
+        35,
+        20,
+        20,
+        45
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 30,
+        "def": 35,
+        "spa": 20,
+        "spd": 20,
+        "spe": 45
+      }
+    },
+    {
+      "id": 11,
+      "name_ko": "단데기",
+      "types_ko": [
+        "벌레"
+      ],
+      "types_en": [
+        "bug"
+      ],
+      "stats_habdcs": [
+        50,
+        20,
+        55,
+        25,
+        25,
+        30
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 20,
+        "def": 55,
+        "spa": 25,
+        "spd": 25,
+        "spe": 30
+      }
+    },
+    {
+      "id": 12,
+      "name_ko": "버터플",
+      "types_ko": [
+        "벌레",
+        "비행"
+      ],
+      "types_en": [
+        "bug",
+        "flying"
+      ],
+      "stats_habdcs": [
+        60,
+        45,
+        50,
+        90,
+        80,
+        70
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 45,
+        "def": 50,
+        "spa": 90,
+        "spd": 80,
+        "spe": 70
+      }
+    },
+    {
+      "id": 13,
+      "name_ko": "뿔충이",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        40,
+        35,
+        30,
+        20,
+        20,
+        50
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 35,
+        "def": 30,
+        "spa": 20,
+        "spd": 20,
+        "spe": 50
+      }
+    },
+    {
+      "id": 14,
+      "name_ko": "딱충이",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        45,
+        25,
+        50,
+        25,
+        25,
+        35
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 25,
+        "def": 50,
+        "spa": 25,
+        "spd": 25,
+        "spe": 35
+      }
+    },
+    {
+      "id": 15,
+      "name_ko": "독침붕",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        65,
+        90,
+        40,
+        45,
+        80,
+        75
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 90,
+        "def": 40,
+        "spa": 45,
+        "spd": 80,
+        "spe": 75
+      }
+    },
+    {
+      "id": 16,
+      "name_ko": "구구",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        40,
+        45,
+        40,
+        35,
+        35,
+        56
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 45,
+        "def": 40,
+        "spa": 35,
+        "spd": 35,
+        "spe": 56
+      }
+    },
+    {
+      "id": 17,
+      "name_ko": "피죤",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        63,
+        60,
+        55,
+        50,
+        50,
+        71
+      ],
+      "stats": {
+        "hp": 63,
+        "atk": 60,
+        "def": 55,
+        "spa": 50,
+        "spd": 50,
+        "spe": 71
+      }
+    },
+    {
+      "id": 18,
+      "name_ko": "피죤투",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        83,
+        80,
+        75,
+        70,
+        70,
+        101
+      ],
+      "stats": {
+        "hp": 83,
+        "atk": 80,
+        "def": 75,
+        "spa": 70,
+        "spd": 70,
+        "spe": 101
+      }
+    },
+    {
+      "id": 19,
+      "name_ko": "꼬렛",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        30,
+        56,
+        35,
+        25,
+        35,
+        72
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 56,
+        "def": 35,
+        "spa": 25,
+        "spd": 35,
+        "spe": 72
+      }
+    },
+    {
+      "id": 20,
+      "name_ko": "레트라",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        55,
+        81,
+        60,
+        50,
+        70,
+        97
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 81,
+        "def": 60,
+        "spa": 50,
+        "spd": 70,
+        "spe": 97
+      }
+    },
+    {
+      "id": 21,
+      "name_ko": "깨비참",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        40,
+        60,
+        30,
+        31,
+        31,
+        70
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 60,
+        "def": 30,
+        "spa": 31,
+        "spd": 31,
+        "spe": 70
+      }
+    },
+    {
+      "id": 22,
+      "name_ko": "깨비드릴조",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        65,
+        90,
+        65,
+        61,
+        61,
+        100
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 90,
+        "def": 65,
+        "spa": 61,
+        "spd": 61,
+        "spe": 100
+      }
+    },
+    {
+      "id": 23,
+      "name_ko": "아보",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        35,
+        60,
+        44,
+        40,
+        54,
+        55
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 60,
+        "def": 44,
+        "spa": 40,
+        "spd": 54,
+        "spe": 55
+      }
+    },
+    {
+      "id": 24,
+      "name_ko": "아보크",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        60,
+        95,
+        69,
+        65,
+        79,
+        80
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 95,
+        "def": 69,
+        "spa": 65,
+        "spd": 79,
+        "spe": 80
+      }
+    },
+    {
+      "id": 25,
+      "name_ko": "피카츄",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        35,
+        55,
+        40,
+        50,
+        50,
+        90
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 55,
+        "def": 40,
+        "spa": 50,
+        "spd": 50,
+        "spe": 90
+      }
+    },
+    {
+      "id": 26,
+      "name_ko": "라이츄",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        60,
+        90,
+        55,
+        90,
+        80,
+        110
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 90,
+        "def": 55,
+        "spa": 90,
+        "spd": 80,
+        "spe": 110
+      }
+    },
+    {
+      "id": 27,
+      "name_ko": "모래두지",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        50,
+        75,
+        85,
+        20,
+        30,
+        40
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 75,
+        "def": 85,
+        "spa": 20,
+        "spd": 30,
+        "spe": 40
+      }
+    },
+    {
+      "id": 28,
+      "name_ko": "고지",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        75,
+        100,
+        110,
+        45,
+        55,
+        65
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 100,
+        "def": 110,
+        "spa": 45,
+        "spd": 55,
+        "spe": 65
+      }
+    },
+    {
+      "id": 29,
+      "name_ko": "니드런♀",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        55,
+        47,
+        52,
+        40,
+        40,
+        41
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 47,
+        "def": 52,
+        "spa": 40,
+        "spd": 40,
+        "spe": 41
+      }
+    },
+    {
+      "id": 30,
+      "name_ko": "니드리나",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        70,
+        62,
+        67,
+        55,
+        55,
+        56
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 62,
+        "def": 67,
+        "spa": 55,
+        "spd": 55,
+        "spe": 56
+      }
+    },
+    {
+      "id": 31,
+      "name_ko": "니드퀸",
+      "types_ko": [
+        "독",
+        "땅"
+      ],
+      "types_en": [
+        "poison",
+        "ground"
+      ],
+      "stats_habdcs": [
+        90,
+        92,
+        87,
+        75,
+        85,
+        76
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 92,
+        "def": 87,
+        "spa": 75,
+        "spd": 85,
+        "spe": 76
+      }
+    },
+    {
+      "id": 32,
+      "name_ko": "니드런♂",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        46,
+        57,
+        40,
+        40,
+        40,
+        50
+      ],
+      "stats": {
+        "hp": 46,
+        "atk": 57,
+        "def": 40,
+        "spa": 40,
+        "spd": 40,
+        "spe": 50
+      }
+    },
+    {
+      "id": 33,
+      "name_ko": "니드리노",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        61,
+        72,
+        57,
+        55,
+        55,
+        65
+      ],
+      "stats": {
+        "hp": 61,
+        "atk": 72,
+        "def": 57,
+        "spa": 55,
+        "spd": 55,
+        "spe": 65
+      }
+    },
+    {
+      "id": 34,
+      "name_ko": "니드킹",
+      "types_ko": [
+        "독",
+        "땅"
+      ],
+      "types_en": [
+        "poison",
+        "ground"
+      ],
+      "stats_habdcs": [
+        81,
+        102,
+        77,
+        85,
+        75,
+        85
+      ],
+      "stats": {
+        "hp": 81,
+        "atk": 102,
+        "def": 77,
+        "spa": 85,
+        "spd": 75,
+        "spe": 85
+      }
+    },
+    {
+      "id": 35,
+      "name_ko": "삐삐",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "fairy"
+      ],
+      "stats_habdcs": [
+        70,
+        45,
+        48,
+        60,
+        65,
+        35
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 45,
+        "def": 48,
+        "spa": 60,
+        "spd": 65,
+        "spe": 35
+      }
+    },
+    {
+      "id": 36,
+      "name_ko": "픽시",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "fairy"
+      ],
+      "stats_habdcs": [
+        95,
+        70,
+        73,
+        95,
+        90,
+        60
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 70,
+        "def": 73,
+        "spa": 95,
+        "spd": 90,
+        "spe": 60
+      }
+    },
+    {
+      "id": 37,
+      "name_ko": "식스테일",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        38,
+        41,
+        40,
+        50,
+        65,
+        65
+      ],
+      "stats": {
+        "hp": 38,
+        "atk": 41,
+        "def": 40,
+        "spa": 50,
+        "spd": 65,
+        "spe": 65
+      }
+    },
+    {
+      "id": 38,
+      "name_ko": "나인테일",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        73,
+        76,
+        75,
+        81,
+        100,
+        100
+      ],
+      "stats": {
+        "hp": 73,
+        "atk": 76,
+        "def": 75,
+        "spa": 81,
+        "spd": 100,
+        "spe": 100
+      }
+    },
+    {
+      "id": 39,
+      "name_ko": "푸린",
+      "types_ko": [
+        "노말",
+        "노말"
+      ],
+      "types_en": [
+        "normal",
+        "fairy"
+      ],
+      "stats_habdcs": [
+        115,
+        45,
+        20,
+        45,
+        25,
+        20
+      ],
+      "stats": {
+        "hp": 115,
+        "atk": 45,
+        "def": 20,
+        "spa": 45,
+        "spd": 25,
+        "spe": 20
+      }
+    },
+    {
+      "id": 40,
+      "name_ko": "푸크린",
+      "types_ko": [
+        "노말",
+        "노말"
+      ],
+      "types_en": [
+        "normal",
+        "fairy"
+      ],
+      "stats_habdcs": [
+        140,
+        70,
+        45,
+        85,
+        50,
+        45
+      ],
+      "stats": {
+        "hp": 140,
+        "atk": 70,
+        "def": 45,
+        "spa": 85,
+        "spd": 50,
+        "spe": 45
+      }
+    },
+    {
+      "id": 41,
+      "name_ko": "주뱃",
+      "types_ko": [
+        "독",
+        "비행"
+      ],
+      "types_en": [
+        "poison",
+        "flying"
+      ],
+      "stats_habdcs": [
+        40,
+        45,
+        35,
+        30,
+        40,
+        55
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 45,
+        "def": 35,
+        "spa": 30,
+        "spd": 40,
+        "spe": 55
+      }
+    },
+    {
+      "id": 42,
+      "name_ko": "골뱃",
+      "types_ko": [
+        "독",
+        "비행"
+      ],
+      "types_en": [
+        "poison",
+        "flying"
+      ],
+      "stats_habdcs": [
+        75,
+        80,
+        70,
+        65,
+        75,
+        90
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 80,
+        "def": 70,
+        "spa": 65,
+        "spd": 75,
+        "spe": 90
+      }
+    },
+    {
+      "id": 43,
+      "name_ko": "뚜벅쵸",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        45,
+        50,
+        55,
+        75,
+        65,
+        30
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 50,
+        "def": 55,
+        "spa": 75,
+        "spd": 65,
+        "spe": 30
+      }
+    },
+    {
+      "id": 44,
+      "name_ko": "냄새꼬",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        60,
+        65,
+        70,
+        85,
+        75,
+        40
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 65,
+        "def": 70,
+        "spa": 85,
+        "spd": 75,
+        "spe": 40
+      }
+    },
+    {
+      "id": 45,
+      "name_ko": "라플레시아",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        75,
+        80,
+        85,
+        110,
+        90,
+        50
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 80,
+        "def": 85,
+        "spa": 110,
+        "spd": 90,
+        "spe": 50
+      }
+    },
+    {
+      "id": 46,
+      "name_ko": "파라스",
+      "types_ko": [
+        "벌레",
+        "풀"
+      ],
+      "types_en": [
+        "bug",
+        "grass"
+      ],
+      "stats_habdcs": [
+        35,
+        70,
+        55,
+        45,
+        55,
+        25
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 70,
+        "def": 55,
+        "spa": 45,
+        "spd": 55,
+        "spe": 25
+      }
+    },
+    {
+      "id": 47,
+      "name_ko": "파라섹트",
+      "types_ko": [
+        "벌레",
+        "풀"
+      ],
+      "types_en": [
+        "bug",
+        "grass"
+      ],
+      "stats_habdcs": [
+        60,
+        95,
+        80,
+        60,
+        80,
+        30
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 95,
+        "def": 80,
+        "spa": 60,
+        "spd": 80,
+        "spe": 30
+      }
+    },
+    {
+      "id": 48,
+      "name_ko": "콘팡",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        60,
+        55,
+        50,
+        40,
+        55,
+        45
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 55,
+        "def": 50,
+        "spa": 40,
+        "spd": 55,
+        "spe": 45
+      }
+    },
+    {
+      "id": 49,
+      "name_ko": "도나리",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        70,
+        65,
+        60,
+        90,
+        75,
+        90
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 65,
+        "def": 60,
+        "spa": 90,
+        "spd": 75,
+        "spe": 90
+      }
+    },
+    {
+      "id": 50,
+      "name_ko": "디그다",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        10,
+        55,
+        25,
+        35,
+        45,
+        95
+      ],
+      "stats": {
+        "hp": 10,
+        "atk": 55,
+        "def": 25,
+        "spa": 35,
+        "spd": 45,
+        "spe": 95
+      }
+    },
+    {
+      "id": 51,
+      "name_ko": "닥트리오",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        35,
+        100,
+        50,
+        50,
+        70,
+        120
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 100,
+        "def": 50,
+        "spa": 50,
+        "spd": 70,
+        "spe": 120
+      }
+    },
+    {
+      "id": 52,
+      "name_ko": "나옹",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        40,
+        45,
+        35,
+        40,
+        40,
+        90
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 45,
+        "def": 35,
+        "spa": 40,
+        "spd": 40,
+        "spe": 90
+      }
+    },
+    {
+      "id": 53,
+      "name_ko": "페르시온",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        65,
+        70,
+        60,
+        65,
+        65,
+        115
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 70,
+        "def": 60,
+        "spa": 65,
+        "spd": 65,
+        "spe": 115
+      }
+    },
+    {
+      "id": 54,
+      "name_ko": "고라파덕",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        50,
+        52,
+        48,
+        65,
+        50,
+        55
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 52,
+        "def": 48,
+        "spa": 65,
+        "spd": 50,
+        "spe": 55
+      }
+    },
+    {
+      "id": 55,
+      "name_ko": "골덕",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        80,
+        82,
+        78,
+        95,
+        80,
+        85
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 82,
+        "def": 78,
+        "spa": 95,
+        "spd": 80,
+        "spe": 85
+      }
+    },
+    {
+      "id": 56,
+      "name_ko": "망키",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        40,
+        80,
+        35,
+        35,
+        45,
+        70
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 80,
+        "def": 35,
+        "spa": 35,
+        "spd": 45,
+        "spe": 70
+      }
+    },
+    {
+      "id": 57,
+      "name_ko": "성원숭",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        65,
+        105,
+        60,
+        60,
+        70,
+        95
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 105,
+        "def": 60,
+        "spa": 60,
+        "spd": 70,
+        "spe": 95
+      }
+    },
+    {
+      "id": 58,
+      "name_ko": "가디",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        55,
+        70,
+        45,
+        70,
+        50,
+        60
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 70,
+        "def": 45,
+        "spa": 70,
+        "spd": 50,
+        "spe": 60
+      }
+    },
+    {
+      "id": 59,
+      "name_ko": "윈디",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        90,
+        110,
+        80,
+        100,
+        80,
+        95
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 110,
+        "def": 80,
+        "spa": 100,
+        "spd": 80,
+        "spe": 95
+      }
+    },
+    {
+      "id": 60,
+      "name_ko": "발챙이",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        40,
+        50,
+        40,
+        40,
+        40,
+        90
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 50,
+        "def": 40,
+        "spa": 40,
+        "spd": 40,
+        "spe": 90
+      }
+    },
+    {
+      "id": 61,
+      "name_ko": "슈륙챙이",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        65,
+        65,
+        65,
+        50,
+        50,
+        90
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 65,
+        "def": 65,
+        "spa": 50,
+        "spd": 50,
+        "spe": 90
+      }
+    },
+    {
+      "id": 62,
+      "name_ko": "강챙이",
+      "types_ko": [
+        "물",
+        "격투"
+      ],
+      "types_en": [
+        "water",
+        "fighting"
+      ],
+      "stats_habdcs": [
+        90,
+        95,
+        95,
+        70,
+        90,
+        70
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 95,
+        "def": 95,
+        "spa": 70,
+        "spd": 90,
+        "spe": 70
+      }
+    },
+    {
+      "id": 63,
+      "name_ko": "캐이시",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        25,
+        20,
+        15,
+        105,
+        55,
+        90
+      ],
+      "stats": {
+        "hp": 25,
+        "atk": 20,
+        "def": 15,
+        "spa": 105,
+        "spd": 55,
+        "spe": 90
+      }
+    },
+    {
+      "id": 64,
+      "name_ko": "윤겔라",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        40,
+        35,
+        30,
+        120,
+        70,
+        105
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 35,
+        "def": 30,
+        "spa": 120,
+        "spd": 70,
+        "spe": 105
+      }
+    },
+    {
+      "id": 65,
+      "name_ko": "후딘",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        55,
+        50,
+        45,
+        135,
+        95,
+        120
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 50,
+        "def": 45,
+        "spa": 135,
+        "spd": 95,
+        "spe": 120
+      }
+    },
+    {
+      "id": 66,
+      "name_ko": "알통몬",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        70,
+        80,
+        50,
+        35,
+        35,
+        35
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 80,
+        "def": 50,
+        "spa": 35,
+        "spd": 35,
+        "spe": 35
+      }
+    },
+    {
+      "id": 67,
+      "name_ko": "근육몬",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        80,
+        100,
+        70,
+        50,
+        60,
+        45
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 100,
+        "def": 70,
+        "spa": 50,
+        "spd": 60,
+        "spe": 45
+      }
+    },
+    {
+      "id": 68,
+      "name_ko": "괴력몬",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        90,
+        130,
+        80,
+        65,
+        85,
+        55
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 130,
+        "def": 80,
+        "spa": 65,
+        "spd": 85,
+        "spe": 55
+      }
+    },
+    {
+      "id": 69,
+      "name_ko": "모다피",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        50,
+        75,
+        35,
+        70,
+        30,
+        40
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 75,
+        "def": 35,
+        "spa": 70,
+        "spd": 30,
+        "spe": 40
+      }
+    },
+    {
+      "id": 70,
+      "name_ko": "우츠동",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        65,
+        90,
+        50,
+        85,
+        45,
+        55
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 90,
+        "def": 50,
+        "spa": 85,
+        "spd": 45,
+        "spe": 55
+      }
+    },
+    {
+      "id": 71,
+      "name_ko": "우츠보트",
+      "types_ko": [
+        "풀",
+        "독"
+      ],
+      "types_en": [
+        "grass",
+        "poison"
+      ],
+      "stats_habdcs": [
+        80,
+        105,
+        65,
+        100,
+        70,
+        70
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 105,
+        "def": 65,
+        "spa": 100,
+        "spd": 70,
+        "spe": 70
+      }
+    },
+    {
+      "id": 72,
+      "name_ko": "왕눈해",
+      "types_ko": [
+        "물",
+        "독"
+      ],
+      "types_en": [
+        "water",
+        "poison"
+      ],
+      "stats_habdcs": [
+        40,
+        40,
+        35,
+        50,
+        100,
+        70
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 40,
+        "def": 35,
+        "spa": 50,
+        "spd": 100,
+        "spe": 70
+      }
+    },
+    {
+      "id": 73,
+      "name_ko": "독파리",
+      "types_ko": [
+        "물",
+        "독"
+      ],
+      "types_en": [
+        "water",
+        "poison"
+      ],
+      "stats_habdcs": [
+        80,
+        70,
+        65,
+        80,
+        120,
+        100
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 70,
+        "def": 65,
+        "spa": 80,
+        "spd": 120,
+        "spe": 100
+      }
+    },
+    {
+      "id": 74,
+      "name_ko": "꼬마돌",
+      "types_ko": [
+        "바위",
+        "땅"
+      ],
+      "types_en": [
+        "rock",
+        "ground"
+      ],
+      "stats_habdcs": [
+        40,
+        80,
+        100,
+        30,
+        30,
+        20
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 80,
+        "def": 100,
+        "spa": 30,
+        "spd": 30,
+        "spe": 20
+      }
+    },
+    {
+      "id": 75,
+      "name_ko": "데구리",
+      "types_ko": [
+        "바위",
+        "땅"
+      ],
+      "types_en": [
+        "rock",
+        "ground"
+      ],
+      "stats_habdcs": [
+        55,
+        95,
+        115,
+        45,
+        45,
+        35
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 95,
+        "def": 115,
+        "spa": 45,
+        "spd": 45,
+        "spe": 35
+      }
+    },
+    {
+      "id": 76,
+      "name_ko": "딱구리",
+      "types_ko": [
+        "바위",
+        "땅"
+      ],
+      "types_en": [
+        "rock",
+        "ground"
+      ],
+      "stats_habdcs": [
+        80,
+        120,
+        130,
+        55,
+        65,
+        45
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 120,
+        "def": 130,
+        "spa": 55,
+        "spd": 65,
+        "spe": 45
+      }
+    },
+    {
+      "id": 77,
+      "name_ko": "포니타",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        50,
+        85,
+        55,
+        65,
+        65,
+        90
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 85,
+        "def": 55,
+        "spa": 65,
+        "spd": 65,
+        "spe": 90
+      }
+    },
+    {
+      "id": 78,
+      "name_ko": "날쌩마",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        65,
+        100,
+        70,
+        80,
+        80,
+        105
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 100,
+        "def": 70,
+        "spa": 80,
+        "spd": 80,
+        "spe": 105
+      }
+    },
+    {
+      "id": 79,
+      "name_ko": "야돈",
+      "types_ko": [
+        "물",
+        "에스퍼"
+      ],
+      "types_en": [
+        "water",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        90,
+        65,
+        65,
+        40,
+        40,
+        15
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 65,
+        "def": 65,
+        "spa": 40,
+        "spd": 40,
+        "spe": 15
+      }
+    },
+    {
+      "id": 80,
+      "name_ko": "야도란",
+      "types_ko": [
+        "물",
+        "에스퍼"
+      ],
+      "types_en": [
+        "water",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        95,
+        75,
+        110,
+        100,
+        80,
+        30
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 75,
+        "def": 110,
+        "spa": 100,
+        "spd": 80,
+        "spe": 30
+      }
+    },
+    {
+      "id": 81,
+      "name_ko": "코일",
+      "types_ko": [
+        "전기",
+        "강철"
+      ],
+      "types_en": [
+        "electric",
+        "steel"
+      ],
+      "stats_habdcs": [
+        25,
+        35,
+        70,
+        95,
+        55,
+        45
+      ],
+      "stats": {
+        "hp": 25,
+        "atk": 35,
+        "def": 70,
+        "spa": 95,
+        "spd": 55,
+        "spe": 45
+      }
+    },
+    {
+      "id": 82,
+      "name_ko": "레어코일",
+      "types_ko": [
+        "전기",
+        "강철"
+      ],
+      "types_en": [
+        "electric",
+        "steel"
+      ],
+      "stats_habdcs": [
+        50,
+        60,
+        95,
+        120,
+        70,
+        70
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 60,
+        "def": 95,
+        "spa": 120,
+        "spd": 70,
+        "spe": 70
+      }
+    },
+    {
+      "id": 83,
+      "name_ko": "파오리",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        52,
+        90,
+        55,
+        58,
+        62,
+        60
+      ],
+      "stats": {
+        "hp": 52,
+        "atk": 90,
+        "def": 55,
+        "spa": 58,
+        "spd": 62,
+        "spe": 60
+      }
+    },
+    {
+      "id": 84,
+      "name_ko": "두두",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        35,
+        85,
+        45,
+        35,
+        35,
+        75
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 85,
+        "def": 45,
+        "spa": 35,
+        "spd": 35,
+        "spe": 75
+      }
+    },
+    {
+      "id": 85,
+      "name_ko": "두트리오",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        60,
+        110,
+        70,
+        60,
+        60,
+        110
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 110,
+        "def": 70,
+        "spa": 60,
+        "spd": 60,
+        "spe": 110
+      }
+    },
+    {
+      "id": 86,
+      "name_ko": "쥬쥬",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        65,
+        45,
+        55,
+        45,
+        70,
+        45
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 45,
+        "def": 55,
+        "spa": 45,
+        "spd": 70,
+        "spe": 45
+      }
+    },
+    {
+      "id": 87,
+      "name_ko": "쥬레곤",
+      "types_ko": [
+        "물",
+        "얼음"
+      ],
+      "types_en": [
+        "water",
+        "ice"
+      ],
+      "stats_habdcs": [
+        90,
+        70,
+        80,
+        70,
+        95,
+        70
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 70,
+        "def": 80,
+        "spa": 70,
+        "spd": 95,
+        "spe": 70
+      }
+    },
+    {
+      "id": 88,
+      "name_ko": "질퍽이",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        80,
+        80,
+        50,
+        40,
+        50,
+        25
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 80,
+        "def": 50,
+        "spa": 40,
+        "spd": 50,
+        "spe": 25
+      }
+    },
+    {
+      "id": 89,
+      "name_ko": "질뻐기",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        105,
+        105,
+        75,
+        65,
+        100,
+        50
+      ],
+      "stats": {
+        "hp": 105,
+        "atk": 105,
+        "def": 75,
+        "spa": 65,
+        "spd": 100,
+        "spe": 50
+      }
+    },
+    {
+      "id": 90,
+      "name_ko": "셀러",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        30,
+        65,
+        100,
+        45,
+        25,
+        40
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 65,
+        "def": 100,
+        "spa": 45,
+        "spd": 25,
+        "spe": 40
+      }
+    },
+    {
+      "id": 91,
+      "name_ko": "파르셀",
+      "types_ko": [
+        "물",
+        "얼음"
+      ],
+      "types_en": [
+        "water",
+        "ice"
+      ],
+      "stats_habdcs": [
+        50,
+        95,
+        180,
+        85,
+        45,
+        70
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 95,
+        "def": 180,
+        "spa": 85,
+        "spd": 45,
+        "spe": 70
+      }
+    },
+    {
+      "id": 92,
+      "name_ko": "고오스",
+      "types_ko": [
+        "고스트",
+        "독"
+      ],
+      "types_en": [
+        "ghost",
+        "poison"
+      ],
+      "stats_habdcs": [
+        30,
+        35,
+        30,
+        100,
+        35,
+        80
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 35,
+        "def": 30,
+        "spa": 100,
+        "spd": 35,
+        "spe": 80
+      }
+    },
+    {
+      "id": 93,
+      "name_ko": "고우스트",
+      "types_ko": [
+        "고스트",
+        "독"
+      ],
+      "types_en": [
+        "ghost",
+        "poison"
+      ],
+      "stats_habdcs": [
+        45,
+        50,
+        45,
+        115,
+        55,
+        95
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 50,
+        "def": 45,
+        "spa": 115,
+        "spd": 55,
+        "spe": 95
+      }
+    },
+    {
+      "id": 94,
+      "name_ko": "팬텀",
+      "types_ko": [
+        "고스트",
+        "독"
+      ],
+      "types_en": [
+        "ghost",
+        "poison"
+      ],
+      "stats_habdcs": [
+        60,
+        65,
+        60,
+        130,
+        75,
+        110
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 65,
+        "def": 60,
+        "spa": 130,
+        "spd": 75,
+        "spe": 110
+      }
+    },
+    {
+      "id": 95,
+      "name_ko": "롱스톤",
+      "types_ko": [
+        "바위",
+        "땅"
+      ],
+      "types_en": [
+        "rock",
+        "ground"
+      ],
+      "stats_habdcs": [
+        35,
+        45,
+        160,
+        30,
+        45,
+        70
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 45,
+        "def": 160,
+        "spa": 30,
+        "spd": 45,
+        "spe": 70
+      }
+    },
+    {
+      "id": 96,
+      "name_ko": "슬리프",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        60,
+        48,
+        45,
+        43,
+        90,
+        42
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 48,
+        "def": 45,
+        "spa": 43,
+        "spd": 90,
+        "spe": 42
+      }
+    },
+    {
+      "id": 97,
+      "name_ko": "슬리퍼",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        85,
+        73,
+        70,
+        73,
+        115,
+        67
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 73,
+        "def": 70,
+        "spa": 73,
+        "spd": 115,
+        "spe": 67
+      }
+    },
+    {
+      "id": 98,
+      "name_ko": "크랩",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        30,
+        105,
+        90,
+        25,
+        25,
+        50
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 105,
+        "def": 90,
+        "spa": 25,
+        "spd": 25,
+        "spe": 50
+      }
+    },
+    {
+      "id": 99,
+      "name_ko": "킹크랩",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        55,
+        130,
+        115,
+        50,
+        50,
+        75
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 130,
+        "def": 115,
+        "spa": 50,
+        "spd": 50,
+        "spe": 75
+      }
+    },
+    {
+      "id": 100,
+      "name_ko": "찌리리공",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        40,
+        30,
+        50,
+        55,
+        55,
+        100
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 30,
+        "def": 50,
+        "spa": 55,
+        "spd": 55,
+        "spe": 100
+      }
+    },
+    {
+      "id": 101,
+      "name_ko": "붐볼",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        60,
+        50,
+        70,
+        80,
+        80,
+        150
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 50,
+        "def": 70,
+        "spa": 80,
+        "spd": 80,
+        "spe": 150
+      }
+    },
+    {
+      "id": 102,
+      "name_ko": "아라리",
+      "types_ko": [
+        "풀",
+        "에스퍼"
+      ],
+      "types_en": [
+        "grass",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        60,
+        40,
+        80,
+        60,
+        45,
+        40
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 40,
+        "def": 80,
+        "spa": 60,
+        "spd": 45,
+        "spe": 40
+      }
+    },
+    {
+      "id": 103,
+      "name_ko": "나시",
+      "types_ko": [
+        "풀",
+        "에스퍼"
+      ],
+      "types_en": [
+        "grass",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        95,
+        95,
+        85,
+        125,
+        75,
+        55
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 95,
+        "def": 85,
+        "spa": 125,
+        "spd": 75,
+        "spe": 55
+      }
+    },
+    {
+      "id": 104,
+      "name_ko": "탕구리",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        50,
+        50,
+        95,
+        40,
+        50,
+        35
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 50,
+        "def": 95,
+        "spa": 40,
+        "spd": 50,
+        "spe": 35
+      }
+    },
+    {
+      "id": 105,
+      "name_ko": "텅구리",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        60,
+        80,
+        110,
+        50,
+        80,
+        45
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 80,
+        "def": 110,
+        "spa": 50,
+        "spd": 80,
+        "spe": 45
+      }
+    },
+    {
+      "id": 106,
+      "name_ko": "시라소몬",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        50,
+        120,
+        53,
+        35,
+        110,
+        87
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 120,
+        "def": 53,
+        "spa": 35,
+        "spd": 110,
+        "spe": 87
+      }
+    },
+    {
+      "id": 107,
+      "name_ko": "홍수몬",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        50,
+        105,
+        79,
+        35,
+        110,
+        76
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 105,
+        "def": 79,
+        "spa": 35,
+        "spd": 110,
+        "spe": 76
+      }
+    },
+    {
+      "id": 108,
+      "name_ko": "내루미",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        90,
+        55,
+        75,
+        60,
+        75,
+        30
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 55,
+        "def": 75,
+        "spa": 60,
+        "spd": 75,
+        "spe": 30
+      }
+    },
+    {
+      "id": 109,
+      "name_ko": "또가스",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        40,
+        65,
+        95,
+        60,
+        45,
+        35
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 65,
+        "def": 95,
+        "spa": 60,
+        "spd": 45,
+        "spe": 35
+      }
+    },
+    {
+      "id": 110,
+      "name_ko": "또도가스",
+      "types_ko": [
+        "독"
+      ],
+      "types_en": [
+        "poison"
+      ],
+      "stats_habdcs": [
+        65,
+        90,
+        120,
+        85,
+        70,
+        60
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 90,
+        "def": 120,
+        "spa": 85,
+        "spd": 70,
+        "spe": 60
+      }
+    },
+    {
+      "id": 111,
+      "name_ko": "뿔카노",
+      "types_ko": [
+        "땅",
+        "바위"
+      ],
+      "types_en": [
+        "ground",
+        "rock"
+      ],
+      "stats_habdcs": [
+        80,
+        85,
+        95,
+        30,
+        30,
+        25
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 85,
+        "def": 95,
+        "spa": 30,
+        "spd": 30,
+        "spe": 25
+      }
+    },
+    {
+      "id": 112,
+      "name_ko": "코뿌리",
+      "types_ko": [
+        "땅",
+        "바위"
+      ],
+      "types_en": [
+        "ground",
+        "rock"
+      ],
+      "stats_habdcs": [
+        105,
+        130,
+        120,
+        45,
+        45,
+        40
+      ],
+      "stats": {
+        "hp": 105,
+        "atk": 130,
+        "def": 120,
+        "spa": 45,
+        "spd": 45,
+        "spe": 40
+      }
+    },
+    {
+      "id": 113,
+      "name_ko": "럭키",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        250,
+        5,
+        5,
+        35,
+        105,
+        50
+      ],
+      "stats": {
+        "hp": 250,
+        "atk": 5,
+        "def": 5,
+        "spa": 35,
+        "spd": 105,
+        "spe": 50
+      }
+    },
+    {
+      "id": 114,
+      "name_ko": "덩쿠리",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        65,
+        55,
+        115,
+        100,
+        40,
+        60
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 55,
+        "def": 115,
+        "spa": 100,
+        "spd": 40,
+        "spe": 60
+      }
+    },
+    {
+      "id": 115,
+      "name_ko": "캥카",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        105,
+        95,
+        80,
+        40,
+        80,
+        90
+      ],
+      "stats": {
+        "hp": 105,
+        "atk": 95,
+        "def": 80,
+        "spa": 40,
+        "spd": 80,
+        "spe": 90
+      }
+    },
+    {
+      "id": 116,
+      "name_ko": "쏘드라",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        30,
+        40,
+        70,
+        70,
+        25,
+        60
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 40,
+        "def": 70,
+        "spa": 70,
+        "spd": 25,
+        "spe": 60
+      }
+    },
+    {
+      "id": 117,
+      "name_ko": "시드라",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        55,
+        65,
+        95,
+        95,
+        45,
+        85
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 65,
+        "def": 95,
+        "spa": 95,
+        "spd": 45,
+        "spe": 85
+      }
+    },
+    {
+      "id": 118,
+      "name_ko": "콘치",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        45,
+        67,
+        60,
+        35,
+        50,
+        63
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 67,
+        "def": 60,
+        "spa": 35,
+        "spd": 50,
+        "spe": 63
+      }
+    },
+    {
+      "id": 119,
+      "name_ko": "왕콘치",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        80,
+        92,
+        65,
+        65,
+        80,
+        68
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 92,
+        "def": 65,
+        "spa": 65,
+        "spd": 80,
+        "spe": 68
+      }
+    },
+    {
+      "id": 120,
+      "name_ko": "별가사리",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        30,
+        45,
+        55,
+        70,
+        55,
+        85
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 45,
+        "def": 55,
+        "spa": 70,
+        "spd": 55,
+        "spe": 85
+      }
+    },
+    {
+      "id": 121,
+      "name_ko": "아쿠스타",
+      "types_ko": [
+        "물",
+        "에스퍼"
+      ],
+      "types_en": [
+        "water",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        60,
+        75,
+        85,
+        100,
+        85,
+        115
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 75,
+        "def": 85,
+        "spa": 100,
+        "spd": 85,
+        "spe": 115
+      }
+    },
+    {
+      "id": 122,
+      "name_ko": "마임맨",
+      "types_ko": [
+        "에스퍼",
+        "노말"
+      ],
+      "types_en": [
+        "psychic",
+        "fairy"
+      ],
+      "stats_habdcs": [
+        40,
+        45,
+        65,
+        100,
+        120,
+        90
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 45,
+        "def": 65,
+        "spa": 100,
+        "spd": 120,
+        "spe": 90
+      }
+    },
+    {
+      "id": 123,
+      "name_ko": "스라크",
+      "types_ko": [
+        "벌레",
+        "비행"
+      ],
+      "types_en": [
+        "bug",
+        "flying"
+      ],
+      "stats_habdcs": [
+        70,
+        110,
+        80,
+        55,
+        80,
+        105
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 110,
+        "def": 80,
+        "spa": 55,
+        "spd": 80,
+        "spe": 105
+      }
+    },
+    {
+      "id": 124,
+      "name_ko": "루주라",
+      "types_ko": [
+        "얼음",
+        "에스퍼"
+      ],
+      "types_en": [
+        "ice",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        65,
+        50,
+        35,
+        115,
+        95,
+        95
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 50,
+        "def": 35,
+        "spa": 115,
+        "spd": 95,
+        "spe": 95
+      }
+    },
+    {
+      "id": 125,
+      "name_ko": "에레브",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        65,
+        83,
+        57,
+        95,
+        85,
+        105
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 83,
+        "def": 57,
+        "spa": 95,
+        "spd": 85,
+        "spe": 105
+      }
+    },
+    {
+      "id": 126,
+      "name_ko": "마그마",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        65,
+        95,
+        57,
+        100,
+        85,
+        93
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 95,
+        "def": 57,
+        "spa": 100,
+        "spd": 85,
+        "spe": 93
+      }
+    },
+    {
+      "id": 127,
+      "name_ko": "쁘사이저",
+      "types_ko": [
+        "벌레"
+      ],
+      "types_en": [
+        "bug"
+      ],
+      "stats_habdcs": [
+        65,
+        125,
+        100,
+        55,
+        70,
+        85
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 125,
+        "def": 100,
+        "spa": 55,
+        "spd": 70,
+        "spe": 85
+      }
+    },
+    {
+      "id": 128,
+      "name_ko": "켄타로스",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        75,
+        100,
+        95,
+        40,
+        70,
+        110
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 100,
+        "def": 95,
+        "spa": 40,
+        "spd": 70,
+        "spe": 110
+      }
+    },
+    {
+      "id": 129,
+      "name_ko": "잉어킹",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        20,
+        10,
+        55,
+        15,
+        20,
+        80
+      ],
+      "stats": {
+        "hp": 20,
+        "atk": 10,
+        "def": 55,
+        "spa": 15,
+        "spd": 20,
+        "spe": 80
+      }
+    },
+    {
+      "id": 130,
+      "name_ko": "갸라도스",
+      "types_ko": [
+        "물",
+        "비행"
+      ],
+      "types_en": [
+        "water",
+        "flying"
+      ],
+      "stats_habdcs": [
+        95,
+        125,
+        79,
+        60,
+        100,
+        81
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 125,
+        "def": 79,
+        "spa": 60,
+        "spd": 100,
+        "spe": 81
+      }
+    },
+    {
+      "id": 131,
+      "name_ko": "라프라스",
+      "types_ko": [
+        "물",
+        "얼음"
+      ],
+      "types_en": [
+        "water",
+        "ice"
+      ],
+      "stats_habdcs": [
+        130,
+        85,
+        80,
+        85,
+        95,
+        60
+      ],
+      "stats": {
+        "hp": 130,
+        "atk": 85,
+        "def": 80,
+        "spa": 85,
+        "spd": 95,
+        "spe": 60
+      }
+    },
+    {
+      "id": 132,
+      "name_ko": "메타몽",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        48,
+        48,
+        48,
+        48,
+        48,
+        48
+      ],
+      "stats": {
+        "hp": 48,
+        "atk": 48,
+        "def": 48,
+        "spa": 48,
+        "spd": 48,
+        "spe": 48
+      }
+    },
+    {
+      "id": 133,
+      "name_ko": "이브이",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        55,
+        55,
+        50,
+        45,
+        65,
+        55
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 55,
+        "def": 50,
+        "spa": 45,
+        "spd": 65,
+        "spe": 55
+      }
+    },
+    {
+      "id": 134,
+      "name_ko": "샤미드",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        130,
+        65,
+        60,
+        110,
+        95,
+        65
+      ],
+      "stats": {
+        "hp": 130,
+        "atk": 65,
+        "def": 60,
+        "spa": 110,
+        "spd": 95,
+        "spe": 65
+      }
+    },
+    {
+      "id": 135,
+      "name_ko": "쥬피썬더",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        65,
+        65,
+        60,
+        110,
+        95,
+        130
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 65,
+        "def": 60,
+        "spa": 110,
+        "spd": 95,
+        "spe": 130
+      }
+    },
+    {
+      "id": 136,
+      "name_ko": "부스터",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        65,
+        130,
+        60,
+        95,
+        110,
+        65
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 130,
+        "def": 60,
+        "spa": 95,
+        "spd": 110,
+        "spe": 65
+      }
+    },
+    {
+      "id": 137,
+      "name_ko": "폴리곤",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        65,
+        60,
+        70,
+        85,
+        75,
+        40
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 60,
+        "def": 70,
+        "spa": 85,
+        "spd": 75,
+        "spe": 40
+      }
+    },
+    {
+      "id": 138,
+      "name_ko": "암나이트",
+      "types_ko": [
+        "바위",
+        "물"
+      ],
+      "types_en": [
+        "rock",
+        "water"
+      ],
+      "stats_habdcs": [
+        35,
+        40,
+        100,
+        90,
+        55,
+        35
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 40,
+        "def": 100,
+        "spa": 90,
+        "spd": 55,
+        "spe": 35
+      }
+    },
+    {
+      "id": 139,
+      "name_ko": "암스타",
+      "types_ko": [
+        "바위",
+        "물"
+      ],
+      "types_en": [
+        "rock",
+        "water"
+      ],
+      "stats_habdcs": [
+        70,
+        60,
+        125,
+        115,
+        70,
+        55
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 60,
+        "def": 125,
+        "spa": 115,
+        "spd": 70,
+        "spe": 55
+      }
+    },
+    {
+      "id": 140,
+      "name_ko": "투구",
+      "types_ko": [
+        "바위",
+        "물"
+      ],
+      "types_en": [
+        "rock",
+        "water"
+      ],
+      "stats_habdcs": [
+        30,
+        80,
+        90,
+        55,
+        45,
+        55
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 80,
+        "def": 90,
+        "spa": 55,
+        "spd": 45,
+        "spe": 55
+      }
+    },
+    {
+      "id": 141,
+      "name_ko": "투구푸스",
+      "types_ko": [
+        "바위",
+        "물"
+      ],
+      "types_en": [
+        "rock",
+        "water"
+      ],
+      "stats_habdcs": [
+        60,
+        115,
+        105,
+        65,
+        70,
+        80
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 115,
+        "def": 105,
+        "spa": 65,
+        "spd": 70,
+        "spe": 80
+      }
+    },
+    {
+      "id": 142,
+      "name_ko": "프테라",
+      "types_ko": [
+        "바위",
+        "비행"
+      ],
+      "types_en": [
+        "rock",
+        "flying"
+      ],
+      "stats_habdcs": [
+        80,
+        105,
+        65,
+        60,
+        75,
+        130
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 105,
+        "def": 65,
+        "spa": 60,
+        "spd": 75,
+        "spe": 130
+      }
+    },
+    {
+      "id": 143,
+      "name_ko": "잠만보",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        160,
+        110,
+        65,
+        65,
+        110,
+        30
+      ],
+      "stats": {
+        "hp": 160,
+        "atk": 110,
+        "def": 65,
+        "spa": 65,
+        "spd": 110,
+        "spe": 30
+      }
+    },
+    {
+      "id": 144,
+      "name_ko": "프리져",
+      "types_ko": [
+        "얼음",
+        "비행"
+      ],
+      "types_en": [
+        "ice",
+        "flying"
+      ],
+      "stats_habdcs": [
+        90,
+        85,
+        100,
+        95,
+        125,
+        85
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 85,
+        "def": 100,
+        "spa": 95,
+        "spd": 125,
+        "spe": 85
+      }
+    },
+    {
+      "id": 145,
+      "name_ko": "썬더",
+      "types_ko": [
+        "전기",
+        "비행"
+      ],
+      "types_en": [
+        "electric",
+        "flying"
+      ],
+      "stats_habdcs": [
+        90,
+        90,
+        85,
+        125,
+        90,
+        100
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 90,
+        "def": 85,
+        "spa": 125,
+        "spd": 90,
+        "spe": 100
+      }
+    },
+    {
+      "id": 146,
+      "name_ko": "파이어",
+      "types_ko": [
+        "불꽃",
+        "비행"
+      ],
+      "types_en": [
+        "fire",
+        "flying"
+      ],
+      "stats_habdcs": [
+        90,
+        100,
+        90,
+        125,
+        85,
+        90
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 100,
+        "def": 90,
+        "spa": 125,
+        "spd": 85,
+        "spe": 90
+      }
+    },
+    {
+      "id": 147,
+      "name_ko": "미뇽",
+      "types_ko": [
+        "드래곤"
+      ],
+      "types_en": [
+        "dragon"
+      ],
+      "stats_habdcs": [
+        41,
+        64,
+        45,
+        50,
+        50,
+        50
+      ],
+      "stats": {
+        "hp": 41,
+        "atk": 64,
+        "def": 45,
+        "spa": 50,
+        "spd": 50,
+        "spe": 50
+      }
+    },
+    {
+      "id": 148,
+      "name_ko": "신뇽",
+      "types_ko": [
+        "드래곤"
+      ],
+      "types_en": [
+        "dragon"
+      ],
+      "stats_habdcs": [
+        61,
+        84,
+        65,
+        70,
+        70,
+        70
+      ],
+      "stats": {
+        "hp": 61,
+        "atk": 84,
+        "def": 65,
+        "spa": 70,
+        "spd": 70,
+        "spe": 70
+      }
+    },
+    {
+      "id": 149,
+      "name_ko": "망나뇽",
+      "types_ko": [
+        "드래곤",
+        "비행"
+      ],
+      "types_en": [
+        "dragon",
+        "flying"
+      ],
+      "stats_habdcs": [
+        91,
+        134,
+        95,
+        100,
+        100,
+        80
+      ],
+      "stats": {
+        "hp": 91,
+        "atk": 134,
+        "def": 95,
+        "spa": 100,
+        "spd": 100,
+        "spe": 80
+      }
+    },
+    {
+      "id": 150,
+      "name_ko": "뮤츠",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        106,
+        110,
+        90,
+        154,
+        90,
+        130
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 110,
+        "def": 90,
+        "spa": 154,
+        "spd": 90,
+        "spe": 130
+      }
+    },
+    {
+      "id": 151,
+      "name_ko": "뮤",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 100,
+        "def": 100,
+        "spa": 100,
+        "spd": 100,
+        "spe": 100
+      }
+    },
+    {
+      "id": 152,
+      "name_ko": "치코리타",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        45,
+        49,
+        65,
+        49,
+        65,
+        45
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 49,
+        "def": 65,
+        "spa": 49,
+        "spd": 65,
+        "spe": 45
+      }
+    },
+    {
+      "id": 153,
+      "name_ko": "베이리프",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        60,
+        62,
+        80,
+        63,
+        80,
+        60
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 62,
+        "def": 80,
+        "spa": 63,
+        "spd": 80,
+        "spe": 60
+      }
+    },
+    {
+      "id": 154,
+      "name_ko": "메가니움",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        80,
+        82,
+        100,
+        83,
+        100,
+        80
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 82,
+        "def": 100,
+        "spa": 83,
+        "spd": 100,
+        "spe": 80
+      }
+    },
+    {
+      "id": 155,
+      "name_ko": "브케인",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        39,
+        52,
+        43,
+        60,
+        50,
+        65
+      ],
+      "stats": {
+        "hp": 39,
+        "atk": 52,
+        "def": 43,
+        "spa": 60,
+        "spd": 50,
+        "spe": 65
+      }
+    },
+    {
+      "id": 156,
+      "name_ko": "마그케인",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        58,
+        64,
+        58,
+        80,
+        65,
+        80
+      ],
+      "stats": {
+        "hp": 58,
+        "atk": 64,
+        "def": 58,
+        "spa": 80,
+        "spd": 65,
+        "spe": 80
+      }
+    },
+    {
+      "id": 157,
+      "name_ko": "블레이범",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        78,
+        84,
+        78,
+        109,
+        85,
+        100
+      ],
+      "stats": {
+        "hp": 78,
+        "atk": 84,
+        "def": 78,
+        "spa": 109,
+        "spd": 85,
+        "spe": 100
+      }
+    },
+    {
+      "id": 158,
+      "name_ko": "리아코",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        50,
+        65,
+        64,
+        44,
+        48,
+        43
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 65,
+        "def": 64,
+        "spa": 44,
+        "spd": 48,
+        "spe": 43
+      }
+    },
+    {
+      "id": 159,
+      "name_ko": "엘리게이",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        65,
+        80,
+        80,
+        59,
+        63,
+        58
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 80,
+        "def": 80,
+        "spa": 59,
+        "spd": 63,
+        "spe": 58
+      }
+    },
+    {
+      "id": 160,
+      "name_ko": "장크로다일",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        85,
+        105,
+        100,
+        79,
+        83,
+        78
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 105,
+        "def": 100,
+        "spa": 79,
+        "spd": 83,
+        "spe": 78
+      }
+    },
+    {
+      "id": 161,
+      "name_ko": "꼬리선",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        35,
+        46,
+        34,
+        35,
+        45,
+        20
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 46,
+        "def": 34,
+        "spa": 35,
+        "spd": 45,
+        "spe": 20
+      }
+    },
+    {
+      "id": 162,
+      "name_ko": "다꼬리",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        85,
+        76,
+        64,
+        45,
+        55,
+        90
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 76,
+        "def": 64,
+        "spa": 45,
+        "spd": 55,
+        "spe": 90
+      }
+    },
+    {
+      "id": 163,
+      "name_ko": "부우부",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        60,
+        30,
+        30,
+        36,
+        56,
+        50
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 30,
+        "def": 30,
+        "spa": 36,
+        "spd": 56,
+        "spe": 50
+      }
+    },
+    {
+      "id": 164,
+      "name_ko": "야부엉",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "normal",
+        "flying"
+      ],
+      "stats_habdcs": [
+        100,
+        50,
+        50,
+        86,
+        96,
+        70
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 50,
+        "def": 50,
+        "spa": 86,
+        "spd": 96,
+        "spe": 70
+      }
+    },
+    {
+      "id": 165,
+      "name_ko": "레디바",
+      "types_ko": [
+        "벌레",
+        "비행"
+      ],
+      "types_en": [
+        "bug",
+        "flying"
+      ],
+      "stats_habdcs": [
+        40,
+        20,
+        30,
+        40,
+        80,
+        55
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 20,
+        "def": 30,
+        "spa": 40,
+        "spd": 80,
+        "spe": 55
+      }
+    },
+    {
+      "id": 166,
+      "name_ko": "레디안",
+      "types_ko": [
+        "벌레",
+        "비행"
+      ],
+      "types_en": [
+        "bug",
+        "flying"
+      ],
+      "stats_habdcs": [
+        55,
+        35,
+        50,
+        55,
+        110,
+        85
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 35,
+        "def": 50,
+        "spa": 55,
+        "spd": 110,
+        "spe": 85
+      }
+    },
+    {
+      "id": 167,
+      "name_ko": "페이검",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        40,
+        60,
+        40,
+        40,
+        40,
+        30
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 60,
+        "def": 40,
+        "spa": 40,
+        "spd": 40,
+        "spe": 30
+      }
+    },
+    {
+      "id": 168,
+      "name_ko": "아리아도스",
+      "types_ko": [
+        "벌레",
+        "독"
+      ],
+      "types_en": [
+        "bug",
+        "poison"
+      ],
+      "stats_habdcs": [
+        70,
+        90,
+        70,
+        60,
+        70,
+        40
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 90,
+        "def": 70,
+        "spa": 60,
+        "spd": 70,
+        "spe": 40
+      }
+    },
+    {
+      "id": 169,
+      "name_ko": "크로뱃",
+      "types_ko": [
+        "독",
+        "비행"
+      ],
+      "types_en": [
+        "poison",
+        "flying"
+      ],
+      "stats_habdcs": [
+        85,
+        90,
+        80,
+        70,
+        80,
+        130
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 90,
+        "def": 80,
+        "spa": 70,
+        "spd": 80,
+        "spe": 130
+      }
+    },
+    {
+      "id": 170,
+      "name_ko": "초라기",
+      "types_ko": [
+        "물",
+        "전기"
+      ],
+      "types_en": [
+        "water",
+        "electric"
+      ],
+      "stats_habdcs": [
+        75,
+        38,
+        38,
+        56,
+        56,
+        67
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 38,
+        "def": 38,
+        "spa": 56,
+        "spd": 56,
+        "spe": 67
+      }
+    },
+    {
+      "id": 171,
+      "name_ko": "랜턴",
+      "types_ko": [
+        "물",
+        "전기"
+      ],
+      "types_en": [
+        "water",
+        "electric"
+      ],
+      "stats_habdcs": [
+        125,
+        58,
+        58,
+        76,
+        76,
+        67
+      ],
+      "stats": {
+        "hp": 125,
+        "atk": 58,
+        "def": 58,
+        "spa": 76,
+        "spd": 76,
+        "spe": 67
+      }
+    },
+    {
+      "id": 172,
+      "name_ko": "피츄",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        20,
+        40,
+        15,
+        35,
+        35,
+        60
+      ],
+      "stats": {
+        "hp": 20,
+        "atk": 40,
+        "def": 15,
+        "spa": 35,
+        "spd": 35,
+        "spe": 60
+      }
+    },
+    {
+      "id": 173,
+      "name_ko": "삐",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "fairy"
+      ],
+      "stats_habdcs": [
+        50,
+        25,
+        28,
+        45,
+        55,
+        15
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 25,
+        "def": 28,
+        "spa": 45,
+        "spd": 55,
+        "spe": 15
+      }
+    },
+    {
+      "id": 174,
+      "name_ko": "푸푸린",
+      "types_ko": [
+        "노말",
+        "노말"
+      ],
+      "types_en": [
+        "normal",
+        "fairy"
+      ],
+      "stats_habdcs": [
+        90,
+        30,
+        15,
+        40,
+        20,
+        15
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 30,
+        "def": 15,
+        "spa": 40,
+        "spd": 20,
+        "spe": 15
+      }
+    },
+    {
+      "id": 175,
+      "name_ko": "토게피",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "fairy"
+      ],
+      "stats_habdcs": [
+        35,
+        20,
+        65,
+        40,
+        65,
+        20
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 20,
+        "def": 65,
+        "spa": 40,
+        "spd": 65,
+        "spe": 20
+      }
+    },
+    {
+      "id": 176,
+      "name_ko": "토게틱",
+      "types_ko": [
+        "노말",
+        "비행"
+      ],
+      "types_en": [
+        "fairy",
+        "flying"
+      ],
+      "stats_habdcs": [
+        55,
+        40,
+        85,
+        80,
+        105,
+        40
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 40,
+        "def": 85,
+        "spa": 80,
+        "spd": 105,
+        "spe": 40
+      }
+    },
+    {
+      "id": 177,
+      "name_ko": "네이티",
+      "types_ko": [
+        "에스퍼",
+        "비행"
+      ],
+      "types_en": [
+        "psychic",
+        "flying"
+      ],
+      "stats_habdcs": [
+        40,
+        50,
+        45,
+        70,
+        45,
+        70
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 50,
+        "def": 45,
+        "spa": 70,
+        "spd": 45,
+        "spe": 70
+      }
+    },
+    {
+      "id": 178,
+      "name_ko": "네이티오",
+      "types_ko": [
+        "에스퍼",
+        "비행"
+      ],
+      "types_en": [
+        "psychic",
+        "flying"
+      ],
+      "stats_habdcs": [
+        65,
+        75,
+        70,
+        95,
+        70,
+        95
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 75,
+        "def": 70,
+        "spa": 95,
+        "spd": 70,
+        "spe": 95
+      }
+    },
+    {
+      "id": 179,
+      "name_ko": "메리프",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        55,
+        40,
+        40,
+        65,
+        45,
+        35
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 40,
+        "def": 40,
+        "spa": 65,
+        "spd": 45,
+        "spe": 35
+      }
+    },
+    {
+      "id": 180,
+      "name_ko": "보송송",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        70,
+        55,
+        55,
+        80,
+        60,
+        45
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 55,
+        "def": 55,
+        "spa": 80,
+        "spd": 60,
+        "spe": 45
+      }
+    },
+    {
+      "id": 181,
+      "name_ko": "전룡",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        90,
+        75,
+        85,
+        115,
+        90,
+        55
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 75,
+        "def": 85,
+        "spa": 115,
+        "spd": 90,
+        "spe": 55
+      }
+    },
+    {
+      "id": 182,
+      "name_ko": "아르코",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        75,
+        80,
+        95,
+        90,
+        100,
+        50
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 80,
+        "def": 95,
+        "spa": 90,
+        "spd": 100,
+        "spe": 50
+      }
+    },
+    {
+      "id": 183,
+      "name_ko": "마릴",
+      "types_ko": [
+        "물",
+        "노말"
+      ],
+      "types_en": [
+        "water",
+        "fairy"
+      ],
+      "stats_habdcs": [
+        70,
+        20,
+        50,
+        20,
+        50,
+        40
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 20,
+        "def": 50,
+        "spa": 20,
+        "spd": 50,
+        "spe": 40
+      }
+    },
+    {
+      "id": 184,
+      "name_ko": "마릴리",
+      "types_ko": [
+        "물",
+        "노말"
+      ],
+      "types_en": [
+        "water",
+        "fairy"
+      ],
+      "stats_habdcs": [
+        100,
+        50,
+        80,
+        60,
+        80,
+        50
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 50,
+        "def": 80,
+        "spa": 60,
+        "spd": 80,
+        "spe": 50
+      }
+    },
+    {
+      "id": 185,
+      "name_ko": "꼬지모",
+      "types_ko": [
+        "바위"
+      ],
+      "types_en": [
+        "rock"
+      ],
+      "stats_habdcs": [
+        70,
+        100,
+        115,
+        30,
+        65,
+        30
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 100,
+        "def": 115,
+        "spa": 30,
+        "spd": 65,
+        "spe": 30
+      }
+    },
+    {
+      "id": 186,
+      "name_ko": "왕구리",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        90,
+        75,
+        75,
+        90,
+        100,
+        70
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 75,
+        "def": 75,
+        "spa": 90,
+        "spd": 100,
+        "spe": 70
+      }
+    },
+    {
+      "id": 187,
+      "name_ko": "통통코",
+      "types_ko": [
+        "풀",
+        "비행"
+      ],
+      "types_en": [
+        "grass",
+        "flying"
+      ],
+      "stats_habdcs": [
+        35,
+        35,
+        40,
+        35,
+        55,
+        50
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 35,
+        "def": 40,
+        "spa": 35,
+        "spd": 55,
+        "spe": 50
+      }
+    },
+    {
+      "id": 188,
+      "name_ko": "두코",
+      "types_ko": [
+        "풀",
+        "비행"
+      ],
+      "types_en": [
+        "grass",
+        "flying"
+      ],
+      "stats_habdcs": [
+        55,
+        45,
+        50,
+        45,
+        65,
+        80
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 45,
+        "def": 50,
+        "spa": 45,
+        "spd": 65,
+        "spe": 80
+      }
+    },
+    {
+      "id": 189,
+      "name_ko": "솜솜코",
+      "types_ko": [
+        "풀",
+        "비행"
+      ],
+      "types_en": [
+        "grass",
+        "flying"
+      ],
+      "stats_habdcs": [
+        75,
+        55,
+        70,
+        55,
+        95,
+        110
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 55,
+        "def": 70,
+        "spa": 55,
+        "spd": 95,
+        "spe": 110
+      }
+    },
+    {
+      "id": 190,
+      "name_ko": "에이팜",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        55,
+        70,
+        55,
+        40,
+        55,
+        85
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 70,
+        "def": 55,
+        "spa": 40,
+        "spd": 55,
+        "spe": 85
+      }
+    },
+    {
+      "id": 191,
+      "name_ko": "해너츠",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        30,
+        30,
+        30,
+        30,
+        30,
+        30
+      ],
+      "stats": {
+        "hp": 30,
+        "atk": 30,
+        "def": 30,
+        "spa": 30,
+        "spd": 30,
+        "spe": 30
+      }
+    },
+    {
+      "id": 192,
+      "name_ko": "해루미",
+      "types_ko": [
+        "풀"
+      ],
+      "types_en": [
+        "grass"
+      ],
+      "stats_habdcs": [
+        75,
+        75,
+        55,
+        105,
+        85,
+        30
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 75,
+        "def": 55,
+        "spa": 105,
+        "spd": 85,
+        "spe": 30
+      }
+    },
+    {
+      "id": 193,
+      "name_ko": "왕자리",
+      "types_ko": [
+        "벌레",
+        "비행"
+      ],
+      "types_en": [
+        "bug",
+        "flying"
+      ],
+      "stats_habdcs": [
+        65,
+        65,
+        45,
+        75,
+        45,
+        95
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 65,
+        "def": 45,
+        "spa": 75,
+        "spd": 45,
+        "spe": 95
+      }
+    },
+    {
+      "id": 194,
+      "name_ko": "우파",
+      "types_ko": [
+        "물",
+        "땅"
+      ],
+      "types_en": [
+        "water",
+        "ground"
+      ],
+      "stats_habdcs": [
+        55,
+        45,
+        45,
+        25,
+        25,
+        15
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 45,
+        "def": 45,
+        "spa": 25,
+        "spd": 25,
+        "spe": 15
+      }
+    },
+    {
+      "id": 195,
+      "name_ko": "누오",
+      "types_ko": [
+        "물",
+        "땅"
+      ],
+      "types_en": [
+        "water",
+        "ground"
+      ],
+      "stats_habdcs": [
+        95,
+        85,
+        85,
+        65,
+        65,
+        35
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 85,
+        "def": 85,
+        "spa": 65,
+        "spd": 65,
+        "spe": 35
+      }
+    },
+    {
+      "id": 196,
+      "name_ko": "에브이",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        65,
+        65,
+        60,
+        130,
+        95,
+        110
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 65,
+        "def": 60,
+        "spa": 130,
+        "spd": 95,
+        "spe": 110
+      }
+    },
+    {
+      "id": 197,
+      "name_ko": "블래키",
+      "types_ko": [
+        "악"
+      ],
+      "types_en": [
+        "dark"
+      ],
+      "stats_habdcs": [
+        95,
+        65,
+        110,
+        60,
+        130,
+        65
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 65,
+        "def": 110,
+        "spa": 60,
+        "spd": 130,
+        "spe": 65
+      }
+    },
+    {
+      "id": 198,
+      "name_ko": "니로우",
+      "types_ko": [
+        "악",
+        "비행"
+      ],
+      "types_en": [
+        "dark",
+        "flying"
+      ],
+      "stats_habdcs": [
+        60,
+        85,
+        42,
+        85,
+        42,
+        91
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 85,
+        "def": 42,
+        "spa": 85,
+        "spd": 42,
+        "spe": 91
+      }
+    },
+    {
+      "id": 199,
+      "name_ko": "야도킹",
+      "types_ko": [
+        "물",
+        "에스퍼"
+      ],
+      "types_en": [
+        "water",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        95,
+        75,
+        80,
+        100,
+        110,
+        30
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 75,
+        "def": 80,
+        "spa": 100,
+        "spd": 110,
+        "spe": 30
+      }
+    },
+    {
+      "id": 200,
+      "name_ko": "무우마",
+      "types_ko": [
+        "고스트"
+      ],
+      "types_en": [
+        "ghost"
+      ],
+      "stats_habdcs": [
+        60,
+        60,
+        60,
+        85,
+        85,
+        85
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 60,
+        "def": 60,
+        "spa": 85,
+        "spd": 85,
+        "spe": 85
+      }
+    },
+    {
+      "id": 201,
+      "name_ko": "안농",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        48,
+        72,
+        48,
+        72,
+        48,
+        48
+      ],
+      "stats": {
+        "hp": 48,
+        "atk": 72,
+        "def": 48,
+        "spa": 72,
+        "spd": 48,
+        "spe": 48
+      }
+    },
+    {
+      "id": 202,
+      "name_ko": "마자용",
+      "types_ko": [
+        "에스퍼"
+      ],
+      "types_en": [
+        "psychic"
+      ],
+      "stats_habdcs": [
+        190,
+        33,
+        58,
+        33,
+        58,
+        33
+      ],
+      "stats": {
+        "hp": 190,
+        "atk": 33,
+        "def": 58,
+        "spa": 33,
+        "spd": 58,
+        "spe": 33
+      }
+    },
+    {
+      "id": 203,
+      "name_ko": "키링키",
+      "types_ko": [
+        "노말",
+        "에스퍼"
+      ],
+      "types_en": [
+        "normal",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        70,
+        80,
+        65,
+        90,
+        65,
+        85
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 80,
+        "def": 65,
+        "spa": 90,
+        "spd": 65,
+        "spe": 85
+      }
+    },
+    {
+      "id": 204,
+      "name_ko": "피콘",
+      "types_ko": [
+        "벌레"
+      ],
+      "types_en": [
+        "bug"
+      ],
+      "stats_habdcs": [
+        50,
+        65,
+        90,
+        35,
+        35,
+        15
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 65,
+        "def": 90,
+        "spa": 35,
+        "spd": 35,
+        "spe": 15
+      }
+    },
+    {
+      "id": 205,
+      "name_ko": "쏘콘",
+      "types_ko": [
+        "벌레",
+        "강철"
+      ],
+      "types_en": [
+        "bug",
+        "steel"
+      ],
+      "stats_habdcs": [
+        75,
+        90,
+        140,
+        60,
+        60,
+        40
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 90,
+        "def": 140,
+        "spa": 60,
+        "spd": 60,
+        "spe": 40
+      }
+    },
+    {
+      "id": 206,
+      "name_ko": "노고치",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        100,
+        70,
+        70,
+        65,
+        65,
+        45
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 70,
+        "def": 70,
+        "spa": 65,
+        "spd": 65,
+        "spe": 45
+      }
+    },
+    {
+      "id": 207,
+      "name_ko": "글라이거",
+      "types_ko": [
+        "땅",
+        "비행"
+      ],
+      "types_en": [
+        "ground",
+        "flying"
+      ],
+      "stats_habdcs": [
+        65,
+        75,
+        105,
+        35,
+        65,
+        85
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 75,
+        "def": 105,
+        "spa": 35,
+        "spd": 65,
+        "spe": 85
+      }
+    },
+    {
+      "id": 208,
+      "name_ko": "강철톤",
+      "types_ko": [
+        "강철",
+        "땅"
+      ],
+      "types_en": [
+        "steel",
+        "ground"
+      ],
+      "stats_habdcs": [
+        75,
+        85,
+        200,
+        55,
+        65,
+        30
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 85,
+        "def": 200,
+        "spa": 55,
+        "spd": 65,
+        "spe": 30
+      }
+    },
+    {
+      "id": 209,
+      "name_ko": "블루",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "fairy"
+      ],
+      "stats_habdcs": [
+        60,
+        80,
+        50,
+        40,
+        40,
+        30
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 80,
+        "def": 50,
+        "spa": 40,
+        "spd": 40,
+        "spe": 30
+      }
+    },
+    {
+      "id": 210,
+      "name_ko": "그랑블루",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "fairy"
+      ],
+      "stats_habdcs": [
+        90,
+        120,
+        75,
+        60,
+        60,
+        45
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 120,
+        "def": 75,
+        "spa": 60,
+        "spd": 60,
+        "spe": 45
+      }
+    },
+    {
+      "id": 211,
+      "name_ko": "침바루",
+      "types_ko": [
+        "물",
+        "독"
+      ],
+      "types_en": [
+        "water",
+        "poison"
+      ],
+      "stats_habdcs": [
+        65,
+        95,
+        85,
+        55,
+        55,
+        85
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 95,
+        "def": 85,
+        "spa": 55,
+        "spd": 55,
+        "spe": 85
+      }
+    },
+    {
+      "id": 212,
+      "name_ko": "핫삼",
+      "types_ko": [
+        "벌레",
+        "강철"
+      ],
+      "types_en": [
+        "bug",
+        "steel"
+      ],
+      "stats_habdcs": [
+        70,
+        130,
+        100,
+        55,
+        80,
+        65
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 130,
+        "def": 100,
+        "spa": 55,
+        "spd": 80,
+        "spe": 65
+      }
+    },
+    {
+      "id": 213,
+      "name_ko": "단단지",
+      "types_ko": [
+        "벌레",
+        "바위"
+      ],
+      "types_en": [
+        "bug",
+        "rock"
+      ],
+      "stats_habdcs": [
+        20,
+        10,
+        230,
+        10,
+        230,
+        5
+      ],
+      "stats": {
+        "hp": 20,
+        "atk": 10,
+        "def": 230,
+        "spa": 10,
+        "spd": 230,
+        "spe": 5
+      }
+    },
+    {
+      "id": 214,
+      "name_ko": "헤라크로스",
+      "types_ko": [
+        "벌레",
+        "격투"
+      ],
+      "types_en": [
+        "bug",
+        "fighting"
+      ],
+      "stats_habdcs": [
+        80,
+        125,
+        75,
+        40,
+        95,
+        85
+      ],
+      "stats": {
+        "hp": 80,
+        "atk": 125,
+        "def": 75,
+        "spa": 40,
+        "spd": 95,
+        "spe": 85
+      }
+    },
+    {
+      "id": 215,
+      "name_ko": "포푸니",
+      "types_ko": [
+        "악",
+        "얼음"
+      ],
+      "types_en": [
+        "dark",
+        "ice"
+      ],
+      "stats_habdcs": [
+        55,
+        95,
+        55,
+        35,
+        75,
+        115
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 95,
+        "def": 55,
+        "spa": 35,
+        "spd": 75,
+        "spe": 115
+      }
+    },
+    {
+      "id": 216,
+      "name_ko": "깜지곰",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        60,
+        80,
+        50,
+        50,
+        50,
+        40
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 80,
+        "def": 50,
+        "spa": 50,
+        "spd": 50,
+        "spe": 40
+      }
+    },
+    {
+      "id": 217,
+      "name_ko": "링곰",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        90,
+        130,
+        75,
+        75,
+        75,
+        55
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 130,
+        "def": 75,
+        "spa": 75,
+        "spd": 75,
+        "spe": 55
+      }
+    },
+    {
+      "id": 218,
+      "name_ko": "마그마그",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        40,
+        40,
+        40,
+        70,
+        40,
+        20
+      ],
+      "stats": {
+        "hp": 40,
+        "atk": 40,
+        "def": 40,
+        "spa": 70,
+        "spd": 40,
+        "spe": 20
+      }
+    },
+    {
+      "id": 219,
+      "name_ko": "마그카르고",
+      "types_ko": [
+        "불꽃",
+        "바위"
+      ],
+      "types_en": [
+        "fire",
+        "rock"
+      ],
+      "stats_habdcs": [
+        60,
+        50,
+        120,
+        90,
+        80,
+        30
+      ],
+      "stats": {
+        "hp": 60,
+        "atk": 50,
+        "def": 120,
+        "spa": 90,
+        "spd": 80,
+        "spe": 30
+      }
+    },
+    {
+      "id": 220,
+      "name_ko": "꾸꾸리",
+      "types_ko": [
+        "얼음",
+        "땅"
+      ],
+      "types_en": [
+        "ice",
+        "ground"
+      ],
+      "stats_habdcs": [
+        50,
+        50,
+        40,
+        30,
+        30,
+        50
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 50,
+        "def": 40,
+        "spa": 30,
+        "spd": 30,
+        "spe": 50
+      }
+    },
+    {
+      "id": 221,
+      "name_ko": "메꾸리",
+      "types_ko": [
+        "얼음",
+        "땅"
+      ],
+      "types_en": [
+        "ice",
+        "ground"
+      ],
+      "stats_habdcs": [
+        100,
+        100,
+        80,
+        60,
+        60,
+        50
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 100,
+        "def": 80,
+        "spa": 60,
+        "spd": 60,
+        "spe": 50
+      }
+    },
+    {
+      "id": 222,
+      "name_ko": "코산호",
+      "types_ko": [
+        "물",
+        "바위"
+      ],
+      "types_en": [
+        "water",
+        "rock"
+      ],
+      "stats_habdcs": [
+        65,
+        55,
+        95,
+        65,
+        95,
+        35
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 55,
+        "def": 95,
+        "spa": 65,
+        "spd": 95,
+        "spe": 35
+      }
+    },
+    {
+      "id": 223,
+      "name_ko": "총어",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        35,
+        65,
+        35,
+        65,
+        35,
+        65
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 65,
+        "def": 35,
+        "spa": 65,
+        "spd": 35,
+        "spe": 65
+      }
+    },
+    {
+      "id": 224,
+      "name_ko": "대포무노",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        75,
+        105,
+        75,
+        105,
+        75,
+        45
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 105,
+        "def": 75,
+        "spa": 105,
+        "spd": 75,
+        "spe": 45
+      }
+    },
+    {
+      "id": 225,
+      "name_ko": "딜리버드",
+      "types_ko": [
+        "얼음",
+        "비행"
+      ],
+      "types_en": [
+        "ice",
+        "flying"
+      ],
+      "stats_habdcs": [
+        45,
+        55,
+        45,
+        65,
+        45,
+        75
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 55,
+        "def": 45,
+        "spa": 65,
+        "spd": 45,
+        "spe": 75
+      }
+    },
+    {
+      "id": 226,
+      "name_ko": "만타인",
+      "types_ko": [
+        "물",
+        "비행"
+      ],
+      "types_en": [
+        "water",
+        "flying"
+      ],
+      "stats_habdcs": [
+        85,
+        40,
+        70,
+        80,
+        140,
+        70
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 40,
+        "def": 70,
+        "spa": 80,
+        "spd": 140,
+        "spe": 70
+      }
+    },
+    {
+      "id": 227,
+      "name_ko": "무장조",
+      "types_ko": [
+        "강철",
+        "비행"
+      ],
+      "types_en": [
+        "steel",
+        "flying"
+      ],
+      "stats_habdcs": [
+        65,
+        80,
+        140,
+        40,
+        70,
+        70
+      ],
+      "stats": {
+        "hp": 65,
+        "atk": 80,
+        "def": 140,
+        "spa": 40,
+        "spd": 70,
+        "spe": 70
+      }
+    },
+    {
+      "id": 228,
+      "name_ko": "델빌",
+      "types_ko": [
+        "악",
+        "불꽃"
+      ],
+      "types_en": [
+        "dark",
+        "fire"
+      ],
+      "stats_habdcs": [
+        45,
+        60,
+        30,
+        80,
+        50,
+        65
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 60,
+        "def": 30,
+        "spa": 80,
+        "spd": 50,
+        "spe": 65
+      }
+    },
+    {
+      "id": 229,
+      "name_ko": "헬가",
+      "types_ko": [
+        "악",
+        "불꽃"
+      ],
+      "types_en": [
+        "dark",
+        "fire"
+      ],
+      "stats_habdcs": [
+        75,
+        90,
+        50,
+        110,
+        80,
+        95
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 90,
+        "def": 50,
+        "spa": 110,
+        "spd": 80,
+        "spe": 95
+      }
+    },
+    {
+      "id": 230,
+      "name_ko": "킹드라",
+      "types_ko": [
+        "물",
+        "드래곤"
+      ],
+      "types_en": [
+        "water",
+        "dragon"
+      ],
+      "stats_habdcs": [
+        75,
+        95,
+        95,
+        95,
+        95,
+        85
+      ],
+      "stats": {
+        "hp": 75,
+        "atk": 95,
+        "def": 95,
+        "spa": 95,
+        "spd": 95,
+        "spe": 85
+      }
+    },
+    {
+      "id": 231,
+      "name_ko": "코코리",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        90,
+        60,
+        60,
+        40,
+        40,
+        40
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 60,
+        "def": 60,
+        "spa": 40,
+        "spd": 40,
+        "spe": 40
+      }
+    },
+    {
+      "id": 232,
+      "name_ko": "코리갑",
+      "types_ko": [
+        "땅"
+      ],
+      "types_en": [
+        "ground"
+      ],
+      "stats_habdcs": [
+        90,
+        120,
+        120,
+        60,
+        60,
+        50
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 120,
+        "def": 120,
+        "spa": 60,
+        "spd": 60,
+        "spe": 50
+      }
+    },
+    {
+      "id": 233,
+      "name_ko": "폴리곤2",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        85,
+        80,
+        90,
+        105,
+        95,
+        60
+      ],
+      "stats": {
+        "hp": 85,
+        "atk": 80,
+        "def": 90,
+        "spa": 105,
+        "spd": 95,
+        "spe": 60
+      }
+    },
+    {
+      "id": 234,
+      "name_ko": "노라키",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        73,
+        95,
+        62,
+        85,
+        65,
+        85
+      ],
+      "stats": {
+        "hp": 73,
+        "atk": 95,
+        "def": 62,
+        "spa": 85,
+        "spd": 65,
+        "spe": 85
+      }
+    },
+    {
+      "id": 235,
+      "name_ko": "루브도",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        55,
+        20,
+        35,
+        20,
+        45,
+        75
+      ],
+      "stats": {
+        "hp": 55,
+        "atk": 20,
+        "def": 35,
+        "spa": 20,
+        "spd": 45,
+        "spe": 75
+      }
+    },
+    {
+      "id": 236,
+      "name_ko": "배루키",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        35,
+        35,
+        35,
+        35,
+        35,
+        35
+      ],
+      "stats": {
+        "hp": 35,
+        "atk": 35,
+        "def": 35,
+        "spa": 35,
+        "spd": 35,
+        "spe": 35
+      }
+    },
+    {
+      "id": 237,
+      "name_ko": "카포에라",
+      "types_ko": [
+        "격투"
+      ],
+      "types_en": [
+        "fighting"
+      ],
+      "stats_habdcs": [
+        50,
+        95,
+        95,
+        35,
+        110,
+        70
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 95,
+        "def": 95,
+        "spa": 35,
+        "spd": 110,
+        "spe": 70
+      }
+    },
+    {
+      "id": 238,
+      "name_ko": "뽀뽀라",
+      "types_ko": [
+        "얼음",
+        "에스퍼"
+      ],
+      "types_en": [
+        "ice",
+        "psychic"
+      ],
+      "stats_habdcs": [
+        45,
+        30,
+        15,
+        85,
+        65,
+        65
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 30,
+        "def": 15,
+        "spa": 85,
+        "spd": 65,
+        "spe": 65
+      }
+    },
+    {
+      "id": 239,
+      "name_ko": "에레키드",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        45,
+        63,
+        37,
+        65,
+        55,
+        95
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 63,
+        "def": 37,
+        "spa": 65,
+        "spd": 55,
+        "spe": 95
+      }
+    },
+    {
+      "id": 240,
+      "name_ko": "마그비",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        45,
+        75,
+        37,
+        70,
+        55,
+        83
+      ],
+      "stats": {
+        "hp": 45,
+        "atk": 75,
+        "def": 37,
+        "spa": 70,
+        "spd": 55,
+        "spe": 83
+      }
+    },
+    {
+      "id": 241,
+      "name_ko": "밀탱크",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        95,
+        80,
+        105,
+        40,
+        70,
+        100
+      ],
+      "stats": {
+        "hp": 95,
+        "atk": 80,
+        "def": 105,
+        "spa": 40,
+        "spd": 70,
+        "spe": 100
+      }
+    },
+    {
+      "id": 242,
+      "name_ko": "해피너스",
+      "types_ko": [
+        "노말"
+      ],
+      "types_en": [
+        "normal"
+      ],
+      "stats_habdcs": [
+        255,
+        10,
+        10,
+        75,
+        135,
+        55
+      ],
+      "stats": {
+        "hp": 255,
+        "atk": 10,
+        "def": 10,
+        "spa": 75,
+        "spd": 135,
+        "spe": 55
+      }
+    },
+    {
+      "id": 243,
+      "name_ko": "라이코",
+      "types_ko": [
+        "전기"
+      ],
+      "types_en": [
+        "electric"
+      ],
+      "stats_habdcs": [
+        90,
+        85,
+        75,
+        115,
+        100,
+        115
+      ],
+      "stats": {
+        "hp": 90,
+        "atk": 85,
+        "def": 75,
+        "spa": 115,
+        "spd": 100,
+        "spe": 115
+      }
+    },
+    {
+      "id": 244,
+      "name_ko": "앤테이",
+      "types_ko": [
+        "불꽃"
+      ],
+      "types_en": [
+        "fire"
+      ],
+      "stats_habdcs": [
+        115,
+        115,
+        85,
+        90,
+        75,
+        100
+      ],
+      "stats": {
+        "hp": 115,
+        "atk": 115,
+        "def": 85,
+        "spa": 90,
+        "spd": 75,
+        "spe": 100
+      }
+    },
+    {
+      "id": 245,
+      "name_ko": "스이쿤",
+      "types_ko": [
+        "물"
+      ],
+      "types_en": [
+        "water"
+      ],
+      "stats_habdcs": [
+        100,
+        75,
+        115,
+        90,
+        115,
+        85
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 75,
+        "def": 115,
+        "spa": 90,
+        "spd": 115,
+        "spe": 85
+      }
+    },
+    {
+      "id": 246,
+      "name_ko": "애버라스",
+      "types_ko": [
+        "바위",
+        "땅"
+      ],
+      "types_en": [
+        "rock",
+        "ground"
+      ],
+      "stats_habdcs": [
+        50,
+        64,
+        50,
+        45,
+        50,
+        41
+      ],
+      "stats": {
+        "hp": 50,
+        "atk": 64,
+        "def": 50,
+        "spa": 45,
+        "spd": 50,
+        "spe": 41
+      }
+    },
+    {
+      "id": 247,
+      "name_ko": "데기라스",
+      "types_ko": [
+        "바위",
+        "땅"
+      ],
+      "types_en": [
+        "rock",
+        "ground"
+      ],
+      "stats_habdcs": [
+        70,
+        84,
+        70,
+        65,
+        70,
+        51
+      ],
+      "stats": {
+        "hp": 70,
+        "atk": 84,
+        "def": 70,
+        "spa": 65,
+        "spd": 70,
+        "spe": 51
+      }
+    },
+    {
+      "id": 248,
+      "name_ko": "마기라스",
+      "types_ko": [
+        "바위",
+        "악"
+      ],
+      "types_en": [
+        "rock",
+        "dark"
+      ],
+      "stats_habdcs": [
+        100,
+        134,
+        110,
+        95,
+        100,
+        61
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 134,
+        "def": 110,
+        "spa": 95,
+        "spd": 100,
+        "spe": 61
+      }
+    },
+    {
+      "id": 249,
+      "name_ko": "루기아",
+      "types_ko": [
+        "에스퍼",
+        "비행"
+      ],
+      "types_en": [
+        "psychic",
+        "flying"
+      ],
+      "stats_habdcs": [
+        106,
+        90,
+        130,
+        90,
+        154,
+        110
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 90,
+        "def": 130,
+        "spa": 90,
+        "spd": 154,
+        "spe": 110
+      }
+    },
+    {
+      "id": 250,
+      "name_ko": "칠색조",
+      "types_ko": [
+        "불꽃",
+        "비행"
+      ],
+      "types_en": [
+        "fire",
+        "flying"
+      ],
+      "stats_habdcs": [
+        106,
+        130,
+        90,
+        110,
+        154,
+        90
+      ],
+      "stats": {
+        "hp": 106,
+        "atk": 130,
+        "def": 90,
+        "spa": 110,
+        "spd": 154,
+        "spe": 90
+      }
+    },
+    {
+      "id": 251,
+      "name_ko": "세레비",
+      "types_ko": [
+        "에스퍼",
+        "풀"
+      ],
+      "types_en": [
+        "psychic",
+        "grass"
+      ],
+      "stats_habdcs": [
+        100,
+        100,
+        100,
+        100,
+        100,
+        100
+      ],
+      "stats": {
+        "hp": 100,
+        "atk": 100,
+        "def": 100,
+        "spa": 100,
+        "spd": 100,
+        "spe": 100
+      }
+    }
+  ]
+}

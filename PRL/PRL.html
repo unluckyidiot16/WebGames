@@ -69,10 +69,17 @@
                 </div>
                 <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-xs font-bold flex items-center gap-1">
                     <span class="text-blue-500">P</span><span id="pointsTextLobby">0</span>
+                    <button onclick="importFromClipboard()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 active:scale-95 transition-transform mb-2">
+                        📥 index 데이터(클립보드) 가져오기
+                    </button>
                 </div>
             </div>
         </div>
 
+        <button onclick="importFromClipboard()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 active:scale-95 transition-transform mb-2">
+            📥 index 데이터(클립보드) 가져오기
+        </button>
+        
         <div class="grid grid-cols-2 gap-3">
             <button id="lobbyCodexBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-emerald-400 transition-colors group">
                 <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100">
@@ -288,7 +295,7 @@
 
 
 <div id="quizModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="bg-slate-800 p-4 text-white flex justify-between items-center"><h3 class="font-bold text-lg">📝 수학 퀴즈</h3><span class="text-xs bg-slate-700 px-2 py-1 rounded text-yellow-300">정답 시 공격</span></div><div class="p-6"><div class="text-center mb-6"><p class="text-3xl font-black text-slate-800 tracking-wider" id="quizQuestion">?</p></div><div id="quizChoices" class="grid grid-cols-2 gap-3"></div></div><div class="bg-slate-50 p-3 text-center border-t"><button id="quizCancel" class="text-xs text-slate-400 underline">포기하기</button></div></div></div>
-<div id="rewardModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"><h3 class="text-2xl font-black text-slate-800 mb-2">VICTORY!</h3><div class="text-xs text-sky-600 font-bold mb-4 bg-sky-50 inline-block px-3 py-1 rounded-full">EXP <span id="rewardXpVal">0</span> 획득!</div><p class="text-sm text-slate-500 mb-2" id="rewardTitle">보상을 선택하세요</p><div class="grid grid-cols-1 gap-3" id="rewardButtons"></div></div></div>
+<div id="rewardModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"><h3 class="text-2xl font-black text-slate-800 mb-2">VICTORY!</h3><div class="text-xs text-sky-600 font-bold mb-4 bg-sky-50 inline-block px-3 py-1 rounded-full">EXP <span id="rewardXpVal">0</span> 획득!</div><div id="bonusLootLine" class="text-[11px] font-black text-emerald-600 mb-3 hidden"></div><p class="text-sm text-slate-500 mb-2" id="rewardTitle">보상을 선택하세요</p><div class="grid grid-cols-1 gap-3" id="rewardButtons"></div></div></div>
 <div id="messageModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[60] p-6"><div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-5 text-center"><h3 id="messageTitle" class="text-lg font-bold text-slate-800 mb-2">알림</h3><p id="messageBody" class="text-sm text-slate-600 mb-4 break-keep"></p><button id="messageOk" class="w-full py-2.5 rounded-lg bg-slate-800 text-white text-sm font-bold">확인</button></div></div>
 
 <script>
@@ -695,7 +702,9 @@
     };
 
     // 👻 고스트 QR이 항상 이 주소로 연결되도록 고정
-    const GHOST_ROOT_URL = "https://unluckyidiot16.github.io/WebGames/PRL/PRL.html";
+    const GHOST_ROOT_URL = (location.origin && location.origin !== "null")
+        ? `${location.origin}${location.pathname}`
+        : "https://unluckyidiot16.github.io/WebGames/PRL/RPL.html";
 
     // [추가] 캐릭터 성장 데이터 가져오기
     function getCharData() {
@@ -737,6 +746,130 @@
     function saveOwned(set) { localStorage.setItem(LS_KEY.OWNED, JSON.stringify([...set])); }
     function getDupes() { try { return JSON.parse(localStorage.getItem(LS_KEY.DUPES) || "{}"); } catch { return {}; } }
     function saveDupes(d) { localStorage.setItem(LS_KEY.DUPES, JSON.stringify(d)); }
+
+    /* =========================================
+     * INDEX -> PRL(RPL) 데이터 가져오기
+     * - index에서 localStorage + URL hash(import=...)로 전달
+     * - 여기서 자동으로 보유 목록(owned)에 병합
+     * ========================================= */
+    const INDEX_EXPORT_KEY = "classhub_index_export_to_prl_v1";
+    const INDEX_IMPORT_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14; // 14일
+
+    function _b64UrlDecodeUtf8(token) {
+        try {
+            token = (token || "").replace(/-/g, "+").replace(/_/g, "/");
+            token += "=".repeat((4 - (token.length % 4)) % 4);
+            const bin = atob(token);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return new TextDecoder().decode(bytes);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _readImportFromUrl() {
+        // 1) search ?import=...
+        try {
+            const sp = new URLSearchParams(location.search);
+            const token = sp.get("import");
+            if (token) return token;
+        } catch {}
+        // 2) hash #import=...
+        try {
+            const h = (location.hash || "").replace(/^#/, "");
+            if (!h) return null;
+            const m = h.match(/(?:^|&)import=([^&]+)/);
+            if (m && m[1]) return decodeURIComponent(m[1]);
+        } catch {}
+        return null;
+    }
+
+    function _stripImportFromUrl() {
+        try {
+            const sp = new URLSearchParams(location.search);
+            if (sp.has("import")) {
+                sp.delete("import");
+                const qs = sp.toString();
+                history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + (location.hash || ""));
+            }
+        } catch {}
+
+        try {
+            if ((location.hash || "").includes("import=")) {
+                history.replaceState(null, "", location.pathname + location.search);
+            }
+        } catch {}
+    }
+
+    function tryImportFromIndex() {
+        // 0) URL token 우선
+        let payload = null;
+
+        const token = _readImportFromUrl();
+        if (token) {
+            const raw = _b64UrlDecodeUtf8(token);
+            if (raw) {
+                try { payload = JSON.parse(raw); } catch {}
+            }
+        }
+
+        // 1) localStorage fallback
+        if (!payload) {
+            try {
+                const raw = localStorage.getItem(INDEX_EXPORT_KEY);
+                if (raw) payload = JSON.parse(raw);
+            } catch {}
+        }
+
+        if (!payload) return;
+
+        // 최소 검증
+        const ts = Number(payload.ts || payload.timestamp || payload.time || 0);
+        if (ts && (Date.now() - ts) > INDEX_IMPORT_MAX_AGE_MS) {
+            // 너무 오래된 데이터면 무시(원하면 key만 지우고 끝)
+            try { localStorage.removeItem(INDEX_EXPORT_KEY); } catch {}
+            _stripImportFromUrl();
+            return;
+        }
+
+        const dexIds = payload.dexIds || payload.dex || payload.ownedIds || payload.ids || [];
+        if (!Array.isArray(dexIds)) return;
+
+        const BASE_DEX_MAX = 251; // 현재 PRL 기본 도감 범위
+        const owned = getOwned();
+        let added = 0;
+
+        for (const v of dexIds) {
+            const pid = parseInt(v, 10);
+            if (!Number.isFinite(pid) || pid < 1 || pid > BASE_DEX_MAX) continue;
+            if (!owned.has(pid)) {
+                owned.add(pid);
+                added++;
+            }
+        }
+
+        if (added > 0) saveOwned(owned);
+
+        // 파트너(스타터)도 같이 가져오되, 없으면 그냥 무시
+        const partnerId = parseInt(payload.partnerId, 10);
+        if (Number.isFinite(partnerId) && owned.has(partnerId)) {
+            localStorage.setItem(LS_KEY.PARTNER, String(partnerId));
+        }
+
+        // 한 번 가져왔으면 반복 적용되지 않도록 정리
+        try { localStorage.removeItem(INDEX_EXPORT_KEY); } catch {}
+        _stripImportFromUrl();
+
+        // UI 반영
+        updateResUI();
+        updateLobbyPartner();
+        renderCodex();
+
+        if (added > 0) {
+            showAlert("✅ 내보내기 완료", `index에서 가져온 포켓몬 ${added}마리를 PRL에 등록했어요!`);
+        }
+    }
     function getStarterId() { return parseInt(localStorage.getItem(LS_KEY.PARTNER) || "0"); }
     function setStarterId(id) {
         localStorage.setItem(LS_KEY.PARTNER, id);
@@ -1671,13 +1804,19 @@
 
     function handleWin() {
         const isGhost = battleState.mode === "ghost";
+        const s = battleState.stage;
 
+        // 🎫 티켓 보상: 전설/환상 보스 + (모험) 5층마다 지급
+        const bonusLoot = [];
         if (battleState.enemy.isBoss) {
             addTickets(1);
-            alert("✨ 전설 승리! [황금 티켓] 획득!");
+            bonusLoot.push("✨ 전설 보상: 티켓 +1");
+        }
+        if (!isGhost && s > 0 && (s % 5 === 0)) {
+            addTickets(1);
+            bonusLoot.push(`🎟️ ${s}층 보상: 티켓 +1`);
         }
 
-        const s = battleState.stage;
         const pt = Math.floor(50 + (s * 10) + (s * s * 0.5));
         const xp = 50 + (s * 10);
 
@@ -1734,6 +1873,17 @@
 
         // 🟢 일반 모험: 여기서는 "게임 오버" 안 뜨고, 보상 선택만
         document.getElementById("rewardXpVal").textContent = `${xp}${lvUp ? ' & Level Up!' : ''}`;
+        const bonusEl = document.getElementById("bonusLootLine");
+        if (bonusEl) {
+            if (typeof bonusLoot !== "undefined" && bonusLoot.length > 0) {
+                bonusEl.textContent = bonusLoot.join("  ");
+                bonusEl.classList.remove("hidden");
+            } else {
+                bonusEl.textContent = "";
+                bonusEl.classList.add("hidden");
+            }
+        }
+
         const grid = document.getElementById("rewardButtons");
         grid.innerHTML = "";
         const isFullSlots = battleState.player.moves.length >= 4;
@@ -1931,6 +2081,7 @@
     function showAlert(t,b){ alert(`${t}\n${b}`); }
 
     window.onload = () => {
+        tryImportFromIndex();
         updateResUI();
         updateLobbyPartner();
 
@@ -1982,6 +2133,121 @@
             );
         }
     };
+
+    // [추가됨] 클립보드에서 토큰 읽어서 데이터 병합
+    async function importFromClipboard() {
+        try {
+            // 클립보드 읽기 권한 요청 및 텍스트 가져오기
+            const text = await navigator.clipboard.readText();
+
+            if (!text) {
+                alert("클립보드가 비어있습니다. index 게임에서 '내보내기'를 먼저 해주세요.");
+                return;
+            }
+
+            // 기존 Base64 디코딩 로직 활용
+            const raw = _b64UrlDecodeUtf8(text);
+            if (!raw) {
+                alert("올바르지 않은 데이터 형식입니다.\n(Base64 디코딩 실패)");
+                return;
+            }
+
+            let payload;
+            try {
+                payload = JSON.parse(raw);
+            } catch (e) {
+                alert("데이터가 손상되었습니다.\n(JSON 파싱 실패)");
+                return;
+            }
+
+            // 데이터 검증 (index에서 온 데이터인지 확인)
+            if (payload.source !== "index" || !Array.isArray(payload.dexIds)) {
+                alert("유효한 포켓몬 데이터가 아닙니다.");
+                return;
+            }
+
+            // 병합 로직 (기존 tryImportFromIndex 로직 재사용)
+            const BASE_DEX_MAX = 251;
+            const owned = getOwned();
+            let added = 0;
+
+            for (const v of payload.dexIds) {
+                const pid = parseInt(v, 10);
+                if (!Number.isFinite(pid) || pid < 1 || pid > BASE_DEX_MAX) continue;
+                if (!owned.has(pid)) {
+                    owned.add(pid);
+                    added++;
+                }
+            }
+
+            if (added > 0) {
+                saveOwned(owned);
+                updateResUI();
+                renderCodex(); // 도감 UI 갱신
+            }
+
+            // 파트너 설정 (선택사항)
+            const partnerId = parseInt(payload.partnerId, 10);
+            if (Number.isFinite(partnerId) && partnerId <= BASE_DEX_MAX) {
+                if(confirm(`${added}마리 포켓몬을 가져왔습니다!\n\n파트너 포켓몬(${getPokeInfo(partnerId).name})도 설정하시겠습니까?`)) {
+                    setStarterId(partnerId);
+                }
+            } else {
+                alert(`${added}마리의 포켓몬을 성공적으로 가져왔습니다!`);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("클립보드 접근이 차단되었거나 오류가 발생했습니다.\n브라우저 권한을 확인해주세요.");
+        }
+    }
+
+    async function importFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (!text) { alert("클립보드가 비어있습니다."); return; }
+
+            // 기존 디코딩 함수 사용
+            const raw = _b64UrlDecodeUtf8(text);
+            if (!raw) { alert("데이터 형식이 올바르지 않습니다."); return; }
+
+            const payload = JSON.parse(raw);
+            if (payload.source !== "index" || !Array.isArray(payload.dexIds)) {
+                alert("유효한 포켓몬 데이터가 아닙니다."); return;
+            }
+
+            const owned = getOwned();
+            let added = 0;
+            const BASE_DEX_MAX = 251;
+
+            for (const v of payload.dexIds) {
+                const pid = parseInt(v, 10);
+                if (pid > 0 && pid <= BASE_DEX_MAX && !owned.has(pid)) {
+                    owned.add(pid);
+                    added++;
+                }
+            }
+
+            if (added > 0) {
+                saveOwned(owned);
+                updateResUI();
+                renderCodex();
+                alert(`${added}마리의 포켓몬을 성공적으로 가져왔습니다!`);
+            } else {
+                alert("새로운 포켓몬이 없거나 이미 모두 보유 중입니다.");
+            }
+
+            // 파트너 설정 (선택 사항)
+            if (payload.partnerId && confirm("파트너 포켓몬도 설정하시겠습니까?")) {
+                setStarterId(payload.partnerId);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("클립보드 접근 권한이 필요하거나 오류가 발생했습니다.");
+        }
+    }
+    
 </script>
 <!-- 👻 고스트 배틀 QR 모달 -->
 <div id="ghostModal"
