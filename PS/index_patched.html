@@ -801,6 +801,104 @@
     }
 
 
+
+    // --- 탐험 스폰 프리로드(다음 1~3마리) ---
+    // 원칙: "전체 프리로드"는 무겁다. 대신 "다음 후보"만 미리 이미지 캐시에 올려서 스폰 순간 빈칸을 줄인다.
+    const SPAWN_PREFETCH_SIZE = 3; // 1~3 권장 (기본 3)
+
+    let spawnQueue = []; // [{id, rarity}]
+    const spritePreloadCache = new Map(); // id -> { url: string|null, ok: boolean, at: number }
+    const spritePreloadInflight = new Map(); // id -> Promise<string|null>
+
+    function getNextSpawnData() {
+        const next = spawnQueue.length ? spawnQueue.shift() : null;
+        return next || getWeightedRandomId();
+    }
+
+    function normalizeCandidatesWithCache(id, candidates) {
+        const cached = spritePreloadCache.get(id);
+        if (cached && cached.ok && cached.url && candidates.includes(cached.url)) {
+            return [cached.url, ...candidates.filter((u) => u !== cached.url)];
+        }
+        return candidates;
+    }
+
+    function preloadUrl(url) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.onload = () => resolve(url);
+            img.onerror = () => reject(new Error("img load failed"));
+            // 캐시 힌트(브라우저가 무시할 수 있음)
+            img.decoding = "async";
+            img.loading = "eager";
+            img.src = url;
+        });
+    }
+
+    async function preloadFirstSuccessful(urls) {
+        for (const u of (urls || [])) {
+            try {
+                await preloadUrl(u);
+                return u;
+            } catch (e) {
+                // try next
+            }
+        }
+        return null;
+    }
+
+    async function preloadPokemonSprite(id) {
+        if (spritePreloadCache.has(id) && spritePreloadCache.get(id)?.ok) {
+            return spritePreloadCache.get(id).url || null;
+        }
+        if (spritePreloadInflight.has(id)) return spritePreloadInflight.get(id);
+
+        const p = (async () => {
+            try {
+                await ensurePokeDb();
+                let candidates = buildSpriteCandidates(id);
+                candidates = normalizeCandidatesWithCache(id, candidates);
+                const okUrl = await preloadFirstSuccessful(candidates);
+                spritePreloadCache.set(id, { url: okUrl, ok: !!okUrl, at: Date.now() });
+                return okUrl;
+            } catch (e) {
+                spritePreloadCache.set(id, { url: null, ok: false, at: Date.now() });
+                return null;
+            } finally {
+                spritePreloadInflight.delete(id);
+            }
+        })();
+
+        spritePreloadInflight.set(id, p);
+        return p;
+    }
+
+    function refillSpawnQueue() {
+        while (spawnQueue.length < SPAWN_PREFETCH_SIZE) {
+            const sd = getWeightedRandomId();
+            spawnQueue.push(sd);
+            // fire-and-forget
+            preloadPokemonSprite(sd.id);
+        }
+    }
+
+    async function primeSpawnQueue(n = SPAWN_PREFETCH_SIZE, opts = { awaitFirst: false }) {
+        spawnQueue = [];
+        const firstPreloadPromises = [];
+        for (let i = 0; i < n; i++) {
+            const sd = getWeightedRandomId();
+            spawnQueue.push(sd);
+            const pr = preloadPokemonSprite(sd.id);
+            firstPreloadPromises.push(pr);
+        }
+        // 옵션: 첫 스폰(1마리)만큼은 "미리 로드 완료"를 기다려서, 시작 직후 빈칸 체감을 줄인다.
+        if (opts && opts.awaitFirst) {
+            try { await firstPreloadPromises[0]; } catch (e) {}
+        }
+        return true;
+    }
+
+
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
     const MAX_POKEMON_ID = 1025;
 
@@ -1134,7 +1232,7 @@
         }
     }
 
-    function startExploration() {
+    async function startExploration() {
         const baseSteps = 30 + (user.upgrades.maxSteps * 10);
         const bonusBalls = 10;
         session = { active: true, steps: baseSteps, caught: [], earnedPoints: 0 };
@@ -1148,6 +1246,11 @@
         updatePlayerPos();
         updateGameHeader();
         switchView('view-game');
+
+        // ✅ 다음 스폰 후보 1~3마리 선(先)프리로드 (최대 3마리)
+        // 첫 1마리는 로드 완료를 기다려서 시작 직후 "안 보임" 체감을 줄인다.
+        await primeSpawnQueue(SPAWN_PREFETCH_SIZE, { awaitFirst: true });
+
         removeSilhouette();
         spawnPokemon();
     }
@@ -1264,7 +1367,9 @@
         currentPokemon = null;
 
         const targetTile = document.querySelector(`.tile[data-x="${x}"][data-y="${y}"]`);
-        const spawnData = getWeightedRandomId();
+        const spawnData = getNextSpawnData();
+        // 다음 후보를 채워두고(프리로드 포함), 탐험 진행 중에도 계속 유지한다
+        refillSpawnQueue();
         const id = spawnData.id;
         const rarity = spawnData.rarity;
 
@@ -1296,7 +1401,8 @@
                 rate = data?.capture_rate ?? 45;
             }
 
-            const candidates = buildSpriteCandidates(id);
+            let candidates = buildSpriteCandidates(id);
+            candidates = normalizeCandidatesWithCache(id, candidates);
             currentPokemon = { id, name, rate, sprite: candidates[0], spriteCandidates: candidates, rarity };
 
             if (tileImg) {
