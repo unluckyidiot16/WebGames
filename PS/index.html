@@ -656,7 +656,7 @@
             <button class="ball-opt" id="btn-use-hyper" onclick="tryCatch('hyper')"><img src="./png/ub.png">하이퍼볼<br>x<span id="qty-hyper">0</span></button>
 
             <button class="ball-opt" id="btn-use-special" onclick="tryCatch('special')">
-                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png">스피드볼<br>x<span id="qty-special">0</span>
+                <img src="./png/lb.png">스피드볼<br>x<span id="qty-special">0</span>
             </button>
 
             <button class="ball-opt" id="btn-use-master" onclick="tryCatch('master')"><img src="./png/mb.png">마스터볼<br>x<span id="qty-master">0</span></button>
@@ -737,12 +737,11 @@
         722,725,728, 810,813,816, 887, 906,909,912, 996, 997, 998
     ];
 
-    // [변경] 볼 스프라이트 목록 (monster 삭제, special 추가)
-    // special(스피드볼) 이미지는 마스터볼 이미지를 사용하지만 로직상 구분을 위해 special로 명명
+    // [변경] 볼 스프라이트 목록 (monster 삭제, special 추가, special 이미지 경로 변경)
     const BALL_SPRITES = {
         super: "./png/gb.png",
         hyper: "./png/ub.png",
-        special: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png",
+        special: "./png/lb.png",
         master: "./png/mb.png"
     };
 
