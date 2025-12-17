@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>QuizMon: Ver 8.1 (1025 포켓몬)</title>
+    <title>QuizMon: Ver 8.2 (진화 수정)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
@@ -54,7 +54,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter relative z-10">
             <span class="text-red-500">Quiz</span>Mon
         </h1>
-        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 8.1 (1025 포켓몬 + 기본형 뽑기)</div>
+        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 8.2 (연속 진화 + UI 업데이트)</div>
     </div>
     <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center border-4 border-slate-800">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png" class="w-24 h-24 mx-auto pixel-art animate-bounce" alt="Ho-oh">
@@ -1499,8 +1499,7 @@
         battleState.player.xp += xp;
 
         let lvUp = false;
-        let evolved = false;
-        let evolveToId = null;
+        let evolutionChain = []; // 연속 진화 체인
 
         // 레벨업 체크
         while (battleState.player.xp >= battleState.player.level * 100) {
@@ -1508,11 +1507,17 @@
             battleState.player.level++;
             lvUp = true;
 
-            // 진화 체크
-            const possibleEvolve = canEvolve(battleState.player.id, battleState.player.level);
-            if (possibleEvolve && !evolved) {
-                evolveToId = possibleEvolve;
-                evolved = true;
+            // 진화 체크 (현재 진화 체인의 마지막 포켓몬 기준)
+            const currentId = evolutionChain.length > 0 
+                ? evolutionChain[evolutionChain.length - 1].toId 
+                : battleState.player.id;
+            const possibleEvolve = canEvolve(currentId, battleState.player.level);
+            if (possibleEvolve) {
+                evolutionChain.push({
+                    fromId: currentId,
+                    toId: possibleEvolve,
+                    level: battleState.player.level
+                });
             }
         }
 
@@ -1531,44 +1536,9 @@
 
         saveCurrentPlayerProgress();
 
-        // 진화 처리
-        if (evolved && evolveToId) {
-            showEvolveModal(battleState.player.id, evolveToId, () => {
-                // 진화 완료 후 처리
-                const newPokemonId = doEvolve(battleState.player.id);
-                if (newPokemonId) {
-                    // 캐릭터 데이터 업데이트 (새 포켓몬 ID로)
-                    const charData = getCharData();
-                    charData[newPokemonId] = {
-                        level: battleState.player.level,
-                        xp: battleState.player.xp
-                    };
-                    // 이전 포켓몬 데이터는 유지 (나중에 다시 키울 수 있도록)
-                    saveCharData(charData);
-                    
-                    // 스타터 업데이트
-                    setStarterId(newPokemonId);
-                    
-                    // 배틀 스테이트 업데이트
-                    const newInfo = getPokeInfo(newPokemonId);
-                    battleState.player.id = newPokemonId;
-                    battleState.player.name = newInfo.name;
-                    battleState.player.sprite = newInfo.sprite;
-                    battleState.player.type = newInfo.type.name;
-                    battleState.player.base = newInfo.base;
-                    
-                    // 진화 후 스탯 재계산
-                    const evolvedStats = calcStats(newInfo.base, battleState.player.level);
-                    battleState.player.maxHp = evolvedStats.maxHp;
-                    battleState.player.hp = evolvedStats.maxHp; // 완전 회복
-                    battleState.player.atk = evolvedStats.atk;
-                    battleState.player.def = evolvedStats.def;
-                    battleState.player.spa = evolvedStats.spa;
-                    battleState.player.spd = evolvedStats.spd;
-                    battleState.player.spe = evolvedStats.spe;
-                }
-                
-                // 진화 후 보상 선택 표시
+        // 진화 처리 (연속 진화 지원)
+        if (evolutionChain.length > 0) {
+            processEvolutionChain(evolutionChain, 0, () => {
                 continueWithReward(isGhost, pt, xp, lvUp, bonusLoot, s);
             });
             return;
@@ -1576,8 +1546,73 @@
 
         continueWithReward(isGhost, pt, xp, lvUp, bonusLoot, s);
     }
+    
+    // 연속 진화 처리 함수
+    function processEvolutionChain(chain, index, finalCallback) {
+        if (index >= chain.length) {
+            finalCallback();
+            return;
+        }
+        
+        const evo = chain[index];
+        const stageText = chain.length > 1 ? `(${index + 1}/${chain.length})` : '';
+        showEvolveModal(evo.fromId, evo.toId, stageText, () => {
+            // 진화 완료 후 처리
+            const newPokemonId = doEvolve(evo.fromId);
+            if (newPokemonId) {
+                // 캐릭터 데이터 업데이트
+                const charData = getCharData();
+                charData[newPokemonId] = {
+                    level: battleState.player.level,
+                    xp: battleState.player.xp
+                };
+                saveCharData(charData);
+                
+                // 스타터 업데이트
+                setStarterId(newPokemonId);
+                
+                // 배틀 스테이트 업데이트
+                const newInfo = getPokeInfo(newPokemonId);
+                battleState.player.id = newPokemonId;
+                battleState.player.name = newInfo.name;
+                battleState.player.sprite = newInfo.sprite;
+                battleState.player.type = newInfo.type.name;
+                battleState.player.base = newInfo.base;
+                
+                // 스탯 재계산
+                const evolvedStats = calcStats(newInfo.base, battleState.player.level);
+                battleState.player.maxHp = evolvedStats.maxHp;
+                battleState.player.hp = evolvedStats.maxHp;
+                battleState.player.atk = evolvedStats.atk;
+                battleState.player.def = evolvedStats.def;
+                battleState.player.spa = evolvedStats.spa;
+                battleState.player.spd = evolvedStats.spd;
+                battleState.player.spe = evolvedStats.spe;
+                
+                // 기술 업데이트
+                const maxTier = battleState.player.level < 20 ? 'R' : battleState.player.level < 40 ? 'SR' : 'SSR';
+                battleState.player.moves = getRandomMoves(newInfo.type.name, 4, maxTier);
+                battleState.cooldowns = [0, 0, 0, 0];
+                
+                // UI 업데이트
+                updateBattleUI();
+                saveCurrentPlayerProgress();
+            }
+            
+            // 다음 진화 처리 (딜레이 추가)
+            setTimeout(() => {
+                processEvolutionChain(chain, index + 1, finalCallback);
+            }, 500);
+        });
+    }
 
-    function showEvolveModal(fromId, toId, callback) {
+    function showEvolveModal(fromId, toId, stageText, callback) {
+        // 파라미터 호환성 (stageText 없이 호출된 경우)
+        if (typeof stageText === 'function') {
+            callback = stageText;
+            stageText = '';
+        }
+        
         const fromInfo = getPokeInfo(fromId);
         const toInfo = getPokeInfo(toId);
         
@@ -1585,7 +1620,7 @@
         document.getElementById("evolveFromName").textContent = fromInfo.name;
         document.getElementById("evolveToImg").src = toInfo.sprite;
         document.getElementById("evolveToName").textContent = toInfo.name;
-        document.getElementById("evolveMessage").textContent = `${fromInfo.name}이(가) ${toInfo.name}(으)로 진화했습니다!`;
+        document.getElementById("evolveMessage").textContent = `${fromInfo.name}이(가) ${toInfo.name}(으)로 진화했습니다! ${stageText}`;
         
         document.getElementById("evolveModal").classList.remove("hidden");
         document.getElementById("evolveModal").classList.add("flex");
