@@ -1,1808 +1,6442 @@
 {
-  "packId": "so3-past-present-001",
-  "title": "초3 사회 옛날과 오늘날의 달라진 모습",
+  "packId": "ma3-kg-g-add-001",
+  "title": "초3 수학 무게의 덧셈 (kg과 g)",
   "grade": 3,
-  "subject": "social_studies",
-  "description": "초등 3학년 사회 - 풍습과 놀이, 교통의 변화 (맞춤법 + 개념 선택형)",
+  "subject": "math",
+  "description": "초등 3학년 수학 - 무게의 덧셈 (kg과 g의 단위 변환 및 받아올림)",
   "questions": [
     {
-      "id": "so3-pp-001",
-      "type": "correct_spelling",
-      "prompt": "설날에 온 가족이 모여서 윷가락을 던지며 하는 전통 놀이",
+      "id": "ma3-kg-001",
+      "type": "calculation",
+      "prompt": "3kg 350g + 1kg 250g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "윷놀이",
-        "윳놀이",
-        "율놀이",
-        "윷널이"
+        "4kg",
+        "4kg 600g",
+        "4kg 250g",
+        "4kg 200g"
       ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-002",
+      "type": "calculation",
+      "prompt": "1kg 250g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "3kg",
+        "3kg 50g",
+        "3kg 350g",
+        "3kg 250g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-003",
+      "type": "calculation",
+      "prompt": "2kg 800g + 1kg 300g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "3kg 850g",
+        "4kg 100g",
+        "4kg 150g",
+        "3kg 400g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-004",
+      "type": "calculation",
+      "prompt": "4kg 100g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 100g",
+        "5kg 650g",
+        "5kg 200g",
+        "5kg 900g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-005",
+      "type": "calculation",
+      "prompt": "1kg 800g + 3kg 950g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "5kg 300g",
+        "5kg 200g",
+        "5kg 50g",
+        "5kg 750g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-006",
+      "type": "calculation",
+      "prompt": "5kg 350g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "8kg 950g",
+        "9kg",
+        "8kg 450g",
+        "9kg 350g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-007",
+      "type": "calculation",
+      "prompt": "2kg 450g + 3kg 500g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "6kg 250g",
+        "6kg 450g",
+        "6kg 350g",
+        "5kg 950g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-008",
+      "type": "calculation",
+      "prompt": "1kg 700g + 4kg 400g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "6kg 250g",
+        "6kg 100g",
+        "6kg 800g",
+        "5kg 750g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-009",
+      "type": "calculation",
+      "prompt": "4kg 300g + 4kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "8kg 800g",
+        "7kg 750g",
+        "8kg 350g",
+        "8kg 300g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-010",
+      "type": "calculation",
+      "prompt": "3kg 350g + 2kg 450g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 800g",
+        "5kg 850g",
+        "5kg 950g",
+        "5kg 300g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-011",
+      "type": "calculation",
+      "prompt": "2kg 300g + 4kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 100g",
+        "6kg 550g",
+        "7kg 600g",
+        "7kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-012",
+      "type": "calculation",
+      "prompt": "4kg 50g + 1kg 950g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 500g",
+        "6kg",
+        "6kg 200g",
+        "5kg 800g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-013",
+      "type": "calculation",
+      "prompt": "3kg 250g + 3kg 350g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 600g",
+        "6kg 250g",
+        "6kg 650g",
+        "6kg 400g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-014",
+      "type": "calculation",
+      "prompt": "1kg 300g + 3kg 100g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "4kg 750g",
+        "5kg 100g",
+        "4kg 600g",
+        "4kg 400g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-015",
+      "type": "calculation",
+      "prompt": "5kg 50g + 4kg 550g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "9kg 300g",
+        "8kg 600g",
+        "10kg 50g",
+        "9kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-016",
+      "type": "calculation",
+      "prompt": "3kg 300g + 1kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 150g",
+        "5kg",
+        "5kg 350g",
+        "4kg 900g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-017",
+      "type": "calculation",
+      "prompt": "2kg 100g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "3kg 800g",
+        "3kg 600g",
+        "3kg 100g",
+        "3kg 650g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-018",
+      "type": "calculation",
+      "prompt": "3kg 750g + 4kg 350g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "8kg 100g",
+        "7kg 900g",
+        "8kg 600g",
+        "8kg 900g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-019",
+      "type": "calculation",
+      "prompt": "4kg 500g + 4kg 600g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "9kg 400g",
+        "9kg 350g",
+        "9kg 800g",
+        "9kg 100g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-020",
+      "type": "calculation",
+      "prompt": "3kg 50g + 4kg 950g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg",
+        "8kg 450g",
+        "7kg 300g",
+        "8kg 350g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-021",
+      "type": "calculation",
+      "prompt": "3kg 150g + 3kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 100g",
+        "6kg 800g",
+        "6kg 150g",
+        "6kg 450g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-022",
+      "type": "calculation",
+      "prompt": "3kg 700g + 1kg 700g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "4kg 900g",
+        "5kg 400g",
+        "5kg 800g",
+        "4kg 800g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-023",
+      "type": "calculation",
+      "prompt": "1kg 350g + 1kg 650g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "3kg 350g",
+        "3kg",
+        "3kg 600g",
+        "2kg 300g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-024",
+      "type": "calculation",
+      "prompt": "5kg 150g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 950g",
+        "7kg 150g",
+        "6kg 900g",
+        "7kg 50g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-025",
+      "type": "calculation",
+      "prompt": "3kg 450g + 1kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 100g",
+        "4kg 600g",
+        "4kg 300g",
+        "4kg 200g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-026",
+      "type": "calculation",
+      "prompt": "3kg 400g + 5kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "8kg 700g",
+        "8kg",
+        "7kg 900g",
+        "8kg 450g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-027",
+      "type": "calculation",
+      "prompt": "3kg 500g + 1kg 500g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg",
+        "4kg 400g",
+        "4kg 950g",
+        "5kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-028",
+      "type": "calculation",
+      "prompt": "3kg 300g + 4kg 550g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "7kg 850g",
+        "8kg 550g",
+        "8kg 450g",
+        "7kg 300g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-029",
+      "type": "calculation",
+      "prompt": "3kg 300g + 2kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 150g",
+        "6kg 100g",
+        "6kg 800g",
+        "6kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-030",
+      "type": "calculation",
+      "prompt": "3kg 900g + 2kg 100g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 300g",
+        "5kg 750g",
+        "5kg 900g",
+        "6kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-031",
+      "type": "calculation",
+      "prompt": "1kg 850g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 850g",
+        "4kg 650g",
+        "4kg 800g",
+        "4kg 600g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-032",
+      "type": "calculation",
+      "prompt": "5kg 250g + 4kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "9kg 350g",
+        "9kg 400g",
+        "8kg 950g",
+        "9kg 900g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-033",
+      "type": "calculation",
+      "prompt": "4kg 950g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "9kg 950g",
+        "9kg 500g",
+        "9kg 550g",
+        "9kg 400g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-034",
+      "type": "calculation",
+      "prompt": "3kg 300g + 2kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "5kg 800g",
+        "5kg 850g",
+        "5kg 350g",
+        "5kg 650g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-035",
+      "type": "calculation",
+      "prompt": "2kg 900g + 4kg 100g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 450g",
+        "7kg",
+        "7kg 200g",
+        "7kg 250g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-036",
+      "type": "calculation",
+      "prompt": "3kg 100g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 800g",
+        "4kg 100g",
+        "5kg 100g",
+        "5kg 500g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-037",
+      "type": "calculation",
+      "prompt": "1kg 350g + 2kg 200g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "2kg 750g",
+        "3kg 550g",
+        "3kg 400g",
+        "3kg 650g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-038",
+      "type": "calculation",
+      "prompt": "4kg 800g + 3kg 250g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "7kg 650g",
+        "7kg 50g",
+        "8kg 50g",
+        "8kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-039",
+      "type": "calculation",
+      "prompt": "1kg 900g + 3kg 350g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "5kg 850g",
+        "4kg 850g",
+        "5kg 250g",
+        "5kg 800g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-040",
+      "type": "calculation",
+      "prompt": "2kg 850g + 3kg 150g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 450g",
+        "6kg 100g",
+        "6kg",
+        "6kg 200g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-041",
+      "type": "calculation",
+      "prompt": "3kg 250g + 3kg 200g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 550g",
+        "6kg 750g",
+        "6kg 450g",
+        "5kg 900g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-042",
+      "type": "calculation",
+      "prompt": "4kg 100g + 1kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 750g",
+        "6kg",
+        "6kg 50g",
+        "5kg 650g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-043",
+      "type": "calculation",
+      "prompt": "2kg 400g + 1kg 150g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "3kg 400g",
+        "3kg 550g",
+        "3kg 200g",
+        "2kg 750g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-044",
+      "type": "calculation",
+      "prompt": "2kg 800g + 1kg 200g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "3kg 700g",
+        "3kg 800g",
+        "3kg 300g",
+        "4kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-045",
+      "type": "calculation",
+      "prompt": "1kg 200g + 1kg 350g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "2kg 550g",
+        "1kg 850g",
+        "2kg 200g",
+        "3kg 150g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-046",
+      "type": "calculation",
+      "prompt": "3kg 200g + 3kg 450g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "6kg 150g",
+        "6kg 650g",
+        "6kg 900g",
+        "7kg 350g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-047",
+      "type": "calculation",
+      "prompt": "4kg 900g + 2kg 750g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 950g",
+        "7kg 650g",
+        "7kg 850g",
+        "7kg 250g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-048",
+      "type": "calculation",
+      "prompt": "1kg 250g + 3kg 750g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 100g",
+        "4kg",
+        "5kg 550g",
+        "5kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-049",
+      "type": "calculation",
+      "prompt": "1kg 750g + 4kg 650g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "6kg 400g",
+        "6kg 700g",
+        "6kg 850g",
+        "6kg 200g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-050",
+      "type": "calculation",
+      "prompt": "3kg 650g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 450g",
+        "5kg 650g",
+        "5kg 750g",
+        "5kg 350g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-051",
+      "type": "calculation",
+      "prompt": "3kg 100g + 2kg 200g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "5kg 350g",
+        "5kg 300g",
+        "5kg 850g",
+        "4kg 850g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-052",
+      "type": "calculation",
+      "prompt": "2kg 300g + 1kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg",
+        "3kg 800g",
+        "3kg 500g",
+        "4kg 200g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-053",
+      "type": "calculation",
+      "prompt": "2kg 400g + 2kg 350g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "4kg 750g",
+        "4kg 150g",
+        "4kg 550g",
+        "4kg 500g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-054",
+      "type": "calculation",
+      "prompt": "1kg 550g + 4kg 550g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "6kg 50g",
+        "6kg 300g",
+        "5kg 100g",
+        "6kg 100g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-055",
+      "type": "calculation",
+      "prompt": "2kg 750g + 4kg 750g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "8kg",
+        "7kg 950g",
+        "6kg 500g",
+        "7kg 500g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-056",
+      "type": "calculation",
+      "prompt": "3kg 600g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 900g",
+        "8kg 300g",
+        "7kg 600g",
+        "7kg 300g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-057",
+      "type": "calculation",
+      "prompt": "1kg 200g + 1kg 250g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "2kg",
+        "2kg 400g",
+        "2kg 450g",
+        "2kg 300g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-058",
+      "type": "calculation",
+      "prompt": "3kg 250g + 3kg 350g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 100g",
+        "6kg 800g",
+        "6kg 700g",
+        "6kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-059",
+      "type": "calculation",
+      "prompt": "1kg 600g + 3kg 400g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 900g",
+        "5kg 50g",
+        "5kg 800g",
+        "5kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-060",
+      "type": "calculation",
+      "prompt": "5kg 500g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 100g",
+        "6kg 500g",
+        "6kg 550g",
+        "6kg 700g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-061",
+      "type": "calculation",
+      "prompt": "2kg 100g + 2kg 500g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 750g",
+        "3kg 600g",
+        "4kg 700g",
+        "4kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-062",
+      "type": "calculation",
+      "prompt": "2kg 800g + 3kg 950g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "6kg 900g",
+        "6kg 750g",
+        "6kg 150g",
+        "7kg"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-063",
+      "type": "calculation",
+      "prompt": "1kg 350g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "2kg 900g",
+        "3kg 50g",
+        "3kg 350g",
+        "2kg 950g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-064",
+      "type": "calculation",
+      "prompt": "1kg 550g + 3kg 500g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "5kg 750g",
+        "5kg 650g",
+        "5kg 400g",
+        "5kg 50g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-065",
+      "type": "calculation",
+      "prompt": "3kg 550g + 4kg 900g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "7kg 850g",
+        "8kg 50g",
+        "8kg 450g",
+        "8kg 400g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-066",
+      "type": "calculation",
+      "prompt": "3kg 750g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 600g",
+        "7kg 350g",
+        "6kg 750g",
+        "5kg 750g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-067",
+      "type": "calculation",
+      "prompt": "5kg 400g + 1kg 350g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "6kg 750g",
+        "7kg 350g",
+        "7kg 150g",
+        "6kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-068",
+      "type": "calculation",
+      "prompt": "4kg 200g + 2kg 750g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "6kg 700g",
+        "6kg 50g",
+        "7kg 50g",
+        "6kg 950g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-069",
+      "type": "calculation",
+      "prompt": "3kg 600g + 4kg 700g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "8kg 850g",
+        "8kg 300g",
+        "8kg 400g",
+        "9kg"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-070",
+      "type": "calculation",
+      "prompt": "2kg 500g + 2kg 50g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 250g",
+        "4kg 700g",
+        "4kg 950g",
+        "4kg 550g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-071",
+      "type": "calculation",
+      "prompt": "3kg 300g + 3kg 50g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 950g",
+        "6kg 350g",
+        "5kg 450g",
+        "5kg 900g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-072",
+      "type": "calculation",
+      "prompt": "4kg 850g + 2kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "7kg 200g",
+        "7kg 50g",
+        "6kg 600g",
+        "7kg 850g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-073",
+      "type": "calculation",
+      "prompt": "5kg 100g + 2kg 750g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "8kg 350g",
+        "7kg 900g",
+        "8kg 100g",
+        "7kg 850g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-074",
+      "type": "calculation",
+      "prompt": "2kg 200g + 1kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "3kg",
+        "3kg 450g",
+        "3kg 300g",
+        "2kg 600g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-075",
+      "type": "calculation",
+      "prompt": "2kg 150g + 1kg 200g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "3kg 550g",
+        "3kg 800g",
+        "3kg 350g",
+        "3kg 450g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-076",
+      "type": "calculation",
+      "prompt": "2kg 150g + 2kg 350g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 250g",
+        "4kg 950g",
+        "4kg 500g",
+        "4kg 800g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-077",
+      "type": "calculation",
+      "prompt": "2kg 950g + 2kg 500g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "4kg 900g",
+        "4kg 950g",
+        "5kg 300g",
+        "5kg 450g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-078",
+      "type": "calculation",
+      "prompt": "4kg 900g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 500g",
+        "6kg 900g",
+        "5kg 900g",
+        "7kg"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-079",
+      "type": "calculation",
+      "prompt": "3kg 500g + 3kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "5kg 600g",
+        "6kg 700g",
+        "6kg 650g",
+        "6kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-080",
+      "type": "calculation",
+      "prompt": "3kg 400g + 3kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 200g",
+        "7kg 250g",
+        "6kg 700g",
+        "5kg 800g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-081",
+      "type": "calculation",
+      "prompt": "2kg 750g + 1kg 250g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "3kg 100g",
+        "3kg 600g",
+        "4kg 450g",
+        "4kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-082",
+      "type": "calculation",
+      "prompt": "2kg 150g + 1kg 850g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "3kg 850g",
+        "3kg 550g",
+        "3kg 450g",
+        "4kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-083",
+      "type": "calculation",
+      "prompt": "1kg 900g + 4kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "6kg 500g",
+        "5kg 550g",
+        "6kg 350g",
+        "6kg 450g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-084",
+      "type": "calculation",
+      "prompt": "3kg 250g + 2kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 50g",
+        "5kg 350g",
+        "5kg 550g",
+        "6kg 50g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-085",
+      "type": "calculation",
+      "prompt": "1kg 150g + 5kg 600g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "6kg 400g",
+        "6kg 750g",
+        "6kg 550g",
+        "6kg 200g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-086",
+      "type": "calculation",
+      "prompt": "2kg 850g + 2kg 150g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 800g",
+        "5kg",
+        "5kg 450g",
+        "5kg 300g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-087",
+      "type": "calculation",
+      "prompt": "2kg 600g + 3kg 400g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 500g",
+        "6kg",
+        "6kg 150g",
+        "5kg 300g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-088",
+      "type": "calculation",
+      "prompt": "4kg 550g + 4kg 450g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "9kg 700g",
+        "9kg",
+        "8kg 550g",
+        "8kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-089",
+      "type": "calculation",
+      "prompt": "1kg 750g + 3kg 250g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 800g",
+        "4kg 700g",
+        "5kg 150g",
+        "5kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-090",
+      "type": "calculation",
+      "prompt": "3kg 300g + 3kg 650g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "7kg 550g",
+        "6kg 650g",
+        "6kg 950g",
+        "6kg 850g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-091",
+      "type": "calculation",
+      "prompt": "1kg 600g + 2kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 850g",
+        "4kg 550g",
+        "4kg 500g",
+        "4kg 750g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-092",
+      "type": "calculation",
+      "prompt": "1kg 250g + 3kg 750g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 600g",
+        "4kg 200g",
+        "5kg",
+        "4kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-093",
+      "type": "calculation",
+      "prompt": "3kg 50g + 2kg 200g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 550g",
+        "5kg 200g",
+        "5kg 850g",
+        "5kg 250g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-094",
+      "type": "calculation",
+      "prompt": "2kg 350g + 3kg 350g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 200g",
+        "5kg 700g",
+        "5kg 850g",
+        "5kg 150g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-095",
+      "type": "calculation",
+      "prompt": "3kg 750g + 2kg 800g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 650g",
+        "6kg 550g",
+        "6kg 200g",
+        "5kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-096",
+      "type": "calculation",
+      "prompt": "3kg 350g + 5kg 100g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "8kg 450g",
+        "9kg",
+        "8kg 500g",
+        "8kg"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-097",
+      "type": "calculation",
+      "prompt": "2kg 150g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 150g",
+        "3kg 950g",
+        "3kg 600g",
+        "3kg 850g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-098",
+      "type": "calculation",
+      "prompt": "4kg 700g + 1kg 300g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg",
+        "6kg 50g",
+        "6kg 200g",
+        "5kg 300g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-099",
+      "type": "calculation",
+      "prompt": "2kg 300g + 2kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 600g",
+        "4kg 700g",
+        "4kg 150g",
+        "3kg 800g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-100",
+      "type": "calculation",
+      "prompt": "1kg 350g + 4kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "5kg 950g",
+        "5kg 800g",
+        "5kg",
+        "5kg 700g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-101",
+      "type": "calculation",
+      "prompt": "3kg 550g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 750g",
+        "5kg 550g",
+        "5kg 700g",
+        "5kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-102",
+      "type": "calculation",
+      "prompt": "1kg 400g + 3kg 150g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "4kg 550g",
+        "4kg 600g",
+        "3kg 850g",
+        "4kg 250g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-103",
+      "type": "calculation",
+      "prompt": "1kg 150g + 2kg 200g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "3kg 350g",
+        "3kg 700g",
+        "3kg 850g",
+        "3kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-104",
+      "type": "calculation",
+      "prompt": "4kg 700g + 3kg 300g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg 500g",
+        "8kg",
+        "8kg 150g",
+        "7kg 800g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-105",
+      "type": "calculation",
+      "prompt": "1kg 650g + 3kg 350g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg",
+        "5kg 800g",
+        "5kg 700g",
+        "5kg 200g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-106",
+      "type": "calculation",
+      "prompt": "4kg 950g + 4kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "10kg 100g",
+        "8kg 800g",
+        "9kg 400g",
+        "8kg 500g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-107",
+      "type": "calculation",
+      "prompt": "1kg 350g + 3kg 100g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "3kg 650g",
+        "4kg 600g",
+        "4kg 450g",
+        "4kg 500g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-108",
+      "type": "calculation",
+      "prompt": "4kg 300g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 100g",
+        "6kg 350g",
+        "6kg 450g",
+        "6kg 300g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-109",
+      "type": "calculation",
+      "prompt": "3kg 600g + 4kg 500g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg 650g",
+        "7kg 300g",
+        "8kg 700g",
+        "8kg 100g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-110",
+      "type": "calculation",
+      "prompt": "1kg 200g + 2kg 500g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 150g",
+        "4kg 200g",
+        "3kg 300g",
+        "3kg 700g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-111",
+      "type": "calculation",
+      "prompt": "2kg 150g + 1kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "2kg 600g",
+        "3kg 150g",
+        "3kg 300g",
+        "2kg 900g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-112",
+      "type": "calculation",
+      "prompt": "2kg 300g + 1kg 200g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "2kg 700g",
+        "3kg 950g",
+        "3kg 750g",
+        "3kg 500g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-113",
+      "type": "calculation",
+      "prompt": "1kg 950g + 1kg 400g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "3kg 400g",
+        "2kg 550g",
+        "3kg 950g",
+        "3kg 350g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-114",
+      "type": "calculation",
+      "prompt": "2kg 250g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 650g",
+        "5kg 850g",
+        "5kg 750g",
+        "6kg 250g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-115",
+      "type": "calculation",
+      "prompt": "5kg 250g + 4kg 350g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "9kg 250g",
+        "9kg 600g",
+        "9kg 500g",
+        "10kg 50g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-116",
+      "type": "calculation",
+      "prompt": "2kg 850g + 3kg 950g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "7kg 250g",
+        "7kg 100g",
+        "7kg 400g",
+        "6kg 800g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-117",
+      "type": "calculation",
+      "prompt": "4kg 550g + 1kg 650g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "5kg 300g",
+        "6kg 800g",
+        "6kg 200g",
+        "5kg 800g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-118",
+      "type": "calculation",
+      "prompt": "2kg 550g + 4kg 650g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "6kg 850g",
+        "7kg 150g",
+        "7kg 200g",
+        "7kg 700g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-119",
+      "type": "calculation",
+      "prompt": "2kg 500g + 2kg 550g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 50g",
+        "5kg 400g",
+        "5kg 150g",
+        "5kg 550g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-120",
+      "type": "calculation",
+      "prompt": "4kg 900g + 3kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg 700g",
+        "7kg 950g",
+        "7kg 300g",
+        "8kg 100g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-121",
+      "type": "calculation",
+      "prompt": "2kg 300g + 3kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "5kg 100g",
+        "5kg 600g",
+        "5kg 450g",
+        "5kg 550g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-122",
+      "type": "calculation",
+      "prompt": "4kg 600g + 3kg 400g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg 800g",
+        "7kg 950g",
+        "8kg",
+        "7kg 750g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-123",
+      "type": "calculation",
+      "prompt": "3kg 850g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "9kg 400g",
+        "8kg 850g",
+        "8kg 150g",
+        "8kg 350g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-124",
+      "type": "calculation",
+      "prompt": "3kg 750g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 300g",
+        "7kg 400g",
+        "7kg 700g",
+        "7kg 750g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-125",
+      "type": "calculation",
+      "prompt": "2kg 650g + 3kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "7kg 350g",
+        "6kg 550g",
+        "6kg 100g",
+        "7kg 250g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-126",
+      "type": "calculation",
+      "prompt": "3kg 300g + 4kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg 350g",
+        "7kg 550g",
+        "8kg 300g",
+        "8kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-127",
+      "type": "calculation",
+      "prompt": "4kg 400g + 1kg 600g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg",
+        "5kg 950g",
+        "6kg 600g",
+        "5kg 300g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-128",
+      "type": "calculation",
+      "prompt": "3kg 950g + 4kg 550g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "8kg",
+        "8kg 500g",
+        "8kg 400g",
+        "9kg"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-129",
+      "type": "calculation",
+      "prompt": "2kg 250g + 1kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "3kg 300g",
+        "3kg 950g",
+        "3kg 850g",
+        "3kg 400g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-130",
+      "type": "calculation",
+      "prompt": "2kg 600g + 2kg 900g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "6kg 100g",
+        "5kg 500g",
+        "5kg 650g",
+        "5kg 150g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-131",
+      "type": "calculation",
+      "prompt": "4kg 350g + 5kg 250g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "9kg 300g",
+        "8kg 600g",
+        "9kg 350g",
+        "9kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-132",
+      "type": "calculation",
+      "prompt": "4kg 550g + 3kg 700g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "8kg 300g",
+        "8kg 350g",
+        "8kg 450g",
+        "8kg 250g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-133",
+      "type": "calculation",
+      "prompt": "3kg 500g + 2kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "5kg 550g",
+        "5kg 100g",
+        "5kg 700g",
+        "5kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-134",
+      "type": "calculation",
+      "prompt": "2kg 850g + 1kg 150g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg",
+        "3kg 750g",
+        "3kg 500g",
+        "3kg 400g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-135",
+      "type": "calculation",
+      "prompt": "2kg 500g + 2kg 550g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "4kg 900g",
+        "4kg 950g",
+        "4kg 650g",
+        "5kg 50g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-136",
+      "type": "calculation",
+      "prompt": "2kg 650g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 350g",
+        "5kg 500g",
+        "4kg 750g",
+        "5kg 650g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-137",
+      "type": "calculation",
+      "prompt": "1kg 700g + 2kg 500g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "3kg 950g",
+        "3kg 700g",
+        "4kg 200g",
+        "3kg 650g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-138",
+      "type": "calculation",
+      "prompt": "2kg 250g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 800g",
+        "4kg 250g",
+        "5kg 50g",
+        "3kg 350g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-139",
+      "type": "calculation",
+      "prompt": "1kg 750g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 950g",
+        "6kg 750g",
+        "6kg 200g",
+        "6kg 550g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-140",
+      "type": "calculation",
+      "prompt": "5kg 100g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "9kg 700g",
+        "9kg 300g",
+        "10kg 500g",
+        "10kg 100g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-141",
+      "type": "calculation",
+      "prompt": "2kg 250g + 2kg 550g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 850g",
+        "4kg 800g",
+        "5kg 150g",
+        "5kg 250g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-142",
+      "type": "calculation",
+      "prompt": "3kg 850g + 3kg 550g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "7kg 400g",
+        "7kg 800g",
+        "6kg 400g",
+        "7kg 600g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-143",
+      "type": "calculation",
+      "prompt": "4kg 900g + 4kg 200g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "9kg 100g",
+        "9kg 250g",
+        "9kg",
+        "9kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-144",
+      "type": "calculation",
+      "prompt": "3kg 400g + 4kg 550g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "8kg 650g",
+        "7kg 450g",
+        "7kg 950g",
+        "8kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-145",
+      "type": "calculation",
+      "prompt": "2kg 950g + 2kg 250g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "5kg 200g",
+        "4kg 800g",
+        "5kg 800g",
+        "4kg 750g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-146",
+      "type": "calculation",
+      "prompt": "3kg 350g + 2kg 200g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "4kg 550g",
+        "5kg 950g",
+        "6kg 50g",
+        "5kg 550g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-147",
+      "type": "calculation",
+      "prompt": "2kg 850g + 1kg 650g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "4kg 100g",
+        "3kg 500g",
+        "4kg 500g",
+        "4kg 450g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-148",
+      "type": "calculation",
+      "prompt": "1kg 650g + 3kg 350g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 450g",
+        "5kg 150g",
+        "4kg 950g",
+        "5kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-149",
+      "type": "calculation",
+      "prompt": "3kg 750g + 2kg 650g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "6kg 900g",
+        "5kg 500g",
+        "6kg 400g",
+        "6kg 950g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-150",
+      "type": "calculation",
+      "prompt": "4kg 50g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 150g",
+        "4kg 550g",
+        "4kg 250g",
+        "5kg 50g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-151",
+      "type": "calculation",
+      "prompt": "1kg 200g + 2kg 800g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 700g",
+        "4kg 100g",
+        "4kg",
+        "4kg 300g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-152",
+      "type": "calculation",
+      "prompt": "2kg 400g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 900g",
+        "5kg 200g",
+        "4kg 400g",
+        "4kg 950g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-153",
+      "type": "calculation",
+      "prompt": "5kg 400g + 2kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 700g",
+        "7kg 600g",
+        "7kg 950g",
+        "7kg 800g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-154",
+      "type": "calculation",
+      "prompt": "4kg 200g + 2kg 800g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 200g",
+        "6kg 600g",
+        "6kg 800g",
+        "7kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-155",
+      "type": "calculation",
+      "prompt": "3kg 150g + 1kg 750g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 900g",
+        "4kg 800g",
+        "4kg 750g",
+        "4kg 850g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-156",
+      "type": "calculation",
+      "prompt": "2kg 600g + 2kg 450g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "4kg 700g",
+        "5kg 650g",
+        "5kg 50g",
+        "5kg 850g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-157",
+      "type": "calculation",
+      "prompt": "1kg 750g + 3kg 950g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
+      "choices": [
+        "6kg",
+        "4kg 900g",
+        "6kg 200g",
+        "5kg 700g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-158",
+      "type": "calculation",
+      "prompt": "1kg 100g + 3kg 850g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "5kg 50g",
+        "5kg",
+        "5kg 350g",
+        "4kg 950g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-159",
+      "type": "calculation",
+      "prompt": "4kg 350g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "9kg 150g",
+        "9kg 750g",
+        "9kg 300g",
+        "9kg 350g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-160",
+      "type": "calculation",
+      "prompt": "1kg 100g + 1kg 800g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "3kg 300g",
+        "2kg 450g",
+        "3kg 150g",
+        "2kg 900g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-161",
+      "type": "calculation",
+      "prompt": "3kg 200g + 3kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 500g",
+        "6kg 450g",
+        "6kg 300g",
+        "6kg 100g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-162",
+      "type": "calculation",
+      "prompt": "3kg 250g + 3kg 250g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "5kg 950g",
+        "6kg 500g",
+        "6kg 750g",
+        "6kg 700g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-163",
+      "type": "calculation",
+      "prompt": "5kg 450g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 450g",
+        "6kg 400g",
+        "5kg 750g",
+        "6kg 350g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-164",
+      "type": "calculation",
+      "prompt": "1kg 750g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 300g",
+        "4kg 350g",
+        "3kg 250g",
+        "3kg 750g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-165",
+      "type": "calculation",
+      "prompt": "3kg 300g + 3kg 400g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 350g",
+        "6kg 900g",
+        "6kg 250g",
+        "6kg 700g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-166",
+      "type": "calculation",
+      "prompt": "4kg 550g + 3kg 500g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "8kg 50g",
+        "7kg 250g",
+        "7kg 850g",
+        "7kg 900g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-167",
+      "type": "calculation",
+      "prompt": "4kg 750g + 3kg 650g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "8kg 800g",
+        "9kg",
+        "8kg 400g",
+        "7kg 500g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-168",
+      "type": "calculation",
+      "prompt": "1kg 150g + 2kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "3kg 500g",
+        "3kg 850g",
+        "3kg 300g",
+        "4kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-169",
+      "type": "calculation",
+      "prompt": "3kg 200g + 2kg 100g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "5kg 300g",
+        "5kg 350g",
+        "5kg 700g",
+        "5kg 450g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-170",
+      "type": "calculation",
+      "prompt": "4kg 150g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "7kg 150g",
+        "6kg 150g",
+        "6kg 800g",
+        "6kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-171",
+      "type": "calculation",
+      "prompt": "2kg 350g + 2kg 50g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 100g",
+        "4kg 450g",
+        "4kg 400g",
+        "4kg 750g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-172",
+      "type": "calculation",
+      "prompt": "1kg 100g + 2kg 200g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "2kg 950g",
+        "3kg 350g",
+        "3kg 300g",
+        "2kg 700g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-173",
+      "type": "calculation",
+      "prompt": "3kg 700g + 2kg 350g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 650g",
+        "6kg 50g",
+        "6kg 300g",
+        "6kg 850g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-174",
+      "type": "calculation",
+      "prompt": "2kg 500g + 1kg 500g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg",
+        "3kg 850g",
+        "3kg",
+        "3kg 550g"
+      ],
       "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-175",
+      "type": "calculation",
+      "prompt": "4kg 500g + 2kg 500g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 650g",
+        "7kg",
+        "7kg 400g",
+        "7kg 50g"
+      ],
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-002",
-      "type": "correct_spelling",
-      "prompt": "엽전이나 종이로 만든 것을 발로 차며 노는 전통 놀이",
+      "id": "ma3-kg-176",
+      "type": "calculation",
+      "prompt": "4kg 500g + 2kg 500g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
-        "제기차기",
-        "재기차기",
-        "제기짜기",
-        "게기차기"
+        "7kg",
+        "6kg",
+        "6kg 300g",
+        "7kg 100g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-003",
-      "type": "correct_spelling",
-      "prompt": "나무로 만든 것을 채로 쳐서 돌리며 노는 겨울 놀이",
+      "id": "ma3-kg-177",
+      "type": "calculation",
+      "prompt": "1kg 400g + 1kg 150g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "팽이치기",
-        "펭이치기",
-        "팽이티기",
-        "뱅이치기"
+        "2kg 550g",
+        "2kg 350g",
+        "3kg 150g",
+        "2kg 150g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-004",
-      "type": "correct_spelling",
-      "prompt": "바람을 이용해 하늘 높이 띄우며 노는 전통 놀이",
+      "id": "ma3-kg-178",
+      "type": "calculation",
+      "prompt": "1kg 550g + 1kg 600g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "연날리기",
-        "연널리기",
-        "연날이기",
-        "연눌리기"
+        "3kg 550g",
+        "3kg 650g",
+        "3kg 150g",
+        "2kg 700g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-005",
-      "type": "correct_spelling",
-      "prompt": "긴 널빤지 양쪽에 서서 번갈아 뛰어오르는 전통 놀이",
+      "id": "ma3-kg-179",
+      "type": "calculation",
+      "prompt": "4kg 550g + 4kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "널뛰기",
-        "널띄기",
-        "넘뛰기",
-        "늘뛰기"
+        "8kg 850g",
+        "9kg 700g",
+        "9kg 800g",
+        "9kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-006",
-      "type": "correct_spelling",
-      "prompt": "나무에 매단 줄에 앉아 앞뒤로 흔들며 노는 전통 놀이",
+      "id": "ma3-kg-180",
+      "type": "calculation",
+      "prompt": "3kg 450g + 2kg 500g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "그네뛰기",
-        "그내뛰기",
-        "그니뛰기",
-        "끄네뛰기"
+        "5kg 950g",
+        "5kg 650g",
+        "5kg 700g",
+        "6kg 150g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-007",
-      "type": "correct_spelling",
-      "prompt": "설날 아침에 어른들께 절을 하며 새해 인사를 드리는 풍습",
+      "id": "ma3-kg-181",
+      "type": "calculation",
+      "prompt": "2kg 50g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "세배",
-        "새배",
-        "세베",
-        "쌔배"
+        "6kg 150g",
+        "6kg 50g",
+        "5kg 700g",
+        "5kg 850g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "설날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-008",
-      "type": "correct_spelling",
-      "prompt": "설날 아침에 먹는 흰 가래떡이 들어간 음식",
+      "id": "ma3-kg-182",
+      "type": "calculation",
+      "prompt": "2kg 400g + 3kg 250g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "떡국",
-        "떡굿",
-        "덕국",
-        "떡꾹"
+        "5kg 100g",
+        "5kg 50g",
+        "5kg 350g",
+        "5kg 650g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "설날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-009",
-      "type": "correct_spelling",
-      "prompt": "추석에 햅쌀로 빚어 먹는 반달 모양의 떡",
+      "id": "ma3-kg-183",
+      "type": "calculation",
+      "prompt": "1kg 600g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "송편",
-        "송평",
-        "숭편",
-        "송펜"
+        "3kg 600g",
+        "4kg 50g",
+        "4kg 200g",
+        "3kg"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "추석"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-010",
-      "type": "correct_spelling",
-      "prompt": "명절에 조상님께 음식을 차려 놓고 절을 하는 것",
+      "id": "ma3-kg-184",
+      "type": "calculation",
+      "prompt": "4kg 800g + 1kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "차례",
-        "차레",
-        "차려",
-        "차리"
+        "6kg 450g",
+        "6kg 400g",
+        "6kg",
+        "5kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-011",
-      "type": "correct_spelling",
-      "prompt": "명절에 조상님의 무덤을 찾아가 인사드리는 것",
+      "id": "ma3-kg-185",
+      "type": "calculation",
+      "prompt": "1kg 600g + 4kg 400g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "성묘",
-        "성뇨",
-        "성모",
-        "섬묘"
+        "6kg 800g",
+        "5kg 600g",
+        "5kg 550g",
+        "6kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-012",
-      "type": "correct_spelling",
-      "prompt": "우리나라의 전통 옷",
+      "id": "ma3-kg-186",
+      "type": "calculation",
+      "prompt": "1kg 900g + 2kg 900g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "한복",
-        "한볶",
-        "함복",
-        "핚복"
+        "5kg 350g",
+        "5kg 250g",
+        "4kg 250g",
+        "4kg 800g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "전통"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-013",
-      "type": "correct_spelling",
-      "prompt": "음력 5월 5일에 씨름과 그네뛰기를 하던 명절",
+      "id": "ma3-kg-187",
+      "type": "calculation",
+      "prompt": "2kg 200g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "단오",
-        "단우",
-        "단어",
-        "닷오"
+        "7kg 300g",
+        "7kg 400g",
+        "7kg 700g",
+        "7kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-014",
-      "type": "correct_spelling",
-      "prompt": "예로부터 전해 내려오는 생활 습관이나 관습",
+      "id": "ma3-kg-188",
+      "type": "calculation",
+      "prompt": "1kg 550g + 1kg 450g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "풍습",
-        "풍슴",
-        "풍숩",
-        "퐁습"
+        "3kg 500g",
+        "3kg 800g",
+        "3kg",
+        "2kg 600g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-015",
-      "type": "correct_spelling",
-      "prompt": "옛날부터 이어져 내려오는 것",
+      "id": "ma3-kg-189",
+      "type": "calculation",
+      "prompt": "2kg 400g + 2kg 350g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "전통",
-        "전동",
-        "전총",
-        "점통"
+        "3kg 750g",
+        "5kg 50g",
+        "5kg 550g",
+        "4kg 750g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-016",
-      "type": "correct_spelling",
-      "prompt": "사람이나 물건을 한 장소에서 다른 장소로 이동시키는 것",
+      "id": "ma3-kg-190",
+      "type": "calculation",
+      "prompt": "3kg 50g + 2kg 50g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "교통",
-        "교동",
-        "교총",
-        "괴통"
+        "4kg 950g",
+        "4kg 850g",
+        "5kg 400g",
+        "5kg 100g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-017",
-      "type": "correct_spelling",
-      "prompt": "옛날에 양반들이 타고 다니던 것으로, 사람이 메고 다녔어요",
+      "id": "ma3-kg-191",
+      "type": "calculation",
+      "prompt": "3kg 950g + 3kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "가마",
-        "가매",
-        "까마",
-        "카마"
+        "7kg 400g",
+        "8kg",
+        "7kg 100g",
+        "7kg"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-018",
-      "type": "correct_spelling",
-      "prompt": "옛날에 소나 말이 끌던 바퀴 달린 운송 수단",
+      "id": "ma3-kg-192",
+      "type": "calculation",
+      "prompt": "2kg 50g + 3kg 250g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "수레",
-        "수래",
-        "수리",
-        "쑤레"
+        "6kg 100g",
+        "5kg 900g",
+        "5kg 300g",
+        "5kg 700g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-019",
-      "type": "correct_spelling",
-      "prompt": "옛날부터 사람이 타고 달리던 동물",
+      "id": "ma3-kg-193",
+      "type": "calculation",
+      "prompt": "5kg 300g + 1kg 600g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "말",
-        "맘",
-        "망",
-        "만"
+        "7kg 50g",
+        "6kg 900g",
+        "7kg",
+        "7kg 450g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-020",
-      "type": "correct_spelling",
-      "prompt": "옛날에 바람의 힘으로 물 위를 이동하던 배",
+      "id": "ma3-kg-194",
+      "type": "calculation",
+      "prompt": "5kg 400g + 5kg 450g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "돛배",
-        "돗배",
-        "독배",
-        "돛베"
+        "11kg 300g",
+        "11kg",
+        "11kg 450g",
+        "10kg 850g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-021",
-      "type": "correct_spelling",
-      "prompt": "두 바퀴가 달린 것으로, 페달을 밟아 움직여요",
+      "id": "ma3-kg-195",
+      "type": "calculation",
+      "prompt": "5kg 450g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "자전거",
-        "자전가",
-        "자전커",
-        "재전거"
+        "9kg 450g",
+        "9kg 300g",
+        "9kg 900g",
+        "9kg 50g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-022",
-      "type": "correct_spelling",
-      "prompt": "엔진의 힘으로 도로 위를 달리는 교통수단",
+      "id": "ma3-kg-196",
+      "type": "calculation",
+      "prompt": "4kg 650g + 4kg 350g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "자동차",
-        "자동카",
-        "재동차",
-        "자둥차"
+        "9kg",
+        "9kg 500g",
+        "9kg 200g",
+        "9kg 100g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-023",
-      "type": "correct_spelling",
-      "prompt": "철로 위를 달리며 많은 사람과 짐을 나르는 교통수단",
+      "id": "ma3-kg-197",
+      "type": "calculation",
+      "prompt": "3kg 450g + 3kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "기차",
-        "기자",
-        "기카",
-        "키차"
+        "6kg 500g",
+        "7kg",
+        "6kg 100g",
+        "6kg 950g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-024",
-      "type": "correct_spelling",
-      "prompt": "하늘을 날아서 먼 거리를 빠르게 이동하는 교통수단",
+      "id": "ma3-kg-198",
+      "type": "calculation",
+      "prompt": "3kg 900g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "비행기",
-        "비헹기",
-        "비행키",
-        "피행기"
+        "6kg 900g",
+        "6kg 450g",
+        "6kg 700g",
+        "6kg 550g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-025",
-      "type": "correct_spelling",
-      "prompt": "땅 아래 터널을 달리며 많은 사람을 나르는 전철",
+      "id": "ma3-kg-199",
+      "type": "calculation",
+      "prompt": "5kg 300g + 2kg 250g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "지하철",
-        "지하칠",
-        "지하첼",
-        "지아철"
+        "7kg 550g",
+        "8kg",
+        "8kg 50g",
+        "7kg 600g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-026",
-      "type": "correct_spelling",
-      "prompt": "많은 사람이 함께 타고 정해진 길을 다니는 자동차",
+      "id": "ma3-kg-200",
+      "type": "calculation",
+      "prompt": "3kg 550g + 2kg 450g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "버스",
-        "바스",
-        "버쓰",
-        "뻐스"
+        "6kg 800g",
+        "6kg 250g",
+        "6kg 150g",
+        "6kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-027",
-      "type": "correct_spelling",
-      "prompt": "자동차가 빠르게 달릴 수 있도록 만든 넓은 길",
+      "id": "ma3-kg-201",
+      "type": "calculation",
+      "prompt": "3kg 800g + 4kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "고속도로",
-        "고속두로",
-        "고속또로",
-        "고석도로"
+        "8kg 350g",
+        "8kg",
+        "8kg 250g",
+        "7kg 950g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-028",
-      "type": "correct_spelling",
-      "prompt": "빨강, 노랑, 초록불로 차와 사람의 이동을 조절해요",
+      "id": "ma3-kg-202",
+      "type": "calculation",
+      "prompt": "2kg 800g + 3kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "신호등",
-        "신호동",
-        "심호등",
-        "싱호등"
+        "6kg 600g",
+        "6kg 200g",
+        "6kg",
+        "6kg 100g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-029",
-      "type": "correct_spelling",
-      "prompt": "사람들이 안전하게 길을 건널 수 있도록 그려진 하얀 줄무늬",
+      "id": "ma3-kg-203",
+      "type": "calculation",
+      "prompt": "1kg 400g + 2kg 300g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "횡단보도",
-        "횡단부도",
-        "횡단보두",
-        "횡단버도"
+        "3kg 700g",
+        "3kg 850g",
+        "4kg 300g",
+        "4kg 100g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-030",
-      "type": "correct_spelling",
-      "prompt": "원하는 곳까지 데려다주는 노란색 자동차",
+      "id": "ma3-kg-204",
+      "type": "calculation",
+      "prompt": "3kg 800g + 1kg 350g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "택시",
-        "택사",
-        "텍시",
-        "탹시"
+        "5kg 150g",
+        "4kg 450g",
+        "5kg 50g",
+        "4kg 800g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-031",
-      "type": "correct_spelling",
-      "prompt": "물건이나 사람을 실어 나르는 것",
+      "id": "ma3-kg-205",
+      "type": "calculation",
+      "prompt": "2kg 650g + 1kg 750g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "운송",
-        "운숭",
-        "운쏭",
-        "윤송"
+        "4kg 750g",
+        "4kg",
+        "4kg 400g",
+        "3kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-032",
-      "type": "correct_spelling",
-      "prompt": "물건을 보내서 전달하는 것",
+      "id": "ma3-kg-206",
+      "type": "calculation",
+      "prompt": "1kg 200g + 1kg 300g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "배달",
-        "배덜",
-        "베달",
-        "배딜"
+        "1kg 600g",
+        "2kg 500g",
+        "2kg 700g",
+        "2kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-033",
-      "type": "correct_spelling",
-      "prompt": "다른 지역이나 나라를 구경하러 다니는 것",
+      "id": "ma3-kg-207",
+      "type": "calculation",
+      "prompt": "2kg 100g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "여행",
-        "여핸",
-        "여항",
-        "어행"
+        "5kg 400g",
+        "4kg 100g",
+        "4kg 600g",
+        "5kg 100g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-034",
-      "type": "correct_spelling",
-      "prompt": "오가며 다니는 것, 학교나 직장에 오고 가는 것",
+      "id": "ma3-kg-208",
+      "type": "calculation",
+      "prompt": "1kg 500g + 2kg 100g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "통근",
-        "통금",
-        "퉁근",
-        "동근"
+        "2kg 600g",
+        "3kg 850g",
+        "2kg 900g",
+        "3kg 600g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-035",
-      "type": "correct_spelling",
-      "prompt": "비행기가 뜨고 내리는 곳",
+      "id": "ma3-kg-209",
+      "type": "calculation",
+      "prompt": "2kg 850g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "공항",
-        "공한",
-        "공핫",
-        "꽁항"
+        "7kg 100g",
+        "7kg 350g",
+        "6kg 850g",
+        "6kg 350g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-036",
-      "type": "correct_spelling",
-      "prompt": "배가 드나드는 곳",
+      "id": "ma3-kg-210",
+      "type": "calculation",
+      "prompt": "2kg 150g + 1kg 50g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "항구",
-        "항쿠",
-        "한구",
-        "항꾸"
+        "3kg 700g",
+        "3kg 200g",
+        "3kg 50g",
+        "2kg 800g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-037",
-      "type": "correct_spelling",
-      "prompt": "기차가 서고 출발하는 곳",
+      "id": "ma3-kg-211",
+      "type": "calculation",
+      "prompt": "5kg 650g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "기차역",
-        "기차엮",
-        "기차력",
-        "키차역"
+        "6kg 300g",
+        "5kg 850g",
+        "6kg 650g",
+        "5kg 650g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-038",
-      "type": "correct_spelling",
-      "prompt": "버스가 서서 사람을 태우고 내려주는 곳",
+      "id": "ma3-kg-212",
+      "type": "calculation",
+      "prompt": "3kg 250g + 1kg 750g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "정류장",
-        "정류짱",
-        "정뉴장",
-        "정류잔"
+        "5kg 250g",
+        "5kg 300g",
+        "5kg",
+        "5kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-039",
-      "type": "correct_spelling",
-      "prompt": "단오에 힘센 사람들이 겨루던 전통 놀이",
+      "id": "ma3-kg-213",
+      "type": "calculation",
+      "prompt": "5kg 300g + 4kg 450g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "씨름",
-        "씨럼",
-        "시름",
-        "씨룸"
+        "9kg 850g",
+        "8kg 850g",
+        "9kg 250g",
+        "9kg 750g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-040",
-      "type": "correct_spelling",
-      "prompt": "단오에 여자들이 머리를 감던 향기 나는 물",
+      "id": "ma3-kg-214",
+      "type": "calculation",
+      "prompt": "3kg 500g + 1kg 800g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "창포물",
-        "창푸물",
-        "창포뮬",
-        "챵포물"
+        "5kg 300g",
+        "5kg 400g",
+        "5kg 450g",
+        "5kg 750g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "단오"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-041",
-      "type": "correct_spelling",
-      "prompt": "음력 8월 15일, 한가위라고도 불리는 명절",
+      "id": "ma3-kg-215",
+      "type": "calculation",
+      "prompt": "2kg 400g + 2kg 500g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "추석",
-        "츄석",
-        "추섞",
-        "추삭"
+        "4kg 750g",
+        "4kg 900g",
+        "5kg",
+        "4kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-042",
-      "type": "correct_spelling",
-      "prompt": "음력 1월 1일, 새해 첫날인 명절",
+      "id": "ma3-kg-216",
+      "type": "calculation",
+      "prompt": "4kg 750g + 4kg 250g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "설날",
-        "썰날",
-        "설랄",
-        "셜날"
+        "9kg",
+        "9kg 300g",
+        "9kg 700g",
+        "9kg 500g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-043",
-      "type": "correct_spelling",
-      "prompt": "설날에 어른들께 세배를 하고 받는 돈",
+      "id": "ma3-kg-217",
+      "type": "calculation",
+      "prompt": "2kg 500g + 1kg 400g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "세뱃돈",
-        "세벳돈",
-        "새뱃돈",
-        "세밷돈"
+        "4kg 600g",
+        "2kg 900g",
+        "4kg 700g",
+        "3kg 900g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "설날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-044",
-      "type": "correct_spelling",
-      "prompt": "여러 도시를 빠르게 연결하는 버스",
+      "id": "ma3-kg-218",
+      "type": "calculation",
+      "prompt": "2kg 150g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "고속버스",
-        "고속바스",
-        "고속뻐스",
-        "고석버스"
+        "4kg 100g",
+        "4kg 650g",
+        "4kg 150g",
+        "4kg 850g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-045",
-      "type": "correct_spelling",
-      "prompt": "서울에서 부산까지 2시간 만에 갈 수 있는 빠른 기차",
+      "id": "ma3-kg-219",
+      "type": "calculation",
+      "prompt": "3kg 50g + 2kg 400g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "케이티엑스",
-        "게이티엑스",
-        "케이티엑쓰",
-        "케이디엑스"
+        "5kg 450g",
+        "5kg",
+        "5kg 700g",
+        "6kg 250g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-046",
-      "type": "correct_spelling",
-      "prompt": "전기로 움직이는 바퀴 달린 이동 수단",
+      "id": "ma3-kg-220",
+      "type": "calculation",
+      "prompt": "4kg 250g + 1kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "전동킥보드",
-        "전동킥볻드",
-        "전동긱보드",
-        "전동킥버드"
+        "5kg 950g",
+        "5kg 100g",
+        "5kg 350g",
+        "6kg 50g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-047",
-      "type": "correct_spelling",
-      "prompt": "물건을 사고파는 곳, 교통이 발달하면 더 멀리 갈 수 있어요",
+      "id": "ma3-kg-221",
+      "type": "calculation",
+      "prompt": "2kg 250g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "시장",
-        "씨장",
-        "시짱",
-        "싯장"
+        "3kg 400g",
+        "3kg 250g",
+        "3kg 350g",
+        "2kg 650g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-048",
-      "type": "correct_spelling",
-      "prompt": "서로 주고받으며 사귀는 것, 교통 발달로 늘어났어요",
+      "id": "ma3-kg-222",
+      "type": "calculation",
+      "prompt": "1kg 500g + 3kg 350g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "교류",
-        "교뉴",
-        "괴류",
-        "교유"
+        "4kg 850g",
+        "5kg 50g",
+        "5kg 650g",
+        "5kg 300g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-049",
-      "type": "correct_spelling",
-      "prompt": "자동차가 많아지면서 생기는 문제",
+      "id": "ma3-kg-223",
+      "type": "calculation",
+      "prompt": "3kg 650g + 2kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "환경오염",
-        "환경오엽",
-        "환경어염",
-        "환경오연"
+        "5kg 650g",
+        "4kg 650g",
+        "5kg 950g",
+        "6kg 150g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "영향"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-050",
-      "type": "correct_spelling",
-      "prompt": "자동차끼리 부딪치는 것, 교통이 발달하면서 늘어났어요",
+      "id": "ma3-kg-224",
+      "type": "calculation",
+      "prompt": "1kg 400g + 2kg 50g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "교통사고",
-        "교통새고",
-        "교통싸고",
-        "교통서고"
+        "4kg 50g",
+        "3kg 450g",
+        "3kg 400g",
+        "3kg 150g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "영향"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-051",
-      "type": "concept_choice",
-      "prompt": "설날에 온 가족이 모여서 윷가락을 던지며 하는 전통 놀이",
+      "id": "ma3-kg-225",
+      "type": "calculation",
+      "prompt": "4kg 500g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "윷놀이",
-        "제기차기",
-        "팽이치기",
-        "연날리기"
+        "5kg 700g",
+        "5kg 500g",
+        "5kg 650g",
+        "5kg 250g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-052",
-      "type": "concept_choice",
-      "prompt": "엽전이나 종이로 만든 것을 발로 차며 노는 전통 놀이",
+      "id": "ma3-kg-226",
+      "type": "calculation",
+      "prompt": "3kg 750g + 3kg 500g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "제기차기",
-        "윷놀이",
-        "널뛰기",
-        "그네뛰기"
+        "7kg 700g",
+        "7kg 250g",
+        "7kg 500g",
+        "6kg 900g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-053",
-      "type": "concept_choice",
-      "prompt": "나무로 만든 것을 채로 쳐서 돌리며 노는 겨울 놀이",
+      "id": "ma3-kg-227",
+      "type": "calculation",
+      "prompt": "5kg 50g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "팽이치기",
-        "연날리기",
-        "씨름",
-        "윷놀이"
+        "6kg 600g",
+        "5kg 750g",
+        "6kg 200g",
+        "6kg 50g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-054",
-      "type": "concept_choice",
-      "prompt": "바람을 이용해 하늘 높이 띄우며 노는 전통 놀이",
+      "id": "ma3-kg-228",
+      "type": "calculation",
+      "prompt": "3kg 600g + 4kg 650g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
-        "연날리기",
-        "팽이치기",
-        "제기차기",
-        "널뛰기"
+        "8kg 700g",
+        "8kg 250g",
+        "9kg 50g",
+        "8kg 300g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-055",
-      "type": "concept_choice",
-      "prompt": "긴 널빤지 양쪽에 서서 번갈아 뛰어오르는 전통 놀이",
+      "id": "ma3-kg-229",
+      "type": "calculation",
+      "prompt": "3kg 650g + 3kg 650g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "널뛰기",
-        "그네뛰기",
-        "씨름",
-        "윷놀이"
+        "7kg 300g",
+        "6kg 850g",
+        "7kg 200g",
+        "7kg 900g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-056",
-      "type": "concept_choice",
-      "prompt": "나무에 매단 줄에 앉아 앞뒤로 흔들며 노는 전통 놀이",
+      "id": "ma3-kg-230",
+      "type": "calculation",
+      "prompt": "3kg 400g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "그네뛰기",
-        "널뛰기",
-        "연날리기",
-        "제기차기"
+        "8kg 400g",
+        "7kg 950g",
+        "8kg",
+        "9kg 100g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-057",
-      "type": "concept_choice",
-      "prompt": "설날 아침에 어른들께 절을 하며 새해 인사를 드리는 풍습",
+      "id": "ma3-kg-231",
+      "type": "calculation",
+      "prompt": "2kg 50g + 4kg 250g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "세배",
-        "차례",
-        "성묘",
-        "송편"
+        "5kg 850g",
+        "5kg 300g",
+        "6kg 300g",
+        "6kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "설날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-058",
-      "type": "concept_choice",
-      "prompt": "설날 아침에 먹는 흰 가래떡이 들어간 음식",
+      "id": "ma3-kg-232",
+      "type": "calculation",
+      "prompt": "2kg 600g + 4kg 450g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "떡국",
-        "송편",
-        "세뱃돈",
-        "한복"
+        "7kg 50g",
+        "7kg 150g",
+        "7kg 550g",
+        "7kg 300g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "설날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-059",
-      "type": "concept_choice",
-      "prompt": "추석에 햅쌀로 빚어 먹는 반달 모양의 떡",
+      "id": "ma3-kg-233",
+      "type": "calculation",
+      "prompt": "1kg 950g + 4kg 400g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "송편",
-        "떡국",
-        "세배",
-        "차례"
+        "6kg 350g",
+        "5kg 750g",
+        "5kg 800g",
+        "6kg 150g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "추석"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-060",
-      "type": "concept_choice",
-      "prompt": "명절에 조상님께 음식을 차려 놓고 절을 하는 것",
+      "id": "ma3-kg-234",
+      "type": "calculation",
+      "prompt": "1kg 300g + 4kg 650g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "차례",
-        "성묘",
-        "세배",
-        "단오"
+        "5kg 700g",
+        "5kg 950g",
+        "6kg 400g",
+        "5kg 50g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-061",
-      "type": "concept_choice",
-      "prompt": "명절에 조상님의 무덤을 찾아가 인사드리는 것",
+      "id": "ma3-kg-235",
+      "type": "calculation",
+      "prompt": "3kg 100g + 3kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "성묘",
-        "차례",
-        "세배",
-        "풍습"
+        "6kg",
+        "6kg 550g",
+        "7kg",
+        "7kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-062",
-      "type": "concept_choice",
-      "prompt": "우리나라의 전통 옷",
+      "id": "ma3-kg-236",
+      "type": "calculation",
+      "prompt": "2kg 450g + 3kg 400g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "한복",
-        "송편",
-        "떡국",
-        "세뱃돈"
+        "6kg 300g",
+        "5kg 650g",
+        "5kg 850g",
+        "6kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "전통"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-063",
-      "type": "concept_choice",
-      "prompt": "음력 5월 5일에 씨름과 그네뛰기를 하던 명절",
+      "id": "ma3-kg-237",
+      "type": "calculation",
+      "prompt": "1kg 600g + 3kg 400g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "단오",
-        "추석",
-        "설날",
-        "차례"
+        "4kg 550g",
+        "4kg 700g",
+        "5kg",
+        "4kg 450g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-064",
-      "type": "concept_choice",
-      "prompt": "예로부터 전해 내려오는 생활 습관이나 관습",
+      "id": "ma3-kg-238",
+      "type": "calculation",
+      "prompt": "2kg 50g + 1kg 350g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "풍습",
-        "전통",
-        "교통",
-        "교류"
+        "3kg 300g",
+        "4kg",
+        "3kg 250g",
+        "3kg 400g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-065",
-      "type": "concept_choice",
-      "prompt": "옛날부터 이어져 내려오는 것",
+      "id": "ma3-kg-239",
+      "type": "calculation",
+      "prompt": "4kg 450g + 4kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "전통",
-        "풍습",
-        "운송",
-        "여행"
+        "8kg 250g",
+        "8kg 100g",
+        "8kg 150g",
+        "8kg 600g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-066",
-      "type": "concept_choice",
-      "prompt": "사람이나 물건을 한 장소에서 다른 장소로 이동시키는 것",
+      "id": "ma3-kg-240",
+      "type": "calculation",
+      "prompt": "2kg 300g + 3kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "교통",
-        "운송",
-        "배달",
-        "통근"
+        "5kg 900g",
+        "5kg 950g",
+        "6kg",
+        "5kg 600g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-067",
-      "type": "concept_choice",
-      "prompt": "옛날에 양반들이 타고 다니던 것으로, 사람이 메고 다녔어요",
+      "id": "ma3-kg-241",
+      "type": "calculation",
+      "prompt": "2kg 250g + 3kg 350g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "가마",
-        "수레",
-        "말",
-        "돛배"
+        "5kg 600g",
+        "4kg 800g",
+        "5kg 350g",
+        "5kg 300g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-068",
-      "type": "concept_choice",
-      "prompt": "옛날에 소나 말이 끌던 바퀴 달린 운송 수단",
+      "id": "ma3-kg-242",
+      "type": "calculation",
+      "prompt": "3kg 950g + 1kg 800g",
+      "promptExplain": "1000g은 1kg으로 받아올림 합니다.",
       "choices": [
-        "수레",
-        "가마",
-        "돛배",
-        "말"
+        "5kg 450g",
+        "5kg 250g",
+        "5kg 750g",
+        "5kg 550g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-069",
-      "type": "concept_choice",
-      "prompt": "옛날부터 사람이 타고 달리던 동물",
+      "id": "ma3-kg-243",
+      "type": "calculation",
+      "prompt": "1kg 500g + 2kg 150g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "말",
-        "수레",
-        "가마",
-        "돛배"
+        "4kg 150g",
+        "3kg 650g",
+        "3kg 800g",
+        "4kg 350g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-070",
-      "type": "concept_choice",
-      "prompt": "옛날에 바람의 힘으로 물 위를 이동하던 배",
+      "id": "ma3-kg-244",
+      "type": "calculation",
+      "prompt": "3kg 900g + 1kg 100g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "돛배",
-        "가마",
-        "수레",
-        "말"
+        "4kg 550g",
+        "5kg",
+        "4kg 700g",
+        "4kg 850g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "옛날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-071",
-      "type": "concept_choice",
-      "prompt": "두 바퀴가 달린 것으로, 페달을 밟아 움직여요",
+      "id": "ma3-kg-245",
+      "type": "calculation",
+      "prompt": "1kg 350g + 5kg 550g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "자전거",
-        "자동차",
-        "버스",
-        "기차"
+        "6kg 350g",
+        "7kg 250g",
+        "7kg 350g",
+        "6kg 900g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-072",
-      "type": "concept_choice",
-      "prompt": "엔진의 힘으로 도로 위를 달리는 교통수단",
+      "id": "ma3-kg-246",
+      "type": "calculation",
+      "prompt": "1kg 400g + 2kg 100g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "자동차",
-        "자전거",
-        "지하철",
-        "비행기"
+        "4kg 50g",
+        "2kg 950g",
+        "3kg 650g",
+        "3kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-073",
-      "type": "concept_choice",
-      "prompt": "철로 위를 달리며 많은 사람과 짐을 나르는 교통수단",
+      "id": "ma3-kg-247",
+      "type": "calculation",
+      "prompt": "3kg 200g + 4kg 800g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "기차",
-        "버스",
-        "택시",
-        "비행기"
+        "8kg",
+        "8kg 700g",
+        "8kg 450g",
+        "8kg 550g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-074",
-      "type": "concept_choice",
-      "prompt": "하늘을 날아서 먼 거리를 빠르게 이동하는 교통수단",
+      "id": "ma3-kg-248",
+      "type": "calculation",
+      "prompt": "2kg 150g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "비행기",
-        "기차",
-        "지하철",
-        "고속버스"
+        "4kg 450g",
+        "5kg 150g",
+        "4kg 250g",
+        "5kg 400g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-075",
-      "type": "concept_choice",
-      "prompt": "땅 아래 터널을 달리며 많은 사람을 나르는 전철",
+      "id": "ma3-kg-249",
+      "type": "calculation",
+      "prompt": "2kg 300g + 3kg 700g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "지하철",
-        "기차",
-        "버스",
-        "택시"
+        "5kg 550g",
+        "6kg",
+        "6kg 550g",
+        "6kg 400g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-076",
-      "type": "concept_choice",
-      "prompt": "많은 사람이 함께 타고 정해진 길을 다니는 자동차",
+      "id": "ma3-kg-250",
+      "type": "calculation",
+      "prompt": "5kg 400g + 3kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "버스",
-        "택시",
-        "자전거",
-        "자동차"
+        "8kg 500g",
+        "8kg 450g",
+        "8kg 750g",
+        "8kg 400g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-077",
-      "type": "concept_choice",
-      "prompt": "자동차가 빠르게 달릴 수 있도록 만든 넓은 길",
+      "id": "ma3-kg-251",
+      "type": "calculation",
+      "prompt": "1kg 250g + 3kg 750g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "고속도로",
-        "횡단보도",
-        "정류장",
-        "기차역"
+        "5kg 600g",
+        "5kg",
+        "5kg 100g",
+        "5kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-078",
-      "type": "concept_choice",
-      "prompt": "빨강, 노랑, 초록불로 차와 사람의 이동을 조절해요",
+      "id": "ma3-kg-252",
+      "type": "calculation",
+      "prompt": "4kg 200g + 1kg 400g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "신호등",
-        "횡단보도",
-        "고속도로",
-        "정류장"
+        "5kg",
+        "6kg",
+        "5kg 600g",
+        "6kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-079",
-      "type": "concept_choice",
-      "prompt": "사람들이 안전하게 길을 건널 수 있도록 그려진 하얀 줄무늬",
+      "id": "ma3-kg-253",
+      "type": "calculation",
+      "prompt": "2kg 350g + 2kg 100g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "횡단보도",
-        "신호등",
-        "고속도로",
-        "공항"
+        "4kg 200g",
+        "3kg 900g",
+        "5kg 150g",
+        "4kg 450g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-080",
-      "type": "concept_choice",
-      "prompt": "원하는 곳까지 데려다주는 노란색 자동차",
+      "id": "ma3-kg-254",
+      "type": "calculation",
+      "prompt": "4kg 700g + 2kg 300g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "택시",
-        "버스",
-        "지하철",
-        "기차"
+        "7kg 500g",
+        "7kg",
+        "7kg 400g",
+        "7kg 50g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-081",
-      "type": "concept_choice",
-      "prompt": "물건이나 사람을 실어 나르는 것",
+      "id": "ma3-kg-255",
+      "type": "calculation",
+      "prompt": "4kg 250g + 4kg 200g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "운송",
-        "교통",
-        "배달",
-        "여행"
+        "8kg 950g",
+        "8kg 650g",
+        "8kg 450g",
+        "7kg 950g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "개념"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-082",
-      "type": "concept_choice",
-      "prompt": "물건을 보내서 전달하는 것",
+      "id": "ma3-kg-256",
+      "type": "calculation",
+      "prompt": "2kg 50g + 2kg 400g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "배달",
-        "운송",
-        "통근",
-        "교류"
+        "4kg 450g",
+        "4kg 250g",
+        "5kg 50g",
+        "4kg 850g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-083",
-      "type": "concept_choice",
-      "prompt": "다른 지역이나 나라를 구경하러 다니는 것",
+      "id": "ma3-kg-257",
+      "type": "calculation",
+      "prompt": "4kg 950g + 1kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "여행",
-        "통근",
-        "배달",
-        "운송"
+        "6kg 150g",
+        "5kg 950g",
+        "5kg 750g",
+        "6kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-084",
-      "type": "concept_choice",
-      "prompt": "오가며 다니는 것, 학교나 직장에 오고 가는 것",
+      "id": "ma3-kg-258",
+      "type": "calculation",
+      "prompt": "1kg 200g + 3kg 200g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "통근",
-        "여행",
-        "교류",
-        "배달"
+        "4kg",
+        "4kg 950g",
+        "4kg 400g",
+        "4kg 650g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-085",
-      "type": "concept_choice",
-      "prompt": "비행기가 뜨고 내리는 곳",
+      "id": "ma3-kg-259",
+      "type": "calculation",
+      "prompt": "4kg 850g + 1kg 650g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "공항",
-        "항구",
-        "기차역",
-        "정류장"
+        "6kg 500g",
+        "7kg 200g",
+        "6kg 850g",
+        "6kg 50g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-086",
-      "type": "concept_choice",
-      "prompt": "배가 드나드는 곳",
+      "id": "ma3-kg-260",
+      "type": "calculation",
+      "prompt": "1kg 650g + 1kg 900g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "항구",
-        "공항",
-        "기차역",
-        "정류장"
+        "3kg 400g",
+        "3kg 550g",
+        "3kg 100g",
+        "3kg 450g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-087",
-      "type": "concept_choice",
-      "prompt": "기차가 서고 출발하는 곳",
+      "id": "ma3-kg-261",
+      "type": "calculation",
+      "prompt": "3kg 200g + 1kg 300g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "기차역",
-        "정류장",
-        "공항",
-        "항구"
+        "4kg 500g",
+        "4kg 400g",
+        "3kg 700g",
+        "4kg 150g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-088",
-      "type": "concept_choice",
-      "prompt": "버스가 서서 사람을 태우고 내려주는 곳",
+      "id": "ma3-kg-262",
+      "type": "calculation",
+      "prompt": "2kg 300g + 5kg 650g",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "정류장",
-        "기차역",
-        "항구",
-        "공항"
+        "7kg 950g",
+        "7kg 850g",
+        "7kg 500g",
+        "7kg 900g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-089",
-      "type": "concept_choice",
-      "prompt": "단오에 힘센 사람들이 겨루던 전통 놀이",
+      "id": "ma3-kg-263",
+      "type": "calculation",
+      "prompt": "1kg 550g + 3kg 600g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "씨름",
-        "윷놀이",
-        "제기차기",
-        "팽이치기"
+        "5kg",
+        "5kg 150g",
+        "5kg 200g",
+        "4kg 450g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "놀이"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-090",
-      "type": "concept_choice",
-      "prompt": "단오에 여자들이 머리를 감던 향기 나는 물",
+      "id": "ma3-kg-264",
+      "type": "calculation",
+      "prompt": "1kg 800g + 4kg 850g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
       "choices": [
-        "창포물",
-        "송편",
-        "떡국",
-        "한복"
+        "6kg 200g",
+        "6kg 650g",
+        "6kg 500g",
+        "6kg 50g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "단오"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-091",
-      "type": "concept_choice",
-      "prompt": "음력 8월 15일, 한가위라고도 불리는 명절",
+      "id": "ma3-kg-265",
+      "type": "calculation",
+      "prompt": "3kg 800g + 2kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "추석",
-        "설날",
-        "단오",
-        "차례"
+        "6kg",
+        "6kg 100g",
+        "6kg 400g",
+        "6kg 350g"
       ],
       "answerIndex": 0,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-092",
-      "type": "concept_choice",
-      "prompt": "음력 1월 1일, 새해 첫날인 명절",
+      "id": "ma3-kg-266",
+      "type": "calculation",
+      "prompt": "3kg 100g + 3kg 900g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "설날",
-        "추석",
-        "단오",
-        "성묘"
+        "7kg 300g",
+        "6kg 400g",
+        "7kg 50g",
+        "7kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "명절"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-093",
-      "type": "concept_choice",
-      "prompt": "설날에 어른들께 세배를 하고 받는 돈",
+      "id": "ma3-kg-267",
+      "type": "calculation",
+      "prompt": "4kg 300g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "세뱃돈",
-        "떡국",
-        "송편",
-        "한복"
+        "9kg 450g",
+        "9kg 200g",
+        "9kg 500g",
+        "9kg 300g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "풍습",
-        "설날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-094",
-      "type": "concept_choice",
-      "prompt": "여러 도시를 빠르게 연결하는 버스",
+      "id": "ma3-kg-268",
+      "type": "calculation",
+      "prompt": "2kg 200g + 5kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
       "choices": [
-        "고속버스",
-        "택시",
-        "지하철",
-        "자전거"
+        "6kg 850g",
+        "7kg 700g",
+        "7kg 800g",
+        "7kg 350g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-095",
-      "type": "concept_choice",
-      "prompt": "서울에서 부산까지 2시간 만에 갈 수 있는 빠른 기차",
+      "id": "ma3-kg-269",
+      "type": "calculation",
+      "prompt": "3kg 800g + 3kg 200g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "케이티엑스",
-        "지하철",
-        "고속버스",
-        "비행기"
+        "6kg 600g",
+        "7kg",
+        "7kg 700g",
+        "6kg 800g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-096",
-      "type": "concept_choice",
-      "prompt": "전기로 움직이는 바퀴 달린 이동 수단",
+      "id": "ma3-kg-270",
+      "type": "calculation",
+      "prompt": "4kg 200g + 5kg",
+      "promptExplain": "무게의 합을 구하세요.",
       "choices": [
-        "전동킥보드",
-        "자전거",
-        "버스",
-        "택시"
+        "8kg 400g",
+        "9kg",
+        "8kg 650g",
+        "9kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "오늘날"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-097",
-      "type": "concept_choice",
-      "prompt": "물건을 사고파는 곳, 교통이 발달하면 더 멀리 갈 수 있어요",
+      "id": "ma3-kg-271",
+      "type": "calculation",
+      "prompt": "1kg 500g + 3kg 200g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
       "choices": [
-        "시장",
-        "공항",
-        "항구",
-        "정류장"
+        "5kg 50g",
+        "4kg 400g",
+        "4kg",
+        "4kg 700g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
       ]
     },
     {
-      "id": "so3-pp-098",
-      "type": "concept_choice",
-      "prompt": "서로 주고받으며 사귀는 것, 교통 발달로 늘어났어요",
+      "id": "ma3-kg-272",
+      "type": "calculation",
+      "prompt": "1kg 50g + 4kg 950g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
       "choices": [
-        "교류",
-        "교통",
-        "운송",
-        "통근"
+        "6kg 200g",
+        "6kg",
+        "6kg 250g",
+        "6kg 450g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-273",
+      "type": "calculation",
+      "prompt": "3kg 750g + 1kg 500g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "5kg 150g",
+        "5kg 250g",
+        "5kg 100g",
+        "4kg 250g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-274",
+      "type": "calculation",
+      "prompt": "3kg 600g + 3kg 400g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "7kg 800g",
+        "6kg 800g",
+        "7kg 350g",
+        "7kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-275",
+      "type": "calculation",
+      "prompt": "2kg 150g + 3kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 400g",
+        "4kg 800g",
+        "4kg 750g",
+        "5kg 300g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-276",
+      "type": "calculation",
+      "prompt": "3kg 400g + 2kg 600g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 650g",
+        "5kg 500g",
+        "5kg 800g",
+        "6kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-277",
+      "type": "calculation",
+      "prompt": "3kg 500g + 1kg 50g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 400g",
+        "3kg 650g",
+        "4kg 550g",
+        "4kg 750g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-278",
+      "type": "calculation",
+      "prompt": "3kg 250g + 1kg 750g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 250g",
+        "5kg 100g",
+        "5kg",
+        "5kg 450g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-279",
+      "type": "calculation",
+      "prompt": "3kg 650g + 4kg 650g",
+      "promptExplain": "g끼리 더해서 1000이 넘으면 1kg을 올려주세요.",
+      "choices": [
+        "8kg 650g",
+        "9kg 100g",
+        "7kg 400g",
+        "8kg 300g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-280",
+      "type": "calculation",
+      "prompt": "3kg 100g + 5kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "8kg 450g",
+        "8kg 200g",
+        "8kg 400g",
+        "8kg 750g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-281",
+      "type": "calculation",
+      "prompt": "5kg 150g + 1kg 650g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 750g",
+        "6kg 800g",
+        "5kg 900g",
+        "7kg 150g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-282",
+      "type": "calculation",
+      "prompt": "1kg 300g + 3kg 50g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "4kg 50g",
+        "4kg",
+        "4kg 150g",
+        "4kg 350g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-283",
+      "type": "calculation",
+      "prompt": "1kg 400g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "6kg 100g",
+        "5kg 600g",
+        "5kg 400g",
+        "6kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-284",
+      "type": "calculation",
+      "prompt": "3kg 950g + 2kg 50g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 500g",
+        "6kg 600g",
+        "5kg 550g",
+        "6kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-285",
+      "type": "calculation",
+      "prompt": "1kg 500g + 3kg 300g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 250g",
+        "4kg",
+        "5kg 300g",
+        "4kg 800g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-286",
+      "type": "calculation",
+      "prompt": "1kg 650g + 2kg 350g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "3kg",
+        "4kg",
+        "3kg 550g",
+        "4kg 550g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-287",
+      "type": "calculation",
+      "prompt": "3kg 950g + 2kg 50g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "5kg 550g",
+        "6kg 150g",
+        "5kg 200g",
+        "6kg"
+      ],
+      "answerIndex": 3,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "변화"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-099",
-      "type": "concept_choice",
-      "prompt": "자동차가 많아지면서 생기는 문제",
+      "id": "ma3-kg-288",
+      "type": "calculation",
+      "prompt": "3kg 500g + 2kg 850g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "환경오염",
-        "교통사고",
-        "교류",
-        "여행"
+        "6kg 350g",
+        "6kg 700g",
+        "6kg 200g",
+        "5kg 650g"
       ],
       "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-289",
+      "type": "calculation",
+      "prompt": "3kg 300g + 5kg 350g",
+      "promptExplain": "같은 단위끼리 더해보세요.",
+      "choices": [
+        "8kg 800g",
+        "8kg 650g",
+        "9kg 200g",
+        "8kg 300g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-290",
+      "type": "calculation",
+      "prompt": "2kg 600g + 4kg 400g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "6kg 300g",
+        "7kg",
+        "7kg 600g",
+        "7kg 150g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-291",
+      "type": "calculation",
+      "prompt": "3kg 650g + 2kg 800g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "6kg 900g",
+        "5kg 650g",
+        "6kg 150g",
+        "6kg 450g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-292",
+      "type": "calculation",
+      "prompt": "4kg 950g + 1kg 500g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "6kg 600g",
+        "6kg 450g",
+        "7kg",
+        "6kg 900g"
+      ],
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "영향"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     },
     {
-      "id": "so3-pp-100",
-      "type": "concept_choice",
-      "prompt": "자동차끼리 부딪치는 것, 교통이 발달하면서 늘어났어요",
+      "id": "ma3-kg-293",
+      "type": "calculation",
+      "prompt": "4kg 850g + 4kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "교통사고",
-        "환경오염",
-        "배달",
-        "시장"
+        "9kg 750g",
+        "9kg 300g",
+        "9kg 850g",
+        "9kg 550g"
       ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-294",
+      "type": "calculation",
+      "prompt": "5kg 200g + 4kg",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "9kg 200g",
+        "8kg 400g",
+        "8kg 850g",
+        "9kg 100g"
+      ],
       "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-295",
+      "type": "calculation",
+      "prompt": "2kg 400g + 2kg 600g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 300g",
+        "5kg 800g",
+        "5kg",
+        "5kg 600g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-296",
+      "type": "calculation",
+      "prompt": "3kg 150g + 3kg 850g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "6kg 850g",
+        "7kg 550g",
+        "7kg",
+        "7kg 250g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-297",
+      "type": "calculation",
+      "prompt": "1kg 500g + 2kg 500g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "4kg 350g",
+        "4kg 700g",
+        "3kg 200g",
+        "4kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
+      ]
+    },
+    {
+      "id": "ma3-kg-298",
+      "type": "calculation",
+      "prompt": "1kg 250g + 3kg 400g",
+      "promptExplain": "무게의 합을 구하세요.",
+      "choices": [
+        "4kg 450g",
+        "4kg 750g",
+        "4kg 850g",
+        "4kg 650g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-299",
+      "type": "calculation",
+      "prompt": "4kg 150g + 2kg 650g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 더합니다.",
+      "choices": [
+        "5kg 900g",
+        "6kg 800g",
+        "6kg 250g",
+        "6kg 650g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-300",
+      "type": "calculation",
+      "prompt": "1kg 200g + 2kg 800g",
+      "promptExplain": "g의 합이 1000g이 넘는지 확인해보세요.",
+      "choices": [
+        "3kg 450g",
+        "4kg",
+        "4kg 550g",
+        "3kg 900g"
+      ],
+      "answerIndex": 1,
       "tags": [
         "초3",
-        "사회",
-        "교통",
-        "영향"
+        "수학",
+        "무게",
+        "덧셈",
+        "kg",
+        "g",
+        "받아올림"
       ]
     }
   ]
