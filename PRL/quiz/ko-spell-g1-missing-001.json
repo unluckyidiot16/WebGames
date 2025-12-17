@@ -1,0 +1,1809 @@
+{
+  "packId": "ko-spell-g1-missing-001",
+  "title": "초1-2 맞춤법 빠진 글자 & 바른 표기 찾기",
+  "grade": 1,
+  "subject": "korean_spelling",
+  "description": "초등 1‧2학년군 국어 교과서 필수 낱말: 빠진 글자 채우기(1~100) 및 틀린 표기 고치기(101~200) 200문제 세트",
+  "questions": [
+    {
+      "id": "g1-miss-001",
+      "type": "missing_letter",
+      "prompt": "_교",
+      "promptExplain": "우리가 공부하러 가는 곳",
+      "choices": ["학", "신", "전", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-002",
+      "type": "missing_letter",
+      "prompt": "학_",
+      "promptExplain": "우리가 공부하러 가는 곳",
+      "choices": ["그", "교", "타", "필"],
+      "answerIndex": 1,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-003",
+      "type": "missing_letter",
+      "prompt": "교_",
+      "promptExplain": "수업을 하는 방",
+      "choices": ["실", "우", "저", "오"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-004",
+      "type": "missing_letter",
+      "prompt": "_실",
+      "promptExplain": "수업을 하는 방",
+      "choices": ["교", "밥", "구", "흐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-005",
+      "type": "missing_letter",
+      "prompt": "운_장",
+      "promptExplain": "학교에서 뛰어노는 넓은 곳",
+      "choices": ["동", "니", "저", "무"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-006",
+      "type": "missing_letter",
+      "prompt": "운동_",
+      "promptExplain": "학교에서 뛰어노는 넓은 곳",
+      "choices": ["장", "쓰", "제", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-007",
+      "type": "missing_letter",
+      "prompt": "복_",
+      "promptExplain": "교실과 교실 사이를 잇는 길",
+      "choices": ["도", "새", "넌", "흐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-008",
+      "type": "missing_letter",
+      "prompt": "_도",
+      "promptExplain": "교실과 교실 사이를 잇는 길",
+      "choices": ["복", "누", "부", "흐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-009",
+      "type": "missing_letter",
+      "prompt": "놀_터",
+      "promptExplain": "그네와 미끄럼틀이 있는 곳",
+      "choices": ["보", "이", "형", "카"],
+      "answerIndex": 1,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-010",
+      "type": "missing_letter",
+      "prompt": "놀이_",
+      "promptExplain": "그네와 미끄럼틀이 있는 곳",
+      "choices": ["교", "주", "화", "터"],
+      "answerIndex": 3,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-011",
+      "type": "missing_letter",
+      "prompt": "도_관",
+      "promptExplain": "책을 빌리고 읽는 곳",
+      "choices": ["서", "도", "키", "와"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-012",
+      "type": "missing_letter",
+      "prompt": "도서_",
+      "promptExplain": "책을 빌리고 읽는 곳",
+      "choices": ["관", "배", "서", "저"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-013",
+      "type": "missing_letter",
+      "prompt": "시_",
+      "promptExplain": "물건을 사고파는 곳",
+      "choices": ["장", "서", "저", "주"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-014",
+      "type": "missing_letter",
+      "prompt": "_장",
+      "promptExplain": "물건을 사고파는 곳",
+      "choices": ["시", "허", "또", "태"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-015",
+      "type": "missing_letter",
+      "prompt": "병_",
+      "promptExplain": "아플 때 가는 곳",
+      "choices": ["원", "허", "더", "너"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-016",
+      "type": "missing_letter",
+      "prompt": "_원",
+      "promptExplain": "아플 때 가는 곳",
+      "choices": ["병", "다", "소", "무"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-017",
+      "type": "missing_letter",
+      "prompt": "우체_",
+      "promptExplain": "편지를 보내는 곳",
+      "choices": ["국", "또", "두", "저"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-018",
+      "type": "missing_letter",
+      "prompt": "_체국",
+      "promptExplain": "편지를 보내는 곳",
+      "choices": ["우", "세", "오", "라"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-019",
+      "type": "missing_letter",
+      "prompt": "약_",
+      "promptExplain": "약을 파는 가게",
+      "choices": ["국", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-020",
+      "type": "missing_letter",
+      "prompt": "_국",
+      "promptExplain": "약을 파는 가게",
+      "choices": ["약", "두", "너", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-021",
+      "type": "missing_letter",
+      "prompt": "가_",
+      "promptExplain": "같이 사는 식구들",
+      "choices": ["족", "쿠", "누", "차"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-022",
+      "type": "missing_letter",
+      "prompt": "가족_",
+      "promptExplain": "같이 사는 식구들",
+      "choices": [" ", "허", "저", "다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-023",
+      "type": "missing_letter",
+      "prompt": "형_",
+      "promptExplain": "형과 동생, 오빠와 남동생",
+      "choices": ["제", "니", "보", "쿠"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-024",
+      "type": "missing_letter",
+      "prompt": "_제",
+      "promptExplain": "형과 동생, 오빠와 남동생",
+      "choices": ["형", "저", "다", "푸"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-025",
+      "type": "missing_letter",
+      "prompt": "친_",
+      "promptExplain": "함께 놀고 공부하는 사이",
+      "choices": ["구", "두", "저", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-026",
+      "type": "missing_letter",
+      "prompt": "_구",
+      "promptExplain": "함께 놀고 공부하는 사이",
+      "choices": ["친", "무", "보", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-027",
+      "type": "missing_letter",
+      "prompt": "선_님",
+      "promptExplain": "우리를 가르쳐 주시는 분",
+      "choices": ["생", "허", "보", "루"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-028",
+      "type": "missing_letter",
+      "prompt": "선생_",
+      "promptExplain": "우리를 가르쳐 주시는 분",
+      "choices": ["님", "누", "저", "타"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-029",
+      "type": "missing_letter",
+      "prompt": "이_",
+      "promptExplain": "사람을 부를 때 쓰는 말",
+      "choices": ["름", "서", "저", "노"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-030",
+      "type": "missing_letter",
+      "prompt": "_름",
+      "promptExplain": "사람을 부를 때 쓰는 말",
+      "choices": ["이", "무", "조", "다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-031",
+      "type": "missing_letter",
+      "prompt": "주_",
+      "promptExplain": "집이 있는 곳을 적은 말",
+      "choices": ["소", "저", "쿠", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-032",
+      "type": "missing_letter",
+      "prompt": "_소",
+      "promptExplain": "집이 있는 곳을 적은 말",
+      "choices": ["주", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-033",
+      "type": "missing_letter",
+      "prompt": "전_",
+      "promptExplain": "상대와 목소리로 이야기하는 것",
+      "choices": ["화", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-034",
+      "type": "missing_letter",
+      "prompt": "_화",
+      "promptExplain": "상대와 목소리로 이야기하는 것",
+      "choices": ["전", "무", "다", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-035",
+      "type": "missing_letter",
+      "prompt": "공_",
+      "promptExplain": "공부할 때 글을 쓰는 책",
+      "choices": ["책", "니", "보", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-036",
+      "type": "missing_letter",
+      "prompt": "_책",
+      "promptExplain": "공부할 때 글을 쓰는 책",
+      "choices": ["공", "무", "저", "푸"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-037",
+      "type": "missing_letter",
+      "prompt": "연_",
+      "promptExplain": "글씨를 쓰는 도구",
+      "choices": ["필", "보", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-038",
+      "type": "missing_letter",
+      "prompt": "_필",
+      "promptExplain": "글씨를 쓰는 도구",
+      "choices": ["연", "무", "저", "푸"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-039",
+      "type": "missing_letter",
+      "prompt": "지우_",
+      "promptExplain": "잘못 쓴 글씨를 지우는 것",
+      "choices": ["개", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-040",
+      "type": "missing_letter",
+      "prompt": "_우개",
+      "promptExplain": "잘못 쓴 글씨를 지우는 것",
+      "choices": ["지", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-041",
+      "type": "missing_letter",
+      "prompt": "필_",
+      "promptExplain": "연필과 지우개를 넣어 두는 것",
+      "choices": ["통", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-042",
+      "type": "missing_letter",
+      "prompt": "_통",
+      "promptExplain": "연필과 지우개를 넣어 두는 것",
+      "choices": ["필", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-043",
+      "type": "missing_letter",
+      "prompt": "책_방",
+      "promptExplain": "학교에 갈 때 메고 다니는 것",
+      "choices": ["가", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-044",
+      "type": "missing_letter",
+      "prompt": "책가_",
+      "promptExplain": "학교에 갈 때 메고 다니는 것",
+      "choices": ["방", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-045",
+      "type": "missing_letter",
+      "prompt": "운_화",
+      "promptExplain": "뛰어놀 때 신는 신발",
+      "choices": ["동", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-046",
+      "type": "missing_letter",
+      "prompt": "운동_",
+      "promptExplain": "뛰어놀 때 신는 신발",
+      "choices": ["화", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-047",
+      "type": "missing_letter",
+      "prompt": "체_복",
+      "promptExplain": "체육 시간에 입는 옷",
+      "choices": ["육", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-048",
+      "type": "missing_letter",
+      "prompt": "체육_",
+      "promptExplain": "체육 시간에 입는 옷",
+      "choices": ["복", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-049",
+      "type": "missing_letter",
+      "prompt": "도_락",
+      "promptExplain": "밖에서 먹으려고 싸 가지고 가는 밥",
+      "choices": ["시", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-050",
+      "type": "missing_letter",
+      "prompt": "도시_",
+      "promptExplain": "밖에서 먹으려고 싸 가지고 가는 밥",
+      "choices": ["락", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-051",
+      "type": "missing_letter",
+      "prompt": "물_",
+      "promptExplain": "물을 담아 두는 통",
+      "choices": ["통", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-052",
+      "type": "missing_letter",
+      "prompt": "_통",
+      "promptExplain": "물을 담아 두는 통",
+      "choices": ["물", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-053",
+      "type": "missing_letter",
+      "prompt": "간_",
+      "promptExplain": "식사 때 말고 먹는 음식",
+      "choices": ["식", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-054",
+      "type": "missing_letter",
+      "prompt": "_식",
+      "promptExplain": "식사 때 말고 먹는 음식",
+      "choices": ["간", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-055",
+      "type": "missing_letter",
+      "prompt": "아침_",
+      "promptExplain": "하루 중 첫 번째로 먹는 밥",
+      "choices": ["밥", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-056",
+      "type": "missing_letter",
+      "prompt": "_침밥",
+      "promptExplain": "하루 중 첫 번째로 먹는 밥",
+      "choices": ["아", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-057",
+      "type": "missing_letter",
+      "prompt": "저녁_",
+      "promptExplain": "해가 진 뒤에 먹는 밥",
+      "choices": ["밥", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-058",
+      "type": "missing_letter",
+      "prompt": "_녁밥",
+      "promptExplain": "해가 진 뒤에 먹는 밥",
+      "choices": ["저", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-059",
+      "type": "missing_letter",
+      "prompt": "달_",
+      "promptExplain": "날짜와 요일이 적힌 종이",
+      "choices": ["력", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-060",
+      "type": "missing_letter",
+      "prompt": "_력",
+      "promptExplain": "날짜와 요일이 적힌 종이",
+      "choices": ["달", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-061",
+      "type": "missing_letter",
+      "prompt": "시_",
+      "promptExplain": "시간을 알려 주는 물건",
+      "choices": ["계", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-062",
+      "type": "missing_letter",
+      "prompt": "_계",
+      "promptExplain": "시간을 알려 주는 물건",
+      "choices": ["시", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-063",
+      "type": "missing_letter",
+      "prompt": "놀이_원",
+      "promptExplain": "놀이기구가 많은 곳",
+      "choices": ["공", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-064",
+      "type": "missing_letter",
+      "prompt": "놀이공_",
+      "promptExplain": "놀이기구가 많은 곳",
+      "choices": ["원", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-065",
+      "type": "missing_letter",
+      "prompt": "그림_",
+      "promptExplain": "그림이 많이 들어 있는 책",
+      "choices": ["책", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-066",
+      "type": "missing_letter",
+      "prompt": "_림책",
+      "promptExplain": "그림이 많이 들어 있는 책",
+      "choices": ["그", "무", "두", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-067",
+      "type": "missing_letter",
+      "prompt": "동_책",
+      "promptExplain": "이야기가 담긴 어린이 책",
+      "choices": ["화", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-068",
+      "type": "missing_letter",
+      "prompt": "동화_",
+      "promptExplain": "이야기가 담긴 어린이 책",
+      "choices": ["책", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-069",
+      "type": "missing_letter",
+      "prompt": "일_장",
+      "promptExplain": "하루 일을 적는 공책",
+      "choices": ["기", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-070",
+      "type": "missing_letter",
+      "prompt": "일기_",
+      "promptExplain": "하루 일을 적는 공책",
+      "choices": ["장", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-071",
+      "type": "missing_letter",
+      "prompt": "편_지",
+      "promptExplain": "편지를 쓰는 종이",
+      "choices": ["지", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-072",
+      "type": "missing_letter",
+      "prompt": "편지_",
+      "promptExplain": "편지를 쓰는 종이",
+      "choices": ["지", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-073",
+      "type": "missing_letter",
+      "prompt": "우_",
+      "promptExplain": "편지를 보낼 때 붙이는 작은 종이",
+      "choices": ["표", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-074",
+      "type": "missing_letter",
+      "prompt": "_표",
+      "promptExplain": "편지를 보낼 때 붙이는 작은 종이",
+      "choices": ["우", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-075",
+      "type": "missing_letter",
+      "prompt": "나_",
+      "promptExplain": "날개가 예쁜 곤충",
+      "choices": ["비", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-076",
+      "type": "missing_letter",
+      "prompt": "_비",
+      "promptExplain": "날개가 예쁜 곤충",
+      "choices": ["나", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-077",
+      "type": "missing_letter",
+      "prompt": "무지_",
+      "promptExplain": "비 온 뒤 하늘에 생기는 여러 빛깔의 띠",
+      "choices": ["개", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-078",
+      "type": "missing_letter",
+      "prompt": "_지개",
+      "promptExplain": "비 온 뒤 하늘에 생기는 여러 빛깔의 띠",
+      "choices": ["무", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-079",
+      "type": "missing_letter",
+      "prompt": "눈_람",
+      "promptExplain": "눈으로 만드는 사람 모양",
+      "choices": ["사", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-080",
+      "type": "missing_letter",
+      "prompt": "눈사_",
+      "promptExplain": "눈으로 만드는 사람 모양",
+      "choices": ["람", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-081",
+      "type": "missing_letter",
+      "prompt": "눈_이",
+      "promptExplain": "하늘에서 내리는 작은 눈 알갱이",
+      "choices": ["송", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-082",
+      "type": "missing_letter",
+      "prompt": "_송이",
+      "promptExplain": "하늘에서 내리는 작은 눈 알갱이",
+      "choices": ["눈", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-083",
+      "type": "missing_letter",
+      "prompt": "바_",
+      "promptExplain": "공기가 움직이는 것",
+      "choices": ["람", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-084",
+      "type": "missing_letter",
+      "prompt": "_람",
+      "promptExplain": "공기가 움직이는 것",
+      "choices": ["바", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-085",
+      "type": "missing_letter",
+      "prompt": "햇_",
+      "promptExplain": "해에서 나오는 밝은 빛",
+      "choices": ["살", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-086",
+      "type": "missing_letter",
+      "prompt": "_살",
+      "promptExplain": "해에서 나오는 밝은 빛",
+      "choices": ["햇", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-087",
+      "type": "missing_letter",
+      "prompt": "미끄_틀",
+      "promptExplain": "위에서 아래로 미끄러져 내려오는 놀이기구",
+      "choices": ["럼", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-088",
+      "type": "missing_letter",
+      "prompt": "미끄럼_",
+      "promptExplain": "위에서 아래로 미끄러져 내려오는 놀이기구",
+      "choices": ["틀", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-089",
+      "type": "missing_letter",
+      "prompt": "그_",
+      "promptExplain": "앞뒤로 왔다 갔다 타는 놀이기구",
+      "choices": ["네", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-090",
+      "type": "missing_letter",
+      "prompt": "_네",
+      "promptExplain": "앞뒤로 왔다 갔다 타는 놀이기구",
+      "choices": ["그", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-091",
+      "type": "missing_letter",
+      "prompt": "공_",
+      "promptExplain": "나무와 풀, 벤치가 있는 쉼터",
+      "choices": ["원", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-092",
+      "type": "missing_letter",
+      "prompt": "_원",
+      "promptExplain": "나무와 풀, 벤치가 있는 쉼터",
+      "choices": ["공", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-093",
+      "type": "missing_letter",
+      "prompt": "길_리",
+      "promptExplain": "집과 집 사이의 길",
+      "choices": ["거", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-094",
+      "type": "missing_letter",
+      "prompt": "길거_",
+      "promptExplain": "집과 집 사이의 길",
+      "choices": ["리", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-095",
+      "type": "missing_letter",
+      "prompt": "횡단_도",
+      "promptExplain": "사람이 길을 건너는 곳에 그려진 줄무늬",
+      "choices": ["보", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-096",
+      "type": "missing_letter",
+      "prompt": "횡단보_",
+      "promptExplain": "사람이 길을 건너는 곳에 그려진 줄무늬",
+      "choices": ["도", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-097",
+      "type": "missing_letter",
+      "prompt": "신_등",
+      "promptExplain": "빨간불, 초록불을 보여 주는 기계",
+      "choices": ["호", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-098",
+      "type": "missing_letter",
+      "prompt": "신호_",
+      "promptExplain": "빨간불, 초록불을 보여 주는 기계",
+      "choices": ["등", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-099",
+      "type": "missing_letter",
+      "prompt": "모래_",
+      "promptExplain": "모래로 쌓아 올린 성 모양",
+      "choices": ["성", "저", "니", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-100",
+      "type": "missing_letter",
+      "prompt": "_래성",
+      "promptExplain": "모래로 쌓아 올린 성 모양",
+      "choices": ["모", "두", "무", "허"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "낱말"]
+    },
+    {
+      "id": "g1-miss-101",
+      "type": "spelling_choice",
+      "prompt": "'설겆이'를 바르게 적은 것은?",
+      "promptExplain": "밥 먹고 그릇을 씻는 일을 어떻게 쓸까요?",
+      "choices": ["설거지", "설겆이", "설거이", "설걷이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-102",
+      "type": "spelling_choice",
+      "prompt": "'노리터'를 바르게 적은 것은?",
+      "promptExplain": "그네와 미끄럼틀이 있는 곳 이름이에요.",
+      "choices": ["놀이터", "노리터", "놀리터", "노리떠"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-103",
+      "type": "spelling_choice",
+      "prompt": "'도서괸'을 바르게 적은 것은?",
+      "promptExplain": "책을 빌리고 읽는 곳 이름이에요.",
+      "choices": ["도서관", "도서괸", "도서관ㅎ", "도셔관"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-104",
+      "type": "spelling_choice",
+      "prompt": "'우채국'을 바르게 적은 것은?",
+      "promptExplain": "편지와 소포를 보내는 곳이에요.",
+      "choices": ["우체국", "우채국", "우체굑", "우채굑"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-105",
+      "type": "spelling_choice",
+      "prompt": "'운돔장'을 바르게 적은 것은?",
+      "promptExplain": "학교에서 뛰어노는 넓은 곳이에요.",
+      "choices": ["운동장", "운돔장", "운둥장", "온동장"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-106",
+      "type": "spelling_choice",
+      "prompt": "'운돔화'를 바르게 적은 것은?",
+      "promptExplain": "체육 시간에 신는 신발 이름이에요.",
+      "choices": ["운동화", "운돔화", "운동홧", "운돔홧"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-107",
+      "type": "spelling_choice",
+      "prompt": "'채육복'을 바르게 적은 것은?",
+      "promptExplain": "체육 시간에 입는 옷이에요.",
+      "choices": ["체육복", "채육복", "체육볶", "체윽복"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-108",
+      "type": "spelling_choice",
+      "prompt": "'모래섬'을 바르게 적은 것은?",
+      "promptExplain": "모래로 쌓아 올린 성 모양이에요.",
+      "choices": ["모래성", "모래섬", "모레성", "모레섬"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-109",
+      "type": "spelling_choice",
+      "prompt": "'교싫'을 바르게 적은 것은?",
+      "promptExplain": "수업을 하는 방 이름이에요.",
+      "choices": ["교실", "교싫", "굥실", "꾜실"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-110",
+      "type": "spelling_choice",
+      "prompt": "'복도오'를 바르게 적은 것은?",
+      "promptExplain": "교실과 교실 사이 길이에요.",
+      "choices": ["복도", "복도오", "복또", "볻도"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-111",
+      "type": "spelling_choice",
+      "prompt": "'창뭉'을 바르게 적은 것은?",
+      "promptExplain": "밖을 내다보는 유리문이에요.",
+      "choices": ["창문", "창뭉", "창문ㅇ", "챵문"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-112",
+      "type": "spelling_choice",
+      "prompt": "'칠반'을 바르게 적은 것은?",
+      "promptExplain": "선생님이 글씨를 쓰는 판이에요.",
+      "choices": ["칠판", "칠반", "실판", "칠팡"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-113",
+      "type": "spelling_choice",
+      "prompt": "'년필'을 바르게 적은 것은?",
+      "promptExplain": "글씨를 쓰는 도구예요.",
+      "choices": ["연필", "년필", "연필ㅎ", "연필이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-114",
+      "type": "spelling_choice",
+      "prompt": "'지우게'를 바르게 적은 것은?",
+      "promptExplain": "잘못 쓴 글씨를 지우는 도구예요.",
+      "choices": ["지우개", "지우게", "지우개ㅣ", "지우캐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-115",
+      "type": "spelling_choice",
+      "prompt": "'콩책'을 바르게 적은 것은?",
+      "promptExplain": "공부한 것을 쓰는 책이에요.",
+      "choices": ["공책", "콩책", "공챀", "공책이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-116",
+      "type": "spelling_choice",
+      "prompt": "'쁠통'을 바르게 적은 것은?",
+      "promptExplain": "연필과 지우개를 넣는 통이에요.",
+      "choices": ["필통", "쁠통", "필퉁", "필동"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-117",
+      "type": "spelling_choice",
+      "prompt": "'챋가방'을 바르게 적은 것은?",
+      "promptExplain": "학교에 갈 때 메는 가방이에요.",
+      "choices": ["책가방", "챋가방", "책가밥", "책가방이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-118",
+      "type": "spelling_choice",
+      "prompt": "'학꾜'를 바르게 적은 것은?",
+      "promptExplain": "우리가 공부하러 가는 곳이에요.",
+      "choices": ["학교", "학꾜", "핰교", "학굣"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-119",
+      "type": "spelling_choice",
+      "prompt": "'섬생님'을 바르게 적은 것은?",
+      "promptExplain": "우리를 가르쳐 주시는 분이에요.",
+      "choices": ["선생님", "섬생님", "선생님ㅁ", "성생님"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-120",
+      "type": "spelling_choice",
+      "prompt": "'칫구'를 바르게 적은 것은?",
+      "promptExplain": "함께 놀고 지내는 사이예요.",
+      "choices": ["친구", "칫구", "친구우", "칭구"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-121",
+      "type": "spelling_choice",
+      "prompt": "'가족ㅅ'을 바르게 적은 것은?",
+      "promptExplain": "함께 사는 식구들이에요.",
+      "choices": ["가족", "가족ㅅ", "가좆", "가족이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-122",
+      "type": "spelling_choice",
+      "prompt": "'형재'를 바르게 적은 것은?",
+      "promptExplain": "형과 동생을 함께 이르는 말이에요.",
+      "choices": ["형제", "형재", "형쟤", "형죄"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-123",
+      "type": "spelling_choice",
+      "prompt": "'이르ㅁ'을 바르게 적은 것은?",
+      "promptExplain": "사람을 부를 때 쓰는 말이에요.",
+      "choices": ["이름", "이르ㅁ", "이름이", "일음"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-124",
+      "type": "spelling_choice",
+      "prompt": "'쥬소'를 바르게 적은 것은?",
+      "promptExplain": "집이 있는 곳을 적은 말이에요.",
+      "choices": ["주소", "쥬소", "주쇼", "주소오"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-125",
+      "type": "spelling_choice",
+      "prompt": "'전와번호'를 바르게 적은 것은?",
+      "promptExplain": "전화를 걸 때 누르는 숫자예요.",
+      "choices": ["전화번호", "전와번호", "전화번호", "전화번호"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-126",
+      "type": "spelling_choice",
+      "prompt": "'쌩일'을 바르게 적은 것은?",
+      "promptExplain": "태어난 날이에요.",
+      "choices": ["생일", "쌩일", "생이ㄹ", "생닐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-127",
+      "type": "spelling_choice",
+      "prompt": "'게단'을 바르게 적은 것은?",
+      "promptExplain": "위아래로 오르내리는 층계예요.",
+      "choices": ["계단", "게단", "계댠", "계단이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-128",
+      "type": "spelling_choice",
+      "prompt": "'시당'을 바르게 적은 것은?",
+      "promptExplain": "물건을 사고파는 곳 이름이에요.",
+      "choices": ["시장", "시당", "시쟝", "시장이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-129",
+      "type": "spelling_choice",
+      "prompt": "'병원ㅇ'을 바르게 적은 것은?",
+      "promptExplain": "아플 때 가는 곳이에요.",
+      "choices": ["병원", "병원ㅇ", "병원ㅎ", "병왼"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-130",
+      "type": "spelling_choice",
+      "prompt": "'약꾹'을 바르게 적은 것은?",
+      "promptExplain": "약을 파는 가게예요.",
+      "choices": ["약국", "약꾹", "약굑", "약굳"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-131",
+      "type": "spelling_choice",
+      "prompt": "'공왼'을 바르게 적은 것은?",
+      "promptExplain": "나무와 벤치가 있는 쉼터예요.",
+      "choices": ["공원", "공왼", "공언", "콩원"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-132",
+      "type": "spelling_choice",
+      "prompt": "'소풍ㅇ'을 바르게 적은 것은?",
+      "promptExplain": "학교에서 함께 나들이 가는 일이에요.",
+      "choices": ["소풍", "소풍ㅇ", "소훙", "쇼풍"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-133",
+      "type": "spelling_choice",
+      "prompt": "'운산'을 바르게 적은 것은?",
+      "promptExplain": "비를 막기 위해 쓰는 것이에요.",
+      "choices": ["우산", "운산", "우쌘", "우싼"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-134",
+      "type": "spelling_choice",
+      "prompt": "'무지게'를 바르게 적은 것은?",
+      "promptExplain": "비 온 뒤 하늘에 나타나는 여러 빛깔의 띠예요.",
+      "choices": ["무지개", "무지게", "무지개ㅣ", "무지캐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-135",
+      "type": "spelling_choice",
+      "prompt": "'나비이'를 바르게 적은 것은?",
+      "promptExplain": "날개가 알록달록한 곤충이에요.",
+      "choices": ["나비", "나비이", "나삐", "나빚"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-136",
+      "type": "spelling_choice",
+      "prompt": "'해쌀'을 바르게 적은 것은?",
+      "promptExplain": "해에서 나오는 밝은 빛이에요.",
+      "choices": ["햇살", "해쌀", "햇쌀", "핻살"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-137",
+      "type": "spelling_choice",
+      "prompt": "'발암'을 바르게 적은 것은?",
+      "promptExplain": "공기가 움직이는 것이에요.",
+      "choices": ["바람", "발암", "바뢈", "발람"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-138",
+      "type": "spelling_choice",
+      "prompt": "'눈사람ㅁ'을 바르게 적은 것은?",
+      "promptExplain": "눈으로 만드는 사람 모양이에요.",
+      "choices": ["눈사람", "눈사람ㅁ", "눈살암", "눙사람"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-139",
+      "type": "spelling_choice",
+      "prompt": "'눈송이이'를 바르게 적은 것은?",
+      "promptExplain": "하늘에서 내리는 작은 눈 알갱이예요.",
+      "choices": ["눈송이", "눈송이이", "눈쏭이", "눈송잌"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-140",
+      "type": "spelling_choice",
+      "prompt": "'노리공원'을 바르게 적은 것은?",
+      "promptExplain": "놀이기구가 많은 곳이에요.",
+      "choices": ["놀이공원", "노리공원", "놀이공언", "놀잇공원"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-141",
+      "type": "spelling_choice",
+      "prompt": "'동화챀'을 바르게 적은 것은?",
+      "promptExplain": "이야기가 들어 있는 어린이 책이에요.",
+      "choices": ["동화책", "동화챀", "동화챡", "동와책"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-142",
+      "type": "spelling_choice",
+      "prompt": "'그림챀'을 바르게 적은 것은?",
+      "promptExplain": "그림이 많이 실린 책이에요.",
+      "choices": ["그림책", "그림챀", "그림챡", "그림책이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-143",
+      "type": "spelling_choice",
+      "prompt": "'일기쟝'을 바르게 적은 것은?",
+      "promptExplain": "하루 일을 적는 공책이에요.",
+      "choices": ["일기장", "일기쟝", "일긔장", "일기장ㅇ"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-144",
+      "type": "spelling_choice",
+      "prompt": "'편지찌'를 바르게 적은 것은?",
+      "promptExplain": "편지를 쓰는 종이예요.",
+      "choices": ["편지지", "편지찌", "편지기", "편지쥐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-145",
+      "type": "spelling_choice",
+      "prompt": "'우표오'를 바르게 적은 것은?",
+      "promptExplain": "편지를 보낼 때 붙이는 작은 종이예요.",
+      "choices": ["우표", "우표오", "우푀", "우표ㅛ"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-146",
+      "type": "spelling_choice",
+      "prompt": "'종이젚기'를 바르게 적은 것은?",
+      "promptExplain": "종이를 접어 모양을 만드는 놀이예요.",
+      "choices": ["종이접기", "종이젚기", "존이접기", "종이접긔"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-147",
+      "type": "spelling_choice",
+      "prompt": "'쌩일파티'를 바르게 적은 것은?",
+      "promptExplain": "생일을 함께 축하하는 자리예요.",
+      "choices": ["생일파티", "쌩일파티", "생일파티이", "생일 파티"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-148",
+      "type": "spelling_choice",
+      "prompt": "'바다쓰기'를 바르게 적은 것은?",
+      "promptExplain": "선생님이 읽어 주면 그대로 쓰는 공부예요.",
+      "choices": ["받아쓰기", "바다쓰기", "받아쓰끼", "받어쓰기"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-149",
+      "type": "spelling_choice",
+      "prompt": "'달녁'을 바르게 적은 것은?",
+      "promptExplain": "날짜와 요일을 볼 수 있는 것이에요.",
+      "choices": ["달력", "달녁", "달역", "달력ㅇ"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-150",
+      "type": "spelling_choice",
+      "prompt": "'시게'를 바르게 적은 것은?",
+      "promptExplain": "시간을 알려 주는 물건이에요.",
+      "choices": ["시계", "시게", "쉬계", "시계이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-151",
+      "type": "spelling_choice",
+      "prompt": "'질거리'를 바르게 적은 것은?",
+      "promptExplain": "집과 집 사이의 길이에요.",
+      "choices": ["길거리", "질거리", "길거기", "길거니"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-152",
+      "type": "spelling_choice",
+      "prompt": "'횡단보돋'을 바르게 적은 것은?",
+      "promptExplain": "사람이 길을 건너는 곳이에요.",
+      "choices": ["횡단보도", "횡단보돋", "횡단뽀도", "횡단보다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-153",
+      "type": "spelling_choice",
+      "prompt": "'신호드응'을 바르게 적은 것은?",
+      "promptExplain": "빨간불, 초록불을 보여 주는 기계예요.",
+      "choices": ["신호등", "신호드응", "싱호등", "신호듣"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-154",
+      "type": "spelling_choice",
+      "prompt": "'자돔차'를 바르게 적은 것은?",
+      "promptExplain": "바퀴가 달린 탈것이에요.",
+      "choices": ["자동차", "자동차", "자돔차", "쟈동차"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-155",
+      "type": "spelling_choice",
+      "prompt": "'자전거ㅓ'를 바르게 적은 것은?",
+      "promptExplain": "발로 페달을 밟아 가는 탈것이에요.",
+      "choices": ["자전거", "자전거ㅓ", "자젼거", "자전거이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-156",
+      "type": "spelling_choice",
+      "prompt": "'뻐스'를 바르게 적은 것은?",
+      "promptExplain": "많은 사람이 타는 큰 차예요.",
+      "choices": ["버스", "뻐스", "버쓰", "버수"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-157",
+      "type": "spelling_choice",
+      "prompt": "'긔차'를 바르게 적은 것은?",
+      "promptExplain": "레일 위를 달리는 탈것이에요.",
+      "choices": ["기차", "긔차", "기자", "기찻"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-158",
+      "type": "spelling_choice",
+      "prompt": "'고마워어'를 바르게 적은 것은?",
+      "promptExplain": "친구에게 감사할 때 하는 말이에요.",
+      "choices": ["고마워", "고마워어", "고마워여", "고마워요"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-159",
+      "type": "spelling_choice",
+      "prompt": "'미안해ㅔ'를 바르게 적은 것은?",
+      "promptExplain": "잘못했을 때 하는 말이에요.",
+      "choices": ["미안해", "미안해ㅔ", "미안헤", "미얀해"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-160",
+      "type": "spelling_choice",
+      "prompt": "'괜찬아'를 바르게 적은 것은?",
+      "promptExplain": "걱정하지 말라는 뜻이에요.",
+      "choices": ["괜찮아", "괜찬아", "괜찮아아", "괜차나"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-161",
+      "type": "spelling_choice",
+      "prompt": "'안넝하세요'를 바르게 적은 것은?",
+      "promptExplain": "처음 만날 때 하는 인사말이에요.",
+      "choices": ["안녕하세요", "안넝하세요", "안녀하세요", "안녕 하세요"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-162",
+      "type": "spelling_choice",
+      "prompt": "'감샤합니다'를 바르게 적은 것은?",
+      "promptExplain": "정중하게 고맙다는 말이에요.",
+      "choices": ["감사합니다", "감샤합니다", "감사합니디", "감사합니다요"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-163",
+      "type": "spelling_choice",
+      "prompt": "'그레서'를 바르게 적은 것은?",
+      "promptExplain": "앞에 나온 일의 까닭을 이어 줄 때 쓰는 말이에요.",
+      "choices": ["그래서", "그레서", "그래써", "그래서"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-164",
+      "type": "spelling_choice",
+      "prompt": "'그런대'를 바르게 적은 것은?",
+      "promptExplain": "이야기가 달라질 때 쓰는 말이에요.",
+      "choices": ["그런데", "그런대", "그런데이", "그런데요"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-165",
+      "type": "spelling_choice",
+      "prompt": "'그리구'를 바르게 적은 것은?",
+      "promptExplain": "이야기를 이어 줄 때 쓰는 말이에요.",
+      "choices": ["그리고", "그리고", "그리고오", "그리구"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-166",
+      "type": "spelling_choice",
+      "prompt": "'하치만'을 바르게 적은 것은?",
+      "promptExplain": "앞과 반대되는 내용을 말할 때 쓰는 말이에요.",
+      "choices": ["하지만", "하지만", "하치만", "하즈만"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-167",
+      "type": "spelling_choice",
+      "prompt": "'자쥬'를 바르게 적은 것은?",
+      "promptExplain": "많이, 여러 번이라는 뜻이에요.",
+      "choices": ["자주", "자쥬", "자즈", "자주우"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-168",
+      "type": "spelling_choice",
+      "prompt": "'젱말'을 바르게 적은 것은?",
+      "promptExplain": "진짜라는 뜻이에요.",
+      "choices": ["정말", "젱말", "정말이", "정맣"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-169",
+      "type": "spelling_choice",
+      "prompt": "'쪼끔'을 바르게 적은 것은?",
+      "promptExplain": "많지 않다는 뜻이에요.",
+      "choices": ["조금", "쪼끔", "조끔", "조금이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-170",
+      "type": "spelling_choice",
+      "prompt": "'아가'를 바르게 적은 것은?",
+      "promptExplain": "조금 전에라는 뜻이에요.",
+      "choices": ["아까", "아가", "아까아", "악까"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-171",
+      "type": "spelling_choice",
+      "prompt": "'어재'를 바르게 적은 것은?",
+      "promptExplain": "하루 전 날이에요.",
+      "choices": ["어제", "어재", "어졔", "어제이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-172",
+      "type": "spelling_choice",
+      "prompt": "'네일'을 바르게 적은 것은?",
+      "promptExplain": "다음 날이에요.",
+      "choices": ["내일", "네일", "낼일", "내이ㄹ"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-173",
+      "type": "spelling_choice",
+      "prompt": "'온늘'을 바르게 적은 것은?",
+      "promptExplain": "지금 이 날이에요.",
+      "choices": ["오늘", "오늘", "오늘이", "온늘"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-174",
+      "type": "spelling_choice",
+      "prompt": "'지금음'을 바르게 적은 것은?",
+      "promptExplain": "바로 이때라는 뜻이에요.",
+      "choices": ["지금", "지금", "지금이", "지금음"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-175",
+      "type": "spelling_choice",
+      "prompt": "'언재'를 바르게 적은 것은?",
+      "promptExplain": "때를 물을 때 쓰는 말이에요.",
+      "choices": ["언제", "언재", "언졔", "언제이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-176",
+      "type": "spelling_choice",
+      "prompt": "'어디이'를 바르게 적은 것은?",
+      "promptExplain": "곳을 물을 때 쓰는 말이에요.",
+      "choices": ["어디", "어디이", "어디ㅣ", "어디이이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-177",
+      "type": "spelling_choice",
+      "prompt": "'누구우'를 바르게 적은 것은?",
+      "promptExplain": "사람을 물을 때 쓰는 말이에요.",
+      "choices": ["누구", "누구우", "누구이", "누구ㅜ"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-178",
+      "type": "spelling_choice",
+      "prompt": "'뭐엇'을 바르게 적은 것은?",
+      "promptExplain": "어떤 것인지 물을 때 쓰는 말이에요.",
+      "choices": ["무엇", "뭐엇", "무엇이", "무엇ㅅ"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-179",
+      "type": "spelling_choice",
+      "prompt": "'왜냐하년'을 바르게 적은 것은?",
+      "promptExplain": "이유를 말할 때 쓰는 말이에요.",
+      "choices": ["왜냐하면", "왜냐하년", "왜냐면", "왜냐하몐"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-180",
+      "type": "spelling_choice",
+      "prompt": "'그레서요'를 바르게 적은 것은?",
+      "promptExplain": "앞에서 말한 까닭을 이어 말할 때예요.",
+      "choices": ["그래서요", "그레서요", "그래서여", "그래서 요"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-181",
+      "type": "spelling_choice",
+      "prompt": "'괜찬아요'를 바르게 적은 것은?",
+      "promptExplain": "상대에게 걱정하지 말라고 할 때예요.",
+      "choices": ["괜찮아요", "괜찬아요", "괜찮아요요", "괜차나요"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-182",
+      "type": "spelling_choice",
+      "prompt": "'맛잇다'를 바르게 적은 것은?",
+      "promptExplain": "음식이 맛이 좋다는 뜻이에요.",
+      "choices": ["맛있다", "맛잇다", "맛이따", "맛있따"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-183",
+      "type": "spelling_choice",
+      "prompt": "'멋잇다'를 바르게 적은 것은?",
+      "promptExplain": "모습이 보기 좋다는 뜻이에요.",
+      "choices": ["멋있다", "멋잇다", "멋이따", "머싰다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-184",
+      "type": "spelling_choice",
+      "prompt": "'이쁘다'를 바르게 적은 것은?",
+      "promptExplain": "모양이 고운 것을 말해요.",
+      "choices": ["예쁘다", "이쁘다", "예프다", "옙쁘다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-185",
+      "type": "spelling_choice",
+      "prompt": "'깨긋하다'를 바르게 적은 것은?",
+      "promptExplain": "더럽지 않다는 뜻이에요.",
+      "choices": ["깨끗하다", "깨긋하다", "깨끗타다", "깨끗하다가"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-186",
+      "type": "spelling_choice",
+      "prompt": "'시크럽다'를 바르게 적은 것은?",
+      "promptExplain": "소리가 크고 어수선하다는 뜻이에요.",
+      "choices": ["시끄럽다", "시크럽다", "시끄럽따", "씨끄럽다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-187",
+      "type": "spelling_choice",
+      "prompt": "'조요하다'를 바르게 적은 것은?",
+      "promptExplain": "소리가 거의 없다는 뜻이에요.",
+      "choices": ["조용하다", "조요하다", "조용타다", "조용하다가"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-188",
+      "type": "spelling_choice",
+      "prompt": "'즐겁따'를 바르게 적은 것은?",
+      "promptExplain": "기분이 좋고 신이 난다는 뜻이에요.",
+      "choices": ["즐겁다", "즐겁따", "즐겁다ㅏ", "즐거웁다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-189",
+      "type": "spelling_choice",
+      "prompt": "'슬프따'를 바르게 적은 것은?",
+      "promptExplain": "마음이 아프고 눈물이 날 때예요.",
+      "choices": ["슬프다", "슬프따", "슬픈다", "슬프다아"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-190",
+      "type": "spelling_choice",
+      "prompt": "'무섭따'를 바르게 적은 것은?",
+      "promptExplain": "겁이 날 때 느끼는 마음이에요.",
+      "choices": ["무섭다", "무섭따", "무섭다아", "무섶다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-191",
+      "type": "spelling_choice",
+      "prompt": "'재밌다'를 바르게 적은 것은?",
+      "promptExplain": "웃음이 나고 즐겁다는 뜻이에요.",
+      "choices": ["재미있다", "재밌다", "재미읻다", "잼있다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-192",
+      "type": "spelling_choice",
+      "prompt": "'놀아도 되'를 바르게 적은 것은?",
+      "promptExplain": "'해도 좋다'는 뜻의 말이에요.",
+      "choices": ["돼", "되", "대", "되에"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "돼/되", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-193",
+      "type": "spelling_choice",
+      "prompt": "'그래도 되요'를 바르게 적은 것은?",
+      "promptExplain": "'그래도 괜찮다'는 뜻의 말이에요.",
+      "choices": ["돼요", "되요", "됴요", "되여"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "돼/되", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-194",
+      "type": "spelling_choice",
+      "prompt": "'안 되'를 바르게 적은 것은?",
+      "promptExplain": "'하면 못 한다'는 뜻의 말이에요.",
+      "choices": ["안 돼", "안 되", "안되", "안대"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "돼/되", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-195",
+      "type": "spelling_choice",
+      "prompt": "'되지'를 바르게 적은 것은?",
+      "promptExplain": "농장에서 키우는 동물 이름이에요.",
+      "choices": ["돼지", "되지", "대지", "뒈지"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "돼/되", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-196",
+      "type": "spelling_choice",
+      "prompt": "'되어요'를 줄인 말 중 바르게 적은 것은?",
+      "promptExplain": "\"되다\"가 줄어든 모양이에요.",
+      "choices": ["돼", "되", "대", "되이"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "돼/되", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-197",
+      "type": "spelling_choice",
+      "prompt": "'가지고'를 바르게 적은 것은?",
+      "promptExplain": "\"가지고 오다\"에서 쓰는 말이에요.",
+      "choices": ["가지고", "가지고", "가디고", "가지고오"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-198",
+      "type": "spelling_choice",
+      "prompt": "'가지고 갈께'를 바르게 적은 것은?",
+      "promptExplain": "물건을 들고 간다는 뜻이에요.",
+      "choices": ["가지고 갈게", "가지고 갈게", "가지고 갈께", "가디고 갈게"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-199",
+      "type": "spelling_choice",
+      "prompt": "'그러니깐'을 바르게 적은 것은?",
+      "promptExplain": "앞의 내용을 정리해 말할 때 쓰는 말이에요.",
+      "choices": ["그러니까", "그러니까", "그러니깐", "글으니까"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    },
+    {
+      "id": "g1-miss-200",
+      "type": "spelling_choice",
+      "prompt": "'설레이다'를 바르게 적은 것은?",
+      "promptExplain": "마음이 두근두근하는 느낌이에요.",
+      "choices": ["설레다", "설레이다", "설레이다가", "설래다"],
+      "answerIndex": 0,
+      "tags": ["초1", "초2", "맞춤법", "헷갈리는낱말"]
+    }
+  ]
+}
