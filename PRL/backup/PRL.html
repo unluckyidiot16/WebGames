@@ -1,0 +1,2260 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>QuizMon: Ver 7.1 Fix</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; touch-action: manipulation; }
+        .view { display: none; }
+        .view.active { display: flex; }
+        .poke-card { transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .poke-card:active { transform: scale(0.95); }
+
+        /* 등급별 스타일 */
+        .rarity-UR  { border: 2px solid #ef4444; background: linear-gradient(135deg, #fff0f0 0%, #ffe4e4 100%); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+        .rarity-SSR { border: 2px solid #f97316; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); }
+        .rarity-SR  { border: 2px solid #eab308; background: #fefce8; }
+        .rarity-R   { border: 2px solid #3b82f6; background: #eff6ff; }
+        .rarity-C   { border: 1px solid #cbd5e1; background: #ffffff; }
+
+        .modal-backdrop { background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+        img.pixel-art { image-rendering: pixelated; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes damageShake { 0% { transform: translateX(0); } 20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } 40% { transform: translateX(6px) rotate(5deg); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+        .animate-damage { animation: damageShake 0.4s ease-in-out; }
+        .animate-attack-player { animation: attackRight 0.2s ease-out; }
+        .animate-attack-enemy { animation: attackLeft 0.2s ease-out; }
+        @keyframes attackRight { 0% { transform: translateX(0) scaleX(-1); } 50% { transform: translateX(30px) scaleX(-1); } 100% { transform: translateX(0) scaleX(-1); } }
+        @keyframes attackLeft { 0% { transform: translateX(0); } 50% { transform: translateX(-30px); } 100% { transform: translateX(0); } }
+
+        .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+    <script src="../../Scripts/buildPokeDb.cjs"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 select-none">
+
+<section id="titleScreen" class="view active flex-col items-center justify-center p-6 h-screen">
+    <div class="mb-8 relative">
+        <div class="absolute -top-10 -left-10 w-20 h-20 bg-purple-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
+        <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter relative z-10">
+            <span class="text-red-500">Quiz</span>Mon
+        </h1>
+        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 7.1 Fix</div>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center border-4 border-slate-800">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png" class="w-24 h-24 mx-auto pixel-art animate-bounce" alt="Ho-oh">
+        <p class="text-slate-500 text-sm mb-6 font-medium">
+            10연차 기능 정상화!<br>강력한 적들과의 승부
+        </p>
+        <button id="startButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg text-lg transition-colors border-b-4 border-red-700 active:border-b-0 active:translate-y-1">
+            모험 시작하기
+        </button>
+    </div>
+</section>
+
+<section id="lobbyScreen" class="view flex-col items-center justify-start p-4 min-h-screen overflow-y-auto">
+    <div class="w-full max-w-md flex flex-col gap-4 mt-2">
+        <div class="flex justify-between items-end px-2">
+            <h2 class="text-3xl font-black text-slate-800">LOBBY</h2>
+            <div class="flex gap-2">
+                <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-xs font-bold flex items-center gap-1">
+                    <span class="text-yellow-500">🎫</span><span id="ticketTextLobby">0</span>
+                </div>
+                <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-xs font-bold flex items-center gap-1">
+                    <span class="text-blue-500">P</span><span id="pointsTextLobby">0</span>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="importFromClipboard()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 active:scale-95 transition-transform mb-2">
+            📥 index 데이터(클립보드) 가져오기
+        </button>
+        
+        <div class="grid grid-cols-2 gap-3">
+            <button id="lobbyCodexBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-emerald-400 transition-colors group">
+                <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-8 h-8 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-slate-700">스타터 선택</div>
+                    <div class="text-[10px] text-slate-400">모험 준비</div>
+                </div>
+            </button>
+
+            <button id="lobbyGachaBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-indigo-400 transition-colors group">
+                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-8 h-8 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-slate-700">몬스터 소환</div>
+                    <div class="text-[10px] text-slate-400">동료 영입</div>
+                </div>
+            </button>
+
+            <button id="lobbyHofBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-yellow-400 transition-colors group">
+                <div class="w-10 h-10 bg-yellow-50 rounded-full flex items-center justify-center group-hover:bg-yellow-100">
+                    <span class="text-xl">🏆</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">명예의 전당</div>
+                    <div class="text-[10px] text-slate-400">역대 최고 기록 보기</div>
+                </div>
+            </button>
+
+            <!-- 👻 고스트 배틀 버튼 추가 -->
+            <button id="lobbyGhostBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-purple-400 transition-colors group">
+                <div class="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center group-hover:bg-purple-100">
+                    <span class="text-xl">👻</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">친구와 배틀</div>
+                    <div class="text-[10px] text-slate-400">QR 공유 / 스캔 대결</div>
+                </div>
+            </button>
+        </div>
+
+
+        <div class="bg-slate-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden mt-2">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <div class="text-xs text-slate-400 mb-1">선택된 스타터</div>
+                    <div id="lobbyPartnerName" class="font-bold text-xl">없음</div>
+                    <div class="text-[10px] text-slate-400 mt-1 bg-slate-700 inline-block px-2 py-1 rounded" id="lobbyStartBonus">
+                        선택 필요
+                    </div>
+                </div>
+                <img id="lobbyPartnerImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="w-16 h-16 pixel-art bg-slate-700 rounded-full">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="codexScreen" class="view flex-col items-center h-screen bg-slate-50">
+    <div class="w-full max-w-3xl flex flex-col h-full">
+        <div class="flex-none p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10">
+            <h2 class="text-xl font-bold text-slate-800">스타터 <span class="text-xs font-normal text-slate-400" id="collectionRate">0/--</span></h2>
+            <button id="codexToLobbyBtn" class="text-xs font-bold px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">나가기</button>
+        </div>
+        <div class="flex-none p-4 bg-white border-t border-slate-200 order-last flex gap-3 items-center">
+            <div class="flex-1"><div class="text-xs text-slate-400">선택됨</div><div id="partnerInfo" class="font-bold text-slate-800 text-sm truncate">없음</div></div>
+            <button id="startAdventureBtn" disabled class="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white font-bold py-3 px-6 rounded-xl shadow-md w-32">모험 시작</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 bg-slate-50">
+            <div id="codexGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 pb-4"></div>
+        </div>
+    </div>
+</section>
+
+<section id="battleScreen" class="view flex-col items-center justify-between h-screen bg-gradient-to-b from-sky-200 to-sky-100 relative overflow-hidden">
+    <div class="absolute bottom-0 w-full h-1/3 bg-emerald-600 rounded-t-[50%] scale-150 translate-y-12 border-t-8 border-emerald-700 opacity-90"></div>
+    <div class="w-full max-w-md p-4 flex justify-between items-start z-10">
+        <button id="battleBackBtn" class="bg-white/80 backdrop-blur text-slate-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">&larr; 포기</button>
+        <div class="bg-black/40 backdrop-blur text-white px-4 py-1.5 rounded-full text-xs font-bold">STAGE <span id="battleStageText" class="text-yellow-300 text-base ml-1">1</span></div>
+    </div>
+    <div class="w-full max-w-md flex-1 relative flex flex-col justify-center px-4 z-10 gap-8">
+        <div class="flex flex-col items-end relative">
+            <div class="bg-white/90 p-2 rounded-xl shadow-md mb-2 w-40 transform translate-x-2">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span id="enemyName" class="font-bold text-sm text-slate-800">?</span>
+                    <span id="enemyLevel" class="text-[10px] text-slate-500">Lv.1</span>
+                </div>
+                <div id="enemyTypeBadge" class="text-[9px] text-white px-1.5 py-0.5 rounded mb-1 inline-block bg-gray-400">TYPE</div>
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden"><div id="enemyHpBar" class="h-full bg-red-500 transition-all duration-500" style="width: 100%"></div></div>
+            </div>
+            <img id="enemyImg" src="" class="w-32 h-32 pixel-art animate-bounce-slow drop-shadow-xl filter grayscale-0">
+        </div>
+        <div class="flex flex-col items-start relative mt-4">
+            <img id="playerImg" src="" class="w-40 h-40 pixel-art drop-shadow-2xl scale-x-[-1]">
+            <div class="bg-white/90 p-3 rounded-xl shadow-md w-44 -mt-4 z-20 transform -translate-x-2 border-l-4 border-emerald-500">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span id="playerName" class="font-bold text-sm text-slate-800">?</span>
+                    <span id="playerLevel" class="text-[10px] text-slate-500">Lv.1</span>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-500 mb-0.5"><span>HP</span><span id="playerHpText">0/0</span></div>
+                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden"><div id="playerHpBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 100%"></div></div>
+                <div class="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden"><div id="playerExpBar" class="h-full bg-sky-400 transition-all" style="width: 0%"></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="w-full max-w-md bg-white rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] p-5 z-20">
+        <div id="battleLog" class="text-xs text-slate-500 mb-3 h-6 overflow-y-hidden text-center italic">전투 시작!</div>
+        <div id="moveButtons" class="skill-grid"></div>
+    </div>
+</section>
+
+<div id="hofModal" class="fixed inset-0 bg-slate-900 z-50 hidden flex-col items-center justify-center"><div class="w-full max-w-md bg-white p-6 rounded-2xl shadow-2xl m-4 max-h-[80vh] flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black text-slate-800">🏆 명예의 전당</h3><button id="hofClose" class="text-slate-400 font-bold">닫기</button></div><div id="hofList" class="flex-1 overflow-y-auto space-y-3"></div></div></div>
+
+<div id="gachaModal" class="fixed inset-0 bg-slate-900 z-50 hidden flex-col items-center justify-center">
+    <div class="w-full max-w-lg p-6 flex flex-col h-full md:h-auto">
+        <div class="flex justify-between items-center mb-6 text-white">
+            <div><h3 class="text-2xl font-bold">몬스터 소환</h3><p class="text-xs opacity-70" id="gachaResDisplay"></p></div>
+            <button id="gachaClose" class="bg-white/20 rounded-full p-2">✕</button>
+        </div>
+        <div id="gachaScene" class="flex-1 bg-slate-800 rounded-2xl border border-slate-700 p-4 overflow-y-auto mb-4 min-h-[300px] flex items-center justify-center relative">
+            <div id="gachaPlaceholder" class="text-center text-slate-500">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-24 h-24 mx-auto mb-4 opacity-20 grayscale">
+                <p>소환 방식을 선택하세요</p>
+            </div>
+            <div id="gachaResultsGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 w-full hidden"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mb-2">
+            <button id="gacha1Btn" class="bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 text-xs">
+                <span class="block opacity-80">100 P</span>1회 소환
+            </button>
+            <button id="gacha10Btn" class="bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-xl shadow-lg border-b-4 border-purple-800 active:border-b-0 active:translate-y-1 text-xs">
+                <span class="block opacity-80">900 P</span>10회 소환
+            </button>
+            <button id="gachaSpecialBtn" class="bg-yellow-500 hover:bg-yellow-400 text-white py-3 rounded-xl shadow-lg border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1 text-xs relative overflow-hidden">
+                <div class="absolute inset-0 bg-white opacity-10 animate-pulse"></div>
+                <span class="block opacity-80 font-bold text-yellow-900">🎫 티켓 1</span>전설 소환
+            </button>
+        </div>
+        <p class="text-center text-[10px] text-slate-400">* 중복 획득 시 시작 경험치(잠재력)가 상승합니다.</p>
+    </div>
+</div>
+
+<!-- 👻 고스트 배틀 모달 -->
+<div id="ghostModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[55] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800">👻 고스트 배틀</h3>
+            <button id="ghostClose" class="text-slate-400 text-xs font-bold">닫기</button>
+        </div>
+
+        <!-- 탭 버튼 -->
+        <div class="flex gap-2 px-4 pt-3">
+            <button
+                    id="ghostTabMyBtn"
+                    class="flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-800 text-white"
+            >
+                내 QR 공유
+            </button>
+            <button
+                    id="ghostTabScanBtn"
+                    class="flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-100 text-slate-500"
+            >
+                스캔해서 도전
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 text-slate-800 text-sm">
+            <!-- 내 QR 탭 -->
+            <div id="ghostMyPane">
+                <p id="ghostMySummary" class="text-[11px] text-slate-500 mb-3 break-keep">
+                    현재 스타터 정보를 QR 코드로 만들어서 다른 기기에서 스캔하면,
+                    내 포켓몬과 고스트 배틀을 할 수 있습니다.
+                </p>
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 flex flex-col items-center justify-center py-4">
+                    <canvas id="ghostQrCanvas" class="bg-white rounded-xl p-2"></canvas>
+                    <p class="mt-2 text-[10px] text-slate-400 text-center leading-relaxed">
+                        다른 기기에서 이 QR을 카메라로 비추면<br />
+                        내 포켓몬과의 고스트 배틀이 시작됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 스캔 탭 -->
+            <div id="ghostScanPane" class="hidden">
+                <p class="text-[11px] text-slate-500 mb-2 break-keep">
+                    카메라 사용을 허용한 뒤, 친구의 폰에 띄워진 고스트 QR을 비춰 보세요.
+                </p>
+                <div class="bg-black rounded-2xl overflow-hidden mb-2">
+                    <video id="ghostVideo" class="w-full h-48 object-cover bg-black"></video>
+                </div>
+                <p id="ghostScanStatus" class="text-[11px] text-slate-500 mb-3">
+                    대기 중...
+                </p>
+                <button
+                        id="ghostScanStartBtn"
+                        class="w-full py-2.5 rounded-xl bg-slate-800 text-white text-xs font-bold"
+                >
+                    스캔 시작
+                </button>
+                <button
+                        id="ghostScanStopBtn"
+                        class="w-full py-2 mt-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold"
+                >
+                    스캔 종료
+                </button>
+                <!-- 비표시용 캔버스 (프레임 캡쳐용) -->
+                <canvas id="ghostScanCanvas" class="hidden"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div id="quizModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="bg-slate-800 p-4 text-white flex justify-between items-center"><h3 class="font-bold text-lg">📝 수학 퀴즈</h3><span class="text-xs bg-slate-700 px-2 py-1 rounded text-yellow-300">정답 시 공격</span></div><div class="p-6"><div class="text-center mb-6"><p class="text-3xl font-black text-slate-800 tracking-wider" id="quizQuestion">?</p></div><div id="quizChoices" class="grid grid-cols-2 gap-3"></div></div><div class="bg-slate-50 p-3 text-center border-t"><button id="quizCancel" class="text-xs text-slate-400 underline">포기하기</button></div></div></div>
+<div id="rewardModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"><h3 class="text-2xl font-black text-slate-800 mb-2">VICTORY!</h3><div class="text-xs text-sky-600 font-bold mb-4 bg-sky-50 inline-block px-3 py-1 rounded-full">EXP <span id="rewardXpVal">0</span> 획득!</div><div id="bonusLootLine" class="text-[11px] font-black text-emerald-600 mb-3 hidden"></div><p class="text-sm text-slate-500 mb-2" id="rewardTitle">보상을 선택하세요</p><div class="grid grid-cols-1 gap-3" id="rewardButtons"></div></div></div>
+<div id="messageModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[60] p-6"><div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-5 text-center"><h3 id="messageTitle" class="text-lg font-bold text-slate-800 mb-2">알림</h3><p id="messageBody" class="text-sm text-slate-600 mb-4 break-keep"></p><button id="messageOk" class="w-full py-2.5 rounded-lg bg-slate-800 text-white text-sm font-bold">확인</button></div></div>
+
+<script>
+    /* =========================================
+     * DATA & CONSTANTS (UPDATED)
+     * ========================================= */
+    const POKE_NAMES_STR = "이상해씨,이상해풀,이상해꽃,파이리,리자드,리자몽,꼬부기,어니부기,거북왕,캐터피,단데기,버터플,뿔충이,딱충이,독침붕,구구,피죤,피죤투,꼬렛,레트라,깨비참,깨비드릴조,아보,아보크,피카츄,라이츄,모래두지,고지,니드런♀,니드리나,니드퀸,니드런♂,니드리노,니드킹,삐삐,픽시,식스테일,나인테일,푸린,푸크린,주뱃,골뱃,뚜벅쵸,냄새꼬,라플레시아,파라스,파라섹트,콘팡,도나리,디그다,닥트리오,나옹,페르시온,고라파덕,골덕,망키,성원숭,가디,윈디,발챙이,슈륙챙이,강챙이,캐이시,윤겔라,후딘,알통몬,근육몬,괴력몬,모다피,우츠동,우츠보트,왕눈해,독파리,꼬마돌,데구리,딱구리,포니타,날쌩마,야돈,야도란,코일,레어코일,파오리,두두,두트리오,쥬쥬,쥬레곤,질퍽이,질뻐기,셀러,파르셀,고오스,고우스트,팬텀,롱스톤,슬리프,슬리퍼,크랩,킹크랩,찌리리공,붐볼,아라리,나시,탕구리,텅구리,시라소몬,홍수몬,내루미,또가스,또도가스,뿔카노,코뿌리,럭키,덩쿠리,캥카,쏘드라,시드라,콘치,왕콘치,별가사리,아쿠스타,마임맨,스턱,루주라,에레브,마그마,쁘사이저,켄타로스,잉어킹,갸라도스,라프라스,메타몽,이브이,샤미드,쥬피썬더,부스터,폴리곤,암나이트,암스타,투구,투구푸스,프테라,잠만보,프리져,썬더,파이어,미뇽,신뇽,망나뇽,뮤츠,뮤,치코리타,베이리프,메가니움,브케인,마그케인,블레이범,리아코,엘리게이,장크로다일,꼬리선,다꼬리,부우부,야부엉,레디바,레디안,페이검,아리아도스,크로뱃,초라기,랜턴,피츄,삐,푸푸린,토게피,토게틱,네이티,네이티오,메리프,보송송,전룡,아르코,마릴,마릴리,꼬지모,왕구리,통통코,두코,솜솜코,에이팜,해너츠,해루미,왕자리,우파,누오,에브이,블래키,니로우,야도킹,무우마,안농,마자용,키링키,피콘,쏘콘,노고치,글라이거,강철톤,블루,그랑블루,침바루,핫삼,단단지,헤라크로스,포뉴라,깜지곰,링곰,마그마그,마그카르고,꾸꾸리,메꾸리,코산호,총어,대포무노,딜리버드,만타인,무장조,델빌,헬가,킹드라,코판,코리갑,폴리곤2,노라키,루브도,배루키,카포에라,뽀뽀라,에레키드,마그비,밀탱크,해피너스,라이코,앤테이,스이쿤,애버라스,데기라스,마기라스,루기아,칠색조,세레비";
+    const POKE_NAMES = POKE_NAMES_STR.split(",");
+
+    // [변경] 모든 1~251번 포켓몬의 실제 종족값 데이터 (H,A,B,C,D,S 순서)
+    // 데이터 압축을 위해 배열로 선언
+    const ALL_STATS_DB = [
+        [45,49,49,65,65,45],[60,62,63,80,80,60],[80,82,83,100,100,80],[39,52,43,60,50,65],[58,64,58,80,65,80],[78,84,78,109,85,100],[44,48,65,50,64,43],[59,63,80,65,80,58],[79,83,100,85,105,78],[45,30,35,20,20,45],
+        [50,20,55,25,25,30],[60,45,50,90,80,70],[40,35,30,20,20,50],[45,25,50,25,25,35],[65,90,40,45,80,75],[40,45,40,35,35,56],[63,60,55,50,50,71],[83,80,75,70,70,101],[30,56,35,25,35,72],[55,81,60,50,70,97],
+        [40,60,30,31,31,70],[65,90,65,61,61,100],[35,60,44,40,54,55],[60,95,69,65,79,80],[35,55,40,50,50,90],[60,90,55,90,80,110],[50,75,85,20,30,40],[75,100,110,45,55,65],[55,47,52,40,40,41],[70,62,67,55,55,56],
+        [90,92,87,75,85,76],[46,57,40,40,40,50],[61,72,57,55,55,65],[81,102,77,85,75,85],[70,45,48,60,65,35],[95,70,73,95,90,60],[38,41,40,50,65,65],[73,76,75,81,100,100],[115,45,20,45,25,20],[140,70,45,85,50,45],
+        [40,45,35,30,40,55],[75,80,70,65,75,90],[45,50,55,75,65,30],[60,65,70,85,75,40],[75,80,85,110,90,50],[35,70,55,45,55,25],[60,95,80,60,80,30],[60,55,50,40,55,45],[70,65,60,90,75,90],[10,55,25,35,45,95],
+        [35,100,50,50,70,120],[40,45,35,40,40,90],[65,70,60,65,65,115],[50,52,48,65,50,55],[80,82,78,95,80,85],[40,80,35,35,45,70],[65,105,60,60,70,95],[55,70,45,70,50,60],[90,110,80,100,80,95],[40,50,40,40,40,90],
+        [65,65,65,50,50,90],[90,95,95,70,90,70],[25,20,15,105,55,90],[40,35,30,120,70,105],[55,50,45,135,95,120],[70,80,50,35,35,35],[80,100,70,50,60,45],[90,130,80,65,85,55],[50,75,35,70,30,40],[65,90,50,85,45,55],
+        [80,105,65,100,70,70],[40,40,35,100,100,70],[80,70,65,80,120,100],[40,80,100,30,30,20],[55,95,115,45,45,35],[80,120,130,55,65,45],[50,85,55,65,65,90],[65,100,70,80,80,105],[90,65,65,40,40,15],[95,75,110,100,80,30],
+        [25,35,70,95,55,45],[50,60,95,120,70,70],[52,90,55,58,62,60],[35,85,45,35,35,75],[60,110,70,60,60,110],[65,45,55,45,70,45],[90,70,80,70,95,70],[80,80,50,40,50,25],[105,105,75,65,100,50],[30,65,100,45,25,40],
+        [50,95,180,85,45,70],[30,35,30,100,35,80],[45,50,45,115,55,95],[60,65,60,130,75,110],[35,45,160,30,45,70],[60,48,45,43,90,42],[85,73,70,73,115,67],[30,105,90,25,25,50],[55,130,115,50,50,75],[40,30,50,55,55,100],
+        [60,50,70,80,80,150],[60,40,80,60,45,40],[95,95,85,125,75,55],[50,50,95,40,50,35],[60,80,110,50,80,45],[50,120,53,35,110,87],[50,105,79,35,110,76],[90,55,75,60,75,30],[40,65,95,60,45,35],[65,90,120,85,70,60],
+        [80,85,95,30,30,25],[105,130,120,45,45,40],[250,5,5,35,105,50],[65,55,115,100,40,60],[90,95,80,40,80,90],[30,40,70,70,25,60],[55,65,95,95,45,85],[45,67,60,35,50,63],[80,92,65,65,80,68],[30,45,55,70,55,85],
+        [60,75,85,100,85,115],[40,45,65,100,120,90],[70,110,70,60,60,70],[65,50,35,115,95,95],[65,83,57,95,85,105],[65,95,57,100,85,93],[65,125,100,55,70,85],[75,100,95,40,70,110],[20,10,55,15,20,80],[95,125,79,60,100,81],
+        [130,85,80,85,95,60],[48,48,48,48,48,48],[55,55,50,45,65,55],[130,65,60,110,95,65],[65,65,60,110,95,130],[65,130,60,95,110,65],[65,60,70,85,75,40],[35,40,100,90,55,35],[70,60,125,115,70,55],[30,80,90,55,45,55],
+        [60,115,105,65,70,80],[80,105,65,60,75,130],[160,110,65,65,110,30],[90,85,100,95,125,85],[90,90,85,125,90,100],[90,100,90,125,85,90],[41,64,45,50,50,50],[61,84,65,70,70,70],[91,134,95,100,100,80],[106,110,90,154,90,130],
+        [100,100,100,100,100,100],[45,49,65,49,65,45],[60,62,80,63,80,60],[80,82,100,83,100,80],[39,52,43,60,50,65],[58,64,58,80,65,80],[78,84,78,109,85,100],[50,65,64,44,48,43],[65,80,80,59,63,58],[85,105,100,79,83,78],
+        [35,46,34,35,45,20],[55,76,64,45,55,90],[60,30,30,36,56,50],[100,50,50,86,96,70],[40,35,30,40,80,85],[55,35,50,55,110,85],[40,60,40,40,40,70],[70,90,70,60,60,40],[85,90,80,70,80,130],[75,38,38,56,56,67],[125,58,58,76,76,67],
+        [20,40,15,35,35,60],[50,25,28,45,55,15],[90,30,15,40,20,15],[35,20,65,40,65,20],[55,40,85,80,105,40],[40,50,45,70,45,70],[65,75,70,95,70,95],[55,40,40,65,45,35],[70,55,55,80,60,45],[90,75,85,115,90,55],
+        [75,80,95,90,100,70],[70,20,50,20,50,40],[100,50,80,60,80,50],[70,100,115,30,65,30],[90,75,75,90,100,70],[35,35,40,35,55,30],[55,55,55,45,65,55],[75,55,70,55,95,110],[55,70,55,40,55,85],[30,30,30,30,30,30],
+        [75,75,55,105,85,30],[65,65,45,75,45,95],[55,45,45,25,25,15],[95,85,85,65,65,35],[65,65,60,130,95,110],[95,65,110,60,130,65],[60,85,42,85,42,91],[95,75,80,100,110,30],[60,60,60,85,85,85],[48,35,48,35,48,35],
+        [190,33,58,33,58,33],[70,80,65,90,65,60],[50,65,90,35,35,15],[75,90,140,60,60,40],[100,70,70,65,65,45],[65,75,105,35,65,85],[75,85,200,55,65,30],[60,80,50,40,40,30],[90,120,75,60,60,45],[65,95,75,55,55,85],
+        [70,130,100,55,80,65],[20,10,230,10,230,5],[80,125,75,40,95,85],[55,95,55,35,75,115],[60,80,50,50,50,40],[90,130,75,75,75,55],[50,50,40,70,40,20],[60,50,120,90,80,30],[50,50,40,30,30,50],[100,100,80,60,60,50],
+        [55,55,85,55,85,30],[65,65,45,75,45,75],[75,75,75,105,105,75],[45,55,45,65,45,75],[75,90,50,110,80,95],[65,90,140,70,70,70],[75,95,125,45,75,45],[85,80,90,105,95,60],[90,60,60,40,40,20],[85,105,85,65,65,115],
+        [90,120,120,120,120,50],[73,95,62,85,65,85],[55,20,35,20,45,75],[50,95,95,35,110,70],[50,35,35,35,35,50],[45,63,37,65,55,95],[45,75,37,70,55,83],[95,80,105,40,70,100],[255,10,10,75,135,55],[90,85,75,115,100,115],
+        [115,115,85,90,75,100],[100,75,115,90,115,85],[50,64,50,45,50,41],[70,84,70,65,70,51],[100,134,110,95,100,61],[106,90,130,90,154,110],[106,130,90,110,154,90],[100,100,100,100,100,100]
+    ];
+
+    const LEGENDARY_IDS = [144,145,146,150,243,244,245,249,250];
+    const MYTHICAL_IDS = [151, 251];
+    // 📊 밸런스 설정: 레어도에 따른 스탯 배율 정의 (PRL 동적 보정용)
+    const TIER_CONFIG = {
+        "C":   { mult: 0.6,  bonus: 0 },    // 일반
+        "R":   { mult: 0.8,  bonus: 5 },    // 희귀
+        "SR":  { mult: 1.0,  bonus: 10 },   // 기준점 (최종 진화체 급)
+        "SSR": { mult: 1.25, bonus: 15 },   // 600족/준전설 급
+        "UR":  { mult: 1.6,  bonus: 25 }    // 초전설/히든(귀여운 포켓몬) 급
+    };
+
+    // 💖 귀여운 포켓몬 리스트 (인기/밈 기반 Gen 1~2 선정)
+    // 이 리스트에 포함되면 '전설급(UR)' 스탯 보정 + '이로치(Shiny)' 속성 부여
+    const CUTE_IDS = [
+        25,  // 피카츄
+        133, // 이브이
+        175, // 토게피
+        39,  // 푸린
+        35,  // 삐삐
+        37,  // 식스테일
+        151, // 뮤 (환상 + 귀여움)
+        172, // 피츄
+        194, // 우파
+        216, // 깜지곰
+        147, // 미뇽
+        183, // 마릴
+        152, // 치코리타
+        155, // 브케인
+        158, // 리아코
+        251  // 세레비 (환상 + 귀여움)
+    ];
+    // =====================================================
+    // ✅ 타입(단일) 전체 지원 + (선택) PokeAPI 자동 보정 + UR 색상 도감 확장
+    // =====================================================
+
+    const BASE_DEX_MAX = 251; // Gen1~2 기본 도감 범위
+
+    // 1) (선택) PokeAPI로 단일 타입 자동 보정 (캐시: localStorage)
+    //    - 이중 속성은 사용하지 않으므로 slot=1(첫 타입)만 채택
+    const ENABLE_POKEAPI_TYPE_PATCH = true;
+    const POKEAPI_TYPE_CACHE_KEY = "prl_pokeapi_primary_types_v1";
+    let POKEAPI_PRIMARY_TYPE = {};
+    try { POKEAPI_PRIMARY_TYPE = JSON.parse(localStorage.getItem(POKEAPI_TYPE_CACHE_KEY) || "{}"); }
+    catch { POKEAPI_PRIMARY_TYPE = {}; }
+
+    const EN_TYPE_TO_KO = {
+        normal:"노말", fire:"불꽃", water:"물", electric:"전기", grass:"풀",
+        ice:"얼음", fighting:"격투", poison:"독", ground:"땅", flying:"비행",
+        psychic:"에스퍼", bug:"벌레", rock:"바위", ghost:"고스트", steel:"강철",
+        dark:"악", dragon:"드래곤",
+    };
+
+    const _pendingTypeFetch = new Set();
+    async function _fetchPrimaryTypeFromPokeApi(pid) {
+        const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${pid}`);
+        const j = await res.json();
+        const first = (j?.types || []).slice().sort((a,b)=> (a.slot||0) - (b.slot||0))[0];
+        const en = first?.type?.name;
+        return EN_TYPE_TO_KO[en] || "노말";
+    }
+    function ensurePokeApiType(pid) {
+        if (!ENABLE_POKEAPI_TYPE_PATCH) return;
+        if (POKEAPI_PRIMARY_TYPE[pid]) return;
+        if (_pendingTypeFetch.has(pid)) return;
+
+        _pendingTypeFetch.add(pid);
+        _fetchPrimaryTypeFromPokeApi(pid).then((ko)=>{
+            POKEAPI_PRIMARY_TYPE[pid] = ko;
+            try { localStorage.setItem(POKEAPI_TYPE_CACHE_KEY, JSON.stringify(POKEAPI_PRIMARY_TYPE)); } catch {}
+            _pendingTypeFetch.delete(pid);
+
+            // 도감 화면이 열려 있으면 즉시 갱신
+            const codexEl = document.getElementById("codexScreen");
+            if (codexEl && codexEl.classList.contains("active")) {
+                renderCodex();
+            }
+        }).catch(()=> _pendingTypeFetch.delete(pid));
+    }
+
+    // 2) (대략) 단일 타입 수동 매핑: 없으면 노말.
+    //    - 정확도는 PokeAPI 자동 보정이 최종 담당.
+    const PRIMARY_TYPE_LISTS = {
+        "풀": [1,2,3,43,44,45,69,70,71,102,103,114,152,153,154,182,187,188,189,191,192,165,166],
+        "불꽃": [4,5,6,37,38,58,59,77,126,136,146,155,156,157,218,219,228,229,240,244,250],
+        "물": [7,8,9,54,55,60,61,62,86,87,90,91,98,99,116,117,118,119,120,121,129,130,131,134,158,159,160,170,171,183,184,186,194,195,211,223,224,226,245,249],
+        "전기": [25,26,81,82,100,101,125,135,145,172,179,180,181,239,243],
+        "에스퍼": [63,64,65,96,97,122,124,150,151,177,178,196,199,201,202,203,249,251],
+        "격투": [56,57,66,67,68,106,107,214,236,237],
+        "독": [13,14,15,23,24,29,30,31,32,33,34,41,42,88,89,109,110,167,168,169,211],
+
+        "얼음": [87,91,124,131,144,215,220,221,225,238],
+        "땅": [27,28,50,51,74,75,76,95,104,105,111,112,207,231,232,246,247],
+        "비행": [16,17,18,21,22,41,42,83,84,85,142,144,145,146,149,163,164,169,176,177,178,187,188,189,193,198,207,225,226,227,249,250],
+        "벌레": [10,11,12,13,14,15,46,47,48,49,123,127,165,166,167,168,193,204,205,212,213,214],
+        "바위": [74,75,76,95,111,112,138,139,140,141,142,185,246,247,248],
+        "고스트": [92,93,94,200],
+        "강철": [81,82,205,208,212,227],
+        "악": [197,198,215,228,229,248],
+        "드래곤": [147,148,149,230],
+    };
+
+    // 빠른 조회용: id -> typeName
+    const PRIMARY_TYPE_BY_ID = (() => {
+        const map = {};
+        for (const [t, arr] of Object.entries(PRIMARY_TYPE_LISTS)) {
+            for (const pid of arr) {
+                if (!map[pid]) map[pid] = t;
+            }
+        }
+        return map;
+    })();
+
+    // 3) 251번 이후: UR(전설급) "색상(샤이니)" 버전을 도감에 추가 (가챠로 뽑는 개념은 아님)
+    //    - 252부터 UR 샤이니 카드가 1장씩 추가됨
+    const UR_VARIANT_BASE_IDS = (() => {
+        // ✅ 251번 이후 "UR 색상(샤이니)" 도감 엔트리는 CUTE_IDS의 UR(샤이니) 버전만 노출
+        //    (요청: 다른 UR/전설/환상은 여기서 제외)
+        const out = [];
+        for (const pid of (CUTE_IDS || [])) {
+            if (typeof pid === "number" && pid >= 1 && pid <= BASE_DEX_MAX) out.push(pid);
+        }
+        // 혹시 중복이 있으면 제거
+        return Array.from(new Set(out));
+    })();
+    const DEX_TOTAL = BASE_DEX_MAX + UR_VARIANT_BASE_IDS.length;
+
+    // 초기 표시(도감 총 수 반영)
+    try {
+        const _cr = document.getElementById("collectionRate");
+        if (_cr) _cr.textContent = `0/${DEX_TOTAL}`;
+    } catch {}
+
+
+
+
+    // 타입별 데이터 및 상성
+    const TYPE_DATA = {
+        // ✅ 단일 속성(Gen1~2) 전체 지원: 이중 속성은 사용하지 않되, 상성표/색상은 모두 정의
+        "노말":   { color: "bg-slate-400", weak: ["격투"], resist: [] },
+        "불꽃":   { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철"] },
+        "물":     { color: "bg-blue-500", weak: ["전기", "풀"], resist: ["불꽃", "물", "얼음", "강철"] },
+        "전기":   { color: "bg-yellow-400", weak: ["땅"], resist: ["전기", "비행", "강철"] },
+        "풀":     { color: "bg-green-500", weak: ["불꽃", "얼음", "독", "비행", "벌레"], resist: ["물", "전기", "풀", "땅"] },
+        "얼음":   { color: "bg-cyan-300", weak: ["불꽃", "격투", "바위", "강철"], resist: ["얼음"] },
+        "격투":   { color: "bg-orange-600", weak: ["비행", "에스퍼"], resist: ["벌레", "바위", "악"] },
+        "독":     { color: "bg-fuchsia-600", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레"] },
+        "땅":     { color: "bg-amber-700", weak: ["물", "풀", "얼음"], resist: ["독", "바위"] },
+        "비행":   { color: "bg-sky-400", weak: ["전기", "얼음", "바위"], resist: ["풀", "격투", "벌레"] },
+        "에스퍼": { color: "bg-pink-500", weak: ["벌레", "고스트", "악"], resist: ["격투", "에스퍼"] },
+        "벌레":   { color: "bg-lime-600", weak: ["불꽃", "비행", "바위"], resist: ["풀", "격투", "땅"] },
+        "바위":   { color: "bg-stone-500", weak: ["물", "풀", "격투", "땅", "강철"], resist: ["노말", "불꽃", "독", "비행"] },
+        "고스트": { color: "bg-indigo-700", weak: ["고스트", "악"], resist: ["독", "벌레"] },
+        "강철":   { color: "bg-slate-500", weak: ["불꽃", "격투", "땅"], resist: ["노말", "풀", "얼음", "비행", "에스퍼", "벌레", "바위", "고스트", "드래곤", "강철"] },
+        "악":     { color: "bg-zinc-800", weak: ["격투", "벌레"], resist: ["고스트", "악", "에스퍼"] },
+        "드래곤": { color: "bg-violet-600", weak: ["얼음", "드래곤"], resist: ["불꽃", "물", "전기", "풀"] },
+    };
+    const TYPE_KEYS = Object.keys(TYPE_DATA);
+
+    // 물리/특수 분류
+    const PHYSICAL_TYPES = ["노말", "격투", "독", "땅", "비행", "벌레", "바위", "고스트", "강철"];
+    const SPECIAL_TYPES = ["불꽃", "물", "풀", "전기", "에스퍼", "얼음", "드래곤", "악"];
+
+    // 기술 목록
+    const RAW_MOVES = {
+        "노말": [ {n:"몸통박치기",p:40,a:100}, {n:"할퀴기",p:40,a:100}, {n:"메가톤펀치",p:80,a:85}, {n:"파괴광선",p:150,a:90} ],
+
+        "풀":   [ {n:"덩굴채찍",p:45,a:100}, {n:"잎날가르기",p:55,a:95}, {n:"씨폭탄",p:80,a:100}, {n:"에너지볼",p:90,a:100}, {n:"솔라빔",p:120,a:100}, {n:"리프스톰",p:130,a:90} ],
+        "불꽃": [ {n:"불꽃세례",p:40,a:100}, {n:"불꽃펀치",p:75,a:100}, {n:"화염방사",p:90,a:100}, {n:"불대문자",p:110,a:85}, {n:"블레이즈킥",p:85,a:90}, {n:"폭렬화염",p:150,a:90} ],
+        "물":   [ {n:"물총",p:40,a:100}, {n:"거품광선",p:65,a:100}, {n:"파도타기",p:90,a:100}, {n:"하이드로펌프",p:110,a:80}, {n:"아쿠아테일",p:90,a:90}, {n:"하이드로캐논",p:150,a:90} ],
+        "전기": [ {n:"전기쇼크",p:40,a:100}, {n:"스파크",p:65,a:100}, {n:"번개",p:110,a:70}, {n:"10만볼트",p:90,a:100}, {n:"볼트태클",p:120,a:100}, {n:"라이트닝",p:150,a:90} ],
+
+        "얼음": [ {n:"냉동빔",p:90,a:100}, {n:"눈보라",p:110,a:70}, {n:"얼음뭉치",p:40,a:100}, {n:"얼음엄니",p:65,a:95}, {n:"냉동펀치",p:75,a:100} ],
+        "땅":   [ {n:"진흙뿌리기",p:20,a:100}, {n:"땅고르기",p:60,a:100}, {n:"지진",p:100,a:100}, {n:"대지의힘",p:90,a:100}, {n:"뼈다귀부메랑",p:50,a:90} ],
+        "비행": [ {n:"날개치기",p:60,a:100}, {n:"공중날기",p:90,a:95}, {n:"에어슬래시",p:75,a:95}, {n:"드릴부리",p:80,a:100}, {n:"폭풍",p:110,a:70} ],
+        "벌레": [ {n:"벌레먹기",p:60,a:100}, {n:"연속자르기",p:40,a:95}, {n:"메가혼",p:120,a:85}, {n:"시그널빔",p:75,a:100}, {n:"벌레의야단법석",p:90,a:100} ],
+        "바위": [ {n:"바위던지기",p:50,a:90}, {n:"암석봉인",p:60,a:95}, {n:"스톤에지",p:100,a:80}, {n:"록블래스트",p:25,a:90}, {n:"파워젬",p:80,a:100} ],
+        "고스트":[ {n:"섀도볼",p:80,a:100}, {n:"섀도펀치",p:60,a:100}, {n:"나이트헤드",p:70,a:100}, {n:"섀도클로",p:70,a:100}, {n:"섀도다이브",p:120,a:90} ],
+        "강철": [ {n:"메탈클로",p:50,a:95}, {n:"아이언헤드",p:80,a:100}, {n:"미러샷",p:65,a:85}, {n:"코멧펀치",p:90,a:90}, {n:"철벽타격",p:90,a:95} ],
+        "악":   [ {n:"깨물어부수기",p:60,a:100}, {n:"크런치",p:80,a:100}, {n:"악의파동",p:80,a:100}, {n:"기습",p:40,a:100}, {n:"속임수",p:95,a:100} ],
+        "드래곤":[ {n:"용의숨결",p:60,a:100}, {n:"용의파동",p:85,a:100}, {n:"드래곤클로",p:80,a:100}, {n:"역린",p:120,a:100}, {n:"용성군",p:130,a:90} ],
+
+        "에스퍼":[ {n:"염동력",p:50,a:100}, {n:"사이코키네시스",p:90,a:100}, {n:"사이코쇼크",p:80,a:100}, {n:"드림이터",p:100,a:100}, {n:"미래예지",p:120,a:100} ],
+        "격투": [ {n:"로킥",p:50,a:100}, {n:"카운터",p:60,a:100}, {n:"스카이업퍼",p:85,a:90}, {n:"인파이트",p:120,a:100}, {n:"폭발펀치",p:100,a:50} ],
+        "독":   [ {n:"독침",p:15,a:100}, {n:"독가스",p:40,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"크로스포이즌",p:70,a:100} ],
+    };
+
+    function calcMoveTier(m) {
+        let t, c;
+        if (m.p <= 60) { t="C"; c=0; }
+        else if (m.p < 80) { t="R"; c=1; }
+        else if (m.p < 110) { t="SR"; c=2; }
+        else if (m.p < 140) { t="SSR"; c=3; }
+        else { t="UR"; c=4; }
+        return { ...m, t, c };
+    }
+
+    const MOVE_POOL = {};
+    Object.keys(RAW_MOVES).forEach(k => { MOVE_POOL[k] = RAW_MOVES[k].map(m => calcMoveTier(m)); });
+
+    function getMoveCategory(typeName) {
+        if (PHYSICAL_TYPES.includes(typeName)) return "Physical";
+        return "Special";
+    }
+
+    // [수정] 랜덤 생성 함수 제거됨 -> DB 조회로 통합
+
+    function getPokeInfo(id) {
+        id = Math.floor(Number(id) || 1);
+        if (id < 1) id = 1;
+
+        const dexId = id;
+        let baseId = id;
+        let isVariant = false;
+        let forcedShiny = false;
+
+        // ✅ 251번 이후: UR 색상(샤이니) 도감 카드
+        if (dexId > BASE_DEX_MAX) {
+            const idx = dexId - (BASE_DEX_MAX + 1);
+            baseId = UR_VARIANT_BASE_IDS[idx] ?? (((dexId - 1) % BASE_DEX_MAX) + 1);
+            isVariant = true;
+            forcedShiny = true;
+        } else if (baseId > BASE_DEX_MAX) {
+            baseId = ((baseId - 1) % BASE_DEX_MAX) + 1;
+        }
+
+        const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
+        const name = isVariant ? `${nameBase} ✨` : nameBase;
+
+        // 1) 타입 결정 (단일): 수동 매핑 + (선택) PokeAPI 자동 보정
+        let typeName = PRIMARY_TYPE_BY_ID[baseId] || "노말";
+        const apiType = POKEAPI_PRIMARY_TYPE[baseId];
+        if (apiType && TYPE_DATA[apiType]) {
+            typeName = apiType;
+        } else {
+            // ⚠️ 도감 전체를 한번에 렌더링할 때 251개를 다 fetch 하지 않도록,
+            //    "수동 매핑이 없는 경우"에만 타입을 자동 보정합니다.
+            if (!PRIMARY_TYPE_BY_ID[baseId]) ensurePokeApiType(baseId);
+        }
+
+        // 2) 기본 종족값 가져오기 (비율 유지를 위해 사용)
+        const sData = ALL_STATS_DB[baseId - 1] || [45,45,45,45,45,45];
+        const rawBase = { hp:sData[0], a:sData[1], b:sData[2], sa:sData[3], sd:sData[4], s:sData[5] };
+        const bst = rawBase.hp + rawBase.a + rawBase.b + rawBase.sa + rawBase.sd + rawBase.s;
+
+        // 3) 레어도 판단 (BST 기준 + 전설/환상/귀여움 override)
+        let rarity = "C";
+        if (bst >= 580) rarity = "UR";
+        else if (bst >= 500) rarity = "SSR";
+        else if (bst >= 400) rarity = "SR";
+        else if (bst >= 300) rarity = "R";
+
+        const isLegendary = LEGENDARY_IDS.includes(baseId);
+        const isMythical = MYTHICAL_IDS.includes(baseId);
+
+        // 히든(=샤이니) 조건: 귀여움 ID
+        let isShiny = CUTE_IDS.includes(baseId);
+        let isHidden = CUTE_IDS.includes(baseId);
+
+        if (isLegendary || isMythical) rarity = "UR";
+        if (CUTE_IDS.includes(baseId)) rarity = "UR";
+
+        // ✅ 도감 색상 카드(variant)는 UR 고정 + 샤이니 강제, 히든은 아님
+        if (isVariant) {
+            rarity = "UR";
+            isShiny = true;
+            isHidden = false;
+        } else if (forcedShiny) {
+            isShiny = true;
+        }
+
+        // 4) BST 차이를 살리되, 티어별 목표 BST 기준으로 비율 조정
+        const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
+        const ratio = config.targetBst / Math.max(1, bst);
+
+        const finalBase = {
+            hp: Math.max(1, Math.floor(rawBase.hp * ratio) + config.bonus),
+            a:  Math.max(1, Math.floor(rawBase.a  * ratio) + config.bonus),
+            b:  Math.max(1, Math.floor(rawBase.b  * ratio) + config.bonus),
+            sa: Math.max(1, Math.floor(rawBase.sa * ratio) + config.bonus),
+            sd: Math.max(1, Math.floor(rawBase.sd * ratio) + config.bonus),
+            s:  Math.max(1, Math.floor(rawBase.s  * ratio) + config.bonus)
+        };
+
+        // 5) 이로치 여부에 따른 스프라이트 URL 결정
+        const baseUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
+        const spriteUrl = isShiny
+            ? `${baseUrl}/shiny/${baseId}.png`
+            : `${baseUrl}/${baseId}.png`;
+
+        return {
+            id: dexId,
+            baseId,
+            name,
+            rarity,
+            type: { name: typeName, ...TYPE_DATA[typeName] },
+            sprite: spriteUrl,
+            base: finalBase,
+            isShiny,
+            isHidden,
+            isVariant
+        };
+    }
+
+
+    const TIER_ORDER = ['C', 'R', 'SR', 'SSR', 'UR'];
+
+    function getRandomMoves(typeName, count, maxTierStr = 'UR') {
+        const pool = MOVE_POOL[typeName] || MOVE_POOL["노말"];
+
+        // [수정] maxTierStr보다 낮거나 같은 등급의 기술만 필터링
+        const maxIdx = TIER_ORDER.indexOf(maxTierStr);
+        const filtered = pool.filter(m => TIER_ORDER.indexOf(m.t) <= maxIdx);
+
+        const res = [];
+        if (filtered.length === 0) return res; // 안전장치
+
+        for(let i=0; i<count; i++) {
+            // 랜덤 선택
+            res.push(filtered[Math.floor(Math.random() * filtered.length)]);
+        }
+        return res;
+    }
+
+    // [수정] 본가 공식 참조 스탯 계산 (IV=31, EV=0 가정)
+    // HP = ((2*Base + 31)*Lv)/100 + Lv + 10
+    // Others = ((2*Base + 31)*Lv)/100 + 5
+    function calcStats(base, level) {
+        const calc = (b, isHp) => Math.floor(((2 * b + 31) * level) / 100) + (isHp ? level + 10 : 5);
+        return {
+            maxHp: calc(base.h, true),
+            atk: calc(base.a, false),
+            def: calc(base.d, false),
+            spa: calc(base.sa, false),
+            spd: calc(base.sd, false),
+            spe: calc(base.s, false),
+        };
+    }
+
+    // 🔐 UTF-8 안전 Base64 인코더/디코더 (한글 대응)
+    function toBase64UTF8(obj) {
+        const json = typeof obj === "string" ? obj : JSON.stringify(obj);
+        // JSON 문자열을 UTF-8로 변환 후 btoa
+        return btoa(unescape(encodeURIComponent(json)));
+    }
+
+    function fromBase64UTF8(b64) {
+        // atob 결과(바이너리 문자열)를 다시 UTF-8 문자열로 복원
+        const str = decodeURIComponent(escape(atob(b64)));
+        return str;
+    }
+
+
+    /* =========================================
+     * STATE & LOGIC
+     * ========================================= */
+    /* STATE & LOGIC 부분의 LS_KEY 수정 및 함수 추가 */
+    const LS_KEY = {
+        POINTS: "qz_p_v72",
+        OWNED: "qz_o_v72",
+        PARTNER: "qz_st_v72",
+        HOF: "qz_hof_v72",
+        TICKETS: "qz_t_v72",
+        DUPES: "qz_d_v72",
+        CHAR_DATA: "qz_c_prog_v72" // [추가] 캐릭터별 성장 데이터 저장 키
+    };
+
+    // 👻 고스트 QR이 항상 이 주소로 연결되도록 고정
+    const GHOST_ROOT_URL = (location.origin && location.origin !== "null")
+        ? `${location.origin}${location.pathname}`
+        : "https://unluckyidiot16.github.io/WebGames/PRL/PRL.html";
+
+    // [추가] 캐릭터 성장 데이터 가져오기
+    function getCharData() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY.CHAR_DATA) || "{}"); }
+        catch { return {}; }
+    }
+
+    // [추가] 캐릭터 성장 데이터 저장하기
+    function saveCharData(data) {
+        localStorage.setItem(LS_KEY.CHAR_DATA, JSON.stringify(data));
+    }
+
+    // [추가] 현재 플레이어 상태(레벨, XP) 저장 함수
+    function saveCurrentPlayerProgress() {
+        if (!battleState || !battleState.player) return;
+        const allData = getCharData();
+
+        // 스킬은 저장하지 않음(로그라이트: 빌드 초기화), 레벨과 XP만 저장
+        allData[battleState.player.id] = {
+            level: battleState.player.level,
+            xp: battleState.player.xp
+        };
+        saveCharData(allData);
+    }
+
+    let battleState = null;
+    let quizCallback = null;
+
+    let ghostScanStream = null;
+    let ghostScanFrameId = null;
+
+    function getPoints() { return parseInt(localStorage.getItem(LS_KEY.POINTS) || "1000", 10); }
+    function setPoints(n) { localStorage.setItem(LS_KEY.POINTS, Math.max(0, n)); updateResUI(); }
+    function addPoints(n) { setPoints(getPoints() + n); }
+    function getTickets() { return parseInt(localStorage.getItem(LS_KEY.TICKETS) || "0", 10); }
+    function setTickets(n) { localStorage.setItem(LS_KEY.TICKETS, Math.max(0, n)); updateResUI(); }
+    function addTickets(n) { setTickets(getTickets() + n); }
+    function getOwned() { try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.OWNED) || "[]")); } catch { return new Set(); } }
+    function saveOwned(set) { localStorage.setItem(LS_KEY.OWNED, JSON.stringify([...set])); }
+    function getDupes() { try { return JSON.parse(localStorage.getItem(LS_KEY.DUPES) || "{}"); } catch { return {}; } }
+    function saveDupes(d) { localStorage.setItem(LS_KEY.DUPES, JSON.stringify(d)); }
+
+    /* =========================================
+     * INDEX -> PRL(PRL) 데이터 가져오기
+     * - index에서 localStorage + URL hash(import=...)로 전달
+     * - 여기서 자동으로 보유 목록(owned)에 병합
+     * ========================================= */
+    const INDEX_EXPORT_KEY = "classhub_index_export_to_prl_v1";
+    const INDEX_IMPORT_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14; // 14일
+
+    function _b64UrlDecodeUtf8(token) {
+        try {
+            token = (token || "").replace(/-/g, "+").replace(/_/g, "/");
+            token += "=".repeat((4 - (token.length % 4)) % 4);
+            const bin = atob(token);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return new TextDecoder().decode(bytes);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _readImportFromUrl() {
+        // 1) search ?import=...
+        try {
+            const sp = new URLSearchParams(location.search);
+            const token = sp.get("import");
+            if (token) return token;
+        } catch {}
+        // 2) hash #import=...
+        try {
+            const h = (location.hash || "").replace(/^#/, "");
+            if (!h) return null;
+            const m = h.match(/(?:^|&)import=([^&]+)/);
+            if (m && m[1]) return decodeURIComponent(m[1]);
+        } catch {}
+        return null;
+    }
+
+    function _stripImportFromUrl() {
+        try {
+            const sp = new URLSearchParams(location.search);
+            if (sp.has("import")) {
+                sp.delete("import");
+                const qs = sp.toString();
+                history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + (location.hash || ""));
+            }
+        } catch {}
+
+        try {
+            if ((location.hash || "").includes("import=")) {
+                history.replaceState(null, "", location.pathname + location.search);
+            }
+        } catch {}
+    }
+
+    function tryImportFromIndex() {
+        // 0) URL token 우선
+        let payload = null;
+
+        const token = _readImportFromUrl();
+        if (token) {
+            const raw = _b64UrlDecodeUtf8(token);
+            if (raw) {
+                try { payload = JSON.parse(raw); } catch {}
+            }
+        }
+
+        // 1) localStorage fallback
+        if (!payload) {
+            try {
+                const raw = localStorage.getItem(INDEX_EXPORT_KEY);
+                if (raw) payload = JSON.parse(raw);
+            } catch {}
+        }
+
+        if (!payload) return;
+
+        // 최소 검증
+        const ts = Number(payload.ts || payload.timestamp || payload.time || 0);
+        if (ts && (Date.now() - ts) > INDEX_IMPORT_MAX_AGE_MS) {
+            // 너무 오래된 데이터면 무시(원하면 key만 지우고 끝)
+            try { localStorage.removeItem(INDEX_EXPORT_KEY); } catch {}
+            _stripImportFromUrl();
+            return;
+        }
+
+        const dexIds = payload.dexIds || payload.dex || payload.ownedIds || payload.ids || [];
+        if (!Array.isArray(dexIds)) return;
+
+        const BASE_DEX_MAX = 251; // 현재 PRL 기본 도감 범위
+        const owned = getOwned();
+        let added = 0;
+
+        for (const v of dexIds) {
+            const pid = parseInt(v, 10);
+            if (!Number.isFinite(pid) || pid < 1 || pid > BASE_DEX_MAX) continue;
+            if (!owned.has(pid)) {
+                owned.add(pid);
+                added++;
+            }
+        }
+
+        if (added > 0) saveOwned(owned);
+
+        // 파트너(스타터)도 같이 가져오되, 없으면 그냥 무시
+        const partnerId = parseInt(payload.partnerId, 10);
+        if (Number.isFinite(partnerId) && owned.has(partnerId)) {
+            localStorage.setItem(LS_KEY.PARTNER, String(partnerId));
+        }
+
+        // 한 번 가져왔으면 반복 적용되지 않도록 정리
+        try { localStorage.removeItem(INDEX_EXPORT_KEY); } catch {}
+        _stripImportFromUrl();
+
+        // UI 반영
+        updateResUI();
+        updateLobbyPartner();
+        renderCodex();
+
+        if (added > 0) {
+            showAlert("✅ 내보내기 완료", `index에서 가져온 포켓몬 ${added}마리를 PRL에 등록했어요!`);
+        }
+    }
+    function getStarterId() { return parseInt(localStorage.getItem(LS_KEY.PARTNER) || "0"); }
+    function setStarterId(id) {
+        localStorage.setItem(LS_KEY.PARTNER, id);
+        updateLobbyPartner();
+
+        // 고스트 초대가 대기 중이면 바로 물어보기
+        if (window.__pendingGhost) {
+            const g = window.__pendingGhost;
+            window.__pendingGhost = null;
+
+            if (confirm(`고스트 ${g.name} (Lv.${g.level}) 초대가 있습니다.\n지금 바로 도전할까요?`)) {
+                startGhostBattle(g);
+            }
+        }
+    }
+
+    function getHoF() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY.HOF) || "[]"); }
+        catch { return []; }
+    }
+
+    // ⭐ 명예의 전당 중 "일반 모험" 최고 기록 1개 반환
+    function getBestAdventureRecord() {
+        const list = getHoF();
+        const adv = list.filter(r => !r.kind || r.kind === "adventure");
+
+        if (!adv.length) return null;
+
+        adv.sort((a, b) => (b.stage || 0) - (a.stage || 0));
+        return adv[0];  // 스테이지 가장 높은 기록
+    }
+
+    // 변경 후: 모드(kind) 포함 + 정렬 안전하게
+    function addHoF(record) {
+        const list = getHoF();
+
+        const enriched = {
+            kind: record.kind || "adventure",   // 기본은 일반 모험
+            ts: record.ts || Date.now(),        // 타임스탬프(정렬용)
+            ...record,
+        };
+
+        list.push(enriched);
+
+        // 기본 정렬 기준: 스테이지 높은 순 (없으면 0)
+        list.sort((a, b) => (b.stage || 0) - (a.stage || 0));
+
+        // 필요시 10개 정도까지 저장
+        localStorage.setItem(LS_KEY.HOF, JSON.stringify(list.slice(0, 10)));
+    }
+
+
+    function buildGhostPayload() {
+        const best = getBestAdventureRecord();
+        const charData = getCharData();
+
+        // 1) 먼저 명예의 전당 기록을 기반으로 QR 생성 시도
+        if (best) {
+            const payloadFromBest = buildGhostPayloadFromHofRecord(best);
+            if (payloadFromBest) {
+                return payloadFromBest;
+            }
+        }
+
+        // 2) 명예의 전당 기록이 없거나(첫 플레이),
+        //    구버전 기록이라 speciesId를 복구하지 못한 경우
+        //    → 현재 스타터 기준으로 고스트 생성
+        const starterId = getStarterId();
+        if (!starterId) {
+            showAlert(
+                "공유할 기록 없음",
+                "먼저 스타터를 선택하고 모험을 한 번 이상 플레이해 주세요."
+            );
+            return null;
+        }
+
+        const pid = starterId;
+        const info = getPokeInfo(pid);
+        const dupes = getDupes()[pid] || 0;
+        const cData = charData[pid] || {};
+
+        const level = Math.max(1 + dupes, cData.level || 1);
+        const xp = cData.xp || 0;
+
+        // 이름이 같은 명예의 전당 기록들 중 최고 스테이지 찾기
+        let bestStage = 0;
+        const hofList = getHoF();
+        hofList.forEach((rec) => {
+            if (rec.name === info.name &&
+                typeof rec.stage === "number" &&
+                rec.stage > bestStage) {
+                bestStage = rec.stage;
+            }
+        });
+
+        const ghost = {
+            v: 1,
+            game: "QuizMonPRL",
+            speciesId: pid,
+            name: info.name,
+            level,
+            xp,
+            bestStage,
+            ts: Date.now(),
+        };
+
+        const token = toBase64UTF8(ghost);
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
+        return { ghost, encoded: url };
+    }
+
+
+    function buildGhostPayloadFromHofRecord(rec) {
+        if (!rec) return null;
+
+        let pid = rec.speciesId;
+
+        // 1) speciesId가 없으면 sprite URL에서 추출 시도
+        if (!pid && rec.sprite) {
+            try {
+                const m = rec.sprite.match(/\/(\d+)\.(png|gif|jpg|jpeg)$/);
+                if (m) {
+                    pid = parseInt(m[1], 10);
+                }
+            } catch (e) {
+                console.warn("[Ghost QR] sprite에서 id 추출 실패", e);
+            }
+        }
+
+        // 2) 그래도 없으면 이름으로 검색 (완전 일치)
+        if (!pid && rec.name) {
+            const idx = POKE_NAMES.indexOf(rec.name);
+            if (idx >= 0) {
+                pid = idx + 1;
+            }
+        }
+
+        if (!pid) {
+            console.warn("[Ghost QR] HoF 기록에서 speciesId를 찾을 수 없습니다.", rec);
+            return null;
+        }
+
+        const info = getPokeInfo(pid);
+        if (!info) {
+            console.warn("[Ghost QR] HoF 기록용 포켓몬 정보를 찾지 못했습니다.", rec);
+            return null;
+        }
+
+        const level =
+            typeof rec.level === "number" && rec.level > 0
+                ? rec.level
+                : 1;
+        const xp = 0;
+        const bestStage = rec.stage || 0;
+
+        const ghost = {
+            v: 1,
+            game: "QuizMonPRL",
+            speciesId: pid,
+            name: rec.name || info.name,
+            level,
+            xp,
+            bestStage,
+            ts: Date.now(),
+        };
+
+        // ✅ 여기서도 UTF-8-safe 인코딩 사용
+        const token = toBase64UTF8(ghost);
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
+        return { ghost, encoded: url };
+    }
+
+
+    function openGhostModalFromHof(rec) {
+        if (!rec) return;
+
+        const payload = buildGhostPayloadFromHofRecord(rec);
+        if (!payload) {
+            alert(
+                "이 기록에는 포켓몬 정보가 없어 QR을 만들 수 없습니다.\n" +
+                "새 버전에서 다시 플레이하면 공유 가능한 기록이 저장됩니다."
+            );
+            return;
+        }
+
+        const { ghost, encoded } = payload;
+
+        const modal = document.getElementById("ghostModal");
+        const summaryEl = document.getElementById("ghostMySummary");
+        const canvas = document.getElementById("ghostQrCanvas");
+        if (!modal || !summaryEl || !canvas) return;
+
+        // 내 QR 탭으로 전환
+        switchGhostTab("my");
+
+        // 설명 텍스트를 “명예의 전당 기록 공유” 버전으로 교체
+        summaryEl.textContent =
+            `명예의 전당 기록: ${ghost.name} Lv.${ghost.level} ` +
+            `(최종 스테이지 ${rec.stage || "-"}). 이 기록을 고스트로 공유합니다.`;
+
+        if (window.QRCode && typeof QRCode.toCanvas === "function") {
+            QRCode.toCanvas(
+                canvas,
+                encoded,
+                { width: 220, margin: 1 },
+                (err) => {
+                    if (err) console.error("[Ghost QR] 생성 오류", err);
+                },
+            );
+        } else {
+            console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.");
+        }
+
+        modal.classList.remove("hidden");
+    }
+
+
+    function refreshGhostMyPane() {
+        const canvas = document.getElementById("ghostMyQrCanvas");
+        const label = document.getElementById("ghostMyQrLabel");
+        const rawInput = document.getElementById("ghostMyCodeInput");
+
+        if (!canvas || !label || !rawInput) {
+            console.warn("[Ghost QR] QR UI 요소를 찾을 수 없습니다.");
+            return;
+        }
+
+        const raw = rawInput.value || "";
+        if (!raw) {
+            label.textContent = "먼저 내 코드(텍스트)를 생성해 주세요.";
+            const ctx = canvas.getContext("2d");
+            if (ctx) {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+            }
+            return;
+        }
+
+        // 🔐 UTF-8 안전한 Base64 인코딩
+        function encodeUtf8Base64(str) {
+            const utf8 = encodeURIComponent(str).replace(
+                /%([0-9A-F]{2})/g,
+                (_, p1) => String.fromCharCode(parseInt(p1, 16))
+            );
+            return btoa(utf8);
+        }
+
+        const payload = {
+            v: 1,
+            type: "ghost-run",
+            data: raw,
+            ts: Date.now(),
+        };
+
+        let encoded;
+        try {
+            encoded = "PRL1:" + encodeUtf8Base64(JSON.stringify(payload));
+        } catch (e) {
+            console.error("[Ghost QR] JSON 인코딩 에러", e);
+            label.textContent = "QR 데이터 인코딩 에러";
+            return;
+        }
+
+        // ✅ QR 라이브러리 찾기 (여러 이름 허용)
+        const QRLib =
+            window.QRCode ||           // qrcode 1.5.x 브라우저 빌드
+            window.qrcode ||           // 혹시 소문자로 노출된 경우
+            window.QRcode;             // 오타/다른 빌드 대응
+
+        if (!QRLib || typeof QRLib.toCanvas !== "function") {
+            console.warn("[Ghost QR] QRCode 라이브러리를 찾을 수 없습니다.", QRLib);
+            label.textContent = "QR 라이브러리 로드 실패";
+            return;
+        }
+
+        // 🎯 실제 QR 그리기
+        QRCode.toCanvas(
+            canvas,
+            url,
+            { width: 220, margin: 1 },
+            (err) => {
+                if (err) {
+                    console.error("[Ghost QR] QR 코드 생성 실패:", err);
+                } else {
+                    console.log("[Ghost QR] QR 코드 생성 완료:", url);
+                }
+            }
+        );
+    }
+
+    // 페이지 로드 시 자동 갱신하고 싶으면:
+    window.addEventListener("load", () => {
+        try {
+            refreshGhostMyPane();
+        } catch (e) {
+            console.error("[Ghost QR] 초기화 중 에러", e);
+        }
+    });
+
+    // 👻 고스트 모달 탭 전환
+    function switchGhostTab(mode) {
+        const myPane = document.getElementById("ghostMyPane");
+        const scanPane = document.getElementById("ghostScanPane");
+        const myBtn = document.getElementById("ghostTabMyBtn");
+        const scanBtn = document.getElementById("ghostTabScanBtn");
+        if (!myPane || !scanPane || !myBtn || !scanBtn) return;
+
+        if (mode === "scan") {
+            myPane.classList.add("hidden");
+            scanPane.classList.remove("hidden");
+            myBtn.classList.remove("bg-slate-800", "text-white");
+            scanBtn.classList.add("bg-slate-800", "text-white");
+        } else {
+            myPane.classList.remove("hidden");
+            scanPane.classList.add("hidden");
+            scanBtn.classList.remove("bg-slate-800", "text-white");
+            myBtn.classList.add("bg-slate-800", "text-white");
+            stopGhostScan();
+        }
+    }
+
+    function openGhostModal() {
+        const modal = document.getElementById("ghostModal");
+        if (!modal) return;
+        modal.classList.remove("hidden");
+        switchGhostTab("my");
+        refreshGhostMyPane();
+    }
+
+    function closeGhostModal() {
+        const modal = document.getElementById("ghostModal");
+        if (!modal) return;
+        stopGhostScan();
+        modal.classList.add("hidden");
+    }
+
+    // 👻 카메라 스캔 종료
+    function stopGhostScan() {
+        if (ghostScanFrameId) {
+            cancelAnimationFrame(ghostScanFrameId);
+            ghostScanFrameId = null;
+        }
+        if (ghostScanStream) {
+            ghostScanStream.getTracks().forEach((t) => t.stop());
+            ghostScanStream = null;
+        }
+        const video = document.getElementById("ghostVideo");
+        if (video) {
+            video.srcObject = null;
+        }
+    }
+
+    // 👻 카메라 스캔 시작
+    async function startGhostScan() {
+        const statusEl = document.getElementById("ghostScanStatus");
+        const video = document.getElementById("ghostVideo");
+
+        if (!statusEl || !video) return;
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            statusEl.textContent = "이 브라우저에서는 카메라 사용을 지원하지 않습니다.";
+            return;
+        }
+
+        try {
+            statusEl.textContent = "카메라 준비 중...";
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: { facingMode: "environment" },
+            });
+            ghostScanStream = stream;
+            video.srcObject = stream;
+            video.setAttribute("playsinline", "true");
+            await video.play();
+            statusEl.textContent = "QR 코드에 카메라를 가져가 주세요.";
+            ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+        } catch (err) {
+            console.error("[Ghost Scan] 카메라 오류", err);
+            statusEl.textContent = "카메라 접근 실패: " + (err.message || err);
+        }
+    }
+
+    // 👻 프레임마다 QR 코드를 찾는 루프
+    function tickGhostScan() {
+        const video = document.getElementById("ghostVideo");
+        const canvas = document.getElementById("ghostScanCanvas");
+        const statusEl = document.getElementById("ghostScanStatus");
+
+        if (!video || !canvas || !statusEl || !ghostScanStream) return;
+
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+
+        if (!w || !h) {
+            ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+            return;
+        }
+
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+
+        if (typeof jsQR === "function") {
+            const code = jsQR(imageData.data, w, h);
+            if (code && code.data) {
+                statusEl.textContent = "QR 인식 완료!";
+                handleGhostPayload(code.data);
+                stopGhostScan();
+                return;
+            }
+        } else {
+            console.warn("[Ghost Scan] jsQR 라이브러리를 찾을 수 없습니다.");
+        }
+
+        ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+    }
+
+    // 👻 문자열에서 고스트 정보 꺼내기
+    function parseGhostFromData(data) {
+        if (typeof data !== "string") return null;
+
+        try {
+            // 1) 새 포맷: URL 에 ?ghost= 가 붙어 있는 형태
+            if (data.startsWith("http")) {
+                const url = new URL(data);
+                const token = url.searchParams.get("ghost");
+                if (token) {
+                    const base64 = decodeURIComponent(token);
+                    const jsonStr = fromBase64UTF8(base64);  // ✅ 변경
+                    return JSON.parse(jsonStr);
+                }
+            }
+
+            // 2) 예전 포맷: "QZMGHOST|base64" 형태도 그대로 지원
+            if (data.startsWith("QZMGHOST|")) {
+                const raw = data.split("|")[1];
+                const jsonStr = fromBase64UTF8(raw);       // ✅ 변경
+                return JSON.parse(jsonStr);
+            }
+
+            return null;
+        } catch (err) {
+            console.error("[Ghost Payload] parse error", err);
+            return null;
+        }
+    }
+
+
+    function handleGhostPayload(data) {
+        const ghost = parseGhostFromData(data);
+        if (!ghost) {
+            showAlert("인식 실패", "퀴즈몬 고스트 QR 코드가 아닙니다.");
+            return;
+        }
+        startGhostBattle(ghost);
+    }
+
+    function updateResUI() {
+        const p = getPoints().toLocaleString(), t = getTickets().toLocaleString();
+        document.getElementById("pointsTextLobby").textContent = p;
+        document.getElementById("ticketTextLobby").textContent = t;
+        document.getElementById("gachaResDisplay").textContent = `P: ${p} / 🎫: ${t}`;
+    }
+
+    function updateLobbyPartner() {
+        const pid = getStarterId();
+        if (pid > 0) {
+            const info = getPokeInfo(pid);
+            const dupes = getDupes()[pid] || 0;
+            const savedData = getCharData()[pid];
+
+            // 저장된 레벨이 있으면 표시, 없으면 기본값(1+중복)
+            const currentLv = savedData ? savedData.level : (1 + dupes);
+
+            document.getElementById("lobbyPartnerName").textContent = info.name;
+            document.getElementById("lobbyPartnerImg").src = info.sprite;
+            document.getElementById("partnerInfo").textContent = info.name;
+
+            // [변경] 현재 레벨 정보 표시
+            document.getElementById("lobbyStartBonus").textContent = `현재 Lv.${currentLv} (중복 +${dupes})`;
+            document.getElementById("startAdventureBtn").disabled = false;
+        } else {
+            document.getElementById("lobbyPartnerName").textContent = "없음";
+            document.getElementById("partnerInfo").textContent = "선택 필요";
+            document.getElementById("lobbyStartBonus").textContent = "선택 필요";
+            document.getElementById("startAdventureBtn").disabled = true;
+        }
+    }
+
+    function renderCodex() {
+        const grid = document.getElementById("codexGrid"); grid.innerHTML = "";
+        const owned = getOwned(), pid = getStarterId(), dupes = getDupes();
+        let count = 0;
+        for (let i=1;i<=DEX_TOTAL;i++) {
+            const info = getPokeInfo(i);
+            const ownedBase = owned.has(info.baseId);
+            if(ownedBase) count++;
+            const el = document.createElement("div");
+            el.className = `poke-card relative rounded-xl p-2 flex flex-col items-center cursor-pointer rarity-${info.rarity}`;
+            if (!ownedBase) el.classList.add("opacity-50", "grayscale");
+            if (pid === i) el.classList.add("ring-4", "ring-emerald-400");
+            const dupeCount = dupes[i] || 0;
+            el.innerHTML = `<div class="absolute top-1 left-1 text-[9px] font-bold text-slate-400">#${String(i).padStart(3,'0')}</div>${dupeCount > 0 ? `<div class="absolute top-1 right-1 bg-red-500 text-white text-[8px] px-1 rounded-full">+${dupeCount}</div>` : ''}<div class="w-12 h-12 mt-2"><img src="${ownedBase ? info.sprite : 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'}" class="w-full h-full pixel-art object-contain ${!ownedBase?'opacity-20':''}"></div><div class="text-[10px] font-bold truncate mt-1">${ownedBase ? info.name : '???'}</div><div class="text-[8px] font-bold mt-0.5 ${info.rarity==='UR'?'text-red-500':info.rarity==='SSR'?'text-orange-500':'text-slate-400'}">${info.rarity}</div>`;
+            el.onclick = () => { if(!ownedBase) { showAlert("미보유", "가챠로 먼저 획득하세요."); return; } setStarterId(info.baseId); renderCodex(); };
+            grid.appendChild(el);
+        }
+        document.getElementById("collectionRate").textContent = `${count}/${DEX_TOTAL}`;
+    }
+
+    function renderHoF() {
+        const list = getHoF();
+        const container = document.getElementById("hofList");
+        container.innerHTML = "";
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-400 py-10">기록이 없습니다.</p>';
+            return;
+        }
+
+        const normal = list
+            .filter((r) => !r.kind || r.kind === "adventure")
+            .sort((a, b) => (b.stage || 0) - (a.stage || 0));
+
+        const ghost = list
+            .filter((r) => r.kind === "ghost")
+            .sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+        // 🟡 일반 모험 기록
+        if (normal.length > 0) {
+            const header = document.createElement("div");
+            header.className = "text-xs font-bold text-slate-500 mt-1 mb-2 flex items-center gap-1";
+            header.innerHTML = '<span>🌟 일반 모험 기록</span>';
+            container.appendChild(header);
+
+            normal.forEach((rec, idx) => {
+                const div = document.createElement("div");
+                div.className = "hof-item border-2 rounded-xl p-3 flex items-center gap-3 relative";
+                div.innerHTML = `
+                <div class="font-black text-2xl w-8 text-center text-slate-400 italic">#${idx + 1}</div>
+                <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-slate-200">
+                <div class="flex-1">
+                    <div class="font-bold text-slate-800">
+                        ${rec.name}
+                        <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
+                    </div>
+                    <div class="text-xs text-slate-600">
+                        최종 스테이지:
+                        <span class="text-red-500 font-bold text-base">${rec.stage}</span>
+                    </div>
+                </div>
+                <button
+                    type="button"
+                    class="hof-export-btn absolute right-3 top-3 text-[10px] px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200"
+                >
+                    QR
+                </button>
+            `;
+
+                const btn = div.querySelector(".hof-export-btn");
+                if (btn) {
+                    btn.addEventListener("click", (ev) => {
+                        ev.stopPropagation();
+                        openGhostModalFromHof(rec);   // ✅ 이 기록을 고스트 QR로 공유
+                    });
+                }
+
+                container.appendChild(div);
+            });
+        }
+
+        // 👻 고스트 승리 기록
+        if (ghost.length > 0) {
+            const header = document.createElement("div");
+            header.className = "text-xs font-bold text-slate-500 mt-4 mb-2 flex items-center gap-1";
+            header.innerHTML = '<span>👻 고스트 승리 기록</span>';
+            container.appendChild(header);
+
+            ghost.forEach((rec, idx) => {
+                const div = document.createElement("div");
+                div.className = "hof-item border-2 border-purple-300 rounded-xl p-3 flex items-center gap-3 relative bg-purple-50/40";
+                div.innerHTML = `
+                <div class="font-black text-2xl w-8 text-center text-purple-400 italic">#${idx + 1}</div>
+                <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-purple-200">
+                <div class="flex-1">
+                    <div class="font-bold text-slate-800">
+                        ${rec.name}
+                        <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span>
+                    </div>
+                    <div class="text-xs text-slate-600">
+                        상대:
+                        <span class="font-bold text-purple-600">${rec.ghostName || "알 수 없음"}</span>
+                        <span class="text-[11px] text-slate-500 ml-1">Lv.${rec.ghostLevel || "?"}</span>
+                    </div>
+                    <div class="text-[11px] text-slate-500 mt-0.5">
+                        기록 스테이지: <span class="font-semibold">${rec.stage ?? "-"}</span>
+                    </div>
+                </div>
+            `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+
+    /* =========================================
+     * BATTLE SYSTEM (Updated)
+     * ========================================= */
+    function initAdventure() {
+        const pid = getStarterId(); if (!pid) return;
+        const info = getPokeInfo(pid);
+        const dupes = getDupes()[pid] || 0;
+        const savedData = getCharData()[pid];
+
+        // [변경] 저장된 레벨이 있으면 불러오고, 없으면 (1 + 중복수)로 시작
+        let level = 1 + dupes;
+        let xp = 0;
+
+        if (savedData) {
+            // 저장된 레벨이 중복 보너스보다 낮을 경우(거의 없겠지만) 보정
+            level = Math.max(savedData.level, 1 + dupes);
+            xp = savedData.xp;
+        }
+
+        // 해당 레벨에 맞는 스탯 계산
+        const stats = calcStats(info.base, level);
+
+        // [로그라이트 특징] 스킬은 초기화 (랜덤 2개) -> 매 판 새로운 조합 재미
+        const startMoves = getRandomMoves(info.type.name, 2, 'C');
+
+        battleState = {
+            mode: "adventure",
+            stage: 1,
+            player: {
+                id: pid, name: info.name, sprite: info.sprite, type: info.type.name,
+                level: level, xp: xp,
+                maxHp: stats.maxHp, hp: stats.maxHp,
+                atk: stats.atk, def: stats.def, spa: stats.spa, spd: stats.spd, spe: stats.spe,
+                base: info.base,
+                moves: startMoves
+            },
+            cooldowns: [0, 0]
+        };
+
+        startBattleStage();
+        document.getElementById("titleScreen").classList.remove("active");
+        document.getElementById("codexScreen").classList.remove("active");
+        document.getElementById("battleScreen").classList.add("active");
+    }
+
+    // 👻 고스트 배틀: 내 스타터 vs QR에서 읽은 고스트
+    function startGhostBattle(ghost) {
+        const pid = getStarterId();
+        if (!pid) {
+            showAlert("스타터 없음", "먼저 내 스타터를 하나 선택해 주세요.");
+            return;
+        }
+
+        const myInfo = getPokeInfo(pid);
+        const myCharData = getCharData()[pid];
+        const myDupes = getDupes()[pid] || 0;
+
+        let myLevel = 1 + myDupes;
+        let myXp = 0;
+        if (myCharData) {
+            if (typeof myCharData.level === "number") myLevel = myCharData.level;
+            if (typeof myCharData.xp === "number") myXp = myCharData.xp;
+        }
+
+        const myStats = calcStats(myInfo.base, myLevel);
+        // 내 쪽은 SR 등급까지 기술 2개 랜덤
+        const myMoves = getRandomMoves(myInfo.type.name, 2, "SR");
+
+        const enemyInfo = getPokeInfo(ghost.speciesId || ghost.id || 1);
+        const enemyLevel = ghost.level || 1;
+        const enemyStats = calcStats(enemyInfo.base, enemyLevel);
+        // 상대는 UR까지 1개 기술 랜덤
+        const enemyMoves = getRandomMoves(enemyInfo.type.name, 1, "UR");
+
+        battleState = {
+            mode: "ghost",
+            stage: 1,
+            player: {
+                id: pid,
+                name: myInfo.name,
+                sprite: myInfo.sprite,
+                type: myInfo.type.name,
+                level: myLevel,
+                xp: myXp,
+                maxHp: myStats.maxHp,
+                hp: myStats.maxHp,
+                atk: myStats.atk,
+                def: myStats.def,
+                spa: myStats.spa,
+                spd: myStats.spd,
+                spe: myStats.spe,
+                base: myInfo.base,
+                moves: myMoves,
+            },
+            enemy: {
+                id: enemyInfo.id,
+                name: ghost.name || enemyInfo.name,
+                sprite: enemyInfo.sprite,
+                type: ghost.type || enemyInfo.type.name,
+                level: enemyLevel,
+                maxHp: enemyStats.maxHp,
+                hp: enemyStats.maxHp,
+                atk: enemyStats.atk,
+                def: enemyStats.def,
+                spa: enemyStats.spa,
+                spd: enemyStats.spd,
+                spe: enemyStats.spe,
+                move: enemyMoves[0],
+                isBoss: true,
+            },
+            cooldowns: [0, 0],
+        };
+
+        // 화면 전환
+        closeGhostModal();
+        document.getElementById("titleScreen").classList.remove("active");
+        document.getElementById("lobbyScreen").classList.remove("active");
+        document.getElementById("codexScreen").classList.remove("active");
+        document.getElementById("battleScreen").classList.add("active");
+
+        updateBattleUI();
+        logBattle(`QR 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 도전!`, "critical");
+    }
+
+    function startBattleStage() {
+        const { stage, player } = battleState;
+
+        // [변경] 적 레벨 스케일링 조정
+        // 스테이지 1 -> Lv.1
+        // 스테이지 10 -> Lv.13
+        // 스테이지 30 -> Lv.40
+        const eLevel = Math.floor(stage + (stage / 3));
+
+        let enemyId;
+
+        // [추가] 5% 확률로 전설 또는 환상 포켓몬 조우
+        const isLegendaryEncounter = Math.random() < 0.05;
+
+        if (isLegendaryEncounter) {
+            // 전설(LEGENDARY_IDS) + 환상(MYTHICAL_IDS) 합친 배열에서 랜덤 선택
+            const legends = [...LEGENDARY_IDS, ...MYTHICAL_IDS];
+            enemyId = legends[Math.floor(Math.random() * legends.length)];
+        } else {
+            // [기존 로직] 일반적인 스테이지별 등급 제한 적용
+            let allowedRarities = ['C'];
+            if (stage >= 3) allowedRarities.push('R');
+            if (stage >= 7) allowedRarities.push('SR');
+            if (stage >= 12) allowedRarities.push('SSR');
+            // 전설은 위 5% 로직에서 처리되므로 일반 풀에서는 제외하거나 확률 낮게 유지
+            // 여기서는 'UR'을 allowedRarities에 넣지 않아, 5% 찬스가 아니면 전설이 안 나오게 함 (희소성 강화)
+
+            // 난이도 조절: 스테이지가 오르면 낮은 등급 제외
+            if (stage >= 10) allowedRarities = allowedRarities.filter(r => r !== 'C');
+            if (stage >= 20) allowedRarities = allowedRarities.filter(r => r !== 'R');
+
+            let safe = 0;
+            do {
+                enemyId = Math.floor(Math.random() * BASE_DEX_MAX) + 1;
+                const checkInfo = getPokeInfo(enemyId);
+                // 전설/환상 ID가 일반 뽑기에서 나오면 제외 (5% 이벤트로만 등장하게 하려면)
+                if (LEGENDARY_IDS.includes(enemyId) || MYTHICAL_IDS.includes(enemyId)) continue;
+
+                if(allowedRarities.includes(checkInfo.rarity)) break;
+                safe++;
+            } while(safe < 200);
+
+            // 안전장치 (루프 실패시 랜덤)
+            if (!enemyId) enemyId = Math.floor(Math.random() * 150) + 1;
+        }
+
+        const eInfo = getPokeInfo(enemyId);
+        const eStats = calcStats(eInfo.base, eLevel);
+
+        // 적 스킬: 자신의 레어도 + 1단계 기술까지 사용
+        const currentTierIdx = TIER_ORDER.indexOf(eInfo.rarity);
+        const maxSkillIdx = Math.min(TIER_ORDER.length - 1, currentTierIdx + 1);
+        const maxSkillTier = TIER_ORDER[maxSkillIdx];
+
+        const eMoves = getRandomMoves(eInfo.type.name, 1, maxSkillTier);
+
+        battleState.enemy = {
+            id: enemyId, name: eInfo.name, sprite: eInfo.sprite, type: eInfo.type.name,
+            maxHp: eStats.maxHp, hp: eStats.maxHp,
+            atk: eStats.atk, def: eStats.def, spa: eStats.spa, spd: eStats.spd, spe: eStats.spe,
+            level: eLevel,
+            move: eMoves[0], isBoss: eInfo.rarity === 'UR'
+        };
+        battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
+
+        updateBattleUI();
+
+        let msg = `야생의 ${eInfo.name} (Lv.${eLevel}) 등장!`;
+        let type = 'normal';
+
+        if (eInfo.rarity === 'UR') {
+            // 5% 당첨 시 메시지 강조
+            msg = `⚡ 전설의 포켓몬 ${eInfo.name} 출현!!`;
+            type = 'critical';
+        } else if (eInfo.rarity === 'SSR') {
+            msg = `강적! ${eInfo.name} (Lv.${eLevel}) 등장!`;
+            type = 'weak';
+        }
+
+        logBattle(msg, type);
+    }
+
+    function updateBattleUI() {
+        const { player, enemy } = battleState;
+        document.getElementById("battleStageText").textContent = battleState.stage;
+        document.getElementById("playerName").textContent = player.name;
+        document.getElementById("playerLevel").textContent = `Lv.${player.level}`;
+        document.getElementById("playerImg").src = player.sprite;
+        document.getElementById("playerHpText").textContent = `${Math.ceil(player.hp)}/${Math.ceil(player.maxHp)}`;
+        document.getElementById("playerHpBar").style.width = `${Math.max(0, (player.hp/player.maxHp)*100)}%`;
+        document.getElementById("playerExpBar").style.width = `${Math.min(100, (player.xp/(player.level*100))*100)}%`;
+
+        document.getElementById("enemyName").textContent = enemy.name;
+        document.getElementById("enemyLevel").textContent = `Lv.${enemy.level}`;
+        document.getElementById("enemyImg").src = enemy.sprite;
+        document.getElementById("enemyHpBar").style.width = `${Math.max(0, (enemy.hp/enemy.maxHp)*100)}%`;
+        document.getElementById("enemyTypeBadge").textContent = enemy.type;
+        document.getElementById("enemyTypeBadge").className = `text-[9px] text-white px-1.5 py-0.5 rounded mb-1 inline-block ${TYPE_DATA[enemy.type].color}`;
+
+        const btnGrid = document.getElementById("moveButtons"); btnGrid.innerHTML = "";
+        player.moves.forEach((m, idx) => {
+            const btn = document.createElement("button");
+            const cd = battleState.cooldowns[idx];
+            const cat = getMoveCategory(player.type); // 자신의 타입에 맞는 기술만 있다고 가정 (단순화)
+            let cls = "bg-white border-slate-200";
+            let tColor = "text-slate-500";
+            if(m.t === "UR") { cls = "bg-red-50 border-red-300"; tColor = "text-red-600"; }
+            else if(m.t === "SSR") { cls = "bg-orange-50 border-orange-300"; tColor = "text-orange-600"; }
+            else if(m.t === "SR") { cls = "bg-yellow-50 border-yellow-300"; tColor = "text-yellow-600"; }
+            else if(m.t === "R") { cls = "bg-blue-50 border-blue-200"; tColor = "text-blue-600"; }
+
+            if(cd > 0) cls = "btn-cooldown";
+            btn.className = `${cls} border-b-4 rounded-xl py-2 flex flex-col items-center justify-center transition-all h-16 ${cd===0 ? 'hover:brightness-95 active:border-b-0 active:translate-y-1' : ''}`;
+
+            // 물리/특수 표기 추가
+            const isPhys = getMoveCategory(player.type) === "Physical"; // *주의: 현재는 플레이어 타입 기준으로 기술 카테고리 결정 (데이터 한계상)
+            // 더 정확히는 기술별로 지정해야 하지만, RAW_MOVES 구조상 키(Type)로 구분 가능.
+            // 여기선 편의상 Move 버튼 그릴 때, 해당 기술의 타입을 알 수 없으므로(객체에 타입 정보 누락됨) 플레이어 타입 따라감.
+            // *개선*: RAW_MOVES 파싱 시 type을 넣었어야 함. -> 일단 플레이어 타입 기반으로 처리.
+
+            btn.innerHTML = `<span class="font-bold text-xs truncate w-full text-center">${m.n}</span><span class="text-[9px] ${cd > 0 ? 'text-slate-400' : tColor}">${cd > 0 ? `쿨타임 ${cd}` : `${m.t}/${m.p} `}</span>`;
+            btn.disabled = cd > 0;
+            btn.onclick = () => handlePlayerMove(m, idx);
+            btnGrid.appendChild(btn);
+        });
+    }
+
+    function logBattle(msg, type="normal") {
+        const log = document.getElementById("battleLog"); log.textContent = msg;
+        log.className = `text-xs font-bold mb-3 h-6 text-center overflow-hidden ${type==='critical'?'text-red-500 animate-pulse': type==='weak'?'text-blue-500':'text-slate-500 italic'}`;
+    }
+
+    // 데미지 계산 공식 적용
+    function calculateDamage(attacker, defender, move, moveType) {
+        // 1. 카테고리(물리/특수) 결정
+        const cat = getMoveCategory(moveType);
+
+        // 2. 공격/방어 스탯 결정
+        let A, D;
+        if (cat === "Physical") { A = attacker.atk; D = defender.def; }
+        else { A = attacker.spa; D = defender.spd; }
+
+        // 3. 데미지 공식 (본가 4세대 이후 기준 변형)
+        // Damage = ( ((2*Lv/5 + 2) * Power * A/D) / 50 + 2 ) * Modifiers
+        let dmg = Math.floor( (( (2 * attacker.level / 5 + 2) * move.p * (A / D) ) / 50 + 2) );
+
+        // 4. 상성 계산
+        const typeInfo = TYPE_DATA[defender.type];
+        let eff = 1.0;
+        if (typeInfo.weak.includes(moveType)) eff = 2.0; // 2배
+        if (typeInfo.resist.includes(moveType)) eff = 0.5; // 반감
+
+        // 5. 자속 보정 (STAB)
+        if (attacker.type === moveType) dmg *= 1.5;
+
+        // 6. 랜덤 난수 (0.85 ~ 1.0)
+        dmg = Math.floor(dmg * eff * (0.85 + Math.random() * 0.15));
+
+        return { dmg, eff, cat };
+    }
+
+    function handlePlayerMove(move, idx) {
+        openQuiz((isCorrect) => {
+            if(!isCorrect) { logBattle("퀴즈 오답! 공격 실패!"); setTimeout(enemyTurn, 800); return; }
+            battleState.cooldowns[idx] = move.c + 1;
+            const el = document.getElementById("playerImg"); el.classList.remove("animate-attack-player"); void el.offsetWidth; el.classList.add("animate-attack-player");
+
+            // 플레이어 공격 (플레이어 타입의 기술로 간주)
+            const { dmg, eff, cat } = calculateDamage(battleState.player, battleState.enemy, move, battleState.player.type);
+
+            setTimeout(() => {
+                battleState.enemy.hp -= dmg;
+                const eImg = document.getElementById("enemyImg"); eImg.classList.remove("animate-damage"); void eImg.offsetWidth; eImg.classList.add("animate-damage");
+
+                let msg = eff > 1 ? `급소! 효과가 굉장했다! (${dmg})` : (eff < 1 ? `효과가 별로다... (${dmg})` : `명중! (${dmg})`);
+                logBattle(msg, eff > 1 ? 'critical' : (eff < 1 ? 'weak' : 'normal'));
+
+                battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
+                updateBattleUI();
+                if(battleState.enemy.hp <= 0) setTimeout(handleWin, 800);
+                else setTimeout(enemyTurn, 1000);
+            }, 200);
+        });
+    }
+
+    function enemyTurn() {
+        if(battleState.enemy.hp <= 0) return;
+        const eImg = document.getElementById("enemyImg"); eImg.classList.remove("animate-attack-enemy"); void eImg.offsetWidth; eImg.classList.add("animate-attack-enemy");
+
+        const move = battleState.enemy.move;
+        // 적 공격 (적 타입의 기술로 간주)
+        const { dmg, eff, cat } = calculateDamage(battleState.enemy, battleState.player, move, battleState.enemy.type);
+
+        if(Math.random()*100 > 90) { setTimeout(() => { logBattle("적의 공격이 빗나갔다!"); }, 300); return; }
+
+        setTimeout(() => {
+            battleState.player.hp -= dmg;
+            const pImg = document.getElementById("playerImg"); pImg.classList.remove("animate-damage"); void pImg.offsetWidth; pImg.classList.add("animate-damage");
+            logBattle(`적의 ${move.n}! (${dmg})`);
+            updateBattleUI();
+            if(battleState.player.hp <= 0) setTimeout(handleDefeat, 800);
+        }, 200);
+    }
+
+    function handleWin() {
+        const isGhost = battleState.mode === "ghost";
+        const s = battleState.stage;
+
+        // 🎫 티켓 보상: 전설/환상 보스 + (모험) 5층마다 지급
+        const bonusLoot = [];
+        if (battleState.enemy.isBoss) {
+            addTickets(1);
+            bonusLoot.push("✨ 전설 보상: 티켓 +1");
+        }
+        if (!isGhost && s > 0 && (s % 5 === 0)) {
+            addTickets(1);
+            bonusLoot.push(`🎟️ ${s}층 보상: 티켓 +1`);
+        }
+
+        const pt = Math.floor(50 + (s * 10) + (s * s * 0.5));
+        const xp = 50 + (s * 10);
+
+        // ✅ 공통: EXP만 먼저 지급
+        battleState.player.xp += xp;
+
+        let lvUp = false;
+        if (battleState.player.xp >= battleState.player.level * 100) {
+            battleState.player.xp -= battleState.player.level * 100;
+            battleState.player.level++;
+
+            const newStats = calcStats(battleState.player.base, battleState.player.level);
+            battleState.player.maxHp = newStats.maxHp;
+            battleState.player.atk    = newStats.atk;
+            battleState.player.def    = newStats.def;
+            battleState.player.spa    = newStats.spa;
+            battleState.player.spd    = newStats.spd;
+            battleState.player.spe    = newStats.spe;
+            battleState.player.hp     = battleState.player.maxHp;
+
+            lvUp = true;
+        }
+
+        saveCurrentPlayerProgress();
+
+        // 👻 고스트 모드 승리 처리
+        if (isGhost) {
+            // 고스트 승리 기록
+            addHoF({
+                kind: "ghost",
+                speciesId: battleState.player.id,
+                level: battleState.player.level,
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                stage: battleState.stage, // 참고용
+                ghostName: battleState.enemy.name,
+                ghostLevel: battleState.enemy.level,
+                date: new Date().toLocaleDateString(),
+            });
+
+            // 고스트는 포인트도 바로 지급
+            addPoints(pt);
+
+            alert(
+                `고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 승리!\n` +
+                `+${pt} P / EXP ${xp}${lvUp ? " (레벨 업!)" : ""}`
+            );
+
+            document.getElementById("battleScreen").classList.remove("active");
+            document.getElementById("lobbyScreen").classList.add("active");
+            updateResUI();
+            return;
+        }
+
+        // 🟢 일반 모험: 여기서는 "게임 오버" 안 뜨고, 보상 선택만
+        document.getElementById("rewardXpVal").textContent = `${xp}${lvUp ? ' & Level Up!' : ''}`;
+        const bonusEl = document.getElementById("bonusLootLine");
+        if (bonusEl) {
+            if (typeof bonusLoot !== "undefined" && bonusLoot.length > 0) {
+                bonusEl.textContent = bonusLoot.join("  ");
+                bonusEl.classList.remove("hidden");
+            } else {
+                bonusEl.textContent = "";
+                bonusEl.classList.add("hidden");
+            }
+        }
+
+        const grid = document.getElementById("rewardButtons");
+        grid.innerHTML = "";
+        const isFullSlots = battleState.player.moves.length >= 4;
+
+        [
+            {
+                t: `포인트 +${pt} P`,
+                d: "가챠 재화",
+                f: () => {
+                    addPoints(pt);      // ✅ 여기서만 포인트 지급
+                    nextStage();
+                },
+            },
+            {
+                t: "완전 회복",
+                d: "HP 100%",
+                f: () => {
+                    battleState.player.hp = battleState.player.maxHp;
+                    nextStage();
+                },
+            },
+            {
+                t: "기술 머신",
+                d: isFullSlots ? "스킬 1개 교체" : "스킬 추가 습득",
+                f: () => {
+                    if (isFullSlots) showSkillReplaceUI();
+                    else addNewSkill();
+                },
+            },
+        ].forEach((r) => {
+            const btn = document.createElement("button");
+            btn.className =
+                "w-full py-3 bg-slate-100 hover:bg-indigo-50 border rounded-xl flex justify-between px-4 items-center";
+            btn.innerHTML = `<span class="font-bold text-sm">${r.t}</span><span class="text-xs text-slate-500">${r.d}</span>`;
+            btn.onclick = () => {
+                if (r.t !== "기술 머신") {
+                    document.getElementById("rewardModal").classList.add("hidden");
+                }
+                r.f();
+            };
+            grid.appendChild(btn);
+        });
+
+        document.getElementById("rewardModal").classList.remove("hidden");
+    }
+
+
+
+    function addNewSkill() {
+        const newMove = getRandomMoves(battleState.player.type, 1)[0];
+        battleState.player.moves.push(newMove);
+        battleState.cooldowns.push(0);
+        document.getElementById("rewardModal").classList.add("hidden");
+        alert(`[${newMove.n}] 기술을 새로 배웠습니다!`);
+        nextStage();
+    }
+
+    function showSkillReplaceUI() {
+        document.getElementById("rewardTitle").textContent = "교체할 스킬을 선택하세요";
+        const grid = document.getElementById("rewardButtons"); grid.innerHTML = "";
+        battleState.player.moves.forEach((m, idx) => {
+            const btn = document.createElement("button");
+            let cls = "bg-white border-slate-200";
+            if(m.t === "UR") cls = "bg-red-50 border-red-300"; else if(m.t === "SSR") cls = "bg-orange-50 border-orange-300"; else if(m.t === "SR") cls = "bg-yellow-50 border-yellow-300"; else if(m.t === "R") cls = "bg-blue-50 border-blue-200";
+            btn.className = `w-full py-2 ${cls} border rounded-xl hover:brightness-95 flex flex-col items-center`;
+            btn.innerHTML = `<span class="font-bold text-sm">${m.n}</span><span class="text-[9px]">${m.t} / 쿨타임 ${m.c}</span>`;
+            btn.onclick = () => {
+                const newMove = getRandomMoves(battleState.player.type, 1)[0];
+                battleState.player.moves[idx] = newMove;
+                battleState.cooldowns[idx] = 0;
+                document.getElementById("rewardModal").classList.add("hidden");
+                alert(`[${newMove.n}] 습득 완료!`);
+                nextStage();
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function nextStage() { battleState.stage++; startBattleStage(); }
+    function handleDefeat() {
+        if (battleState.mode === "ghost") {
+            alert(
+                `패배... 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 졌습니다.\n` +
+                `다시 도전해 보세요!`
+            );
+        } else {
+            addHoF({
+                kind: "adventure",
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                speciesId: battleState.player.id,
+                level: battleState.player.level,
+                stage: battleState.stage,
+                date: new Date().toLocaleDateString(),
+            });
+
+            alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
+        }
+
+        document.getElementById("battleScreen").classList.remove("active");
+        document.getElementById("lobbyScreen").classList.add("active");
+        updateResUI();
+    }
+
+
+
+    function openQuiz(cb) {
+        quizCallback = cb;
+        const qData = generateMath();
+        document.getElementById("quizQuestion").textContent = qData.q;
+        const grid = document.getElementById("quizChoices"); grid.innerHTML = "";
+        qData.choices.forEach(c => {
+            const btn = document.createElement("button");
+            btn.className = "bg-slate-100 hover:bg-sky-100 border-2 border-slate-200 font-bold py-4 rounded-xl text-lg";
+            btn.textContent = c;
+            btn.onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(c===qData.a); };
+            grid.appendChild(btn);
+        });
+        document.getElementById("quizModal").classList.remove("hidden");
+    }
+
+    function generateMath() {
+        // 첫 번째 숫자 (단)는 3~9 (2단 제외)
+        // Math.random() * 7 은 0.0 ~ 6.99... 이므로, + 3 하면 3.0 ~ 9.99...
+        const n1 = Math.floor(Math.random() * 7) + 3;
+
+        // 두 번째 숫자 (곱해지는 수)는 1~9
+        // Math.random() * 9 는 0.0 ~ 8.99... 이므로, + 1 하면 1.0 ~ 9.99...
+        const n2 = Math.floor(Math.random() * 9) + 1;
+
+        const a = n1 * n2;
+        const q = `${n1} × ${n2} = ?`;
+
+        // 정답을 포함한 4개의 선택지 생성
+        const s = new Set([a]);
+        while (s.size < 4) {
+            // 정답 근처의 오답 생성 (-4 ~ +4 범위에서 0 제외)
+            let offset;
+            do {
+                // Math.floor(Math.random() * 9) - 4 는 -4부터 4까지의 정수를 생성
+                offset = Math.floor(Math.random() * 9) - 4;
+            } while (offset === 0);
+
+            let f = a + offset;
+
+            // 정답이 아니며, 결과가 0보다 큰 경우만 선택지로 추가
+            if (f > 0 && f !== a) {
+                s.add(f);
+            }
+        }
+
+        // 무작위로 섞인 선택지 반환
+        return {
+            q,
+            a,
+            choices: Array.from(s).sort(() => Math.random() - 0.5)
+        };
+    }
+
+    function playGacha(type) {
+        let count = 1;
+        if (type === '10x') { type = 'normal'; count = 10; }
+
+        const costPer = type==='normal' ? 100 : 1;
+        const totalCost = count === 10 ? 900 : costPer * count;
+        const cur = type==='normal' ? getPoints() : getTickets();
+
+        if(cur < totalCost){ alert("재화 부족!"); return; }
+        if(type==='normal') setPoints(getPoints()-totalCost); else setTickets(getTickets()-totalCost);
+
+        document.getElementById("gachaPlaceholder").classList.add("hidden");
+        const grid = document.getElementById("gachaResultsGrid"); grid.classList.remove("hidden"); grid.innerHTML="";
+
+        const owned = getOwned();
+        const dupes = getDupes();
+
+        for(let i=0; i<count; i++) {
+            let pid;
+            if(type==='special') pid = Math.random()<0.5 ? LEGENDARY_IDS[Math.floor(Math.random()*LEGENDARY_IDS.length)] : Math.floor(Math.random() * BASE_DEX_MAX) + 1;
+            else { do { pid = Math.floor(Math.random() * BASE_DEX_MAX) + 1; } while(LEGENDARY_IDS.includes(pid)); }
+            if (pid > BASE_DEX_MAX) pid = BASE_DEX_MAX;
+
+            const info = getPokeInfo(pid);
+            if (owned.has(pid)) { dupes[pid] = (dupes[pid] || 0) + 1; saveDupes(dupes); }
+            else { owned.add(pid); saveOwned(owned); }
+
+            const div = document.createElement("div");
+            div.className = `flex flex-col items-center p-2 rounded-xl animate-[bounce_0.5s] ${info.rarity==='UR'?'bg-red-100 border border-red-400': info.rarity==='SSR'?'bg-orange-100 border-orange-400' : 'bg-slate-700'}`;
+            div.innerHTML = `<img src="${info.sprite}" class="w-8 h-8 pixel-art"><div class="text-[8px] font-bold ${['UR','SSR','SR'].includes(info.rarity)?'text-black':'text-white'} truncate w-full text-center">${info.name}</div>`;
+            grid.appendChild(div);
+        }
+        updateResUI(); renderCodex();
+    }
+
+    function showAlert(t,b){ alert(`${t}\n${b}`); }
+
+    window.onload = () => {
+        tryImportFromIndex();
+        updateResUI();
+        updateLobbyPartner();
+
+        document.getElementById("startButton").onclick = () => { document.getElementById("titleScreen").classList.remove("active"); document.getElementById("lobbyScreen").classList.add("active"); };
+        document.getElementById("lobbyCodexBtn").onclick = () => { renderCodex(); document.getElementById("lobbyScreen").classList.remove("active"); document.getElementById("codexScreen").classList.add("active"); };
+        document.getElementById("codexToLobbyBtn").onclick = () => { document.getElementById("codexScreen").classList.remove("active"); document.getElementById("lobbyScreen").classList.add("active"); };
+
+        document.getElementById("lobbyGachaBtn").onclick = () => document.getElementById("gachaModal").classList.remove("hidden");
+        document.getElementById("gachaClose").onclick = () => document.getElementById("gachaModal").classList.add("hidden");
+
+        document.getElementById("gacha1Btn").onclick = () => playGacha('normal');
+        document.getElementById("gacha10Btn").onclick = () => playGacha('10x');
+        document.getElementById("gachaSpecialBtn").onclick = () => playGacha('special');
+
+        document.getElementById("startAdventureBtn").onclick = initAdventure;
+        document.getElementById("battleBackBtn").onclick = () => { if(confirm("포기하시겠습니까?")) handleDefeat(); };
+        document.getElementById("quizCancel").onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(false); };
+        document.getElementById("lobbyHofBtn").onclick = () => { renderHoF(); document.getElementById("hofModal").classList.remove("hidden"); };
+        document.getElementById("hofClose").onclick = () => document.getElementById("hofModal").classList.add("hidden");
+
+        // 👻 고스트 배틀 버튼
+        const ghostBtn = document.getElementById("lobbyGhostBtn");
+        if (ghostBtn) {
+            ghostBtn.onclick = () => openGhostModal();
+        }
+
+        const ghostClose = document.getElementById("ghostClose");
+        if (ghostClose) {
+            ghostClose.onclick = () => closeGhostModal();
+        }
+
+        const ghostTabMyBtn = document.getElementById("ghostTabMyBtn");
+        const ghostTabScanBtn = document.getElementById("ghostTabScanBtn");
+        if (ghostTabMyBtn) ghostTabMyBtn.onclick = () => switchGhostTab("my");
+        if (ghostTabScanBtn) ghostTabScanBtn.onclick = () => switchGhostTab("scan");
+
+        const ghostScanStartBtn = document.getElementById("ghostScanStartBtn");
+        const ghostScanStopBtn = document.getElementById("ghostScanStopBtn");
+        if (ghostScanStartBtn) ghostScanStartBtn.onclick = () => startGhostScan();
+        if (ghostScanStopBtn) ghostScanStopBtn.onclick = () => stopGhostScan();
+
+        const urlGhost = parseGhostFromData(window.location.href);
+        if (urlGhost) {
+            // 일단 전역에 보관해 두고, 스타터를 고른 순간 물어보도록 함
+            window.__pendingGhost = urlGhost;
+            alert(
+                "고스트 배틀 초대 링크입니다!\n" +
+                "먼저 스타터를 선택하면, 바로 이 고스트에게 도전할 수 있어요."
+            );
+        }
+    };
+
+    // [추가됨] 클립보드에서 토큰 읽어서 데이터 병합
+    async function importFromClipboard() {
+        try {
+            // 클립보드 읽기 권한 요청 및 텍스트 가져오기
+            const text = await navigator.clipboard.readText();
+
+            if (!text) {
+                alert("클립보드가 비어있습니다. index 게임에서 '내보내기'를 먼저 해주세요.");
+                return;
+            }
+
+            // 기존 Base64 디코딩 로직 활용
+            const raw = _b64UrlDecodeUtf8(text);
+            if (!raw) {
+                alert("올바르지 않은 데이터 형식입니다.\n(Base64 디코딩 실패)");
+                return;
+            }
+
+            let payload;
+            try {
+                payload = JSON.parse(raw);
+            } catch (e) {
+                alert("데이터가 손상되었습니다.\n(JSON 파싱 실패)");
+                return;
+            }
+
+            // 데이터 검증 (index에서 온 데이터인지 확인)
+            if (payload.source !== "index" || !Array.isArray(payload.dexIds)) {
+                alert("유효한 포켓몬 데이터가 아닙니다.");
+                return;
+            }
+
+            // 병합 로직 (기존 tryImportFromIndex 로직 재사용)
+            const BASE_DEX_MAX = 251;
+            const owned = getOwned();
+            let added = 0;
+
+            for (const v of payload.dexIds) {
+                const pid = parseInt(v, 10);
+                if (!Number.isFinite(pid) || pid < 1 || pid > BASE_DEX_MAX) continue;
+                if (!owned.has(pid)) {
+                    owned.add(pid);
+                    added++;
+                }
+            }
+
+            if (added > 0) {
+                saveOwned(owned);
+                updateResUI();
+                renderCodex(); // 도감 UI 갱신
+            }
+
+            // 파트너 설정 (선택사항)
+            const partnerId = parseInt(payload.partnerId, 10);
+            if (Number.isFinite(partnerId) && partnerId <= BASE_DEX_MAX) {
+                if(confirm(`${added}마리 포켓몬을 가져왔습니다!\n\n파트너 포켓몬(${getPokeInfo(partnerId).name})도 설정하시겠습니까?`)) {
+                    setStarterId(partnerId);
+                }
+            } else {
+                alert(`${added}마리의 포켓몬을 성공적으로 가져왔습니다!`);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("클립보드 접근이 차단되었거나 오류가 발생했습니다.\n브라우저 권한을 확인해주세요.");
+        }
+    }
+    
+</script>
+<!-- 👻 고스트 배틀 QR 모달 -->
+<div id="ghostModal"
+     class="fixed inset-0 z-40 hidden items-center justify-center bg-black/60">
+    <div class="bg-slate-900 text-slate-100 rounded-xl shadow-xl w-full max-w-md mx-4 p-4 relative">
+        <!-- 닫기 버튼 -->
+        <button type="button"
+                onclick="closeGhostModal()"
+                class="absolute right-3 top-3 text-slate-400 hover:text-white text-xl">
+            ✕
+        </button>
+
+        <h2 class="text-lg font-bold mb-3">👻 고스트 배틀</h2>
+
+        <!-- 탭 버튼 -->
+        <div class="flex gap-2 mb-3">
+            <button id="ghostTabMy"
+                    type="button"
+                    class="flex-1 py-1.5 text-sm rounded-md bg-indigo-600 text-white"
+                    onclick="switchGhostTab('my')">
+                내 고스트 QR
+            </button>
+            <button id="ghostTabFriends"
+                    type="button"
+                    class="flex-1 py-1.5 text-sm rounded-md bg-slate-700 text-slate-200"
+                    onclick="switchGhostTab('friends')">
+                친구 고스트 목록
+            </button>
+        </div>
+
+        <!-- 내 고스트 탭 -->
+        <div id="ghostMyPane" class="space-y-3">
+            <p id="ghostMySummary" class="text-xs text-slate-300">
+                내 고스트 QR 정보를 불러오는 중입니다...
+            </p>
+            <div class="flex justify-center">
+                <!-- ⬇⬇ 이 캔버스를 JS에서 찾고 있어 ⬇⬇ -->
+                <canvas id="ghostQrCanvas"
+                        class="border border-slate-700 rounded-lg bg-white"
+                        width="220" height="220">
+                </canvas>
+            </div>
+        </div>
+
+        <!-- 친구 고스트 탭 -->
+        <div id="ghostFriendsPane" class="hidden">
+            <p class="text-xs text-slate-300 mb-2">
+                (예정) 친구가 공유한 고스트와 대전할 수 있습니다.
+            </p>
+            <ul id="ghostFriendsList" class="space-y-1 text-sm">
+                <li class="text-slate-400">아직 등록된 친구 고스트가 없습니다.</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
