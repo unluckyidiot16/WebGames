@@ -1,0 +1,868 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ImmuneChain: 백혈구 vs 바이러스</title>
+    <link rel="stylesheet" href="./tailwind.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        body { font-family: 'Noto Sans KR', sans-serif; overflow: hidden; user-select: none; }
+        .font-jua { font-family: 'Jua', sans-serif; }
+
+        canvas { display: block; touch-action: none; }
+
+        /* Custom Scrollbar for Pokedex */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; }
+        ::-webkit-scrollbar-thumb { background: #888; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+
+        .game-overlay { pointer-events: none; }
+        .interactive { pointer-events: auto; }
+
+        /* Animation for Evolution/Death */
+        @keyframes popIn {
+            0% { transform: scale(0); opacity: 0; }
+            80% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pop-in { animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+        }
+        .animate-pulse-red { animation: pulse-red 2s infinite; }
+
+        /* Pokedex Styles */
+        .grayscale-filter { filter: grayscale(100%) contrast(1.2); opacity: 0.7; }
+    </style>
+</head>
+<body class="bg-slate-900 text-white w-full h-full fixed">
+
+<!-- Canvas Layer -->
+<canvas id="gameCanvas" class="absolute top-0 left-0 w-full h-full"></canvas>
+
+<!-- UI Layer (In-Game) -->
+<div id="uiLayer" class="absolute top-0 left-0 w-full h-full game-overlay flex flex-col justify-between p-4 z-10 hidden">
+
+    <!-- Top HUD: Energy & Evolution -->
+    <div class="flex justify-between items-start w-full">
+        <div class="flex flex-col gap-2 w-1/3 min-w-[150px]">
+            <div class="bg-black/60 p-2 rounded-lg border-2 border-slate-600 backdrop-blur-sm">
+                <div class="flex justify-between text-xs text-gray-300 mb-1">
+                    <span id="currentSpeciesName" class="font-jua text-lg text-yellow-400 drop-shadow">종 이름</span>
+                    <span id="tierLabel" class="text-xs bg-blue-600 px-2 py-0.5 rounded-full font-bold shadow">T0</span>
+                </div>
+                <!-- Energy Bar -->
+                <div class="w-full h-4 bg-gray-700 rounded-full overflow-hidden relative border border-gray-600">
+                    <div id="energyBar" class="h-full bg-gradient-to-r from-green-400 to-emerald-600 transition-all duration-300 shadow-[0_0_10px_rgba(74,222,128,0.5)]" style="width: 0%"></div>
+                    <p class="absolute inset-0 text-center text-[10px] leading-4 font-bold drop-shadow-md text-white mix-blend-screen">면역 에너지</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Food Chain Indicator (Right Top) -->
+        <div class="bg-black/60 p-3 rounded-xl border border-slate-500 backdrop-blur-md interactive max-w-md hidden sm:block">
+            <h3 class="text-xs text-center text-gray-400 mb-2 font-bold">백혈구 성장 단계</h3>
+            <div class="flex items-center justify-between gap-2 text-[10px]">
+                <div id="hud-t0" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
+                        <img src="./png/cell0.png" class="w-full h-full object-contain" alt="cell0">
+                    </div>
+                    <span>Lv0</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <div id="hud-t1" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
+                        <img src="./png/cell1.png" class="w-full h-full object-contain" alt="cell1">
+                    </div>
+                    <span>Lv1</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <div id="hud-t2" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
+                        <img src="./png/cell2.png" class="w-full h-full object-contain" alt="cell2">
+                    </div>
+                    <span>Lv2</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <div id="hud-t3" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
+                        <img src="./png/cell3.png" class="w-full h-full object-contain" alt="cell3">
+                    </div>
+                    <span>Lv3</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <div id="hud-t4" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
+                        <img src="./png/cell4.png" class="w-full h-full object-contain" alt="cell4">
+                    </div>
+                    <span>Lv4</span>
+                </div>
+                <span class="text-gray-500">➜</span>
+                <div id="hud-t5" class="flex flex-col items-center opacity-50 transition-all p-1 rounded">
+                    <div class="w-9 h-9 rounded-full bg-slate-100 border-2 border-slate-400 mb-1 flex items-center justify-center overflow-hidden">
+                        <img src="./png/cell5.png" class="w-full h-full object-contain" alt="cell5">
+                    </div>
+                    <span>Lv5</span>
+                </div>
+            </div>
+        </div>
+
+
+    <!-- Bottom Controls/Info -->
+    <div class="flex justify-end items-end w-full">
+        <div class="text-right opacity-70 text-xs bg-black/30 p-2 rounded text-white">
+            <p>Move: 마우스 / 터치 드래그</p>
+            <!-- Removed Dash info -->
+        </div>
+    </div>
+</div>
+
+<!-- Start Screen Modal (Main Lobby) -->
+<div id="startScreen" class="absolute inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 interactive backdrop-blur-sm bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiZmZmYiLz48L3N2Zz4')]">
+    <h1 class="text-6xl font-jua text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-600 mb-2 drop-shadow-lg">ImmuneChain</h1>
+    <p class="text-xl text-gray-400 mb-8 font-light tracking-widest">몸 속 면역 로그라이크</p>
+
+    <div class="flex flex-col gap-4 w-full max-w-xs">
+        <button id="startBtn" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-bold py-4 px-8 rounded-xl text-xl shadow-[0_0_20px_rgba(37,99,235,0.4)] transform transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2">
+            <span>▶</span> 몸 속으로 들어가기
+        </button>
+
+        <button id="lobbyPokedexBtn" class="bg-slate-700 hover:bg-slate-600 border border-slate-500 text-white font-bold py-3 px-8 rounded-xl text-lg shadow-lg transform transition hover:scale-105 active:scale-95 flex items-center justify-center gap-2 relative">
+            <span>📖</span> 면역 도감
+            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold rounded-full w-5 h-5 flex items-center justify-center hidden animate-bounce" id="newPokedexBadge">N</span>
+        </button>
+    </div>
+
+    <div class="mt-8 text-sm text-gray-500 bg-black/20 p-4 rounded-lg text-center">
+        <p>🧫 당신은 <b class="text-sky-300">백혈구</b>예요. 바이러스를 잡아먹어 <b class="text-emerald-300">면역 에너지</b>를 모으세요.</p>
+        <p>🦠 <b class="text-red-300">나보다 큰 바이러스</b>는 피해야 해요. 가까이 오면 위험해요!</p>
+        <p class="mt-2 text-yellow-400">⭐ 같은 Lv라도 <b>크기가 더 크면</b> 이길 수 있어요.</p>
+        <p class="mt-2 text-[12px] text-gray-400">※ 이 게임은 이해를 돕기 위해 <b>아주 간단하게</b> 만든 모델이에요.</p>
+    </div>
+</div>
+
+<!-- Event Overlay (Death / Clear) -->
+<div id="eventOverlay" class="absolute inset-0 bg-black/85 flex flex-col items-center justify-center z-40 hidden interactive p-8 text-center backdrop-blur-sm">
+    <div id="eventContent" class="bg-slate-800 p-8 rounded-2xl border-4 border-slate-600 max-w-lg w-full shadow-2xl pop-in relative overflow-hidden">
+        <!-- Background Decoration -->
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent to-black/50 pointer-events-none"></div>
+
+        <h2 id="eventTitle" class="text-4xl font-jua mb-6 text-red-500 relative z-10 drop-shadow-md">감염되었습니다!</h2>
+
+        <div id="eventIcons" class="flex justify-center items-center gap-6 mb-8 relative z-10">
+            <!-- Player Icon -->
+            <div class="flex flex-col items-center opacity-60 scale-90">
+                <div id="eventPlayerImg" class="w-16 h-16 bg-gray-600 rounded-full mb-2 bg-cover bg-center border-2 border-gray-400 shadow-lg"></div>
+                <span class="text-sm text-gray-300">나</span>
+            </div>
+            <span id="eventActionIcon" class="text-3xl text-red-500 font-bold animate-pulse">🦠</span>
+            <!-- Killer Icon -->
+            <div class="flex flex-col items-center scale-110">
+                <div id="eventKillerImg" class="w-24 h-24 bg-red-600 rounded-full mb-2 bg-cover bg-center border-4 border-red-500 shadow-[0_0_30px_rgba(239,68,68,0.6)]"></div>
+                <span id="eventKillerName" class="text-lg font-bold text-red-400">바이러스</span>
+            </div>
+        </div>
+
+        <p id="eventDesc" class="text-lg text-gray-200 mb-8 bg-black/40 p-5 rounded-xl border border-white/10 relative z-10">
+            설명 텍스트가 들어갑니다.
+        </p>
+
+        <button id="toMainBtn" class="w-full bg-gray-600 hover:bg-gray-500 text-white font-bold py-4 px-6 rounded-xl text-xl transition shadow-lg hover:shadow-gray-500/30 relative z-10 flex items-center justify-center gap-2">
+            <span>🏠</span> 메인으로
+        </button>
+    </div>
+</div>
+
+<!-- Pokedex Modal -->
+<div id="pokedexModal" class="absolute inset-0 bg-slate-900/95 z-50 hidden interactive flex flex-col backdrop-blur-md">
+    <div class="p-6 border-b border-slate-700 flex justify-between items-center bg-slate-800 shadow-xl">
+        <div>
+            <h2 class="text-3xl font-jua text-yellow-400 mb-1">면역 도감</h2>
+            <p class="text-xs text-gray-400">성장한 백혈구와 발견한 바이러스가 기록됩니다.</p>
+        </div>
+        <button id="closePokedex" class="text-gray-400 hover:text-white text-4xl w-10 h-10 flex items-center justify-center hover:bg-white/10 rounded-full transition">&times;</button>
+    </div>
+    <div class="flex-1 overflow-y-auto p-4 sm:p-8 bg-[url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyMCIgaGVpZ2h0PSIyMCIgb3BhY2l0eT0iMC4wNSI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiZmZmYiLz48L3N2Zz4')]">
+        <div id="pokedexGrid" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 max-w-6xl mx-auto">
+            <!-- Cards injected via JS -->
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 1. Game Data & Configuration ---
+    const RESOURCES = [
+        { id: 'virus0', exp: 1, color: '#a7f3d0' }, // 아주 약한 바이러스 조각
+        { id: 'virus1', exp: 1, color: '#6ee7b7' },
+        { id: 'virus2', exp: 2, color: '#fde68a' }, // 보통 바이러스 조각
+        { id: 'virus3', exp: 2, color: '#fbbf24' },
+        { id: 'virus4', exp: 3, color: '#fdba74' }, // 강한 바이러스 조각
+        { id: 'virus5', exp: 3, color: '#fb7185' }
+    ];
+
+    // Species Database
+    const SPECIES_DB = {
+        // --- 내 편(플레이어): 백혈구 성장 단계 ---
+        'cell0': { id: 'cell0', name: '백혈구 (새싹)', tier: 0, type: 'immune', diet: '작은 바이러스', predators: '강한 바이러스', desc: '몸 속을 지키는 백혈구예요. 작은 바이러스를 잡아먹고 힘을 키워요.', color: '#93c5fd', scale: 0.85 },
+        'cell1': { id: 'cell1', name: '백혈구 (훈련)', tier: 1, type: 'immune', diet: '바이러스', predators: '강한 바이러스', desc: '조금 더 빠르고 튼튼해졌어요. 바이러스를 더 잘 잡아먹어요.', color: '#60a5fa', scale: 0.92 },
+        'cell2': { id: 'cell2', name: '백혈구 (전문)', tier: 2, type: 'immune', diet: '바이러스', predators: '강한 바이러스', desc: '몸 속 순찰을 더 잘해요. 바이러스가 가까이 오면 바로 달려가요.', color: '#38bdf8', scale: 0.98 },
+        'cell3': { id: 'cell3', name: '백혈구 (강화)', tier: 3, type: 'immune', diet: '강한 바이러스', predators: '아주 강한 바이러스', desc: '힘이 더 세졌어요. 큰 바이러스도 이길 수 있어요.', color: '#34d399', scale: 1.03 },
+        'cell4': { id: 'cell4', name: '백혈구 (엘리트)', tier: 4, type: 'immune', diet: '강한 바이러스', predators: '최강 바이러스', desc: '몸 속 방패 같은 존재예요. 위험한 바이러스도 겁내지 않아요!', color: '#22c55e', scale: 1.08 },
+        'cell5': { id: 'cell5', name: '백혈구 (최강)', tier: 5, type: 'immune', diet: '모든 바이러스', predators: '거의 없음', desc: '최강 백혈구! 아주 강한 바이러스도 잡아먹을 수 있어요.', color: '#a78bfa', scale: 1.12 },
+
+        // --- 상대(적): 바이러스 단계 ---
+        'virus0': { id: 'virus0', name: '바이러스 (약함)', tier: 0, type: 'virus', diet: '몸 속에 들어오기', predators: '백혈구', desc: '약한 바이러스예요. 그래도 많이 모이면 위험해요.', color: '#fda4af', scale: 0.75 },
+        'virus1': { id: 'virus1', name: '바이러스 (조심)', tier: 1, type: 'virus', diet: '몸 속에서 늘어나기', predators: '백혈구', desc: '조심해야 하는 바이러스예요. 가까이 오면 피하세요.', color: '#fb7185', scale: 0.85 },
+        'virus2': { id: 'virus2', name: '바이러스 (보통)', tier: 2, type: 'virus', diet: '빠르게 퍼지기', predators: '강한 백혈구', desc: '보통보다 센 바이러스예요. 몸을 아프게 할 수 있어요.', color: '#f59e0b', scale: 0.95 },
+        'virus3': { id: 'virus3', name: '바이러스 (강함)', tier: 3, type: 'virus', diet: '더 빠르게 퍼지기', predators: '강한 백혈구', desc: '강한 바이러스예요. 나보다 크면 절대 가까이 가지 마세요!', color: '#f97316', scale: 1.05 },
+        'virus4': { id: 'virus4', name: '바이러스 (위험)', tier: 4, type: 'virus', diet: '아주 빠르게 퍼지기', predators: '엘리트 백혈구', desc: '위험한 바이러스예요. 가까이 오면 쉽게 감염될 수 있어요.', color: '#ef4444', scale: 1.12 },
+        'virus5': { id: 'virus5', name: '바이러스 (최강)', tier: 5, type: 'virus', diet: '몸을 크게 아프게 하기', predators: '최강 백혈구', desc: '최강 바이러스예요. 아주 조심해야 해요!', color: '#dc2626', scale: 1.20 }
+    };
+
+    const PLAYER_TIER_GROUPS = {
+        0: ['cell0'],
+        1: ['cell1'],
+        2: ['cell2'],
+        3: ['cell3'],
+        4: ['cell4'],
+        5: ['cell5']
+    };
+
+    const VIRUS_TIER_GROUPS = {
+        0: ['virus0'],
+        1: ['virus1'],
+        2: ['virus2'],
+        3: ['virus3'],
+        4: ['virus4'],
+        5: ['virus5']
+    };
+
+    // --- 1. Game Data & Configuration --- 위쪽 어딘가에 추가
+    const IMAGE_BASE_PATH = './png/';   // 또는 'png/' 도 가능
+
+    // Assets Loader
+    const images = {};
+    const loadImages = () => {
+        // Resources
+        RESOURCES.forEach(r => {
+            const img = new Image();
+            img.src = `${IMAGE_BASE_PATH}${r.id}.png`;   // ✅ 수정
+            images[r.id] = img;
+        });
+        // Species
+        Object.values(SPECIES_DB).forEach(s => {
+            const img = new Image();
+            img.src = `${IMAGE_BASE_PATH}${s.id}.png`;   // ✅ 수정
+            images[s.id] = img;
+        });
+    };
+
+
+    // --- 2. Game State & Logic ---
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    let width, height;
+    const WORLD_SIZE = 3000;
+
+    let animationFrameId = null;
+    let lastTime = 0; // For Delta Time
+
+    let player = {
+        x: WORLD_SIZE/2, y: WORLD_SIZE/2,
+        baseRadius: 20,
+        radius: 20,
+        angle: 0,
+        speed: 0,
+        maxSpeed: 4,
+        tier: 0,
+        speciesId: 'cell0',
+        energy: 0,
+        maxEnergy: 50,
+        isDead: false
+    };
+
+    const mouse = { x: 0, y: 0, active: false };
+    // Removed isBoosting
+
+    let foods = [];
+    let enemies = [];
+    let particles = [];
+
+    let unlockedSpecies = [];
+    let seenSpecies = [];
+    let hasPlayedBefore = false;
+
+    try {
+        unlockedSpecies = JSON.parse(localStorage.getItem('immuneChain_unlocked')) || ['cell0'];
+        seenSpecies = JSON.parse(localStorage.getItem('immuneChain_seen')) || [];
+        hasPlayedBefore = localStorage.getItem('immuneChain_hasPlayed') === 'true';
+    } catch (e) {
+        console.error("Storage Error", e);
+        unlockedSpecies = ['cell0'];
+    }
+
+    let camX = 0, camY = 0;
+
+    function resize() {
+        width = canvas.width = window.innerWidth;
+        height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resize);
+    resize();
+
+    // --- 3. Core Functions ---
+
+    function initGame() {
+        loadImages();
+
+        document.getElementById('uiLayer').classList.remove('hidden');
+
+        setPlayerSpecies('cell0');
+
+        if (!hasPlayedBefore) {
+            localStorage.setItem('immuneChain_hasPlayed', 'true');
+        }
+
+        resetWorld();
+        startGameLoop();
+    }
+
+    function resetWorld() {
+        foods = [];
+        enemies = [];
+        player.x = Math.random() * WORLD_SIZE;
+        player.y = Math.random() * WORLD_SIZE;
+        player.energy = 0;
+        player.isDead = false;
+        player.tier = SPECIES_DB[player.speciesId].tier;
+        updateMaxEnergy();
+
+        for(let i=0; i<300; i++) spawnFood();
+        for(let i=0; i<35; i++) spawnEnemy();
+
+        updateHUD();
+    }
+
+    function setPlayerSpecies(id) {
+        player.speciesId = id;
+        const data = SPECIES_DB[id];
+        player.tier = data.tier;
+
+        // ✅ 초등 3학년용 간단 모델:
+        // "크기"는 실제 세포 크기가 아니라 "힘(면역 능력)"을 보기 쉽게 표시한 값이에요.
+        player.baseRadius = (18 + (data.tier * 7)) * (data.scale ?? 1);
+        if (player.tier === 0) player.baseRadius = 18 * (data.scale ?? 1);
+
+        player.radius = player.baseRadius;
+
+        // 레벨이 높을수록 조금 느려지는 느낌(무거워짐 표현)
+        player.maxSpeed = Math.max(2.8, 5.6 - (data.tier * 0.35));
+        if (player.tier === 0) player.maxSpeed = 5.8;
+
+        if(!unlockedSpecies.includes(id)) {
+            unlockedSpecies.push(id);
+            localStorage.setItem('immuneChain_unlocked', JSON.stringify(unlockedSpecies));
+            if(!seenSpecies.includes(id)) {
+                seenSpecies.push(id);
+                localStorage.setItem('immuneChain_seen', JSON.stringify(seenSpecies));
+            }
+            showBadge();
+        }
+        updateHUD();
+    }
+
+    function updateMaxEnergy() {
+        // Lv가 오를수록 다음 성장까지 필요한 면역 에너지가 늘어나요.
+        player.maxEnergy = 25 + (player.tier * 35);
+        if (player.tier === 0) player.maxEnergy = 25;
+        if (player.tier === 5) player.maxEnergy = 220;
+    }
+
+    function spawnFood() {
+        const r = Math.random();
+        let typeIdx = 0;
+        if (r > 0.9) typeIdx = Math.floor(Math.random() * 2) + 4;
+        else if (r > 0.7) typeIdx = Math.floor(Math.random() * 2) + 2;
+        else typeIdx = Math.floor(Math.random() * 2);
+
+        const res = RESOURCES[typeIdx];
+        foods.push({
+            x: Math.random() * WORLD_SIZE,
+            y: Math.random() * WORLD_SIZE,
+            id: res.id,
+            exp: res.exp,
+            color: res.color,
+            radius: 5 + (typeIdx * 1.5),
+            angle: Math.random() * Math.PI * 2
+        });
+    }
+
+    function spawnEnemy() {
+        let possibleTiers = [];
+        if (player.tier === 0) possibleTiers = [0, 0, 1];
+        else if (player.tier === 1) possibleTiers = [0, 1, 1, 2];
+        else if (player.tier === 2) possibleTiers = [1, 2, 2, 3];
+        else if (player.tier === 3) possibleTiers = [2, 3, 3, 4];
+        else if (player.tier === 4) possibleTiers = [3, 4, 4, 5];
+        else possibleTiers = [4, 5];
+
+        const t = possibleTiers[Math.floor(Math.random() * possibleTiers.length)];
+        const group = VIRUS_TIER_GROUPS[t];
+        const sId = group[Math.floor(Math.random() * group.length)];
+        const data = SPECIES_DB[sId];
+
+        const sizeVariance = 0.8 + Math.random() * 0.4;
+        let baseR = (18 + (t * 7)) * (data.scale ?? 1);
+        if (t === 0) baseR = 18 * (data.scale ?? 1);
+
+        enemies.push({
+            x: Math.random() * WORLD_SIZE,
+            y: Math.random() * WORLD_SIZE,
+            speciesId: sId,
+            tier: t,
+            baseRadius: baseR,
+            radius: baseR * sizeVariance,
+            speed: (Math.random() * 2) + 1 + (t === 0 ? 1 : 0),
+            vx: 0, vy: 0,
+            color: data.color
+        });
+    }
+
+    function evolve() {
+        if (player.tier >= 5) {
+            gameClear();
+            return;
+        }
+
+        const nextTier = player.tier + 1;
+        const candidates = PLAYER_TIER_GROUPS[nextTier];
+        const nextId = candidates[Math.floor(Math.random() * candidates.length)];
+
+        createExplosion(player.x, player.y, 30, '#ffffff');
+        setPlayerSpecies(nextId);
+        player.energy = 0;
+        updateMaxEnergy();
+    }
+
+    function createExplosion(x, y, count, color) {
+        for(let i=0; i<count; i++) {
+            particles.push({
+                x: x, y: y,
+                vx: (Math.random() - 0.5) * 12,
+                vy: (Math.random() - 0.5) * 12,
+                life: 1.0,
+                color: color
+            });
+        }
+    }
+
+    // --- 4. Game Loop (Delta Time) ---
+
+    function startGameLoop() {
+        if (animationFrameId) cancelAnimationFrame(animationFrameId);
+        lastTime = 0;
+        requestAnimationFrame(gameLoop);
+    }
+
+    function stopGameLoop() {
+        if (animationFrameId) {
+            cancelAnimationFrame(animationFrameId);
+            animationFrameId = null;
+        }
+    }
+
+    function gameLoop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const deltaTime = timestamp - lastTime;
+        lastTime = timestamp;
+
+        // Cap delta time to prevent physics explosion on lag/tab switch (max 100ms)
+        const safeDelta = Math.min(deltaTime, 100);
+
+        // Normalize to 60 FPS (approx 16.67ms per frame)
+        const timeScale = safeDelta / 16.67;
+
+        update(timeScale);
+        draw();
+        animationFrameId = requestAnimationFrame(gameLoop);
+    }
+
+    function update(timeScale) {
+        if (player.isDead) return;
+
+        // Growth
+        const growthFactor = 1 + (player.energy / player.maxEnergy) * 0.5;
+        player.radius = player.baseRadius * growthFactor;
+
+        // Movement
+        const dx = mouse.x - width/2;
+        const dy = mouse.y - height/2;
+        const angle = Math.atan2(dy, dx);
+        player.angle = angle;
+
+        let currentSpeed = player.maxSpeed;
+        // Removed Boosting Logic
+
+        player.x += Math.cos(angle) * currentSpeed * timeScale;
+        player.y += Math.sin(angle) * currentSpeed * timeScale;
+
+        player.x = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.x));
+        player.y = Math.max(player.radius, Math.min(WORLD_SIZE - player.radius, player.y));
+
+        camX = player.x - width / 2;
+        camY = player.y - height / 2;
+
+        // Foods
+        for (let i = foods.length - 1; i >= 0; i--) {
+            const f = foods[i];
+            // Apply timeScale to float animation drift
+            f.x += (Math.cos(Date.now()/500 + i)*0.2) * timeScale;
+
+            const dist = Math.hypot(player.x - f.x, player.y - f.y);
+            if (dist < player.radius + f.radius) {
+                player.energy += f.exp;
+                createExplosion(f.x, f.y, 3, f.color);
+                foods.splice(i, 1);
+                spawnFood();
+
+                if (player.energy >= player.maxEnergy) {
+                    evolve();
+                }
+            }
+        }
+
+        // Enemies
+        for (let i = enemies.length - 1; i >= 0; i--) {
+            const e = enemies[i];
+            const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
+
+            // AI Danger Logic (Threshold: 5% = 1.05)
+            if (distToPlayer < 400) {
+                const angleToP = Math.atan2(player.y - e.y, player.x - e.x);
+
+                let isPlayerDangerous = false;
+                let isPlayerEdible = false;
+
+                if (player.tier > e.tier) isPlayerDangerous = true;
+                else if (player.tier < e.tier) isPlayerEdible = true;
+                else {
+                    // Same Tier: 5% difference
+                    if (player.radius > e.radius * 1.05) isPlayerDangerous = true;
+                    else if (player.radius < e.radius / 1.05) isPlayerEdible = true;
+                }
+
+                let moveX = 0;
+                let moveY = 0;
+
+                if (isPlayerDangerous) {
+                    moveX = -Math.cos(angleToP) * e.speed;
+                    moveY = -Math.sin(angleToP) * e.speed;
+                } else if (isPlayerEdible) {
+                    moveX = Math.cos(angleToP) * e.speed;
+                    moveY = Math.sin(angleToP) * e.speed;
+                } else {
+                    // Random drift
+                    e.vx += (Math.random()-0.5) * 0.5 * timeScale;
+                    e.vy += (Math.random()-0.5) * 0.5 * timeScale;
+                    // Clamp velocity
+                    const maxV = 2;
+                    e.vx = Math.max(-maxV, Math.min(maxV, e.vx));
+                    e.vy = Math.max(-maxV, Math.min(maxV, e.vy));
+
+                    moveX = e.vx;
+                    moveY = e.vy;
+                }
+
+                e.x += moveX * timeScale;
+                e.y += moveY * timeScale;
+
+            } else {
+                // Wander logic
+                if (Math.random() < 0.05) {
+                    e.vx = (Math.random() - 0.5) * e.speed;
+                    e.vy = (Math.random() - 0.5) * e.speed;
+                }
+                e.x += e.vx * timeScale;
+                e.y += e.vy * timeScale;
+            }
+
+            e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
+            e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
+
+            // Collision Logic (Threshold 5%)
+            if (distToPlayer < player.radius + e.radius) {
+                let playerWins = false;
+                let enemyWins = false;
+
+                if (player.tier > e.tier) playerWins = true;
+                else if (player.tier < e.tier) enemyWins = true;
+                else {
+                    // Same Tier: Need 5% advantage
+                    if (player.radius > e.radius * 1.05) playerWins = true;
+                    else if (e.radius > player.radius * 1.05) enemyWins = true;
+                }
+
+                if (playerWins) {
+                    player.energy += 15 * (e.tier + 1);
+                    createExplosion(e.x, e.y, 10, e.color);
+                    enemies.splice(i, 1);
+                    spawnEnemy();
+                    if (player.energy >= player.maxEnergy) evolve();
+                } else if (enemyWins) {
+                    die(e);
+                } else {
+                    // Bump
+                    const angle = Math.atan2(player.y - e.y, player.x - e.x);
+                    const pushForce = 5 * timeScale;
+                    player.x += Math.cos(angle) * pushForce;
+                    player.y += Math.sin(angle) * pushForce;
+                    e.x -= Math.cos(angle) * pushForce;
+                    e.y -= Math.sin(angle) * pushForce;
+                }
+            }
+        }
+
+        if (enemies.length < 35) spawnEnemy();
+
+        for(let i=particles.length-1; i>=0; i--) {
+            let p = particles[i];
+            p.x += p.vx * timeScale;
+            p.y += p.vy * timeScale;
+            p.life -= 0.05 * timeScale;
+            if(p.life <= 0) particles.splice(i, 1);
+        }
+
+        // HUD
+        const p = Math.min((player.energy / player.maxEnergy) * 100, 100);
+        document.getElementById('energyBar').style.width = `${p}%`;
+        document.getElementById('currentSpeciesName').innerText = SPECIES_DB[player.speciesId].name;
+        document.getElementById('tierLabel').innerText = `Lv.${player.tier}`;
+    }
+
+    function draw() {
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(0, 0, width, height);
+
+        ctx.save();
+        ctx.translate(-camX, -camY);
+
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for(let x=0; x<=WORLD_SIZE; x+=100) { ctx.moveTo(x,0); ctx.lineTo(x, WORLD_SIZE); }
+        for(let y=0; y<=WORLD_SIZE; y+=100) { ctx.moveTo(0,y); ctx.lineTo(WORLD_SIZE, y); }
+        ctx.stroke();
+
+        foods.forEach(f => {
+            ctx.save();
+            ctx.translate(f.x, f.y);
+            const img = images[f.id];
+            if (img && img.complete && img.naturalHeight !== 0) {
+                ctx.drawImage(img, -f.radius, -f.radius, f.radius*2, f.radius*2);
+            } else {
+                ctx.fillStyle = f.color;
+                ctx.beginPath();
+                ctx.arc(0, 0, f.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.fillStyle = 'rgba(255,255,255,0.3)';
+                ctx.beginPath();
+                ctx.arc(-f.radius*0.3, -f.radius*0.3, f.radius*0.3, 0, Math.PI*2);
+                ctx.fill();
+            }
+            ctx.restore();
+        });
+
+        enemies.forEach(e => {
+            drawEntity(e, false);
+        });
+
+        if (!player.isDead) {
+            drawEntity(player, true);
+        }
+
+        particles.forEach(p => {
+            ctx.globalAlpha = p.life;
+            ctx.fillStyle = p.color;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+            ctx.fill();
+            ctx.globalAlpha = 1;
+        });
+
+        ctx.restore();
+    }
+
+    function drawEntity(entity, isPlayer) {
+        ctx.save();
+        ctx.translate(entity.x, entity.y);
+
+        const data = SPECIES_DB[entity.speciesId];
+        const img = images[entity.speciesId];
+        const r = entity.radius;
+
+        ctx.fillStyle = 'white';
+        ctx.font = '10px "Noto Sans KR"';
+        ctx.textAlign = 'center';
+        ctx.shadowColor="black";
+        ctx.shadowBlur=4;
+        ctx.fillText(data.name, 0, -r - 5);
+        ctx.shadowBlur=0;
+
+        if (img && img.complete && img.naturalHeight !== 0) {
+            ctx.drawImage(img, -r, -r, r*2, r*2);
+        } else {
+            ctx.fillStyle = data.color || '#ccc';
+            ctx.beginPath();
+            ctx.arc(0, 0, r, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(-r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
+            ctx.arc(r*0.3, -r*0.1, r*0.25, 0, Math.PI*2);
+            ctx.fill();
+            ctx.fillStyle = 'black';
+            ctx.beginPath();
+            ctx.arc(-r*0.3, -r*0.1, r*0.1, 0, Math.PI*2);
+            ctx.arc(r*0.3, -r*0.1, r*0.1, 0, Math.PI*2);
+            ctx.fill();
+        }
+
+        // Ring Logic
+        if (isPlayer) {
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.arc(0,0,r+2,0,Math.PI*2); ctx.stroke();
+        } else {
+            let isDangerous = false;
+            let isEdible = false;
+
+            if (player.tier > entity.tier) isEdible = true;
+            else if (player.tier < entity.tier) isDangerous = true;
+            else {
+                // Same Tier
+                if (player.radius > entity.radius * 1.05) isEdible = true;
+                else if (entity.radius > player.radius * 1.05) isDangerous = true;
+            }
+
+            if (isDangerous) {
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 3;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+                ctx.setLineDash([]);
+            } else if (isEdible) {
+                ctx.strokeStyle = '#4ade80';
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+            } else {
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 1;
+                ctx.beginPath(); ctx.arc(0,0,r+5,0,Math.PI*2); ctx.stroke();
+            }
+        }
+
+        ctx.restore();
+    }
+
+    // --- 5. UI & Interaction Logic ---
+
+    function updateHUD() {
+        ['hud-t0', 'hud-t1', 'hud-t2', 'hud-t3', 'hud-t4', 'hud-t5'].forEach(id => {
+            const el = document.getElementById(id);
+            if(el) {
+                el.style.opacity = '0.5';
+                el.classList.remove('scale-110');
+            }
+        });
+
+        const cur = document.getElementById(`hud-t${player.tier}`);
+        if(cur) {
+            cur.style.opacity = '1';
+            cur.classList.add('scale-110');
+        }
+    }
+
+    function die(killer) {
+        player.isDead = true;
+        const kData = SPECIES_DB[killer.speciesId];
+
+        if(!seenSpecies.includes(killer.speciesId)) {
+            seenSpecies.push(killer.speciesId);
+            localStorage.setItem('immuneChain_seen', JSON.stringify(seenSpecies));
+            showBadge();
+        }
+
+        document.getElementById('eventTitle').innerText = "감염되었습니다!";
+        document.getElementById('eventTitle').className = "text-4xl font-jua mb-6 text-red-400 relative z-10 drop-shadow-md";
+        document.getElementById('eventActionIcon').innerText = "🦠";
+        document.getElementById('eventKillerImg').parentElement.classList.remove('hidden');
+
+        setEventImage('eventPlayerImg', player.speciesId);
+        setEventImage('eventKillerImg', killer.speciesId);
+
+        document.getElementById('eventKillerName').innerText = kData.name;
+        document.getElementById('eventDesc').innerHTML =
+            `<span class="text-yellow-300 font-bold">${kData.name}</span> 설명:<br>"${kData.desc}"<br><br>` +
+            `<span class="text-sm text-gray-300">하는 일: ${kData.diet}</span>`;
+
+        document.getElementById('eventOverlay').classList.remove('hidden');
+        document.getElementById('eventOverlay').classList.add('flex');
+    }
+
+
+    function gameClear() {
+        player.isDead = true;
+        stopGameLoop();
+
+        document.getElementById('eventTitle').innerText = "면역 영웅!";
+        document.getElementById('eventTitle').className = "text-5xl font-jua mb-6 text-emerald-300 relative z-10 drop-shadow-md";
+
+        setEventImage('eventPlayerImg', player.speciesId);
+        document.getElementById('eventActionIcon').innerText = "🛡️";
+        document.getElementById('eventKillerImg').parentElement.classList.add('hidden');
+
+        document.getElementById('eventDesc').innerHTML =
+            `<span class="text-emerald-200 font-bold text-xl">Game Clear!</span><br><br>` +
+            `당신의 백혈구는 점점 강해져서<br>아주 강한 바이러스도 물리쳤어요!<br><br>` +
+            `<span class="text-sm text-gray-300">※ 실제 몸 속에서는 더 복잡하지만, 여기서는 쉽게 배워요.</span>`;
+
+        document.getElementById('eventOverlay').classList.remove('hidden');
+        document.getElementById('eventOverlay').classList.add('flex');
+    }
+
+
+    document.getElementById('startBtn').addEventListener('click', () => {
+        document.getElementById('startScreen').classList.add('hidden');
+        initGame();
+    });
+
+    document.getElementById('toMainBtn').addEventListener('click', () => {
+        document.getElementById('eventOverlay').classList.add('hidden');
+        document.getElementById('eventOverlay').classList.remove('flex');
+        stopGameLoop();
+        document.getElementById('uiLayer').classList.add('hidden');
+        document.getElementById('startScreen').classList.remove('hidden');
+    });
+
+    document.getElementById('lobbyPokedexBtn').addEventListener('click', () => {
+        renderPokedex();
+        document.getElementById('pokedexModal').classList.remove('hidden');
+        document.getElementById('newPokedexBadge').classList.add('hidden');
+    });
+
+    document.getElementById('closePokedex').addEventListener('click', () => {
+        document.getElementById('pokedexModal').classList.add('hidden');
+    });
+
+    loadImages();
+
+</script>
+</body>
+</html>
