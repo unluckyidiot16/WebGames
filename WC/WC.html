@@ -235,7 +235,7 @@
     // Assets Loader
     const images = {};
     const loadImages = () => {
-        // 중복 로딩 방지: 이미 로딩되었으면 다시 실행 안 함
+        // 중복 로딩 방지
         if (Object.keys(images).length > 0) return;
 
         // Resources
@@ -349,9 +349,6 @@
     // --- 3. Core Functions ---
 
     function initGame() {
-        // 이미지는 initGame 바깥이나 최초 1회만 로딩
-        // loadImages(); -> 중복 호출 방지를 위해 loadImages 내부에서 처리하거나 제거
-
         mouse.x = width / 2;
         mouse.y = height / 2;
         mouse.active = false;
@@ -512,7 +509,6 @@
         const deltaTime = timestamp - lastTime;
         lastTime = timestamp;
 
-        // Cap delta time to prevent physics explosion
         const safeDelta = Math.min(deltaTime, 100);
         const timeScale = safeDelta / 16.67;
 
@@ -522,7 +518,6 @@
     }
 
     function update(timeScale) {
-        // 플레이어가 죽어도 배경(적, 파티클)은 계속 움직이도록 수정 (UX 개선)
         const isDead = player.isDead;
 
         if (!isDead) {
@@ -566,7 +561,7 @@
             }
         }
 
-        // Enemies (항상 움직임)
+        // Enemies
         for (let i = enemies.length - 1; i >= 0; i--) {
             const e = enemies[i];
             const distToPlayer = Math.hypot(player.x - e.x, player.y - e.y);
@@ -602,7 +597,6 @@
                 e.x += moveX * timeScale;
                 e.y += moveY * timeScale;
             } else {
-                // Wander or Idle
                 if (Math.random() < 0.05) {
                     e.vx = (Math.random() - 0.5) * e.speed;
                     e.vy = (Math.random() - 0.5) * e.speed;
@@ -614,7 +608,7 @@
             e.x = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.x));
             e.y = Math.max(e.radius, Math.min(WORLD_SIZE - e.radius, e.y));
 
-            // Collision (플레이어 생존 시에만)
+            // Collision
             if (!isDead && distToPlayer < player.radius + e.radius) {
                 let playerWins = false;
                 let enemyWins = false;
@@ -818,7 +812,6 @@
 
     function gameClear() {
         player.isDead = true;
-        // stopGameLoop(); // Keep loop running for particles
 
         document.getElementById('eventTitle').innerText = "면역 영웅!";
         document.getElementById('eventTitle').className = "text-5xl font-jua mb-6 text-emerald-300 relative z-10 drop-shadow-md";
@@ -836,6 +829,7 @@
         document.getElementById('eventOverlay').classList.add('flex');
     }
 
+    // --- 추가된 필수 함수 ---
     function setEventImage(elementId, speciesId) {
         const el = document.getElementById(elementId);
         const img = images[speciesId];
@@ -852,13 +846,10 @@
         document.getElementById('newPokedexBadge').classList.remove('hidden');
     }
 
-    // --- Missing Functions Implementation ---
-
     function renderPokedex() {
         const grid = document.getElementById('pokedexGrid');
         grid.innerHTML = '';
 
-        // All species: cells then viruses
         const allKeys = Object.keys(SPECIES_DB);
 
         allKeys.forEach(key => {
@@ -876,7 +867,6 @@
             if (isKnown) {
                 imgHtml = `<img src="${imgSrc}" class="w-full h-full object-contain ${!isUnlocked && isSeen ? 'grayscale-filter' : ''}" onerror="this.style.display='none'">`;
             } else {
-                // Unknown (Silhouette)
                 imgHtml = `<img src="${imgSrc}" class="w-full h-full object-contain unknown-species" onerror="this.style.display='none'">`;
             }
 
@@ -919,7 +909,6 @@
         document.getElementById('pokedexModal').classList.add('hidden');
     });
 
-    // Start Loading Immediately
     loadImages();
 
 </script>
