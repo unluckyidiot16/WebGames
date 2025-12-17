@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>QuizMon: Ver 8.0 (DB 연동)</title>
+    <title>QuizMon: Ver 8.1 (1025 포켓몬)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
@@ -54,7 +54,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter relative z-10">
             <span class="text-red-500">Quiz</span>Mon
         </h1>
-        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 8.0 (DB 연동 + 진화)</div>
+        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 8.1 (1025 포켓몬 + 기본형 뽑기)</div>
     </div>
     <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center border-4 border-slate-800">
         <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png" class="w-24 h-24 mx-auto pixel-art animate-bounce" alt="Ho-oh">
@@ -149,7 +149,12 @@
     <div class="w-full max-w-3xl flex flex-col h-full">
         <div class="flex-none p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10">
             <h2 class="text-xl font-bold text-slate-800">도감 <span class="text-xs font-normal text-slate-400" id="collectionRate">0/--</span></h2>
-            <button id="codexToLobbyBtn" class="text-xs font-bold px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200">나가기</button>
+            <div class="flex items-center gap-2">
+                <button id="codexPrevBtn" class="text-xs font-bold px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-50">◀</button>
+                <span id="codexPageInfo" class="text-xs text-slate-500">1/11</span>
+                <button id="codexNextBtn" class="text-xs font-bold px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-50">▶</button>
+                <button id="codexToLobbyBtn" class="text-xs font-bold px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 ml-2">나가기</button>
+            </div>
         </div>
         <div class="flex-none p-4 bg-white border-t border-slate-200 order-last flex gap-3 items-center">
             <div class="flex-1"><div class="text-xs text-slate-400">선택됨</div><div id="partnerInfo" class="font-bold text-slate-800 text-sm truncate">없음</div></div>
@@ -339,9 +344,44 @@
     // 퀴즈 데이터
     let externalQuizList = [];
 
-    const BASE_DEX_MAX = 251;
-    const LEGENDARY_IDS = [144,145,146,150,243,244,245,249,250];
-    const MYTHICAL_IDS = [151, 251];
+    const BASE_DEX_MAX = 1025;  // 전체 포켓몬 지원
+    
+    // 전설 포켓몬 (Gen1~9)
+    const LEGENDARY_IDS = [
+        // Gen1
+        144, 145, 146, 150,
+        // Gen2
+        243, 244, 245, 249, 250,
+        // Gen3
+        377, 378, 379, 380, 381, 382, 383, 384, 386,
+        // Gen4
+        480, 481, 482, 483, 484, 485, 486, 487, 488,
+        // Gen5
+        638, 639, 640, 641, 642, 643, 644, 645, 646,
+        // Gen6
+        716, 717, 718,
+        // Gen7
+        785, 786, 787, 788, 791, 792, 800,
+        // Gen8
+        888, 889, 890, 891, 892, 894, 895, 896, 897, 898,
+        // Gen9
+        1001, 1002, 1003, 1004, 1007, 1008, 1014, 1015, 1016, 1017, 1020, 1021, 1022, 1023, 1024
+    ];
+    
+    // 환상 포켓몬 (Mythical)
+    const MYTHICAL_IDS = [
+        151,  // 뮤
+        251,  // 세레비
+        385,  // 지라치
+        489, 490,  // 필로네/마나피
+        491, 492, 493,  // 다크라이/셰이미/아르세우스
+        494,  // 비크티니
+        647, 648, 649,  // 케르디오/메로엣타/게노세크트
+        719, 720, 721,  // 디안시/후파/볼케니온
+        801, 802, 807, 808, 809,  // 마기아나/마샤도/제라오라/멜탄/멜메탈
+        893,  // 자루도
+        1025  // 복숭악동
+    ];
     
     const TIER_CONFIG = {
         "C":   { targetBst: 300, bonus: 0 },
@@ -351,17 +391,18 @@
         "UR":  { targetBst: 650, bonus: 25 }
     };
 
-    const CUTE_IDS = [25, 133, 175, 39, 35, 37, 151, 172, 194, 216, 147, 183, 152, 155, 158, 251];
+    // 인기/귀여운 포켓몬 (샤이니 UR 버전)
+    const CUTE_IDS = [
+        25, 133, 175, 39, 35, 37, 151, 172, 194, 216, 147, 183, 152, 155, 158, 251,
+        // 추가 인기 포켓몬
+        393, 403, 417, 427, 447, 471, 495, 501, 531, 572, 587, 613, 677, 702, 722, 728,
+        778, 813, 819, 835, 868, 872, 906, 912, 924
+    ];
     
-    const UR_VARIANT_BASE_IDS = (() => {
-        const out = [];
-        for (const pid of CUTE_IDS) {
-            if (typeof pid === "number" && pid >= 1 && pid <= BASE_DEX_MAX) out.push(pid);
-        }
-        return Array.from(new Set(out));
-    })();
+    // UR 샤이니 변형은 사용하지 않음 (1025개 전체 지원)
+    const UR_VARIANT_BASE_IDS = [];
     
-    let DEX_TOTAL = BASE_DEX_MAX + UR_VARIANT_BASE_IDS.length;
+    let DEX_TOTAL = BASE_DEX_MAX;
 
     // 타입별 데이터 및 상성
     const TYPE_DATA = {
@@ -425,6 +466,8 @@
     /* =========================================
      * 데이터 로딩 함수들
      * ========================================= */
+    let DB_LOADED = false;  // DB 로드 완료 플래그
+    
     async function loadPokeDb() {
         try {
             const timestamp = new Date().getTime();
@@ -477,9 +520,12 @@
             
             console.log(`[DB] ${POKE_DB.pokemon.length}개 포켓몬 로드 완료`);
             console.log(`[DB] 기본형 포켓몬: ${BASIC_POKEMON_IDS.length}개`);
+            console.log(`[DB] 기본형 샘플:`, BASIC_POKEMON_IDS.slice(0, 10));
+            DB_LOADED = true;
             return true;
         } catch (e) {
             console.error("[DB] poke_db.json 로드 실패:", e);
+            DB_LOADED = false;
             // Fallback: 기존 하드코딩 데이터 사용
             return false;
         }
@@ -538,27 +584,17 @@
     function getPokeInfo(id) {
         id = Math.floor(Number(id) || 1);
         if (id < 1) id = 1;
+        if (id > BASE_DEX_MAX) id = BASE_DEX_MAX;
 
         const dexId = id;
-        let baseId = id;
-        let isVariant = false;
-        let forcedShiny = false;
-
-        if (dexId > BASE_DEX_MAX) {
-            const idx = dexId - (BASE_DEX_MAX + 1);
-            baseId = UR_VARIANT_BASE_IDS[idx] ?? (((dexId - 1) % BASE_DEX_MAX) + 1);
-            isVariant = true;
-            forcedShiny = true;
-        } else if (baseId > BASE_DEX_MAX) {
-            baseId = ((baseId - 1) % BASE_DEX_MAX) + 1;
-        }
+        const baseId = id;
 
         const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
-        const name = isVariant ? `${nameBase} ✨` : nameBase;
+        const name = nameBase;
 
         // 타입 결정 (poke_db.json에서 가져오기)
         let typeName = "노말";
-        if (POKE_DB && POKE_DB.pokemon[baseId - 1]) {
+        if (POKE_DB && POKE_DB.pokemon && POKE_DB.pokemon[baseId - 1]) {
             const types_ko = POKE_DB.pokemon[baseId - 1].types_ko;
             if (types_ko && types_ko.length > 0) {
                 typeName = types_ko[0];
@@ -581,18 +617,8 @@
         const isMythical = MYTHICAL_IDS.includes(baseId);
 
         let isShiny = CUTE_IDS.includes(baseId);
-        let isHidden = CUTE_IDS.includes(baseId);
 
         if (isLegendary || isMythical) rarity = "UR";
-        if (CUTE_IDS.includes(baseId)) rarity = "UR";
-
-        if (isVariant) {
-            rarity = "UR";
-            isShiny = true;
-            isHidden = false;
-        } else if (forcedShiny) {
-            isShiny = true;
-        }
 
         // BST 차이를 살리되 티어별 목표 BST 기준으로 비율 조정
         const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
@@ -617,12 +643,12 @@
             baseId,
             name,
             rarity,
-            type: { name: typeName, ...TYPE_DATA[typeName] },
+            type: { name: typeName, ...(TYPE_DATA[typeName] || TYPE_DATA["노말"]) },
             sprite: spriteUrl,
             base: finalBase,
             isShiny,
-            isHidden,
-            isVariant
+            isLegendary,
+            isMythical
         };
     }
 
@@ -954,16 +980,28 @@
         }
     }
 
+    let codexPage = 0;
+    const CODEX_PER_PAGE = 100;
+    
     function renderCodex() {
         const grid = document.getElementById("codexGrid"); 
         grid.innerHTML = "";
         const owned = getOwned(), pid = getStarterId(), dupes = getDupes();
-        let count = 0;
         
+        // 전체 소유 수 계산
+        let totalOwned = 0;
         for (let i = 1; i <= DEX_TOTAL; i++) {
+            if (owned.has(i)) totalOwned++;
+        }
+        
+        // 페이지 범위 계산
+        const totalPages = Math.ceil(DEX_TOTAL / CODEX_PER_PAGE);
+        const startIdx = codexPage * CODEX_PER_PAGE + 1;
+        const endIdx = Math.min((codexPage + 1) * CODEX_PER_PAGE, DEX_TOTAL);
+        
+        for (let i = startIdx; i <= endIdx; i++) {
             const info = getPokeInfo(i);
             const ownedBase = owned.has(info.baseId);
-            if (ownedBase) count++;
             
             const el = document.createElement("div");
             el.className = `poke-card relative rounded-xl p-2 flex flex-col items-center cursor-pointer rarity-${info.rarity}`;
@@ -975,10 +1013,10 @@
             const evoTag = evoInfo ? `<div class="absolute bottom-1 left-1 text-[8px] bg-yellow-400 text-yellow-900 px-1 rounded">→Lv.${evoInfo.min_level}</div>` : '';
             
             el.innerHTML = `
-                <div class="absolute top-1 left-1 text-[9px] font-bold text-slate-400">#${String(i).padStart(3,'0')}</div>
+                <div class="absolute top-1 left-1 text-[9px] font-bold text-slate-400">#${String(i).padStart(4,'0')}</div>
                 ${dupeCount > 0 ? `<div class="absolute top-1 right-1 bg-red-500 text-white text-[8px] px-1 rounded-full">+${dupeCount}</div>` : ''}
                 <div class="w-12 h-12 mt-2">
-                    <img src="${ownedBase ? info.sprite : 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'}" class="w-full h-full pixel-art object-contain ${!ownedBase ? 'opacity-20' : ''}">
+                    <img src="${ownedBase ? info.sprite : 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'}" class="w-full h-full pixel-art object-contain ${!ownedBase ? 'opacity-20' : ''}" loading="lazy">
                 </div>
                 <div class="text-[10px] font-bold truncate mt-1">${ownedBase ? info.name : '???'}</div>
                 <div class="text-[8px] font-bold mt-0.5 ${info.rarity==='UR'?'text-red-500':info.rarity==='SSR'?'text-orange-500':'text-slate-400'}">${info.rarity}</div>
@@ -994,7 +1032,35 @@
             };
             grid.appendChild(el);
         }
-        document.getElementById("collectionRate").textContent = `${count}/${DEX_TOTAL}`;
+        
+        // 페이지 정보 및 네비게이션
+        document.getElementById("collectionRate").textContent = `${totalOwned}/${DEX_TOTAL}`;
+        
+        // 페이지네이션 UI 업데이트
+        const pageInfo = document.getElementById("codexPageInfo");
+        if (pageInfo) {
+            pageInfo.textContent = `${codexPage + 1}/${totalPages} (${startIdx}-${endIdx})`;
+        }
+        
+        const prevBtn = document.getElementById("codexPrevBtn");
+        const nextBtn = document.getElementById("codexNextBtn");
+        if (prevBtn) prevBtn.disabled = codexPage === 0;
+        if (nextBtn) nextBtn.disabled = codexPage >= totalPages - 1;
+    }
+    
+    function codexPrevPage() {
+        if (codexPage > 0) {
+            codexPage--;
+            renderCodex();
+        }
+    }
+    
+    function codexNextPage() {
+        const totalPages = Math.ceil(DEX_TOTAL / CODEX_PER_PAGE);
+        if (codexPage < totalPages - 1) {
+            codexPage++;
+            renderCodex();
+        }
     }
 
     function renderHoF() {
@@ -1067,6 +1133,13 @@
      * GACHA SYSTEM - 기본형만 뽑기
      * ========================================= */
     function playGacha(type) {
+        // DB 로드 확인
+        if (!DB_LOADED || BASIC_POKEMON_IDS.length === 0) {
+            alert("포켓몬 데이터 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+            console.error("[Gacha] DB_LOADED:", DB_LOADED, "BASIC_POKEMON_IDS:", BASIC_POKEMON_IDS.length);
+            return;
+        }
+        
         let count = 1;
         if (type === '10x') { type = 'normal'; count = 10; }
 
@@ -1085,19 +1158,15 @@
         const owned = getOwned();
         const dupes = getDupes();
 
-        // 기본형 포켓몬 풀 준비
-        let pool = BASIC_POKEMON_IDS.length > 0 ? BASIC_POKEMON_IDS : [];
+        // 기본형 포켓몬 풀 (DB에서 로드된 is_basic:true인 포켓몬들)
+        const pool = BASIC_POKEMON_IDS;
         
-        // 풀이 비어있으면 폴백 (1~251)
-        if (pool.length === 0) {
-            for (let i = 1; i <= BASE_DEX_MAX; i++) {
-                pool.push(i);
-            }
-        }
-
-        // 전설 제외한 기본형 풀
-        const normalPool = pool.filter(id => !LEGENDARY_IDS.includes(id));
+        // 전설/환상 제외한 일반 기본형 풀
+        const normalPool = pool.filter(id => !LEGENDARY_IDS.includes(id) && !MYTHICAL_IDS.includes(id));
+        // 기본형 중 전설/환상만
         const legendaryPool = pool.filter(id => LEGENDARY_IDS.includes(id) || MYTHICAL_IDS.includes(id));
+        
+        console.log(`[Gacha] 일반 풀: ${normalPool.length}개, 전설 풀: ${legendaryPool.length}개`);
 
         for (let i = 0; i < count; i++) {
             let pid;
@@ -2041,6 +2110,10 @@
             document.getElementById("codexScreen").classList.remove("active"); 
             document.getElementById("lobbyScreen").classList.add("active"); 
         };
+        
+        // 도감 페이지네이션
+        document.getElementById("codexPrevBtn").onclick = codexPrevPage;
+        document.getElementById("codexNextBtn").onclick = codexNextPage;
 
         document.getElementById("lobbyGachaBtn").onclick = () => document.getElementById("gachaModal").classList.remove("hidden");
         document.getElementById("gachaClose").onclick = () => document.getElementById("gachaModal").classList.add("hidden");
