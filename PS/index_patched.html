@@ -518,7 +518,6 @@
             z-index: 100;
         }
     </style>
-    <script src="../../Scripts/buildPokeDb.cjs"></script>
 </head>
 <body>
 
@@ -720,6 +719,88 @@
 </div>
 
 <script>
+    // --- PokeDB (poke_db.json) : buildPokeDb.cjs로 생성한 DB를 브라우저에서 읽어온다 ---
+    let pokeDbMap = new Map();
+    let pokeDbLoaded = false;
+    let pokeDbLoading = null;
+
+    async function ensurePokeDb() {
+        if (pokeDbLoaded) return pokeDbMap;
+        if (pokeDbLoading) return pokeDbLoading;
+
+        pokeDbLoading = (async () => {
+            try {
+                const res = await fetch("./poke_db.json", { cache: "force-cache" });
+                if (!res.ok) throw new Error(`poke_db.json load failed: ${res.status}`);
+                const json = await res.json();
+
+                // 지원: { pokemon:[...] } / { items:[...] } / [...] 형태
+                const arr = Array.isArray(json) ? json : (json.pokemon || json.items || []);
+                const map = new Map();
+                for (const it of arr) {
+                    if (it && typeof it.id === "number") map.set(it.id, it);
+                }
+                pokeDbMap = map;
+                pokeDbLoaded = true;
+                return pokeDbMap;
+            } catch (e) {
+                console.warn("[PokeDB] local poke_db.json load failed. Falling back to live PokeAPI only.", e);
+                pokeDbMap = new Map();
+                pokeDbLoaded = true;
+                return pokeDbMap;
+            }
+        })();
+
+        return pokeDbLoading;
+    }
+
+    // --- sprite URL 후보 목록 (성공하는 걸로 자동 교체) ---
+    const SPRITE_SOURCES = {
+        pixel: [
+            (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`,
+            (id) => `https://github.com/PokeAPI/sprites/raw/master/sprites/pokemon/${id}.png`,
+        ],
+        artwork: [
+            (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`,
+            (id) => `https://github.com/PokeAPI/sprites/raw/master/sprites/pokemon/other/official-artwork/${id}.png`,
+        ],
+    };
+
+    function buildSpriteCandidates(id) {
+        const urls = [];
+        try {
+            // poke_db.json에 URL이 있으면 최우선 (나중에 로컬 스프라이트로 바꿔도 그대로)
+            const entry = (pokeDbMap && pokeDbMap.get) ? pokeDbMap.get(id) : null;
+            if (entry && entry.sprite_pixel) urls.push(entry.sprite_pixel);
+            if (entry && entry.sprite_artwork) urls.push(entry.sprite_artwork);
+        } catch (e) {}
+
+        for (const fn of SPRITE_SOURCES.pixel) urls.push(fn(id));
+        for (const fn of SPRITE_SOURCES.artwork) urls.push(fn(id));
+
+        return Array.from(new Set(urls)).filter(Boolean);
+    }
+
+    function setImgWithFallback(img, urls, finalFallback = "./png/pb.png", onFinalFallback) {
+        if (!img || !urls || urls.length === 0) {
+            if (img) img.src = finalFallback;
+            return;
+        }
+        let i = 0;
+        img.onerror = () => {
+            i += 1;
+            if (i < urls.length) {
+                img.src = urls[i];
+                return;
+            }
+            img.onerror = null;
+            img.src = finalFallback;
+            if (onFinalFallback) onFinalFallback(img);
+        };
+        img.src = urls[0];
+    }
+
+
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
     const MAX_POKEMON_ID = 1025;
 
@@ -796,6 +877,8 @@
 
     async function init() {
         loadGame();
+        // DB를 미리 당겨서 탐험 스폰/표시 지연을 줄인다 (실패해도 fallback)
+        ensurePokeDb();
         await loadQuizData();
         initDexFilter();
         updateLobbyUI();
@@ -1044,7 +1127,7 @@
         const partnerImg = document.getElementById('lobby-partner-img');
         if (user.partnerId) {
             partnerContainer.classList.remove('hidden');
-            partnerImg.src = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${user.partnerId}.png`;
+            setImgWithFallback(partnerImg, buildSpriteCandidates(user.partnerId), './png/pb.png');
         } else {
             partnerContainer.classList.add('hidden');
             partnerImg.src = "";
@@ -1179,33 +1262,49 @@
         do { x = Math.floor(Math.random() * 9); y = Math.floor(Math.random() * 9); } while (x === player.x && y === player.y);
         silhouettePos = { x, y };
         currentPokemon = null;
+
         const targetTile = document.querySelector(`.tile[data-x="${x}"][data-y="${y}"]`);
         const spawnData = getWeightedRandomId();
         const id = spawnData.id;
         const rarity = spawnData.rarity;
 
+        // ✅ 빈칸 방지: 먼저 placeholder를 깔고, 데이터/이미지는 뒤에서 교체한다
+        let tileImg = null;
+        if (targetTile) {
+            targetTile.classList.add("silhouette");
+            if (rarity === "legendary") targetTile.classList.add("legendary");
+
+            tileImg = document.createElement("img");
+            tileImg.className = "silhouette-img";
+            tileImg.src = "./png/pb.png";
+            targetTile.appendChild(tileImg);
+        }
+
         try {
-            const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
-            const data = await res.json();
-            const name = data.names.find((n) => n.language.name === "ko")?.name || data.name;
-            const spriteUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
-            const backupUrl = `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+            await ensurePokeDb();
+            const entry = pokeDbMap.get(id);
 
-            currentPokemon = { id, name, rate: data.capture_rate, sprite: spriteUrl, rarity };
+            // 로컬 DB 우선
+            let name = entry?.name_ko || entry?.name_en || null;
+            let rate = entry?.capture_rate;
 
-            if (targetTile) {
-                targetTile.classList.add("silhouette");
-                if(rarity === 'legendary') targetTile.classList.add("legendary");
-                const img = document.createElement("img");
-                img.className = "silhouette-img";
-                img.onerror = function() {
-                    if (this.src === spriteUrl) this.src = backupUrl;
-                    else if (this.src === backupUrl) { this.src = "./png/pb.png"; this.style.filter = "none"; }
-                };
-                img.src = spriteUrl;
-                targetTile.appendChild(img);
+            // 로컬 DB에 없으면 PokeAPI fallback
+            if (!name || typeof rate !== "number") {
+                const res = await fetch(`https://pokeapi.co/api/v2/pokemon-species/${id}`);
+                const data = await res.json();
+                name = data?.names?.find((n) => n?.language?.name === "ko")?.name || data?.name || `No.${id}`;
+                rate = data?.capture_rate ?? 45;
             }
-        } catch (e) { console.error("Spawn Error", e); }
+
+            const candidates = buildSpriteCandidates(id);
+            currentPokemon = { id, name, rate, sprite: candidates[0], spriteCandidates: candidates, rarity };
+
+            if (tileImg) {
+                setImgWithFallback(tileImg, candidates, "./png/pb.png", (el) => { el.style.filter = "none"; });
+            }
+        } catch (e) {
+            console.error("Spawn Error", e);
+        }
     }
 
     function startEncounter() {
@@ -1216,7 +1315,11 @@
         }
         document.getElementById('modal-layer').classList.remove('hidden');
         document.getElementById('modal-encounter').classList.remove('hidden');
-        document.getElementById('enc-img').src = currentPokemon.sprite;
+        const encImgEl = document.getElementById('enc-img');
+        if (encImgEl) {
+            const urls = currentPokemon.spriteCandidates || buildSpriteCandidates(currentPokemon.id);
+            setImgWithFallback(encImgEl, urls, './png/pb.png');
+        }
         document.getElementById('enc-name').textContent = currentPokemon.name;
 
         const badgeArea = document.getElementById('enc-badge-area');
@@ -1425,7 +1528,10 @@
                 user.points += pts;
             }
             session.earnedPoints += pts;
-            session.caught.push({ name: currentPokemon.name, sprite: currentPokemon.sprite });
+            let shownSprite = currentPokemon.sprite;
+            const encImgEl2 = document.getElementById('enc-img');
+            if (encImgEl2 && encImgEl2.src) shownSprite = encImgEl2.src;
+            session.caught.push({ name: currentPokemon.name, sprite: shownSprite });
         } else {
             titleText = "놓쳤다...";
             titleColor = "#f87171";
@@ -1497,7 +1603,11 @@
         const msgModal = document.getElementById('modal-msg');
         layer.classList.remove('hidden');
         msgModal.classList.remove('hidden');
-        document.getElementById('msg-img').src = currentPokemon.sprite;
+        const msgImgEl = document.getElementById('msg-img');
+        if (msgImgEl) {
+            const urls = currentPokemon.spriteCandidates || buildSpriteCandidates(currentPokemon.id);
+            setImgWithFallback(msgImgEl, urls, './png/pb.png');
+        }
         if (lastCapture) {
             const titleEl = document.getElementById('msg-title');
             titleEl.textContent = lastCapture.titleText;

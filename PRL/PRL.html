@@ -232,8 +232,10 @@
      * ==========================================================
      */
 
-// 전역 설정
-    const BASE_DEX_MAX = 1025; // 9세대까지 지원
+// 전역 설정: 9세대까지 지원
+    const BASE_DEX_MAX = 1025;
+
+    // 타입 색상 매핑
     const TYPE_COLORS = {
         "노말":"#aaaa99", "불꽃":"#ff4422", "물":"#3399ff", "전기":"#ffcc33",
         "풀":"#77cc55", "얼음":"#66ccff", "격투":"#bb5544", "독":"#aa5599",
@@ -247,7 +249,7 @@
         "steel":"강철", "dark":"악", "fairy":"노말" // 페어리는 노말 취급 (밸런스 유지)
     };
 
-    // [중요] DB가 로드될 변수들
+    // [중요] DB가 로드될 변수들 (초기화)
     let POKE_NAMES = []; // 인덱스 = id-1
     let ALL_STATS_DB = []; // 인덱스 = id-1 (hp, atk, def, spa, spd, spe)
     let POKE_TYPES = []; // 인덱스 = id-1, [type1, type2]
@@ -259,7 +261,7 @@
     let enemy = null;
     let isBattleBusy = false;
 
-    // DB 로드 함수
+    // [패치] DB 로드 함수: poke_db.json을 fetch로 불러옴
     async function loadPokeDB() {
         try {
             showToast("데이터베이스 로딩 중...");
@@ -294,16 +296,16 @@
         }
     }
 
-    // 초기화
+    // 초기화: DB 로드를 기다린 후 실행
     window.onload = async () => {
         await loadPokeDB();
 
-        // URL 파라미터로 데이터 전달받았는지 확인
+        // URL 파라미터로 데이터 전달받았는지 확인 (Index에서 가져오기)
         const urlParams = new URLSearchParams(window.location.search);
         const importData = urlParams.get('import');
         if(importData) {
             processImportToken(importData);
-            // 처리 후 URL 정리
+            // 처리 후 URL 정리 (새로고침 시 중복 처리 방지)
             window.history.replaceState({}, document.title, window.location.pathname);
         }
     };
@@ -342,7 +344,7 @@
 
     function processImportToken(token) {
         try {
-            // base64url -> string
+            // base64url -> string (Index 게임에서 인코딩한 방식 역변환)
             const jsonStr = atob(token.replace(/-/g, '+').replace(/_/g, '/'));
             const data = JSON.parse(jsonStr);
 
@@ -401,7 +403,7 @@
             const div = document.createElement('div');
             div.className = 'dex-entry';
 
-            // DB에서 이름 가져오기
+            // DB에서 이름 가져오기 (비어있으면 번호로 표시)
             const name = POKE_NAMES[id-1] || `No.${id}`;
 
             div.innerHTML = `
@@ -419,8 +421,8 @@
     function startGame(id) {
         // 플레이어 초기화
         const stats = ALL_STATS_DB[id-1] || [10,10,10,10,10,10];
-        const name = POKE_NAMES[id-1];
-        const types = POKE_TYPES[id-1];
+        const name = POKE_NAMES[id-1] || `Pokemon ${id}`;
+        const types = POKE_TYPES[id-1] || ["노말"];
 
         myPartner = {
             id: id,
@@ -487,7 +489,7 @@
 
         const stats = ALL_STATS_DB[eid-1] || [10,10,10,10,10,10];
         const name = POKE_NAMES[eid-1];
-        const types = POKE_TYPES[eid-1];
+        const types = POKE_TYPES[eid-1] || ["노말"];
 
         enemy = {
             id: eid,
@@ -527,23 +529,23 @@
         moveContainer.innerHTML = "";
         myPartner.moves.forEach((m, idx) => {
             const btn = document.createElement('div');
-            btn.className = `move-btn type-${TYPE_EN_MAP_REV(m.type)}`;
+            // CSS 클래스 매핑용
+            const enType = TYPE_EN_MAP_REV(m.type);
+            btn.className = `move-btn type-${enType}`;
             btn.innerHTML = `
             <span class="move-type">${m.type}</span>
             <span>${m.name}</span>
             <span class="move-pp">${m.pp}/${m.maxPp}</span>
         `;
             btn.onclick = () => useMove(idx);
-            // 스타일 오버라이드 (타입색상)
-            const enType = TYPE_EN_MAP_REV(m.type);
-            if(enType) btn.classList.add(`type-${enType}`);
 
             moveContainer.appendChild(btn);
         });
     }
 
+    // 한글 타입 -> 영문 타입 (CSS용)
     function TYPE_EN_MAP_REV(ko) {
-        return Object.keys(TYPE_EN_MAP).find(key => TYPE_EN_MAP[key] === ko);
+        return Object.keys(TYPE_EN_MAP).find(key => TYPE_EN_MAP[key] === ko) || "normal";
     }
 
     async function useMove(moveIdx) {
@@ -572,7 +574,8 @@
                 await animateAttack('e-img', 'anim-atk');
                 // 적의 공격력 기준 (물리/특수 구분 없이 단순화)
                 // 적 기술은 랜덤 위력 40~60 가정
-                const enemyMove = { type: enemy.types[0], power: 40, cat: "physical" };
+                const enemyType = enemy.types[0];
+                const enemyMove = { type: enemyType, power: 40, cat: "physical" };
                 const eDmg = calcDamage(enemy, myPartner, enemyMove);
                 showDamage(eDmg, 'p-img');
                 await animateHit('p-img');
@@ -593,6 +596,9 @@
         // 물리/특수 구분
         let a = (move.cat === "physical") ? atkObj.atk : atkObj.spa;
         let d = (move.cat === "physical") ? defObj.def : defObj.spd;
+
+        // 0 방지
+        if(d < 1) d = 1;
 
         let baseDmg = Math.floor(((2 * atkObj.lv / 5 + 2) * move.power * (a / d)) / 50 + 2);
 
@@ -632,7 +638,7 @@
     }
     function showDamage(amount, targetId) {
         const target = document.getElementById(targetId);
-        const rect = target.getBoundingClientRect();
+        if(!target) return;
         const layer = document.getElementById('dmg-layer');
 
         const div = document.createElement('div');
@@ -736,7 +742,6 @@
 
         const json = JSON.stringify(ghostData);
         // URL에 붙여서 QR 생성 (간편 공유)
-        // 실제로는 데이터가 길면 URL이 너무 길어질 수 있으므로 base64 등으로 압축 추천
         const payload = btoa(unescape(encodeURIComponent(json)));
         const targetUrl = `${GHOST_ROOT_URL}?ghost=${payload}`;
 
@@ -840,7 +845,7 @@
         enemy = {
             id: ghost.id,
             name: `Ghost ${ghost.nm}`,
-            types: POKE_TYPES[ghost.id-1],
+            types: POKE_TYPES[ghost.id-1] || ["고스트"],
             lv: ghost.lv,
             maxHp: ghost.st[0],
             hp: ghost.st[0],
