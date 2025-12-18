@@ -1843,24 +1843,45 @@
     }
 
     function generateMath() {
-        const n1 = Math.floor(Math.random() * 7) + 3;
-        const n2 = Math.floor(Math.random() * 9) + 1;
-        const a = n1 * n2;
-        const q = `${n1} × ${n2} = ?`;
+        // 10, 20, 30, ..., 90 중 하나를 선택
+        const num1 = (Math.floor(Math.random() * 9) + 1) * 10;
+        const num2 = (Math.floor(Math.random() * 9) + 1) * 10;
+        const a = num1 * num2; // 정답
+        const q = `${num1} × ${num2} = ?`; // 문제 텍스트
 
-        const s = new Set([a]);
-        while (s.size < 4) {
-            let offset;
-            do { offset = Math.floor(Math.random() * 9) - 4; } while (offset === 0);
-            let f = a + offset;
-            if (f > 0 && f !== a) s.add(f);
+        let s = new Set([a]);
+
+        while(s.size < 4) {
+            let wrong;
+            const coinFlip = Math.random();
+
+            if (coinFlip < 0.4) {
+                // 1. 정답에서 100이나 200 정도 차이 나는 숫자 생성
+                const offset = (Math.floor(Math.random() * 5) - 2) * 100;
+                wrong = a + (offset === 0 ? 100 : offset);
+            } else if (coinFlip < 0.7) {
+                // 2. 다른 10단 단위의 무작위 곱셈 결과 생성
+                const w1 = (Math.floor(Math.random() * 9) + 1) * 10;
+                const w2 = (Math.floor(Math.random() * 9) + 1) * 10;
+                wrong = w1 * w2;
+            } else {
+                // 3. 숫자가 비슷해 보이도록 정답에 10을 더하거나 뺀 결과
+                wrong = a + (Math.random() < 0.5 ? 10 : -10);
+            }
+
+            if (wrong > 0 && wrong !== a) {
+                s.add(wrong);
+            }
         }
+
+        // 보기 섞기 및 배열 변환
+        const choices = Array.from(s).sort(() => Math.random() - 0.5);
 
         return {
             q,
             a,
-            explain: "구구단을 외자!",
-            choices: Array.from(s).sort(() => Math.random() - 0.5)
+            explain: "큰 수의 곱셈을 해보자!",
+            choices
         };
     }
 
