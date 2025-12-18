@@ -1204,20 +1204,39 @@
     }
 
     function generateGuGuDan() {
-        const num1 = Math.floor(Math.random() * 8) + 2;
-        const num2 = Math.floor(Math.random() * 9) + 1;
+        // 10, 20, 30, ..., 90 중 하나를 선택
+        const num1 = (Math.floor(Math.random() * 9) + 1) * 10;
+        const num2 = (Math.floor(Math.random() * 9) + 1) * 10;
         const ans = num1 * num2;
 
         let choices = new Set();
         choices.add(ans);
+
         while(choices.size < 4) {
             let wrong;
-            if (Math.random() < 0.5) wrong = ans + (Math.floor(Math.random() * 10) - 5) * 2;
-            else wrong = (Math.floor(Math.random() * 8) + 2) * (Math.floor(Math.random() * 9) + 1);
-            if (wrong > 0 && wrong !== ans) choices.add(wrong);
+            const coinFlip = Math.random();
+
+            if (coinFlip < 0.4) {
+                // 1. 정답에서 100이나 200 정도 차이 나는 숫자 생성
+                const offset = (Math.floor(Math.random() * 5) - 2) * 100;
+                wrong = ans + (offset === 0 ? 100 : offset);
+            } else if (coinFlip < 0.7) {
+                // 2. 다른 10단 단위의 무작위 곱셈 결과 생성
+                const w1 = (Math.floor(Math.random() * 9) + 1) * 10;
+                const w2 = (Math.floor(Math.random() * 9) + 1) * 10;
+                wrong = w1 * w2;
+            } else {
+                // 3. 숫자가 비슷해 보이도록 정답에 10을 더하거나 뺀 결과
+                wrong = ans + (Math.random() < 0.5 ? 10 : -10);
+            }
+
+            if (wrong > 0 && wrong !== ans) {
+                choices.add(wrong);
+            }
         }
 
         let finalChoices = Array.from(choices);
+        // 보기 섞기
         for (let i = finalChoices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [finalChoices[i], finalChoices[j]] = [finalChoices[j], finalChoices[i]];
@@ -1225,7 +1244,7 @@
 
         return {
             prompt: `${num1} × ${num2} = ?`,
-            promptExplain: "구구단을 외자!",
+            promptExplain: "큰 수의 곱셈을 해보자!",
             choices: finalChoices,
             answerIndex: finalChoices.indexOf(ans)
         };
