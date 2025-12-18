@@ -1,0 +1,1102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>면역 서바이버</title>
+
+    <!-- UI는 Tailwind(CDN) 사용. 로컬 빌드로 바꾸고 싶으면 나중에 tailwind.min.css로 교체하면 됩니다. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        :root { --uiW: 1280; --uiH: 720; }
+        body{
+            margin:0; height:100vh; overflow:hidden;
+            background:#000; font-family: ui-sans-serif, system-ui;
+            display:flex; align-items:center; justify-content:center;
+        }
+        #game-container{ width:100vw; height:100vh; position:relative; }
+        canvas{
+            position:absolute; inset:0;
+            background: radial-gradient(1200px 800px at 50% 45%, #1a2140 0%, #070a14 65%, #000 100%);
+            display:block;
+            image-rendering: pixelated;
+            touch-action: none; /* 모바일 드래그/스틱용 */
+        }
+        #ui-wrapper{
+            transform-origin: top left;
+            width: calc(var(--uiW) * 1px);
+            height: calc(var(--uiH) * 1px);
+            pointer-events:none;
+        }
+        .ui-element{ pointer-events: all; }
+        .modal-backdrop{ background-color: rgba(0,0,0,0.78); }
+        .card{
+            background:#fff; border:2px solid #cbd5e1;
+            border-radius:14px; transition: transform .15s, box-shadow .15s;
+        }
+        .card:hover{ transform: translateY(-8px); box-shadow: 0 10px 18px rgba(0,0,0,.25); }
+        .shake { animation: shake .25s linear; }
+        @keyframes shake {
+            0%{ transform: translateX(0); }
+            25%{ transform: translateX(-4px); }
+            50%{ transform: translateX(4px); }
+            75%{ transform: translateX(-3px); }
+            100%{ transform: translateX(0); }
+        }
+    </style>
+</head>
+<body>
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="ui-wrapper" class="absolute top-0 left-0">
+        <!-- HUD -->
+        <div id="ui" class="relative w-full h-full p-4 text-slate-100 z-10 hidden">
+            <div class="flex justify-between items-start">
+                <div class="p-3 rounded-xl bg-white/10 backdrop-blur border border-white/10">
+                    <div id="level-display" class="font-bold text-xl">레벨: 1</div>
+                    <div class="w-72 h-7 bg-white/10 rounded-full mt-2 border border-white/15 overflow-hidden">
+                        <div id="hp-bar" class="h-full bg-rose-500 rounded-full text-center text-white text-sm" style="width: 100%;"></div>
+                    </div>
+                    <div id="hp-text" class="text-sm font-semibold mt-1">40 / 40</div>
+                </div>
+
+                <div class="flex flex-col items-center gap-2">
+                    <div id="timer" class="text-4xl font-extrabold bg-white/10 px-5 py-2 rounded-2xl shadow-lg border border-white/10">10:00</div>
+                    <div class="text-xs text-white/70">살아남으면 승리</div>
+                </div>
+
+                <div class="flex flex-col items-end gap-2">
+                    <div id="resource-display" class="font-bold text-xl bg-white/10 px-3 py-2 rounded-xl border border-white/10">
+                        ATP: <span id="atp-text">0</span>
+                    </div>
+                    <div class="flex gap-2">
+                        <div id="weapon-ui" class="p-3 rounded-xl bg-white/10 border border-white/10 min-w-44"></div>
+                        <div id="passive-ui" class="p-3 rounded-xl bg-white/10 border border-white/10 min-w-44"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 모바일: 간단한 가이드 -->
+            <div class="absolute bottom-4 left-4 text-xs text-white/60 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
+                PC: WASD/방향키 • 모바일: 화면을 드래그하면 이동
+            </div>
+        </div>
+
+        <!-- Title -->
+        <div id="titleModal" class="absolute inset-0 z-40 flex flex-col items-center justify-center modal-backdrop">
+            <div class="text-center text-white px-6">
+                <div class="inline-flex items-center gap-3 mb-4">
+                    <div class="w-4 h-4 rounded-full bg-pink-400"></div>
+                    <div class="w-4 h-4 rounded-full bg-sky-300"></div>
+                    <div class="w-4 h-4 rounded-full bg-amber-300"></div>
+                </div>
+                <h1 class="text-7xl font-black mb-3 tracking-tight">면역 서바이버</h1>
+                <p class="text-xl text-white/80 mb-10">세포가 되어 바이러스의 파도를 버텨보세요 🧫🦠</p>
+
+                <button id="startBtn" class="ui-element bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-4 px-10 rounded-2xl text-3xl shadow-lg transition-transform transform hover:scale-[1.03]">
+                    시작
+                </button>
+
+                <div class="mt-6 text-sm text-white/60">
+                    로컬 에셋: <span class="font-mono">png/cell0.png</span> / <span class="font-mono">png/virus0.png</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Level Up -->
+        <div id="levelUpModal" class="hidden absolute inset-0 z-30 flex-col items-center justify-center modal-backdrop">
+            <div class="bg-white/95 p-8 rounded-2xl shadow-2xl text-center max-w-5xl">
+                <h2 class="text-3xl font-black mb-2 text-slate-800">레벨 업</h2>
+                <p class="text-slate-600 mb-6">면역 반응을 강화하세요.</p>
+                <div id="card-options" class="flex gap-6 flex-wrap justify-center"></div>
+            </div>
+        </div>
+
+        <!-- Game Over -->
+        <div id="gameOverModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop">
+            <div class="bg-white/95 p-10 rounded-2xl shadow-2xl text-center">
+                <h2 id="gameOverTitle" class="text-5xl font-black mb-3 text-slate-900">종료</h2>
+                <p id="gameOverText" class="text-lg mb-8 text-slate-700">스코어: 0</p>
+                <div class="flex gap-3 justify-center">
+                    <button id="restartBtn" class="ui-element bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-7 rounded-xl text-xl">
+                        다시 하기
+                    </button>
+                    <button id="backToTitleBtn" class="ui-element bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-7 rounded-xl text-xl">
+                        타이틀로
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    (() => {
+        // ===== Canvas / UI =====
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const uiWrapper = document.getElementById('ui-wrapper');
+        const uiContainer = document.getElementById('ui');
+
+        const titleModal = document.getElementById('titleModal');
+        const startBtn = document.getElementById('startBtn');
+
+        const levelUpModal = document.getElementById('levelUpModal');
+        const cardOptionsContainer = document.getElementById('card-options');
+
+        const gameOverModal = document.getElementById('gameOverModal');
+        const gameOverTitle = document.getElementById('gameOverTitle');
+        const gameOverText = document.getElementById('gameOverText');
+        const restartBtn = document.getElementById('restartBtn');
+        const backToTitleBtn = document.getElementById('backToTitleBtn');
+
+        const hpBar = document.getElementById('hp-bar');
+        const hpText = document.getElementById('hp-text');
+        const levelDisplay = document.getElementById('level-display');
+        const timerDisplay = document.getElementById('timer');
+        const atpText = document.getElementById('atp-text');
+        const weaponUI = document.getElementById('weapon-ui');
+        const passiveUI = document.getElementById('passive-ui');
+
+        // ===== Config =====
+        const ORIGINAL_UI_WIDTH = 1280;
+        const ORIGINAL_UI_HEIGHT = 720;
+        const GLOBAL_SCALE = 2.0;
+
+        // local assets (요청: /png 안에 배치)
+        const IMG_CELL = "png/cell0.png";
+        const IMG_VIRUS = "png/virus0.png";
+
+        // ===== Images =====
+        const imageCache = {};
+        function preloadImages() {
+            imageCache['cell'] = new Image();
+            imageCache['cell'].src = IMG_CELL;
+
+            imageCache['virus'] = new Image();
+            imageCache['virus'].src = IMG_VIRUS;
+        }
+
+        // ===== Game State =====
+        let gameState = 'title'; // title, playing, paused, gameOver
+
+        let keys = {};
+        let touch = { active:false, id:null, startX:0, startY:0, dx:0, dy:0 };
+
+        let player, enemies, projectiles, pickups, effects;
+        let camera;
+        let lastTime = 0;
+        let gameTimeMs = 0; // countdown
+        let lastSpawnTimes = {};
+        let seed = 1;
+
+        // ===== Database (면역 테마) =====
+        const WEAPON_DB = {
+            W_MEMBRANE: { name:"세포막 충돌", desc:"근접 부채꼴 공격", baseDmg: 18, cooldown: 650, range: 44 * GLOBAL_SCALE, angle: 55, type:'melee' },
+            W_ANTIBODY: { name:"항체 발사", desc:"가장 가까운 바이러스에 탄환", baseDmg: 12, cooldown: 460, projectileSpeed: 9.5, pierce: 1, projectileSize: 8 * GLOBAL_SCALE, type:'ranged' },
+            W_PHAGO: { name:"식세포 포식", desc:"느리지만 강력한 원형 공격", baseDmg: 30, cooldown: 1200, range: 36 * GLOBAL_SCALE, type:'melee_slam' },
+            W_INTERFERON: { name:"인터페론 파동", desc:"주기적으로 파동 방출", baseDmg: 22, cooldown: 2700, maxRadius: 220 * GLOBAL_SCALE * 0.35, pulseSpeed: 3.2, type:'pulse' },
+            W_COMPLEMENT: { name:"보체 링", desc:"주위를 도는 보체로 타격", baseDmg: 8, cooldown: 100, count: 1, orbitRadius: 70 * GLOBAL_SCALE, orbitSpeed: 2.2, type:'orbital' },
+        };
+
+        const PASSIVE_DB = {
+            P_MEMBRANE: { name:"막 강화", desc:"방어력 +2", effect: p => { p.defense += 2; } },
+            P_CHEMO: { name:"주화성", desc:"이동 속도 +15%", effect: p => { p.speed *= 1.15; } },
+            P_MITO: { name:"미토 부스트", desc:"최대 HP +15%", effect: p => { p.maxHp *= 1.15; p.hp = p.maxHp; } },
+            P_AMP: { name:"항체 증폭", desc:"모든 피해 +12%", effect: p => { p.damageMultiplier += 0.12; } },
+            P_MEMORY: { name:"면역 기억", desc:"XP 획득 +10%", effect: p => { p.xpMultiplier += 0.10; } },
+            P_CYTOKINE: { name:"사이토카인 튜닝", desc:"재사용 대기시간 -6%", effect: p => { p.cooldownReduction *= 0.94; } },
+            P_RANGE: { name:"반응 범위 확장", desc:"범위 스킬 크기 +20%", effect: p => {
+                    Object.values(p.weapons).forEach(w => {
+                        if (w.type === 'melee' || w.type === 'melee_slam') {
+                            w.range *= 1.2;
+                            if (w.angle) w.angle *= 1.15;
+                        }
+                        if (w.type === 'pulse') w.maxRadius *= 1.2;
+                        if (w.type === 'orbital') w.orbitRadius *= 1.12;
+                    });
+                } },
+        };
+
+        const ENEMY_CATALOG = {
+            virus:        { name:'바이러스',         hp: 18, dmg: 3, spd: 2.6, size: 18 * GLOBAL_SCALE, xp: 1, imgKey: 'virus' },
+            fastVirus:    { name:'돌연변이 바이러스', hp: 14, dmg: 3, spd: 3.6, size: 16 * GLOBAL_SCALE, xp: 2, imgKey: 'virus' },
+            tankVirus:    { name:'캡시드 강화체',    hp: 42, dmg: 5, spd: 1.9, size: 23 * GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
+            clusterVirus: { name:'군집 바이러스',    hp: 26, dmg: 4, spd: 2.4, size: 20 * GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
+        };
+
+        // 시간대 별 스폰 패턴
+        const SPAWNER_CLIPS = [
+            { start: 0,   end: 60,  enemies: [{ type:"virus", every: 1.7, count:[5,7] }] },
+            { start: 60,  end: 120, enemies: [{ type:"virus", every: 2.3, count:[4,6] }, { type:"fastVirus", every: 4.2, count:[1,2] }] },
+            { start: 120, end: 180, enemies: [{ type:"fastVirus", every: 3.4, count:[2,3] }, { type:"clusterVirus", every: 4.3, count:[2,3] }] },
+            { start: 180, end: 240, enemies: [{ type:"clusterVirus", every: 3.2, count:[3,5] }, { type:"tankVirus", every: 5.3, count:[1,2] }] },
+            { start: 240, end: 360, enemies: [{ type:"virus", every: 1.6, count:[6,9] }, { type:"tankVirus", every: 4.4, count:[1,2] }, { type:"fastVirus", every: 3.6, count:[2,3] }] },
+            { start: 360, end: 540, enemies: [{ type:"clusterVirus", every: 2.8, count:[4,6] }, { type:"tankVirus", every: 3.8, count:[2,3] }, { type:"fastVirus", every: 2.9, count:[2,4] }] },
+            { start: 540, end: 600, enemies: [{ type:"virus", every: 1.1, count:[10,15] }, { type:"fastVirus", every: 2.2, count:[4,7] }, { type:"tankVirus", every: 3.2, count:[2,4] }] },
+        ];
+
+        // ===== Utils =====
+        function rand() {
+            // 작은 고정 PRNG: 재현성 좋고 가볍게
+            seed = (seed * 1664525 + 1013904223) >>> 0;
+            return seed / 4294967296;
+        }
+        function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+        function resizeGame(){
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const scaleX = canvas.width / ORIGINAL_UI_WIDTH;
+            const scaleY = canvas.height / ORIGINAL_UI_HEIGHT;
+            const uiScale = Math.min(scaleX, scaleY);
+
+            uiWrapper.style.transform = `scale(${uiScale})`;
+            const uiLeft = (canvas.width - ORIGINAL_UI_WIDTH * uiScale) / 2;
+            const uiTop  = (canvas.height - ORIGINAL_UI_HEIGHT * uiScale) / 2;
+            uiWrapper.style.left = `${uiLeft}px`;
+            uiWrapper.style.top  = `${uiTop}px`;
+        }
+
+        // ===== Core init =====
+        function initGame(){
+            gameTimeMs = 600 * 1000; // 10 minutes
+            lastSpawnTimes = {};
+            enemies = [];
+            projectiles = [];
+            pickups = [];
+            effects = [];
+            camera = { x:0, y:0 };
+
+            player = {
+                x:0, y:0,
+                size: 26 * GLOBAL_SCALE,
+                speed: 3.2,
+                hp: 46, maxHp: 46,
+                defense: 0,
+                level: 1,
+                xp: 0,
+                xpToNextLevel: 12,
+                pickupRadius: 56 * GLOBAL_SCALE,
+                weapons: {},
+                passives: {},
+                invincible: false,
+                invincibleTimer: 0,
+                xpMultiplier: 1.0,
+                cooldownReduction: 1.0,
+                damageMultiplier: 1.0,
+                atp: 0,
+                growthStage: 1,
+            };
+
+            addWeapon('W_MEMBRANE', true);
+            addWeapon('W_ANTIBODY', true);
+            addPassive('P_MEMORY');
+
+            updateUI();
+        }
+
+        function startGame(){
+            initGame();
+            gameState = 'playing';
+            titleModal.style.display = 'none';
+            gameOverModal.style.display = 'none';
+            uiContainer.classList.remove('hidden');
+            lastTime = performance.now();
+            requestAnimationFrame(gameLoop);
+        }
+
+        function backToTitle(){
+            gameState = 'title';
+            uiContainer.classList.add('hidden');
+            gameOverModal.style.display = 'none';
+            titleModal.style.display = 'flex';
+            lastTime = 0;
+            draw(); // 깔끔하게 1프레임 그리기
+        }
+
+        // ===== Movement input =====
+        function getMoveVector(){
+            let dx = 0, dy = 0;
+            if(keys['ArrowUp'] || keys['w']) dy -= 1;
+            if(keys['ArrowDown'] || keys['s']) dy += 1;
+            if(keys['ArrowLeft'] || keys['a']) dx -= 1;
+            if(keys['ArrowRight'] || keys['d']) dx += 1;
+
+            // 터치 드래그
+            if(touch.active){
+                dx += touch.dx;
+                dy += touch.dy;
+            }
+
+            const mag = Math.hypot(dx, dy);
+            if(mag <= 0.0001) return { dx:0, dy:0 };
+            return { dx: dx/mag, dy: dy/mag };
+        }
+
+        // ===== Update loop =====
+        function update(dt){
+            const mv = getMoveVector();
+            if(mv.dx || mv.dy){
+                player.x += mv.dx * player.speed * (dt/16.67);
+                player.y += mv.dy * player.speed * (dt/16.67);
+            }
+
+            camera.x = player.x - canvas.width/2;
+            camera.y = player.y - canvas.height/2;
+
+            if(player.invincibleTimer > 0){
+                player.invincibleTimer -= dt;
+                if(player.invincibleTimer <= 0) player.invincible = false;
+            }
+
+            spawnEnemies();
+
+            // weapons
+            Object.values(player.weapons).forEach(w => {
+                w.timer -= dt;
+                if(w.timer <= 0){
+                    fireWeapon(w);
+                    w.timer = w.cooldown * player.cooldownReduction;
+                }
+                if(w.type === 'orbital'){
+                    w.orbitals.forEach(o => o.angle += w.orbitSpeed*(dt/1000));
+                }
+            });
+
+            // enemies
+            enemies.forEach(e => updateEnemy(e, dt));
+
+            // projectiles
+            for (let i=projectiles.length-1; i>=0; i--){
+                const p = projectiles[i];
+                updateProjectile(p, dt);
+                if(p.lived > 2200) projectiles.splice(i, 1);
+            }
+
+            // pickups magnet
+            pickups.forEach(p => updatePickup(p));
+
+            // effects
+            effects = effects.filter(e => {
+                e.duration -= dt;
+                if(e.type === 'pulse') e.currentRadius += e.pulseSpeed * (dt/16.67);
+                return e.duration > 0;
+            });
+
+            checkCollisions();
+
+            // timer
+            gameTimeMs -= dt;
+            if(gameTimeMs < 0) gameTimeMs = 0;
+            if(gameTimeMs <= 0){
+                winGame("시간을 버텼습니다!");
+            }
+        }
+
+        // ===== Combat =====
+        function findClosestEnemy(x, y){
+            let closest = null;
+            let best = Infinity;
+            for(const e of enemies){
+                const d = Math.hypot(x - e.x, y - e.y);
+                if(d < best){ best = d; closest = e; }
+            }
+            return closest;
+        }
+
+        function fireWeapon(weapon){
+            const closest = findClosestEnemy(player.x, player.y);
+            const angle = closest ? Math.atan2(closest.y - player.y, closest.x - player.x) : 0;
+
+            if(weapon.type === 'melee'){
+                if(!closest) return;
+
+                const dmg = weapon.baseDmg * player.damageMultiplier;
+                for(const enemy of enemies){
+                    const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
+                    if(dist < weapon.range + 10){
+                        let aDiff = Math.abs(angle - Math.atan2(enemy.y - player.y, enemy.x - player.x));
+                        if(aDiff > Math.PI) aDiff = 2*Math.PI - aDiff;
+                        if(aDiff < (weapon.angle*Math.PI/180)/2){
+                            enemyTakeDamage(enemy, dmg);
+                        }
+                    }
+                }
+
+                effects.push({
+                    type:'slash_arc', x:player.x, y:player.y,
+                    angle, range:weapon.range, angleWidth:weapon.angle*Math.PI/180,
+                    duration:140, maxDuration:140
+                });
+                return;
+            }
+
+            if(weapon.type === 'melee_slam'){
+                if(!closest) return;
+                const slamX = closest.x;
+                const slamY = closest.y;
+                const dmg = weapon.baseDmg * player.damageMultiplier;
+
+                for(const enemy of enemies){
+                    if(Math.hypot(enemy.x - slamX, enemy.y - slamY) < weapon.range){
+                        enemyTakeDamage(enemy, dmg);
+                    }
+                }
+
+                effects.push({ type:'slam_circle', x:slamX, y:slamY, radius:weapon.range, duration:220, maxDuration:220 });
+                return;
+            }
+
+            if(weapon.type === 'ranged'){
+                if(!closest) return;
+                projectiles.push({
+                    x: player.x, y: player.y,
+                    angle,
+                    speed: weapon.projectileSpeed,
+                    damage: weapon.baseDmg * player.damageMultiplier,
+                    pierce: weapon.pierce,
+                    size: weapon.projectileSize,
+                    hitEnemies: [],
+                    lived: 0,
+                });
+                return;
+            }
+
+            if(weapon.type === 'pulse'){
+                effects.push({
+                    type:'pulse',
+                    x: player.x, y: player.y,
+                    currentRadius: 0,
+                    maxRadius: weapon.maxRadius,
+                    pulseSpeed: weapon.pulseSpeed,
+                    damage: weapon.baseDmg * player.damageMultiplier,
+                    duration: (weapon.maxRadius/weapon.pulseSpeed)*16.67,
+                    maxDuration: (weapon.maxRadius/weapon.pulseSpeed)*16.67,
+                    hitEnemies: [],
+                });
+                return;
+            }
+        }
+
+        function playerTakeDamage(damage){
+            if(player.invincible) return;
+            const actual = Math.max(1, damage - player.defense);
+            player.hp -= actual;
+
+            player.invincible = true;
+            player.invincibleTimer = 520;
+
+            // 피격 피드백
+            uiContainer.classList.add('shake');
+            setTimeout(() => uiContainer.classList.remove('shake'), 250);
+
+            if(player.hp <= 0){
+                player.hp = 0;
+                loseGame();
+            }
+            updateUI();
+        }
+
+        function enemyTakeDamage(enemy, damage){
+            enemy.hp -= damage;
+            enemy.isHit = true;
+            enemy.hitTimer = 100;
+
+            if(enemy.hp <= 0){
+                createPickups(enemy);
+                enemies = enemies.filter(e => e.id !== enemy.id);
+            }
+        }
+
+        // ===== Spawning =====
+        function spawnEnemies(){
+            const sec = (600000 - gameTimeMs) / 1000;
+            const clip = SPAWNER_CLIPS.find(c => sec >= c.start && sec < c.end);
+            if(!clip) return;
+
+            // 점점 강해지는 계수
+            const diffMult = 1 + (sec/60) * 0.08;
+
+            for(const sInfo of clip.enemies){
+                if(!lastSpawnTimes[sInfo.type]) lastSpawnTimes[sInfo.type] = 0;
+                if(sec - lastSpawnTimes[sInfo.type] > sInfo.every){
+                    lastSpawnTimes[sInfo.type] = sec;
+
+                    const n = Math.floor(rand() * (sInfo.count[1] - sInfo.count[0] + 1)) + sInfo.count[0];
+                    for(let i=0; i<n; i++){
+                        if(enemies.length > 170) break;
+
+                        const a = rand() * Math.PI * 2;
+                        const r = Math.max(canvas.width/2, canvas.height/2) + 120;
+                        const x = player.x + Math.cos(a) * r;
+                        const y = player.y + Math.sin(a) * r;
+
+                        const base = ENEMY_CATALOG[sInfo.type];
+                        enemies.push({
+                            ...base,
+                            type: sInfo.type,
+                            x, y,
+                            hp: base.hp * diffMult,
+                            speed: base.spd * (1 + (sec/60)*0.02),
+                            id: (Math.floor(rand()*1e9) ^ Date.now()) >>> 0,
+                            isHit:false,
+                            hitTimer:0,
+                        });
+                    }
+                }
+            }
+        }
+
+        function updateEnemy(e, dt){
+            if(e.isHit){
+                e.hitTimer -= dt;
+                if(e.hitTimer <= 0) e.isHit = false;
+            }
+            const a = Math.atan2(player.y - e.y, player.x - e.x);
+            e.x += Math.cos(a) * e.speed * (dt/16.67);
+            e.y += Math.sin(a) * e.speed * (dt/16.67);
+
+            // 화면 근처 바깥으로 나가면 래핑(쓸데없는 멀리 추적 방지)
+            const margin = 260;
+            const l = camera.x - margin, r = camera.x + canvas.width + margin;
+            const t = camera.y - margin, b = camera.y + canvas.height + margin;
+            if(e.x < l) e.x = r; else if(e.x > r) e.x = l;
+            if(e.y < t) e.y = b; else if(e.y > b) e.y = t;
+        }
+
+        // ===== Projectiles / Pickups =====
+        function updateProjectile(p, dt){
+            p.x += Math.cos(p.angle) * p.speed * (dt/16.67);
+            p.y += Math.sin(p.angle) * p.speed * (dt/16.67);
+            p.lived += dt;
+        }
+
+        function updatePickup(p){
+            if(Math.hypot(p.x - player.x, p.y - player.y) < player.pickupRadius){
+                const a = Math.atan2(player.y - p.y, player.x - p.x);
+                p.x += Math.cos(a) * 9;
+                p.y += Math.sin(a) * 9;
+            }
+        }
+
+        function createPickups(e){
+            // xp + atp + heal
+            const drops = 1 + (e.type === 'tankVirus' ? 1 : 0);
+            for(let i=0;i<drops;i++){
+                const rr = rand();
+                const off = (rr - 0.5) * 22 * GLOBAL_SCALE;
+                if(rr < 0.76){
+                    pickups.push({ x:e.x+off, y:e.y+off, type:'xp', value:e.xp, size:4*GLOBAL_SCALE, color:'#7CFFB2' });
+                } else if(rr < 0.92){
+                    pickups.push({ x:e.x+off, y:e.y+off, type:'atp', value:1, size:6*GLOBAL_SCALE, color:'#FFD166' });
+                } else {
+                    pickups.push({ x:e.x+off, y:e.y+off, type:'heal', value:5, size:7*GLOBAL_SCALE, color:'#9AD0FF' });
+                }
+            }
+        }
+
+        function collectPickup(p){
+            if(p.type === 'xp'){
+                player.xp += p.value * player.xpMultiplier;
+                if(player.xp >= player.xpToNextLevel) levelUp();
+            } else if(p.type === 'atp'){
+                player.atp += p.value;
+            } else if(p.type === 'heal'){
+                player.hp = Math.min(player.maxHp, player.hp + p.value);
+            }
+            updateUI();
+        }
+
+        // ===== Collisions =====
+        function checkCollisions(){
+            // projectile -> enemy
+            for(let i=projectiles.length-1; i>=0; i--){
+                const p = projectiles[i];
+                for(const e of enemies){
+                    if(p.hitEnemies.includes(e.id)) continue;
+                    if(Math.hypot(p.x - e.x, p.y - e.y) < (p.size + e.size)/2){
+                        enemyTakeDamage(e, p.damage);
+                        p.hitEnemies.push(e.id);
+                        if(p.hitEnemies.length >= p.pierce){
+                            projectiles.splice(i,1);
+                            break;
+                        }
+                    }
+                }
+            }
+
+            // enemy -> player
+            for(const e of enemies){
+                if(Math.hypot(player.x - e.x, player.y - e.y) < (player.size + e.size)/2){
+                    playerTakeDamage(e.dmg);
+                }
+            }
+
+            // pickup -> player
+            pickups = pickups.filter(p => {
+                if(Math.hypot(player.x - p.x, player.y - p.y) < (player.size/2 + p.size)){
+                    collectPickup(p);
+                    return false;
+                }
+                return true;
+            });
+
+            // orbital hits
+            Object.values(player.weapons).filter(w => w.type === 'orbital').forEach(w => {
+                w.orbitals.forEach(o => {
+                    const ox = player.x + Math.cos(o.angle) * w.orbitRadius;
+                    const oy = player.y + Math.sin(o.angle) * w.orbitRadius;
+                    for(const e of enemies){
+                        if(o.hitEnemies.includes(e.id)) continue;
+                        if(Math.hypot(ox - e.x, oy - e.y) < (15*GLOBAL_SCALE + e.size)/2){
+                            enemyTakeDamage(e, w.baseDmg * player.damageMultiplier);
+                            o.hitEnemies.push(e.id);
+                            setTimeout(() => { o.hitEnemies = o.hitEnemies.filter(id => id !== e.id); }, 420);
+                        }
+                    }
+                });
+            });
+
+            // pulse damage
+            effects.filter(e => e.type === 'pulse').forEach(p => {
+                for(const e of enemies){
+                    if(p.hitEnemies.includes(e.id)) continue;
+                    const dist = Math.hypot(e.x - p.x, e.y - p.y);
+                    if(Math.abs(dist - p.currentRadius) < (15 + e.size)/2){
+                        enemyTakeDamage(e, p.damage);
+                        p.hitEnemies.push(e.id);
+                    }
+                }
+            });
+        }
+
+        // ===== Level Up =====
+        function addWeapon(id, isNew=true){
+            if(isNew && Object.keys(player.weapons).length >= 6) return;
+
+            const base = WEAPON_DB[id];
+            player.weapons[id] = {
+                ...(player.weapons[id] || {}),
+                ...base,
+                id,
+                timer: base.cooldown * player.cooldownReduction,
+                level: isNew ? 1 : (player.weapons[id]?.level ?? 1),
+            };
+
+            if(id === 'W_COMPLEMENT'){
+                const w = player.weapons[id];
+                w.orbitals = [];
+                const cnt = w.count;
+                for(let i=0; i<cnt; i++){
+                    w.orbitals.push({ angle:(Math.PI*2/cnt)*i, hitEnemies:[] });
+                }
+            }
+        }
+
+        function addPassive(id){
+            if(player.passives[id]){
+                player.passives[id].level++;
+            } else {
+                player.passives[id] = { id, name: PASSIVE_DB[id].name, level: 1 };
+            }
+            PASSIVE_DB[id].effect(player);
+        }
+
+        function getLevelUpChoices(n){
+            const availableWeapons = Object.keys(WEAPON_DB).filter(id => !player.weapons[id]);
+            const availablePassives = Object.keys(PASSIVE_DB).filter(id => !player.passives[id] || player.passives[id].level < 5);
+
+            // 이미 가진 무기 강화 카드도 섞기
+            const ownedWeaponUpgrades = Object.values(player.weapons).map(w => ({
+                id: w.id,
+                name: `${w.name} 강화`,
+                desc: "피해 +15% (해당 무기)",
+                isUpgrade: true,
+                upgradeWeaponId: w.id,
+            }));
+
+            let pool = [
+                ...ownedWeaponUpgrades,
+                ...availableWeapons.map(id => ({ id, ...WEAPON_DB[id], isWeapon:true })),
+                ...availablePassives.map(id => ({ id, ...PASSIVE_DB[id], isPassive:true })),
+            ];
+
+            // 셔플
+            for(let i=pool.length-1; i>0; i--){
+                const j = Math.floor(rand() * (i+1));
+                [pool[i], pool[j]] = [pool[j], pool[i]];
+            }
+            return pool.slice(0, n);
+        }
+
+        function showLevelUpOptions(){
+            cardOptionsContainer.innerHTML = '';
+            const opts = getLevelUpChoices(3);
+
+            for(const opt of opts){
+                const card = document.createElement('div');
+                card.className = 'card ui-element w-64 h-80 p-5 cursor-pointer flex flex-col justify-between text-center';
+
+                const name = opt.name;
+                const desc = opt.desc;
+                const tag =
+                    opt.isUpgrade ? '<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">강화</span>' :
+                        opt.isWeapon ?  '<span class="text-xs font-bold text-sky-700 bg-sky-100 px-2 py-1 rounded-full">무기</span>' :
+                            '<span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">패시브</span>';
+
+                card.innerHTML = `
+        <div>
+          <div class="mb-3">${tag}</div>
+          <h3 class="text-2xl font-black mb-3 text-slate-900">${name}</h3>
+          <p class="text-slate-700">${desc}</p>
+        </div>
+        <div class="text-xs text-slate-500">눌러서 선택</div>
+      `;
+
+                card.onclick = () => selectUpgrade(opt);
+                cardOptionsContainer.appendChild(card);
+            }
+
+            levelUpModal.style.display = 'flex';
+        }
+
+        function selectUpgrade(opt){
+            if(opt.isUpgrade){
+                const w = player.weapons[opt.upgradeWeaponId];
+                if(w){
+                    w.baseDmg *= 1.15;
+                    w.level++;
+                    // 보체 링은 강화 시 개수 증가
+                    if(w.id === 'W_COMPLEMENT'){
+                        w.count++;
+                        addWeapon('W_COMPLEMENT', false);
+                    }
+                }
+            } else if(WEAPON_DB[opt.id]){
+                if(player.weapons[opt.id]){
+                    // 혹시나 중복이면 강화
+                    player.weapons[opt.id].baseDmg *= 1.15;
+                    player.weapons[opt.id].level++;
+                } else {
+                    addWeapon(opt.id, true);
+                }
+            } else if(PASSIVE_DB[opt.id]){
+                addPassive(opt.id);
+            }
+
+            levelUpModal.style.display = 'none';
+            gameState = 'playing';
+            updateUI();
+        }
+
+        function levelUp(){
+            gameState = 'paused';
+            player.level++;
+            player.xp -= player.xpToNextLevel;
+            player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.28 + 10);
+
+            // 성장 연출: 5, 10레벨에 덩치 + 체력 증가
+            if(player.level === 5 && player.growthStage === 1){
+                player.growthStage = 2;
+                player.size *= 1.18;
+                player.maxHp *= 1.45;
+                player.hp = player.maxHp;
+                player.invincible = true;
+                player.invincibleTimer = 1200;
+            }
+            if(player.level === 10 && player.growthStage === 2){
+                player.growthStage = 3;
+                player.size *= 1.18;
+                player.maxHp *= 1.55;
+                player.hp = player.maxHp;
+                player.invincible = true;
+                player.invincibleTimer = 1400;
+            }
+
+            showLevelUpOptions();
+            updateUI();
+        }
+
+        // ===== UI =====
+        function updateUI(){
+            if(!player) return;
+
+            hpBar.style.width = `${clamp((player.hp/player.maxHp)*100, 0, 100)}%`;
+            hpText.textContent = `${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}`;
+
+            levelDisplay.innerHTML = `레벨: ${player.level} <span class="text-sm text-white/70">(${Math.floor(player.xp)}/${player.xpToNextLevel} XP)</span>`;
+
+            const m = Math.floor(gameTimeMs / 60000);
+            const s = Math.floor((gameTimeMs % 60000) / 1000);
+            timerDisplay.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+
+            atpText.textContent = `${player.atp}`;
+
+            weaponUI.innerHTML =
+                `<div class="font-extrabold mb-1">무기</div>` +
+                Object.values(player.weapons)
+                    .map(w => `<div class="text-sm text-white/85">${w.name} <span class="text-white/60">Lv.${w.level}</span></div>`)
+                    .join('');
+
+            passiveUI.innerHTML =
+                `<div class="font-extrabold mb-1">패시브</div>` +
+                Object.values(player.passives)
+                    .map(p => `<div class="text-sm text-white/85">${p.name} <span class="text-white/60">Lv.${p.level}</span></div>`)
+                    .join('');
+        }
+
+        // ===== Draw =====
+        function drawBackgroundGrid(){
+            // 혈관 느낌의 느슨한 격자
+            ctx.strokeStyle = "rgba(255,255,255,0.06)";
+            ctx.lineWidth = 2;
+
+            const grid = 220;
+            const startX = Math.floor(camera.x / grid) * grid;
+            const startY = Math.floor(camera.y / grid) * grid;
+
+            for(let x = startX; x < camera.x + canvas.width; x += grid){
+                ctx.beginPath();
+                ctx.moveTo(x, camera.y);
+                ctx.lineTo(x, camera.y + canvas.height);
+                ctx.stroke();
+            }
+            for(let y = startY; y < camera.y + canvas.height; y += grid){
+                ctx.beginPath();
+                ctx.moveTo(camera.x, y);
+                ctx.lineTo(camera.x + canvas.width, y);
+                ctx.stroke();
+            }
+        }
+
+        function draw(){
+            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+            // world space
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
+
+            drawBackgroundGrid();
+
+            // pickups
+            for(const p of pickups){
+                ctx.fillStyle = p.color;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // projectiles (항체)
+            for(const p of projectiles){
+                ctx.fillStyle = "rgba(255,255,255,0.92)";
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, Math.max(2, p.size/2), 0, Math.PI*2);
+                ctx.fill();
+
+                // 꼬리
+                ctx.strokeStyle = "rgba(150,200,255,0.35)";
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(p.x, p.y);
+                ctx.lineTo(p.x - Math.cos(p.angle)*14, p.y - Math.sin(p.angle)*14);
+                ctx.stroke();
+            }
+
+            // orbitals
+            Object.values(player.weapons).filter(w => w.type === 'orbital').forEach(w => {
+                w.orbitals.forEach(o => {
+                    const x = player.x + Math.cos(o.angle) * w.orbitRadius;
+                    const y = player.y + Math.sin(o.angle) * w.orbitRadius;
+                    ctx.fillStyle = "rgba(120,220,255,0.55)";
+                    ctx.beginPath();
+                    ctx.arc(x, y, 14*GLOBAL_SCALE*0.5, 0, Math.PI*2);
+                    ctx.fill();
+                });
+            });
+
+            // enemies
+            for(const e of enemies){
+                const img = imageCache[ENEMY_CATALOG[e.type].imgKey];
+                if(e.isHit){
+                    ctx.save();
+                    ctx.filter = "brightness(1.8)";
+                }
+                if(img && img.complete){
+                    ctx.drawImage(img, e.x - e.size/2, e.y - e.size/2, e.size, e.size);
+                } else {
+                    // fallback
+                    ctx.fillStyle = "rgba(255,80,120,0.9)";
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                if(e.isHit) ctx.restore();
+            }
+
+            // player
+            if(player){
+                const img = imageCache['cell'];
+                if(player.invincible){
+                    ctx.globalAlpha = (Math.floor(player.invincibleTimer/110) % 2 === 0) ? 0.55 : 1.0;
+                }
+                if(img && img.complete){
+                    ctx.drawImage(img, player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+                } else {
+                    ctx.fillStyle = "rgba(255,180,220,0.95)";
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, player.size/2, 0, Math.PI*2);
+                    ctx.fill();
+                }
+                ctx.globalAlpha = 1.0;
+            }
+
+            // effects
+            for(const e of effects){
+                const op = clamp(e.duration / e.maxDuration, 0, 1);
+
+                if(e.type === 'slash_arc'){
+                    ctx.save();
+                    ctx.translate(e.x, e.y);
+                    ctx.rotate(e.angle);
+                    ctx.strokeStyle = `rgba(255,255,255,${op*0.65})`;
+                    ctx.lineWidth = 18;
+                    ctx.beginPath();
+                    ctx.arc(0,0,e.range, -e.angleWidth/2, e.angleWidth/2);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                if(e.type === 'slam_circle'){
+                    ctx.fillStyle = `rgba(255,120,160,${op*0.55})`;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.radius*(1-op), 0, Math.PI*2);
+                    ctx.fill();
+                }
+
+                if(e.type === 'pulse'){
+                    ctx.strokeStyle = `rgba(120,220,255,${op*0.55})`;
+                    ctx.lineWidth = 14;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.currentRadius, 0, Math.PI*2);
+                    ctx.stroke();
+                }
+            }
+
+            ctx.restore();
+
+            // title state: 깔끔하게 살짝 어두운 오버레이
+            if(gameState === 'title'){
+                ctx.fillStyle = "rgba(0,0,0,0.15)";
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+            }
+        }
+
+        // ===== End states =====
+        function loseGame(){
+            if(gameState === 'gameOver') return;
+            gameState = 'gameOver';
+
+            const survivedSec = Math.floor((600000 - gameTimeMs)/1000);
+            const score = player.level*120 + player.atp*35 + survivedSec;
+
+            gameOverTitle.textContent = "세포가 붕괴했습니다";
+            gameOverText.textContent = `생존: ${survivedSec}초 • 레벨: ${player.level} • ATP: ${player.atp} • 점수: ${score}`;
+
+            gameOverModal.style.display = 'flex';
+        }
+
+        function winGame(message){
+            if(gameState === 'gameOver') return;
+            gameState = 'gameOver';
+
+            const survivedSec = 600;
+            const score = player.level*220 + player.atp*55 + Math.floor(player.hp*10);
+
+            gameOverTitle.textContent = message;
+            gameOverText.textContent = `완주! 레벨: ${player.level} • 남은 HP: ${Math.ceil(player.hp)} • ATP: ${player.atp} • 점수: ${score}`;
+            gameOverModal.style.display = 'flex';
+        }
+
+        // ===== Game loop =====
+        function gameLoop(ts){
+            if(gameState !== 'playing' && gameState !== 'paused'){
+                draw();
+                return;
+            }
+            if(!lastTime) lastTime = ts;
+            const dt = ts - lastTime;
+            lastTime = ts;
+
+            if(gameState === 'playing'){
+                update(dt);
+                updateUI();
+            }
+
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ===== Events =====
+        startBtn.addEventListener('click', startGame);
+        restartBtn.addEventListener('click', () => { startGame(); });
+        backToTitleBtn.addEventListener('click', backToTitle);
+
+        window.addEventListener('keydown', (e) => {
+            keys[e.key] = true;
+            // 게임 중 스페이스로 일시정지 토글
+            if(e.key === ' '){
+                if(gameState === 'playing') gameState = 'paused';
+                else if(gameState === 'paused') gameState = 'playing';
+            }
+        });
+        window.addEventListener('keyup', (e) => keys[e.key] = false);
+
+        // Touch movement: "드래그하는 방향으로 이동"
+        canvas.addEventListener('pointerdown', (e) => {
+            // UI 클릭 방해 최소화: 타이틀/모달은 UI 요소로 처리
+            if(gameState !== 'playing') return;
+            touch.active = true;
+            touch.id = e.pointerId;
+            touch.startX = e.clientX;
+            touch.startY = e.clientY;
+            touch.dx = 0;
+            touch.dy = 0;
+            canvas.setPointerCapture(e.pointerId);
+        });
+        canvas.addEventListener('pointermove', (e) => {
+            if(!touch.active || touch.id !== e.pointerId) return;
+            const dx = e.clientX - touch.startX;
+            const dy = e.clientY - touch.startY;
+
+            // 화면 크기에 비례한 민감도
+            const k = 0.012;
+            touch.dx = clamp(dx * k, -1, 1);
+            touch.dy = clamp(dy * k, -1, 1);
+        });
+        function endTouch(e){
+            if(!touch.active || touch.id !== e.pointerId) return;
+            touch.active = false;
+            touch.id = null;
+            touch.dx = 0;
+            touch.dy = 0;
+        }
+        canvas.addEventListener('pointerup', endTouch);
+        canvas.addEventListener('pointercancel', endTouch);
+        canvas.addEventListener('pointerout', endTouch);
+
+        window.addEventListener('resize', resizeGame);
+
+        // ===== Boot =====
+        preloadImages();
+        resizeGame();
+        initGame();
+        draw();
+    })();
+</script>
+</body>
+</html>
