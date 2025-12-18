@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>면역 서바이버</title>
-
-    <!-- UI는 Tailwind(CDN) 사용. 로컬 빌드로 바꾸고 싶으면 나중에 tailwind.min.css로 교체하면 됩니다. -->
+    <title>면역 서바이버 Ultimate</title>
     <script src="https://cdn.tailwindcss.com"></script>
-
     <style>
         :root { --uiW: 1280; --uiH: 720; }
         body{
@@ -21,7 +18,7 @@
             background: radial-gradient(1200px 800px at 50% 45%, #1a2140 0%, #070a14 65%, #000 100%);
             display:block;
             image-rendering: pixelated;
-            touch-action: none; /* 모바일 드래그/스틱용 */
+            touch-action: none;
         }
         #ui-wrapper{
             transform-origin: top left;
@@ -30,19 +27,29 @@
             pointer-events:none;
         }
         .ui-element{ pointer-events: all; }
+        /* ✅ 모달 스크롤/터치 안정화 (모바일 포함) */
+        #titleModal, #charModal, #labModal, #levelUpModal, #gameOverModal { pointer-events: all; }
+        .scroll-panel { -webkit-overflow-scrolling: touch; overscroll-behavior: contain; touch-action: pan-y; }
+        .pixel-img { image-rendering: pixelated; }
+
         .modal-backdrop{ background-color: rgba(0,0,0,0.78); }
         .card{
             background:#fff; border:2px solid #cbd5e1;
             border-radius:14px; transition: transform .15s, box-shadow .15s;
         }
-        .card:hover{ transform: translateY(-8px); box-shadow: 0 10px 18px rgba(0,0,0,.25); }
-        .shake { animation: shake .25s linear; }
+        .card:hover{ transform: translateY(-6px); box-shadow: 0 10px 18px rgba(0,0,0,.25); }
+        .shake { animation: shake .22s linear; }
         @keyframes shake {
             0%{ transform: translateX(0); }
             25%{ transform: translateX(-4px); }
             50%{ transform: translateX(4px); }
             75%{ transform: translateX(-3px); }
             100%{ transform: translateX(0); }
+        }
+        .glow { animation: glow 1s ease-in-out infinite alternate; }
+        @keyframes glow {
+            from { box-shadow: 0 0 5px #4ade80, 0 0 10px #4ade80; }
+            to { box-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; }
         }
     </style>
 </head>
@@ -55,73 +62,181 @@
         <div id="ui" class="relative w-full h-full p-4 text-slate-100 z-10 hidden">
             <div class="flex justify-between items-start">
                 <div class="p-3 rounded-xl bg-white/10 backdrop-blur border border-white/10">
-                    <div id="level-display" class="font-bold text-xl">레벨: 1</div>
+                    <div class="flex items-center justify-between gap-4">
+                        <div id="level-display" class="font-bold text-xl">레벨: 1</div>
+                        <div class="text-sm text-white/70">처치: <span id="kills-text">0</span></div>
+                    </div>
                     <div class="w-72 h-7 bg-white/10 rounded-full mt-2 border border-white/15 overflow-hidden">
                         <div id="hp-bar" class="h-full bg-rose-500 rounded-full text-center text-white text-sm" style="width: 100%;"></div>
                     </div>
-                    <div id="hp-text" class="text-sm font-semibold mt-1">40 / 40</div>
+                    <div class="flex items-center justify-between mt-1">
+                        <div id="hp-text" class="text-sm font-semibold">40 / 40</div>
+                        <div id="shield-text" class="text-xs text-cyan-300">🛡️ 0</div>
+                    </div>
+                    <div class="mt-2 w-72">
+                        <div class="flex justify-between text-[11px] text-white/70 mb-1">
+                            <span>감염</span><span id="infection-text">0%</span>
+                        </div>
+                        <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/10">
+                            <div id="infection-bar" class="h-full bg-lime-300" style="width:0%"></div>
+                        </div>
+                    </div>
+                    <div class="mt-2 w-72">
+                        <div class="flex justify-between text-[11px] text-white/70 mb-1">
+                            <span>XP</span><span id="xp-text">0 / 14</span>
+                        </div>
+                        <div class="w-full h-2 bg-white/10 rounded-full overflow-hidden border border-white/10">
+                            <div id="xp-bar" class="h-full bg-violet-400" style="width:0%"></div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="flex flex-col items-center gap-2">
                     <div id="timer" class="text-4xl font-extrabold bg-white/10 px-5 py-2 rounded-2xl shadow-lg border border-white/10">10:00</div>
-                    <div class="text-xs text-white/70">살아남으면 승리</div>
+                    <div class="text-xs text-white/70">
+                        <span class="font-semibold">살아남기</span> + <span class="font-semibold">움직이기</span>
+                    </div>
+                    <div id="toast" class="hidden px-4 py-2 rounded-xl bg-emerald-500/90 text-white font-bold text-sm"></div>
                 </div>
 
                 <div class="flex flex-col items-end gap-2">
-                    <div id="resource-display" class="font-bold text-xl bg-white/10 px-3 py-2 rounded-xl border border-white/10">
-                        ATP: <span id="atp-text">0</span>
+                    <div class="flex gap-2">
+                        <div class="font-bold text-xl bg-white/10 px-3 py-2 rounded-xl border border-white/10">
+                            ATP: <span id="atp-text">0</span>
+                        </div>
+                        <div class="font-bold text-xl bg-white/10 px-3 py-2 rounded-xl border border-white/10">
+                            GOLD: <span id="gold-hud-text">0</span>
+                        </div>
                     </div>
                     <div class="flex gap-2">
-                        <div id="weapon-ui" class="p-3 rounded-xl bg-white/10 border border-white/10 min-w-44"></div>
-                        <div id="passive-ui" class="p-3 rounded-xl bg-white/10 border border-white/10 min-w-44"></div>
+                        <div id="weapon-ui" class="p-3 rounded-xl bg-white/10 border border-white/10 min-w-52 text-xs"></div>
+                        <div id="passive-ui" class="p-3 rounded-xl bg-white/10 border border-white/10 min-w-52 text-xs"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- 모바일: 간단한 가이드 -->
             <div class="absolute bottom-4 left-4 text-xs text-white/60 bg-white/5 border border-white/10 rounded-xl px-3 py-2">
-                PC: WASD/방향키 • 모바일: 화면을 드래그하면 이동
+                PC: WASD/방향키 • 모바일: 드래그 • 스페이스: 일시정지
+            </div>
+
+            <div class="absolute bottom-4 right-4 flex gap-2">
+                <button id="openLabInGameBtn" class="ui-element bg-white/10 hover:bg-white/15 border border-white/10 text-white px-4 py-2 rounded-xl text-sm">
+                    연구소
+                </button>
             </div>
         </div>
 
         <!-- Title -->
-        <div id="titleModal" class="absolute inset-0 z-40 flex flex-col items-center justify-center modal-backdrop">
-            <div class="text-center text-white px-6">
+        <div id="titleModal" class="absolute inset-0 z-50 flex flex-col items-center justify-center modal-backdrop ui-element">
+            <div class="text-center text-white px-6 max-w-3xl">
                 <div class="inline-flex items-center gap-3 mb-4">
                     <div class="w-4 h-4 rounded-full bg-pink-400"></div>
                     <div class="w-4 h-4 rounded-full bg-sky-300"></div>
                     <div class="w-4 h-4 rounded-full bg-amber-300"></div>
                 </div>
-                <h1 class="text-7xl font-black mb-3 tracking-tight">면역 서바이버</h1>
-                <p class="text-xl text-white/80 mb-10">세포가 되어 바이러스의 파도를 버텨보세요 🧫🦠</p>
+                <h1 class="text-6xl font-black mb-3 tracking-tight">면역 서바이버</h1>
+                <p class="text-lg text-white/80 mb-6">세포가 되어 바이러스/세균의 파도를 버텨보세요 🧫🦠</p>
 
-                <button id="startBtn" class="ui-element bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-4 px-10 rounded-2xl text-3xl shadow-lg transition-transform transform hover:scale-[1.03]">
-                    시작
-                </button>
+                <div class="flex items-center justify-center gap-3 mb-6">
+                    <div class="bg-white/10 border border-white/10 rounded-2xl px-4 py-2 font-bold">
+                        GOLD: <span id="gold-title-text">0</span>
+                    </div>
+                    <div class="bg-white/10 border border-white/10 rounded-2xl px-4 py-2 font-bold">
+                        BEST: <span id="best-title-text">-</span>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 items-center">
+                    <button id="startBtn" class="ui-element bg-emerald-500 hover:bg-emerald-600 text-white font-extrabold py-4 px-10 rounded-2xl text-3xl shadow-lg transition-transform transform hover:scale-[1.02] w-[280px]">
+                        시작
+                    </button>
+                    <button id="openLabBtn" class="ui-element bg-white/10 hover:bg-white/15 border border-white/10 text-white font-bold py-3 px-10 rounded-2xl text-xl w-[280px]">
+                        연구소
+                    </button>
+                </div>
 
                 <div class="mt-6 text-sm text-white/60">
-                    로컬 에셋: <span class="font-mono">png/cell0.png</span> / <span class="font-mono">png/virus0.png</span>
+                    Ultimate Edition - 무기 진화 & 캐릭터 선택
+                </div>
+            </div>
+        </div>
+
+        <!-- Character Select -->
+        <div id="charModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop ui-element">
+            <div class="bg-white/95 p-8 rounded-2xl shadow-2xl text-center max-w-5xl max-h-[90vh] overflow-y-auto scroll-panel">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <div class="text-left">
+                        <h2 class="text-3xl font-black text-slate-900">세포 선택</h2>
+                        <p class="text-slate-600">역할에 따라 시작 무기/스탯이 달라요.</p>
+                    </div>
+                    <button id="closeCharBtn" class="ui-element px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold">
+                        닫기
+                    </button>
+                </div>
+                <div id="char-options" class="flex gap-4 flex-wrap justify-center"></div>
+            </div>
+        </div>
+
+        <!-- Research Lab -->
+        <div id="labModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop ui-element">
+            <div class="bg-white/95 p-6 rounded-2xl shadow-2xl max-w-6xl w-[min(1100px,95vw)] max-h-[90vh] overflow-y-auto scroll-panel">
+                <div class="flex items-center justify-between gap-4 mb-4">
+                    <div class="text-left">
+                        <h2 class="text-3xl font-black text-slate-900">연구소</h2>
+                        <p class="text-slate-600">GOLD로 영구 강화/해금</p>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <div class="px-4 py-2 rounded-xl bg-slate-100 border border-slate-200 font-extrabold text-slate-800">
+                            GOLD: <span id="gold-lab-text">0</span>
+                        </div>
+                        <button id="closeLabBtn" class="ui-element px-4 py-2 rounded-xl bg-slate-200 hover:bg-slate-300 text-slate-800 font-bold">
+                            닫기
+                        </button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                    <div class="text-left">
+                        <div class="font-black text-slate-900 text-lg mb-2">영구 강화</div>
+                        <div id="upgradeGrid" class="grid grid-cols-1 gap-2"></div>
+                    </div>
+
+                    <div class="text-left">
+                        <div class="font-black text-slate-900 text-lg mb-2">무기 해금</div>
+                        <div id="unlockGrid" class="grid grid-cols-1 gap-2"></div>
+                    </div>
+
+                    <div class="text-left">
+                        <div class="font-black text-slate-900 text-lg mb-2">진화 힌트</div>
+                        <div id="evoHints" class="text-xs text-slate-600 space-y-1"></div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Level Up -->
-        <div id="levelUpModal" class="hidden absolute inset-0 z-30 flex-col items-center justify-center modal-backdrop">
+        <div id="levelUpModal" class="hidden absolute inset-0 z-30 flex-col items-center justify-center modal-backdrop ui-element">
             <div class="bg-white/95 p-8 rounded-2xl shadow-2xl text-center max-w-5xl">
                 <h2 class="text-3xl font-black mb-2 text-slate-800">레벨 업</h2>
                 <p class="text-slate-600 mb-6">면역 반응을 강화하세요.</p>
-                <div id="card-options" class="flex gap-6 flex-wrap justify-center"></div>
+                <div id="card-options" class="flex gap-4 flex-wrap justify-center"></div>
             </div>
         </div>
 
         <!-- Game Over -->
-        <div id="gameOverModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop">
+        <div id="gameOverModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop ui-element">
             <div class="bg-white/95 p-10 rounded-2xl shadow-2xl text-center">
                 <h2 id="gameOverTitle" class="text-5xl font-black mb-3 text-slate-900">종료</h2>
-                <p id="gameOverText" class="text-lg mb-8 text-slate-700">스코어: 0</p>
-                <div class="flex gap-3 justify-center">
+                <p id="gameOverText" class="text-lg mb-3 text-slate-700">스코어: 0</p>
+                <p class="text-slate-700 mb-8">
+                    획득 GOLD: <span id="runGoldText" class="font-black">0</span>
+                </p>
+                <div class="flex gap-3 justify-center flex-wrap">
                     <button id="restartBtn" class="ui-element bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-7 rounded-xl text-xl">
                         다시 하기
+                    </button>
+                    <button id="openLabFromGameOverBtn" class="ui-element bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold py-3 px-7 rounded-xl text-xl">
+                        연구소
                     </button>
                     <button id="backToTitleBtn" class="ui-element bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-7 rounded-xl text-xl">
                         타이틀로
@@ -143,6 +258,17 @@
 
         const titleModal = document.getElementById('titleModal');
         const startBtn = document.getElementById('startBtn');
+        const openLabBtn = document.getElementById('openLabBtn');
+        const openLabInGameBtn = document.getElementById('openLabInGameBtn');
+        const charModal = document.getElementById('charModal');
+        const closeCharBtn = document.getElementById('closeCharBtn');
+        const charOptions = document.getElementById('char-options');
+
+        const labModal = document.getElementById('labModal');
+        const closeLabBtn = document.getElementById('closeLabBtn');
+        const upgradeGrid = document.getElementById('upgradeGrid');
+        const unlockGrid = document.getElementById('unlockGrid');
+        const evoHints = document.getElementById('evoHints');
 
         const levelUpModal = document.getElementById('levelUpModal');
         const cardOptionsContainer = document.getElementById('card-options');
@@ -150,102 +276,519 @@
         const gameOverModal = document.getElementById('gameOverModal');
         const gameOverTitle = document.getElementById('gameOverTitle');
         const gameOverText = document.getElementById('gameOverText');
+        const runGoldText = document.getElementById('runGoldText');
         const restartBtn = document.getElementById('restartBtn');
+        const openLabFromGameOverBtn = document.getElementById('openLabFromGameOverBtn');
         const backToTitleBtn = document.getElementById('backToTitleBtn');
 
         const hpBar = document.getElementById('hp-bar');
         const hpText = document.getElementById('hp-text');
+        const infectionBar = document.getElementById('infection-bar');
+        const infectionText = document.getElementById('infection-text');
+        const xpBar = document.getElementById('xp-bar');
+        const xpText = document.getElementById('xp-text');
         const levelDisplay = document.getElementById('level-display');
         const timerDisplay = document.getElementById('timer');
         const atpText = document.getElementById('atp-text');
         const weaponUI = document.getElementById('weapon-ui');
         const passiveUI = document.getElementById('passive-ui');
+        const killsText = document.getElementById('kills-text');
+        const shieldText = document.getElementById('shield-text');
+
+        const goldTitleText = document.getElementById('gold-title-text');
+        const bestTitleText = document.getElementById('best-title-text');
+        const goldHudText = document.getElementById('gold-hud-text');
+        const goldLabText = document.getElementById('gold-lab-text');
+        const toast = document.getElementById('toast');
 
         // ===== Config =====
         const ORIGINAL_UI_WIDTH = 1280;
         const ORIGINAL_UI_HEIGHT = 720;
         const GLOBAL_SCALE = 2.0;
 
-        // local assets (요청: /png 안에 배치)
-        const IMG_CELL = "png/cell0.png";
-        const IMG_VIRUS = "png/virus0.png";
+        const IMG_CELL_LIST = Array.from({length:6}, (_,i)=>`png/cell${i}.png`);
+        const IMG_VIRUS_LIST = Array.from({length:6}, (_,i)=>`png/virus${i}.png`);
+
+        // ===== Meta (persistent) =====
+        const META_KEY = "immune_survivor_ultimate_v1";
+        const META_DEFAULT = () => ({
+            gold: 0,
+            bestScore: 0,
+            bestLabel: "",
+            upgrades: {
+                vitamin: 0,
+                vaccine: 0,
+                antibiotic: 0,
+                hygiene: 0,
+                booster: 0,
+                training: 0,
+                lucky: 0,
+            },
+            unlockedWeapons: {
+                W_MEMBRANE: true,
+                W_ANTIBODY: true,
+                W_DART: true,
+                W_SPIKE: true,
+                W_PHAGO: true,
+                W_COMPLEMENT: true,
+                W_INTERFERON: false,
+                W_SHOTGUN: false,
+                W_CHAIN: false,
+                W_MINE: false,
+                W_NEUTRALIZE: false,
+                W_LASER: false,
+                W_FIELD: false,
+                W_BOOMERANG: false,
+            }
+        });
+
+        function loadMeta(){
+            try{
+                const raw = localStorage.getItem(META_KEY);
+                if(!raw) return META_DEFAULT();
+                const m = JSON.parse(raw);
+                const d = META_DEFAULT();
+                return {
+                    ...d,
+                    ...m,
+                    upgrades: { ...d.upgrades, ...(m.upgrades||{}) },
+                    unlockedWeapons: { ...d.unlockedWeapons, ...(m.unlockedWeapons||{}) },
+                };
+            }catch(e){
+                return META_DEFAULT();
+            }
+        }
+        function saveMeta(){
+            localStorage.setItem(META_KEY, JSON.stringify(meta));
+            syncTitleMetaUI();
+        }
+
+        let meta = loadMeta();
+
+        // ===== Research definitions =====
+        const UPGRADE_DB = {
+            vitamin: { name: "비타민 복용", max: 10, baseCost: 40, costMult: 1.33, short: "최대 HP +4/레벨", note: "영양 보충" },
+            vaccine: { name: "백신 투여", max: 10, baseCost: 80, costMult: 1.36, short: "바이러스 피해 -2%/레벨", note: "면역 기억 강화" },
+            antibiotic: { name: "항생제 복용", max: 10, baseCost: 60, costMult: 1.35, short: "세균 피해 -3%/레벨", note: "2차 감염 대비" },
+            hygiene: { name: "위생 습관", max: 10, baseCost: 35, costMult: 1.30, short: "이동속도 +2%/레벨", note: "접촉 회피" },
+            booster: { name: "부스터 샷", max: 10, baseCost: 70, costMult: 1.34, short: "쿨타임 -2%/레벨", note: "반응 속도 증가" },
+            training: { name: "면역 훈련", max: 10, baseCost: 50, costMult: 1.32, short: "XP 획득 +3%/레벨", note: "학습 속도 증가" },
+            lucky: { name: "행운", max: 5, baseCost: 100, costMult: 1.5, short: "레벨업 선택지 +1", note: "더 많은 선택권" },
+        };
+
+        const UNLOCK_DB = [
+            { id:"W_INTERFERON", name:"인터페론 파동", cost:120, desc:"주기적 광역 파동" },
+            { id:"W_SHOTGUN", name:"항체 산탄", cost:140, desc:"5발 산탄 발사" },
+            { id:"W_CHAIN", name:"사이토카인 체인", cost:170, desc:"연쇄 4타격" },
+            { id:"W_MINE", name:"면역 지뢰", cost:160, desc:"설치형 폭발" },
+            { id:"W_NEUTRALIZE", name:"중화 폭발", cost:190, desc:"폭발성 투사체" },
+            { id:"W_LASER", name:"항체 레이저", cost:220, desc:"관통 직선 빔" },
+            { id:"W_FIELD", name:"사이토카인 필드", cost:250, desc:"주변 지속 피해" },
+            { id:"W_BOOMERANG", name:"부메랑 항체", cost:200, desc:"돌아오는 투사체" },
+        ];
+
+        function upgradeCost(key){
+            const u = UPGRADE_DB[key];
+            const lv = meta.upgrades[key] || 0;
+            return Math.floor(u.baseCost * Math.pow(u.costMult, lv));
+        }
+
+        function tryBuyUpgrade(key){
+            const u = UPGRADE_DB[key];
+            const lv = meta.upgrades[key] || 0;
+            if(lv >= u.max) return;
+            const cost = upgradeCost(key);
+            if(meta.gold < cost) return;
+            meta.gold -= cost;
+            meta.upgrades[key] = lv + 1;
+            saveMeta();
+            renderLab();
+            showToast(`${u.name} Lv.${lv+1} 구매!`);
+        }
+
+        function tryUnlockWeapon(id){
+            if(meta.unlockedWeapons[id]) return;
+            const item = UNLOCK_DB.find(x => x.id === id);
+            if(!item) return;
+            if(meta.gold < item.cost) return;
+            meta.gold -= item.cost;
+            meta.unlockedWeapons[id] = true;
+            saveMeta();
+            renderLab();
+            showToast(`${item.name} 해금!`);
+        }
+
+        function syncTitleMetaUI(){
+            if(goldTitleText) goldTitleText.textContent = `${meta.gold}`;
+            if(goldHudText) goldHudText.textContent = `${meta.gold}`;
+            if(goldLabText) goldLabText.textContent = `${meta.gold}`;
+            if(bestTitleText) bestTitleText.textContent = meta.bestScore > 0 ? `${meta.bestScore}` : "-";
+        }
+
+        function renderLab(){
+            syncTitleMetaUI();
+
+            upgradeGrid.innerHTML = "";
+            for(const key of Object.keys(UPGRADE_DB)){
+                const u = UPGRADE_DB[key];
+                const lv = meta.upgrades[key] || 0;
+                const cost = (lv >= u.max) ? null : upgradeCost(key);
+                const can = (cost != null && meta.gold >= cost);
+
+                const el = document.createElement("div");
+                el.className = "card p-3 text-left text-sm";
+                el.innerHTML = `
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="font-black text-slate-900">${u.name}</div>
+                        <div class="text-xs text-slate-600">${u.short}</div>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-xs font-extrabold text-slate-900">Lv.${lv}/${u.max}</div>
+                        <div class="text-xs text-slate-500">${cost==null ? "MAX" : cost+"G"}</div>
+                    </div>
+                </div>
+                <button class="ui-element mt-2 w-full ${can ? "bg-emerald-600 hover:bg-emerald-700" : "bg-slate-200"} text-white font-bold py-1 rounded-lg text-xs ${can ? "" : "opacity-70"}">
+                    ${cost==null ? "최대" : (can ? "구매" : "부족")}
+                </button>
+            `;
+                el.querySelector("button").onclick = () => tryBuyUpgrade(key);
+                upgradeGrid.appendChild(el);
+            }
+
+            unlockGrid.innerHTML = "";
+            for(const item of UNLOCK_DB){
+                const unlocked = !!meta.unlockedWeapons[item.id];
+                const can = (!unlocked && meta.gold >= item.cost);
+
+                const el = document.createElement("div");
+                el.className = "card p-3 text-left text-sm";
+                el.innerHTML = `
+                <div class="flex items-start justify-between gap-2">
+                    <div>
+                        <div class="font-black text-slate-900">${item.name}</div>
+                        <div class="text-xs text-slate-600">${item.desc}</div>
+                    </div>
+                    <div class="text-xs text-slate-500">${unlocked ? "✓" : item.cost+"G"}</div>
+                </div>
+                <button class="ui-element mt-2 w-full ${unlocked ? "bg-slate-300" : (can ? "bg-sky-600 hover:bg-sky-700" : "bg-slate-200")} text-white font-bold py-1 rounded-lg text-xs">
+                    ${unlocked ? "완료" : (can ? "해금" : "부족")}
+                </button>
+            `;
+                el.querySelector("button").onclick = () => tryUnlockWeapon(item.id);
+                unlockGrid.appendChild(el);
+            }
+
+            // Evolution hints
+            evoHints.innerHTML = "";
+            for(const evo of EVOLUTIONS){
+                const w = WEAPON_DB[evo.from];
+                const p = PASSIVE_DB[evo.needPassive];
+                const t = WEAPON_DB[evo.to];
+                if(!w || !p || !t) continue;
+                const div = document.createElement("div");
+                div.className = "p-2 bg-slate-100 rounded-lg";
+                div.innerHTML = `<b>${w.name}</b> Lv.${evo.minLevel} + <b>${p.name}</b> → <span class="text-emerald-600 font-black">${t.name}</span>`;
+                evoHints.appendChild(div);
+            }
+        }
+
+        // ===== Characters =====
+        const CHARACTER_DB = {
+            macrophage: {
+                name: "대식세포",
+                role: "탱커",
+                desc: "HP↑ 방어↑ 속도↓",
+                color: "#f472b6",
+                mods: (p) => {
+                    p.maxHp *= 1.25;
+                    p.hp = p.maxHp;
+                    p.defense += 2;
+                    p.speed *= 0.92;
+                    p.infectionGainMult *= 0.85;
+                },
+                startWeapons: ["W_MEMBRANE", "W_PHAGO"],
+                startPassives: ["P_REGEN"]
+            },
+            tcell: {
+                name: "T세포",
+                role: "딜러",
+                desc: "데미지↑ HP↓",
+                color: "#60a5fa",
+                mods: (p) => {
+                    p.maxHp *= 0.90;
+                    p.hp = p.maxHp;
+                    p.damageMultiplier += 0.18;
+                    p.speed *= 1.05;
+                },
+                startWeapons: ["W_MEMBRANE", "W_ANTIBODY"],
+                startPassives: ["P_AMP"]
+            },
+            bcell: {
+                name: "B세포",
+                role: "원거리",
+                desc: "XP↑ 관통↑ 수집↑",
+                color: "#a78bfa",
+                mods: (p) => {
+                    p.xpMultiplier += 0.10;
+                    p.projectilePierceBonus += 1;
+                    p.pickupRadius *= 1.15;
+                },
+                startWeapons: ["W_ANTIBODY", "W_COMPLEMENT"],
+                startPassives: ["P_MEMORY"]
+            },
+            nk: {
+                name: "NK세포",
+                role: "암살자",
+                desc: "치명타↑ 쿨감↑",
+                color: "#f87171",
+                mods: (p) => {
+                    p.maxHp *= 0.85;
+                    p.hp = p.maxHp;
+                    p.critChance += 0.15;
+                    p.critDamage += 0.5;
+                    p.cooldownReduction *= 0.90;
+                },
+                startWeapons: ["W_MEMBRANE", "W_ANTIBODY"],
+                startPassives: ["P_CRIT"]
+            },
+            dendritic: {
+                name: "수지상세포",
+                role: "서포터",
+                desc: "XP↑↑ 무기획득↑",
+                color: "#fbbf24",
+                mods: (p) => {
+                    p.xpMultiplier += 0.25;
+                    p.luckyBonus += 1;
+                },
+                startWeapons: ["W_ANTIBODY"],
+                startPassives: ["P_MEMORY", "P_SCAVENGE"]
+            },
+        };
+
+        const CHAR_SKIN_MAP = {
+            macrophage: 0,
+            tcell: 1,
+            bcell: 2,
+            nk: 3,
+            dendritic: 4,
+        };
+        let selectedCharId = "tcell";
+        let charSelectReturnState = "title";
+        let labReturnState = "title";
+
+        function openCharSelect(){
+            setCanvasInputEnabled(false);
+            // 어떤 화면에서 열어도 모달이 겹치지 않게 정리
+            charSelectReturnState = gameState;
+            gameOverModal.style.display = "none";
+            levelUpModal.style.display = "none";
+            labModal.style.display = "none";
+
+            // ✅ 타이틀에서 캐릭터를 고르면, 타이틀 오버레이가 남아있는 현상 방지
+            titleModal.style.display = "none";
+            titleModal.classList.add("hidden");
+
+            charOptions.innerHTML = "";
+            for(const [id, c] of Object.entries(CHARACTER_DB)){
+                const card = document.createElement("div");
+                card.className = "card ui-element w-56 p-4 cursor-pointer text-left";
+                const skin = (CHAR_SKIN_MAP[id] ?? 0);
+                card.innerHTML = `
+                <div class="flex items-start gap-3">
+                    <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                        <img class="pixel-img w-full h-full object-contain" src="png/cell${skin}.png" alt="${c.name}" />
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center justify-between mb-1">
+                            <div class="text-lg font-black text-slate-900">${c.name}</div>
+                            <div class="text-xs font-bold px-2 py-1 rounded-xl" style="background:${c.color}30;color:${c.color}">${c.role}</div>
+                        </div>
+                        <div class="text-slate-700 text-sm">${c.desc}</div>
+                        <div class="mt-2 text-xs text-slate-500">
+                            시작: ${c.startWeapons.map(w => WEAPON_DB[w]?.name || w).join(", ")}
+                        </div>
+                    </div>
+                </div>
+                <button class="ui-element mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl">
+                    <span class="inline-flex items-center justify-center gap-2">
+                        <img class="pixel-img w-5 h-5" src="png/cell${skin}.png" alt="" />
+                        선택
+                    </span>
+                </button>
+            `;
+                card.querySelector("button").onclick = () => {
+                    selectedCharId = id;
+                    charModal.style.display = "none";
+                    startGame();
+                };
+                charOptions.appendChild(card);
+            }
+            charModal.style.display = "flex";
+        }
 
         // ===== Images =====
-        const imageCache = {};
-        function preloadImages() {
-            imageCache['cell'] = new Image();
-            imageCache['cell'].src = IMG_CELL;
+        const imageCache = { cell: [], virus: [] };
+        function setCanvasInputEnabled(enabled){
+            canvas.style.pointerEvents = enabled ? "auto" : "none";
+            canvas.style.touchAction = enabled ? "none" : "auto";
+        }
 
-            imageCache['virus'] = new Image();
-            imageCache['virus'].src = IMG_VIRUS;
+        function preloadImages(){
+            // preload 6 skins each
+            imageCache.cell = IMG_CELL_LIST.map(src => { const img = new Image(); img.src = src; return img; });
+            imageCache.virus = IMG_VIRUS_LIST.map(src => { const img = new Image(); img.src = src; return img; });
         }
 
         // ===== Game State =====
-        let gameState = 'title'; // title, playing, paused, gameOver
-
+        let gameState = 'title';
         let keys = {};
         let touch = { active:false, id:null, startX:0, startY:0, dx:0, dy:0 };
 
-        let player, enemies, projectiles, pickups, effects;
+        let player, enemies, projectiles, enemyProjectiles, pickups, effects, mines, summons;
         let camera;
         let lastTime = 0;
-        let gameTimeMs = 0; // countdown
+        let gameTimeMs = 0;
         let lastSpawnTimes = {};
         let seed = 1;
+        let runStats = { kills:0, survivedSec:0, score:0, goldEarned:0 };
+        let toastTimer = 0;
 
-        // ===== Database (면역 테마) =====
+        // ===== Content =====
         const WEAPON_DB = {
-            W_MEMBRANE: { name:"세포막 충돌", desc:"근접 부채꼴 공격", baseDmg: 18, cooldown: 650, range: 44 * GLOBAL_SCALE, angle: 55, type:'melee' },
-            W_ANTIBODY: { name:"항체 발사", desc:"가장 가까운 바이러스에 탄환", baseDmg: 12, cooldown: 460, projectileSpeed: 9.5, pierce: 1, projectileSize: 8 * GLOBAL_SCALE, type:'ranged' },
-            W_PHAGO: { name:"식세포 포식", desc:"느리지만 강력한 원형 공격", baseDmg: 30, cooldown: 1200, range: 36 * GLOBAL_SCALE, type:'melee_slam' },
-            W_INTERFERON: { name:"인터페론 파동", desc:"주기적으로 파동 방출", baseDmg: 22, cooldown: 2700, maxRadius: 220 * GLOBAL_SCALE * 0.35, pulseSpeed: 3.2, type:'pulse' },
-            W_COMPLEMENT: { name:"보체 링", desc:"주위를 도는 보체로 타격", baseDmg: 8, cooldown: 100, count: 1, orbitRadius: 70 * GLOBAL_SCALE, orbitSpeed: 2.2, type:'orbital' },
+            // === 기본 무기 ===
+            W_MEMBRANE: { name:"세포막 충돌", desc:"근접 부채꼴", baseDmg: 16, cooldown: 700, range: 44*GLOBAL_SCALE, angle: 55, type:'melee' },
+            W_ANTIBODY: { name:"항체 발사", desc:"단일 타겟 탄환", baseDmg: 11, cooldown: 500, projectileSpeed: 9.5, pierce: 1, projectileSize: 8*GLOBAL_SCALE, type:'ranged' },
+            W_DART: { name:"항체 다트", desc:"3연사(좁은 산탄)", baseDmg: 5, cooldown: 420, pellet: 3, spreadDeg: 12, projectileSpeed: 11.0, pierce: 1, projectileSize: 6*GLOBAL_SCALE, type:'ranged_spread' },
+            W_SPIKE: { name:"면역 스파이크", desc:"관통 2발", baseDmg: 9, cooldown: 650, projectileSpeed: 12.0, pierce: 2, projectileSize: 7*GLOBAL_SCALE, type:'ranged' },
+
+            W_PHAGO: { name:"식세포 포식", desc:"강력한 원형 공격", baseDmg: 28, cooldown: 1400, range: 38*GLOBAL_SCALE, type:'melee_slam' },
+            W_COMPLEMENT: { name:"보체 링", desc:"공전 보체", baseDmg: 8, cooldown: 100, count: 1, orbitRadius: 70*GLOBAL_SCALE, orbitSpeed: 2.2, type:'orbital' },
+
+            // === 해금 무기 ===
+            W_INTERFERON: { name:"인터페론 파동", desc:"광역 파동", baseDmg: 20, cooldown: 3000, maxRadius: 220*GLOBAL_SCALE*0.35, pulseSpeed: 3.2, type:'pulse' },
+            W_SHOTGUN: { name:"항체 산탄", desc:"5발 산탄", baseDmg: 6, cooldown: 800, projectileSpeed: 9.0, pellet: 5, spreadDeg: 28, pierce: 1, projectileSize: 7*GLOBAL_SCALE, type:'ranged_spread' },
+            W_CHAIN: { name:"사이토카인 체인", desc:"연쇄 4타격", baseDmg: 15, cooldown: 1300, bounces: 4, bounceRange: 140*GLOBAL_SCALE*0.55, type:'chain' },
+            W_MINE: { name:"면역 지뢰", desc:"설치 폭발", baseDmg: 32, cooldown: 1900, triggerRadius: 52*GLOBAL_SCALE, blastRadius: 95*GLOBAL_SCALE*0.55, type:'mine' },
+            W_NEUTRALIZE: { name:"중화 폭발", desc:"폭발 투사체", baseDmg: 18, cooldown: 1200, projectileSpeed: 8.2, pierce: 1, projectileSize: 9*GLOBAL_SCALE, blastRadius: 105*GLOBAL_SCALE*0.55, type:'ranged_bomb' },
+            W_LASER: { name:"항체 레이저", desc:"관통 빔", baseDmg: 25, cooldown: 1800, range: 400*GLOBAL_SCALE*0.5, width: 12, duration: 300, type:'laser' },
+            W_FIELD: { name:"사이토카인 필드", desc:"주변 지속피해", baseDmg: 3, cooldown: 200, radius: 80*GLOBAL_SCALE, type:'field' },
+            W_BOOMERANG: { name:"부메랑 항체", desc:"돌아오는 투사체", baseDmg: 14, cooldown: 1100, projectileSpeed: 7.0, projectileSize: 12*GLOBAL_SCALE, maxDist: 200*GLOBAL_SCALE, type:'boomerang' },
+
+            // === 진화 무기 (hidden) ===
+            W_VACCINE_BOLT: { hidden:true, name:"백신 볼트", desc:"강화 연사", baseDmg: 18, cooldown: 280, projectileSpeed: 12.5, projectileSize: 9*GLOBAL_SCALE, pierce: 3, type:'ranged' },
+            W_INTERFERON_STORM: { hidden:true, name:"인터페론 폭풍", desc:"대형 연속파동", baseDmg: 22, cooldown: 1600, maxRadius: 300*GLOBAL_SCALE*0.35, pulseSpeed: 4.4, type:'pulse' },
+            W_COMPLEMENT_SWARM: { hidden:true, name:"보체 스웜", desc:"다수 고속 공전", baseDmg: 12, cooldown: 100, count: 4, orbitRadius: 85*GLOBAL_SCALE, orbitSpeed: 3.0, type:'orbital' },
+            W_MEMBRANE_BLADE: { hidden:true, name:"세포막 블레이드", desc:"광역 연속베기", baseDmg: 24, cooldown: 450, range: 65*GLOBAL_SCALE, angle: 100, type:'melee' },
+            W_SHOTGUN_STORM: { hidden:true, name:"산탄 폭풍", desc:"8발 산탄", baseDmg: 8, cooldown: 600, projectileSpeed: 10, pellet: 8, spreadDeg: 50, pierce: 2, projectileSize: 8*GLOBAL_SCALE, type:'ranged_spread' },
+            W_CHAIN_LIGHTNING: { hidden:true, name:"연쇄 번개", desc:"8연쇄 강화", baseDmg: 20, cooldown: 1000, bounces: 8, bounceRange: 180*GLOBAL_SCALE*0.55, type:'chain' },
+            W_SUPER_BOMB: { hidden:true, name:"슈퍼 폭탄", desc:"거대 폭발", baseDmg: 35, cooldown: 1400, projectileSpeed: 7.0, pierce: 1, projectileSize: 14*GLOBAL_SCALE, blastRadius: 160*GLOBAL_SCALE*0.55, type:'ranged_bomb' },
+            W_CLUSTER_MINE: { hidden:true, name:"클러스터 지뢰", desc:"분열 폭발", baseDmg: 25, cooldown: 2200, triggerRadius: 60*GLOBAL_SCALE, blastRadius: 120*GLOBAL_SCALE*0.55, cluster: 4, type:'mine' },
+            W_MEGA_LASER: { hidden:true, name:"메가 레이저", desc:"관통 대형빔", baseDmg: 45, cooldown: 2000, range: 500*GLOBAL_SCALE*0.5, width: 24, duration: 400, type:'laser' },
+            W_PLASMA_FIELD: { hidden:true, name:"플라즈마 필드", desc:"강화 지속피해", baseDmg: 6, cooldown: 150, radius: 120*GLOBAL_SCALE, type:'field' },
         };
+
+        // ===== Weapon Evolution =====
+        const EVOLUTIONS = [
+            { from:'W_ANTIBODY', needPassive:'P_PIERCE', minLevel:5, to:'W_VACCINE_BOLT', text:'항체 발사 → 백신 볼트' },
+            { from:'W_INTERFERON', needPassive:'P_CYTOKINE', minLevel:4, to:'W_INTERFERON_STORM', text:'인터페론 → 폭풍' },
+            { from:'W_COMPLEMENT', needPassive:'P_AMP', minLevel:4, to:'W_COMPLEMENT_SWARM', text:'보체 링 → 스웜' },
+            { from:'W_MEMBRANE', needPassive:'P_RANGE', minLevel:4, to:'W_MEMBRANE_BLADE', text:'세포막 → 블레이드' },
+            { from:'W_SHOTGUN', needPassive:'P_PIERCE', minLevel:4, to:'W_SHOTGUN_STORM', text:'산탄 → 폭풍' },
+            { from:'W_CHAIN', needPassive:'P_AMP', minLevel:4, to:'W_CHAIN_LIGHTNING', text:'체인 → 번개' },
+            { from:'W_NEUTRALIZE', needPassive:'P_RANGE', minLevel:4, to:'W_SUPER_BOMB', text:'중화 → 슈퍼폭탄' },
+            { from:'W_MINE', needPassive:'P_THORNS', minLevel:4, to:'W_CLUSTER_MINE', text:'지뢰 → 클러스터' },
+            { from:'W_LASER', needPassive:'P_AMP', minLevel:4, to:'W_MEGA_LASER', text:'레이저 → 메가' },
+            { from:'W_FIELD', needPassive:'P_RANGE', minLevel:4, to:'W_PLASMA_FIELD', text:'필드 → 플라즈마' },
+        ];
+
+        function tryEvolveWeapons(){
+            if(!player || !player.weapons) return false;
+            let evolved = false;
+
+            for(const evo of EVOLUTIONS){
+                const w = player.weapons[evo.from];
+                if(!w) continue;
+                if(player.weapons[evo.to]) continue;
+                if(!player.passives || !player.passives[evo.needPassive]) continue;
+                if((w.level || 1) < evo.minLevel) continue;
+
+                delete player.weapons[evo.from];
+                addWeapon(evo.to, true, true);
+                player.weapons[evo.to].level = 1;
+                player.weapons[evo.to].timer = 0;
+
+                showToast(`⚡ 무기 진화! ${evo.text}`);
+                evolved = true;
+            }
+            return evolved;
+        }
 
         const PASSIVE_DB = {
             P_MEMBRANE: { name:"막 강화", desc:"방어력 +2", effect: p => { p.defense += 2; } },
-            P_CHEMO: { name:"주화성", desc:"이동 속도 +15%", effect: p => { p.speed *= 1.15; } },
-            P_MITO: { name:"미토 부스트", desc:"최대 HP +15%", effect: p => { p.maxHp *= 1.15; p.hp = p.maxHp; } },
-            P_AMP: { name:"항체 증폭", desc:"모든 피해 +12%", effect: p => { p.damageMultiplier += 0.12; } },
-            P_MEMORY: { name:"면역 기억", desc:"XP 획득 +10%", effect: p => { p.xpMultiplier += 0.10; } },
-            P_CYTOKINE: { name:"사이토카인 튜닝", desc:"재사용 대기시간 -6%", effect: p => { p.cooldownReduction *= 0.94; } },
-            P_RANGE: { name:"반응 범위 확장", desc:"범위 스킬 크기 +20%", effect: p => {
+            P_CHEMO: { name:"주화성", desc:"이동속도 +15%", effect: p => { p.speed *= 1.15; } },
+            P_MITO: { name:"미토 부스트", desc:"최대 HP +15%", effect: p => { p.maxHp *= 1.15; p.hp = Math.min(p.hp, p.maxHp); } },
+            P_AMP: { name:"항체 증폭", desc:"피해 +12%", effect: p => { p.damageMultiplier += 0.12; } },
+            P_MEMORY: { name:"면역 기억", desc:"XP +10%", effect: p => { p.xpMultiplier += 0.10; } },
+            P_CYTOKINE: { name:"사이토카인", desc:"쿨타임 -6%", effect: p => { p.cooldownReduction *= 0.94; } },
+            P_RANGE: { name:"범위 확장", desc:"범위 +20%", effect: p => {
                     Object.values(p.weapons).forEach(w => {
-                        if (w.type === 'melee' || w.type === 'melee_slam') {
-                            w.range *= 1.2;
-                            if (w.angle) w.angle *= 1.15;
-                        }
+                        if (w.type === 'melee' || w.type === 'melee_slam') { w.range *= 1.2; if(w.angle) w.angle *= 1.15; }
                         if (w.type === 'pulse') w.maxRadius *= 1.2;
                         if (w.type === 'orbital') w.orbitRadius *= 1.12;
+                        if (w.type === 'mine' || w.type === 'ranged_bomb') { if(w.blastRadius) w.blastRadius *= 1.15; if(w.triggerRadius) w.triggerRadius *= 1.15; }
+                        if (w.type === 'field') w.radius *= 1.2;
+                        if (w.type === 'laser') { w.range *= 1.15; w.width *= 1.2; }
                     });
-                } },
+                }},
+            P_REGEN: { name:"자가 회복", desc:"초당 HP +0.7", effect: p => { p.regenPerSec += 0.7; } },
+            P_SCAVENGE: { name:"흡수 범위", desc:"획득 범위 +25%", effect: p => { p.pickupRadius *= 1.25; } },
+            P_PIERCE: { name:"관통 항체", desc:"투사체 관통 +1", effect: p => { p.projectilePierceBonus += 1; } },
+            P_THORNS: { name:"접촉 반격", desc:"근접 적에게 반격", effect: p => { p.thorns += 5; } },
+            P_KILLHEAL: { name:"포식 보너스", desc:"처치 시 HP +0.2", effect: p => { p.healOnKill += 0.2; } },
+            P_CLEAN: { name:"해독 효소", desc:"감염 감소 +25%", effect: p => { p.infectionDecayMult *= 1.25; } },
+            P_SHIELD: { name:"보호막 재생", desc:"보호막 주기 -20%", effect: p => { p.shieldInterval *= 0.8; } },
+            P_CRIT: { name:"치명타", desc:"치명타 확률 +8%", effect: p => { p.critChance += 0.08; } },
+            P_CRITDMG: { name:"치명타 강화", desc:"치명타 데미지 +30%", effect: p => { p.critDamage += 0.30; } },
+            P_LIFESTEAL: { name:"흡혈", desc:"피해의 3% 회복", effect: p => { p.lifesteal += 0.03; } },
+            P_GROWTH: { name:"성장", desc:"레벨당 데미지 +2%", effect: p => { p.growthDmgPerLevel += 0.02; } },
+            P_MAGNET: { name:"강력 자석", desc:"획득 범위 +40%", effect: p => { p.pickupRadius *= 1.40; } },
         };
 
         const ENEMY_CATALOG = {
-            virus:        { name:'바이러스',         hp: 18, dmg: 3, spd: 2.6, size: 18 * GLOBAL_SCALE, xp: 1, imgKey: 'virus' },
-            fastVirus:    { name:'돌연변이 바이러스', hp: 14, dmg: 3, spd: 3.6, size: 16 * GLOBAL_SCALE, xp: 2, imgKey: 'virus' },
-            tankVirus:    { name:'캡시드 강화체',    hp: 42, dmg: 5, spd: 1.9, size: 23 * GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
-            clusterVirus: { name:'군집 바이러스',    hp: 26, dmg: 4, spd: 2.4, size: 20 * GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
+            virus:        { name:'바이러스',         hp: 18, dmg: 4, spd: 2.7, size: 18*GLOBAL_SCALE, xp: 1, imgKey: 'virus' },
+            fastVirus:    { name:'돌연변이',         hp: 16, dmg: 4, spd: 3.8, size: 16*GLOBAL_SCALE, xp: 2, imgKey: 'virus' },
+            tankVirus:    { name:'캡시드 강화체',    hp: 50, dmg: 6, spd: 2.0, size: 24*GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
+            clusterVirus: { name:'군집 바이러스',    hp: 28, dmg: 5, spd: 2.5, size: 20*GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
+            spitterVirus: { name:'스피터',           hp: 24, dmg: 3, spd: 2.2, size: 19*GLOBAL_SCALE, xp: 3, imgKey: 'virus' },
+            chargerVirus: { name:'차저',             hp: 28, dmg: 8, spd: 2.4, size: 19*GLOBAL_SCALE, xp: 4, imgKey: 'virus' },
+            bacteria:     { name:'세균',             hp: 38, dmg: 6, spd: 2.3, size: 21*GLOBAL_SCALE, xp: 4, imgKey: 'virus' },
+            superVirus:   { name:'슈퍼바이러스',     hp: 500, dmg: 12, spd: 2.0, size: 32*GLOBAL_SCALE, xp: 30, imgKey: 'virus' },
         };
 
-        // 시간대 별 스폰 패턴
         const SPAWNER_CLIPS = [
-            { start: 0,   end: 60,  enemies: [{ type:"virus", every: 1.7, count:[5,7] }] },
-            { start: 60,  end: 120, enemies: [{ type:"virus", every: 2.3, count:[4,6] }, { type:"fastVirus", every: 4.2, count:[1,2] }] },
-            { start: 120, end: 180, enemies: [{ type:"fastVirus", every: 3.4, count:[2,3] }, { type:"clusterVirus", every: 4.3, count:[2,3] }] },
-            { start: 180, end: 240, enemies: [{ type:"clusterVirus", every: 3.2, count:[3,5] }, { type:"tankVirus", every: 5.3, count:[1,2] }] },
-            { start: 240, end: 360, enemies: [{ type:"virus", every: 1.6, count:[6,9] }, { type:"tankVirus", every: 4.4, count:[1,2] }, { type:"fastVirus", every: 3.6, count:[2,3] }] },
-            { start: 360, end: 540, enemies: [{ type:"clusterVirus", every: 2.8, count:[4,6] }, { type:"tankVirus", every: 3.8, count:[2,3] }, { type:"fastVirus", every: 2.9, count:[2,4] }] },
-            { start: 540, end: 600, enemies: [{ type:"virus", every: 1.1, count:[10,15] }, { type:"fastVirus", every: 2.2, count:[4,7] }, { type:"tankVirus", every: 3.2, count:[2,4] }] },
+            { start: 0,   end: 60,  enemies: [{ type:"virus", every: 1.3, count:[6,9] }] },
+            { start: 60,  end: 120, enemies: [{ type:"virus", every: 1.4, count:[7,10] }, { type:"fastVirus", every: 3.5, count:[2,3] }] },
+            { start: 120, end: 210, enemies: [{ type:"fastVirus", every: 3.0, count:[2,4] }, { type:"clusterVirus", every: 3.5, count:[3,5] }] },
+            { start: 210, end: 300, enemies: [{ type:"clusterVirus", every: 2.8, count:[4,6] }, { type:"tankVirus", every: 5.0, count:[1,2] }, { type:"spitterVirus", every: 5.0, count:[1,2] }] },
+            { start: 300, end: 420, enemies: [{ type:"virus", every: 1.2, count:[10,15] }, { type:"tankVirus", every: 4.2, count:[1,2] }, { type:"spitterVirus", every: 4.0, count:[2,3] }, { type:"chargerVirus", every: 4.5, count:[1,2] }] },
+            { start: 420, end: 540, enemies: [{ type:"clusterVirus", every: 2.0, count:[5,8] }, { type:"tankVirus", every: 3.5, count:[2,3] }, { type:"spitterVirus", every: 3.5, count:[2,4] }, { type:"chargerVirus", every: 3.8, count:[2,3] }] },
+            { start: 540, end: 9999, enemies: [{ type:"virus", every: 0.9, count:[12,18] }, { type:"fastVirus", every: 2.0, count:[4,7] }, { type:"tankVirus", every: 3.0, count:[2,4] }, { type:"spitterVirus", every: 2.8, count:[3,5] }, { type:"chargerVirus", every: 3.0, count:[3,5] }] },
         ];
 
         // ===== Utils =====
-        function rand() {
-            // 작은 고정 PRNG: 재현성 좋고 가볍게
+        function rand(){
             seed = (seed * 1664525 + 1013904223) >>> 0;
             return seed / 4294967296;
         }
         function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
+
+        function showToast(msg, ms = 1800){
+            if(!toast) return;
+            toast.textContent = msg;
+            toast.classList.remove('hidden');
+            toastTimer = ms;
+        }
 
         function resizeGame(){
             canvas.width = window.innerWidth;
@@ -264,47 +807,99 @@
 
         // ===== Core init =====
         function initGame(){
-            gameTimeMs = 600 * 1000; // 10 minutes
+            gameTimeMs = 600 * 1000;
             lastSpawnTimes = {};
             enemies = [];
             projectiles = [];
+            enemyProjectiles = [];
             pickups = [];
             effects = [];
+            mines = [];
+            summons = [];
             camera = { x:0, y:0 };
+
+            runStats = { kills:0, survivedSec:0, score:0, goldEarned:0 };
 
             player = {
                 x:0, y:0,
                 size: 26 * GLOBAL_SCALE,
-                speed: 3.2,
-                hp: 46, maxHp: 46,
+                speed: 3.0,
+                hp: 40, maxHp: 40,
                 defense: 0,
                 level: 1,
                 xp: 0,
-                xpToNextLevel: 12,
-                pickupRadius: 56 * GLOBAL_SCALE,
+                xpToNextLevel: 14,
+                pickupRadius: 54 * GLOBAL_SCALE,
                 weapons: {},
                 passives: {},
                 invincible: false,
                 invincibleTimer: 0,
+
                 xpMultiplier: 1.0,
                 cooldownReduction: 1.0,
                 damageMultiplier: 1.0,
+                projectilePierceBonus: 0,
+                regenPerSec: 0,
+                thorns: 0,
+                healOnKill: 0,
+
+                infectionGainMult: 1.0,
+                infectionDecayMult: 1.0,
+                infection: 0,
+
+                virusDamageTakenMult: 1.0,
+                bacteriaDamageTakenMult: 1.0,
+
                 atp: 0,
-                growthStage: 1,
+                kills: 0,
+
+                shields: 0,
+                shieldInterval: 15000,
+                shieldTimer: 15000,
+
+                stationaryMs: 0,
+
+                critChance: 0.05,
+                critDamage: 1.5,
+                lifesteal: 0,
+                growthDmgPerLevel: 0,
+                luckyBonus: 0,
             };
 
-            addWeapon('W_MEMBRANE', true);
-            addWeapon('W_ANTIBODY', true);
-            addPassive('P_MEMORY');
+            applyMetaUpgrades(player);
+
+            const char = CHARACTER_DB[selectedCharId] || CHARACTER_DB.tcell;
+            char.mods(player);
+
+            for(const wid of char.startWeapons) addWeapon(wid, true, true);
+            for(const pid of char.startPassives) addPassive(pid);
+
+            player.invincible = true;
+            player.invincibleTimer = 1200;
 
             updateUI();
+        }
+
+        function applyMetaUpgrades(p){
+            const u = meta.upgrades;
+            if(u.vitamin > 0){ p.maxHp += 4 * u.vitamin; p.hp = p.maxHp; }
+            if(u.hygiene > 0){ p.speed *= (1 + 0.02 * u.hygiene); }
+            if(u.training > 0){ p.xpMultiplier *= (1 + 0.03 * u.training); }
+            if(u.booster > 0){ p.cooldownReduction *= clamp(1 - 0.02 * u.booster, 0.78, 1.0); }
+            if(u.vaccine > 0){ p.virusDamageTakenMult = clamp(1 - 0.02 * u.vaccine, 0.75, 1.0); if(u.vaccine >= 5) p.shields += 1; }
+            if(u.antibiotic > 0){ p.bacteriaDamageTakenMult = clamp(1 - 0.03 * u.antibiotic, 0.70, 1.0); }
+            if(u.lucky > 0){ p.luckyBonus += u.lucky; }
         }
 
         function startGame(){
             initGame();
             gameState = 'playing';
+            setCanvasInputEnabled(true);
             titleModal.style.display = 'none';
+            titleModal.classList.add('hidden');
             gameOverModal.style.display = 'none';
+            labModal.style.display = 'none';
+            charModal.style.display = 'none';
             uiContainer.classList.remove('hidden');
             lastTime = performance.now();
             requestAnimationFrame(gameLoop);
@@ -312,27 +907,26 @@
 
         function backToTitle(){
             gameState = 'title';
+            setCanvasInputEnabled(false);
             uiContainer.classList.add('hidden');
             gameOverModal.style.display = 'none';
+            levelUpModal.style.display = 'none';
+            labModal.style.display = 'none';
+            charModal.style.display = 'none';
+            titleModal.classList.remove('hidden');
             titleModal.style.display = 'flex';
             lastTime = 0;
-            draw(); // 깔끔하게 1프레임 그리기
+            draw();
         }
 
-        // ===== Movement input =====
+        // ===== Input =====
         function getMoveVector(){
             let dx = 0, dy = 0;
-            if(keys['ArrowUp'] || keys['w']) dy -= 1;
-            if(keys['ArrowDown'] || keys['s']) dy += 1;
-            if(keys['ArrowLeft'] || keys['a']) dx -= 1;
-            if(keys['ArrowRight'] || keys['d']) dx += 1;
-
-            // 터치 드래그
-            if(touch.active){
-                dx += touch.dx;
-                dy += touch.dy;
-            }
-
+            if(keys['ArrowUp'] || keys['w'] || keys['W']) dy -= 1;
+            if(keys['ArrowDown'] || keys['s'] || keys['S']) dy += 1;
+            if(keys['ArrowLeft'] || keys['a'] || keys['A']) dx -= 1;
+            if(keys['ArrowRight'] || keys['d'] || keys['D']) dx += 1;
+            if(touch.active){ dx += touch.dx; dy += touch.dy; }
             const mag = Math.hypot(dx, dy);
             if(mag <= 0.0001) return { dx:0, dy:0 };
             return { dx: dx/mag, dy: dy/mag };
@@ -340,10 +934,27 @@
 
         // ===== Update loop =====
         function update(dt){
+            // toast
+            if(toastTimer > 0){
+                toastTimer -= dt;
+                if(toastTimer <= 0){
+                    toastTimer = 0;
+                    if(toast) toast.classList.add('hidden');
+                }
+            }
+
             const mv = getMoveVector();
-            if(mv.dx || mv.dy){
+            const moved = !!(mv.dx || mv.dy);
+            if(moved){
                 player.x += mv.dx * player.speed * (dt/16.67);
                 player.y += mv.dy * player.speed * (dt/16.67);
+                player.infection = Math.max(0, player.infection - 0.02 * dt);
+                player.stationaryMs = 0;
+            } else {
+                player.stationaryMs = (player.stationaryMs || 0) + dt;
+                if(player.stationaryMs > 1500){
+                    player.infection = clamp(player.infection + 0.012 * dt, 0, 120);
+                }
             }
 
             camera.x = player.x - canvas.width/2;
@@ -352,6 +963,33 @@
             if(player.invincibleTimer > 0){
                 player.invincibleTimer -= dt;
                 if(player.invincibleTimer <= 0) player.invincible = false;
+            }
+
+            const dtSec = dt/1000;
+
+            // regen
+            if(player.regenPerSec > 0){
+                player.hp = Math.min(player.maxHp, player.hp + player.regenPerSec * dtSec);
+            }
+
+            // infection decay + dot
+            player.infection = Math.max(0, player.infection - (8.0 * player.infectionDecayMult) * dtSec);
+            if(player.infection > 1){
+                const drain = (player.infection / 100) * 1.2;
+                player.hp -= drain * dtSec;
+            }
+
+            // shields
+            player.shieldTimer -= dt;
+            if(player.shieldTimer <= 0){
+                player.shieldTimer += player.shieldInterval;
+                player.shields = Math.min(3, player.shields + 1);
+            }
+
+            if(player.hp <= 0){
+                player.hp = 0;
+                loseGame();
+                return;
             }
 
             spawnEnemies();
@@ -368,17 +1006,43 @@
                 }
             });
 
+            // mines
+            for(let i=mines.length-1; i>=0; i--){
+                const m = mines[i];
+                m.timer += dt;
+                if(!m.armed && m.timer > 350) m.armed = true;
+                if(m.armed){
+                    for(const e of enemies){
+                        if(Math.hypot(e.x - m.x, e.y - m.y) < m.triggerRadius){
+                            explodeMine(m);
+                            mines.splice(i, 1);
+                            break;
+                        }
+                    }
+                }
+                if(m.timer > 7000) mines.splice(i, 1);
+            }
+
             // enemies
             enemies.forEach(e => updateEnemy(e, dt));
 
             // projectiles
-            for (let i=projectiles.length-1; i>=0; i--){
+            for(let i=projectiles.length-1; i>=0; i--){
                 const p = projectiles[i];
                 updateProjectile(p, dt);
-                if(p.lived > 2200) projectiles.splice(i, 1);
+                if(p.lived > 2500 || p.dead) projectiles.splice(i, 1);
             }
 
-            // pickups magnet
+            // enemy projectiles
+            for(let i=enemyProjectiles.length-1; i>=0; i--){
+                const p = enemyProjectiles[i];
+                p.x += Math.cos(p.angle) * p.speed * (dt/16.67);
+                p.y += Math.sin(p.angle) * p.speed * (dt/16.67);
+                p.lived += dt;
+                if(p.lived > p.maxLife) enemyProjectiles.splice(i, 1);
+            }
+
+            // pickups
             pickups.forEach(p => updatePickup(p));
 
             // effects
@@ -393,12 +1057,20 @@
             // timer
             gameTimeMs -= dt;
             if(gameTimeMs < 0) gameTimeMs = 0;
+
+            // super virus
+            const elapsed = (600000 - gameTimeMs) / 1000;
+            if(elapsed > 545 && !lastSpawnTimes.__super){
+                lastSpawnTimes.__super = elapsed;
+                spawnSuperVirus();
+            }
+
             if(gameTimeMs <= 0){
-                winGame("시간을 버텼습니다!");
+                winGame("면역이 버텼습니다!");
             }
         }
 
-        // ===== Combat =====
+        // ===== Combat helpers =====
         function findClosestEnemy(x, y){
             let closest = null;
             let best = Infinity;
@@ -409,108 +1081,254 @@
             return closest;
         }
 
-        function fireWeapon(weapon){
+        function calcDamage(baseDmg){
+            let dmg = baseDmg * player.damageMultiplier * (1 + player.growthDmgPerLevel * (player.level - 1));
+            const isCrit = rand() < player.critChance;
+            if(isCrit) dmg *= player.critDamage;
+            return { dmg, isCrit };
+        }
+
+        function fireWeapon(w){
             const closest = findClosestEnemy(player.x, player.y);
             const angle = closest ? Math.atan2(closest.y - player.y, closest.x - player.x) : 0;
 
-            if(weapon.type === 'melee'){
-                if(!closest) return;
+            const { dmg } = calcDamage(w.baseDmg);
 
-                const dmg = weapon.baseDmg * player.damageMultiplier;
+            if(w.type === 'melee'){
+                if(!closest) return;
                 for(const enemy of enemies){
                     const dist = Math.hypot(enemy.x - player.x, enemy.y - player.y);
-                    if(dist < weapon.range + 10){
+                    if(dist < w.range + 10){
                         let aDiff = Math.abs(angle - Math.atan2(enemy.y - player.y, enemy.x - player.x));
                         if(aDiff > Math.PI) aDiff = 2*Math.PI - aDiff;
-                        if(aDiff < (weapon.angle*Math.PI/180)/2){
-                            enemyTakeDamage(enemy, dmg);
+                        if(aDiff < (w.angle*Math.PI/180)/2){
+                            const { dmg:finalDmg, isCrit } = calcDamage(w.baseDmg);
+                            enemyTakeDamage(enemy, finalDmg, isCrit);
                         }
                     }
                 }
+                effects.push({ type:'slash_arc', x:player.x, y:player.y, angle, range:w.range, angleWidth:w.angle*Math.PI/180, duration:140, maxDuration:140 });
+                return;
+            }
 
+            if(w.type === 'melee_slam'){
+                if(!closest) return;
+                const slamX = closest.x;
+                const slamY = closest.y;
+                for(const enemy of enemies){
+                    if(Math.hypot(enemy.x - slamX, enemy.y - slamY) < w.range){
+                        const { dmg:finalDmg, isCrit } = calcDamage(w.baseDmg);
+                        enemyTakeDamage(enemy, finalDmg, isCrit);
+                    }
+                }
+                effects.push({ type:'slam_circle', x:slamX, y:slamY, radius:w.range, duration:220, maxDuration:220 });
+                return;
+            }
+
+            if(w.type === 'ranged'){
+                if(!closest) return;
+                projectiles.push(makeProjectile(player.x, player.y, angle, w.projectileSpeed, dmg, w.pierce + player.projectilePierceBonus, w.projectileSize, 'white'));
+                return;
+            }
+
+            if(w.type === 'ranged_spread'){
+                if(!closest) return;
+                const n = w.pellet;
+                const spread = (w.spreadDeg*Math.PI/180);
+                for(let i=0;i<n;i++){
+                    const t = (n===1)?0:(i/(n-1)-0.5);
+                    const a = angle + t*spread;
+                    projectiles.push(makeProjectile(player.x, player.y, a, w.projectileSpeed, dmg, w.pierce + player.projectilePierceBonus, w.projectileSize, 'white'));
+                }
+                return;
+            }
+
+            if(w.type === 'pulse'){
                 effects.push({
-                    type:'slash_arc', x:player.x, y:player.y,
-                    angle, range:weapon.range, angleWidth:weapon.angle*Math.PI/180,
-                    duration:140, maxDuration:140
+                    type:'pulse', x: player.x, y: player.y,
+                    currentRadius: 0, maxRadius: w.maxRadius,
+                    pulseSpeed: w.pulseSpeed, damage: dmg,
+                    duration: (w.maxRadius/w.pulseSpeed)*16.67, maxDuration: (w.maxRadius/w.pulseSpeed)*16.67,
+                    hitEnemies: [],
                 });
                 return;
             }
 
-            if(weapon.type === 'melee_slam'){
+            if(w.type === 'chain'){
                 if(!closest) return;
-                const slamX = closest.x;
-                const slamY = closest.y;
-                const dmg = weapon.baseDmg * player.damageMultiplier;
-
-                for(const enemy of enemies){
-                    if(Math.hypot(enemy.x - slamX, enemy.y - slamY) < weapon.range){
-                        enemyTakeDamage(enemy, dmg);
-                    }
+                let cur = closest;
+                const hit = new Set();
+                const segs = [];
+                for(let i=0;i<w.bounces;i++){
+                    if(!cur) break;
+                    hit.add(cur.id);
+                    const { dmg:finalDmg, isCrit } = calcDamage(w.baseDmg);
+                    enemyTakeDamage(cur, finalDmg, isCrit);
+                    const next = findNearestNotHit(cur.x, cur.y, w.bounceRange, hit);
+                    if(next) segs.push({x1:cur.x,y1:cur.y,x2:next.x,y2:next.y});
+                    cur = next;
                 }
-
-                effects.push({ type:'slam_circle', x:slamX, y:slamY, radius:weapon.range, duration:220, maxDuration:220 });
+                if(segs.length) effects.push({ type:'chain', segs, duration:180, maxDuration:180 });
                 return;
             }
 
-            if(weapon.type === 'ranged'){
+            if(w.type === 'mine'){
+                mines.push({
+                    x: player.x, y: player.y,
+                    triggerRadius: w.triggerRadius,
+                    blastRadius: w.blastRadius,
+                    damage: dmg,
+                    timer: 0,
+                    armed: false,
+                    cluster: w.cluster || 0,
+                });
+                effects.push({ type:'mine_drop', x:player.x, y:player.y, duration:160, maxDuration:160 });
+                return;
+            }
+
+            if(w.type === 'ranged_bomb'){
+                if(!closest) return;
+                projectiles.push(makeProjectile(player.x, player.y, angle, w.projectileSpeed, dmg, 1, w.projectileSize, 'bomb', { blastRadius:w.blastRadius }));
+                return;
+            }
+
+            if(w.type === 'laser'){
+                if(!closest) return;
+                effects.push({
+                    type:'laser', x: player.x, y: player.y, angle,
+                    range: w.range, width: w.width, damage: dmg,
+                    duration: w.duration, maxDuration: w.duration,
+                    hitEnemies: [],
+                });
+                return;
+            }
+
+            if(w.type === 'field'){
+                for(const enemy of enemies){
+                    if(Math.hypot(enemy.x - player.x, enemy.y - player.y) < w.radius){
+                        const { dmg:finalDmg, isCrit } = calcDamage(w.baseDmg);
+                        enemyTakeDamage(enemy, finalDmg * 0.5, isCrit);
+                    }
+                }
+                return;
+            }
+
+            if(w.type === 'boomerang'){
                 if(!closest) return;
                 projectiles.push({
                     x: player.x, y: player.y,
-                    angle,
-                    speed: weapon.projectileSpeed,
-                    damage: weapon.baseDmg * player.damageMultiplier,
-                    pierce: weapon.pierce,
-                    size: weapon.projectileSize,
+                    angle, speed: w.projectileSpeed,
+                    damage: dmg, pierce: 999,
+                    size: w.projectileSize,
+                    kind: 'boomerang',
+                    maxDist: w.maxDist,
+                    startX: player.x, startY: player.y,
+                    returning: false,
                     hitEnemies: [],
                     lived: 0,
                 });
                 return;
             }
+        }
 
-            if(weapon.type === 'pulse'){
-                effects.push({
-                    type:'pulse',
-                    x: player.x, y: player.y,
-                    currentRadius: 0,
-                    maxRadius: weapon.maxRadius,
-                    pulseSpeed: weapon.pulseSpeed,
-                    damage: weapon.baseDmg * player.damageMultiplier,
-                    duration: (weapon.maxRadius/weapon.pulseSpeed)*16.67,
-                    maxDuration: (weapon.maxRadius/weapon.pulseSpeed)*16.67,
-                    hitEnemies: [],
-                });
-                return;
+        function findNearestNotHit(x,y, range, hitSet){
+            let best = null;
+            let bestD = Infinity;
+            for(const e of enemies){
+                if(hitSet.has(e.id)) continue;
+                const d = Math.hypot(e.x-x, e.y-y);
+                if(d < range && d < bestD){ bestD = d; best = e; }
+            }
+            return best;
+        }
+
+        function makeProjectile(x,y,angle,speed,damage,pierce,size,kind,extra){
+            return { x,y,angle,speed,damage,pierce,size, kind, extra: extra||null, hitEnemies: [], lived: 0 };
+        }
+
+        function explodeMine(m){
+            for(const e of enemies){
+                if(Math.hypot(e.x - m.x, e.y - m.y) < m.blastRadius){
+                    const { dmg, isCrit } = calcDamage(m.damage);
+                    enemyTakeDamage(e, dmg, isCrit);
+                }
+            }
+            effects.push({ type:'explosion', x:m.x, y:m.y, radius:m.blastRadius, duration:260, maxDuration:260 });
+
+            // cluster
+            if(m.cluster && m.cluster > 0){
+                for(let i=0; i<m.cluster; i++){
+                    const a = (Math.PI*2/m.cluster)*i;
+                    const dist = 40;
+                    mines.push({
+                        x: m.x + Math.cos(a)*dist,
+                        y: m.y + Math.sin(a)*dist,
+                        triggerRadius: m.triggerRadius * 0.7,
+                        blastRadius: m.blastRadius * 0.6,
+                        damage: m.damage * 0.5,
+                        timer: 200,
+                        armed: false,
+                        cluster: 0,
+                    });
+                }
             }
         }
 
-        function playerTakeDamage(damage){
+        function playerTakeDamage(damage, enemyType){
+            if(player.shields > 0){
+                player.shields--;
+                effects.push({ type:'shield_pop', x:player.x, y:player.y, duration:220, maxDuration:220 });
+                return;
+            }
+
             if(player.invincible) return;
-            const actual = Math.max(1, damage - player.defense);
+
+            let mult = 1.0;
+            if(enemyType === 'bacteria') mult *= player.bacteriaDamageTakenMult;
+            else mult *= player.virusDamageTakenMult;
+
+            const actual = Math.max(1, (damage * mult) - player.defense);
             player.hp -= actual;
+            player.infection = clamp(player.infection + actual * 5.0 * player.infectionGainMult, 0, 120);
 
             player.invincible = true;
-            player.invincibleTimer = 520;
+            player.invincibleTimer = 340;
 
-            // 피격 피드백
             uiContainer.classList.add('shake');
-            setTimeout(() => uiContainer.classList.remove('shake'), 250);
+            setTimeout(() => uiContainer.classList.remove('shake'), 220);
 
             if(player.hp <= 0){
                 player.hp = 0;
                 loseGame();
             }
-            updateUI();
         }
 
-        function enemyTakeDamage(enemy, damage){
+        function enemyTakeDamage(enemy, damage, isCrit){
             enemy.hp -= damage;
             enemy.isHit = true;
-            enemy.hitTimer = 100;
+            enemy.hitTimer = 90;
+            if(isCrit) enemy.critHit = true;
+
+            // lifesteal
+            if(player.lifesteal > 0){
+                player.hp = Math.min(player.maxHp, player.hp + damage * player.lifesteal);
+            }
 
             if(enemy.hp <= 0){
-                createPickups(enemy);
+                onEnemyKilled(enemy);
                 enemies = enemies.filter(e => e.id !== enemy.id);
             }
+        }
+
+        function onEnemyKilled(e){
+            runStats.kills++;
+            player.kills++;
+
+            if(player.healOnKill > 0){
+                player.hp = Math.min(player.maxHp, player.hp + player.healOnKill);
+            }
+
+            createPickups(e);
         }
 
         // ===== Spawning =====
@@ -519,440 +1337,703 @@
             const clip = SPAWNER_CLIPS.find(c => sec >= c.start && sec < c.end);
             if(!clip) return;
 
-            // 점점 강해지는 계수
-            const diffMult = 1 + (sec/60) * 0.08;
+            const hpMult  = 1 + sec * 0.0038;
+            const spdMult = 1 + sec * 0.0013;
+            const dmgMult = 1 + sec * 0.0022;
+
+            const bacteriaEnabled = sec >= 150;
+            const antibioticLv = meta.upgrades.antibiotic || 0;
+            const bacteriaSpawnMult = clamp(1 - antibioticLv * 0.04, 0.55, 1.0);
 
             for(const sInfo of clip.enemies){
                 if(!lastSpawnTimes[sInfo.type]) lastSpawnTimes[sInfo.type] = 0;
-                if(sec - lastSpawnTimes[sInfo.type] > sInfo.every){
+
+                const timePressure = 1 + sec/180 * 0.35;
+                const every = sInfo.every / timePressure;
+
+                if(sec - lastSpawnTimes[sInfo.type] > every){
                     lastSpawnTimes[sInfo.type] = sec;
 
-                    const n = Math.floor(rand() * (sInfo.count[1] - sInfo.count[0] + 1)) + sInfo.count[0];
+                    let n = Math.floor(rand() * (sInfo.count[1] - sInfo.count[0] + 1)) + sInfo.count[0];
+
                     for(let i=0; i<n; i++){
-                        if(enemies.length > 170) break;
+                        if(enemies.length > 350) break;
+                        spawnOne(sInfo.type, hpMult, spdMult, dmgMult);
+                    }
+                }
+            }
 
-                        const a = rand() * Math.PI * 2;
-                        const r = Math.max(canvas.width/2, canvas.height/2) + 120;
-                        const x = player.x + Math.cos(a) * r;
-                        const y = player.y + Math.sin(a) * r;
-
-                        const base = ENEMY_CATALOG[sInfo.type];
-                        enemies.push({
-                            ...base,
-                            type: sInfo.type,
-                            x, y,
-                            hp: base.hp * diffMult,
-                            speed: base.spd * (1 + (sec/60)*0.02),
-                            id: (Math.floor(rand()*1e9) ^ Date.now()) >>> 0,
-                            isHit:false,
-                            hitTimer:0,
-                        });
+            // bacteria
+            if(bacteriaEnabled){
+                const key = "__bacteria";
+                if(!lastSpawnTimes[key]) lastSpawnTimes[key] = 0;
+                const everyB = 8.5 / (1 + sec/240);
+                if(sec - lastSpawnTimes[key] > everyB){
+                    lastSpawnTimes[key] = sec;
+                    const n = Math.max(1, Math.floor((2 + rand()*2) * bacteriaSpawnMult));
+                    for(let i=0;i<n;i++){
+                        if(enemies.length > 350) break;
+                        spawnOne("bacteria", hpMult, spdMult, dmgMult);
                     }
                 }
             }
         }
 
-        function updateEnemy(e, dt){
-            if(e.isHit){
-                e.hitTimer -= dt;
-                if(e.hitTimer <= 0) e.isHit = false;
-            }
-            const a = Math.atan2(player.y - e.y, player.x - e.x);
-            e.x += Math.cos(a) * e.speed * (dt/16.67);
-            e.y += Math.sin(a) * e.speed * (dt/16.67);
+        function spawnOne(type, hpMult, spdMult, dmgMult){
+            const a = rand() * Math.PI * 2;
+            const r = Math.max(canvas.width/2, canvas.height/2) + 150;
+            const x = player.x + Math.cos(a) * r;
+            const y = player.y + Math.sin(a) * r;
+            const base = ENEMY_CATALOG[type];
+            const elapsedSec = (600000 - gameTimeMs) / 1000;
+            const skinTier = clamp(Math.floor(elapsedSec / 100), 0, 5);
 
-            // 화면 근처 바깥으로 나가면 래핑(쓸데없는 멀리 추적 방지)
-            const margin = 260;
-            const l = camera.x - margin, r = camera.x + canvas.width + margin;
-            const t = camera.y - margin, b = camera.y + canvas.height + margin;
-            if(e.x < l) e.x = r; else if(e.x > r) e.x = l;
-            if(e.y < t) e.y = b; else if(e.y > b) e.y = t;
+            // ✅ 크기(종) 변이: 스폰될 때 크기/스탯이 조금씩 달라져 "종류가 많아 보이게" 연출
+            // - swarm: 작고 빠름 (체력↓)
+            // - brute: 크고 둔함 (체력↑)
+            let variant = "normal";
+            let sizeMult = 1.0, hpVar = 1.0, spdVar = 1.0, dmgVar = 1.0, xpVar = 1.0;
+            const rVar = rand();
+            if(rVar < 0.55){
+                variant = "normal";
+                sizeMult = 0.90 + rand()*0.25;
+            } else if(rVar < 0.82){
+                variant = "swarm";
+                sizeMult = 0.62 + rand()*0.18;
+                hpVar = 0.75; spdVar = 1.18; dmgVar = 0.85; xpVar = 0.85;
+            } else {
+                variant = "brute";
+                sizeMult = 1.22 + rand()*0.38;
+                hpVar = 1.35; spdVar = 0.86; dmgVar = 1.15; xpVar = 1.40;
+            }
+            sizeMult = clamp(sizeMult, 0.65, 1.55);
+
+            const eSize = base.size * sizeMult;
+            const eMaxHp = base.hp * hpMult * hpVar;
+            const eSpeed = base.spd * spdMult * spdVar;
+            const eDmg = base.dmg * dmgMult * dmgVar;
+            const eXp = Math.max(1, Math.round((base.xp || 1) * xpVar));
+
+            enemies.push({
+                ...base,
+                type,
+                x, y,
+                skinTier,
+                variant,
+                size: eSize,
+                hp: eMaxHp,
+                maxHp: eMaxHp,
+                speed: eSpeed,
+                dmg: eDmg,
+                xp: eXp,
+                id: (Math.floor(rand()*1e9) ^ Date.now()) >>> 0,
+                isHit:false,
+                hitTimer:0,
+                shootTimer: 800 + rand()*800,
+                chargeTimer: 1000 + rand()*1000,
+                charging: false,
+                chargeDir: 0,
+                chargeTime: 0,
+            });
         }
 
-        // ===== Projectiles / Pickups =====
+        function spawnSuperVirus(){
+            const base = ENEMY_CATALOG.superVirus;
+            const a = rand() * Math.PI * 2;
+            const r = Math.max(canvas.width/2, canvas.height/2) + 150;
+            enemies.push({
+                ...base,
+                type: "superVirus",
+                x: player.x + Math.cos(a) * r,
+                y: player.y + Math.sin(a) * r,
+                hp: base.hp,
+                maxHp: base.hp,
+                speed: base.spd,
+                dmg: base.dmg,
+                id: (Math.floor(rand()*1e9) ^ Date.now()) >>> 0,
+                isHit:false,
+                hitTimer:0,
+            });
+            showToast("⚠️ 슈퍼바이러스 출현!");
+        }
+
+        function updateEnemy(e, dt){
+            if(e.hitTimer > 0) e.hitTimer -= dt;
+            else { e.isHit = false; e.critHit = false; }
+
+            // special behaviors
+            if(e.type === 'spitterVirus'){
+                e.shootTimer -= dt;
+                if(e.shootTimer <= 0){
+                    e.shootTimer = 1800 + rand()*1200;
+                    const angle = Math.atan2(player.y - e.y, player.x - e.x);
+                    enemyProjectiles.push({
+                        x: e.x, y: e.y, angle,
+                        speed: 4.5, damage: e.dmg * 0.6,
+                        size: 8, maxLife: 2000, lived: 0,
+                    });
+                }
+            }
+
+            if(e.type === 'chargerVirus'){
+                if(!e.charging){
+                    e.chargeTimer -= dt;
+                    if(e.chargeTimer <= 0 && Math.hypot(player.x - e.x, player.y - e.y) < 300){
+                        e.charging = true;
+                        e.chargeDir = Math.atan2(player.y - e.y, player.x - e.x);
+                        e.chargeTime = 400;
+                    }
+                }
+                if(e.charging){
+                    e.chargeTime -= dt;
+                    e.x += Math.cos(e.chargeDir) * e.speed * 3 * (dt/16.67);
+                    e.y += Math.sin(e.chargeDir) * e.speed * 3 * (dt/16.67);
+                    if(e.chargeTime <= 0){
+                        e.charging = false;
+                        e.chargeTimer = 2000 + rand()*1500;
+                    }
+                    return;
+                }
+            }
+
+            // normal movement
+            const dx = player.x - e.x;
+            const dy = player.y - e.y;
+            const dist = Math.hypot(dx, dy);
+            if(dist > 5){
+                e.x += (dx/dist) * e.speed * (dt/16.67);
+                e.y += (dy/dist) * e.speed * (dt/16.67);
+            }
+        }
+
         function updateProjectile(p, dt){
+            p.lived += dt;
+
+            if(p.kind === 'boomerang'){
+                const distFromStart = Math.hypot(p.x - p.startX, p.y - p.startY);
+                if(!p.returning && distFromStart >= p.maxDist){
+                    p.returning = true;
+                }
+                if(p.returning){
+                    const toPlayer = Math.atan2(player.y - p.y, player.x - p.x);
+                    p.angle = toPlayer;
+                    if(Math.hypot(player.x - p.x, player.y - p.y) < player.size){
+                        p.dead = true;
+                    }
+                }
+            }
+
             p.x += Math.cos(p.angle) * p.speed * (dt/16.67);
             p.y += Math.sin(p.angle) * p.speed * (dt/16.67);
-            p.lived += dt;
         }
 
         function updatePickup(p){
-            if(Math.hypot(p.x - player.x, p.y - player.y) < player.pickupRadius){
-                const a = Math.atan2(player.y - p.y, player.x - p.x);
-                p.x += Math.cos(a) * 9;
-                p.y += Math.sin(a) * 9;
+            const dx = player.x - p.x;
+            const dy = player.y - p.y;
+            const dist = Math.hypot(dx, dy);
+
+            if(dist < player.pickupRadius * 1.5){
+                const speed = 8;
+                p.x += (dx/dist) * speed;
+                p.y += (dy/dist) * speed;
+            }
+
+            if(dist < player.size/2 + 10){
+                if(p.type === 'xp'){
+                    player.xp += p.value * player.xpMultiplier;
+                    checkLevelUp();
+                } else if(p.type === 'atp'){
+                    player.atp += p.value;
+                } else if(p.type === 'heal'){
+                    player.hp = Math.min(player.maxHp, player.hp + p.value);
+                }
+                pickups = pickups.filter(x => x !== p);
             }
         }
 
-        function createPickups(e){
-            // xp + atp + heal
-            const drops = 1 + (e.type === 'tankVirus' ? 1 : 0);
-            for(let i=0;i<drops;i++){
-                const rr = rand();
-                const off = (rr - 0.5) * 22 * GLOBAL_SCALE;
-                if(rr < 0.76){
-                    pickups.push({ x:e.x+off, y:e.y+off, type:'xp', value:e.xp, size:4*GLOBAL_SCALE, color:'#7CFFB2' });
-                } else if(rr < 0.92){
-                    pickups.push({ x:e.x+off, y:e.y+off, type:'atp', value:1, size:6*GLOBAL_SCALE, color:'#FFD166' });
-                } else {
-                    pickups.push({ x:e.x+off, y:e.y+off, type:'heal', value:5, size:7*GLOBAL_SCALE, color:'#9AD0FF' });
+        function createPickups(enemy){
+            const xpVal = enemy.xp || 1;
+            pickups.push({ type:'xp', x: enemy.x, y: enemy.y, value: xpVal });
+
+            if(rand() < 0.15){
+                pickups.push({ type:'atp', x: enemy.x + 10, y: enemy.y, value: 1 });
+            }
+            if(rand() < 0.03){
+                pickups.push({ type:'heal', x: enemy.x - 10, y: enemy.y, value: 5 });
+            }
+        }
+
+        function checkLevelUp(){
+            while(player.xp >= player.xpToNextLevel){
+                player.xp -= player.xpToNextLevel;
+                player.level++;
+                player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.18);
+                showLevelUpOptions();
+            }
+        }
+
+        function showLevelUpOptions(){
+            gameState = 'paused';
+            setCanvasInputEnabled(false);
+            levelUpModal.style.display = 'flex';
+            cardOptionsContainer.innerHTML = '';
+
+            const options = generateLevelUpOptions();
+
+            options.forEach(opt => {
+                const card = document.createElement('div');
+                card.className = 'card ui-element w-48 p-4 cursor-pointer text-center';
+                card.innerHTML = `
+                <div class="text-lg font-black text-slate-900 mb-2">${opt.name}</div>
+                <div class="text-sm text-slate-600 mb-2">${opt.desc}</div>
+                <div class="text-xs text-emerald-600 font-bold">${opt.levelText || ''}</div>
+            `;
+                card.onclick = () => {
+                    if(opt.isWeapon){
+                        if(player.weapons[opt.id]){
+                            player.weapons[opt.id].level = (player.weapons[opt.id].level || 1) + 1;
+                            upgradeWeapon(player.weapons[opt.id]);
+                        } else {
+                            addWeapon(opt.id, true, false);
+                        }
+                    } else {
+                        if(player.passives[opt.id]){
+                            player.passives[opt.id].level = (player.passives[opt.id].level || 1) + 1;
+                        } else {
+                            addPassive(opt.id);
+                        }
+                    }
+                    tryEvolveWeapons();
+                    levelUpModal.style.display = 'none';
+                    gameState = 'playing';
+                    setCanvasInputEnabled(true);
+                };
+                cardOptionsContainer.appendChild(card);
+            });
+        }
+
+        function generateLevelUpOptions(){
+            const weapons = [];
+            const passives = [];
+            const numOptions = 4 + (player.luckyBonus || 0);
+
+            // weapons (공격 스킬)
+            for(const [id, w] of Object.entries(WEAPON_DB)){
+                if(w.hidden) continue;
+                if(!meta.unlockedWeapons[id]) continue;
+                const owned = player.weapons[id];
+                const level = owned ? (owned.level || 1) : 0;
+                if(level >= 8) continue;
+                weapons.push({
+                    id, name: w.name, desc: w.desc, isWeapon: true,
+                    levelText: owned ? `Lv.${level} → ${level+1}` : '신규',
+                    priority: owned ? 2 : 1,
+                });
+            }
+
+            // passives
+            for(const [id, p] of Object.entries(PASSIVE_DB)){
+                const owned = player.passives[id];
+                const level = owned ? (owned.level || 1) : 0;
+                if(level >= 5) continue;
+                passives.push({
+                    id, name: p.name, desc: p.desc, isWeapon: false,
+                    levelText: owned ? `Lv.${level} → ${level+1}` : '신규',
+                    priority: owned ? 2 : 1,
+                });
+            }
+
+            // shuffle helper
+            const shuffle = (arr) => {
+                for(let i = arr.length - 1; i > 0; i--){
+                    const j = Math.floor(rand() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            };
+
+            shuffle(weapons);
+            shuffle(passives);
+
+            // ✅ 공격 스킬이 부족해 보이는 문제 보완: 가능한 한 무기(공격) 옵션을 더 섞는다
+            let wantWeapons = Math.min(2, weapons.length, numOptions);
+            if(passives.length > 0) wantWeapons = Math.min(wantWeapons, numOptions - 1); // 패시브 1칸은 남기기(가능한 경우)
+
+            const picked = [];
+            picked.push(...weapons.slice(0, wantWeapons));
+            picked.push(...passives.slice(0, numOptions - wantWeapons));
+
+            // 부족하면 남은 것에서 채움
+            const remain = [
+                ...weapons.slice(wantWeapons),
+                ...passives.slice(numOptions - wantWeapons),
+            ];
+            shuffle(remain);
+            while(picked.length < numOptions && remain.length > 0){
+                picked.push(remain.pop());
+            }
+
+            shuffle(picked);
+            return picked.slice(0, numOptions);
+        }
+
+        function addWeapon(id, applyImmediately = true, isStart = false){
+            const template = WEAPON_DB[id];
+            if(!template) return;
+
+            const w = { ...template, id, level: 1, timer: isStart ? 500 : 0 };
+
+            if(w.type === 'orbital'){
+                w.orbitals = [];
+                for(let i=0; i<(w.count||1); i++){
+                    w.orbitals.push({ angle: (Math.PI*2/w.count)*i });
                 }
             }
+
+            player.weapons[id] = w;
         }
 
-        function collectPickup(p){
-            if(p.type === 'xp'){
-                player.xp += p.value * player.xpMultiplier;
-                if(player.xp >= player.xpToNextLevel) levelUp();
-            } else if(p.type === 'atp'){
-                player.atp += p.value;
-            } else if(p.type === 'heal'){
-                player.hp = Math.min(player.maxHp, player.hp + p.value);
+        function upgradeWeapon(w){
+            const mult = 1.12;
+            w.baseDmg *= mult;
+            if(w.cooldown > 100) w.cooldown *= 0.95;
+            if(w.pierce) w.pierce += 1;
+            if(w.count && w.type === 'orbital'){
+                w.count++;
+                w.orbitals.push({ angle: rand() * Math.PI * 2 });
             }
-            updateUI();
+            if(w.pellet) w.pellet++;
+            if(w.bounces) w.bounces++;
+            if(w.range) w.range *= 1.08;
+            if(w.maxRadius) w.maxRadius *= 1.1;
+            if(w.blastRadius) w.blastRadius *= 1.08;
+            if(w.radius) w.radius *= 1.1;
+        }
+
+        function addPassive(id){
+            const template = PASSIVE_DB[id];
+            if(!template) return;
+
+            player.passives[id] = { ...template, id, level: 1 };
+            template.effect(player);
         }
 
         // ===== Collisions =====
         function checkCollisions(){
-            // projectile -> enemy
-            for(let i=projectiles.length-1; i>=0; i--){
-                const p = projectiles[i];
-                for(const e of enemies){
-                    if(p.hitEnemies.includes(e.id)) continue;
-                    if(Math.hypot(p.x - e.x, p.y - e.y) < (p.size + e.size)/2){
-                        enemyTakeDamage(e, p.damage);
-                        p.hitEnemies.push(e.id);
-                        if(p.hitEnemies.length >= p.pierce){
-                            projectiles.splice(i,1);
-                            break;
-                        }
+            // player vs enemies
+            for(const e of enemies){
+                const dist = Math.hypot(player.x - e.x, player.y - e.y);
+                if(dist < player.size/2 + e.size/2){
+                    playerTakeDamage(e.dmg, e.type);
+
+                    // thorns
+                    if(player.thorns > 0){
+                        enemyTakeDamage(e, player.thorns, false);
                     }
                 }
             }
 
-            // enemy -> player
-            for(const e of enemies){
-                if(Math.hypot(player.x - e.x, player.y - e.y) < (player.size + e.size)/2){
-                    playerTakeDamage(e.dmg);
+            // projectiles vs enemies
+            for(const p of projectiles){
+                for(const e of enemies){
+                    if(p.hitEnemies.includes(e.id)) continue;
+                    const dist = Math.hypot(p.x - e.x, p.y - e.y);
+                    if(dist < p.size/2 + e.size/2){
+                        const { dmg, isCrit } = calcDamage(p.damage);
+                        enemyTakeDamage(e, dmg, isCrit);
+                        p.hitEnemies.push(e.id);
+                        p.pierce--;
+
+                        // bomb explosion
+                        if(p.kind === 'bomb' && p.extra?.blastRadius){
+                            for(const e2 of enemies){
+                                if(Math.hypot(e2.x - p.x, e2.y - p.y) < p.extra.blastRadius){
+                                    if(!p.hitEnemies.includes(e2.id)){
+                                        const { dmg:d2, isCrit:c2 } = calcDamage(p.damage * 0.7);
+                                        enemyTakeDamage(e2, d2, c2);
+                                        p.hitEnemies.push(e2.id);
+                                    }
+                                }
+                            }
+                            effects.push({ type:'explosion', x:p.x, y:p.y, radius:p.extra.blastRadius, duration:220, maxDuration:220 });
+                            p.pierce = 0;
+                        }
+
+                        if(p.pierce <= 0){ p.dead = true; break; }
+                    }
                 }
             }
 
-            // pickup -> player
-            pickups = pickups.filter(p => {
-                if(Math.hypot(player.x - p.x, player.y - p.y) < (player.size/2 + p.size)){
-                    collectPickup(p);
-                    return false;
-                }
-                return true;
-            });
-
-            // orbital hits
-            Object.values(player.weapons).filter(w => w.type === 'orbital').forEach(w => {
-                w.orbitals.forEach(o => {
+            // orbitals vs enemies
+            for(const w of Object.values(player.weapons)){
+                if(w.type !== 'orbital') continue;
+                for(const o of w.orbitals){
                     const ox = player.x + Math.cos(o.angle) * w.orbitRadius;
                     const oy = player.y + Math.sin(o.angle) * w.orbitRadius;
                     for(const e of enemies){
-                        if(o.hitEnemies.includes(e.id)) continue;
-                        if(Math.hypot(ox - e.x, oy - e.y) < (15*GLOBAL_SCALE + e.size)/2){
-                            enemyTakeDamage(e, w.baseDmg * player.damageMultiplier);
-                            o.hitEnemies.push(e.id);
-                            setTimeout(() => { o.hitEnemies = o.hitEnemies.filter(id => id !== e.id); }, 420);
+                        const dist = Math.hypot(ox - e.x, oy - e.y);
+                        if(dist < 20 + e.size/2){
+                            const now = Date.now();
+                            if(!o.lastHit) o.lastHit = {};
+                            if(!o.lastHit[e.id] || now - o.lastHit[e.id] > 300){
+                                o.lastHit[e.id] = now;
+                                const { dmg, isCrit } = calcDamage(w.baseDmg);
+                                enemyTakeDamage(e, dmg, isCrit);
+                            }
                         }
                     }
-                });
-            });
+                }
+            }
 
-            // pulse damage
-            effects.filter(e => e.type === 'pulse').forEach(p => {
-                for(const e of enemies){
-                    if(p.hitEnemies.includes(e.id)) continue;
-                    const dist = Math.hypot(e.x - p.x, e.y - p.y);
-                    if(Math.abs(dist - p.currentRadius) < (15 + e.size)/2){
-                        enemyTakeDamage(e, p.damage);
-                        p.hitEnemies.push(e.id);
+            // pulses
+            for(const ef of effects){
+                if(ef.type === 'pulse'){
+                    for(const e of enemies){
+                        if(ef.hitEnemies.includes(e.id)) continue;
+                        const dist = Math.hypot(ef.x - e.x, ef.y - e.y);
+                        if(dist < ef.currentRadius && dist > ef.currentRadius - 30){
+                            ef.hitEnemies.push(e.id);
+                            const { dmg, isCrit } = calcDamage(ef.damage);
+                            enemyTakeDamage(e, dmg, isCrit);
+                        }
                     }
                 }
-            });
-        }
 
-        // ===== Level Up =====
-        function addWeapon(id, isNew=true){
-            if(isNew && Object.keys(player.weapons).length >= 6) return;
-
-            const base = WEAPON_DB[id];
-            player.weapons[id] = {
-                ...(player.weapons[id] || {}),
-                ...base,
-                id,
-                timer: base.cooldown * player.cooldownReduction,
-                level: isNew ? 1 : (player.weapons[id]?.level ?? 1),
-            };
-
-            if(id === 'W_COMPLEMENT'){
-                const w = player.weapons[id];
-                w.orbitals = [];
-                const cnt = w.count;
-                for(let i=0; i<cnt; i++){
-                    w.orbitals.push({ angle:(Math.PI*2/cnt)*i, hitEnemies:[] });
-                }
-            }
-        }
-
-        function addPassive(id){
-            if(player.passives[id]){
-                player.passives[id].level++;
-            } else {
-                player.passives[id] = { id, name: PASSIVE_DB[id].name, level: 1 };
-            }
-            PASSIVE_DB[id].effect(player);
-        }
-
-        function getLevelUpChoices(n){
-            const availableWeapons = Object.keys(WEAPON_DB).filter(id => !player.weapons[id]);
-            const availablePassives = Object.keys(PASSIVE_DB).filter(id => !player.passives[id] || player.passives[id].level < 5);
-
-            // 이미 가진 무기 강화 카드도 섞기
-            const ownedWeaponUpgrades = Object.values(player.weapons).map(w => ({
-                id: w.id,
-                name: `${w.name} 강화`,
-                desc: "피해 +15% (해당 무기)",
-                isUpgrade: true,
-                upgradeWeaponId: w.id,
-            }));
-
-            let pool = [
-                ...ownedWeaponUpgrades,
-                ...availableWeapons.map(id => ({ id, ...WEAPON_DB[id], isWeapon:true })),
-                ...availablePassives.map(id => ({ id, ...PASSIVE_DB[id], isPassive:true })),
-            ];
-
-            // 셔플
-            for(let i=pool.length-1; i>0; i--){
-                const j = Math.floor(rand() * (i+1));
-                [pool[i], pool[j]] = [pool[j], pool[i]];
-            }
-            return pool.slice(0, n);
-        }
-
-        function showLevelUpOptions(){
-            cardOptionsContainer.innerHTML = '';
-            const opts = getLevelUpChoices(3);
-
-            for(const opt of opts){
-                const card = document.createElement('div');
-                card.className = 'card ui-element w-64 h-80 p-5 cursor-pointer flex flex-col justify-between text-center';
-
-                const name = opt.name;
-                const desc = opt.desc;
-                const tag =
-                    opt.isUpgrade ? '<span class="text-xs font-bold text-amber-700 bg-amber-100 px-2 py-1 rounded-full">강화</span>' :
-                        opt.isWeapon ?  '<span class="text-xs font-bold text-sky-700 bg-sky-100 px-2 py-1 rounded-full">무기</span>' :
-                            '<span class="text-xs font-bold text-emerald-700 bg-emerald-100 px-2 py-1 rounded-full">패시브</span>';
-
-                card.innerHTML = `
-        <div>
-          <div class="mb-3">${tag}</div>
-          <h3 class="text-2xl font-black mb-3 text-slate-900">${name}</h3>
-          <p class="text-slate-700">${desc}</p>
-        </div>
-        <div class="text-xs text-slate-500">눌러서 선택</div>
-      `;
-
-                card.onclick = () => selectUpgrade(opt);
-                cardOptionsContainer.appendChild(card);
-            }
-
-            levelUpModal.style.display = 'flex';
-        }
-
-        function selectUpgrade(opt){
-            if(opt.isUpgrade){
-                const w = player.weapons[opt.upgradeWeaponId];
-                if(w){
-                    w.baseDmg *= 1.15;
-                    w.level++;
-                    // 보체 링은 강화 시 개수 증가
-                    if(w.id === 'W_COMPLEMENT'){
-                        w.count++;
-                        addWeapon('W_COMPLEMENT', false);
+                // laser
+                if(ef.type === 'laser'){
+                    for(const e of enemies){
+                        if(ef.hitEnemies.includes(e.id)) continue;
+                        // line-circle collision
+                        const dx = Math.cos(ef.angle);
+                        const dy = Math.sin(ef.angle);
+                        const fx = e.x - ef.x;
+                        const fy = e.y - ef.y;
+                        const t = clamp(fx*dx + fy*dy, 0, ef.range);
+                        const closestX = ef.x + dx * t;
+                        const closestY = ef.y + dy * t;
+                        const dist = Math.hypot(e.x - closestX, e.y - closestY);
+                        if(dist < ef.width/2 + e.size/2){
+                            ef.hitEnemies.push(e.id);
+                            const { dmg, isCrit } = calcDamage(ef.damage);
+                            enemyTakeDamage(e, dmg, isCrit);
+                        }
                     }
                 }
-            } else if(WEAPON_DB[opt.id]){
-                if(player.weapons[opt.id]){
-                    // 혹시나 중복이면 강화
-                    player.weapons[opt.id].baseDmg *= 1.15;
-                    player.weapons[opt.id].level++;
-                } else {
-                    addWeapon(opt.id, true);
+            }
+
+            // enemy projectiles vs player
+            for(let i=enemyProjectiles.length-1; i>=0; i--){
+                const p = enemyProjectiles[i];
+                const dist = Math.hypot(p.x - player.x, p.y - player.y);
+                if(dist < p.size + player.size/2){
+                    playerTakeDamage(p.damage, 'virus');
+                    enemyProjectiles.splice(i, 1);
                 }
-            } else if(PASSIVE_DB[opt.id]){
-                addPassive(opt.id);
             }
-
-            levelUpModal.style.display = 'none';
-            gameState = 'playing';
-            updateUI();
-        }
-
-        function levelUp(){
-            gameState = 'paused';
-            player.level++;
-            player.xp -= player.xpToNextLevel;
-            player.xpToNextLevel = Math.floor(player.xpToNextLevel * 1.28 + 10);
-
-            // 성장 연출: 5, 10레벨에 덩치 + 체력 증가
-            if(player.level === 5 && player.growthStage === 1){
-                player.growthStage = 2;
-                player.size *= 1.18;
-                player.maxHp *= 1.45;
-                player.hp = player.maxHp;
-                player.invincible = true;
-                player.invincibleTimer = 1200;
-            }
-            if(player.level === 10 && player.growthStage === 2){
-                player.growthStage = 3;
-                player.size *= 1.18;
-                player.maxHp *= 1.55;
-                player.hp = player.maxHp;
-                player.invincible = true;
-                player.invincibleTimer = 1400;
-            }
-
-            showLevelUpOptions();
-            updateUI();
         }
 
         // ===== UI =====
         function updateUI(){
-            if(!player) return;
-
-            hpBar.style.width = `${clamp((player.hp/player.maxHp)*100, 0, 100)}%`;
+            const hpPct = clamp(player.hp / player.maxHp * 100, 0, 100);
+            hpBar.style.width = `${hpPct}%`;
             hpText.textContent = `${Math.ceil(player.hp)} / ${Math.ceil(player.maxHp)}`;
 
-            levelDisplay.innerHTML = `레벨: ${player.level} <span class="text-sm text-white/70">(${Math.floor(player.xp)}/${player.xpToNextLevel} XP)</span>`;
+            const infPct = clamp(player.infection / 120 * 100, 0, 100);
+            infectionBar.style.width = `${infPct}%`;
+            infectionText.textContent = `${Math.floor(player.infection)}%`;
 
-            const m = Math.floor(gameTimeMs / 60000);
-            const s = Math.floor((gameTimeMs % 60000) / 1000);
-            timerDisplay.textContent = `${m}:${s.toString().padStart(2,'0')}`;
+            const xpPct = clamp(player.xp / player.xpToNextLevel * 100, 0, 100);
+            xpBar.style.width = `${xpPct}%`;
+            xpText.textContent = `${Math.floor(player.xp)} / ${player.xpToNextLevel}`;
+
+            levelDisplay.textContent = `레벨: ${player.level}`;
+            killsText.textContent = `${player.kills}`;
+            shieldText.textContent = `🛡️ ${player.shields}`;
+
+            const mins = Math.floor(gameTimeMs / 60000);
+            const secs = Math.floor((gameTimeMs % 60000) / 1000);
+            timerDisplay.textContent = `${mins}:${secs.toString().padStart(2, '0')}`;
 
             atpText.textContent = `${player.atp}`;
+            goldHudText.textContent = `${meta.gold}`;
 
-            weaponUI.innerHTML =
-                `<div class="font-extrabold mb-1">무기</div>` +
-                Object.values(player.weapons)
-                    .map(w => `<div class="text-sm text-white/85">${w.name} <span class="text-white/60">Lv.${w.level}</span></div>`)
-                    .join('');
+            // weapon UI
+            let whtml = '<div class="font-bold mb-1">무기</div>';
+            for(const [id, w] of Object.entries(player.weapons)){
+                whtml += `<div>${w.name} Lv.${w.level||1}</div>`;
+            }
+            weaponUI.innerHTML = whtml;
 
-            passiveUI.innerHTML =
-                `<div class="font-extrabold mb-1">패시브</div>` +
-                Object.values(player.passives)
-                    .map(p => `<div class="text-sm text-white/85">${p.name} <span class="text-white/60">Lv.${p.level}</span></div>`)
-                    .join('');
+            // passive UI
+            let phtml = '<div class="font-bold mb-1">패시브</div>';
+            for(const [id, p] of Object.entries(player.passives)){
+                phtml += `<div>${p.name} Lv.${p.level||1}</div>`;
+            }
+            passiveUI.innerHTML = phtml;
         }
 
-        // ===== Draw =====
-        function drawBackgroundGrid(){
-            // 혈관 느낌의 느슨한 격자
-            ctx.strokeStyle = "rgba(255,255,255,0.06)";
-            ctx.lineWidth = 2;
+        // ===== Drawing =====
+        function draw(){
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            const grid = 220;
-            const startX = Math.floor(camera.x / grid) * grid;
-            const startY = Math.floor(camera.y / grid) * grid;
+            ctx.save();
+            ctx.translate(-camera.x, -camera.y);
 
-            for(let x = startX; x < camera.x + canvas.width; x += grid){
+            // grid
+            ctx.strokeStyle = 'rgba(255,255,255,0.03)';
+            ctx.lineWidth = 1;
+            const gridSize = 100;
+            const startX = Math.floor(camera.x / gridSize) * gridSize;
+            const startY = Math.floor(camera.y / gridSize) * gridSize;
+            for(let x = startX; x < camera.x + canvas.width + gridSize; x += gridSize){
                 ctx.beginPath();
                 ctx.moveTo(x, camera.y);
                 ctx.lineTo(x, camera.y + canvas.height);
                 ctx.stroke();
             }
-            for(let y = startY; y < camera.y + canvas.height; y += grid){
+            for(let y = startY; y < camera.y + canvas.height + gridSize; y += gridSize){
                 ctx.beginPath();
                 ctx.moveTo(camera.x, y);
                 ctx.lineTo(camera.x + canvas.width, y);
                 ctx.stroke();
             }
-        }
-
-        function draw(){
-            ctx.clearRect(0,0,canvas.width,canvas.height);
-
-            // world space
-            ctx.save();
-            ctx.translate(-camera.x, -camera.y);
-
-            drawBackgroundGrid();
 
             // pickups
             for(const p of pickups){
-                ctx.fillStyle = p.color;
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
-                ctx.fill();
-            }
-
-            // projectiles (항체)
-            for(const p of projectiles){
-                ctx.fillStyle = "rgba(255,255,255,0.92)";
-                ctx.beginPath();
-                ctx.arc(p.x, p.y, Math.max(2, p.size/2), 0, Math.PI*2);
-                ctx.fill();
-
-                // 꼬리
-                ctx.strokeStyle = "rgba(150,200,255,0.35)";
-                ctx.lineWidth = 3;
-                ctx.beginPath();
-                ctx.moveTo(p.x, p.y);
-                ctx.lineTo(p.x - Math.cos(p.angle)*14, p.y - Math.sin(p.angle)*14);
-                ctx.stroke();
-            }
-
-            // orbitals
-            Object.values(player.weapons).filter(w => w.type === 'orbital').forEach(w => {
-                w.orbitals.forEach(o => {
-                    const x = player.x + Math.cos(o.angle) * w.orbitRadius;
-                    const y = player.y + Math.sin(o.angle) * w.orbitRadius;
-                    ctx.fillStyle = "rgba(120,220,255,0.55)";
+                if(p.type === 'xp'){
+                    ctx.fillStyle = '#a78bfa';
                     ctx.beginPath();
-                    ctx.arc(x, y, 14*GLOBAL_SCALE*0.5, 0, Math.PI*2);
+                    ctx.arc(p.x, p.y, 6, 0, Math.PI*2);
                     ctx.fill();
-                });
-            });
+                } else if(p.type === 'atp'){
+                    ctx.fillStyle = '#fbbf24';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 8, 0, Math.PI*2);
+                    ctx.fill();
+                } else if(p.type === 'heal'){
+                    ctx.fillStyle = '#34d399';
+                    ctx.beginPath();
+                    ctx.arc(p.x, p.y, 8, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+
+            // mines
+            for(const m of mines){
+                ctx.fillStyle = m.armed ? 'rgba(255,100,100,0.7)' : 'rgba(200,200,200,0.5)';
+                ctx.beginPath();
+                ctx.arc(m.x, m.y, 12, 0, Math.PI*2);
+                ctx.fill();
+                if(m.armed){
+                    ctx.strokeStyle = 'rgba(255,100,100,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.arc(m.x, m.y, m.triggerRadius, 0, Math.PI*2);
+                    ctx.stroke();
+                }
+            }
 
             // enemies
+            const vImg = imageCache['virus'];
             for(const e of enemies){
-                const img = imageCache[ENEMY_CATALOG[e.type].imgKey];
+                ctx.save();
                 if(e.isHit){
-                    ctx.save();
-                    ctx.filter = "brightness(1.8)";
+                    ctx.globalAlpha = 0.6;
+                    if(e.critHit) ctx.filter = 'brightness(2)';
                 }
-                if(img && img.complete){
-                    ctx.drawImage(img, e.x - e.size/2, e.y - e.size/2, e.size, e.size);
+                if(e.type === 'superVirus'){
+                    ctx.fillStyle = '#ef4444';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
+                    ctx.fill();
+                    // hp bar
+                    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+                    ctx.fillRect(e.x - 20, e.y - e.size/2 - 10, 40, 6);
+                    ctx.fillStyle = '#ef4444';
+                    ctx.fillRect(e.x - 20, e.y - e.size/2 - 10, 40 * (e.hp/e.maxHp), 6);
+                } else if(e.type === 'bacteria'){
+                    ctx.fillStyle = '#84cc16';
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
+                    ctx.fill();
+                } else if(vImg && vImg.complete){
+                    ctx.drawImage(vImg, e.x - e.size/2, e.y - e.size/2, e.size, e.size);
                 } else {
-                    // fallback
-                    ctx.fillStyle = "rgba(255,80,120,0.9)";
+                    ctx.fillStyle = e.type === 'chargerVirus' ? '#f97316' : (e.type === 'spitterVirus' ? '#22d3ee' : '#22c55e');
                     ctx.beginPath();
                     ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
                     ctx.fill();
                 }
-                if(e.isHit) ctx.restore();
+                ctx.restore();
+            }
+
+            // projectiles
+            for(const p of projectiles){
+                ctx.fillStyle = p.kind === 'bomb' ? '#f97316' : (p.kind === 'boomerang' ? '#06b6d4' : '#fff');
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size/2, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // enemy projectiles
+            for(const p of enemyProjectiles){
+                ctx.fillStyle = '#84cc16';
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.size/2, 0, Math.PI*2);
+                ctx.fill();
+            }
+
+            // orbitals
+            for(const w of Object.values(player.weapons || {})){
+                if(w.type !== 'orbital') continue;
+                for(const o of w.orbitals){
+                    const ox = player.x + Math.cos(o.angle) * w.orbitRadius;
+                    const oy = player.y + Math.sin(o.angle) * w.orbitRadius;
+                    ctx.fillStyle = 'rgba(96,165,250,0.8)';
+                    ctx.beginPath();
+                    ctx.arc(ox, oy, 14, 0, Math.PI*2);
+                    ctx.fill();
+                }
+            }
+
+            // field
+            for(const w of Object.values(player.weapons || {})){
+                if(w.type !== 'field') continue;
+                ctx.fillStyle = 'rgba(168,85,247,0.15)';
+                ctx.beginPath();
+                ctx.arc(player.x, player.y, w.radius, 0, Math.PI*2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(168,85,247,0.4)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
 
             // player
+            const pSkin = player ? (CHAR_SKIN_MAP[selectedCharId] ?? 0) : 0;
+            const pImg = imageCache.cell?.[pSkin];
             if(player){
-                const img = imageCache['cell'];
                 if(player.invincible){
-                    ctx.globalAlpha = (Math.floor(player.invincibleTimer/110) % 2 === 0) ? 0.55 : 1.0;
+                    ctx.globalAlpha = (Math.floor(player.invincibleTimer/100) % 2 === 0) ? 0.5 : 1.0;
                 }
-                if(img && img.complete){
-                    ctx.drawImage(img, player.x - player.size/2, player.y - player.size/2, player.size, player.size);
+                if(pImg && pImg.complete){
+                    ctx.drawImage(pImg, player.x - player.size/2, player.y - player.size/2, player.size, player.size);
                 } else {
-                    ctx.fillStyle = "rgba(255,180,220,0.95)";
+                    const char = CHARACTER_DB[selectedCharId];
+                    ctx.fillStyle = char?.color || '#f472b6';
                     ctx.beginPath();
                     ctx.arc(player.x, player.y, player.size/2, 0, Math.PI*2);
                     ctx.fill();
                 }
                 ctx.globalAlpha = 1.0;
+
+                // shields visual
+                if(player.shields > 0){
+                    ctx.strokeStyle = 'rgba(56,189,248,0.6)';
+                    ctx.lineWidth = 3;
+                    ctx.beginPath();
+                    ctx.arc(player.x, player.y, player.size/2 + 8, 0, Math.PI*2);
+                    ctx.stroke();
+                }
             }
 
             // effects
@@ -963,33 +2044,67 @@
                     ctx.save();
                     ctx.translate(e.x, e.y);
                     ctx.rotate(e.angle);
-                    ctx.strokeStyle = `rgba(255,255,255,${op*0.65})`;
-                    ctx.lineWidth = 18;
+                    ctx.strokeStyle = `rgba(255,255,255,${op*0.7})`;
+                    ctx.lineWidth = 16;
                     ctx.beginPath();
-                    ctx.arc(0,0,e.range, -e.angleWidth/2, e.angleWidth/2);
+                    ctx.arc(0, 0, e.range, -e.angleWidth/2, e.angleWidth/2);
                     ctx.stroke();
                     ctx.restore();
                 }
 
                 if(e.type === 'slam_circle'){
-                    ctx.fillStyle = `rgba(255,120,160,${op*0.55})`;
+                    ctx.fillStyle = `rgba(255,120,160,${op*0.5})`;
                     ctx.beginPath();
-                    ctx.arc(e.x, e.y, e.radius*(1-op), 0, Math.PI*2);
+                    ctx.arc(e.x, e.y, e.radius*(1-op*0.3), 0, Math.PI*2);
                     ctx.fill();
                 }
 
                 if(e.type === 'pulse'){
-                    ctx.strokeStyle = `rgba(120,220,255,${op*0.55})`;
-                    ctx.lineWidth = 14;
+                    ctx.strokeStyle = `rgba(120,220,255,${op*0.5})`;
+                    ctx.lineWidth = 12;
                     ctx.beginPath();
                     ctx.arc(e.x, e.y, e.currentRadius, 0, Math.PI*2);
+                    ctx.stroke();
+                }
+
+                if(e.type === 'chain'){
+                    ctx.strokeStyle = `rgba(250,204,21,${op*0.8})`;
+                    ctx.lineWidth = 4;
+                    for(const seg of e.segs){
+                        ctx.beginPath();
+                        ctx.moveTo(seg.x1, seg.y1);
+                        ctx.lineTo(seg.x2, seg.y2);
+                        ctx.stroke();
+                    }
+                }
+
+                if(e.type === 'explosion'){
+                    ctx.fillStyle = `rgba(251,146,60,${op*0.6})`;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, e.radius*(1-op*0.4), 0, Math.PI*2);
+                    ctx.fill();
+                }
+
+                if(e.type === 'laser'){
+                    ctx.save();
+                    ctx.translate(e.x, e.y);
+                    ctx.rotate(e.angle);
+                    ctx.fillStyle = `rgba(239,68,68,${op*0.7})`;
+                    ctx.fillRect(0, -e.width/2, e.range, e.width);
+                    ctx.restore();
+                }
+
+                if(e.type === 'shield_pop'){
+                    ctx.strokeStyle = `rgba(56,189,248,${op*0.7})`;
+                    ctx.lineWidth = 4;
+                    ctx.beginPath();
+                    ctx.arc(e.x, e.y, 30 + (1-op)*20, 0, Math.PI*2);
                     ctx.stroke();
                 }
             }
 
             ctx.restore();
 
-            // title state: 깔끔하게 살짝 어두운 오버레이
             if(gameState === 'title'){
                 ctx.fillStyle = "rgba(0,0,0,0.15)";
                 ctx.fillRect(0,0,canvas.width,canvas.height);
@@ -997,17 +2112,36 @@
         }
 
         // ===== End states =====
+        function endRunAndGrantGold(score){
+            const survivedSec = Math.floor((600000 - gameTimeMs)/1000);
+            const goldEarned = Math.max(0, Math.floor(
+                (player.atp * 1.2) + (survivedSec / 12) + (player.level * 2.2) + (player.kills * 0.18)
+            ));
+
+            meta.gold += goldEarned;
+            runStats.goldEarned = goldEarned;
+            runGoldText.textContent = `${goldEarned}`;
+            goldHudText.textContent = `${meta.gold}`;
+
+            if(score > (meta.bestScore||0)){
+                meta.bestScore = score;
+            }
+            saveMeta();
+        }
+
         function loseGame(){
             if(gameState === 'gameOver') return;
             gameState = 'gameOver';
 
             const survivedSec = Math.floor((600000 - gameTimeMs)/1000);
-            const score = player.level*120 + player.atp*35 + survivedSec;
+            const score = Math.floor(player.level*150 + player.atp*40 + survivedSec*1.5 + player.kills*5);
+
+            endRunAndGrantGold(score);
 
             gameOverTitle.textContent = "세포가 붕괴했습니다";
-            gameOverText.textContent = `생존: ${survivedSec}초 • 레벨: ${player.level} • ATP: ${player.atp} • 점수: ${score}`;
-
+            gameOverText.textContent = `생존: ${survivedSec}초 • 레벨: ${player.level} • 처치: ${player.kills} • ATP: ${player.atp} • 점수: ${score}`;
             gameOverModal.style.display = 'flex';
+            setCanvasInputEnabled(false);
         }
 
         function winGame(message){
@@ -1015,11 +2149,14 @@
             gameState = 'gameOver';
 
             const survivedSec = 600;
-            const score = player.level*220 + player.atp*55 + Math.floor(player.hp*10);
+            const score = Math.floor(player.level*250 + player.atp*60 + Math.floor(player.hp*10) + player.kills*6);
+
+            endRunAndGrantGold(score);
 
             gameOverTitle.textContent = message;
-            gameOverText.textContent = `완주! 레벨: ${player.level} • 남은 HP: ${Math.ceil(player.hp)} • ATP: ${player.atp} • 점수: ${score}`;
+            gameOverText.textContent = `완주! 레벨: ${player.level} • HP: ${Math.ceil(player.hp)} • 처치: ${player.kills} • ATP: ${player.atp} • 점수: ${score}`;
             gameOverModal.style.display = 'flex';
+            setCanvasInputEnabled(false);
         }
 
         // ===== Game loop =====
@@ -1029,36 +2166,97 @@
                 return;
             }
             if(!lastTime) lastTime = ts;
-            const dt = ts - lastTime;
+            const dt = Math.min(ts - lastTime, 50);
             lastTime = ts;
 
             if(gameState === 'playing'){
                 update(dt);
                 updateUI();
             }
-
             draw();
             requestAnimationFrame(gameLoop);
         }
 
+        // ===== Modals =====
+        function openLab(){
+            labReturnState = gameState;
+            setCanvasInputEnabled(false);
+
+            // 모달 겹침 방지: (특히 타이틀이 z-index로 연구소 위를 덮는 케이스)
+            gameOverModal.style.display = "none";
+            levelUpModal.style.display = "none";
+            charModal.style.display = "none";
+            titleModal.style.display = "none";
+            titleModal.classList.add("hidden");
+
+            renderLab();
+            labModal.classList.remove("hidden");
+            labModal.style.display = "flex";
+
+            if(gameState === "playing") gameState = "paused";
+        }
+        function closeLab(){
+            labModal.style.display = "none";
+            labModal.classList.add("hidden");
+
+            if(labReturnState === "playing"){
+                gameState = "playing";
+                setCanvasInputEnabled(true);
+                return;
+            }
+            if(labReturnState === "paused"){
+                gameState = "paused";
+                setCanvasInputEnabled(true);
+                return;
+            }
+            if(labReturnState === "gameOver"){
+                gameState = "gameOver";
+                gameOverModal.style.display = "flex";
+                return;
+            }
+
+            // default: title
+            gameState = "title";
+            titleModal.classList.remove("hidden");
+            titleModal.style.display = "flex";
+        }
+
         // ===== Events =====
-        startBtn.addEventListener('click', startGame);
-        restartBtn.addEventListener('click', () => { startGame(); });
+        startBtn.addEventListener('click', () => openCharSelect());
+        openLabBtn.addEventListener('click', () => openLab());
+        openLabInGameBtn.addEventListener('click', () => openLab());
+        openLabFromGameOverBtn.addEventListener('click', () => openLab());
+        closeLabBtn.addEventListener('click', () => closeLab());
+        closeCharBtn.addEventListener('click', () => {
+            charModal.style.display = "none";
+            setCanvasInputEnabled(false);
+            // 캐릭터 선택을 취소했을 때 원래 화면으로 복귀
+            if(charSelectReturnState === 'gameOver'){
+                gameOverModal.style.display = 'flex';
+            } else {
+                titleModal.classList.remove('hidden');
+                titleModal.style.display = 'flex';
+                gameState = 'title';
+            }
+        });
+        restartBtn.addEventListener('click', () => openCharSelect());
         backToTitleBtn.addEventListener('click', backToTitle);
 
         window.addEventListener('keydown', (e) => {
             keys[e.key] = true;
-            // 게임 중 스페이스로 일시정지 토글
             if(e.key === ' '){
                 if(gameState === 'playing') gameState = 'paused';
                 else if(gameState === 'paused') gameState = 'playing';
             }
+            if(e.key === 'Escape'){
+                if(labModal.style.display === "flex") closeLab();
+                if(charModal.style.display === "flex") charModal.style.display = "none";
+            }
         });
         window.addEventListener('keyup', (e) => keys[e.key] = false);
 
-        // Touch movement: "드래그하는 방향으로 이동"
+        // Touch
         canvas.addEventListener('pointerdown', (e) => {
-            // UI 클릭 방해 최소화: 타이틀/모달은 UI 요소로 처리
             if(gameState !== 'playing') return;
             touch.active = true;
             touch.id = e.pointerId;
@@ -1072,8 +2270,6 @@
             if(!touch.active || touch.id !== e.pointerId) return;
             const dx = e.clientX - touch.startX;
             const dy = e.clientY - touch.startY;
-
-            // 화면 크기에 비례한 민감도
             const k = 0.012;
             touch.dx = clamp(dx * k, -1, 1);
             touch.dy = clamp(dy * k, -1, 1);
@@ -1094,6 +2290,9 @@
         // ===== Boot =====
         preloadImages();
         resizeGame();
+        setCanvasInputEnabled(false);
+        syncTitleMetaUI();
+        renderLab();
         initGame();
         draw();
     })();
