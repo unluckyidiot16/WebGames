@@ -595,7 +595,7 @@
                     <div class="shop-price">500 P</div>
                     <button class="buy-btn" onclick="buyItem('ball', 'special', 500)">구매하기</button>
                 </div>
-
+                
                 <div class="shop-item"><div>마스터볼</div><div class="shop-price">3000 P</div><button class="buy-btn" onclick="buyItem('ball', 'master', 3000)">구매하기</button></div>
             </div>
         </div>
@@ -608,6 +608,12 @@
 
                 <div class="shop-item"><div>🍀 행운의 부적<br><span style="font-size:12px; color:#94a3b8;" id="lv-rate">Lv.0 (Max 10)</span></div><div class="shop-price">800 P</div><button class="buy-btn" id="btn-buy-rate" onclick="buyUpgrade('catchRate', 800)">강화하기</button></div>
 
+                <div class="shop-item">
+                    <div>✨ 빛나는 부적<br><span style="font-size:12px; color:#94a3b8;" id="lv-rare-rate">Lv.0 (Max 10)</span></div>
+                    <div class="shop-price">1200 P</div>
+                    <button class="buy-btn" id="btn-buy-rare" onclick="buyUpgrade('rareRate', 1200)">강화하기</button>
+                </div>
+                
                 <div class="shop-item">
                     <div>⏳ 시간 연장<br>
                         <span style="font-size:12px; color:#94a3b8;" id="lv-timer">Lv.0</span>
@@ -952,7 +958,7 @@
         // [변경] inventory 구조에서 monster 제거, special 추가
         inventory: { super: 0, hyper: 0, special: 0, master: 0 },
         dex: new Set(),
-        upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0, timerLevel: 0 },
+        upgrades: { maxSteps: 0, dexLimit: 0, catchRate: 0, timerLevel: 0, rareRate: 0 }, // rareRate 추가
         partnerId: null
     };
     let session = { active: false, steps: 0, caught: [], earnedPoints: 0 };
@@ -1174,6 +1180,7 @@
             if(saved) {
                 const parsed = JSON.parse(saved);
                 user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
+                if(user.upgrades.rareRate === undefined) user.upgrades.rareRate = 0;
 
                 // [마이그레이션] 인벤토리 구조 변경 대응 (monster -> super로 교체하거나 삭제)
                 if(user.inventory.monster !== undefined) {
@@ -1407,11 +1414,50 @@
         silhouettePos = { x: -1, y: -1 };
     }
 
+    // 2. 가중치 기반 랜덤 ID 생성 로직 수정 (7:3 보정 및 확률 업그레이드 적용)
     function getWeightedRandomId() {
+        // 희귀 조우 확률 보너스 계산 (Lv.10 기준 +5%)
+        const rareBonus = (user.upgrades.rareRate || 0) * 0.005;
         const roll = Math.random();
-        if(roll < 0.02) return { id: LEGENDARY_IDS[Math.floor(Math.random() * LEGENDARY_IDS.length)], rarity: 'legendary' };
-        else if (roll < 0.15) return { id: RARE_IDS[Math.floor(Math.random() * RARE_IDS.length)], rarity: 'rare' };
-        else return { id: Math.floor(Math.random() * MAX_POKEMON_ID) + 1, rarity: 'common' };
+
+        let rarity;
+        // 전설(UR): 기본 2% + 보너스 (최대 7%)
+        if (roll < (0.02 + rareBonus)) {
+            rarity = 'legendary';
+        }
+        // 희귀(Rare): 13% (기본 유지 혹은 소폭 조정 가능)
+        else if (roll < (0.15 + rareBonus)) {
+            rarity = 'rare';
+        }
+        // 일반(C): 나머지
+        else {
+            rarity = 'common';
+        }
+
+        // 등급별 포켓몬 풀 구성
+        let pool = [];
+        if (rarity === 'legendary') {
+            pool = LEGENDARY_IDS;
+        } else if (rarity === 'rare') {
+            pool = RARE_IDS;
+        } else {
+            // 전체에서 전설/희귀를 제외한 나머지
+            pool = Array.from({length: MAX_POKEMON_ID}, (_, i) => i + 1)
+                .filter(id => !LEGENDARY_IDS.includes(id) && !RARE_IDS.includes(id));
+        }
+
+        // --- [핵심] 7:3 미등록 포켓몬 등장 보정 ---
+        const unowned = pool.filter(id => !user.dex.has(id));
+
+        // 미등록 포켓몬이 있고, 70% 확률에 당첨된 경우
+        if (unowned.length > 0 && Math.random() < 0.7) {
+            const selectedId = unowned[Math.floor(Math.random() * unowned.length)];
+            return { id: selectedId, rarity };
+        } else {
+            // 나머지 30% 또는 미등록이 없는 경우 전체 풀에서 랜덤
+            const selectedId = pool[Math.floor(Math.random() * pool.length)];
+            return { id: selectedId, rarity };
+        }
     }
 
     async function spawnPokemon() {
@@ -1821,6 +1867,20 @@
             rateBtn.disabled = false;
             rateBtn.textContent = "강화하기";
         }
+
+        // --- [추가] 빛나는 부적(희귀도) UI ---
+        const rareLv = user.upgrades.rareRate || 0;
+        const rareProbBonus = (rareLv * 0.5).toFixed(1);
+        document.getElementById('lv-rare-rate').textContent = `Lv.${rareLv} (UR 확률 +${rareProbBonus}%)`;
+        const rareBtn = document.getElementById('btn-buy-rare');
+        if(rareLv >= 10) {
+            rareBtn.disabled = true;
+            rareBtn.textContent = "Max Level";
+        } else {
+            rareBtn.disabled = false;
+            rareBtn.textContent = "강화하기";
+        }
+        
     }
 
     function buyItem(cat, type, cost) {
