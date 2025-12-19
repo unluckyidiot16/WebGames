@@ -8,13 +8,35 @@
     {
       "id": "ma3-kg-sub-001",
       "type": "calculation",
-      "prompt": "7kg 750g - 1kg 750g",
+      "prompt": "7kg 150g - 4kg 700g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "choices": [
+        "3kg 450g",
+        "2kg 450g",
+        "2kg 550g",
+        "2kg 350g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-002",
+      "type": "calculation",
+      "prompt": "8kg 850g - 6kg 300g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "6kg",
-        "5kg 950g",
-        "6kg 50g",
-        "7kg"
+        "2kg 550g",
+        "2kg 650g",
+        "3kg 550g",
+        "2kg 450g"
       ],
       "answerIndex": 0,
       "tags": [
@@ -27,15 +49,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-002",
+      "id": "ma3-kg-sub-003",
       "type": "calculation",
-      "prompt": "4kg 700g - 1kg 700g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "3kg 250g - 1kg 250g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "4kg",
-        "2kg 900g",
-        "3kg",
-        "3kg 100g"
+        "1kg 950g",
+        "2kg 100g",
+        "2kg",
+        "3kg"
       ],
       "answerIndex": 2,
       "tags": [
@@ -48,14 +70,100 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-003",
+      "id": "ma3-kg-sub-004",
       "type": "calculation",
-      "prompt": "10kg 200g - 9kg 200g",
+      "prompt": "7kg 100g - 1kg 350g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 150g",
+        "5kg 850g",
+        "5kg 750g",
+        "5kg 650g",
+        "6kg 750g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-005",
+      "type": "calculation",
+      "prompt": "9kg 100g - 2kg 350g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "choices": [
+        "6kg 750g",
+        "6kg 850g",
+        "5kg 750g",
+        "6kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-006",
+      "type": "calculation",
+      "prompt": "2kg 600g - 1kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "1kg 50g",
+        "1kg 200g",
+        "2kg 200g",
+        "1kg 150g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-007",
+      "type": "calculation",
+      "prompt": "5kg 600g - 2kg 350g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "3kg 300g",
+        "3kg 250g",
+        "4kg 250g",
+        "3kg 200g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-008",
+      "type": "calculation",
+      "prompt": "4kg 750g - 3kg 750g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
         "1kg 950g",
         "1kg 50g",
+        "1kg 150g",
         "1kg"
       ],
       "answerIndex": 3,
@@ -69,124 +177,17 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-004",
-      "type": "calculation",
-      "prompt": "5kg 100g - 4kg 100g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg 150g",
-        "1kg",
-        "1kg 950g",
-        "1kg 50g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-005",
-      "type": "calculation",
-      "prompt": "2kg 500g - 1kg 150g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "1kg 300g",
-        "2kg 350g",
-        "1kg 350g",
-        "1kg 400g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-006",
-      "type": "calculation",
-      "prompt": "6kg 650g - 2kg 750g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "3kg 900g",
-        "4kg",
-        "3kg 850g",
-        "4kg 900g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-007",
-      "type": "calculation",
-      "prompt": "4kg 350g - 1kg 650g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "2kg 650g",
-        "2kg 800g",
-        "2kg 700g",
-        "2kg 600g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-008",
-      "type": "calculation",
-      "prompt": "9kg 800g - 3kg 800g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "6kg",
-        "5kg 950g",
-        "7kg",
-        "6kg 50g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
       "id": "ma3-kg-sub-009",
       "type": "calculation",
-      "prompt": "7kg 100g - 2kg 100g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "6kg 200g - 4kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "4kg 900g",
-        "4kg",
-        "5kg",
-        "5kg 50g"
+        "3kg 100g",
+        "2kg 100g",
+        "2kg",
+        "2kg 200g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -199,36 +200,15 @@
     {
       "id": "ma3-kg-sub-010",
       "type": "calculation",
-      "prompt": "9kg 900g - 6kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "4kg 500g - 2kg 900g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "4kg 900g",
-        "3kg 900g",
-        "3kg 850g",
-        "4kg"
+        "1kg 500g",
+        "2kg 650g",
+        "1kg 650g",
+        "1kg 600g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-011",
-      "type": "calculation",
-      "prompt": "10kg 50g - 5kg 800g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "4kg 250g",
-        "4kg 150g",
-        "4kg 350g",
-        "5kg 250g"
-      ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
@@ -240,15 +220,36 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-012",
+      "id": "ma3-kg-sub-011",
       "type": "calculation",
-      "prompt": "6kg 150g - 4kg 600g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "3kg 550g - 2kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 500g",
         "1kg 550g",
         "1kg 600g",
-        "2kg 550g"
+        "2kg 550g",
+        "1kg 500g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-012",
+      "type": "calculation",
+      "prompt": "10kg 100g - 5kg 350g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "choices": [
+        "5kg 750g",
+        "4kg 750g",
+        "3kg 750g",
+        "4kg 800g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -264,13 +265,13 @@
     {
       "id": "ma3-kg-sub-013",
       "type": "calculation",
-      "prompt": "2kg 500g - 1kg 450g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "prompt": "5kg 550g - 4kg 350g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 50g",
-        "2kg",
-        "2kg 100g",
-        "1kg 150g"
+        "1kg 200g",
+        "1kg 300g",
+        "1kg 150g",
+        "2kg 200g"
       ],
       "answerIndex": 0,
       "tags": [
@@ -285,13 +286,13 @@
     {
       "id": "ma3-kg-sub-014",
       "type": "calculation",
-      "prompt": "7kg 200g - 6kg 200g",
+      "prompt": "8kg 300g - 2kg 50g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 150g",
-        "1kg",
-        "1kg 950g",
-        "1kg 50g"
+        "6kg 300g",
+        "6kg 250g",
+        "6kg 150g",
+        "6kg 200g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -306,36 +307,37 @@
     {
       "id": "ma3-kg-sub-015",
       "type": "calculation",
-      "prompt": "9kg 150g - 7kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "7kg 200g - 3kg 300g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
       "choices": [
-        "2kg 150g",
-        "2kg 200g",
-        "1kg 150g",
-        "2kg 100g"
+        "3kg 850g",
+        "3kg 900g",
+        "4kg 900g",
+        "4kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-016",
       "type": "calculation",
-      "prompt": "2kg 450g - 1kg 450g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "8kg 850g - 5kg 50g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "1kg 950g",
-        "1kg 150g",
-        "1kg",
-        "1kg 50g"
+        "3kg 850g",
+        "3kg 800g",
+        "3kg 750g",
+        "4kg 800g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -348,13 +350,13 @@
     {
       "id": "ma3-kg-sub-017",
       "type": "calculation",
-      "prompt": "3kg 300g - 1kg 300g",
+      "prompt": "7kg 550g - 3kg 550g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 950g",
-        "3kg",
-        "2kg",
-        "2kg 100g"
+        "3kg 900g",
+        "4kg 100g",
+        "4kg",
+        "3kg"
       ],
       "answerIndex": 2,
       "tags": [
@@ -369,98 +371,13 @@
     {
       "id": "ma3-kg-sub-018",
       "type": "calculation",
-      "prompt": "9kg 700g - 8kg 700g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "1kg 950g",
-        "1kg 50g",
-        "1kg",
-        "1kg 150g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-019",
-      "type": "calculation",
-      "prompt": "10kg 50g - 6kg 950g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "2kg 100g",
-        "4kg 100g",
-        "3kg 200g",
-        "3kg 100g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-020",
-      "type": "calculation",
-      "prompt": "2kg 600g - 1kg 600g",
+      "prompt": "4kg 650g - 2kg 650g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 50g",
-        "1kg 150g",
-        "1kg 950g",
-        "1kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-021",
-      "type": "calculation",
-      "prompt": "8kg 800g - 3kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "5kg 750g",
-        "4kg 800g",
-        "5kg 850g",
-        "5kg 800g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-022",
-      "type": "calculation",
-      "prompt": "5kg 250g - 3kg 250g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
         "2kg",
+        "2kg 100g",
         "1kg 950g",
-        "3kg",
-        "2kg 100g"
+        "3kg"
       ],
       "answerIndex": 0,
       "tags": [
@@ -473,15 +390,36 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-023",
+      "id": "ma3-kg-sub-019",
       "type": "calculation",
-      "prompt": "5kg 700g - 4kg",
+      "prompt": "8kg 250g - 5kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 650g",
-        "1kg 700g",
-        "1kg 600g",
-        "1kg 750g"
+        "3kg 250g",
+        "3kg 200g",
+        "3kg 300g",
+        "4kg 250g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-020",
+      "type": "calculation",
+      "prompt": "3kg 850g - 2kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 750g",
+        "1kg 850g",
+        "1kg 950g",
+        "2kg 900g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -494,15 +432,78 @@
       ]
     },
     {
+      "id": "ma3-kg-sub-021",
+      "type": "calculation",
+      "prompt": "10kg 650g - 2kg 500g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "9kg 150g",
+        "8kg 150g",
+        "8kg 200g",
+        "8kg 100g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-022",
+      "type": "calculation",
+      "prompt": "4kg 550g - 3kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "2kg 100g",
+        "1kg 50g",
+        "1kg 150g",
+        "1kg 100g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-023",
+      "type": "calculation",
+      "prompt": "5kg 400g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "3kg 400g",
+        "4kg 450g",
+        "4kg 350g",
+        "4kg 400g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
       "id": "ma3-kg-sub-024",
       "type": "calculation",
-      "prompt": "2kg 200g - 1kg 200g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "3kg 900g - 2kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 150g",
+        "1kg 850g",
         "1kg 950g",
-        "1kg 50g",
-        "1kg"
+        "2kg 900g",
+        "1kg 900g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -517,57 +518,55 @@
     {
       "id": "ma3-kg-sub-025",
       "type": "calculation",
-      "prompt": "7kg 100g - 4kg 600g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "3kg 950g - 1kg 100g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "2kg 500g",
-        "2kg 550g",
-        "2kg 450g",
-        "1kg 500g"
+        "1kg 850g",
+        "2kg 850g",
+        "3kg 850g",
+        "2kg 900g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-026",
       "type": "calculation",
-      "prompt": "7kg 400g - 2kg 750g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "prompt": "5kg 300g - 4kg 300g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "4kg 650g",
-        "4kg 550g",
-        "3kg 650g",
-        "4kg 700g"
+        "1kg 950g",
+        "1kg 50g",
+        "1kg",
+        "1kg 150g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-027",
       "type": "calculation",
-      "prompt": "8kg 500g - 1kg 500g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "7kg 600g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "6kg",
-        "6kg 950g",
-        "7kg",
-        "7kg 100g"
+        "6kg 500g",
+        "5kg 600g",
+        "6kg 600g",
+        "6kg 650g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -582,15 +581,15 @@
     {
       "id": "ma3-kg-sub-028",
       "type": "calculation",
-      "prompt": "6kg 400g - 4kg 100g",
+      "prompt": "8kg 800g - 3kg 800g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "2kg 300g",
-        "3kg 300g",
-        "2kg 200g",
-        "1kg 300g"
+        "4kg 900g",
+        "5kg 50g",
+        "5kg",
+        "4kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -603,36 +602,15 @@
     {
       "id": "ma3-kg-sub-029",
       "type": "calculation",
-      "prompt": "9kg 900g - 3kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "5kg 400g - 2kg 550g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "6kg 900g",
-        "6kg 850g",
-        "7kg 900g",
-        "6kg 950g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-030",
-      "type": "calculation",
-      "prompt": "6kg 900g - 3kg 950g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "2kg 950g",
-        "1kg 950g",
-        "3kg",
+        "1kg 850g",
+        "3kg 850g",
+        "2kg 850g",
         "2kg 900g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -644,17 +622,17 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-031",
+      "id": "ma3-kg-sub-030",
       "type": "calculation",
-      "prompt": "2kg 800g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "10kg 800g - 7kg 200g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "1kg 800g",
-        "2kg 800g",
-        "1kg 850g",
-        "1kg 750g"
+        "4kg 600g",
+        "3kg 550g",
+        "3kg 600g",
+        "3kg 650g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -665,15 +643,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-032",
+      "id": "ma3-kg-sub-031",
       "type": "calculation",
-      "prompt": "9kg 600g - 7kg",
+      "prompt": "4kg 700g - 1kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 650g",
-        "2kg 600g",
-        "2kg 550g",
-        "1kg 600g"
+        "3kg 750g",
+        "3kg 700g",
+        "3kg 650g",
+        "4kg 700g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -686,37 +664,57 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-033",
+      "id": "ma3-kg-sub-032",
       "type": "calculation",
-      "prompt": "3kg 250g - 1kg 550g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "prompt": "5kg 850g - 2kg 850g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 700g",
-        "1kg 650g",
-        "1kg 750g",
-        "1kg 600g"
+        "2kg 900g",
+        "3kg 100g",
+        "4kg",
+        "3kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-033",
+      "type": "calculation",
+      "prompt": "2kg 750g - 1kg 100g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg 600g",
+        "1kg 750g",
+        "2kg 650g",
+        "1kg 650g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-034",
       "type": "calculation",
-      "prompt": "8kg 600g - 6kg 50g",
+      "prompt": "4kg 800g - 3kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 650g",
-        "2kg 450g",
-        "3kg 550g",
-        "2kg 550g"
+        "1kg 850g",
+        "2kg 800g",
+        "1kg 750g",
+        "1kg 800g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -731,15 +729,15 @@
     {
       "id": "ma3-kg-sub-035",
       "type": "calculation",
-      "prompt": "2kg 800g - 1kg 800g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "6kg 850g - 2kg 100g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
       "choices": [
-        "1kg 50g",
-        "1kg",
-        "1kg 150g",
-        "1kg 950g"
+        "4kg 750g",
+        "4kg 800g",
+        "5kg 750g",
+        "3kg 750g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -752,35 +750,34 @@
     {
       "id": "ma3-kg-sub-036",
       "type": "calculation",
-      "prompt": "5kg 700g - 3kg 850g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "5kg 800g - 3kg 800g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "2kg 900g",
-        "1kg 850g",
+        "2kg 100g",
         "1kg 950g",
-        "1kg 750g"
+        "3kg",
+        "2kg"
       ],
-      "answerIndex": 1,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-037",
       "type": "calculation",
-      "prompt": "7kg 900g - 1kg",
+      "prompt": "8kg 150g - 4kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "6kg 850g",
-        "7kg 900g",
-        "6kg 950g",
-        "6kg 900g"
+        "4kg 100g",
+        "5kg 150g",
+        "4kg 250g",
+        "4kg 150g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -795,15 +792,15 @@
     {
       "id": "ma3-kg-sub-038",
       "type": "calculation",
-      "prompt": "10kg 950g - 8kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "5kg 200g - 2kg 100g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "3kg",
-        "1kg 950g",
-        "2kg 900g",
-        "2kg 950g"
+        "2kg 100g",
+        "4kg 100g",
+        "3kg 100g",
+        "3kg 200g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -816,13 +813,13 @@
     {
       "id": "ma3-kg-sub-039",
       "type": "calculation",
-      "prompt": "5kg 250g - 1kg 150g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "prompt": "3kg 450g - 1kg 100g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "4kg 150g",
-        "4kg 100g",
-        "3kg 100g",
-        "4kg"
+        "3kg 350g",
+        "2kg 350g",
+        "2kg 450g",
+        "2kg 250g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -837,15 +834,15 @@
     {
       "id": "ma3-kg-sub-040",
       "type": "calculation",
-      "prompt": "10kg 750g - 8kg 750g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "4kg 650g - 1kg 250g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 950g",
-        "3kg",
-        "2kg 100g",
-        "2kg"
+        "3kg 450g",
+        "3kg 400g",
+        "3kg 300g",
+        "3kg 350g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -858,13 +855,13 @@
     {
       "id": "ma3-kg-sub-041",
       "type": "calculation",
-      "prompt": "8kg 300g - 2kg 850g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "prompt": "8kg 450g - 3kg 50g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "5kg 450g",
-        "5kg 500g",
-        "4kg 450g",
-        "5kg 400g"
+        "5kg 400g",
+        "6kg 400g",
+        "5kg 300g",
+        "5kg 500g"
       ],
       "answerIndex": 0,
       "tags": [
@@ -873,22 +870,21 @@
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-042",
       "type": "calculation",
-      "prompt": "6kg 250g - 3kg 50g",
+      "prompt": "9kg 350g - 4kg 50g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "3kg 100g",
-        "3kg 200g",
-        "3kg 300g",
-        "2kg 200g"
+        "5kg 400g",
+        "5kg 200g",
+        "6kg 300g",
+        "5kg 300g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
@@ -901,15 +897,15 @@
     {
       "id": "ma3-kg-sub-043",
       "type": "calculation",
-      "prompt": "4kg 50g - 1kg 50g",
+      "prompt": "9kg 200g - 5kg 200g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
+        "3kg 900g",
+        "3kg",
         "4kg",
-        "2kg 900g",
-        "3kg 100g",
-        "3kg"
+        "4kg 100g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -922,13 +918,13 @@
     {
       "id": "ma3-kg-sub-044",
       "type": "calculation",
-      "prompt": "4kg 400g - 1kg 700g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "7kg 250g - 3kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "2kg 650g",
-        "2kg 700g",
-        "2kg 600g",
-        "2kg 800g"
+        "5kg 150g",
+        "4kg 150g",
+        "4kg 250g",
+        "4kg 100g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -937,22 +933,21 @@
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-045",
       "type": "calculation",
-      "prompt": "4kg 900g - 1kg 850g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "5kg 900g - 3kg 900g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "2kg 50g",
-        "3kg 50g",
         "3kg",
-        "3kg 100g"
+        "2kg 100g",
+        "2kg",
+        "1kg 950g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -965,15 +960,15 @@
     {
       "id": "ma3-kg-sub-046",
       "type": "calculation",
-      "prompt": "2kg 450g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "4kg 500g - 3kg 500g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 500g",
-        "1kg 400g",
-        "2kg 450g",
-        "1kg 450g"
+        "1kg",
+        "1kg 150g",
+        "1kg 50g",
+        "1kg 950g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -986,13 +981,35 @@
     {
       "id": "ma3-kg-sub-047",
       "type": "calculation",
-      "prompt": "5kg 950g - 2kg 200g",
+      "prompt": "8kg 100g - 2kg 250g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "choices": [
+        "5kg 850g",
+        "6kg 850g",
+        "5kg 750g",
+        "5kg 950g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-048",
+      "type": "calculation",
+      "prompt": "8kg 650g - 4kg 950g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "3kg 800g",
+        "3kg 750g",
         "3kg 650g",
-        "3kg 850g",
-        "3kg 750g"
+        "4kg 700g",
+        "3kg 700g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -1001,42 +1018,22 @@
         "무게",
         "뺄셈",
         "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-048",
-      "type": "calculation",
-      "prompt": "9kg 800g - 7kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "2kg 800g",
-        "3kg 800g",
-        "2kg 700g",
-        "2kg 900g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-049",
       "type": "calculation",
-      "prompt": "7kg 950g - 3kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "2kg 250g - 1kg 250g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "4kg 950g",
-        "5kg 950g",
-        "5kg 50g",
-        "4kg 900g"
+        "1kg 50g",
+        "1kg",
+        "1kg 150g",
+        "1kg 950g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -1049,59 +1046,57 @@
     {
       "id": "ma3-kg-sub-050",
       "type": "calculation",
-      "prompt": "8kg 300g - 6kg 950g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "3kg 750g - 1kg 50g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 400g",
-        "2kg 350g",
-        "1kg 300g",
-        "1kg 350g"
+        "2kg 700g",
+        "2kg 800g",
+        "2kg 650g",
+        "2kg 600g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-051",
       "type": "calculation",
-      "prompt": "7kg 100g - 4kg 650g",
+      "prompt": "9kg 550g - 5kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 350g",
-        "2kg 450g",
-        "2kg 550g",
-        "3kg 450g"
+        "4kg 550g",
+        "4kg 600g",
+        "3kg 550g",
+        "4kg 450g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-052",
       "type": "calculation",
-      "prompt": "2kg 250g - 1kg 50g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "prompt": "9kg 900g - 2kg 900g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "2kg 200g",
-        "1kg 200g",
-        "1kg 150g",
-        "1kg 300g"
+        "7kg",
+        "7kg 100g",
+        "6kg",
+        "6kg 950g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -1114,15 +1109,15 @@
     {
       "id": "ma3-kg-sub-053",
       "type": "calculation",
-      "prompt": "4kg 800g - 1kg 750g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "3kg 950g - 2kg 150g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "3kg",
-        "3kg 50g",
-        "3kg 100g",
-        "2kg 50g"
+        "1kg 850g",
+        "2kg 800g",
+        "1kg 800g",
+        "1kg 750g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -1135,37 +1130,15 @@
     {
       "id": "ma3-kg-sub-054",
       "type": "calculation",
-      "prompt": "7kg 450g - 1kg 650g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "5kg 850g",
-        "4kg 800g",
-        "5kg 750g",
-        "5kg 800g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-055",
-      "type": "calculation",
-      "prompt": "7kg 450g - 2kg 450g",
+      "prompt": "5kg 200g - 4kg 150g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "5kg",
-        "5kg 50g",
-        "4kg 900g",
-        "4kg"
+        "2kg",
+        "1kg 150g",
+        "1kg 50g",
+        "2kg 100g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -1176,17 +1149,17 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-056",
+      "id": "ma3-kg-sub-055",
       "type": "calculation",
-      "prompt": "4kg 450g - 2kg 750g",
+      "prompt": "5kg 100g - 3kg 350g",
       "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "1kg 700g",
         "1kg 650g",
-        "1kg 600g",
-        "1kg 750g"
+        "2kg 800g",
+        "1kg 750g",
+        "1kg 850g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -1195,40 +1168,39 @@
         "kg",
         "g",
         "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-056",
+      "type": "calculation",
+      "prompt": "8kg 250g - 3kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "5kg 150g",
+        "5kg 50g",
+        "5kg 100g",
+        "4kg 100g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-057",
       "type": "calculation",
-      "prompt": "8kg 150g - 6kg 300g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "prompt": "9kg 600g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 750g",
-        "2kg 900g",
-        "1kg 950g",
-        "1kg 850g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-058",
-      "type": "calculation",
-      "prompt": "10kg 150g - 1kg 450g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "8kg 750g",
-        "8kg 700g",
-        "8kg 650g",
-        "9kg 700g"
+        "9kg 600g",
+        "8kg 600g",
+        "8kg 550g",
+        "8kg 650g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -1237,22 +1209,21 @@
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
-      "id": "ma3-kg-sub-059",
+      "id": "ma3-kg-sub-058",
       "type": "calculation",
-      "prompt": "10kg 800g - 9kg 500g",
+      "prompt": "8kg 350g - 6kg 350g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 400g",
-        "2kg 350g",
-        "1kg 300g",
-        "1kg 200g"
+        "1kg 950g",
+        "2kg",
+        "2kg 100g",
+        "3kg"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -1263,17 +1234,39 @@
       ]
     },
     {
+      "id": "ma3-kg-sub-059",
+      "type": "calculation",
+      "prompt": "9kg 350g - 1kg 750g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "choices": [
+        "7kg 650g",
+        "6kg 600g",
+        "7kg 550g",
+        "7kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
       "id": "ma3-kg-sub-060",
       "type": "calculation",
-      "prompt": "10kg 750g - 4kg 750g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "6kg 650g - 2kg 350g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "5kg 950g",
-        "6kg 50g",
-        "6kg",
-        "7kg"
+        "3kg 300g",
+        "5kg 300g",
+        "4kg 350g",
+        "4kg 300g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
@@ -1286,36 +1279,15 @@
     {
       "id": "ma3-kg-sub-061",
       "type": "calculation",
-      "prompt": "8kg 50g - 7kg 50g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "4kg 350g - 2kg 450g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
       "choices": [
+        "1kg 900g",
         "1kg 950g",
-        "1kg",
-        "1kg 150g",
-        "1kg 50g"
+        "1kg 850g",
+        "2kg 900g"
       ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-062",
-      "type": "calculation",
-      "prompt": "3kg 150g - 2kg 600g",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 500g",
-        "1kg 600g",
-        "1kg 550g",
-        "2kg 550g"
-      ],
-      "answerIndex": 2,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -1327,15 +1299,36 @@
       ]
     },
     {
+      "id": "ma3-kg-sub-062",
+      "type": "calculation",
+      "prompt": "6kg 550g - 2kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "4kg 450g",
+        "3kg 400g",
+        "4kg 400g",
+        "4kg 350g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
       "id": "ma3-kg-sub-063",
       "type": "calculation",
-      "prompt": "6kg 900g - 4kg 200g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "5kg 400g - 2kg 150g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 600g",
-        "2kg 650g",
-        "2kg 800g",
-        "2kg 700g"
+        "3kg 300g",
+        "4kg 250g",
+        "3kg 200g",
+        "3kg 250g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -1350,13 +1343,35 @@
     {
       "id": "ma3-kg-sub-064",
       "type": "calculation",
-      "prompt": "9kg 750g - 1kg 100g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "5kg 50g - 2kg 900g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "7kg 650g",
-        "8kg 650g",
-        "8kg 750g",
-        "8kg 550g"
+        "2kg 150g",
+        "2kg 100g",
+        "1kg 150g",
+        "2kg 200g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-065",
+      "type": "calculation",
+      "prompt": "5kg 400g - 4kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 300g",
+        "1kg 400g",
+        "2kg 450g",
+        "1kg 500g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -1369,58 +1384,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-065",
-      "type": "calculation",
-      "prompt": "7kg 350g - 4kg 150g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg 300g",
-        "2kg 200g",
-        "3kg 200g",
-        "3kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
       "id": "ma3-kg-sub-066",
       "type": "calculation",
-      "prompt": "10kg 350g - 1kg 450g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "8kg 550g - 4kg 300g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "9kg 900g",
-        "7kg 900g",
-        "8kg 900g",
-        "9kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-067",
-      "type": "calculation",
-      "prompt": "9kg 550g - 4kg 450g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "5kg 150g",
-        "5kg 50g",
-        "4kg 100g",
-        "5kg 100g"
+        "4kg 150g",
+        "5kg 250g",
+        "4kg 350g",
+        "4kg 250g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -1433,15 +1405,36 @@
       ]
     },
     {
+      "id": "ma3-kg-sub-067",
+      "type": "calculation",
+      "prompt": "6kg 650g - 1kg 600g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "5kg 50g",
+        "6kg 50g",
+        "5kg 150g",
+        "4kg 950g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
       "id": "ma3-kg-sub-068",
       "type": "calculation",
-      "prompt": "6kg 850g - 5kg 850g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "3kg 450g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg",
-        "1kg 150g",
-        "1kg 950g",
-        "1kg 50g"
+        "2kg 450g",
+        "2kg 350g",
+        "2kg 550g",
+        "3kg 450g"
       ],
       "answerIndex": 0,
       "tags": [
@@ -1456,203 +1449,13 @@
     {
       "id": "ma3-kg-sub-069",
       "type": "calculation",
-      "prompt": "6kg 300g - 5kg 150g",
+      "prompt": "2kg 650g - 1kg 100g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "1kg 150g",
-        "1kg 50g",
-        "1kg 200g",
-        "2kg 200g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-070",
-      "type": "calculation",
-      "prompt": "6kg 800g - 4kg 800g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "1kg 950g",
-        "2kg 100g",
-        "2kg",
-        "3kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-071",
-      "type": "calculation",
-      "prompt": "8kg 450g - 6kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "3kg 450g",
-        "2kg 450g",
-        "2kg 350g",
-        "2kg 550g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-072",
-      "type": "calculation",
-      "prompt": "6kg 650g - 2kg 500g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "4kg 100g",
-        "5kg 150g",
-        "4kg 150g",
-        "4kg 250g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-073",
-      "type": "calculation",
-      "prompt": "2kg 100g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 100g",
-        "2kg 100g",
-        "1kg 50g",
-        "1kg 150g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-074",
-      "type": "calculation",
-      "prompt": "9kg 450g - 3kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "6kg 450g",
-        "6kg 400g",
-        "6kg 500g",
-        "7kg 450g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-075",
-      "type": "calculation",
-      "prompt": "5kg 600g - 2kg 350g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "4kg 250g",
-        "3kg 200g",
-        "3kg 250g",
-        "3kg 300g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-076",
-      "type": "calculation",
-      "prompt": "6kg 500g - 3kg 350g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "3kg 150g",
-        "4kg 150g",
-        "3kg 200g",
-        "3kg 100g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-077",
-      "type": "calculation",
-      "prompt": "10kg 500g - 9kg 700g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "1kg 800g",
-        "2kg 800g",
-        "1kg 850g",
-        "1kg 750g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-078",
-      "type": "calculation",
-      "prompt": "7kg 100g - 6kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 50g",
-        "1kg 150g",
-        "2kg 100g",
-        "1kg 100g"
+        "2kg 550g",
+        "1kg 500g",
+        "1kg 600g",
+        "1kg 550g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -1665,15 +1468,207 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-079",
+      "id": "ma3-kg-sub-070",
       "type": "calculation",
-      "prompt": "10kg 700g - 2kg 500g",
+      "prompt": "3kg 750g - 1kg 800g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "choices": [
+        "2kg",
+        "1kg 950g",
+        "1kg 850g",
+        "2kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-071",
+      "type": "calculation",
+      "prompt": "8kg 100g - 2kg 100g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "7kg",
+        "5kg 950g",
+        "6kg 50g",
+        "6kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-072",
+      "type": "calculation",
+      "prompt": "9kg 750g - 2kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "7kg 750g",
+        "7kg 650g",
+        "6kg 750g",
+        "8kg 750g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-073",
+      "type": "calculation",
+      "prompt": "3kg 650g - 2kg 500g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 200g",
+        "1kg 50g",
+        "2kg 200g",
+        "1kg 150g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-074",
+      "type": "calculation",
+      "prompt": "4kg 50g - 1kg 100g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "choices": [
+        "1kg 950g",
+        "3kg",
+        "2kg 950g",
+        "2kg 900g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-075",
+      "type": "calculation",
+      "prompt": "4kg 350g - 2kg 600g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "choices": [
+        "1kg 650g",
+        "1kg 750g",
+        "1kg 850g",
+        "2kg 800g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-076",
+      "type": "calculation",
+      "prompt": "7kg 750g - 2kg 500g",
       "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "7kg 200g",
-        "8kg 200g",
-        "8kg 100g",
-        "8kg 300g"
+        "5kg 300g",
+        "5kg 250g",
+        "4kg 250g",
+        "5kg 150g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-077",
+      "type": "calculation",
+      "prompt": "3kg 600g - 2kg 600g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg",
+        "1kg 150g",
+        "1kg 950g",
+        "1kg 50g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-078",
+      "type": "calculation",
+      "prompt": "4kg 250g - 3kg 200g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "2kg 100g",
+        "1kg 150g",
+        "1kg 50g",
+        "2kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-079",
+      "type": "calculation",
+      "prompt": "8kg 750g - 2kg 750g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "7kg",
+        "6kg",
+        "5kg 950g",
+        "6kg 50g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -1688,36 +1683,37 @@
     {
       "id": "ma3-kg-sub-080",
       "type": "calculation",
-      "prompt": "9kg 450g - 3kg 400g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "prompt": "3kg 450g - 1kg 600g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "6kg 150g",
-        "5kg 50g",
-        "5kg 950g",
-        "6kg 50g"
+        "1kg 750g",
+        "2kg 900g",
+        "1kg 850g",
+        "1kg 950g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-081",
       "type": "calculation",
-      "prompt": "5kg 300g - 1kg 750g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "7kg 450g - 3kg 750g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "2kg 550g",
-        "3kg 550g",
-        "4kg 550g",
+        "4kg 700g",
+        "3kg 750g",
+        "3kg 700g",
         "3kg 650g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -1731,13 +1727,13 @@
     {
       "id": "ma3-kg-sub-082",
       "type": "calculation",
-      "prompt": "8kg 700g - 1kg 300g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "9kg 450g - 5kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "7kg 450g",
-        "7kg 350g",
-        "7kg 400g",
-        "6kg 400g"
+        "4kg 250g",
+        "5kg 150g",
+        "4kg 150g",
+        "4kg 100g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -1752,15 +1748,37 @@
     {
       "id": "ma3-kg-sub-083",
       "type": "calculation",
-      "prompt": "7kg 150g - 2kg 150g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "prompt": "4kg 350g - 2kg 400g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "5kg 50g",
-        "4kg 900g",
-        "5kg",
-        "4kg"
+        "1kg 850g",
+        "1kg 950g",
+        "2kg 950g",
+        "2kg"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-084",
+      "type": "calculation",
+      "prompt": "8kg 550g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "8kg 550g",
+        "7kg 650g",
+        "7kg 450g",
+        "7kg 550g"
+      ],
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
@@ -1771,61 +1789,38 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-084",
-      "type": "calculation",
-      "prompt": "8kg 400g - 3kg 550g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "4kg 850g",
-        "5kg 850g",
-        "4kg 900g",
-        "3kg 850g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
       "id": "ma3-kg-sub-085",
       "type": "calculation",
-      "prompt": "5kg 250g - 1kg 350g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "6kg 800g - 1kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "3kg 900g",
-        "4kg 900g",
-        "3kg 850g",
-        "4kg"
+        "6kg 500g",
+        "5kg 400g",
+        "5kg 600g",
+        "5kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-086",
       "type": "calculation",
-      "prompt": "9kg 200g - 7kg 200g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "2kg 700g - 1kg 400g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "1kg 950g",
-        "2kg",
-        "3kg",
-        "2kg 100g"
+        "2kg 350g",
+        "1kg 200g",
+        "1kg 300g",
+        "1kg 400g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -1838,36 +1833,37 @@
     {
       "id": "ma3-kg-sub-087",
       "type": "calculation",
-      "prompt": "8kg 250g - 3kg 250g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "5kg 450g - 3kg 900g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "4kg 900g",
-        "4kg",
-        "5kg",
-        "5kg 50g"
+        "1kg 500g",
+        "1kg 550g",
+        "2kg 550g",
+        "1kg 600g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-088",
       "type": "calculation",
-      "prompt": "10kg 350g - 6kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "6kg 450g - 3kg 450g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "4kg 350g",
-        "4kg 450g",
-        "4kg 250g",
-        "3kg 350g"
+        "4kg",
+        "3kg",
+        "2kg 900g",
+        "3kg 100g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -1880,15 +1876,15 @@
     {
       "id": "ma3-kg-sub-089",
       "type": "calculation",
-      "prompt": "3kg 600g - 1kg 350g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "prompt": "4kg 500g - 1kg 500g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "2kg 200g",
-        "2kg 250g",
-        "2kg 150g",
-        "2kg 350g"
+        "3kg",
+        "3kg 100g",
+        "2kg 900g",
+        "4kg"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -1901,13 +1897,13 @@
     {
       "id": "ma3-kg-sub-090",
       "type": "calculation",
-      "prompt": "4kg 250g - 3kg 850g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "2kg 150g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 450g",
-        "1kg 500g",
-        "1kg 300g",
-        "1kg 400g"
+        "1kg 50g",
+        "2kg 200g",
+        "1kg 200g",
+        "1kg 150g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -1916,22 +1912,21 @@
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-091",
       "type": "calculation",
-      "prompt": "2kg 400g - 1kg 400g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "5kg 700g - 3kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg",
-        "1kg 50g",
-        "1kg 950g",
-        "1kg 150g"
+        "2kg 600g",
+        "2kg 700g",
+        "2kg 650g",
+        "2kg 800g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -1944,1178 +1939,34 @@
     {
       "id": "ma3-kg-sub-092",
       "type": "calculation",
-      "prompt": "8kg 450g - 6kg 150g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "6kg 350g - 3kg 800g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "1kg 300g",
-        "3kg 300g",
-        "2kg 200g",
-        "2kg 300g"
+        "2kg 550g",
+        "2kg 650g",
+        "3kg 550g",
+        "2kg 450g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-093",
       "type": "calculation",
-      "prompt": "6kg 700g - 2kg 700g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "6kg 100g - 3kg 300g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
       "choices": [
-        "4kg 100g",
-        "3kg 900g",
-        "3kg",
-        "4kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-094",
-      "type": "calculation",
-      "prompt": "2kg 900g - 1kg 800g",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "2kg 100g",
-        "1kg 150g",
-        "1kg 50g",
-        "1kg 100g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-095",
-      "type": "calculation",
-      "prompt": "6kg 700g - 1kg 700g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "4kg 900g",
-        "5kg 50g",
-        "5kg",
-        "4kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-096",
-      "type": "calculation",
-      "prompt": "6kg 200g - 3kg 150g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "3kg 50g",
-        "2kg 50g",
-        "3kg 100g",
-        "3kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-097",
-      "type": "calculation",
-      "prompt": "3kg 600g - 2kg 500g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "1kg 150g",
-        "1kg 100g",
-        "1kg 50g",
-        "2kg 100g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-098",
-      "type": "calculation",
-      "prompt": "5kg 600g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "4kg 700g",
-        "5kg 600g",
-        "4kg 600g",
-        "4kg 550g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-099",
-      "type": "calculation",
-      "prompt": "9kg 100g - 8kg 200g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "1kg 900g",
-        "1kg 850g",
-        "1kg 950g",
-        "2kg 900g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-100",
-      "type": "calculation",
-      "prompt": "5kg 750g - 2kg 500g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "4kg 250g",
-        "3kg 200g",
-        "3kg 250g",
-        "3kg 300g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-101",
-      "type": "calculation",
-      "prompt": "5kg 250g - 3kg 50g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "3kg 200g",
-        "2kg 100g",
-        "1kg 200g",
-        "2kg 200g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-102",
-      "type": "calculation",
-      "prompt": "7kg 250g - 1kg 950g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "5kg 400g",
-        "5kg 200g",
-        "6kg 300g",
-        "5kg 300g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-103",
-      "type": "calculation",
-      "prompt": "4kg 400g - 2kg 150g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "2kg 150g",
-        "2kg 200g",
-        "2kg 250g",
-        "2kg 350g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-104",
-      "type": "calculation",
-      "prompt": "6kg 400g - 3kg 500g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "3kg",
-        "3kg 900g",
         "2kg 800g",
-        "2kg 900g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-105",
-      "type": "calculation",
-      "prompt": "10kg 750g - 9kg 750g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg 150g",
-        "1kg 50g",
-        "1kg",
-        "1kg 950g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-106",
-      "type": "calculation",
-      "prompt": "5kg 750g - 2kg 450g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg 350g",
-        "3kg 200g",
-        "3kg 400g",
-        "3kg 300g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-107",
-      "type": "calculation",
-      "prompt": "10kg 600g - 2kg 650g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
-        "7kg 950g",
-        "8kg 50g",
-        "7kg 900g",
-        "6kg 950g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-108",
-      "type": "calculation",
-      "prompt": "2kg 350g - 1kg 350g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg",
-        "1kg 150g",
-        "1kg 950g",
-        "1kg 50g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-109",
-      "type": "calculation",
-      "prompt": "8kg 950g - 7kg 950g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg 50g",
-        "1kg 150g",
-        "1kg",
-        "1kg 950g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-110",
-      "type": "calculation",
-      "prompt": "9kg 700g - 6kg 700g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg 100g",
-        "4kg",
-        "3kg",
-        "2kg 900g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-111",
-      "type": "calculation",
-      "prompt": "3kg 700g - 2kg 350g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "1kg 350g",
-        "1kg 300g",
-        "1kg 400g",
-        "2kg 350g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-112",
-      "type": "calculation",
-      "prompt": "2kg 500g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 600g",
-        "1kg 500g",
-        "1kg 400g",
-        "2kg 550g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-113",
-      "type": "calculation",
-      "prompt": "7kg 200g - 2kg 200g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "4kg",
-        "4kg 900g",
-        "5kg 50g",
-        "5kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-114",
-      "type": "calculation",
-      "prompt": "9kg 250g - 8kg 250g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg 50g",
-        "1kg",
-        "1kg 950g",
-        "1kg 150g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-115",
-      "type": "calculation",
-      "prompt": "7kg 800g - 1kg 650g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "6kg 50g",
-        "5kg 150g",
-        "6kg 150g",
-        "6kg 200g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-116",
-      "type": "calculation",
-      "prompt": "7kg 450g - 1kg 300g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "5kg 150g",
-        "6kg 50g",
-        "6kg 150g",
-        "6kg 200g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-117",
-      "type": "calculation",
-      "prompt": "7kg 150g - 1kg 600g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "4kg 550g",
-        "5kg 500g",
-        "5kg 550g",
-        "5kg 600g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-118",
-      "type": "calculation",
-      "prompt": "5kg 650g - 3kg 450g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "2kg 100g",
-        "3kg 200g",
-        "1kg 200g",
-        "2kg 200g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-119",
-      "type": "calculation",
-      "prompt": "9kg 650g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "7kg 650g",
-        "8kg 750g",
-        "8kg 650g",
-        "8kg 550g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-120",
-      "type": "calculation",
-      "prompt": "10kg 250g - 9kg 150g",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 50g",
-        "1kg 150g",
-        "1kg 100g",
-        "2kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-121",
-      "type": "calculation",
-      "prompt": "3kg 200g - 1kg 550g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "1kg 750g",
-        "1kg 650g",
-        "1kg 600g",
-        "2kg 650g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-122",
-      "type": "calculation",
-      "prompt": "4kg 900g - 1kg 450g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "4kg 450g",
-        "3kg 400g",
-        "2kg 450g",
-        "3kg 450g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-123",
-      "type": "calculation",
-      "prompt": "3kg 750g - 2kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 850g",
-        "1kg 750g",
-        "2kg 800g",
-        "1kg 650g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-124",
-      "type": "calculation",
-      "prompt": "4kg 300g - 3kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "2kg 350g",
-        "1kg 300g",
-        "1kg 400g",
-        "1kg 200g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-125",
-      "type": "calculation",
-      "prompt": "3kg 400g - 1kg 550g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
         "2kg 900g",
-        "1kg 750g",
-        "1kg 950g",
-        "1kg 850g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-126",
-      "type": "calculation",
-      "prompt": "10kg 450g - 8kg 400g",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 950g",
-        "2kg 100g",
-        "1kg 50g",
-        "2kg 50g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-127",
-      "type": "calculation",
-      "prompt": "10kg 700g - 4kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "6kg 650g",
-        "6kg 700g",
-        "6kg 750g",
-        "6kg 600g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-128",
-      "type": "calculation",
-      "prompt": "6kg 400g - 1kg 150g",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "5kg 250g",
-        "4kg 250g",
-        "5kg 150g",
-        "5kg 300g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-129",
-      "type": "calculation",
-      "prompt": "3kg 300g - 1kg 600g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "1kg 600g",
-        "1kg 700g",
-        "1kg 750g",
-        "1kg 650g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-130",
-      "type": "calculation",
-      "prompt": "8kg 250g - 2kg 150g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "6kg 50g",
-        "7kg 100g",
-        "6kg 150g",
-        "6kg 100g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-131",
-      "type": "calculation",
-      "prompt": "9kg 750g - 6kg 750g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg",
-        "2kg 900g",
-        "3kg 100g",
-        "4kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-132",
-      "type": "calculation",
-      "prompt": "5kg 950g - 4kg 950g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg 950g",
-        "1kg 50g",
-        "1kg 150g",
-        "1kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-133",
-      "type": "calculation",
-      "prompt": "8kg 400g - 1kg 400g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "7kg",
-        "7kg 100g",
-        "6kg 950g",
-        "6kg"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-134",
-      "type": "calculation",
-      "prompt": "5kg 400g - 2kg 550g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "2kg 850g",
-        "2kg 900g",
-        "3kg 850g",
-        "1kg 850g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-135",
-      "type": "calculation",
-      "prompt": "5kg 900g - 3kg 550g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "2kg 250g",
-        "2kg 350g",
-        "2kg 450g",
-        "3kg 350g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-136",
-      "type": "calculation",
-      "prompt": "3kg 200g - 1kg 500g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "1kg 700g",
-        "1kg 750g",
-        "1kg 650g",
-        "1kg 600g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-137",
-      "type": "calculation",
-      "prompt": "5kg 300g - 2kg 150g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "3kg 200g",
-        "4kg 150g",
-        "3kg 150g",
-        "3kg 100g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-138",
-      "type": "calculation",
-      "prompt": "9kg 350g - 1kg 350g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "8kg 100g",
-        "8kg",
-        "7kg 900g",
-        "9kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-139",
-      "type": "calculation",
-      "prompt": "9kg 800g - 6kg 800g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "2kg 900g",
-        "4kg",
-        "3kg 100g",
-        "3kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-140",
-      "type": "calculation",
-      "prompt": "6kg 650g - 2kg 300g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "4kg 250g",
-        "4kg 450g",
-        "4kg 350g",
-        "3kg 350g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-141",
-      "type": "calculation",
-      "prompt": "8kg 200g - 4kg 450g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
-      "choices": [
         "3kg 800g",
-        "3kg 750g",
-        "3kg 650g",
-        "3kg 850g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-142",
-      "type": "calculation",
-      "prompt": "9kg 850g - 7kg 850g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "1kg 950g",
-        "2kg 100g",
-        "3kg",
-        "2kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-143",
-      "type": "calculation",
-      "prompt": "10kg 50g - 5kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "4kg 950g",
-        "6kg 50g",
-        "5kg 150g",
-        "5kg 50g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-144",
-      "type": "calculation",
-      "prompt": "10kg 200g - 4kg 200g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "7kg",
-        "6kg",
-        "6kg 50g",
-        "5kg 950g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-145",
-      "type": "calculation",
-      "prompt": "3kg 500g - 2kg",
-      "promptExplain": "무게의 차를 구하세요.",
-      "choices": [
-        "1kg 500g",
-        "1kg 400g",
-        "1kg 600g",
-        "2kg 550g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-146",
-      "type": "calculation",
-      "prompt": "8kg 950g - 2kg 300g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "6kg 750g",
-        "7kg 650g",
-        "6kg 600g",
-        "6kg 650g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-147",
-      "type": "calculation",
-      "prompt": "5kg 450g - 2kg 650g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "2kg 800g",
-        "3kg 800g",
-        "2kg 900g",
         "2kg 700g"
       ],
       "answerIndex": 0,
@@ -3130,36 +1981,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-148",
+      "id": "ma3-kg-sub-094",
       "type": "calculation",
-      "prompt": "6kg 900g - 3kg 900g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "6kg 200g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "3kg 100g",
-        "2kg 900g",
-        "4kg",
-        "3kg"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-149",
-      "type": "calculation",
-      "prompt": "9kg 750g - 5kg 300g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg 450g",
-        "4kg 350g",
-        "4kg 450g",
-        "4kg 550g"
+        "6kg 200g",
+        "5kg 300g",
+        "5kg 200g",
+        "5kg 150g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3172,36 +2002,37 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-150",
+      "id": "ma3-kg-sub-095",
       "type": "calculation",
-      "prompt": "10kg 950g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "3kg 100g - 1kg 950g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "9kg 950g",
-        "10kg 50g",
-        "10kg 950g",
-        "9kg 900g"
+        "2kg 200g",
+        "1kg 150g",
+        "1kg 50g",
+        "1kg 200g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
-      "id": "ma3-kg-sub-151",
+      "id": "ma3-kg-sub-096",
       "type": "calculation",
-      "prompt": "4kg 550g - 1kg 550g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "5kg 450g - 4kg 250g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "4kg",
-        "2kg 900g",
-        "3kg 100g",
-        "3kg"
+        "1kg 300g",
+        "1kg 150g",
+        "2kg 200g",
+        "1kg 200g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -3214,15 +2045,1181 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-152",
+      "id": "ma3-kg-sub-097",
       "type": "calculation",
-      "prompt": "6kg 400g - 5kg 400g",
+      "prompt": "10kg 750g - 5kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "5kg 650g",
+        "6kg 750g",
+        "5kg 750g",
+        "5kg 850g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-098",
+      "type": "calculation",
+      "prompt": "8kg 300g - 5kg 250g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "3kg 50g",
+        "3kg 100g",
+        "3kg",
+        "2kg 50g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-099",
+      "type": "calculation",
+      "prompt": "6kg 400g - 4kg 850g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "choices": [
+        "1kg 500g",
+        "2kg 550g",
+        "1kg 600g",
+        "1kg 550g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-100",
+      "type": "calculation",
+      "prompt": "5kg 600g - 4kg 50g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 600g",
+        "1kg 550g",
+        "2kg 550g",
+        "1kg 500g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-101",
+      "type": "calculation",
+      "prompt": "6kg 150g - 3kg 150g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "2kg 900g",
+        "4kg",
+        "3kg",
+        "3kg 100g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-102",
+      "type": "calculation",
+      "prompt": "2kg 300g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 200g",
+        "2kg 350g",
+        "1kg 300g",
+        "1kg 400g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-103",
+      "type": "calculation",
+      "prompt": "6kg 900g - 2kg 900g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "4kg 100g",
+        "3kg",
+        "4kg",
+        "3kg 900g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-104",
+      "type": "calculation",
+      "prompt": "2kg 750g - 1kg 600g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "2kg 200g",
+        "1kg 200g",
+        "1kg 150g",
+        "1kg 50g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-105",
+      "type": "calculation",
+      "prompt": "8kg 400g - 1kg 400g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "7kg",
+        "7kg 100g",
+        "6kg",
+        "6kg 950g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-106",
+      "type": "calculation",
+      "prompt": "8kg 100g - 4kg 450g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "3kg 550g",
+        "3kg 750g",
+        "2kg 650g",
+        "3kg 650g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-107",
+      "type": "calculation",
+      "prompt": "3kg 450g - 1kg 900g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "choices": [
+        "2kg 550g",
+        "1kg 550g",
+        "1kg 500g",
+        "1kg 600g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-108",
+      "type": "calculation",
+      "prompt": "8kg 300g - 4kg 300g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "3kg 900g",
+        "4kg",
+        "3kg",
+        "4kg 100g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-109",
+      "type": "calculation",
+      "prompt": "8kg 900g - 1kg 900g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "7kg 100g",
+        "6kg 950g",
+        "6kg",
+        "7kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-110",
+      "type": "calculation",
+      "prompt": "9kg 200g - 6kg 50g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "4kg 150g",
+        "3kg 150g",
+        "3kg 100g",
+        "3kg 200g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-111",
+      "type": "calculation",
+      "prompt": "4kg 300g - 3kg 300g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
         "1kg 950g",
+        "1kg 150g",
+        "1kg",
+        "1kg 50g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-112",
+      "type": "calculation",
+      "prompt": "10kg 950g - 2kg 950g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "8kg",
+        "7kg 900g",
+        "8kg 100g",
+        "9kg"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-113",
+      "type": "calculation",
+      "prompt": "10kg 50g - 4kg 50g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "5kg 950g",
+        "7kg",
+        "6kg 50g",
+        "6kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-114",
+      "type": "calculation",
+      "prompt": "4kg 650g - 2kg 650g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg 950g",
+        "2kg 100g",
+        "2kg",
+        "3kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-115",
+      "type": "calculation",
+      "prompt": "3kg 150g - 2kg 150g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg",
+        "1kg 50g",
+        "1kg 150g",
+        "1kg 950g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-116",
+      "type": "calculation",
+      "prompt": "8kg 350g - 6kg 450g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "choices": [
+        "1kg 900g",
+        "1kg 950g",
+        "1kg 850g",
+        "2kg 900g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-117",
+      "type": "calculation",
+      "prompt": "5kg 500g - 4kg 500g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
         "1kg 50g",
         "1kg",
+        "1kg 150g",
+        "1kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-118",
+      "type": "calculation",
+      "prompt": "6kg 50g - 1kg 50g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "4kg 900g",
+        "5kg 50g",
+        "5kg",
+        "4kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-119",
+      "type": "calculation",
+      "prompt": "4kg 950g - 1kg 350g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "3kg 600g",
+        "3kg 550g",
+        "4kg 600g",
+        "3kg 650g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-120",
+      "type": "calculation",
+      "prompt": "10kg 400g - 8kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 400g",
+        "3kg 400g",
+        "2kg 400g",
+        "2kg 450g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-121",
+      "type": "calculation",
+      "prompt": "8kg 800g - 6kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "3kg 800g",
+        "2kg 900g",
+        "2kg 700g",
+        "2kg 800g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-122",
+      "type": "calculation",
+      "prompt": "5kg 600g - 2kg 800g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "choices": [
+        "2kg 900g",
+        "2kg 800g",
+        "3kg 800g",
+        "2kg 700g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-123",
+      "type": "calculation",
+      "prompt": "7kg 50g - 3kg 50g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "4kg 100g",
+        "3kg 900g",
+        "4kg",
+        "3kg"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-124",
+      "type": "calculation",
+      "prompt": "5kg 750g - 2kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "3kg 400g",
+        "3kg 200g",
+        "3kg 350g",
+        "3kg 300g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-125",
+      "type": "calculation",
+      "prompt": "5kg 100g - 3kg 850g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "choices": [
+        "1kg 150g",
+        "1kg 250g",
+        "1kg 300g",
+        "1kg 200g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-126",
+      "type": "calculation",
+      "prompt": "6kg 550g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "4kg 550g",
+        "5kg 500g",
+        "5kg 550g",
+        "5kg 600g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-127",
+      "type": "calculation",
+      "prompt": "3kg 800g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "3kg 800g",
+        "2kg 700g",
+        "2kg 900g",
+        "2kg 800g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-128",
+      "type": "calculation",
+      "prompt": "6kg 950g - 5kg 950g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg",
+        "1kg 150g",
+        "1kg 50g",
+        "1kg 950g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-129",
+      "type": "calculation",
+      "prompt": "10kg 300g - 3kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "7kg 100g",
+        "6kg",
+        "6kg 950g",
+        "7kg"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-130",
+      "type": "calculation",
+      "prompt": "7kg 900g - 5kg 900g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "3kg",
+        "2kg",
+        "2kg 100g",
+        "1kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-131",
+      "type": "calculation",
+      "prompt": "5kg 400g - 3kg 750g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "1kg 750g",
+        "1kg 600g",
+        "1kg 650g",
+        "2kg 650g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-132",
+      "type": "calculation",
+      "prompt": "6kg 700g - 4kg 100g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "2kg 650g",
+        "2kg 550g",
+        "1kg 600g",
+        "2kg 600g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-133",
+      "type": "calculation",
+      "prompt": "2kg 800g - 1kg 800g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg",
+        "1kg 50g",
+        "1kg 950g",
         "1kg 150g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-134",
+      "type": "calculation",
+      "prompt": "6kg 750g - 2kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "3kg 750g",
+        "4kg 750g",
+        "5kg 750g",
+        "4kg 800g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-135",
+      "type": "calculation",
+      "prompt": "2kg 800g - 1kg 50g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 650g",
+        "2kg 800g",
+        "1kg 750g",
+        "1kg 850g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-136",
+      "type": "calculation",
+      "prompt": "4kg 900g - 3kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 900g",
+        "1kg 850g",
+        "1kg 950g",
+        "2kg 900g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-137",
+      "type": "calculation",
+      "prompt": "5kg 700g - 3kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "2kg 800g",
+        "2kg 650g",
+        "2kg 700g",
+        "2kg 600g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-138",
+      "type": "calculation",
+      "prompt": "6kg 250g - 1kg 450g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "choices": [
+        "4kg 800g",
+        "4kg 900g",
+        "4kg 700g",
+        "3kg 800g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-139",
+      "type": "calculation",
+      "prompt": "4kg 800g - 3kg 300g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "1kg 500g",
+        "1kg 600g",
+        "1kg 400g",
+        "2kg 550g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-140",
+      "type": "calculation",
+      "prompt": "9kg 300g - 2kg 450g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "choices": [
+        "6kg 750g",
+        "5kg 850g",
+        "6kg 950g",
+        "6kg 850g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-141",
+      "type": "calculation",
+      "prompt": "4kg 400g - 1kg 100g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "3kg 400g",
+        "3kg 350g",
+        "3kg 200g",
+        "3kg 300g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-142",
+      "type": "calculation",
+      "prompt": "7kg 500g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "6kg 500g",
+        "5kg 500g",
+        "6kg 600g",
+        "6kg 400g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-143",
+      "type": "calculation",
+      "prompt": "2kg 900g - 1kg 700g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 150g",
+        "1kg 300g",
+        "2kg 200g",
+        "1kg 200g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-144",
+      "type": "calculation",
+      "prompt": "8kg 300g - 7kg 300g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "1kg 50g",
+        "1kg 150g",
+        "1kg",
+        "1kg 950g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-145",
+      "type": "calculation",
+      "prompt": "6kg 600g - 5kg 250g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 350g",
+        "2kg 350g",
+        "1kg 300g",
+        "1kg 400g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-146",
+      "type": "calculation",
+      "prompt": "10kg 750g - 6kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "5kg 750g",
+        "3kg 750g",
+        "4kg 750g",
+        "4kg 800g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-147",
+      "type": "calculation",
+      "prompt": "9kg 750g - 4kg 400g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "5kg 300g",
+        "5kg 400g",
+        "4kg 350g",
+        "5kg 350g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-148",
+      "type": "calculation",
+      "prompt": "9kg 50g - 6kg 100g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "2kg 950g",
+        "2kg 900g",
+        "3kg",
+        "1kg 950g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-149",
+      "type": "calculation",
+      "prompt": "8kg 550g - 7kg 50g",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 600g",
+        "1kg 500g",
+        "2kg 550g",
+        "1kg 400g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-150",
+      "type": "calculation",
+      "prompt": "4kg 300g - 2kg 400g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "choices": [
+        "1kg 850g",
+        "2kg 900g",
+        "1kg 950g",
+        "1kg 900g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-151",
+      "type": "calculation",
+      "prompt": "4kg 300g - 2kg",
+      "promptExplain": "무게의 차를 구하세요.",
+      "choices": [
+        "1kg 300g",
+        "2kg 300g",
+        "2kg 200g",
+        "3kg 300g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-152",
+      "type": "calculation",
+      "prompt": "9kg 950g - 1kg 550g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "8kg 350g",
+        "8kg 300g",
+        "8kg 400g",
+        "8kg 450g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3237,15 +3234,15 @@
     {
       "id": "ma3-kg-sub-153",
       "type": "calculation",
-      "prompt": "7kg 200g - 3kg 200g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "6kg 750g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "4kg",
-        "3kg 900g",
-        "4kg 100g",
-        "3kg"
+        "5kg 650g",
+        "5kg 750g",
+        "6kg 750g",
+        "5kg 850g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -3258,36 +3255,37 @@
     {
       "id": "ma3-kg-sub-154",
       "type": "calculation",
-      "prompt": "4kg 400g - 2kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "10kg 200g - 8kg 850g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "2kg 450g",
-        "2kg 400g",
-        "3kg 400g",
+        "1kg 350g",
+        "2kg 350g",
+        "1kg 300g",
         "1kg 400g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-155",
       "type": "calculation",
-      "prompt": "8kg 550g - 3kg 550g",
+      "prompt": "9kg 650g - 7kg 650g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "5kg",
-        "4kg",
-        "5kg 50g",
-        "4kg 900g"
+        "2kg 100g",
+        "2kg",
+        "1kg 950g",
+        "3kg"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -3300,15 +3298,15 @@
     {
       "id": "ma3-kg-sub-156",
       "type": "calculation",
-      "prompt": "6kg 550g - 5kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "3kg 500g - 2kg 500g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "2kg 550g",
-        "1kg 600g",
-        "1kg 500g",
-        "1kg 550g"
+        "1kg",
+        "1kg 50g",
+        "1kg 150g",
+        "1kg 950g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -3321,37 +3319,36 @@
     {
       "id": "ma3-kg-sub-157",
       "type": "calculation",
-      "prompt": "7kg 50g - 1kg 800g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "3kg 650g - 1kg 100g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "5kg 150g",
-        "5kg 250g",
-        "4kg 250g",
-        "5kg 300g"
+        "2kg 550g",
+        "2kg 450g",
+        "3kg 550g",
+        "2kg 650g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-158",
       "type": "calculation",
-      "prompt": "2kg 250g - 1kg 250g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "8kg 400g - 5kg 300g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 950g",
-        "1kg",
-        "1kg 150g",
-        "1kg 50g"
+        "3kg 200g",
+        "4kg 100g",
+        "2kg 100g",
+        "3kg 100g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
@@ -3364,13 +3361,13 @@
     {
       "id": "ma3-kg-sub-159",
       "type": "calculation",
-      "prompt": "6kg 250g - 1kg 350g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "9kg 100g - 6kg 900g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "4kg 950g",
-        "4kg 800g",
-        "4kg 900g",
-        "3kg 900g"
+        "1kg 200g",
+        "3kg 200g",
+        "2kg 200g",
+        "2kg 100g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3386,34 +3383,13 @@
     {
       "id": "ma3-kg-sub-160",
       "type": "calculation",
-      "prompt": "6kg 250g - 3kg 250g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "4kg 700g - 3kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 900g",
-        "3kg 100g",
-        "3kg",
-        "4kg"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-161",
-      "type": "calculation",
-      "prompt": "5kg 250g - 3kg 150g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg 100g",
-        "2kg",
-        "2kg 200g",
-        "2kg 100g"
+        "1kg 750g",
+        "1kg 650g",
+        "1kg 600g",
+        "1kg 700g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -3426,17 +3402,17 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-162",
+      "id": "ma3-kg-sub-161",
       "type": "calculation",
-      "prompt": "10kg 600g - 9kg 250g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "2kg 550g - 1kg 500g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "1kg 350g",
-        "1kg 300g",
-        "2kg 350g",
-        "1kg 400g"
+        "2kg",
+        "1kg 50g",
+        "1kg 150g",
+        "2kg 100g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -3447,15 +3423,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-163",
+      "id": "ma3-kg-sub-162",
       "type": "calculation",
-      "prompt": "10kg 300g - 4kg 150g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "4kg 650g - 3kg 650g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "6kg 50g",
-        "6kg 200g",
-        "6kg 150g",
-        "5kg 150g"
+        "1kg 150g",
+        "1kg 50g",
+        "1kg",
+        "1kg 950g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3468,15 +3444,36 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-164",
+      "id": "ma3-kg-sub-163",
       "type": "calculation",
-      "prompt": "7kg 550g - 5kg",
+      "prompt": "4kg 900g - 1kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "3kg 550g",
-        "2kg 450g",
-        "2kg 550g",
-        "2kg 650g"
+        "4kg",
+        "4kg 900g",
+        "3kg 850g",
+        "3kg 900g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-164",
+      "type": "calculation",
+      "prompt": "4kg 700g - 1kg 300g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "choices": [
+        "3kg 350g",
+        "3kg 450g",
+        "3kg 400g",
+        "3kg 300g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3491,15 +3488,15 @@
     {
       "id": "ma3-kg-sub-165",
       "type": "calculation",
-      "prompt": "7kg 900g - 3kg 900g",
+      "prompt": "10kg 800g - 7kg 800g",
       "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "3kg 900g",
         "3kg",
-        "4kg 100g",
-        "4kg"
+        "2kg 900g",
+        "4kg",
+        "3kg 100g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -3512,13 +3509,13 @@
     {
       "id": "ma3-kg-sub-166",
       "type": "calculation",
-      "prompt": "7kg 250g - 3kg 400g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "2kg 650g - 1kg 450g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "3kg 850g",
-        "3kg 800g",
-        "3kg 750g",
-        "3kg 900g"
+        "1kg 200g",
+        "2kg 200g",
+        "1kg 150g",
+        "1kg 300g"
       ],
       "answerIndex": 0,
       "tags": [
@@ -3527,22 +3524,21 @@
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-167",
       "type": "calculation",
-      "prompt": "6kg 500g - 3kg 200g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "5kg 250g - 2kg 100g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
+        "4kg 150g",
+        "3kg 150g",
         "3kg 200g",
-        "3kg 350g",
-        "3kg 300g",
-        "3kg 400g"
+        "3kg 100g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -3555,13 +3551,13 @@
     {
       "id": "ma3-kg-sub-168",
       "type": "calculation",
-      "prompt": "10kg 350g - 5kg 200g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "10kg 500g - 8kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "5kg 150g",
-        "6kg 150g",
-        "5kg 50g",
-        "5kg 200g"
+        "2kg 350g",
+        "3kg 350g",
+        "2kg 250g",
+        "2kg 450g"
       ],
       "answerIndex": 0,
       "tags": [
@@ -3576,57 +3572,13 @@
     {
       "id": "ma3-kg-sub-169",
       "type": "calculation",
-      "prompt": "4kg 100g - 1kg 400g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "prompt": "6kg 600g - 2kg 350g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "2kg 650g",
-        "2kg 600g",
-        "2kg 700g",
-        "2kg 800g"
-      ],
-      "answerIndex": 2,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-170",
-      "type": "calculation",
-      "prompt": "8kg 250g - 2kg 550g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
-      "choices": [
-        "5kg 600g",
-        "4kg 700g",
-        "5kg 750g",
-        "5kg 700g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-171",
-      "type": "calculation",
-      "prompt": "10kg 400g - 8kg 200g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
-      "choices": [
-        "3kg 200g",
-        "2kg 200g",
-        "2kg 100g",
-        "1kg 200g"
+        "4kg 350g",
+        "4kg 250g",
+        "4kg 150g",
+        "5kg 250g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -3639,36 +3591,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-172",
+      "id": "ma3-kg-sub-170",
       "type": "calculation",
-      "prompt": "7kg 900g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "3kg 150g - 1kg 150g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "7kg 900g",
-        "6kg 950g",
-        "6kg 850g",
-        "6kg 900g"
-      ],
-      "answerIndex": 3,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-173",
-      "type": "calculation",
-      "prompt": "10kg 850g - 1kg 500g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
-      "choices": [
-        "9kg 250g",
-        "9kg 450g",
-        "9kg 350g",
-        "8kg 350g"
+        "1kg 950g",
+        "3kg",
+        "2kg",
+        "2kg 100g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3681,15 +3612,80 @@
       ]
     },
     {
+      "id": "ma3-kg-sub-171",
+      "type": "calculation",
+      "prompt": "5kg 650g - 3kg 500g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "choices": [
+        "2kg 100g",
+        "2kg 200g",
+        "1kg 150g",
+        "2kg 150g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-172",
+      "type": "calculation",
+      "prompt": "4kg 250g - 2kg 400g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "choices": [
+        "1kg 750g",
+        "1kg 850g",
+        "2kg 900g",
+        "1kg 950g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-173",
+      "type": "calculation",
+      "prompt": "7kg 100g - 1kg 750g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "choices": [
+        "5kg 350g",
+        "5kg 300g",
+        "5kg 400g",
+        "4kg 350g"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g",
+        "받아내림"
+      ]
+    },
+    {
       "id": "ma3-kg-sub-174",
       "type": "calculation",
-      "prompt": "5kg 50g - 3kg 750g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
+      "prompt": "5kg 50g - 2kg 500g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "1kg 400g",
-        "1kg 300g",
-        "1kg 200g",
-        "2kg 350g"
+        "2kg 450g",
+        "2kg 550g",
+        "2kg 650g",
+        "3kg 550g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -3705,15 +3701,15 @@
     {
       "id": "ma3-kg-sub-175",
       "type": "calculation",
-      "prompt": "5kg 350g - 4kg 250g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "10kg 750g - 4kg 600g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 50g",
-        "1kg 100g",
-        "1kg 150g",
-        "2kg 100g"
+        "6kg 150g",
+        "5kg 150g",
+        "6kg 200g",
+        "6kg 50g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -3726,13 +3722,13 @@
     {
       "id": "ma3-kg-sub-176",
       "type": "calculation",
-      "prompt": "10kg 400g - 2kg",
+      "prompt": "8kg 450g - 4kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "8kg 350g",
-        "8kg 450g",
-        "8kg 400g",
-        "8kg 300g"
+        "4kg 350g",
+        "3kg 450g",
+        "4kg 450g",
+        "4kg 550g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -3747,55 +3743,13 @@
     {
       "id": "ma3-kg-sub-177",
       "type": "calculation",
-      "prompt": "8kg 450g - 2kg 450g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "4kg 100g - 2kg 600g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "5kg 950g",
-        "6kg",
-        "6kg 50g",
-        "7kg"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-178",
-      "type": "calculation",
-      "prompt": "3kg 950g - 1kg 500g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "2kg 450g",
-        "3kg 450g",
+        "1kg 400g",
+        "1kg 600g",
         "2kg 550g",
-        "2kg 350g"
-      ],
-      "answerIndex": 0,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-179",
-      "type": "calculation",
-      "prompt": "9kg 500g - 4kg 950g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
-      "choices": [
-        "4kg 450g",
-        "4kg 600g",
-        "3kg 550g",
-        "4kg 550g"
+        "1kg 500g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -3809,15 +3763,57 @@
       ]
     },
     {
+      "id": "ma3-kg-sub-178",
+      "type": "calculation",
+      "prompt": "3kg 250g - 2kg 100g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "choices": [
+        "1kg 200g",
+        "1kg 150g",
+        "1kg 50g",
+        "2kg 200g"
+      ],
+      "answerIndex": 1,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-179",
+      "type": "calculation",
+      "prompt": "5kg 500g - 3kg 500g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "3kg",
+        "2kg 100g",
+        "2kg",
+        "1kg 950g"
+      ],
+      "answerIndex": 2,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
       "id": "ma3-kg-sub-180",
       "type": "calculation",
-      "prompt": "2kg 450g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "3kg 650g - 2kg 250g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "1kg 400g",
-        "1kg 450g",
         "1kg 500g",
-        "2kg 450g"
+        "1kg 400g",
+        "2kg 450g",
+        "1kg 300g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -3832,13 +3828,55 @@
     {
       "id": "ma3-kg-sub-181",
       "type": "calculation",
-      "prompt": "6kg 450g - 2kg 700g",
+      "prompt": "9kg 900g - 6kg 400g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "3kg 550g",
+        "3kg 400g",
+        "3kg 450g",
+        "3kg 500g"
+      ],
+      "answerIndex": 3,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-182",
+      "type": "calculation",
+      "prompt": "5kg 500g - 3kg 500g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
+      "choices": [
+        "2kg",
+        "2kg 100g",
+        "1kg 950g",
+        "3kg"
+      ],
+      "answerIndex": 0,
+      "tags": [
+        "초3",
+        "수학",
+        "무게",
+        "뺄셈",
+        "kg",
+        "g"
+      ]
+    },
+    {
+      "id": "ma3-kg-sub-183",
+      "type": "calculation",
+      "prompt": "4kg 50g - 1kg 550g",
       "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "3kg 650g",
-        "3kg 800g",
-        "3kg 850g",
-        "3kg 750g"
+        "2kg 450g",
+        "2kg 550g",
+        "1kg 500g",
+        "2kg 500g"
       ],
       "answerIndex": 3,
       "tags": [
@@ -3852,59 +3890,15 @@
       ]
     },
     {
-      "id": "ma3-kg-sub-182",
-      "type": "calculation",
-      "prompt": "9kg 350g - 1kg 800g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
-      "choices": [
-        "7kg 650g",
-        "7kg 550g",
-        "7kg 450g",
-        "8kg 550g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
-      "id": "ma3-kg-sub-183",
-      "type": "calculation",
-      "prompt": "10kg 150g - 2kg 450g",
-      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
-      "choices": [
-        "7kg 650g",
-        "7kg 700g",
-        "7kg 800g",
-        "7kg 600g"
-      ],
-      "answerIndex": 1,
-      "tags": [
-        "초3",
-        "수학",
-        "무게",
-        "뺄셈",
-        "kg",
-        "g",
-        "받아내림"
-      ]
-    },
-    {
       "id": "ma3-kg-sub-184",
       "type": "calculation",
-      "prompt": "8kg 400g - 4kg 550g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "5kg 350g - 1kg 700g",
+      "promptExplain": "자릿수에 맞추어 계산해보세요.",
       "choices": [
-        "3kg 800g",
-        "3kg 850g",
+        "2kg 650g",
+        "3kg 650g",
         "3kg 750g",
-        "3kg 900g"
+        "3kg 550g"
       ],
       "answerIndex": 1,
       "tags": [
@@ -3920,15 +3914,15 @@
     {
       "id": "ma3-kg-sub-185",
       "type": "calculation",
-      "prompt": "9kg 600g - 1kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "7kg 700g - 1kg 150g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "8kg 650g",
-        "8kg 600g",
-        "9kg 600g",
-        "8kg 550g"
+        "6kg 550g",
+        "6kg 600g",
+        "6kg 500g",
+        "7kg 550g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -3941,15 +3935,15 @@
     {
       "id": "ma3-kg-sub-186",
       "type": "calculation",
-      "prompt": "2kg 400g - 1kg",
+      "prompt": "5kg 550g - 2kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 300g",
-        "2kg 450g",
-        "1kg 500g",
-        "1kg 400g"
+        "3kg 550g",
+        "2kg 550g",
+        "4kg 550g",
+        "3kg 650g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -3962,15 +3956,15 @@
     {
       "id": "ma3-kg-sub-187",
       "type": "calculation",
-      "prompt": "8kg 200g - 4kg 200g",
-      "promptExplain": "1kg = 1000g 임을 기억하세요.",
+      "prompt": "2kg 900g - 1kg 200g",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "3kg 900g",
-        "4kg",
-        "4kg 100g",
-        "3kg"
+        "1kg 600g",
+        "1kg 750g",
+        "1kg 650g",
+        "1kg 700g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
@@ -3983,15 +3977,15 @@
     {
       "id": "ma3-kg-sub-188",
       "type": "calculation",
-      "prompt": "8kg 300g - 3kg 250g",
-      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
+      "prompt": "10kg 900g - 9kg 200g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "4kg 950g",
-        "5kg 150g",
-        "5kg 50g",
-        "6kg 50g"
+        "1kg 700g",
+        "1kg 600g",
+        "1kg 750g",
+        "1kg 650g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -4004,57 +3998,59 @@
     {
       "id": "ma3-kg-sub-189",
       "type": "calculation",
-      "prompt": "2kg 750g - 1kg 750g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "3kg 450g - 1kg 700g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "1kg 50g",
-        "1kg 950g",
-        "1kg",
-        "1kg 150g"
+        "1kg 850g",
+        "1kg 650g",
+        "2kg 800g",
+        "1kg 750g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-190",
       "type": "calculation",
-      "prompt": "10kg 350g - 3kg",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "7kg 250g - 1kg 900g",
+      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
       "choices": [
-        "8kg 350g",
-        "7kg 350g",
-        "7kg 450g",
-        "7kg 250g"
+        "4kg 350g",
+        "5kg 400g",
+        "5kg 300g",
+        "5kg 350g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     },
     {
       "id": "ma3-kg-sub-191",
       "type": "calculation",
-      "prompt": "6kg 850g - 4kg 600g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "7kg 100g - 1kg 100g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "2kg 150g",
-        "2kg 350g",
-        "2kg 250g",
-        "2kg 200g"
+        "7kg",
+        "6kg",
+        "5kg 950g",
+        "6kg 50g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 1,
       "tags": [
         "초3",
         "수학",
@@ -4067,37 +4063,36 @@
     {
       "id": "ma3-kg-sub-192",
       "type": "calculation",
-      "prompt": "4kg 50g - 2kg 900g",
-      "promptExplain": "1kg을 1000g으로 바꿔서 계산하세요.",
+      "prompt": "6kg 850g - 1kg 100g",
+      "promptExplain": "kg은 kg끼리, g은 g끼리 뺍니다.",
       "choices": [
-        "1kg 200g",
-        "1kg 150g",
-        "1kg 50g",
-        "2kg 200g"
+        "6kg 750g",
+        "5kg 850g",
+        "5kg 650g",
+        "5kg 750g"
       ],
-      "answerIndex": 1,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-193",
       "type": "calculation",
-      "prompt": "3kg 250g - 2kg 250g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "2kg 550g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 50g",
-        "1kg 950g",
-        "1kg",
-        "1kg 150g"
+        "1kg 550g",
+        "2kg 550g",
+        "1kg 600g",
+        "1kg 500g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -4110,13 +4105,13 @@
     {
       "id": "ma3-kg-sub-194",
       "type": "calculation",
-      "prompt": "3kg 300g - 1kg 300g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "6kg 950g - 1kg",
+      "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "1kg 950g",
-        "3kg",
-        "2kg",
-        "2kg 100g"
+        "5kg 850g",
+        "6kg 50g",
+        "5kg 950g",
+        "6kg 950g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -4131,15 +4126,15 @@
     {
       "id": "ma3-kg-sub-195",
       "type": "calculation",
-      "prompt": "6kg 300g - 1kg 850g",
-      "promptExplain": "받아내림이 필요한지 확인해보세요.",
+      "prompt": "3kg 50g - 1kg 350g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "4kg 450g",
-        "4kg 550g",
-        "3kg 450g",
-        "4kg 350g"
+        "1kg 650g",
+        "1kg 750g",
+        "1kg 700g",
+        "1kg 600g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -4153,13 +4148,13 @@
     {
       "id": "ma3-kg-sub-196",
       "type": "calculation",
-      "prompt": "8kg 800g - 5kg",
+      "prompt": "2kg 100g - 1kg",
       "promptExplain": "무게의 차를 구하세요.",
       "choices": [
-        "3kg 750g",
-        "3kg 850g",
-        "3kg 800g",
-        "4kg 800g"
+        "2kg 100g",
+        "1kg 50g",
+        "1kg 100g",
+        "1kg 150g"
       ],
       "answerIndex": 2,
       "tags": [
@@ -4174,37 +4169,36 @@
     {
       "id": "ma3-kg-sub-197",
       "type": "calculation",
-      "prompt": "10kg 350g - 3kg 750g",
-      "promptExplain": "자릿수에 맞추어 계산해보세요.",
+      "prompt": "2kg 750g - 1kg 300g",
+      "promptExplain": "같은 단위끼리 빼보세요.",
       "choices": [
-        "6kg 600g",
-        "5kg 600g",
-        "6kg 650g",
-        "6kg 500g"
+        "1kg 400g",
+        "2kg 450g",
+        "1kg 450g",
+        "1kg 500g"
       ],
-      "answerIndex": 0,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g",
-        "받아내림"
+        "g"
       ]
     },
     {
       "id": "ma3-kg-sub-198",
       "type": "calculation",
-      "prompt": "7kg 200g - 6kg 150g",
-      "promptExplain": "무게의 차를 구하세요.",
+      "prompt": "9kg 450g - 4kg 300g",
+      "promptExplain": "1kg = 1000g 임을 기억하세요.",
       "choices": [
-        "2kg",
-        "2kg 100g",
-        "1kg 150g",
-        "1kg 50g"
+        "5kg 50g",
+        "6kg 150g",
+        "5kg 150g",
+        "5kg 200g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 2,
       "tags": [
         "초3",
         "수학",
@@ -4217,15 +4211,15 @@
     {
       "id": "ma3-kg-sub-199",
       "type": "calculation",
-      "prompt": "2kg 900g - 1kg 900g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "10kg 900g - 4kg 100g",
+      "promptExplain": "받아내림이 필요한지 확인해보세요.",
       "choices": [
-        "1kg 50g",
-        "1kg 950g",
-        "1kg 150g",
-        "1kg"
+        "6kg 800g",
+        "7kg 800g",
+        "6kg 750g",
+        "6kg 850g"
       ],
-      "answerIndex": 3,
+      "answerIndex": 0,
       "tags": [
         "초3",
         "수학",
@@ -4238,22 +4232,23 @@
     {
       "id": "ma3-kg-sub-200",
       "type": "calculation",
-      "prompt": "8kg 250g - 7kg 250g",
-      "promptExplain": "같은 단위끼리 빼보세요.",
+      "prompt": "7kg 450g - 4kg 900g",
+      "promptExplain": "g끼리 뺄 수 없으면 1kg에서 받아내림 하세요.",
       "choices": [
-        "1kg 50g",
-        "1kg 950g",
-        "1kg",
-        "1kg 150g"
+        "2kg 650g",
+        "2kg 450g",
+        "3kg 550g",
+        "2kg 550g"
       ],
-      "answerIndex": 2,
+      "answerIndex": 3,
       "tags": [
         "초3",
         "수학",
         "무게",
         "뺄셈",
         "kg",
-        "g"
+        "g",
+        "받아내림"
       ]
     }
   ]
