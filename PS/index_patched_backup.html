@@ -632,10 +632,7 @@
                 <h2 style="margin:0; font-size:24px; color:#92400e;">포켓몬 도감</h2>
                 <div style="margin-left:auto; display:flex; gap:8px; align-items:center;">
                     <button class="btn-3d" style="padding:10px 14px; font-size:16px; border-radius:14px;" onclick="goToPixel()">🎨 색칠하기</button>
-                    <button class="btn-3d" style="padding:10px 14px; font-size:16px; border-radius:14px; background:#ef4444;"
-                            onclick="location.href='./PRL_v2.html'">
-                        ⚔️ 전투/육성
-                    </button>
+                    <button class="btn-3d" style="padding:10px 14px; font-size:16px; border-radius:14px;" onclick="exportDexToPRL()">📤 내보내기</button>
                 </div>
             </div>
 
@@ -909,53 +906,12 @@
         return true;
     }
 
-    function performMigration() {
-        const OLD_KEY = "poke_spell_game_data_v7"; // 기존 PS 폴더에서 사용하던 키
-        const oldRaw = localStorage.getItem(OLD_KEY);
-
-        // 이미 v80 데이터가 있다면(이미 마이그레이션됨) 중단
-        if (localStorage.getItem(SHARED_KEYS.OWNED)) return;
-
-        if (oldRaw) {
-            try {
-                const oldData = JSON.parse(oldRaw);
-
-                // 2. 기존 데이터를 새 공용 키에 할당
-                localStorage.setItem(SHARED_KEYS.POINTS, oldData.points || 0);
-                localStorage.setItem(SHARED_KEYS.OWNED, JSON.stringify(oldData.dex || []));
-                localStorage.setItem(SHARED_KEYS.PARTNER, oldData.partnerId || "");
-
-                console.log("✅ [Migration] 구버전(v7) 데이터가 성공적으로 v80으로 이전되었습니다.");
-
-                // 데이터 확인을 위해 새로고침 혹은 유저 알림
-                alert("이전 게임 데이터가 성공적으로 복구되었습니다!");
-                location.reload();
-            } catch (e) {
-                console.error("Migration failed:", e);
-            }
-        }
-    }
 
     const TILE_IMGS = ["./png/Tile0.png", "./png/Tile1.png", "./png/Tile2.png", "./png/Tile3.png"];
     const MAX_POKEMON_ID = 1025;
 
     // --- [중요] 데이터 버전 관리 ---
-    // 기존 SAVE_KEY를 아래 다중 키 체제로 교체합니다.
-    const LS_KEYS = {
-        POINTS: "qz_p_v80",
-        OWNED: "qz_o_v80",
-        PARTNER: "qz_st_v80",
-        TICKETS: "qz_t_v80",
-        CHAR_DATA: "qz_c_prog_v80"
-    };
-
-    // 1. 공용 키 정의 (PRL_v2와 동일)
-    const SHARED_KEYS = {
-        POINTS: "qz_p_v80",
-        OWNED: "qz_o_v80",
-        PARTNER: "qz_st_v80"
-    };
-    
+    const SAVE_KEY = "poke_spell_game_data_v7";
     // Pixel(색칠)로 이동: index와 동일 오리진이면 localStorage를 자동 공유
     const PIXEL_URL = new URL("../Pixel/Pixel_patched_auto_link.html", location.href).href;
     // v7으로 업데이트 (인벤토리 구조 변경 때문)
@@ -1029,7 +985,6 @@
     let isFilterCollapsed = false;
 
     async function init() {
-        performMigration();
         loadGame();
         // DB를 미리 당겨서 탐험 스폰/표시 지연을 줄인다 (실패해도 fallback)
         ensurePokeDb();
@@ -1038,8 +993,6 @@
         updateLobbyUI();
     }
 
-    
-    
     async function loadQuizData() {
         try {
             // [캐시 방지] 타임스탬프 + 헤더
@@ -1110,11 +1063,9 @@
 
     function saveGame() {
         try {
-            localStorage.setItem(LS_KEYS.POINTS, user.points);
-            localStorage.setItem(LS_KEYS.OWNED, JSON.stringify(Array.from(user.dex)));
-            localStorage.setItem(LS_KEYS.PARTNER, user.partnerId || "0");
-            // 필요한 경우 인벤토리 등도 개별 키로 관리 가능
-        } catch(e) { console.error("저장 실패", e); }
+            const data = { ...user, dex: Array.from(user.dex) };
+            localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+        } catch(e) { console.error("Save failed", e); }
     }
 
 
@@ -1214,16 +1165,35 @@
 
     function loadGame() {
         try {
-            const points = localStorage.getItem(LS_KEYS.POINTS);
-            const owned = localStorage.getItem(LS_KEYS.OWNED);
-            const partner = localStorage.getItem(LS_KEYS.PARTNER);
+            let saved = localStorage.getItem(SAVE_KEY);
+            if (!saved) {
+                for (let oldKey of PREVIOUS_KEYS) {
+                    const oldData = localStorage.getItem(oldKey);
+                    if (oldData) {
+                        console.log(`[Migration] Found old data in ${oldKey}. Migrating to ${SAVE_KEY}...`);
+                        saved = oldData;
+                        localStorage.setItem(SAVE_KEY, saved);
+                        break;
+                    }
+                }
+            }
+            if(saved) {
+                const parsed = JSON.parse(saved);
+                user = { ...user, ...parsed, dex: new Set(parsed.dex || []) };
+                if(user.upgrades.rareRate === undefined) user.upgrades.rareRate = 0;
 
-            if (points !== null) user.points = parseInt(points);
-            if (owned !== null) user.dex = new Set(JSON.parse(owned));
-            if (partner !== null) user.partnerId = parseInt(partner);
+                // [마이그레이션] 인벤토리 구조 변경 대응 (monster -> super로 교체하거나 삭제)
+                if(user.inventory.monster !== undefined) {
+                    user.inventory.super += user.inventory.monster; // 기존 몬스터볼을 슈퍼볼로 통합 보상
+                    delete user.inventory.monster;
+                }
+                if(user.inventory.special === undefined) user.inventory.special = 0;
 
-            // 상점 업그레이드 데이터 등은 기존 방식을 유지하거나 필요시 확장
-        } catch(e) { console.warn("불러오기 실패, 초기 데이터 사용"); }
+                if(user.upgrades.startBalls !== undefined) delete user.upgrades.startBalls;
+                if(user.upgrades.dexLimit === undefined) user.upgrades.dexLimit = 0;
+                if(user.upgrades.timerLevel === undefined) user.upgrades.timerLevel = 0;
+            }
+        } catch(e) { console.error("Load failed", e); }
     }
 
     function resetGameData() {
