@@ -766,8 +766,16 @@
     }
 
     // 2. [추가] Silent Migration: 탐험대(v7) 데이터를 전투(v80)로 자동 병합
+    // 2. [수정됨] Silent Migration: 중복 실행 방지 로직 추가
     function silentMigrateFromIndex() {
-        const OLD_KEY = "poke_spell_game_data_v7"; // index_patched의 저장 키
+        const OLD_KEY = "poke_spell_game_data_v7"; // index_patched의 구버전 저장 키
+        const MIGRATION_FLAG = "qz_migrated_v80"; // 마이그레이션 완료 표시용 플래그
+
+        // 이미 마이그레이션을 완료했거나, 새 버전 데이터(v80)가 이미 존재하면 중단합니다.
+        if (localStorage.getItem(MIGRATION_FLAG) || localStorage.getItem("qz_o_v80")) {
+            return;
+        }
+
         const raw = localStorage.getItem(OLD_KEY);
         if (!raw) return;
 
@@ -786,7 +794,7 @@
                 });
             }
 
-            // 포인트 통합 (기존 포인트가 있으면 합산)
+            // 포인트 통합 (최초 1회만 합산)
             if (oldData.points) {
                 addPoints(oldData.points);
                 changed = true;
@@ -794,11 +802,13 @@
 
             if (changed) {
                 saveOwned(owned);
-                console.log("탐험대 데이터가 성공적으로 통합되었습니다.");
+                // ✅ 중요: 마이그레이션이 완료되었음을 기록하여 다음 로딩 시 중복 실행을 막습니다.
+                localStorage.setItem(MIGRATION_FLAG, "true");
+                console.log("✅ 탐험대 데이터가 최초 1회 성공적으로 통합되었습니다.");
             }
-            // 통합 후 구버전 키 삭제 (선택 사항: 데이터 꼬임 방지용)
-            // localStorage.removeItem(OLD_KEY); 
-        } catch (e) { console.error("Migration error:", e); }
+        } catch (e) {
+            console.error("Migration error:", e);
+        }
     }
     
     // 진화 가능 여부 체크
