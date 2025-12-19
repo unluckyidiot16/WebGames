@@ -957,7 +957,7 @@
     };
     
     // Pixel(색칠)로 이동: index와 동일 오리진이면 localStorage를 자동 공유
-    const PIXEL_URL = new URL("../Pixel/Pixel_patched_auto_link.html", location.href).href;
+    const PIXEL_URL = "Pixel_patched_auto_link.html";
     // v7으로 업데이트 (인벤토리 구조 변경 때문)
     const PREVIOUS_KEYS = ["poke_spell_game_data_v6", "poke_spell_game_data_v5", "poke_spell_game_data_v4"];
 
@@ -1138,38 +1138,28 @@
     // [수정됨] 클립보드 복사 후 이동하는 방식으로 변경
     // Pixel(색칠)로 이동
     function goToPixel() {
-        const dexCount = Array.from(user.dex || []).length;
-        if (dexCount <= 0) {
-            const ok = confirm("아직 잡은 포켓몬이 없습니다.\n\n그래도 Pixel(색칠)로 이동할까요?");
-            if (!ok) return;
-        }
+        saveGame(); // 최신 도감 상태 저장
         window.location.href = PIXEL_URL;
     }
+
+    // [기존 함수 수정] 특정 포켓몬 클릭 시 파라미터 전달
     function openPixelForPokemon(pokeId) {
         const id = parseInt(String(pokeId), 10);
-        if (!Number.isFinite(id) || id <= 0) return;
-        try {
-            const u = new URL(PIXEL_URL, location.href);
-            u.searchParams.set('poke', String(id));
-            window.location.href = u.href;
-        } catch (e) {
-            // fallback: naive concat
-            window.location.href = `${PIXEL_URL}${PIXEL_URL.includes('?') ? '&' : '?'}poke=${id}`;
-        }
+        if (!id) return;
+
+        // 같은 폴더이므로 단순 쿼리 스트링 결합
+        window.location.href = `${PIXEL_URL}?poke=${id}`;
     }
 
-    // ✅ 도감(보유 포켓몬)에서 탭하면: 파트너로 지정 + Pixel에서 해당 포켓몬 바로 열기
+    // [기존 함수 수정] 도감 탭 시 파트너 지정 후 이동
     function setPartnerAndOpenPixel(pokeId) {
         const id = parseInt(String(pokeId), 10);
-        if (!Number.isFinite(id) || id <= 0) return;
-        if (!user.dex || !user.dex.has(id)) {
-            alert("아직 잡지 않은 포켓몬입니다.");
-            return;
-        }
-        user.partnerId = id;      // 토글 없이 '지정'만
+        if (!id || !user.dex.has(id)) return;
+
+        user.partnerId = id;
         saveGame();
-        updateLobbyUI();
-        renderDex();
+
+        // 즉시 이동
         openPixelForPokemon(id);
     }
 
