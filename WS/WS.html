@@ -207,44 +207,57 @@
                     </div>
 
                     <div class="text-left">
+                        <div class="font-black text-slate-900 text-lg mb-2">캐릭터 해금</div>
+                        <div id="charUnlockGrid" class="grid grid-cols-1 gap-2"></div>
+                    </div>
+                </div>
+
+                <div class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div class="text-left">
+                        <div class="font-black text-slate-900 text-lg mb-2">업적</div>
+                        <div id="achGrid" class="grid grid-cols-1 gap-2"></div>
+                    </div>
+
+                    <div class="text-left">
                         <div class="font-black text-slate-900 text-lg mb-2">진화 힌트</div>
                         <div id="evoHints" class="text-xs text-slate-600 space-y-1"></div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <!-- Level Up -->
-        <div id="levelUpModal" class="hidden absolute inset-0 z-30 flex-col items-center justify-center modal-backdrop ui-element">
-            <div class="bg-white/95 p-8 rounded-2xl shadow-2xl text-center max-w-5xl">
-                <h2 class="text-3xl font-black mb-2 text-slate-800">레벨 업</h2>
-                <p class="text-slate-600 mb-6">면역 반응을 강화하세요.</p>
-                <div id="card-options" class="flex gap-4 flex-wrap justify-center"></div>
-            </div>
+    <!-- Level Up -->
+    <div id="levelUpModal" class="hidden absolute inset-0 z-30 flex-col items-center justify-center modal-backdrop ui-element">
+        <div class="bg-white/95 p-8 rounded-2xl shadow-2xl text-center max-w-5xl">
+            <h2 class="text-3xl font-black mb-2 text-slate-800">레벨 업</h2>
+            <p class="text-slate-600 mb-6">면역 반응을 강화하세요.</p>
+            <div id="card-options" class="flex gap-4 flex-wrap justify-center"></div>
         </div>
+    </div>
 
-        <!-- Game Over -->
-        <div id="gameOverModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop ui-element">
-            <div class="bg-white/95 p-10 rounded-2xl shadow-2xl text-center">
-                <h2 id="gameOverTitle" class="text-5xl font-black mb-3 text-slate-900">종료</h2>
-                <p id="gameOverText" class="text-lg mb-3 text-slate-700">스코어: 0</p>
-                <p class="text-slate-700 mb-8">
-                    획득 GOLD: <span id="runGoldText" class="font-black">0</span>
-                </p>
-                <div class="flex gap-3 justify-center flex-wrap">
-                    <button id="restartBtn" class="ui-element bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-7 rounded-xl text-xl">
-                        다시 하기
-                    </button>
-                    <button id="openLabFromGameOverBtn" class="ui-element bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold py-3 px-7 rounded-xl text-xl">
-                        연구소
-                    </button>
-                    <button id="backToTitleBtn" class="ui-element bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-7 rounded-xl text-xl">
-                        타이틀로
-                    </button>
-                </div>
+    <!-- Game Over -->
+    <div id="gameOverModal" class="hidden absolute inset-0 z-40 flex-col items-center justify-center modal-backdrop ui-element">
+        <div class="bg-white/95 p-10 rounded-2xl shadow-2xl text-center">
+            <h2 id="gameOverTitle" class="text-5xl font-black mb-3 text-slate-900">종료</h2>
+            <p id="gameOverText" class="text-lg mb-3 text-slate-700">스코어: 0</p>
+            <p class="text-slate-700 mb-8">
+                획득 GOLD: <span id="runGoldText" class="font-black">0</span>
+            </p>
+            <div class="flex gap-3 justify-center flex-wrap">
+                <button id="restartBtn" class="ui-element bg-sky-600 hover:bg-sky-700 text-white font-bold py-3 px-7 rounded-xl text-xl">
+                    다시 하기
+                </button>
+                <button id="openLabFromGameOverBtn" class="ui-element bg-slate-200 hover:bg-slate-300 text-slate-900 font-bold py-3 px-7 rounded-xl text-xl">
+                    연구소
+                </button>
+                <button id="backToTitleBtn" class="ui-element bg-slate-700 hover:bg-slate-800 text-white font-bold py-3 px-7 rounded-xl text-xl">
+                    타이틀로
+                </button>
             </div>
         </div>
     </div>
+</div>
 </div>
 
 <script>
@@ -268,6 +281,8 @@
         const closeLabBtn = document.getElementById('closeLabBtn');
         const upgradeGrid = document.getElementById('upgradeGrid');
         const unlockGrid = document.getElementById('unlockGrid');
+        const charUnlockGrid = document.getElementById('charUnlockGrid');
+        const achGrid = document.getElementById('achGrid');
         const evoHints = document.getElementById('evoHints');
 
         const levelUpModal = document.getElementById('levelUpModal');
@@ -339,7 +354,21 @@
                 W_LASER: false,
                 W_FIELD: false,
                 W_BOOMERANG: false,
-            }
+            },
+            unlockedChars: {
+                tcell: true,
+                macrophage: false,
+                bcell: false,
+                nk: false,
+                dendritic: false,
+            },
+            achievements: {},
+            stats: {
+                totalRuns: 0,
+                totalKills: 0,
+                totalGoldEarned: 0,
+                bestSurviveSec: 0,
+            },
         });
 
         function loadMeta(){
@@ -353,6 +382,9 @@
                     ...m,
                     upgrades: { ...d.upgrades, ...(m.upgrades||{}) },
                     unlockedWeapons: { ...d.unlockedWeapons, ...(m.unlockedWeapons||{}) },
+                    unlockedChars: { ...d.unlockedChars, ...(m.unlockedChars||{}) },
+                    achievements: { ...d.achievements, ...(m.achievements||{}) },
+                    stats: { ...d.stats, ...(m.stats||{}) },
                 };
             }catch(e){
                 return META_DEFAULT();
@@ -491,6 +523,92 @@
                 div.innerHTML = `<b>${w.name}</b> Lv.${evo.minLevel} + <b>${p.name}</b> → <span class="text-emerald-600 font-black">${t.name}</span>`;
                 evoHints.appendChild(div);
             }
+
+            // Character unlocks (achievement OR gold)
+            if(charUnlockGrid){
+                charUnlockGrid.innerHTML = "";
+                for(const [id, c] of Object.entries(CHARACTER_DB)){
+                    const unlocked = !!(meta.unlockedChars && meta.unlockedChars[id]);
+                    const price = CHAR_UNLOCK_PRICE[id] ?? null;
+                    const isDefault = (id === DEFAULT_CHAR_ID);
+                    const canBuy = (!unlocked && !isDefault && price != null && meta.gold >= price);
+
+                    const skin = (CHAR_SKIN_MAP[id] ?? 0);
+                    const el = document.createElement("div");
+                    el.className = "card p-3 text-left text-sm";
+                    el.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div class="flex items-start gap-2">
+                            <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
+                                <img class="pixel-img w-full h-full object-contain" src="png/cell${skin}.png" alt="" />
+                            </div>
+                            <div>
+                                <div class="font-black text-slate-900">${c.name}</div>
+                                <div class="text-xs text-slate-600">${c.role} · ${c.desc}</div>
+                            </div>
+                        </div>
+                        <div class="text-xs font-bold px-2 py-1 rounded-lg ${unlocked ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-600"}">
+                            ${unlocked ? "해금됨" : (isDefault ? "기본" : "잠김")}
+                        </div>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between gap-2">
+                        <div class="text-xs text-slate-500">
+                            ${unlocked ? "선택 화면에서 사용 가능" : (isDefault ? "기본 캐릭터" : `업적 또는 ${price}G`)}
+                        </div>
+                        <button class="ui-element px-3 py-1 rounded-lg text-xs font-bold ${ (unlocked || isDefault) ? "bg-slate-200 text-slate-600" : (canBuy ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-slate-200 text-slate-500") }">
+                            ${unlocked ? "완료" : (isDefault ? "완료" : (canBuy ? `해금 (${price}G)` : `${price}G`))}
+                        </button>
+                    </div>
+                    `;
+                    const btn = el.querySelector("button");
+                    btn.onclick = () => {
+                        if(unlocked || isDefault) return;
+                        tryBuyCharacter(id);
+                    };
+                    charUnlockGrid.appendChild(el);
+                }
+            }
+
+            // Achievements
+            if(achGrid){
+                achGrid.innerHTML = "";
+                for(const a of ACHIEVEMENTS){
+                    const claimed = !!(meta.achievements && meta.achievements[a.id]);
+                    const prog = a.progress();
+                    const done = prog >= a.target;
+                    const pct = clamp((prog / a.target) * 100, 0, 100);
+                    const rewardName = a.rewardChar ? (CHARACTER_DB[a.rewardChar]?.name || a.rewardChar) : "";
+                    const el = document.createElement("div");
+                    el.className = "card p-3 text-left text-sm";
+                    el.innerHTML = `
+                    <div class="flex items-start justify-between gap-2">
+                        <div>
+                            <div class="font-black text-slate-900">${a.name}</div>
+                            <div class="text-xs text-slate-600">${a.desc}</div>
+                        </div>
+                        <div class="text-xs text-slate-500 whitespace-nowrap">${Math.min(prog,a.target)}/${a.target}</div>
+                    </div>
+                    <div class="mt-2 h-2 rounded-full bg-slate-200 overflow-hidden">
+                        <div class="h-full bg-emerald-500" style="width:${pct}%"></div>
+                    </div>
+                    <div class="mt-2 flex items-center justify-between gap-2">
+                        <div class="text-xs text-slate-500">${rewardName ? `보상: ${rewardName} 해금` : ""}</div>
+                        <button class="ui-element px-3 py-1 rounded-lg text-xs font-bold ${claimed ? "bg-slate-200 text-slate-600" : (done ? "bg-emerald-600 hover:bg-emerald-700 text-white" : "bg-slate-200 text-slate-500")}">
+                            ${claimed ? "수령 완료" : (done ? "보상 수령" : "진행 중")}
+                        </button>
+                    </div>
+                    `;
+                    el.querySelector("button").onclick = () => {
+                        if(claimed) return;
+                        if(!done){
+                            showToast("아직 업적 조건이 부족합니다");
+                            return;
+                        }
+                        claimAchievement(a.id);
+                    };
+                    achGrid.appendChild(el);
+                }
+            }
         }
 
         // ===== Characters =====
@@ -566,6 +684,117 @@
             },
         };
 
+        const CHAR_UNLOCK_PRICE = {
+            // 기본은 1명만 해금 (나머지는 업적 또는 골드)
+            tcell: 0,
+            macrophage: 250,
+            bcell: 350,
+            nk: 450,
+            dendritic: 550,
+        };
+
+        const ACHIEVEMENTS = [
+            {
+                id: "ACH_SURVIVE_60",
+                name: "기초 면역 적응",
+                desc: "한 판에서 60초 이상 생존",
+                target: 60,
+                progress: () => (meta.stats?.bestSurviveSec || 0),
+                rewardChar: "macrophage",
+            },
+            {
+                id: "ACH_KILLS_150",
+                name: "바이러스 150 처치",
+                desc: "누적 처치 150 달성",
+                target: 150,
+                progress: () => (meta.stats?.totalKills || 0),
+                rewardChar: "bcell",
+            },
+            {
+                id: "ACH_SCORE_2500",
+                name: "점수 2500 달성",
+                desc: "최고 점수 2500 달성",
+                target: 2500,
+                progress: () => (meta.bestScore || 0),
+                rewardChar: "nk",
+            },
+            {
+                id: "ACH_GOLD_500",
+                name: "누적 골드 500",
+                desc: "누적 획득 골드 500 달성",
+                target: 500,
+                progress: () => (meta.stats?.totalGoldEarned || 0),
+                rewardChar: "dendritic",
+            },
+        ];
+
+        function firstUnlockedCharId(){
+            for(const id of Object.keys(CHARACTER_DB)){
+                if(meta.unlockedChars && meta.unlockedChars[id]) return id;
+            }
+            return "tcell";
+        }
+
+        function ensureSelectedCharUnlocked(){
+            if(!meta.unlockedChars) meta.unlockedChars = META_DEFAULT().unlockedChars;
+            if(meta.unlockedChars[selectedCharId]) return;
+            selectedCharId = meta.unlockedChars[DEFAULT_CHAR_ID] ? DEFAULT_CHAR_ID : firstUnlockedCharId();
+        }
+
+        function tryBuyCharacter(id){
+            if(!meta.unlockedChars) meta.unlockedChars = META_DEFAULT().unlockedChars;
+            if(meta.unlockedChars[id]) return;
+
+            const price = CHAR_UNLOCK_PRICE[id];
+            if(price == null || price <= 0){
+                showToast("해금할 수 없는 캐릭터입니다");
+                return;
+            }
+            if(meta.gold < price){
+                showToast("골드가 부족합니다");
+                return;
+            }
+
+            meta.gold -= price;
+            meta.unlockedChars[id] = true;
+            saveMeta();
+            syncTitleMetaUI();
+            showToast(`🧬 ${CHARACTER_DB[id]?.name || id} 해금!`);
+
+            // UI 갱신
+            if(labModal.style.display === "flex") renderLab();
+            if(charModal.style.display === "flex") openCharSelect();
+        }
+
+        function claimAchievement(achId){
+            if(!meta.achievements) meta.achievements = {};
+            const a = ACHIEVEMENTS.find(x => x.id === achId);
+            if(!a) return;
+
+            if(meta.achievements[achId]) return;
+
+            const prog = a.progress();
+            if(prog < a.target){
+                showToast("아직 업적 조건이 부족합니다");
+                return;
+            }
+
+            meta.achievements[achId] = true;
+
+            if(a.rewardChar){
+                if(!meta.unlockedChars) meta.unlockedChars = META_DEFAULT().unlockedChars;
+                meta.unlockedChars[a.rewardChar] = true;
+            }
+
+            saveMeta();
+            syncTitleMetaUI();
+            showToast(`🏆 업적 달성: ${a.name}`);
+
+            if(labModal.style.display === "flex") renderLab();
+            if(charModal.style.display === "flex") openCharSelect();
+        }
+
+        const DEFAULT_CHAR_ID = "tcell";
         const CHAR_SKIN_MAP = {
             macrophage: 0,
             tcell: 1,
@@ -573,11 +802,13 @@
             nk: 3,
             dendritic: 4,
         };
-        let selectedCharId = "tcell";
+        let selectedCharId = (meta.unlockedChars && meta.unlockedChars[DEFAULT_CHAR_ID]) ? DEFAULT_CHAR_ID : firstUnlockedCharId();
+        ensureSelectedCharUnlocked();
         let charSelectReturnState = "title";
         let labReturnState = "title";
 
         function openCharSelect(){
+            resetPointerControl();
             setCanvasInputEnabled(false);
             // 어떤 화면에서 열어도 모달이 겹치지 않게 정리
             charSelectReturnState = gameState;
@@ -591,37 +822,62 @@
 
             charOptions.innerHTML = "";
             for(const [id, c] of Object.entries(CHARACTER_DB)){
+                const unlocked = !!(meta.unlockedChars && meta.unlockedChars[id]);
+                const price = CHAR_UNLOCK_PRICE[id] ?? null;
+                const canBuy = (!unlocked && price != null && meta.gold >= price);
+
                 const card = document.createElement("div");
-                card.className = "card ui-element w-56 p-4 cursor-pointer text-left";
+                card.className = "card ui-element w-56 p-4 text-left " + (unlocked ? "cursor-pointer" : "opacity-80");
                 const skin = (CHAR_SKIN_MAP[id] ?? 0);
+
+                const statusText = unlocked ? "선택" : (canBuy ? `해금 (${price}G)` : `잠김 (${price}G)`);
+                const statusClass = unlocked
+                    ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+                    : (canBuy ? "bg-amber-500 hover:bg-amber-600 text-white" : "bg-slate-200 text-slate-500");
+
                 card.innerHTML = `
                 <div class="flex items-start gap-3">
                     <div class="w-16 h-16 rounded-xl bg-slate-100 border border-slate-200 overflow-hidden flex items-center justify-center">
-                        <img class="pixel-img w-full h-full object-contain" src="png/cell${skin}.png" alt="${c.name}" />
+                        <img class="pixel-img w-full h-full object-contain ${unlocked ? "" : "grayscale"}" src="png/cell${skin}.png" alt="${c.name}" />
                     </div>
                     <div class="flex-1">
                         <div class="flex items-center justify-between mb-1">
                             <div class="text-lg font-black text-slate-900">${c.name}</div>
-                            <div class="text-xs font-bold px-2 py-1 rounded-xl" style="background:${c.color}30;color:${c.color}">${c.role}</div>
+                            <div class="text-xs font-bold px-2 py-1 rounded-lg" style="background:${c.color}30;color:${c.color}">${c.role}</div>
                         </div>
                         <div class="text-slate-700 text-sm">${c.desc}</div>
                         <div class="mt-2 text-xs text-slate-500">
                             시작: ${c.startWeapons.map(w => WEAPON_DB[w]?.name || w).join(", ")}
                         </div>
+                        ${unlocked ? "" : `<div class="mt-1 text-[11px] text-slate-500">업적 또는 골드로 해금</div>`}
                     </div>
                 </div>
-                <button class="ui-element mt-3 w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 rounded-xl">
+                <button class="ui-element mt-3 w-full font-bold py-2 rounded-xl ${statusClass}">
                     <span class="inline-flex items-center justify-center gap-2">
-                        <img class="pixel-img w-5 h-5" src="png/cell${skin}.png" alt="" />
-                        선택
+                        <img class="pixel-img w-5 h-5 ${unlocked ? "" : "grayscale"}" src="png/cell${skin}.png" alt="" />
+                        ${statusText}
                     </span>
                 </button>
             `;
+
                 card.querySelector("button").onclick = () => {
-                    selectedCharId = id;
-                    charModal.style.display = "none";
-                    startGame();
+                    if(unlocked){
+                        selectedCharId = id;
+                        charModal.style.display = "none";
+                        startGame();
+                        return;
+                    }
+                    if(canBuy){
+                        tryBuyCharacter(id);
+                        selectedCharId = id;
+                        ensureSelectedCharUnlocked();
+                        charModal.style.display = "none";
+                        startGame();
+                        return;
+                    }
+                    showToast("잠겨 있습니다: 업적 달성 또는 골드가 필요합니다");
                 };
+
                 charOptions.appendChild(card);
             }
             charModal.style.display = "flex";
@@ -644,6 +900,15 @@
         let gameState = 'title';
         let keys = {};
         let touch = { active:false, id:null, startX:0, startY:0, dx:0, dy:0 };
+
+        function resetPointerControl(){
+            try{
+                if(touch.active && touch.id != null) canvas.releasePointerCapture(touch.id);
+            }catch(e){}
+            touch.active = false;
+            touch.id = null;
+            touch.dx = 0; touch.dy = 0;
+        }
 
         let player, enemies, projectiles, enemyProjectiles, pickups, effects, mines, summons;
         let camera;
@@ -783,6 +1048,36 @@
         }
         function clamp(v, a, b){ return Math.max(a, Math.min(b, v)); }
 
+        // Enemy skin pool: 0에서 시작, 100초마다 '추가'되어 섞여서 등장
+        function getUnlockedVirusTierMax(elapsedSec){
+            return clamp(Math.floor(elapsedSec / 100), 0, 5);
+        }
+        function pickVirusTier(elapsedSec){
+            // 시작하자마자 virus0 보장
+            if(elapsedSec < 2) return 0;
+
+            const maxTier = getUnlockedVirusTierMax(elapsedSec);
+            if(maxTier <= 0) return 0;
+
+            // 최신 티어가 살짝 더 자주 나오도록 가중치
+            let totalW = 0;
+            const weights = [];
+            for(let i=0;i<=maxTier;i++){
+                let w = 1;
+                if(i === maxTier) w = 1.8;
+                else if(i === maxTier-1) w = 1.2;
+                weights.push(w);
+                totalW += w;
+            }
+            let r = Math.random() * totalW;
+            for(let i=0;i<weights.length;i++){
+                r -= weights[i];
+                if(r <= 0) return i;
+            }
+            return Math.floor(Math.random() * (maxTier + 1));
+        }
+
+
         function showToast(msg, ms = 1800){
             if(!toast) return;
             toast.textContent = msg;
@@ -892,6 +1187,7 @@
         }
 
         function startGame(){
+            ensureSelectedCharUnlocked();
             initGame();
             gameState = 'playing';
             setCanvasInputEnabled(true);
@@ -1386,7 +1682,7 @@
             const y = player.y + Math.sin(a) * r;
             const base = ENEMY_CATALOG[type];
             const elapsedSec = (600000 - gameTimeMs) / 1000;
-            const skinTier = clamp(Math.floor(elapsedSec / 100), 0, 5);
+            const skinTier = pickVirusTier(elapsedSec);
 
             // ✅ 크기(종) 변이: 스폰될 때 크기/스탯이 조금씩 달라져 "종류가 많아 보이게" 연출
             // - swarm: 작고 빠름 (체력↓)
@@ -1934,7 +2230,7 @@
             }
 
             // enemies
-            const vImg = imageCache['virus'];
+            const vImgs = imageCache['virus'];
             for(const e of enemies){
                 ctx.save();
                 if(e.isHit){
@@ -1956,13 +2252,20 @@
                     ctx.beginPath();
                     ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
                     ctx.fill();
-                } else if(vImg && vImg.complete){
-                    ctx.drawImage(vImg, e.x - e.size/2, e.y - e.size/2, e.size, e.size);
                 } else {
-                    ctx.fillStyle = e.type === 'chargerVirus' ? '#f97316' : (e.type === 'spitterVirus' ? '#22d3ee' : '#22c55e');
-                    ctx.beginPath();
-                    ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
-                    ctx.fill();
+                    const tier = (e.skinTier != null ? e.skinTier : 0);
+                    const img = Array.isArray(vImgs)
+                        ? vImgs[clamp(tier, 0, vImgs.length - 1)]
+                        : vImgs;
+
+                    if(img && img.complete){
+                        ctx.drawImage(img, e.x - e.size/2, e.y - e.size/2, e.size, e.size);
+                    } else {
+                        ctx.fillStyle = e.type === 'chargerVirus' ? '#f97316' : (e.type === 'spitterVirus' ? '#22d3ee' : '#22c55e');
+                        ctx.beginPath();
+                        ctx.arc(e.x, e.y, e.size/2, 0, Math.PI*2);
+                        ctx.fill();
+                    }
                 }
                 ctx.restore();
             }
@@ -2126,6 +2429,14 @@
             if(score > (meta.bestScore||0)){
                 meta.bestScore = score;
             }
+
+            // 누적 통계 (업적용)
+            if(!meta.stats) meta.stats = META_DEFAULT().stats;
+            meta.stats.totalRuns = (meta.stats.totalRuns || 0) + 1;
+            meta.stats.totalKills = (meta.stats.totalKills || 0) + (player?.kills || 0);
+            meta.stats.totalGoldEarned = (meta.stats.totalGoldEarned || 0) + goldEarned;
+            meta.stats.bestSurviveSec = Math.max((meta.stats.bestSurviveSec || 0), survivedSec);
+
             saveMeta();
         }
 
@@ -2179,6 +2490,7 @@
 
         // ===== Modals =====
         function openLab(){
+            resetPointerControl();
             labReturnState = gameState;
             setCanvasInputEnabled(false);
 
