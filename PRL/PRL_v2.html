@@ -131,6 +131,17 @@
                     <div class="text-[10px] text-slate-400">QR 공유 / 스캔 대결</div>
                 </div>
             </button>
+
+            <!-- 🏪 상점 버튼 추가 -->
+            <button id="lobbyShopBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-pink-400 transition-colors group col-span-2">
+                <div class="w-10 h-10 bg-pink-50 rounded-full flex items-center justify-center group-hover:bg-pink-100">
+                    <span class="text-xl">🏪</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">상점</div>
+                    <div class="text-[10px] text-slate-400">레어캔디 / 이로치 스킨</div>
+                </div>
+            </button>
         </div>
 
 
@@ -246,6 +257,87 @@
             </button>
         </div>
         <p class="text-center text-[10px] text-slate-400">* 중복 획득 시 시작 경험치(잠재력)가 상승합니다.</p>
+    </div>
+</div>
+
+<!-- 🏪 상점 모달 -->
+<div id="shopModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[55] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-pink-500 to-purple-500">
+            <h3 class="text-lg font-bold text-white">🏪 상점</h3>
+            <button id="shopClose" class="text-white/80 text-xs font-bold hover:text-white">닫기</button>
+        </div>
+        
+        <div class="p-4 bg-slate-50 border-b">
+            <div class="flex justify-center gap-4 text-sm">
+                <div class="bg-white px-4 py-2 rounded-full shadow-sm border">
+                    <span class="text-blue-500 font-bold">P</span> <span id="shopPoints">0</span>
+                </div>
+                <div class="bg-white px-4 py-2 rounded-full shadow-sm border">
+                    <span class="text-yellow-500">🎫</span> <span id="shopTickets">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- 레어캔디 섹션 -->
+            <div class="bg-white rounded-xl border-2 border-pink-200 p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" class="w-10 h-10 pixel-art">
+                    <div>
+                        <div class="font-bold text-slate-800">🍬 레어캔디</div>
+                        <div class="text-[10px] text-slate-500">스타터 포켓몬 레벨업!</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="buyRareCandy(1)" class="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg text-xs font-bold border-b-2 border-pink-700 active:border-b-0">
+                        <div>+1 Lv</div>
+                        <div class="text-[9px] opacity-80">500 P</div>
+                    </button>
+                    <button onclick="buyRareCandy(5)" class="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg text-xs font-bold border-b-2 border-pink-700 active:border-b-0">
+                        <div>+5 Lv</div>
+                        <div class="text-[9px] opacity-80">2,000 P</div>
+                    </button>
+                    <button onclick="buyRareCandy(10)" class="bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg text-xs font-bold border-b-2 border-pink-800 active:border-b-0">
+                        <div>+10 Lv</div>
+                        <div class="text-[9px] opacity-80">3,500 P</div>
+                    </button>
+                </div>
+                <div id="rareCandyStatus" class="text-[10px] text-slate-500 mt-2 text-center"></div>
+            </div>
+
+            <!-- 이로치 스킨 섹션 -->
+            <div class="bg-white rounded-xl border-2 border-yellow-200 p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shiny-charm.png" class="w-10 h-10 pixel-art">
+                    <div>
+                        <div class="font-bold text-slate-800">✨ 이로치 스킨 뽑기</div>
+                        <div class="text-[10px] text-slate-500">이로치 스킨 = 스탯 보정!</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button onclick="drawShinySkin(1)" class="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg text-xs font-bold border-b-2 border-yellow-700 active:border-b-0">
+                        <div>1회 뽑기</div>
+                        <div class="text-[9px] opacity-80">🎫 1개</div>
+                    </button>
+                    <button onclick="drawShinySkin(3)" class="bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg text-xs font-bold border-b-2 border-amber-700 active:border-b-0">
+                        <div>3회 뽑기</div>
+                        <div class="text-[9px] opacity-80">🎫 2개</div>
+                    </button>
+                </div>
+                <div id="shinyDrawResult" class="min-h-[60px] bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center">
+                    <span class="text-slate-400 text-xs">뽑기 결과가 여기에 표시됩니다</span>
+                </div>
+            </div>
+
+            <!-- 보유 이로치 스킨 -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4">
+                <div class="font-bold text-slate-800 mb-2 text-sm">📦 보유 이로치 스킨 <span class="text-[10px] text-emerald-600">(스탯 +15 보정)</span></div>
+                <div id="ownedShinyList" class="grid grid-cols-5 gap-2 max-h-[150px] overflow-y-auto">
+                    <span class="text-slate-400 text-xs col-span-5 text-center py-4">아직 없음</span>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -631,21 +723,26 @@
         const isLegendary = LEGENDARY_IDS.includes(baseId);
         const isMythical = MYTHICAL_IDS.includes(baseId);
 
-        let isShiny = CUTE_IDS.includes(baseId);
+        // 이로치 스킨 소유 체크만 (CUTE_IDS는 기본 스프라이트 사용)
+        const hasUnlockedShiny = getShinySkins().has(baseId);
+        let isShiny = hasUnlockedShiny;
 
         if (isLegendary || isMythical) rarity = "UR";
 
         // BST 차이를 살리되 티어별 목표 BST 기준으로 비율 조정
         const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
         const ratio = config.targetBst / Math.max(1, bst);
+        
+        // 이로치 스킨 보유 시 스탯 보정 (+15)
+        const shinyBonus = isShiny ? 15 : 0;
 
         const finalBase = {
-            hp: Math.max(1, Math.floor(rawBase.hp * ratio) + config.bonus),
-            atk: Math.max(1, Math.floor(rawBase.atk * ratio) + config.bonus),
-            def: Math.max(1, Math.floor(rawBase.def * ratio) + config.bonus),
-            spa: Math.max(1, Math.floor(rawBase.spa * ratio) + config.bonus),
-            spd: Math.max(1, Math.floor(rawBase.spd * ratio) + config.bonus),
-            spe: Math.max(1, Math.floor(rawBase.spe * ratio) + config.bonus)
+            hp: Math.max(1, Math.floor(rawBase.hp * ratio) + config.bonus + shinyBonus),
+            atk: Math.max(1, Math.floor(rawBase.atk * ratio) + config.bonus + shinyBonus),
+            def: Math.max(1, Math.floor(rawBase.def * ratio) + config.bonus + shinyBonus),
+            spa: Math.max(1, Math.floor(rawBase.spa * ratio) + config.bonus + shinyBonus),
+            spd: Math.max(1, Math.floor(rawBase.spd * ratio) + config.bonus + shinyBonus),
+            spe: Math.max(1, Math.floor(rawBase.spe * ratio) + config.bonus + shinyBonus)
         };
 
         const baseUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
@@ -715,7 +812,8 @@
         HOF: "qz_hof_v80",
         TICKETS: "qz_t_v80",
         DUPES: "qz_d_v80",
-        CHAR_DATA: "qz_c_prog_v80"
+        CHAR_DATA: "qz_c_prog_v80",
+        SHINY_SKINS: "qz_shiny_v80"
     };
 
     const GHOST_ROOT_URL = (location.origin && location.origin !== "null")
@@ -756,6 +854,19 @@
     function saveOwned(set) { localStorage.setItem(LS_KEY.OWNED, JSON.stringify([...set])); }
     function getDupes() { try { return JSON.parse(localStorage.getItem(LS_KEY.DUPES) || "{}"); } catch { return {}; } }
     function saveDupes(d) { localStorage.setItem(LS_KEY.DUPES, JSON.stringify(d)); }
+    
+    // 이로치 스킨 관련 함수들
+    function getShinySkins() { 
+        try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.SHINY_SKINS) || "[]")); } 
+        catch { return new Set(); } 
+    }
+    function saveShinySkins(set) { localStorage.setItem(LS_KEY.SHINY_SKINS, JSON.stringify([...set])); }
+    function hasShinySkin(id) { return getShinySkins().has(id); }
+    function addShinySkin(id) { 
+        const skins = getShinySkins(); 
+        skins.add(id); 
+        saveShinySkins(skins); 
+    }
 
     /* =========================================
      * INDEX -> PRL 데이터 가져오기
@@ -1027,6 +1138,8 @@
             const dupeCount = dupes[i] || 0;
             const evoInfo = EVOLUTION_MAP[info.baseId];
             const evoTag = evoInfo ? `<div class="absolute bottom-1 left-1 text-[8px] bg-yellow-400 text-yellow-900 px-1 rounded">→Lv.${evoInfo.min_level}</div>` : '';
+            const hasShiny = getShinySkins().has(info.baseId);
+            const shinyTag = (hasShiny && ownedBase) ? '<div class="absolute top-7 right-1 text-[10px]">✨</div>' : '';
 
             el.innerHTML = `
                 <div class="absolute top-1 left-1 text-[9px] font-bold text-slate-400">#${String(i).padStart(4,'0')}</div>
@@ -1036,7 +1149,7 @@
                 </div>
                 <div class="text-[10px] font-bold truncate mt-1">${ownedBase ? info.name : '???'}</div>
                 <div class="text-[8px] font-bold mt-0.5 ${info.rarity==='UR'?'text-red-500':info.rarity==='SSR'?'text-orange-500':'text-slate-400'}">${info.rarity}</div>
-                ${evoTag}
+                ${evoTag}${shinyTag}
             `;
             el.onclick = () => {
                 if (!ownedBase) {
@@ -2147,6 +2260,178 @@
     function showAlert(t, b) { alert(`${t}\n${b}`); }
 
     /* =========================================
+     * 상점 시스템
+     * ========================================= */
+    function openShopModal() {
+        updateShopUI();
+        document.getElementById("shopModal").classList.remove("hidden");
+        document.getElementById("shopModal").classList.add("flex");
+    }
+
+    function closeShopModal() {
+        document.getElementById("shopModal").classList.add("hidden");
+        document.getElementById("shopModal").classList.remove("flex");
+    }
+
+    function updateShopUI() {
+        document.getElementById("shopPoints").textContent = getPoints().toLocaleString();
+        document.getElementById("shopTickets").textContent = getTickets().toLocaleString();
+        
+        const pid = getStarterId();
+        const statusEl = document.getElementById("rareCandyStatus");
+        if (pid > 0) {
+            const info = getPokeInfo(pid);
+            const charData = getCharData()[pid] || {};
+            const level = charData.level || 1;
+            statusEl.textContent = `현재 스타터: ${info.name} (Lv.${level})`;
+        } else {
+            statusEl.textContent = "스타터를 먼저 선택하세요";
+        }
+        
+        renderOwnedShinySkins();
+    }
+
+    function buyRareCandy(levels) {
+        const prices = { 1: 500, 5: 2000, 10: 3500 };
+        const cost = prices[levels];
+        const currentPoints = getPoints();
+        
+        if (currentPoints < cost) {
+            alert("포인트가 부족합니다!");
+            return;
+        }
+        
+        const pid = getStarterId();
+        if (!pid) {
+            alert("스타터를 먼저 선택하세요!");
+            return;
+        }
+        
+        const info = getPokeInfo(pid);
+        const charData = getCharData();
+        const currentData = charData[pid] || { level: 1, xp: 0 };
+        
+        // 레벨업
+        currentData.level = (currentData.level || 1) + levels;
+        charData[pid] = currentData;
+        saveCharData(charData);
+        
+        // 포인트 차감
+        setPoints(currentPoints - cost);
+        
+        // 진화 체크
+        let evolutionOccurred = false;
+        let currentPokemonId = pid;
+        
+        while (true) {
+            const evoCheck = canEvolve(currentPokemonId, currentData.level);
+            if (evoCheck) {
+                const nextId = doEvolve(currentPokemonId);
+                if (nextId) {
+                    charData[nextId] = { level: currentData.level, xp: currentData.xp || 0 };
+                    saveCharData(charData);
+                    setStarterId(nextId);
+                    
+                    const fromInfo = getPokeInfo(currentPokemonId);
+                    const toInfo = getPokeInfo(nextId);
+                    alert(`🎉 ${fromInfo.name}이(가) ${toInfo.name}(으)로 진화했습니다!`);
+                    
+                    currentPokemonId = nextId;
+                    evolutionOccurred = true;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        
+        if (!evolutionOccurred) {
+            alert(`🍬 레어캔디 사용!\n${info.name}의 레벨이 ${levels} 상승했습니다!`);
+        }
+        
+        updateShopUI();
+        updateLobbyPartner();
+        updateResUI();
+    }
+
+    function drawShinySkin(count) {
+        const costs = { 1: 1, 3: 2 };
+        const cost = costs[count];
+        const currentTickets = getTickets();
+        
+        if (currentTickets < cost) {
+            alert("티켓이 부족합니다!");
+            return;
+        }
+        
+        const owned = getOwned();
+        if (owned.size === 0) {
+            alert("보유한 포켓몬이 없습니다!");
+            return;
+        }
+        
+        const shinySkins = getShinySkins();
+        const available = [...owned].filter(id => !shinySkins.has(id));
+        
+        if (available.length === 0) {
+            alert("모든 포켓몬의 이로치 스킨을 보유중입니다!");
+            return;
+        }
+        
+        setTickets(currentTickets - cost);
+        
+        const results = [];
+        for (let i = 0; i < count; i++) {
+            if (available.length === 0) break;
+            
+            const randomIdx = Math.floor(Math.random() * available.length);
+            const drawnId = available[randomIdx];
+            available.splice(randomIdx, 1);
+            
+            addShinySkin(drawnId);
+            results.push(drawnId);
+        }
+        
+        const resultContainer = document.getElementById("shinyDrawResult");
+        if (results.length > 0) {
+            resultContainer.innerHTML = results.map(id => {
+                const info = getPokeInfo(id);
+                return `<div class="flex flex-col items-center p-2">
+                    <img src="${info.sprite}" class="w-12 h-12 pixel-art animate-bounce">
+                    <div class="text-[10px] font-bold text-center">${info.name}</div>
+                    <div class="text-[8px] text-yellow-600">✨ NEW!</div>
+                </div>`;
+            }).join('');
+            resultContainer.className = "min-h-[60px] bg-yellow-50 rounded-lg border-2 border-yellow-300 flex items-center justify-center gap-2 p-2";
+        } else {
+            resultContainer.innerHTML = '<span class="text-slate-500 text-xs">더 이상 뽑을 스킨이 없습니다</span>';
+        }
+        
+        updateShopUI();
+        updateResUI();
+        renderCodex();
+    }
+
+    function renderOwnedShinySkins() {
+        const container = document.getElementById("ownedShinyList");
+        const skins = getShinySkins();
+        
+        if (skins.size === 0) {
+            container.innerHTML = '<span class="text-slate-400 text-xs col-span-5 text-center py-4">아직 없음</span>';
+            return;
+        }
+        
+        container.innerHTML = [...skins].map(id => {
+            const info = getPokeInfo(id);
+            return `<div class="flex flex-col items-center p-1 bg-yellow-50 rounded-lg border border-yellow-200">
+                <img src="${info.sprite}" class="w-8 h-8 pixel-art">
+                <div class="text-[8px] truncate w-full text-center">${info.name}</div>
+            </div>`;
+        }).join('');
+    }
+
+    /* =========================================
      * 초기화
      * ========================================= */
     window.onload = async () => {
@@ -2207,6 +2492,13 @@
         document.getElementById("quizCancel").onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(false); };
         document.getElementById("lobbyHofBtn").onclick = () => { renderHoF(); document.getElementById("hofModal").classList.remove("hidden"); };
         document.getElementById("hofClose").onclick = () => document.getElementById("hofModal").classList.add("hidden");
+
+        // 🏪 상점 버튼
+        const shopBtn = document.getElementById("lobbyShopBtn");
+        if (shopBtn) shopBtn.onclick = () => openShopModal();
+        
+        const shopClose = document.getElementById("shopClose");
+        if (shopClose) shopClose.onclick = () => closeShopModal();
 
         // 👻 고스트 배틀 버튼
         const ghostBtn = document.getElementById("lobbyGhostBtn");
