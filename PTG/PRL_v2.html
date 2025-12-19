@@ -694,11 +694,12 @@
         if (id > BASE_DEX_MAX) id = BASE_DEX_MAX;
 
         const dexId = id;
-        const baseId = id;
-
+        const baseId = Math.floor(Number(id) || 1);
+        
+        
         const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
-        const name = nameBase;
-
+        const name = (POKE_NAMES && POKE_NAMES[baseId - 1]) ? POKE_NAMES[baseId - 1] : `No.${String(baseId).padStart(3, '0')}`;
+        
         // 타입 결정 (poke_db.json에서 가져오기)
         let typeName = "노말";
         if (POKE_DB && POKE_DB.pokemon && POKE_DB.pokemon[baseId - 1]) {
@@ -764,6 +765,42 @@
         };
     }
 
+    // 2. [추가] Silent Migration: 탐험대(v7) 데이터를 전투(v80)로 자동 병합
+    function silentMigrateFromIndex() {
+        const OLD_KEY = "poke_spell_game_data_v7"; // index_patched의 저장 키
+        const raw = localStorage.getItem(OLD_KEY);
+        if (!raw) return;
+
+        try {
+            const oldData = JSON.parse(raw);
+            const owned = getOwned(); // 현재 PRL_v2의 도감
+            let changed = false;
+
+            // 도감 통합 (중복 제외)
+            if (oldData.dex && Array.isArray(oldData.dex)) {
+                oldData.dex.forEach(id => {
+                    if (!owned.has(Number(id))) {
+                        owned.add(Number(id));
+                        changed = true;
+                    }
+                });
+            }
+
+            // 포인트 통합 (기존 포인트가 있으면 합산)
+            if (oldData.points) {
+                addPoints(oldData.points);
+                changed = true;
+            }
+
+            if (changed) {
+                saveOwned(owned);
+                console.log("탐험대 데이터가 성공적으로 통합되었습니다.");
+            }
+            // 통합 후 구버전 키 삭제 (선택 사항: 데이터 꼬임 방지용)
+            // localStorage.removeItem(OLD_KEY); 
+        } catch (e) { console.error("Migration error:", e); }
+    }
+    
     // 진화 가능 여부 체크
     function canEvolve(pokemonId, level) {
         const evoInfo = EVOLUTION_MAP[pokemonId];
@@ -2440,6 +2477,8 @@
 
         loadingStatus.textContent = "포켓몬 데이터 로딩 중...";
         const dbLoaded = await loadPokeDb();
+
+        silentMigrateFromIndex(); // 데이터 통합 실행
 
         if (dbLoaded) {
             loadingStatus.textContent = "퀴즈 데이터 로딩 중...";

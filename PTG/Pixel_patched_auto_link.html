@@ -145,9 +145,14 @@
 
     function getIndexDexSet(){
         try {
-            // PRL_v2와 동일한 도감 키를 읽습니다.
-            const raw = localStorage.getItem("qz_o_v80");
-            const arr = raw ? JSON.parse(raw) : [];
+            // PRL_v2와 공유되는 도감 키를 최우선으로 확인
+            const sharedRaw = localStorage.getItem("qz_o_v80");
+            if (sharedRaw) {
+                return new Set(JSON.parse(sharedRaw).map(Number));
+            }
+            // 없을 경우에만 구형 키(v7) 확인
+            const oldData = JSON.parse(localStorage.getItem("poke_spell_game_data_v7") || '{}');
+            const arr = oldData.dex || oldData.dexIds || [];
             return new Set(arr.map(v => parseInt(v, 10)).filter(n => n > 0));
         } catch(_) { return new Set(); }
     }
