@@ -51,6 +51,16 @@
             from { box-shadow: 0 0 5px #4ade80, 0 0 10px #4ade80; }
             to { box-shadow: 0 0 10px #4ade80, 0 0 20px #4ade80; }
         }
+        @media (max-width: 768px) {
+            .card button {
+                padding-top: 0.75rem;
+                padding-bottom: 0.75rem;
+                font-size: 1rem !important; /* 모바일에서 버튼 글자 크기 키움 */
+            }
+            #timer {
+                font-size: 2rem !important; /* 타이머 크기 조정 */
+            }
+        }
     </style>
 </head>
 <body>
@@ -1098,6 +1108,10 @@
             const uiTop  = (canvas.height - ORIGINAL_UI_HEIGHT * uiScale) / 2;
             uiWrapper.style.left = `${uiLeft}px`;
             uiWrapper.style.top  = `${uiTop}px`;
+            if (window.innerHeight > window.innerWidth) {
+                // 필요 시 경고 메시지 표시 로직 추가
+                console.warn("가로 모드에 최적화된 게임입니다.");
+            }
         }
 
         // ===== Core init =====
