@@ -1,0 +1,2529 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8" />
+    <title>QuizMon: Ver 8.2 (진화 수정)</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif; touch-action: manipulation; }
+        .view { display: none; }
+        .view.active { display: flex; }
+        .poke-card { transition: all 0.2s cubic-bezier(0.25, 0.8, 0.25, 1); }
+        .poke-card:active { transform: scale(0.95); }
+
+        /* 등급별 스타일 */
+        .rarity-UR  { border: 2px solid #ef4444; background: linear-gradient(135deg, #fff0f0 0%, #ffe4e4 100%); box-shadow: 0 0 15px rgba(239, 68, 68, 0.5); }
+        .rarity-SSR { border: 2px solid #f97316; background: linear-gradient(135deg, #fff7ed 0%, #ffedd5 100%); }
+        .rarity-SR  { border: 2px solid #eab308; background: #fefce8; }
+        .rarity-R   { border: 2px solid #3b82f6; background: #eff6ff; }
+        .rarity-C   { border: 1px solid #cbd5e1; background: #ffffff; }
+
+        .modal-backdrop { background: rgba(0,0,0,0.8); backdrop-filter: blur(4px); }
+        img.pixel-art { image-rendering: pixelated; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes damageShake { 0% { transform: translateX(0); } 20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } 40% { transform: translateX(6px) rotate(5deg); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+        .animate-damage { animation: damageShake 0.4s ease-in-out; }
+        .animate-attack-player { animation: attackRight 0.2s ease-out; }
+        .animate-attack-enemy { animation: attackLeft 0.2s ease-out; }
+        @keyframes attackRight { 0% { transform: translateX(0) scaleX(-1); } 50% { transform: translateX(30px) scaleX(-1); } 100% { transform: translateX(0) scaleX(-1); } }
+        @keyframes attackLeft { 0% { transform: translateX(0); } 50% { transform: translateX(-30px); } 100% { transform: translateX(0); } }
+
+        .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
+        .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
+
+        /* 진화 애니메이션 */
+        @keyframes evolveGlow {
+            0% { filter: brightness(1); transform: scale(1); }
+            50% { filter: brightness(3) saturate(0); transform: scale(1.3); }
+            100% { filter: brightness(1); transform: scale(1); }
+        }
+        .animate-evolve { animation: evolveGlow 1.5s ease-in-out; }
+
+
+        /* ✅ GachaModal 비활성화: 탐험은 index_patched로 이동 */
+        #gachaModal { display: none !important; }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+</head>
+<body class="bg-slate-100 min-h-screen text-slate-800 select-none">
+
+<section id="titleScreen" class="view active flex-col items-center justify-center p-6 h-screen">
+    <div class="mb-8 relative">
+        <div class="absolute -top-10 -left-10 w-20 h-20 bg-purple-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
+        <h1 class="text-5xl md:text-6xl font-black text-slate-800 tracking-tighter relative z-10">
+            <span class="text-red-500">Quiz</span>Mon
+        </h1>
+        <div class="text-right text-xs font-bold text-slate-400 mt-1">Ver 8.2 (연속 진화 + UI 업데이트)</div>
+    </div>
+    <div class="bg-white p-6 rounded-3xl shadow-xl w-full max-w-sm text-center border-4 border-slate-800">
+        <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/250.png" class="w-24 h-24 mx-auto pixel-art animate-bounce" alt="Ho-oh">
+        <p class="text-slate-500 text-sm mb-6 font-medium">
+            poke_db.json 연동 + 진화 시스템!<br>기본 포켓몬만 뽑기 가능
+        </p>
+        <div id="loadingStatus" class="text-xs text-blue-500 mb-2">데이터 로딩 중...</div>
+        <button id="startButton" class="w-full bg-red-500 hover:bg-red-600 text-white font-bold py-4 rounded-xl shadow-lg text-lg transition-colors border-b-4 border-red-700 active:border-b-0 active:translate-y-1 disabled:bg-slate-400 disabled:border-slate-500" disabled>
+            모험 시작하기
+        </button>
+    </div>
+</section>
+
+<section id="lobbyScreen" class="view flex-col items-center justify-start p-4 min-h-screen overflow-y-auto">
+    <div class="w-full max-w-md flex flex-col gap-4 mt-2">
+        <div class="flex justify-between items-end px-2">
+            <h2 class="text-3xl font-black text-slate-800">LOBBY</h2>
+            <div class="flex gap-2">
+                <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-xs font-bold flex items-center gap-1">
+                    <span class="text-yellow-500">🎫</span><span id="ticketTextLobby">0</span>
+                </div>
+                <div class="bg-white px-3 py-1 rounded-full shadow-sm border border-slate-200 text-xs font-bold flex items-center gap-1">
+                    <span class="text-blue-500">P</span><span id="pointsTextLobby">0</span>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="importFromClipboard()" class="w-full bg-slate-800 text-white py-2 rounded-xl text-xs font-bold shadow-md hover:bg-slate-700 active:scale-95 transition-transform mb-2">
+            📥 index 데이터(클립보드) 가져오기
+        </button>
+
+        <div class="grid grid-cols-2 gap-3">
+            <button id="lobbyCodexBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-emerald-400 transition-colors group">
+                <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center group-hover:bg-emerald-100">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png" class="w-8 h-8 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-slate-700">스타터 선택</div>
+                    <div class="text-[10px] text-slate-400">모험 준비</div>
+                </div>
+            </button>
+
+            <button id="lobbyGachaBtn" class="bg-white p-4 rounded-2xl shadow-sm border-2 border-slate-100 flex flex-col items-center gap-2 hover:border-indigo-400 transition-colors group">
+                <div class="w-12 h-12 bg-indigo-50 rounded-full flex items-center justify-center group-hover:bg-indigo-100">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/town-map.png" class="w-8 h-8 pixel-art opacity-80">
+                </div>
+                <div class="text-center">
+                    <div class="font-bold text-slate-700">탐험으로 이동</div>
+                    <div class="text-[10px] text-slate-400">포획/탐험 화면</div>
+                </div>
+            </button>
+
+            <button id="lobbyHofBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-yellow-400 transition-colors group">
+                <div class="w-10 h-10 bg-yellow-50 rounded-full flex items-center justify-center group-hover:bg-yellow-100">
+                    <span class="text-xl">🏆</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">명예의 전당</div>
+                    <div class="text-[10px] text-slate-400">역대 최고 기록 보기</div>
+                </div>
+            </button>
+
+            <!-- 👻 고스트 배틀 버튼 추가 -->
+            <button id="lobbyGhostBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-purple-400 transition-colors group">
+                <div class="w-10 h-10 bg-purple-50 rounded-full flex items-center justify-center group-hover:bg-purple-100">
+                    <span class="text-xl">👻</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">친구와 배틀</div>
+                    <div class="text-[10px] text-slate-400">QR 공유 / 스캔 대결</div>
+                </div>
+            </button>
+
+            <!-- 🏪 상점 버튼 추가 -->
+            <button id="lobbyShopBtn" class="bg-white p-3 rounded-2xl shadow-sm border-2 border-slate-100 flex items-center justify-center gap-3 hover:border-pink-400 transition-colors group col-span-2">
+                <div class="w-10 h-10 bg-pink-50 rounded-full flex items-center justify-center group-hover:bg-pink-100">
+                    <span class="text-xl">🏪</span>
+                </div>
+                <div class="text-left">
+                    <div class="font-bold text-slate-700">상점</div>
+                    <div class="text-[10px] text-slate-400">레어캔디 / 이로치 스킨</div>
+                </div>
+            </button>
+        </div>
+
+
+        <div class="bg-slate-800 rounded-2xl p-5 text-white shadow-lg relative overflow-hidden mt-2">
+            <div class="relative z-10 flex justify-between items-center">
+                <div>
+                    <div class="text-xs text-slate-400 mb-1">선택된 스타터</div>
+                    <div id="lobbyPartnerName" class="font-bold text-xl">없음</div>
+                    <div class="text-[10px] text-slate-400 mt-1 bg-slate-700 inline-block px-2 py-1 rounded" id="lobbyStartBonus">
+                        선택 필요
+                    </div>
+                </div>
+                <img id="lobbyPartnerImg" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" class="w-16 h-16 pixel-art bg-slate-700 rounded-full">
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="codexScreen" class="view flex-col items-center h-[100dvh] bg-slate-50 relative overflow-hidden">
+    <div class="w-full max-w-3xl flex flex-col h-full">
+        <div class="flex-none p-4 bg-white border-b border-slate-200 flex items-center justify-between shadow-sm z-10">
+            <h2 class="text-xl font-bold text-slate-800">도감 <span class="text-xs font-normal text-slate-400" id="collectionRate">0/--</span></h2>
+            <div class="flex items-center gap-2">
+                <button id="codexPrevBtn" class="text-xs font-bold px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-50">◀</button>
+                <span id="codexPageInfo" class="text-xs text-slate-500">1/11</span>
+                <button id="codexNextBtn" class="text-xs font-bold px-2 py-1 rounded bg-slate-200 hover:bg-slate-300 disabled:opacity-50">▶</button>
+                <button id="codexToLobbyBtn" class="text-xs font-bold px-3 py-2 rounded-lg bg-slate-100 hover:bg-slate-200 ml-2">나가기</button>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 bg-slate-50 pb-32"> <div id="codexGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3"></div>
+        </div>
+
+        <div class="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 flex gap-3 items-center z-30 pb-[env(safe-area-inset-bottom,1rem)]">
+            <div class="max-w-3xl mx-auto w-full flex gap-3 items-center">
+                <div class="flex-1">
+                    <div class="text-[10px] text-slate-400 uppercase tracking-wider">Selected Partner</div>
+                    <div id="partnerInfo" class="font-bold text-slate-800 text-base truncate">없음</div>
+                </div>
+                <button id="startAdventureBtn" disabled class="bg-emerald-500 hover:bg-emerald-600 disabled:bg-slate-300 text-white font-black py-4 px-8 rounded-2xl shadow-lg transition-all active:scale-95">
+                    모험 시작
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="battleScreen" class="view flex-col items-center justify-between h-screen bg-gradient-to-b from-sky-200 to-sky-100 relative overflow-hidden">
+    <div class="absolute bottom-0 w-full h-1/3 bg-emerald-600 rounded-t-[50%] scale-150 translate-y-12 border-t-8 border-emerald-700 opacity-90"></div>
+    <div class="w-full max-w-md p-4 flex justify-between items-start z-10">
+        <button id="battleBackBtn" class="bg-white/80 backdrop-blur text-slate-700 px-3 py-1.5 rounded-full text-xs font-bold shadow-sm">&larr; 포기</button>
+        <div class="bg-black/40 backdrop-blur text-white px-4 py-1.5 rounded-full text-xs font-bold">STAGE <span id="battleStageText" class="text-yellow-300 text-base ml-1">1</span></div>
+    </div>
+    <div class="w-full max-w-md flex-1 relative flex flex-col justify-center px-4 z-10 gap-8">
+        <div class="flex flex-col items-end relative">
+            <div class="bg-white/90 p-2 rounded-xl shadow-md mb-2 w-40 transform translate-x-2">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span id="enemyName" class="font-bold text-sm text-slate-800">?</span>
+                    <span id="enemyLevel" class="text-[10px] text-slate-500">Lv.1</span>
+                </div>
+                <div id="enemyTypeBadge" class="text-[9px] text-white px-1.5 py-0.5 rounded mb-1 inline-block bg-gray-400">TYPE</div>
+                <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden"><div id="enemyHpBar" class="h-full bg-red-500 transition-all duration-500" style="width: 100%"></div></div>
+            </div>
+            <img id="enemyImg" src="" class="w-32 h-32 pixel-art animate-bounce-slow drop-shadow-xl filter grayscale-0">
+        </div>
+        <div class="flex flex-col items-start relative mt-4">
+            <img id="playerImg" src="" class="w-40 h-40 pixel-art drop-shadow-2xl scale-x-[-1]">
+            <div class="bg-white/90 p-3 rounded-xl shadow-md w-44 -mt-4 z-20 transform -translate-x-2 border-l-4 border-emerald-500">
+                <div class="flex justify-between items-baseline mb-1">
+                    <span id="playerName" class="font-bold text-sm text-slate-800">?</span>
+                    <span id="playerLevel" class="text-[10px] text-slate-500">Lv.1</span>
+                </div>
+                <div class="flex justify-between text-[10px] text-slate-500 mb-0.5"><span>HP</span><span id="playerHpText">0/0</span></div>
+                <div class="w-full h-2.5 bg-slate-200 rounded-full overflow-hidden"><div id="playerHpBar" class="h-full bg-emerald-500 transition-all duration-500" style="width: 100%"></div></div>
+                <div class="w-full h-1 bg-slate-100 rounded-full mt-1 overflow-hidden"><div id="playerExpBar" class="h-full bg-sky-400 transition-all" style="width: 0%"></div></div>
+            </div>
+        </div>
+    </div>
+    <div class="w-full max-w-md bg-white rounded-t-3xl shadow-[0_-5px_20px_rgba(0,0,0,0.1)] p-5 z-20">
+        <div id="battleLog" class="text-xs text-slate-500 mb-3 h-6 overflow-y-hidden text-center italic">전투 시작!</div>
+        <div id="moveButtons" class="skill-grid"></div>
+    </div>
+</section>
+
+<div id="hofModal" class="fixed inset-0 bg-slate-900 z-50 hidden flex-col items-center justify-center"><div class="w-full max-w-md bg-white p-6 rounded-2xl shadow-2xl m-4 max-h-[80vh] flex flex-col"><div class="flex justify-between items-center mb-6"><h3 class="text-2xl font-black text-slate-800">🏆 명예의 전당</h3><button id="hofClose" class="text-slate-400 font-bold">닫기</button></div><div id="hofList" class="flex-1 overflow-y-auto space-y-3"></div></div></div>
+
+<div id="gachaModal" class="fixed inset-0 bg-slate-900 z-50 hidden flex-col items-center justify-center">
+    <div class="w-full max-w-lg p-6 flex flex-col h-full md:h-auto">
+        <div class="flex justify-between items-center mb-6 text-white">
+            <div><h3 class="text-2xl font-bold">몬스터 소환</h3><p class="text-xs opacity-70" id="gachaResDisplay"></p></div>
+            <button id="gachaClose" class="bg-white/20 rounded-full p-2">✕</button>
+        </div>
+        <div class="bg-yellow-500/20 text-yellow-200 text-xs p-2 rounded-lg mb-2 text-center">
+            ✨ 기본형 포켓몬만 등장! 레벨업으로 진화해요!
+        </div>
+        <div id="gachaScene" class="flex-1 bg-slate-800 rounded-2xl border border-slate-700 p-4 overflow-y-auto mb-4 min-h-[300px] flex items-center justify-center relative">
+            <div id="gachaPlaceholder" class="text-center text-slate-500">
+                <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/master-ball.png" class="w-24 h-24 mx-auto mb-4 opacity-20 grayscale">
+                <p>소환 방식을 선택하세요</p>
+            </div>
+            <div id="gachaResultsGrid" class="grid grid-cols-3 sm:grid-cols-4 gap-3 w-full hidden"></div>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mb-2">
+            <button id="gacha1Btn" class="bg-blue-600 hover:bg-blue-500 text-white py-3 rounded-xl shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 text-xs">
+                <span class="block opacity-80">100 P</span>1회 소환
+            </button>
+            <button id="gacha10Btn" class="bg-purple-600 hover:bg-purple-500 text-white py-3 rounded-xl shadow-lg border-b-4 border-purple-800 active:border-b-0 active:translate-y-1 text-xs">
+                <span class="block opacity-80">900 P</span>10회 소환
+            </button>
+            <button id="gachaSpecialBtn" class="bg-yellow-500 hover:bg-yellow-400 text-white py-3 rounded-xl shadow-lg border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1 text-xs relative overflow-hidden">
+                <div class="absolute inset-0 bg-white opacity-10 animate-pulse"></div>
+                <span class="block opacity-80 font-bold text-yellow-900">🎫 티켓 1</span>전설 소환
+            </button>
+        </div>
+        <p class="text-center text-[10px] text-slate-400">* 중복 획득 시 시작 경험치(잠재력)가 상승합니다.</p>
+    </div>
+</div>
+
+<!-- 🏪 상점 모달 -->
+<div id="shopModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[55] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200 bg-gradient-to-r from-pink-500 to-purple-500">
+            <h3 class="text-lg font-bold text-white">🏪 상점</h3>
+            <button id="shopClose" class="text-white/80 text-xs font-bold hover:text-white">닫기</button>
+        </div>
+        
+        <div class="p-4 bg-slate-50 border-b">
+            <div class="flex justify-center gap-4 text-sm">
+                <div class="bg-white px-4 py-2 rounded-full shadow-sm border">
+                    <span class="text-blue-500 font-bold">P</span> <span id="shopPoints">0</span>
+                </div>
+                <div class="bg-white px-4 py-2 rounded-full shadow-sm border">
+                    <span class="text-yellow-500">🎫</span> <span id="shopTickets">0</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4">
+            <!-- 레어캔디 섹션 -->
+            <div class="bg-white rounded-xl border-2 border-pink-200 p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/rare-candy.png" class="w-10 h-10 pixel-art">
+                    <div>
+                        <div class="font-bold text-slate-800">🍬 레어캔디</div>
+                        <div class="text-[10px] text-slate-500">스타터 포켓몬 레벨업!</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <button onclick="buyRareCandy(1)" class="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg text-xs font-bold border-b-2 border-pink-700 active:border-b-0">
+                        <div>+1 Lv</div>
+                        <div class="text-[9px] opacity-80">500 P</div>
+                    </button>
+                    <button onclick="buyRareCandy(5)" class="bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-lg text-xs font-bold border-b-2 border-pink-700 active:border-b-0">
+                        <div>+5 Lv</div>
+                        <div class="text-[9px] opacity-80">2,000 P</div>
+                    </button>
+                    <button onclick="buyRareCandy(10)" class="bg-pink-600 hover:bg-pink-700 text-white py-2 rounded-lg text-xs font-bold border-b-2 border-pink-800 active:border-b-0">
+                        <div>+10 Lv</div>
+                        <div class="text-[9px] opacity-80">3,500 P</div>
+                    </button>
+                </div>
+                <div id="rareCandyStatus" class="text-[10px] text-slate-500 mt-2 text-center"></div>
+            </div>
+
+            <!-- 이로치 스킨 섹션 -->
+            <div class="bg-white rounded-xl border-2 border-yellow-200 p-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/shiny-charm.png" class="w-10 h-10 pixel-art">
+                    <div>
+                        <div class="font-bold text-slate-800">✨ 이로치 스킨 뽑기</div>
+                        <div class="text-[10px] text-slate-500">이로치 스킨 = 스탯 보정!</div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-2 mb-3">
+                    <button onclick="drawShinySkin(1)" class="bg-yellow-500 hover:bg-yellow-600 text-white py-3 rounded-lg text-xs font-bold border-b-2 border-yellow-700 active:border-b-0">
+                        <div>1회 뽑기</div>
+                        <div class="text-[9px] opacity-80">🎫 1개</div>
+                    </button>
+                    <button onclick="drawShinySkin(3)" class="bg-amber-500 hover:bg-amber-600 text-white py-3 rounded-lg text-xs font-bold border-b-2 border-amber-700 active:border-b-0">
+                        <div>3회 뽑기</div>
+                        <div class="text-[9px] opacity-80">🎫 2개</div>
+                    </button>
+                </div>
+                <div id="shinyDrawResult" class="min-h-[60px] bg-slate-50 rounded-lg border border-slate-200 flex items-center justify-center">
+                    <span class="text-slate-400 text-xs">뽑기 결과가 여기에 표시됩니다</span>
+                </div>
+            </div>
+
+            <!-- 보유 이로치 스킨 -->
+            <div class="bg-white rounded-xl border border-slate-200 p-4">
+                <div class="font-bold text-slate-800 mb-2 text-sm">📦 보유 이로치 스킨 <span class="text-[10px] text-emerald-600">(스탯 +15 보정)</span></div>
+                <div id="ownedShinyList" class="grid grid-cols-5 gap-2 max-h-[150px] overflow-y-auto">
+                    <span class="text-slate-400 text-xs col-span-5 text-center py-4">아직 없음</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 진화 모달 -->
+<div id="evolveModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[60] p-6">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-5 text-center">
+        <h3 class="text-lg font-bold text-slate-800 mb-2">🎉 진화!</h3>
+        <div class="flex items-center justify-center gap-4 my-4">
+            <div class="text-center">
+                <img id="evolveFromImg" class="w-16 h-16 pixel-art mx-auto" src="">
+                <div id="evolveFromName" class="text-xs mt-1"></div>
+            </div>
+            <div class="text-2xl">→</div>
+            <div class="text-center">
+                <img id="evolveToImg" class="w-20 h-20 pixel-art mx-auto animate-evolve" src="">
+                <div id="evolveToName" class="text-sm font-bold mt-1"></div>
+            </div>
+        </div>
+        <p id="evolveMessage" class="text-sm text-slate-600 mb-4"></p>
+        <button id="evolveOkBtn" class="w-full py-2.5 rounded-lg bg-slate-800 text-white text-sm font-bold">확인</button>
+    </div>
+</div>
+
+<!-- 👻 고스트 배틀 모달 -->
+<div id="ghostModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[55] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[90vh] flex flex-col overflow-hidden">
+        <div class="flex justify-between items-center px-4 py-3 border-b border-slate-200">
+            <h3 class="text-lg font-bold text-slate-800">👻 고스트 배틀</h3>
+            <button id="ghostClose" class="text-slate-400 text-xs font-bold">닫기</button>
+        </div>
+
+        <!-- 탭 버튼 -->
+        <div class="flex gap-2 px-4 pt-3">
+            <button
+                    id="ghostTabMyBtn"
+                    class="flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-800 text-white"
+            >
+                내 QR 공유
+            </button>
+            <button
+                    id="ghostTabScanBtn"
+                    class="flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-100 text-slate-500"
+            >
+                스캔해서 도전
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-4 space-y-4 text-slate-800 text-sm">
+            <!-- 내 QR 탭 -->
+            <div id="ghostMyPane">
+                <p id="ghostMySummary" class="text-[11px] text-slate-500 mb-3 break-keep">
+                    현재 스타터 정보를 QR 코드로 만들어서 다른 기기에서 스캔하면,
+                    내 포켓몬과 고스트 배틀을 할 수 있습니다.
+                </p>
+                <div class="bg-slate-50 rounded-2xl border border-slate-200 flex flex-col items-center justify-center py-4">
+                    <canvas id="ghostQrCanvas" class="bg-white rounded-xl p-2"></canvas>
+                    <p class="mt-2 text-[10px] text-slate-400 text-center leading-relaxed">
+                        다른 기기에서 이 QR을 카메라로 비추면<br />
+                        내 포켓몬과의 고스트 배틀이 시작됩니다.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 스캔 탭 -->
+            <div id="ghostScanPane" class="hidden">
+                <p class="text-[11px] text-slate-500 mb-2 break-keep">
+                    카메라 사용을 허용한 뒤, 친구의 폰에 띄워진 고스트 QR을 비춰 보세요.
+                </p>
+                <div class="bg-black rounded-2xl overflow-hidden mb-2">
+                    <video id="ghostVideo" class="w-full h-48 object-cover bg-black"></video>
+                </div>
+                <p id="ghostScanStatus" class="text-[11px] text-slate-500 mb-3">
+                    대기 중...
+                </p>
+                <button
+                        id="ghostScanStartBtn"
+                        class="w-full py-2.5 rounded-xl bg-slate-800 text-white text-xs font-bold"
+                >
+                    스캔 시작
+                </button>
+                <button
+                        id="ghostScanStopBtn"
+                        class="w-full py-2 mt-2 rounded-xl bg-slate-100 text-slate-600 text-xs font-bold"
+                >
+                    스캔 종료
+                </button>
+                <!-- 비표시용 캔버스 (프레임 캡쳐용) -->
+                <canvas id="ghostScanCanvas" class="hidden"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="quizModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden"><div class="bg-slate-800 p-4 text-white flex justify-between items-center"><h3 class="font-bold text-lg">📝 퀴즈</h3><span class="text-xs bg-slate-700 px-2 py-1 rounded text-yellow-300">정답 시 공격</span></div><div class="p-6"><div class="text-center mb-2"><p class="text-sm text-slate-500 mb-2" id="quizExplain"></p><p class="text-2xl font-black text-slate-800 tracking-wider" id="quizQuestion">?</p></div><div id="quizChoices" class="grid grid-cols-2 gap-3"></div></div><div class="bg-slate-50 p-3 text-center border-t"><button id="quizCancel" class="text-xs text-slate-400 underline">포기하기</button></div></div></div>
+<div id="rewardModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4"><div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 text-center"><h3 class="text-2xl font-black text-slate-800 mb-2">VICTORY!</h3><div class="text-xs text-sky-600 font-bold mb-4 bg-sky-50 inline-block px-3 py-1 rounded-full">EXP <span id="rewardXpVal">0</span> 획득!</div><div id="bonusLootLine" class="text-[11px] font-black text-emerald-600 mb-3 hidden"></div><p class="text-sm text-slate-500 mb-2" id="rewardTitle">보상을 선택하세요</p><div class="grid grid-cols-1 gap-3" id="rewardButtons"></div></div></div>
+<div id="messageModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[60] p-6"><div class="bg-white rounded-xl shadow-xl w-full max-w-xs p-5 text-center"><h3 id="messageTitle" class="text-lg font-bold text-slate-800 mb-2">알림</h3><p id="messageBody" class="text-sm text-slate-600 mb-4 break-keep"></p><button id="messageOk" class="w-full py-2.5 rounded-lg bg-slate-800 text-white text-sm font-bold">확인</button></div></div>
+
+<script>
+    const INDEX_PATCHED_URL = "./index_patched.html"; // 같은 폴더 내 파일명
+    const GACHA_ENABLED = false; // PRL에서는 소환(가챠) UI/로직 숨김
+
+    /* =========================================
+     * DATA & CONSTANTS - poke_db.json에서 로드
+     * ========================================= */
+    let POKE_DB = null;         // poke_db.json 전체 데이터
+    let POKE_NAMES = [];        // 이름 배열
+    let ALL_STATS_DB = [];      // 스탯 배열 [hp, atk, def, spa, spd, spe]
+    let EVOLUTION_MAP = {};     // id -> { next_id, min_level }
+    let BASIC_POKEMON_IDS = []; // is_basic: true인 포켓몬 ID 목록
+
+    // 퀴즈 데이터
+    let externalQuizList = [];
+
+    const BASE_DEX_MAX = 1025;  // 전체 포켓몬 지원
+
+    // 전설 포켓몬 (Gen1~9)
+    const LEGENDARY_IDS = [
+        // Gen1
+        144, 145, 146, 150,
+        // Gen2
+        243, 244, 245, 249, 250,
+        // Gen3
+        377, 378, 379, 380, 381, 382, 383, 384, 386,
+        // Gen4
+        480, 481, 482, 483, 484, 485, 486, 487, 488,
+        // Gen5
+        638, 639, 640, 641, 642, 643, 644, 645, 646,
+        // Gen6
+        716, 717, 718,
+        // Gen7
+        785, 786, 787, 788, 791, 792, 800,
+        // Gen8
+        888, 889, 890, 891, 892, 894, 895, 896, 897, 898,
+        // Gen9
+        1001, 1002, 1003, 1004, 1007, 1008, 1014, 1015, 1016, 1017, 1020, 1021, 1022, 1023, 1024
+    ];
+
+    // 환상 포켓몬 (Mythical)
+    const MYTHICAL_IDS = [
+        151,  // 뮤
+        251,  // 세레비
+        385,  // 지라치
+        489, 490,  // 필로네/마나피
+        491, 492, 493,  // 다크라이/셰이미/아르세우스
+        494,  // 비크티니
+        647, 648, 649,  // 케르디오/메로엣타/게노세크트
+        719, 720, 721,  // 디안시/후파/볼케니온
+        801, 802, 807, 808, 809,  // 마기아나/마샤도/제라오라/멜탄/멜메탈
+        893,  // 자루도
+        1025  // 복숭악동
+    ];
+
+    const TIER_CONFIG = {
+        "C":   { targetBst: 300, bonus: 0 },
+        "R":   { targetBst: 380, bonus: 5 },
+        "SR":  { targetBst: 480, bonus: 10 },
+        "SSR": { targetBst: 550, bonus: 15 },
+        "UR":  { targetBst: 650, bonus: 25 }
+    };
+
+    // 인기/귀여운 포켓몬 (샤이니 UR 버전)
+    const CUTE_IDS = [
+        25, 133, 175, 39, 35, 37, 151, 172, 194, 216, 147, 183, 152, 155, 158, 251,
+        // 추가 인기 포켓몬
+        393, 403, 417, 427, 447, 471, 495, 501, 531, 572, 587, 613, 677, 702, 722, 728,
+        778, 813, 819, 835, 868, 872, 906, 912, 924
+    ];
+
+    // UR 샤이니 변형은 사용하지 않음 (1025개 전체 지원)
+    const UR_VARIANT_BASE_IDS = [];
+
+    let DEX_TOTAL = BASE_DEX_MAX;
+
+    // 타입별 데이터 및 상성
+    const TYPE_DATA = {
+        "노말":   { color: "bg-slate-400", weak: ["격투"], resist: [] },
+        "불꽃":   { color: "bg-red-500", weak: ["물", "땅", "바위"], resist: ["불꽃", "풀", "얼음", "벌레", "강철"] },
+        "물":     { color: "bg-blue-500", weak: ["전기", "풀"], resist: ["불꽃", "물", "얼음", "강철"] },
+        "전기":   { color: "bg-yellow-400", weak: ["땅"], resist: ["전기", "비행", "강철"] },
+        "풀":     { color: "bg-green-500", weak: ["불꽃", "얼음", "독", "비행", "벌레"], resist: ["물", "전기", "풀", "땅"] },
+        "얼음":   { color: "bg-cyan-300", weak: ["불꽃", "격투", "바위", "강철"], resist: ["얼음"] },
+        "격투":   { color: "bg-orange-600", weak: ["비행", "에스퍼"], resist: ["벌레", "바위", "악"] },
+        "독":     { color: "bg-fuchsia-600", weak: ["땅", "에스퍼"], resist: ["풀", "격투", "독", "벌레"] },
+        "땅":     { color: "bg-amber-700", weak: ["물", "풀", "얼음"], resist: ["독", "바위"] },
+        "비행":   { color: "bg-sky-400", weak: ["전기", "얼음", "바위"], resist: ["풀", "격투", "벌레"] },
+        "에스퍼": { color: "bg-pink-500", weak: ["벌레", "고스트", "악"], resist: ["격투", "에스퍼"] },
+        "벌레":   { color: "bg-lime-600", weak: ["불꽃", "비행", "바위"], resist: ["풀", "격투", "땅"] },
+        "바위":   { color: "bg-stone-500", weak: ["물", "풀", "격투", "땅", "강철"], resist: ["노말", "불꽃", "독", "비행"] },
+        "고스트": { color: "bg-indigo-700", weak: ["고스트", "악"], resist: ["독", "벌레"] },
+        "강철":   { color: "bg-slate-500", weak: ["불꽃", "격투", "땅"], resist: ["노말", "풀", "얼음", "비행", "에스퍼", "벌레", "바위", "고스트", "드래곤", "강철"] },
+        "악":     { color: "bg-zinc-800", weak: ["격투", "벌레"], resist: ["고스트", "악", "에스퍼"] },
+        "드래곤": { color: "bg-violet-600", weak: ["얼음", "드래곤"], resist: ["불꽃", "물", "전기", "풀"] },
+        "페어리": { color: "bg-pink-300", weak: ["독", "강철"], resist: ["격투", "벌레", "드래곤", "악"] },
+    };
+
+    const PHYSICAL_TYPES = ["노말", "격투", "독", "땅", "비행", "벌레", "바위", "고스트", "강철"];
+    const SPECIAL_TYPES = ["불꽃", "물", "풀", "전기", "에스퍼", "얼음", "드래곤", "악", "페어리"];
+
+    const RAW_MOVES = {
+        "노말": [ {n:"몸통박치기",p:40,a:100}, {n:"할퀴기",p:40,a:100}, {n:"메가톤펀치",p:80,a:85}, {n:"파괴광선",p:150,a:90} ],
+        "풀":   [ {n:"덩굴채찍",p:45,a:100}, {n:"잎날가르기",p:55,a:95}, {n:"씨폭탄",p:80,a:100}, {n:"에너지볼",p:90,a:100}, {n:"솔라빔",p:120,a:100}, {n:"리프스톰",p:130,a:90} ],
+        "불꽃": [ {n:"불꽃세례",p:40,a:100}, {n:"불꽃펀치",p:75,a:100}, {n:"화염방사",p:90,a:100}, {n:"불대문자",p:110,a:85}, {n:"블레이즈킥",p:85,a:90}, {n:"폭렬화염",p:150,a:90} ],
+        "물":   [ {n:"물총",p:40,a:100}, {n:"거품광선",p:65,a:100}, {n:"파도타기",p:90,a:100}, {n:"하이드로펌프",p:110,a:80}, {n:"아쿠아테일",p:90,a:90}, {n:"하이드로캐논",p:150,a:90} ],
+        "전기": [ {n:"전기쇼크",p:40,a:100}, {n:"스파크",p:65,a:100}, {n:"번개",p:110,a:70}, {n:"10만볼트",p:90,a:100}, {n:"볼트태클",p:120,a:100}, {n:"라이트닝",p:150,a:90} ],
+        "얼음": [ {n:"냉동빔",p:90,a:100}, {n:"눈보라",p:110,a:70}, {n:"얼음뭉치",p:40,a:100}, {n:"얼음엄니",p:65,a:95}, {n:"냉동펀치",p:75,a:100} ],
+        "땅":   [ {n:"진흙뿌리기",p:20,a:100}, {n:"땅고르기",p:60,a:100}, {n:"지진",p:100,a:100}, {n:"대지의힘",p:90,a:100}, {n:"뼈다귀부메랑",p:50,a:90} ],
+        "비행": [ {n:"날개치기",p:60,a:100}, {n:"공중날기",p:90,a:95}, {n:"에어슬래시",p:75,a:95}, {n:"드릴부리",p:80,a:100}, {n:"폭풍",p:110,a:70} ],
+        "벌레": [ {n:"벌레먹기",p:60,a:100}, {n:"연속자르기",p:40,a:95}, {n:"메가혼",p:120,a:85}, {n:"시그널빔",p:75,a:100}, {n:"벌레의야단법석",p:90,a:100} ],
+        "바위": [ {n:"바위던지기",p:50,a:90}, {n:"암석봉인",p:60,a:95}, {n:"스톤에지",p:100,a:80}, {n:"록블래스트",p:25,a:90}, {n:"파워젬",p:80,a:100} ],
+        "고스트":[ {n:"섀도볼",p:80,a:100}, {n:"섀도펀치",p:60,a:100}, {n:"나이트헤드",p:70,a:100}, {n:"섀도클로",p:70,a:100}, {n:"섀도다이브",p:120,a:90} ],
+        "강철": [ {n:"메탈클로",p:50,a:95}, {n:"아이언헤드",p:80,a:100}, {n:"미러샷",p:65,a:85}, {n:"코멧펀치",p:90,a:90}, {n:"철벽타격",p:90,a:95} ],
+        "악":   [ {n:"깨물어부수기",p:60,a:100}, {n:"크런치",p:80,a:100}, {n:"악의파동",p:80,a:100}, {n:"기습",p:40,a:100}, {n:"속임수",p:95,a:100} ],
+        "드래곤":[ {n:"용의숨결",p:60,a:100}, {n:"용의파동",p:85,a:100}, {n:"드래곤클로",p:80,a:100}, {n:"역린",p:120,a:100}, {n:"용성군",p:130,a:90} ],
+        "에스퍼":[ {n:"염동력",p:50,a:100}, {n:"사이코키네시스",p:90,a:100}, {n:"사이코쇼크",p:80,a:100}, {n:"드림이터",p:100,a:100}, {n:"미래예지",p:120,a:100} ],
+        "격투": [ {n:"로킥",p:50,a:100}, {n:"카운터",p:60,a:100}, {n:"스카이업퍼",p:85,a:90}, {n:"인파이트",p:120,a:100}, {n:"폭발펀치",p:100,a:50} ],
+        "독":   [ {n:"독침",p:15,a:100}, {n:"독가스",p:40,a:100}, {n:"오물폭탄",p:90,a:100}, {n:"더스트슈트",p:120,a:80}, {n:"크로스포이즌",p:70,a:100} ],
+        "페어리": [ {n:"요정의바람",p:40,a:100}, {n:"드레인키스",p:50,a:100}, {n:"문포스",p:95,a:100}, {n:"플레이러프",p:90,a:90} ],
+    };
+
+    function calcMoveTier(m) {
+        let t, c;
+        if (m.p <= 60) { t="C"; c=0; }
+        else if (m.p < 80) { t="R"; c=1; }
+        else if (m.p < 110) { t="SR"; c=2; }
+        else if (m.p < 140) { t="SSR"; c=3; }
+        else { t="UR"; c=4; }
+        return { ...m, t, c };
+    }
+
+    const MOVE_POOL = {};
+    Object.keys(RAW_MOVES).forEach(k => { MOVE_POOL[k] = RAW_MOVES[k].map(m => calcMoveTier(m)); });
+
+    /* =========================================
+     * 데이터 로딩 함수들
+     * ========================================= */
+    let DB_LOADED = false;  // DB 로드 완료 플래그
+
+    async function loadPokeDb() {
+        try {
+            const timestamp = new Date().getTime();
+            // 상대 경로로 poke_db.json 로드 시도
+            let res = await fetch(`./poke_db.json?v=${timestamp}`, {
+                cache: "no-store",
+                headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+            });
+
+            if (!res.ok) {
+                // 절대 경로 시도
+                res = await fetch(`/quiz/poke_db.json?v=${timestamp}`, {
+                    cache: "no-store"
+                });
+            }
+
+            if (!res.ok) throw new Error("poke_db.json 로드 실패");
+
+            POKE_DB = await res.json();
+
+            // 데이터 파싱
+            POKE_NAMES = [];
+            ALL_STATS_DB = [];
+            EVOLUTION_MAP = {};
+            BASIC_POKEMON_IDS = [];
+
+            for (const poke of POKE_DB.pokemon) {
+                const idx = poke.id - 1;
+                POKE_NAMES[idx] = poke.name_ko;
+                ALL_STATS_DB[idx] = [
+                    poke.base_stats.hp,
+                    poke.base_stats.atk,
+                    poke.base_stats.def,
+                    poke.base_stats.spa,
+                    poke.base_stats.spd,
+                    poke.base_stats.spe
+                ];
+
+                if (poke.evolution) {
+                    EVOLUTION_MAP[poke.id] = {
+                        next_id: poke.evolution.next_id,
+                        min_level: poke.evolution.min_level
+                    };
+                }
+
+                if (poke.is_basic && poke.id <= BASE_DEX_MAX) {
+                    BASIC_POKEMON_IDS.push(poke.id);
+                }
+            }
+
+            console.log(`[DB] ${POKE_DB.pokemon.length}개 포켓몬 로드 완료`);
+            console.log(`[DB] 기본형 포켓몬: ${BASIC_POKEMON_IDS.length}개`);
+            console.log(`[DB] 기본형 샘플:`, BASIC_POKEMON_IDS.slice(0, 10));
+            DB_LOADED = true;
+            return true;
+        } catch (e) {
+            console.error("[DB] poke_db.json 로드 실패:", e);
+            DB_LOADED = false;
+            // Fallback: 기존 하드코딩 데이터 사용
+            return false;
+        }
+    }
+
+    async function loadQuizData() {
+        try {
+            const timestamp = new Date().getTime();
+            const res = await fetch(`./quiz/quiz.json?v=${timestamp}`, {
+                cache: "no-store",
+                headers: { 'Pragma': 'no-cache', 'Cache-Control': 'no-cache' }
+            });
+            if (!res.ok) throw new Error("Quiz JSON Fetch Failed");
+            const data = await res.json();
+            if (data && data.questions && data.questions.length > 0) {
+                externalQuizList = data.questions;
+                console.log(`[Quiz] ${externalQuizList.length}개 문제 로드 완료`);
+            }
+        } catch (e) {
+            console.warn("[Quiz] quiz.json 로드 실패, 구구단 사용:", e);
+            externalQuizList = [];
+        }
+    }
+
+    /* =========================================
+     * 유틸리티 함수들
+     * ========================================= */
+    const TIER_ORDER = ['C', 'R', 'SR', 'SSR', 'UR'];
+
+    function getRandomMoves(typeName, count, maxTierStr = 'UR') {
+        const pool = MOVE_POOL[typeName] || MOVE_POOL["노말"];
+        const maxIdx = TIER_ORDER.indexOf(maxTierStr);
+        const filtered = pool.filter(m => TIER_ORDER.indexOf(m.t) <= maxIdx);
+        const res = [];
+        if (filtered.length === 0) return res;
+        for (let i = 0; i < count; i++) {
+            res.push(filtered[Math.floor(Math.random() * filtered.length)]);
+        }
+        return res;
+    }
+
+    // [수정] 레벨에 따른 스탯 계산 (본가 공식)
+    function calcStats(base, level) {
+        // base: { hp, atk, def, spa, spd, spe }
+        const calc = (b, isHp) => Math.floor(((2 * b + 31) * level) / 100) + (isHp ? level + 10 : 5);
+        return {
+            maxHp: calc(base.hp, true),
+            atk: calc(base.atk, false),
+            def: calc(base.def, false),
+            spa: calc(base.spa, false),
+            spd: calc(base.spd, false),
+            spe: calc(base.spe, false),
+        };
+    }
+
+    function getPokeInfo(id) {
+        id = Math.floor(Number(id) || 1);
+        if (id < 1) id = 1;
+        if (id > BASE_DEX_MAX) id = BASE_DEX_MAX;
+
+        const dexId = id;
+        const baseId = id;
+
+        const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
+        const name = nameBase;
+
+        // 타입 결정 (poke_db.json에서 가져오기)
+        let typeName = "노말";
+        if (POKE_DB && POKE_DB.pokemon && POKE_DB.pokemon[baseId - 1]) {
+            const types_ko = POKE_DB.pokemon[baseId - 1].types_ko;
+            if (types_ko && types_ko.length > 0) {
+                typeName = types_ko[0];
+            }
+        }
+
+        // 스탯 가져오기
+        const sData = ALL_STATS_DB[baseId - 1] || [45,45,45,45,45,45];
+        const rawBase = { hp: sData[0], atk: sData[1], def: sData[2], spa: sData[3], spd: sData[4], spe: sData[5] };
+        const bst = rawBase.hp + rawBase.atk + rawBase.def + rawBase.spa + rawBase.spd + rawBase.spe;
+
+        // 레어도 판단
+        let rarity = "C";
+        if (bst >= 580) rarity = "UR";
+        else if (bst >= 500) rarity = "SSR";
+        else if (bst >= 400) rarity = "SR";
+        else if (bst >= 300) rarity = "R";
+
+        const isLegendary = LEGENDARY_IDS.includes(baseId);
+        const isMythical = MYTHICAL_IDS.includes(baseId);
+
+        // 이로치 스킨 소유 체크만 (CUTE_IDS는 기본 스프라이트 사용)
+        const hasUnlockedShiny = getShinySkins().has(baseId);
+        let isShiny = hasUnlockedShiny;
+
+        if (isLegendary || isMythical) rarity = "UR";
+
+        // BST 차이를 살리되 티어별 목표 BST 기준으로 비율 조정
+        const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
+        const ratio = config.targetBst / Math.max(1, bst);
+        
+        // 이로치 스킨 보유 시 스탯 보정 (+15)
+        const shinyBonus = isShiny ? 15 : 0;
+
+        const finalBase = {
+            hp: Math.max(1, Math.floor(rawBase.hp * ratio) + config.bonus + shinyBonus),
+            atk: Math.max(1, Math.floor(rawBase.atk * ratio) + config.bonus + shinyBonus),
+            def: Math.max(1, Math.floor(rawBase.def * ratio) + config.bonus + shinyBonus),
+            spa: Math.max(1, Math.floor(rawBase.spa * ratio) + config.bonus + shinyBonus),
+            spd: Math.max(1, Math.floor(rawBase.spd * ratio) + config.bonus + shinyBonus),
+            spe: Math.max(1, Math.floor(rawBase.spe * ratio) + config.bonus + shinyBonus)
+        };
+
+        const baseUrl = "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon";
+        const spriteUrl = isShiny
+            ? `${baseUrl}/shiny/${baseId}.png`
+            : `${baseUrl}/${baseId}.png`;
+
+        return {
+            id: dexId,
+            baseId,
+            name,
+            rarity,
+            type: { name: typeName, ...(TYPE_DATA[typeName] || TYPE_DATA["노말"]) },
+            sprite: spriteUrl,
+            base: finalBase,
+            isShiny,
+            isLegendary,
+            isMythical
+        };
+    }
+
+    // 진화 가능 여부 체크
+    function canEvolve(pokemonId, level) {
+        const evoInfo = EVOLUTION_MAP[pokemonId];
+        if (!evoInfo) return null;
+        if (level >= evoInfo.min_level) {
+            return evoInfo.next_id;
+        }
+        return null;
+    }
+
+    // 진화 실행
+    function doEvolve(pokemonId) {
+        const evoInfo = EVOLUTION_MAP[pokemonId];
+        if (!evoInfo) return null;
+
+        const nextId = evoInfo.next_id;
+        const owned = getOwned();
+
+        // 진화 후 포켓몬 도감 등록
+        if (!owned.has(nextId)) {
+            owned.add(nextId);
+            saveOwned(owned);
+        }
+
+        return nextId;
+    }
+
+    // 🔐 UTF-8 안전 Base64 인코더/디코더
+    function toBase64UTF8(obj) {
+        const json = typeof obj === "string" ? obj : JSON.stringify(obj);
+        return btoa(unescape(encodeURIComponent(json)));
+    }
+
+    function fromBase64UTF8(b64) {
+        const str = decodeURIComponent(escape(atob(b64)));
+        return str;
+    }
+
+    /* =========================================
+     * STATE & LOGIC
+     * ========================================= */
+    const LS_KEY = {
+        POINTS: "qz_p_v80",
+        OWNED: "qz_o_v80",
+        PARTNER: "qz_st_v80",
+        HOF: "qz_hof_v80",
+        TICKETS: "qz_t_v80",
+        DUPES: "qz_d_v80",
+        CHAR_DATA: "qz_c_prog_v80",
+        SHINY_SKINS: "qz_shiny_v80"
+    };
+
+    const GHOST_ROOT_URL = (location.origin && location.origin !== "null")
+        ? `${location.origin}${location.pathname}`
+        : "https://unluckyidiot16.github.io/WebGames/PRL/PRL.html";
+
+    function getCharData() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY.CHAR_DATA) || "{}"); }
+        catch { return {}; }
+    }
+
+    function saveCharData(data) {
+        localStorage.setItem(LS_KEY.CHAR_DATA, JSON.stringify(data));
+    }
+
+    function saveCurrentPlayerProgress() {
+        if (!battleState || !battleState.player) return;
+        const allData = getCharData();
+        allData[battleState.player.id] = {
+            level: battleState.player.level,
+            xp: battleState.player.xp
+        };
+        saveCharData(allData);
+    }
+
+    let battleState = null;
+    let quizCallback = null;
+    let ghostScanStream = null;
+    let ghostScanFrameId = null;
+
+    function getPoints() { return parseInt(localStorage.getItem(LS_KEY.POINTS) || "1000", 10); }
+    function setPoints(n) { localStorage.setItem(LS_KEY.POINTS, Math.max(0, n)); updateResUI(); }
+    function addPoints(n) { setPoints(getPoints() + n); }
+    function getTickets() { return parseInt(localStorage.getItem(LS_KEY.TICKETS) || "0", 10); }
+    function setTickets(n) { localStorage.setItem(LS_KEY.TICKETS, Math.max(0, n)); updateResUI(); }
+    function addTickets(n) { setTickets(getTickets() + n); }
+    function getOwned() { try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.OWNED) || "[]")); } catch { return new Set(); } }
+    function saveOwned(set) { localStorage.setItem(LS_KEY.OWNED, JSON.stringify([...set])); }
+    function getDupes() { try { return JSON.parse(localStorage.getItem(LS_KEY.DUPES) || "{}"); } catch { return {}; } }
+    function saveDupes(d) { localStorage.setItem(LS_KEY.DUPES, JSON.stringify(d)); }
+    
+    // 이로치 스킨 관련 함수들
+    function getShinySkins() { 
+        try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.SHINY_SKINS) || "[]")); } 
+        catch { return new Set(); } 
+    }
+    function saveShinySkins(set) { localStorage.setItem(LS_KEY.SHINY_SKINS, JSON.stringify([...set])); }
+    function hasShinySkin(id) { return getShinySkins().has(id); }
+    function addShinySkin(id) { 
+        const skins = getShinySkins(); 
+        skins.add(id); 
+        saveShinySkins(skins); 
+    }
+
+    /* =========================================
+     * INDEX -> PRL 데이터 가져오기
+     * ========================================= */
+    const INDEX_EXPORT_KEY = "classhub_index_export_to_prl_v1";
+    const INDEX_IMPORT_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 14;
+
+    function _b64UrlDecodeUtf8(token) {
+        try {
+            token = (token || "").replace(/-/g, "+").replace(/_/g, "/");
+            token += "=".repeat((4 - (token.length % 4)) % 4);
+            const bin = atob(token);
+            const bytes = new Uint8Array(bin.length);
+            for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+            return new TextDecoder().decode(bytes);
+        } catch (e) {
+            return null;
+        }
+    }
+
+    function _readImportFromUrl() {
+        try {
+            const sp = new URLSearchParams(location.search);
+            const token = sp.get("import");
+            if (token) return token;
+        } catch {}
+        try {
+            const h = (location.hash || "").replace(/^#/, "");
+            if (!h) return null;
+            const m = h.match(/(?:^|&)import=([^&]+)/);
+            if (m && m[1]) return decodeURIComponent(m[1]);
+        } catch {}
+        return null;
+    }
+
+    function _stripImportFromUrl() {
+        try {
+            const sp = new URLSearchParams(location.search);
+            if (sp.has("import")) {
+                sp.delete("import");
+                const qs = sp.toString();
+                history.replaceState(null, "", location.pathname + (qs ? "?" + qs : "") + (location.hash || ""));
+            }
+        } catch {}
+        try {
+            if ((location.hash || "").includes("import=")) {
+                history.replaceState(null, "", location.pathname + location.search);
+            }
+        } catch {}
+    }
+
+    function tryImportFromIndex() {
+        let payload = null;
+        const token = _readImportFromUrl();
+        if (token) {
+            const raw = _b64UrlDecodeUtf8(token);
+            if (raw) {
+                try { payload = JSON.parse(raw); } catch {}
+            }
+        }
+        if (!payload) {
+            try {
+                const raw = localStorage.getItem(INDEX_EXPORT_KEY);
+                if (raw) payload = JSON.parse(raw);
+            } catch {}
+        }
+        if (!payload) return;
+
+        const ts = Number(payload.ts || payload.timestamp || payload.time || 0);
+        if (ts && (Date.now() - ts) > INDEX_IMPORT_MAX_AGE_MS) {
+            try { localStorage.removeItem(INDEX_EXPORT_KEY); } catch {}
+            _stripImportFromUrl();
+            return;
+        }
+
+        const dexIds = payload.dexIds || payload.dex || payload.ownedIds || payload.ids || [];
+        if (!Array.isArray(dexIds)) return;
+
+        const owned = getOwned();
+        let added = 0;
+
+        for (const v of dexIds) {
+            const pid = parseInt(v, 10);
+            if (!Number.isFinite(pid) || pid < 1 || pid > BASE_DEX_MAX) continue;
+            if (!owned.has(pid)) {
+                owned.add(pid);
+                added++;
+            }
+        }
+
+        if (added > 0) saveOwned(owned);
+
+        const partnerId = parseInt(payload.partnerId, 10);
+        if (Number.isFinite(partnerId) && owned.has(partnerId)) {
+            localStorage.setItem(LS_KEY.PARTNER, String(partnerId));
+        }
+
+        try { localStorage.removeItem(INDEX_EXPORT_KEY); } catch {}
+        _stripImportFromUrl();
+
+        updateResUI();
+        updateLobbyPartner();
+        renderCodex();
+
+        if (added > 0) {
+            showAlert("✅ 내보내기 완료", `index에서 가져온 포켓몬 ${added}마리를 PRL에 등록했어요!`);
+        }
+    }
+
+    async function importFromClipboard() {
+        try {
+            const text = await navigator.clipboard.readText();
+            if (!text) {
+                alert("클립보드가 비어있습니다. index 게임에서 '내보내기'를 먼저 해주세요.");
+                return;
+            }
+
+            const raw = _b64UrlDecodeUtf8(text);
+            if (!raw) {
+                alert("올바르지 않은 데이터 형식입니다.\n(Base64 디코딩 실패)");
+                return;
+            }
+
+            let payload;
+            try {
+                payload = JSON.parse(raw);
+            } catch (e) {
+                alert("데이터가 손상되었습니다.\n(JSON 파싱 실패)");
+                return;
+            }
+
+            if (payload.source !== "index" || !Array.isArray(payload.dexIds)) {
+                alert("유효한 포켓몬 데이터가 아닙니다.");
+                return;
+            }
+
+            const owned = getOwned();
+            let added = 0;
+
+            for (const v of payload.dexIds) {
+                const pid = parseInt(v, 10);
+                if (!Number.isFinite(pid) || pid < 1 || pid > BASE_DEX_MAX) continue;
+                if (!owned.has(pid)) {
+                    owned.add(pid);
+                    added++;
+                }
+            }
+
+            if (added > 0) {
+                saveOwned(owned);
+                updateResUI();
+                renderCodex();
+            }
+
+            const partnerId = parseInt(payload.partnerId, 10);
+            if (Number.isFinite(partnerId) && partnerId <= BASE_DEX_MAX) {
+                if(confirm(`${added}마리 포켓몬을 가져왔습니다!\n\n파트너 포켓몬(${getPokeInfo(partnerId).name})도 설정하시겠습니까?`)) {
+                    setStarterId(partnerId);
+                }
+            } else {
+                alert(`${added}마리의 포켓몬을 성공적으로 가져왔습니다!`);
+            }
+
+        } catch (err) {
+            console.error(err);
+            alert("클립보드 접근이 차단되었거나 오류가 발생했습니다.\n브라우저 권한을 확인해주세요.");
+        }
+    }
+
+    function getStarterId() { return parseInt(localStorage.getItem(LS_KEY.PARTNER) || "0"); }
+    function setStarterId(id) {
+        localStorage.setItem(LS_KEY.PARTNER, id);
+        updateLobbyPartner();
+
+        if (window.__pendingGhost) {
+            const g = window.__pendingGhost;
+            window.__pendingGhost = null;
+            if (confirm(`고스트 ${g.name} (Lv.${g.level}) 초대가 있습니다.\n지금 바로 도전할까요?`)) {
+                startGhostBattle(g);
+            }
+        }
+    }
+
+    function getHoF() {
+        try { return JSON.parse(localStorage.getItem(LS_KEY.HOF) || "[]"); }
+        catch { return []; }
+    }
+
+    function getBestAdventureRecord() {
+        const list = getHoF();
+        const adv = list.filter(r => !r.kind || r.kind === "adventure");
+        if (!adv.length) return null;
+        adv.sort((a, b) => (b.stage || 0) - (a.stage || 0));
+        return adv[0];
+    }
+
+    function addHoF(record) {
+        const list = getHoF();
+        const enriched = {
+            kind: record.kind || "adventure",
+            ts: record.ts || Date.now(),
+            ...record,
+        };
+        list.push(enriched);
+        list.sort((a, b) => (b.stage || 0) - (a.stage || 0));
+        localStorage.setItem(LS_KEY.HOF, JSON.stringify(list.slice(0, 10)));
+    }
+
+    /* =========================================
+     * UI 업데이트 함수들
+     * ========================================= */
+    function updateResUI() {
+        const p = getPoints().toLocaleString(), t = getTickets().toLocaleString();
+        document.getElementById("pointsTextLobby").textContent = p;
+        document.getElementById("ticketTextLobby").textContent = t;
+        const gachaRes = document.getElementById("gachaResDisplay");
+        if (gachaRes) gachaRes.textContent = `P: ${p} / 🎫: ${t}`;
+    }
+
+    function updateLobbyPartner() {
+        const pid = getStarterId();
+        if (pid > 0) {
+            const info = getPokeInfo(pid);
+            const dupes = getDupes()[pid] || 0;
+            const savedData = getCharData()[pid];
+            const currentLv = savedData ? savedData.level : (1 + dupes);
+
+            document.getElementById("lobbyPartnerName").textContent = info.name;
+            document.getElementById("lobbyPartnerImg").src = info.sprite;
+            document.getElementById("partnerInfo").textContent = info.name;
+            document.getElementById("lobbyStartBonus").textContent = `현재 Lv.${currentLv} (중복 +${dupes})`;
+            document.getElementById("startAdventureBtn").disabled = false;
+        } else {
+            document.getElementById("lobbyPartnerName").textContent = "없음";
+            document.getElementById("partnerInfo").textContent = "선택 필요";
+            document.getElementById("lobbyStartBonus").textContent = "선택 필요";
+            document.getElementById("startAdventureBtn").disabled = true;
+        }
+    }
+
+    let codexPage = 0;
+    const CODEX_PER_PAGE = 100;
+
+    function renderCodex() {
+        const grid = document.getElementById("codexGrid");
+        grid.innerHTML = "";
+        const owned = getOwned(), pid = getStarterId(), dupes = getDupes();
+
+        // 전체 소유 수 계산
+        let totalOwned = 0;
+        for (let i = 1; i <= DEX_TOTAL; i++) {
+            if (owned.has(i)) totalOwned++;
+        }
+
+        // 페이지 범위 계산
+        const totalPages = Math.ceil(DEX_TOTAL / CODEX_PER_PAGE);
+        const startIdx = codexPage * CODEX_PER_PAGE + 1;
+        const endIdx = Math.min((codexPage + 1) * CODEX_PER_PAGE, DEX_TOTAL);
+
+        for (let i = startIdx; i <= endIdx; i++) {
+            const info = getPokeInfo(i);
+            const ownedBase = owned.has(info.baseId);
+
+            const el = document.createElement("div");
+            el.className = `poke-card relative rounded-xl p-2 flex flex-col items-center cursor-pointer rarity-${info.rarity}`;
+            if (!ownedBase) el.classList.add("opacity-50", "grayscale");
+            if (pid === i) el.classList.add("ring-4", "ring-emerald-400");
+
+            const dupeCount = dupes[i] || 0;
+            const evoInfo = EVOLUTION_MAP[info.baseId];
+            const evoTag = evoInfo ? `<div class="absolute bottom-1 left-1 text-[8px] bg-yellow-400 text-yellow-900 px-1 rounded">→Lv.${evoInfo.min_level}</div>` : '';
+            const hasShiny = getShinySkins().has(info.baseId);
+            const shinyTag = (hasShiny && ownedBase) ? '<div class="absolute top-7 right-1 text-[10px]">✨</div>' : '';
+
+            el.innerHTML = `
+                <div class="absolute top-1 left-1 text-[9px] font-bold text-slate-400">#${String(i).padStart(4,'0')}</div>
+                ${dupeCount > 0 ? `<div class="absolute top-1 right-1 bg-red-500 text-white text-[8px] px-1 rounded-full">+${dupeCount}</div>` : ''}
+                <div class="w-12 h-12 mt-2">
+                    <img src="${ownedBase ? info.sprite : 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/poke-ball.png'}" class="w-full h-full pixel-art object-contain ${!ownedBase ? 'opacity-20' : ''}" loading="lazy">
+                </div>
+                <div class="text-[10px] font-bold truncate mt-1">${ownedBase ? info.name : '???'}</div>
+                <div class="text-[8px] font-bold mt-0.5 ${info.rarity==='UR'?'text-red-500':info.rarity==='SSR'?'text-orange-500':'text-slate-400'}">${info.rarity}</div>
+                ${evoTag}${shinyTag}
+            `;
+            el.onclick = () => {
+                if (!ownedBase) {
+                    showAlert("미보유", "가챠로 먼저 획득하세요.");
+                    return;
+                }
+                setStarterId(info.baseId);
+                renderCodex();
+            };
+            grid.appendChild(el);
+        }
+
+        // 페이지 정보 및 네비게이션
+        document.getElementById("collectionRate").textContent = `${totalOwned}/${DEX_TOTAL}`;
+
+        // 페이지네이션 UI 업데이트
+        const pageInfo = document.getElementById("codexPageInfo");
+        if (pageInfo) {
+            pageInfo.textContent = `${codexPage + 1}/${totalPages} (${startIdx}-${endIdx})`;
+        }
+
+        const prevBtn = document.getElementById("codexPrevBtn");
+        const nextBtn = document.getElementById("codexNextBtn");
+        if (prevBtn) prevBtn.disabled = codexPage === 0;
+        if (nextBtn) nextBtn.disabled = codexPage >= totalPages - 1;
+    }
+
+    function codexPrevPage() {
+        if (codexPage > 0) {
+            codexPage--;
+            renderCodex();
+        }
+    }
+
+    function codexNextPage() {
+        const totalPages = Math.ceil(DEX_TOTAL / CODEX_PER_PAGE);
+        if (codexPage < totalPages - 1) {
+            codexPage++;
+            renderCodex();
+        }
+    }
+
+    function renderHoF() {
+        const list = getHoF();
+        const container = document.getElementById("hofList");
+        container.innerHTML = "";
+
+        if (!list || list.length === 0) {
+            container.innerHTML = '<p class="text-center text-slate-400 py-10">기록이 없습니다.</p>';
+            return;
+        }
+
+        const normal = list.filter((r) => !r.kind || r.kind === "adventure").sort((a, b) => (b.stage || 0) - (a.stage || 0));
+        const ghost = list.filter((r) => r.kind === "ghost").sort((a, b) => (b.ts || 0) - (a.ts || 0));
+
+        if (normal.length > 0) {
+            const header = document.createElement("div");
+            header.className = "text-xs font-bold text-slate-500 mb-2 flex items-center gap-1";
+            header.innerHTML = '<span>🌟 일반 모험 기록</span>';
+            container.appendChild(header);
+
+            normal.forEach((rec, idx) => {
+                const div = document.createElement("div");
+                div.className = "hof-item border-2 rounded-xl p-3 flex items-center gap-3 relative";
+                div.innerHTML = `
+                    <div class="font-black text-2xl w-8 text-center text-slate-400 italic">#${idx + 1}</div>
+                    <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-slate-200">
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-800">${rec.name} <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span></div>
+                        <div class="text-xs text-slate-600">최종 스테이지: <span class="text-red-500 font-bold text-base">${rec.stage}</span></div>
+                    </div>
+                    <button type="button" class="hof-export-btn absolute right-3 top-3 text-[10px] px-2 py-1 rounded-full bg-slate-100 text-slate-600 border border-slate-300 hover:bg-slate-200">QR</button>
+                `;
+
+                const btn = div.querySelector(".hof-export-btn");
+                if (btn) {
+                    btn.addEventListener("click", (ev) => {
+                        ev.stopPropagation();
+                        openGhostModalFromHof(rec);
+                    });
+                }
+                container.appendChild(div);
+            });
+        }
+
+        if (ghost.length > 0) {
+            const header = document.createElement("div");
+            header.className = "text-xs font-bold text-slate-500 mt-4 mb-2 flex items-center gap-1";
+            header.innerHTML = '<span>👻 고스트 승리 기록</span>';
+            container.appendChild(header);
+
+            ghost.forEach((rec, idx) => {
+                const div = document.createElement("div");
+                div.className = "hof-item border-2 border-purple-300 rounded-xl p-3 flex items-center gap-3 relative bg-purple-50/40";
+                div.innerHTML = `
+                    <div class="font-black text-2xl w-8 text-center text-purple-400 italic">#${idx + 1}</div>
+                    <img src="${rec.sprite}" class="w-12 h-12 pixel-art bg-white rounded-full border border-purple-200">
+                    <div class="flex-1">
+                        <div class="font-bold text-slate-800">${rec.name} <span class="text-xs font-normal text-slate-500">(${rec.date || ""})</span></div>
+                        <div class="text-xs text-slate-600">상대: <span class="font-bold text-purple-600">${rec.ghostName || "알 수 없음"}</span> <span class="text-[11px] text-slate-500 ml-1">Lv.${rec.ghostLevel || "?"}</span></div>
+                        <div class="text-[11px] text-slate-500 mt-0.5">기록 스테이지: <span class="font-semibold">${rec.stage ?? "-"}</span></div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+    }
+
+    /* =========================================
+     * GACHA SYSTEM - 기본형만 뽑기
+     * ========================================= */
+    function playGacha(type) {
+        if (!GACHA_ENABLED) return;
+        // DB 로드 확인
+        if (!DB_LOADED || BASIC_POKEMON_IDS.length === 0) {
+            alert("포켓몬 데이터 로딩 중입니다. 잠시 후 다시 시도해주세요.");
+            console.error("[Gacha] DB_LOADED:", DB_LOADED, "BASIC_POKEMON_IDS:", BASIC_POKEMON_IDS.length);
+            return;
+        }
+
+        let count = 1;
+        if (type === '10x') { type = 'normal'; count = 10; }
+
+        const costPer = type === 'normal' ? 100 : 1;
+        const totalCost = count === 10 ? 900 : costPer * count;
+        const cur = type === 'normal' ? getPoints() : getTickets();
+
+        if (cur < totalCost) { alert("재화 부족!"); return; }
+        if (type === 'normal') setPoints(getPoints() - totalCost); else setTickets(getTickets() - totalCost);
+
+        document.getElementById("gachaPlaceholder").classList.add("hidden");
+        const grid = document.getElementById("gachaResultsGrid");
+        grid.classList.remove("hidden");
+        grid.innerHTML = "";
+
+        const owned = getOwned();
+        const dupes = getDupes();
+
+        // 기본형 포켓몬 풀 (DB에서 로드된 is_basic:true인 포켓몬들)
+        const pool = BASIC_POKEMON_IDS;
+
+        // 전설/환상 제외한 일반 기본형 풀
+        const normalPool = pool.filter(id => !LEGENDARY_IDS.includes(id) && !MYTHICAL_IDS.includes(id));
+        // 기본형 중 전설/환상만
+        const legendaryPool = pool.filter(id => LEGENDARY_IDS.includes(id) || MYTHICAL_IDS.includes(id));
+
+        console.log(`[Gacha] 일반 풀: ${normalPool.length}개, 전설 풀: ${legendaryPool.length}개`);
+
+        for (let i = 0; i < count; i++) {
+            let pid;
+            if (type === 'special') {
+                // 전설 소환: 50% 확률로 전설, 아니면 일반 기본형
+                if (Math.random() < 0.5 && legendaryPool.length > 0) {
+                    pid = legendaryPool[Math.floor(Math.random() * legendaryPool.length)];
+                } else {
+                    pid = normalPool[Math.floor(Math.random() * normalPool.length)];
+                }
+            } else {
+                // 일반 소환: 기본형만 (전설 제외)
+                pid = normalPool[Math.floor(Math.random() * normalPool.length)];
+            }
+
+            const info = getPokeInfo(pid);
+            if (owned.has(pid)) {
+                dupes[pid] = (dupes[pid] || 0) + 1;
+                saveDupes(dupes);
+            } else {
+                owned.add(pid);
+                saveOwned(owned);
+            }
+
+            const div = document.createElement("div");
+            div.className = `flex flex-col items-center p-2 rounded-xl animate-[bounce_0.5s] ${info.rarity === 'UR' ? 'bg-red-100 border border-red-400' : info.rarity === 'SSR' ? 'bg-orange-100 border-orange-400' : 'bg-slate-700'}`;
+            div.innerHTML = `<img src="${info.sprite}" class="w-8 h-8 pixel-art"><div class="text-[8px] font-bold ${['UR','SSR','SR'].includes(info.rarity) ? 'text-black' : 'text-white'} truncate w-full text-center">${info.name}</div>`;
+            grid.appendChild(div);
+        }
+        updateResUI();
+        renderCodex();
+    }
+
+    /* =========================================
+     * BATTLE SYSTEM
+     * ========================================= */
+    function initAdventure() {
+        const pid = getStarterId();
+        if (!pid) return;
+
+        const info = getPokeInfo(pid);
+        const dupes = getDupes()[pid] || 0;
+        const savedData = getCharData()[pid];
+
+        let level = 1 + dupes;
+        let xp = 0;
+
+        if (savedData) {
+            level = Math.max(savedData.level, 1 + dupes);
+            xp = savedData.xp;
+        }
+
+        const stats = calcStats(info.base, level);
+        const startMoves = getRandomMoves(info.type.name, 2, 'C');
+
+        battleState = {
+            mode: "adventure",
+            stage: 1,
+            player: {
+                id: pid, name: info.name, sprite: info.sprite, type: info.type.name,
+                level: level, xp: xp,
+                maxHp: stats.maxHp, hp: stats.maxHp,
+                atk: stats.atk, def: stats.def, spa: stats.spa, spd: stats.spd, spe: stats.spe,
+                base: info.base,
+                moves: startMoves
+            },
+            cooldowns: [0, 0]
+        };
+
+        startBattleStage();
+        document.getElementById("titleScreen").classList.remove("active");
+        document.getElementById("codexScreen").classList.remove("active");
+        document.getElementById("battleScreen").classList.add("active");
+    }
+
+    function startGhostBattle(ghost) {
+        const pid = getStarterId();
+        if (!pid) {
+            showAlert("스타터 없음", "먼저 내 스타터를 하나 선택해 주세요.");
+            return;
+        }
+
+        const myInfo = getPokeInfo(pid);
+        const myCharData = getCharData()[pid];
+        const myDupes = getDupes()[pid] || 0;
+
+        let myLevel = 1 + myDupes;
+        let myXp = 0;
+        if (myCharData) {
+            if (typeof myCharData.level === "number") myLevel = myCharData.level;
+            if (typeof myCharData.xp === "number") myXp = myCharData.xp;
+        }
+
+        const myStats = calcStats(myInfo.base, myLevel);
+        const myMoves = getRandomMoves(myInfo.type.name, 2, "SR");
+
+        const enemyInfo = getPokeInfo(ghost.speciesId || ghost.id || 1);
+        const enemyLevel = ghost.level || 1;
+        const enemyStats = calcStats(enemyInfo.base, enemyLevel);
+        const enemyMoves = getRandomMoves(enemyInfo.type.name, 1, "UR");
+
+        battleState = {
+            mode: "ghost",
+            stage: 1,
+            player: {
+                id: pid, name: myInfo.name, sprite: myInfo.sprite, type: myInfo.type.name,
+                level: myLevel, xp: myXp,
+                maxHp: myStats.maxHp, hp: myStats.maxHp,
+                atk: myStats.atk, def: myStats.def, spa: myStats.spa, spd: myStats.spd, spe: myStats.spe,
+                base: myInfo.base, moves: myMoves,
+            },
+            enemy: {
+                id: enemyInfo.id, name: ghost.name || enemyInfo.name, sprite: enemyInfo.sprite,
+                type: ghost.type || enemyInfo.type.name, level: enemyLevel,
+                maxHp: enemyStats.maxHp, hp: enemyStats.maxHp,
+                atk: enemyStats.atk, def: enemyStats.def, spa: enemyStats.spa, spd: enemyStats.spd, spe: enemyStats.spe,
+                move: enemyMoves[0], isBoss: true,
+            },
+            cooldowns: [0, 0],
+        };
+
+        closeGhostModal();
+        document.getElementById("titleScreen").classList.remove("active");
+        document.getElementById("lobbyScreen").classList.remove("active");
+        document.getElementById("codexScreen").classList.remove("active");
+        document.getElementById("battleScreen").classList.add("active");
+
+        updateBattleUI();
+        logBattle(`QR 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 도전!`, "critical");
+    }
+
+    function startBattleStage() {
+        const { stage, player } = battleState;
+
+        // 적 생성 (기본형 기반)
+        const pool = BASIC_POKEMON_IDS.length > 0 ? BASIC_POKEMON_IDS : Array.from({length: BASE_DEX_MAX}, (_,i) => i+1);
+        let enemyId = pool[Math.floor(Math.random() * pool.length)];
+
+        // 보스 판정 (5의 배수 스테이지)
+        const isBoss = (stage % 5 === 0);
+        if (isBoss) {
+            const legendaryPool = LEGENDARY_IDS.filter(id => id <= BASE_DEX_MAX);
+            if (legendaryPool.length > 0) {
+                enemyId = legendaryPool[Math.floor(Math.random() * legendaryPool.length)];
+            }
+        }
+
+        const enemyInfo = getPokeInfo(enemyId);
+        const enemyLevel = Math.max(1, stage + Math.floor(stage / 3));
+        const enemyStats = calcStats(enemyInfo.base, enemyLevel);
+
+        const maxTier = stage < 5 ? 'R' : stage < 10 ? 'SR' : stage < 15 ? 'SSR' : 'UR';
+        const enemyMoves = getRandomMoves(enemyInfo.type.name, 1, maxTier);
+
+        battleState.enemy = {
+            id: enemyId, name: enemyInfo.name, sprite: enemyInfo.sprite, type: enemyInfo.type.name,
+            level: enemyLevel, maxHp: enemyStats.maxHp, hp: enemyStats.maxHp,
+            atk: enemyStats.atk, def: enemyStats.def, spa: enemyStats.spa, spd: enemyStats.spd, spe: enemyStats.spe,
+            move: enemyMoves[0], isBoss
+        };
+
+        updateBattleUI();
+        logBattle(isBoss ? `⚠️ 보스 ${enemyInfo.name} 등장!` : `${enemyInfo.name} 등장!`);
+    }
+
+    function updateBattleUI() {
+        const { player, enemy, stage } = battleState;
+
+        document.getElementById("battleStageText").textContent = stage;
+        document.getElementById("playerImg").src = player.sprite;
+        document.getElementById("playerName").textContent = player.name;
+        document.getElementById("playerLevel").textContent = `Lv.${player.level}`;
+        document.getElementById("playerHpText").textContent = `${Math.max(0, player.hp)}/${player.maxHp}`;
+        document.getElementById("playerHpBar").style.width = `${Math.max(0, (player.hp / player.maxHp) * 100)}%`;
+
+        const xpPercent = (player.xp / (player.level * 100)) * 100;
+        document.getElementById("playerExpBar").style.width = `${xpPercent}%`;
+
+        document.getElementById("enemyImg").src = enemy.sprite;
+        document.getElementById("enemyName").textContent = enemy.name;
+        document.getElementById("enemyLevel").textContent = `Lv.${enemy.level}`;
+        document.getElementById("enemyHpBar").style.width = `${Math.max(0, (enemy.hp / enemy.maxHp) * 100)}%`;
+
+        const typeInfo = TYPE_DATA[enemy.type] || TYPE_DATA["노말"];
+        const badge = document.getElementById("enemyTypeBadge");
+        badge.textContent = enemy.type;
+        badge.className = `text-[9px] text-white px-1.5 py-0.5 rounded mb-1 inline-block ${typeInfo.color}`;
+
+        renderMoveButtons();
+    }
+
+    function renderMoveButtons() {
+        const grid = document.getElementById("moveButtons");
+        grid.innerHTML = "";
+
+        battleState.player.moves.forEach((m, idx) => {
+            const btn = document.createElement("button");
+            const onCooldown = battleState.cooldowns[idx] > 0;
+
+            let cls = "bg-white border-slate-200";
+            if (m.t === "UR") cls = "bg-red-50 border-red-300";
+            else if (m.t === "SSR") cls = "bg-orange-50 border-orange-300";
+            else if (m.t === "SR") cls = "bg-yellow-50 border-yellow-300";
+            else if (m.t === "R") cls = "bg-blue-50 border-blue-200";
+
+            btn.className = `py-3 px-2 rounded-xl border-2 ${cls} ${onCooldown ? 'btn-cooldown' : 'hover:brightness-95 active:scale-95'}`;
+            btn.innerHTML = `<div class="font-bold text-sm">${m.n}</div><div class="text-[10px] text-slate-500">${m.t} / 위력 ${m.p}</div>`;
+
+            if (onCooldown) {
+                btn.innerHTML += `<div class="text-[9px] text-red-400 mt-1">쿨타임 ${battleState.cooldowns[idx]}</div>`;
+                btn.disabled = true;
+            } else {
+                btn.onclick = () => useMove(idx);
+            }
+            grid.appendChild(btn);
+        });
+    }
+
+    function logBattle(msg, type = "normal") {
+        const log = document.getElementById("battleLog");
+        log.textContent = msg;
+        if (type === "critical") log.className = "text-xs text-red-500 mb-3 h-6 overflow-y-hidden text-center font-bold";
+        else log.className = "text-xs text-slate-500 mb-3 h-6 overflow-y-hidden text-center italic";
+    }
+
+    function useMove(idx) {
+        openQuiz((correct) => {
+            if (correct) {
+                const move = battleState.player.moves[idx];
+                battleState.cooldowns[idx] = move.c;
+
+                const isPhysical = PHYSICAL_TYPES.includes(move.type || battleState.player.type);
+                const atkStat = isPhysical ? battleState.player.atk : battleState.player.spa;
+                const defStat = isPhysical ? battleState.enemy.def : battleState.enemy.spd;
+
+                let damage = Math.floor((((2 * battleState.player.level / 5 + 2) * move.p * atkStat / defStat) / 50) + 2);
+
+                // 타입 상성
+                const enemyTypeData = TYPE_DATA[battleState.enemy.type];
+                if (enemyTypeData && enemyTypeData.weak.includes(battleState.player.type)) {
+                    damage = Math.floor(damage * 1.5);
+                    logBattle(`효과가 굉장했다! ${move.n}로 ${damage} 데미지!`, "critical");
+                } else {
+                    logBattle(`${move.n}! ${damage} 데미지!`);
+                }
+
+                battleState.enemy.hp -= damage;
+
+                // 플레이어 공격 애니메이션
+                const playerImg = document.getElementById("playerImg");
+                playerImg.classList.add("animate-attack-player");
+                setTimeout(() => playerImg.classList.remove("animate-attack-player"), 200);
+
+                // 적 데미지 애니메이션
+                const enemyImg = document.getElementById("enemyImg");
+                setTimeout(() => {
+                    enemyImg.classList.add("animate-damage");
+                    setTimeout(() => enemyImg.classList.remove("animate-damage"), 400);
+                }, 150);
+
+                updateBattleUI();
+
+                if (battleState.enemy.hp <= 0) {
+                    setTimeout(handleWin, 600);
+                } else {
+                    setTimeout(enemyTurn, 800);
+                }
+            } else {
+                logBattle("오답! 공격 실패...");
+                setTimeout(enemyTurn, 500);
+            }
+        });
+    }
+
+    function enemyTurn() {
+        const move = battleState.enemy.move || { n: "몸통박치기", p: 40 };
+        const isPhysical = PHYSICAL_TYPES.includes(battleState.enemy.type);
+        const atkStat = isPhysical ? battleState.enemy.atk : battleState.enemy.spa;
+        const defStat = isPhysical ? battleState.player.def : battleState.player.spd;
+
+        let damage = Math.floor((((2 * battleState.enemy.level / 5 + 2) * move.p * atkStat / defStat) / 50) + 2);
+
+        const playerTypeData = TYPE_DATA[battleState.player.type];
+        if (playerTypeData && playerTypeData.weak.includes(battleState.enemy.type)) {
+            damage = Math.floor(damage * 1.5);
+        }
+
+        battleState.player.hp -= damage;
+        logBattle(`${battleState.enemy.name}의 ${move.n}! ${damage} 데미지!`);
+
+        // 적 공격 애니메이션
+        const enemyImg = document.getElementById("enemyImg");
+        enemyImg.classList.add("animate-attack-enemy");
+        setTimeout(() => enemyImg.classList.remove("animate-attack-enemy"), 200);
+
+        // 플레이어 데미지 애니메이션
+        const playerImg = document.getElementById("playerImg");
+        setTimeout(() => {
+            playerImg.classList.add("animate-damage");
+            setTimeout(() => playerImg.classList.remove("animate-damage"), 400);
+        }, 150);
+
+        // 쿨다운 감소
+        battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
+
+        updateBattleUI();
+
+        if (battleState.player.hp <= 0) {
+            setTimeout(handleDefeat, 600);
+        }
+    }
+
+    function handleWin() {
+        const isGhost = battleState.mode === "ghost";
+        const s = battleState.stage;
+
+        const bonusLoot = [];
+        if (battleState.enemy.isBoss) {
+            addTickets(1);
+            bonusLoot.push("✨ 전설 보상: 티켓 +1");
+        }
+        if (!isGhost && s > 0 && (s % 5 === 0)) {
+            addTickets(1);
+            bonusLoot.push(`🎟️ ${s}층 보상: 티켓 +1`);
+        }
+
+        const pt = Math.floor(50 + (s * 10) + (s * s * 0.5));
+        const xp = 50 + (s * 10);
+
+        battleState.player.xp += xp;
+
+        let lvUp = false;
+        let evolutionChain = []; // 연속 진화 체인
+
+        // 레벨업 체크
+        while (battleState.player.xp >= battleState.player.level * 100) {
+            battleState.player.xp -= battleState.player.level * 100;
+            battleState.player.level++;
+            lvUp = true;
+
+            // 진화 체크 (현재 진화 체인의 마지막 포켓몬 기준)
+            const currentId = evolutionChain.length > 0
+                ? evolutionChain[evolutionChain.length - 1].toId
+                : battleState.player.id;
+            const possibleEvolve = canEvolve(currentId, battleState.player.level);
+            if (possibleEvolve) {
+                evolutionChain.push({
+                    fromId: currentId,
+                    toId: possibleEvolve,
+                    level: battleState.player.level
+                });
+            }
+        }
+
+        // 스탯 업데이트
+        const newStats = calcStats(battleState.player.base, battleState.player.level);
+        battleState.player.maxHp = newStats.maxHp;
+        battleState.player.atk = newStats.atk;
+        battleState.player.def = newStats.def;
+        battleState.player.spa = newStats.spa;
+        battleState.player.spd = newStats.spd;
+        battleState.player.spe = newStats.spe;
+
+        if (lvUp) {
+            battleState.player.hp = battleState.player.maxHp;
+        }
+
+        saveCurrentPlayerProgress();
+
+        // 진화 처리 (연속 진화 지원)
+        if (evolutionChain.length > 0) {
+            processEvolutionChain(evolutionChain, 0, () => {
+                continueWithReward(isGhost, pt, xp, lvUp, bonusLoot, s);
+            });
+            return;
+        }
+
+        continueWithReward(isGhost, pt, xp, lvUp, bonusLoot, s);
+    }
+
+    // 연속 진화 처리 함수
+    function processEvolutionChain(chain, index, finalCallback) {
+        if (index >= chain.length) {
+            finalCallback();
+            return;
+        }
+
+        const evo = chain[index];
+        const stageText = chain.length > 1 ? `(${index + 1}/${chain.length})` : '';
+        showEvolveModal(evo.fromId, evo.toId, stageText, () => {
+            // 진화 완료 후 처리
+            const newPokemonId = doEvolve(evo.fromId);
+            if (newPokemonId) {
+                // 캐릭터 데이터 업데이트
+                const charData = getCharData();
+                charData[newPokemonId] = {
+                    level: battleState.player.level,
+                    xp: battleState.player.xp
+                };
+                saveCharData(charData);
+
+                // 스타터 업데이트
+                setStarterId(newPokemonId);
+
+                // 배틀 스테이트 업데이트
+                const newInfo = getPokeInfo(newPokemonId);
+                battleState.player.id = newPokemonId;
+                battleState.player.name = newInfo.name;
+                battleState.player.sprite = newInfo.sprite;
+                battleState.player.type = newInfo.type.name;
+                battleState.player.base = newInfo.base;
+
+                // 스탯 재계산
+                const evolvedStats = calcStats(newInfo.base, battleState.player.level);
+                battleState.player.maxHp = evolvedStats.maxHp;
+                battleState.player.hp = evolvedStats.maxHp;
+                battleState.player.atk = evolvedStats.atk;
+                battleState.player.def = evolvedStats.def;
+                battleState.player.spa = evolvedStats.spa;
+                battleState.player.spd = evolvedStats.spd;
+                battleState.player.spe = evolvedStats.spe;
+
+                // 기술 업데이트
+                const maxTier = battleState.player.level < 20 ? 'R' : battleState.player.level < 40 ? 'SR' : 'SSR';
+                battleState.player.moves = getRandomMoves(newInfo.type.name, 4, maxTier);
+                battleState.cooldowns = [0, 0, 0, 0];
+
+                // UI 업데이트
+                updateBattleUI();
+                saveCurrentPlayerProgress();
+            }
+
+            // 다음 진화 처리 (딜레이 추가)
+            setTimeout(() => {
+                processEvolutionChain(chain, index + 1, finalCallback);
+            }, 500);
+        });
+    }
+
+    function showEvolveModal(fromId, toId, stageText, callback) {
+        // 파라미터 호환성 (stageText 없이 호출된 경우)
+        if (typeof stageText === 'function') {
+            callback = stageText;
+            stageText = '';
+        }
+
+        const fromInfo = getPokeInfo(fromId);
+        const toInfo = getPokeInfo(toId);
+
+        document.getElementById("evolveFromImg").src = fromInfo.sprite;
+        document.getElementById("evolveFromName").textContent = fromInfo.name;
+        document.getElementById("evolveToImg").src = toInfo.sprite;
+        document.getElementById("evolveToName").textContent = toInfo.name;
+        document.getElementById("evolveMessage").textContent = `${fromInfo.name}이(가) ${toInfo.name}(으)로 진화했습니다! ${stageText}`;
+
+        document.getElementById("evolveModal").classList.remove("hidden");
+        document.getElementById("evolveModal").classList.add("flex");
+
+        document.getElementById("evolveOkBtn").onclick = () => {
+            document.getElementById("evolveModal").classList.add("hidden");
+            document.getElementById("evolveModal").classList.remove("flex");
+            callback();
+        };
+    }
+
+    function continueWithReward(isGhost, pt, xp, lvUp, bonusLoot, s) {
+        if (isGhost) {
+            addHoF({
+                kind: "ghost",
+                speciesId: battleState.player.id,
+                level: battleState.player.level,
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                stage: battleState.stage,
+                ghostName: battleState.enemy.name,
+                ghostLevel: battleState.enemy.level,
+                date: new Date().toLocaleDateString(),
+            });
+
+            addPoints(pt);
+
+            alert(
+                `고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 승리!\n` +
+                `+${pt} P / EXP ${xp}${lvUp ? " (레벨 업!)" : ""}`
+            );
+
+            document.getElementById("battleScreen").classList.remove("active");
+            document.getElementById("lobbyScreen").classList.add("active");
+            updateResUI();
+            return;
+        }
+
+        document.getElementById("rewardXpVal").textContent = `${xp}${lvUp ? ' & Level Up!' : ''}`;
+        const bonusEl = document.getElementById("bonusLootLine");
+        if (bonusEl) {
+            if (bonusLoot.length > 0) {
+                bonusEl.textContent = bonusLoot.join("  ");
+                bonusEl.classList.remove("hidden");
+            } else {
+                bonusEl.textContent = "";
+                bonusEl.classList.add("hidden");
+            }
+        }
+
+        const grid = document.getElementById("rewardButtons");
+        grid.innerHTML = "";
+        const isFullSlots = battleState.player.moves.length >= 4;
+
+        [
+            {
+                t: `포인트 +${pt} P`,
+                d: "가챠 재화",
+                f: () => { addPoints(pt); nextStage(); },
+            },
+            {
+                t: "완전 회복",
+                d: "HP 100%",
+                f: () => { battleState.player.hp = battleState.player.maxHp; nextStage(); },
+            },
+            {
+                t: "기술 머신",
+                d: isFullSlots ? "스킬 1개 교체" : "스킬 추가 습득",
+                f: () => {
+                    if (isFullSlots) showSkillReplaceUI();
+                    else addNewSkill();
+                },
+            },
+        ].forEach((r) => {
+            const btn = document.createElement("button");
+            btn.className = "w-full py-3 bg-slate-100 hover:bg-indigo-50 border rounded-xl flex justify-between px-4 items-center";
+            btn.innerHTML = `<span class="font-bold text-sm">${r.t}</span><span class="text-xs text-slate-500">${r.d}</span>`;
+            btn.onclick = () => {
+                if (r.t !== "기술 머신") {
+                    document.getElementById("rewardModal").classList.add("hidden");
+                }
+                r.f();
+            };
+            grid.appendChild(btn);
+        });
+
+        document.getElementById("rewardModal").classList.remove("hidden");
+    }
+
+    function addNewSkill() {
+        const newMove = getRandomMoves(battleState.player.type, 1)[0];
+        battleState.player.moves.push(newMove);
+        battleState.cooldowns.push(0);
+        document.getElementById("rewardModal").classList.add("hidden");
+        alert(`[${newMove.n}] 기술을 새로 배웠습니다!`);
+        nextStage();
+    }
+
+    function showSkillReplaceUI() {
+        document.getElementById("rewardTitle").textContent = "교체할 스킬을 선택하세요";
+        const grid = document.getElementById("rewardButtons");
+        grid.innerHTML = "";
+        battleState.player.moves.forEach((m, idx) => {
+            const btn = document.createElement("button");
+            let cls = "bg-white border-slate-200";
+            if (m.t === "UR") cls = "bg-red-50 border-red-300";
+            else if (m.t === "SSR") cls = "bg-orange-50 border-orange-300";
+            else if (m.t === "SR") cls = "bg-yellow-50 border-yellow-300";
+            else if (m.t === "R") cls = "bg-blue-50 border-blue-200";
+            btn.className = `w-full py-2 ${cls} border rounded-xl hover:brightness-95 flex flex-col items-center`;
+            btn.innerHTML = `<span class="font-bold text-sm">${m.n}</span><span class="text-[9px]">${m.t} / 쿨타임 ${m.c}</span>`;
+            btn.onclick = () => {
+                const newMove = getRandomMoves(battleState.player.type, 1)[0];
+                battleState.player.moves[idx] = newMove;
+                battleState.cooldowns[idx] = 0;
+                document.getElementById("rewardModal").classList.add("hidden");
+                alert(`[${newMove.n}] 습득 완료!`);
+                nextStage();
+            };
+            grid.appendChild(btn);
+        });
+    }
+
+    function nextStage() {
+        battleState.stage++;
+        startBattleStage();
+    }
+
+    function handleDefeat() {
+        if (battleState.mode === "ghost") {
+            alert(`패배... 고스트 ${battleState.enemy.name} (Lv.${battleState.enemy.level})에게 졌습니다.\n다시 도전해 보세요!`);
+        } else {
+            addHoF({
+                kind: "adventure",
+                name: battleState.player.name,
+                sprite: battleState.player.sprite,
+                speciesId: battleState.player.id,
+                level: battleState.player.level,
+                stage: battleState.stage,
+                date: new Date().toLocaleDateString(),
+            });
+            alert(`게임 오버! 최종 스테이지: ${battleState.stage}`);
+        }
+
+        document.getElementById("battleScreen").classList.remove("active");
+        document.getElementById("lobbyScreen").classList.add("active");
+        updateResUI();
+    }
+
+    /* =========================================
+     * QUIZ SYSTEM - quiz.json 연동
+     * ========================================= */
+    function openQuiz(cb) {
+        quizCallback = cb;
+
+        let qData;
+        if (externalQuizList.length > 0 && Math.random() < 0.7) {
+            // 70% 확률로 외부 퀴즈 사용
+            qData = getExternalQuiz();
+        } else {
+            // 30% 확률로 구구단
+            qData = generateMath();
+        }
+
+        document.getElementById("quizExplain").textContent = qData.explain || "";
+        document.getElementById("quizQuestion").textContent = qData.q;
+
+        const grid = document.getElementById("quizChoices");
+        grid.innerHTML = "";
+
+        qData.choices.forEach(c => {
+            const btn = document.createElement("button");
+            btn.className = "bg-slate-100 hover:bg-sky-100 border-2 border-slate-200 font-bold py-4 rounded-xl text-lg";
+            btn.textContent = c;
+            btn.onclick = () => {
+                document.getElementById("quizModal").classList.add("hidden");
+                if (quizCallback) quizCallback(c === qData.a);
+            };
+            grid.appendChild(btn);
+        });
+        document.getElementById("quizModal").classList.remove("hidden");
+    }
+
+    function getExternalQuiz() {
+        const rawQ = externalQuizList[Math.floor(Math.random() * externalQuizList.length)];
+        const originalChoices = rawQ.choices.map((val, idx) => ({ val: val, isAns: idx === rawQ.answerIndex }));
+
+        // 셔플
+        for (let i = originalChoices.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [originalChoices[i], originalChoices[j]] = [originalChoices[j], originalChoices[i]];
+        }
+
+        const shuffledChoices = originalChoices.map(obj => obj.val);
+        const newAnswerIndex = originalChoices.findIndex(obj => obj.isAns);
+
+        return {
+            q: rawQ.prompt,
+            explain: rawQ.promptExplain || "",
+            choices: shuffledChoices,
+            a: shuffledChoices[newAnswerIndex]
+        };
+    }
+
+    function generateMath() {
+        // 10, 20, 30, ..., 90 중 하나를 선택
+        const num1 = (Math.floor(Math.random() * 9) + 1) * 10;
+        const num2 = (Math.floor(Math.random() * 9) + 1) * 10;
+        const a = num1 * num2; // 정답
+        const q = `${num1} × ${num2} = ?`; // 문제 텍스트
+
+        let s = new Set([a]);
+
+        while(s.size < 4) {
+            let wrong;
+            const coinFlip = Math.random();
+
+            if (coinFlip < 0.4) {
+                // 1. 정답에서 100이나 200 정도 차이 나는 숫자 생성
+                const offset = (Math.floor(Math.random() * 5) - 2) * 100;
+                wrong = a + (offset === 0 ? 100 : offset);
+            } else if (coinFlip < 0.7) {
+                // 2. 다른 10단 단위의 무작위 곱셈 결과 생성
+                const w1 = (Math.floor(Math.random() * 9) + 1) * 10;
+                const w2 = (Math.floor(Math.random() * 9) + 1) * 10;
+                wrong = w1 * w2;
+            } else {
+                // 3. 숫자가 비슷해 보이도록 정답에 10을 더하거나 뺀 결과
+                wrong = a + (Math.random() < 0.5 ? 10 : -10);
+            }
+
+            if (wrong > 0 && wrong !== a) {
+                s.add(wrong);
+            }
+        }
+
+        // 보기 섞기 및 배열 변환
+        const choices = Array.from(s).sort(() => Math.random() - 0.5);
+
+        return {
+            q,
+            a,
+            explain: "큰 수의 곱셈을 해보자!",
+            choices
+        };
+    }
+
+    /* =========================================
+     * GHOST BATTLE SYSTEM
+     * ========================================= */
+    function buildGhostPayload() {
+        const best = getBestAdventureRecord();
+        const charData = getCharData();
+
+        if (best) {
+            const payloadFromBest = buildGhostPayloadFromHofRecord(best);
+            if (payloadFromBest) return payloadFromBest;
+        }
+
+        const starterId = getStarterId();
+        if (!starterId) {
+            showAlert("공유할 기록 없음", "먼저 스타터를 선택하고 모험을 한 번 이상 플레이해 주세요.");
+            return null;
+        }
+
+        const pid = starterId;
+        const info = getPokeInfo(pid);
+        const dupes = getDupes()[pid] || 0;
+        const cData = charData[pid] || {};
+        const level = Math.max(1 + dupes, cData.level || 1);
+        const xp = cData.xp || 0;
+
+        let bestStage = 0;
+        const hofList = getHoF();
+        hofList.forEach((rec) => {
+            if (rec.name === info.name && typeof rec.stage === "number" && rec.stage > bestStage) {
+                bestStage = rec.stage;
+            }
+        });
+
+        const ghost = { v: 1, game: "QuizMonPRL", speciesId: pid, name: info.name, level, xp, bestStage, ts: Date.now() };
+        const token = toBase64UTF8(ghost);
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
+        return { ghost, encoded: url };
+    }
+
+    function buildGhostPayloadFromHofRecord(rec) {
+        if (!rec) return null;
+        let pid = rec.speciesId;
+
+        if (!pid && rec.sprite) {
+            try {
+                const m = rec.sprite.match(/\/(\d+)\.(png|gif|jpg|jpeg)$/);
+                if (m) pid = parseInt(m[1], 10);
+            } catch (e) {}
+        }
+
+        if (!pid && rec.name) {
+            const idx = POKE_NAMES.indexOf(rec.name);
+            if (idx >= 0) pid = idx + 1;
+        }
+
+        if (!pid) return null;
+
+        const info = getPokeInfo(pid);
+        if (!info) return null;
+
+        const level = typeof rec.level === "number" && rec.level > 0 ? rec.level : 1;
+        const xp = 0;
+        const bestStage = rec.stage || 0;
+
+        const ghost = { v: 1, game: "QuizMonPRL", speciesId: pid, name: rec.name || info.name, level, xp, bestStage, ts: Date.now() };
+        const token = toBase64UTF8(ghost);
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
+        return { ghost, encoded: url };
+    }
+
+    function openGhostModal() {
+        const modal = document.getElementById("ghostModal");
+        if (!modal) return;
+
+        switchGhostTab("my");
+
+        const payload = buildGhostPayload();
+        if (payload) {
+            const summaryEl = document.getElementById("ghostMySummary");
+            const canvas = document.getElementById("ghostQrCanvas");
+
+            summaryEl.textContent = `${payload.ghost.name} Lv.${payload.ghost.level} (최고 스테이지: ${payload.ghost.bestStage || "-"})`;
+
+            if (window.QRCode && typeof QRCode.toCanvas === "function") {
+                QRCode.toCanvas(canvas, payload.encoded, { width: 220, margin: 1 }, (err) => {
+                    if (err) console.error("[Ghost QR] 생성 오류", err);
+                });
+            }
+        }
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+    }
+
+    function openGhostModalFromHof(rec) {
+        if (!rec) return;
+
+        const payload = buildGhostPayloadFromHofRecord(rec);
+        if (!payload) {
+            alert("이 기록에는 포켓몬 정보가 없어 QR을 만들 수 없습니다.");
+            return;
+        }
+
+        const { ghost, encoded } = payload;
+        const modal = document.getElementById("ghostModal");
+        const summaryEl = document.getElementById("ghostMySummary");
+        const canvas = document.getElementById("ghostQrCanvas");
+        if (!modal || !summaryEl || !canvas) return;
+
+        switchGhostTab("my");
+        summaryEl.textContent = `명예의 전당 기록: ${ghost.name} Lv.${ghost.level} (최종 스테이지 ${rec.stage || "-"})`;
+
+        if (window.QRCode && typeof QRCode.toCanvas === "function") {
+            QRCode.toCanvas(canvas, encoded, { width: 220, margin: 1 }, (err) => {
+                if (err) console.error("[Ghost QR] 생성 오류", err);
+            });
+        }
+
+        modal.classList.remove("hidden");
+        modal.classList.add("flex");
+    }
+
+    function closeGhostModal() {
+        const modal = document.getElementById("ghostModal");
+        if (!modal) return;
+        stopGhostScan();
+        modal.classList.add("hidden");
+        modal.classList.remove("flex");
+    }
+
+    function switchGhostTab(tab) {
+        const myBtn = document.getElementById("ghostTabMyBtn");
+        const scanBtn = document.getElementById("ghostTabScanBtn");
+        const myPane = document.getElementById("ghostMyPane");
+        const scanPane = document.getElementById("ghostScanPane");
+
+        if (tab === "my") {
+            myBtn.className = "flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-800 text-white";
+            scanBtn.className = "flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-100 text-slate-500";
+            myPane.classList.remove("hidden");
+            scanPane.classList.add("hidden");
+            stopGhostScan();
+        } else {
+            scanBtn.className = "flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-800 text-white";
+            myBtn.className = "flex-1 text-xs font-bold rounded-full px-3 py-2 bg-slate-100 text-slate-500";
+            scanPane.classList.remove("hidden");
+            myPane.classList.add("hidden");
+        }
+    }
+
+    function stopGhostScan() {
+        if (ghostScanFrameId) {
+            cancelAnimationFrame(ghostScanFrameId);
+            ghostScanFrameId = null;
+        }
+        if (ghostScanStream) {
+            ghostScanStream.getTracks().forEach((t) => t.stop());
+            ghostScanStream = null;
+        }
+        const video = document.getElementById("ghostVideo");
+        if (video) video.srcObject = null;
+    }
+
+    async function startGhostScan() {
+        const statusEl = document.getElementById("ghostScanStatus");
+        const video = document.getElementById("ghostVideo");
+
+        if (!statusEl || !video) return;
+
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            statusEl.textContent = "이 브라우저에서는 카메라 사용을 지원하지 않습니다.";
+            return;
+        }
+
+        try {
+            statusEl.textContent = "카메라 준비 중...";
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            ghostScanStream = stream;
+            video.srcObject = stream;
+            video.setAttribute("playsinline", "true");
+            await video.play();
+            statusEl.textContent = "QR 코드에 카메라를 가져가 주세요.";
+            ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+        } catch (err) {
+            console.error("[Ghost Scan] 카메라 오류", err);
+            statusEl.textContent = "카메라 접근 실패: " + (err.message || err);
+        }
+    }
+
+    function tickGhostScan() {
+        const video = document.getElementById("ghostVideo");
+        const canvas = document.getElementById("ghostScanCanvas");
+        const statusEl = document.getElementById("ghostScanStatus");
+
+        if (!video || !canvas || !statusEl || !ghostScanStream) return;
+
+        const w = video.videoWidth;
+        const h = video.videoHeight;
+
+        if (!w || !h) {
+            ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+            return;
+        }
+
+        canvas.width = w;
+        canvas.height = h;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(video, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+
+        if (typeof jsQR === "function") {
+            const code = jsQR(imageData.data, w, h);
+            if (code && code.data) {
+                statusEl.textContent = "QR 인식 완료!";
+                handleGhostPayload(code.data);
+                stopGhostScan();
+                return;
+            }
+        }
+
+        ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+    }
+
+    function parseGhostFromData(data) {
+        if (typeof data !== "string") return null;
+
+        try {
+            if (data.startsWith("http")) {
+                const url = new URL(data);
+                const token = url.searchParams.get("ghost");
+                if (token) {
+                    const base64 = decodeURIComponent(token);
+                    const jsonStr = fromBase64UTF8(base64);
+                    return JSON.parse(jsonStr);
+                }
+            }
+
+            if (data.startsWith("QZMGHOST|")) {
+                const raw = data.split("|")[1];
+                const jsonStr = fromBase64UTF8(raw);
+                return JSON.parse(jsonStr);
+            }
+
+            return null;
+        } catch (err) {
+            console.error("[Ghost Payload] parse error", err);
+            return null;
+        }
+    }
+
+    function handleGhostPayload(data) {
+        const ghost = parseGhostFromData(data);
+        if (!ghost) {
+            showAlert("인식 실패", "퀴즈몬 고스트 QR 코드가 아닙니다.");
+            return;
+        }
+        startGhostBattle(ghost);
+    }
+
+    function showAlert(t, b) { alert(`${t}\n${b}`); }
+
+    /* =========================================
+     * 상점 시스템
+     * ========================================= */
+    function openShopModal() {
+        updateShopUI();
+        document.getElementById("shopModal").classList.remove("hidden");
+        document.getElementById("shopModal").classList.add("flex");
+    }
+
+    function closeShopModal() {
+        document.getElementById("shopModal").classList.add("hidden");
+        document.getElementById("shopModal").classList.remove("flex");
+    }
+
+    function updateShopUI() {
+        document.getElementById("shopPoints").textContent = getPoints().toLocaleString();
+        document.getElementById("shopTickets").textContent = getTickets().toLocaleString();
+        
+        const pid = getStarterId();
+        const statusEl = document.getElementById("rareCandyStatus");
+        if (pid > 0) {
+            const info = getPokeInfo(pid);
+            const charData = getCharData()[pid] || {};
+            const level = charData.level || 1;
+            statusEl.textContent = `현재 스타터: ${info.name} (Lv.${level})`;
+        } else {
+            statusEl.textContent = "스타터를 먼저 선택하세요";
+        }
+        
+        renderOwnedShinySkins();
+    }
+
+    function buyRareCandy(levels) {
+        const prices = { 1: 500, 5: 2000, 10: 3500 };
+        const cost = prices[levels];
+        const currentPoints = getPoints();
+        
+        if (currentPoints < cost) {
+            alert("포인트가 부족합니다!");
+            return;
+        }
+        
+        const pid = getStarterId();
+        if (!pid) {
+            alert("스타터를 먼저 선택하세요!");
+            return;
+        }
+        
+        const info = getPokeInfo(pid);
+        const charData = getCharData();
+        const currentData = charData[pid] || { level: 1, xp: 0 };
+        
+        // 레벨업
+        currentData.level = (currentData.level || 1) + levels;
+        charData[pid] = currentData;
+        saveCharData(charData);
+        
+        // 포인트 차감
+        setPoints(currentPoints - cost);
+        
+        // 진화 체크
+        let evolutionOccurred = false;
+        let currentPokemonId = pid;
+        
+        while (true) {
+            const evoCheck = canEvolve(currentPokemonId, currentData.level);
+            if (evoCheck) {
+                const nextId = doEvolve(currentPokemonId);
+                if (nextId) {
+                    charData[nextId] = { level: currentData.level, xp: currentData.xp || 0 };
+                    saveCharData(charData);
+                    setStarterId(nextId);
+                    
+                    const fromInfo = getPokeInfo(currentPokemonId);
+                    const toInfo = getPokeInfo(nextId);
+                    alert(`🎉 ${fromInfo.name}이(가) ${toInfo.name}(으)로 진화했습니다!`);
+                    
+                    currentPokemonId = nextId;
+                    evolutionOccurred = true;
+                } else {
+                    break;
+                }
+            } else {
+                break;
+            }
+        }
+        
+        if (!evolutionOccurred) {
+            alert(`🍬 레어캔디 사용!\n${info.name}의 레벨이 ${levels} 상승했습니다!`);
+        }
+        
+        updateShopUI();
+        updateLobbyPartner();
+        updateResUI();
+    }
+
+    function drawShinySkin(count) {
+        const costs = { 1: 1, 3: 2 };
+        const cost = costs[count];
+        const currentTickets = getTickets();
+        
+        if (currentTickets < cost) {
+            alert("티켓이 부족합니다!");
+            return;
+        }
+        
+        const owned = getOwned();
+        if (owned.size === 0) {
+            alert("보유한 포켓몬이 없습니다!");
+            return;
+        }
+        
+        const shinySkins = getShinySkins();
+        const available = [...owned].filter(id => !shinySkins.has(id));
+        
+        if (available.length === 0) {
+            alert("모든 포켓몬의 이로치 스킨을 보유중입니다!");
+            return;
+        }
+        
+        setTickets(currentTickets - cost);
+        
+        const results = [];
+        for (let i = 0; i < count; i++) {
+            if (available.length === 0) break;
+            
+            const randomIdx = Math.floor(Math.random() * available.length);
+            const drawnId = available[randomIdx];
+            available.splice(randomIdx, 1);
+            
+            addShinySkin(drawnId);
+            results.push(drawnId);
+        }
+        
+        const resultContainer = document.getElementById("shinyDrawResult");
+        if (results.length > 0) {
+            resultContainer.innerHTML = results.map(id => {
+                const info = getPokeInfo(id);
+                return `<div class="flex flex-col items-center p-2">
+                    <img src="${info.sprite}" class="w-12 h-12 pixel-art animate-bounce">
+                    <div class="text-[10px] font-bold text-center">${info.name}</div>
+                    <div class="text-[8px] text-yellow-600">✨ NEW!</div>
+                </div>`;
+            }).join('');
+            resultContainer.className = "min-h-[60px] bg-yellow-50 rounded-lg border-2 border-yellow-300 flex items-center justify-center gap-2 p-2";
+        } else {
+            resultContainer.innerHTML = '<span class="text-slate-500 text-xs">더 이상 뽑을 스킨이 없습니다</span>';
+        }
+        
+        updateShopUI();
+        updateResUI();
+        renderCodex();
+    }
+
+    function renderOwnedShinySkins() {
+        const container = document.getElementById("ownedShinyList");
+        const skins = getShinySkins();
+        
+        if (skins.size === 0) {
+            container.innerHTML = '<span class="text-slate-400 text-xs col-span-5 text-center py-4">아직 없음</span>';
+            return;
+        }
+        
+        container.innerHTML = [...skins].map(id => {
+            const info = getPokeInfo(id);
+            return `<div class="flex flex-col items-center p-1 bg-yellow-50 rounded-lg border border-yellow-200">
+                <img src="${info.sprite}" class="w-8 h-8 pixel-art">
+                <div class="text-[8px] truncate w-full text-center">${info.name}</div>
+            </div>`;
+        }).join('');
+    }
+
+    /* =========================================
+     * 초기화
+     * ========================================= */
+    window.onload = async () => {
+        const loadingStatus = document.getElementById("loadingStatus");
+        const startBtn = document.getElementById("startButton");
+
+        loadingStatus.textContent = "포켓몬 데이터 로딩 중...";
+        const dbLoaded = await loadPokeDb();
+
+        if (dbLoaded) {
+            loadingStatus.textContent = "퀴즈 데이터 로딩 중...";
+            await loadQuizData();
+            loadingStatus.textContent = `✅ 로드 완료! (포켓몬 ${POKE_DB.pokemon.length}개, 기본형 ${BASIC_POKEMON_IDS.length}개)`;
+        } else {
+            loadingStatus.textContent = "⚠️ DB 로드 실패, 기본 데이터 사용";
+        }
+
+        startBtn.disabled = false;
+
+        tryImportFromIndex();
+        updateResUI();
+        updateLobbyPartner();
+
+        document.getElementById("startButton").onclick = () => {
+            document.getElementById("titleScreen").classList.remove("active");
+            document.getElementById("lobbyScreen").classList.add("active");
+        };
+        document.getElementById("lobbyCodexBtn").onclick = () => {
+            renderCodex();
+            document.getElementById("lobbyScreen").classList.remove("active");
+            document.getElementById("codexScreen").classList.add("active");
+        };
+        document.getElementById("codexToLobbyBtn").onclick = () => {
+            document.getElementById("codexScreen").classList.remove("active");
+            document.getElementById("lobbyScreen").classList.add("active");
+        };
+
+        // 도감 페이지네이션
+        document.getElementById("codexPrevBtn").onclick = codexPrevPage;
+        document.getElementById("codexNextBtn").onclick = codexNextPage;
+
+        document.getElementById("lobbyGachaBtn").onclick = () => { window.location.href = INDEX_PATCHED_URL; };
+        if (GACHA_ENABLED) {
+            const gm = document.getElementById("gachaModal");
+            if (gm) {
+                document.getElementById("gachaClose").onclick = () => gm.classList.add("hidden");
+                document.getElementById("gacha1Btn").onclick = () => playGacha('normal');
+                document.getElementById("gacha10Btn").onclick = () => playGacha('10x');
+                document.getElementById("gachaSpecialBtn").onclick = () => playGacha('special');
+            }
+        } else {
+            const gm = document.getElementById("gachaModal");
+            if (gm) gm.classList.add("hidden");
+        }
+
+        document.getElementById("startAdventureBtn").onclick = initAdventure;
+        document.getElementById("battleBackBtn").onclick = () => { if(confirm("포기하시겠습니까?")) handleDefeat(); };
+        document.getElementById("quizCancel").onclick = () => { document.getElementById("quizModal").classList.add("hidden"); if(quizCallback) quizCallback(false); };
+        document.getElementById("lobbyHofBtn").onclick = () => { renderHoF(); document.getElementById("hofModal").classList.remove("hidden"); };
+        document.getElementById("hofClose").onclick = () => document.getElementById("hofModal").classList.add("hidden");
+
+        // 🏪 상점 버튼
+        const shopBtn = document.getElementById("lobbyShopBtn");
+        if (shopBtn) shopBtn.onclick = () => openShopModal();
+        
+        const shopClose = document.getElementById("shopClose");
+        if (shopClose) shopClose.onclick = () => closeShopModal();
+
+        // 👻 고스트 배틀 버튼
+        const ghostBtn = document.getElementById("lobbyGhostBtn");
+        if (ghostBtn) ghostBtn.onclick = () => openGhostModal();
+
+        const ghostClose = document.getElementById("ghostClose");
+        if (ghostClose) ghostClose.onclick = () => closeGhostModal();
+
+        const ghostTabMyBtn = document.getElementById("ghostTabMyBtn");
+        const ghostTabScanBtn = document.getElementById("ghostTabScanBtn");
+        if (ghostTabMyBtn) ghostTabMyBtn.onclick = () => switchGhostTab("my");
+        if (ghostTabScanBtn) ghostTabScanBtn.onclick = () => switchGhostTab("scan");
+
+        const ghostScanStartBtn = document.getElementById("ghostScanStartBtn");
+        const ghostScanStopBtn = document.getElementById("ghostScanStopBtn");
+        if (ghostScanStartBtn) ghostScanStartBtn.onclick = () => startGhostScan();
+        if (ghostScanStopBtn) ghostScanStopBtn.onclick = () => stopGhostScan();
+
+        const urlGhost = parseGhostFromData(window.location.href);
+        if (urlGhost) {
+            window.__pendingGhost = urlGhost;
+            alert("고스트 배틀 초대 링크입니다!\n먼저 스타터를 선택하면, 바로 이 고스트에게 도전할 수 있어요.");
+        }
+    };
+</script>
+
+</body>
+</html>
