@@ -43,13 +43,13 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.0</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.2</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
-                <img src="./knight.png" class="w-16 h-16 pixel-art animate-bounce" style="animation-delay: 0s">
-                <img src="./wizard.png" class="w-16 h-16 pixel-art animate-bounce" style="animation-delay: 0.1s">
-                <img src="./rogue-male.png" class="w-16 h-16 pixel-art animate-bounce" style="animation-delay: 0.2s">
+                <img src="./png/knight.png" class="w-16 h-16 pixel-art animate-bounce" style="animation-delay: 0s">
+                <img src="./png/wizard.png" class="w-16 h-16 pixel-art animate-bounce" style="animation-delay: 0.1s">
+                <img src="./png/rogue-male.png" class="w-16 h-16 pixel-art animate-bounce" style="animation-delay: 0.2s">
             </div>
             <p id="loadingStatus" class="text-blue-400 text-xs font-bold mb-4 animate-pulse">시스템 초기화 중...</p>
             <button id="startButton" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl shadow-lg text-lg transition-all border-b-4 border-blue-800 active:border-b-0 active:translate-y-1 disabled:bg-slate-600 disabled:border-slate-700 disabled:cursor-not-allowed" disabled>
@@ -159,32 +159,34 @@
                     <span id="enemyName" class="font-bold text-sm text-red-400">Slime</span>
                     <span id="enemyLevel" class="text-[10px] text-slate-400">Lv.1</span>
                 </div>
+                <div id="enemyBuffs" class="flex gap-1 mb-1 min-h-[16px]"></div>
                 <div class="w-full h-2 bg-slate-700 rounded-full overflow-hidden">
                     <div id="enemyHpBar" class="h-full bg-red-500 transition-all duration-500" style="width: 100%"></div>
                 </div>
             </div>
             <div class="relative">
-                <img id="enemyImg" src="./slime-green.png" class="w-32 h-32 pixel-art animate-bounce" style="animation-duration: 2s">
+                <img id="enemyImg" src="./png/slime-green.png" class="w-32 h-32 pixel-art animate-bounce" style="animation-duration: 2s">
             </div>
         </div>
 
         <div class="flex flex-col items-start relative -mt-8">
             <div class="relative z-10">
-                <img id="playerImg" src="./knight.png" class="w-40 h-40 pixel-art drop-shadow-2xl">
+                <img id="playerImg" src="./png/knight.png" class="w-40 h-40 pixel-art drop-shadow-2xl">
             </div>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-blue-500/50 w-48 -mt-6 z-20 transform -translate-x-2 backdrop-blur-md shadow-lg">
                 <div class="flex justify-between items-baseline mb-1">
                     <span id="playerName" class="font-bold text-sm text-blue-300">Player</span>
                     <span id="playerLevel" class="text-[10px] text-slate-400">Lv.1</span>
                 </div>
+                <div id="playerBuffs" class="flex gap-1 mb-1 min-h-[16px]"></div>
                 <div class="flex justify-between text-[10px] text-slate-400 mb-1">
                     <span>HP</span> <span id="playerHpText">100/100</span>
                 </div>
                 <div class="w-full h-2.5 bg-slate-700 rounded-full overflow-hidden mb-1">
                     <div id="playerHpBar" class="h-full bg-blue-500 transition-all duration-500" style="width: 100%"></div>
                 </div>
-                <div id="playerShieldBar" class="w-full h-1 bg-transparent overflow-hidden">
-                    <div class="h-full bg-yellow-400 w-0 transition-all"></div>
+                <div id="playerShieldContainer" class="w-full h-1 bg-slate-800 rounded-full overflow-hidden">
+                    <div id="playerShieldBar" class="h-full bg-yellow-400 w-0 transition-all"></div>
                 </div>
             </div>
         </div>
@@ -281,54 +283,96 @@
     </div>
 </div>
 
+<div id="hofModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[55] p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md max-h-[80vh] flex flex-col overflow-hidden">
+        <div class="bg-yellow-100 p-4 flex justify-between items-center border-b border-yellow-200">
+            <h3 class="font-bold text-lg text-yellow-800">🏆 명예의 전당</h3>
+            <button id="hofClose" class="text-yellow-800 hover:text-black">✕</button>
+        </div>
+        <div id="hofList" class="p-4 overflow-y-auto space-y-3 flex-1 bg-yellow-50">
+        </div>
+    </div>
+</div>
+
 <script>
+    /* =========================================
+     * 0. UTILS & MODAL HELPERS
+     * ========================================= */
+    function showModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.remove("hidden");
+            el.classList.add("flex");
+        }
+    }
+
+    function hideModal(id) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.classList.add("hidden");
+            el.classList.remove("flex");
+        }
+    }
+
+    // Base64 유틸
+    function toBase64UTF8(obj) {
+        const json = typeof obj === "string" ? obj : JSON.stringify(obj);
+        return btoa(unescape(encodeURIComponent(json)));
+    }
+
+    function fromBase64UTF8(b64) {
+        try {
+            return decodeURIComponent(escape(atob(b64)));
+        } catch(e) { return null; }
+    }
+
     /* =========================================
      * 1. DATA DEFINITIONS (DB)
      * ========================================= */
 
-    // 클래스 정의 (3종)
+    // 클래스 정의 (3종) - 이미지 경로 수정됨
     const HERO_DEFINITIONS = {
         "knight": {
             id: "knight", name: "Knight", nameKo: "기사",
             baseStats: { hp: 120, atk: 12, def: 8, spd: 5 },
-            sprites: { default: "./knight.png", skin: "./knight-black.png" },
+            sprites: { default: "./png/knight.png", skin: "./png/knight-black.png" },
             skills: [
                 { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
-                { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 2, desc: "강한 타격 + 적 행동 지연" },
-                { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "다음 턴 방어력 2배" },
-                { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + 체력 회복" }
+                { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 스턴" },
+                { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "2턴간 방어력 2배" },
+                { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" }
             ]
         },
         "rogue": {
             id: "rogue", name: "Rogue", nameKo: "도적",
             baseStats: { hp: 80, atk: 18, def: 4, spd: 10 },
-            sprites: { default: "./rogue-male.png", skin: "./rogue-female.png" },
+            sprites: { default: "./png/rogue-male.png", skin: "./png/rogue-female.png" },
             skills: [
                 { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격" },
                 { id: "r2", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "방어 관통 피해" },
-                { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "3턴간 공격력 증가" },
-                { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "체력이 낮은 적에게 치명적" }
+                { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "3턴간 공격력 50% 증가" },
+                { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" }
             ]
         },
         "mage": {
             id: "mage", name: "Mage", nameKo: "마법사",
             baseStats: { hp: 70, atk: 22, def: 3, spd: 6 },
-            sprites: { default: "./wizard.png", skin: "./wizard.png" }, // 마법사는 단일 스킨
+            sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" }, // 마법사는 단일 스킨
             skills: [
                 { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격" },
                 { id: "m2", name: "파이어볼", type: "atk_aoe", power: 1.8, cd: 3, desc: "강력한 화염 피해" },
-                { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "임시 보호막 생성" },
+                { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "HP 30% 만큼 쉴드 생성" },
                 { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" }
             ]
         }
     };
 
-    // 적 정의 (슬라임 4종)
+    // 적 정의 (슬라임 4종) - 이미지 경로 수정됨
     const ENEMY_VARIANTS = [
-        { id: "slime_g", name: "Green Slime", src: "./slime-green.png", type: "nature" },
-        { id: "slime_b", name: "Blue Slime", src: "./slime-blue.png", type: "water" },
-        { id: "slime_r", name: "Red Slime", src: "./slime-red.png", type: "fire" },
-        { id: "slime_p", name: "Purple Slime", src: "./slime-purple.png", type: "poison" }
+        { id: "slime_g", name: "Green Slime", src: "./png/slime-green.png", type: "nature" },
+        { id: "slime_b", name: "Blue Slime", src: "./png/slime-blue.png", type: "water" },
+        { id: "slime_r", name: "Red Slime", src: "./png/slime-red.png", type: "fire" },
+        { id: "slime_p", name: "Purple Slime", src: "./png/slime-purple.png", type: "poison" }
     ];
 
     /* =========================================
@@ -361,7 +405,6 @@
         if (raw) {
             try {
                 const loaded = JSON.parse(raw);
-                // 병합 (새로운 필드 추가 대비)
                 gameState = { ...gameState, ...loaded, heroes: { ...gameState.heroes, ...loaded.heroes } };
             } catch (e) { console.error("Save load error", e); }
         }
@@ -385,6 +428,20 @@
             def: Math.floor(base.def + (level * 0.8)),
             spd: Math.floor(base.spd + (level * 0.5))
         };
+    }
+
+    function getHoF() {
+        try { return JSON.parse(localStorage.getItem(LS_KEYS.HOF) || "[]"); }
+        catch { return []; }
+    }
+
+    function addHoF(record) {
+        const list = getHoF();
+        list.push({ ts: Date.now(), date: new Date().toLocaleDateString(), ...record });
+        // 최신순 20개 유지
+        list.sort((a,b) => b.ts - a.ts);
+        if(list.length > 20) list.length = 20;
+        localStorage.setItem(LS_KEYS.HOF, JSON.stringify(list));
     }
 
     /* =========================================
@@ -424,7 +481,7 @@
             card.onclick = () => {
                 gameState.selectedClass = key;
                 saveGameData();
-                renderClassSelect(); // 재렌더링으로 선택 표시 업데이트
+                renderClassSelect();
             };
 
             const imgSrc = myData.skin === "skin" ? def.sprites.skin : def.sprites.default;
@@ -501,8 +558,7 @@
             list.appendChild(row);
         });
 
-        document.getElementById("trainingModal").classList.remove("hidden");
-        document.getElementById("trainingModal").classList.add("flex");
+        showModal("trainingModal");
     }
 
     /* =========================================
@@ -523,13 +579,16 @@
                 ...stats,
                 maxHp: stats.maxHp,
                 hp: stats.maxHp,
+                shield: 0,
                 skills: def.skills,
                 skillLevels: hData.skillLevels,
                 name: def.nameKo,
                 img: imgSrc,
-                classId: cid
+                classId: cid,
+                level: hData.level, // 레벨 명시적 저장
+                buffs: { atk: 0, def: 0 }
             },
-            enemy: null,
+            enemy: null, // startBattleStage에서 생성
             cooldowns: [0, 0, 0, 0]
         };
 
@@ -556,9 +615,16 @@
             maxHp: Math.floor(60 * stageMult * bossMult),
             hp: Math.floor(60 * stageMult * bossMult),
             atk: Math.floor(8 * stageMult * bossMult * 0.7), // 플레이어보다 조금 약하게
+            def: Math.floor(2 * stageMult),
             img: variant.src,
-            isBoss: isBoss
+            isBoss: isBoss,
+            buffs: { stun: 0 }
         };
+
+        // 스테이지 시작 시 플레이어 쉴드/버프 초기화 (매 판 리셋)
+        bs.player.shield = 0;
+        bs.player.buffs = { atk: 0, def: 0 };
+        bs.cooldowns = [0, 0, 0, 0];
 
         // UI 업데이트
         document.getElementById("battleStageText").textContent = bs.stage;
@@ -579,11 +645,28 @@
         // Player UI
         document.getElementById("playerImg").src = p.img;
         document.getElementById("playerName").textContent = p.name;
+        document.getElementById("playerLevel").textContent = `Lv.${p.level}`; // 레벨 갱신 적용
         document.getElementById("playerHpText").textContent = `${p.hp}/${p.maxHp}`;
         document.getElementById("playerHpBar").style.width = `${Math.max(0, (p.hp/p.maxHp)*100)}%`;
 
+        // Shield Bar
+        const shieldPct = Math.min(100, (p.shield / p.maxHp) * 100);
+        document.getElementById("playerShieldBar").style.width = `${shieldPct}%`;
+
+        // Player Buffs Display
+        const pBuffsEl = document.getElementById("playerBuffs");
+        pBuffsEl.innerHTML = "";
+        if (p.buffs.atk > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-red-100 text-red-600 px-1 rounded border border-red-200">공격UP ${p.buffs.atk}</span>`;
+        if (p.buffs.def > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-blue-100 text-blue-600 px-1 rounded border border-blue-200">방어UP ${p.buffs.def}</span>`;
+        if (p.shield > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-yellow-100 text-yellow-600 px-1 rounded border border-yellow-200">보호막 ${p.shield}</span>`;
+
         // Enemy UI
         document.getElementById("enemyHpBar").style.width = `${Math.max(0, (e.hp/e.maxHp)*100)}%`;
+
+        // Enemy Buffs (Stun)
+        const eBuffsEl = document.getElementById("enemyBuffs");
+        eBuffsEl.innerHTML = "";
+        if (e.buffs.stun > 0) eBuffsEl.innerHTML += `<span class="text-[9px] bg-purple-100 text-purple-600 px-1 rounded border border-purple-200">기절 ${e.buffs.stun}</span>`;
 
         renderSkillButtons();
     }
@@ -626,36 +709,76 @@
             }
 
             const p = battleState.player;
+            const e = battleState.enemy;
             const skill = p.skills[skillIdx];
             const slv = p.skillLevels[skillIdx];
 
             // 쿨다운 설정
-            battleState.cooldowns[skillIdx] = skill.cd + 1; // +1은 이번 턴 감소 고려
+            battleState.cooldowns[skillIdx] = skill.cd + 1;
 
-            // 데미지 계산 (기본공격력 + 스킬계수 + 레벨보정)
-            // 스킬 레벨 1당 데미지 10% 증가
-            let dmg = Math.floor(p.atk * skill.power * (1 + (slv * 0.1)));
+            // 기본 데미지 계산
+            let mult = 1.0;
+            // 공격력 버프 체크
+            if (p.buffs.atk > 0) mult += 0.5; // 50% 증가
 
-            // 스킬 타입별 효과
-            if (skill.type.includes("crit") && Math.random() < 0.3) dmg = Math.floor(dmg * 1.5);
-            if (skill.type.includes("heal")) {
-                const heal = Math.floor(p.maxHp * 0.2);
-                p.hp = Math.min(p.maxHp, p.hp + heal);
-                logBattle(`${skill.name}! ${dmg}피해 및 ${heal}회복`);
-            } else {
-                logBattle(`${skill.name}! ${dmg}의 피해!`);
+            // 스킬 레벨 계수 (레벨당 10% 증가)
+            let lvlMult = 1 + (slv * 0.1);
+
+            let dmg = Math.floor(p.atk * skill.power * lvlMult * mult);
+
+            // 스킬 효과 구현
+            if (skill.type.includes("crit") && Math.random() < 0.4) {
+                dmg = Math.floor(dmg * 1.5);
+                logBattle("치명타 적중!");
             }
 
-            battleState.enemy.hp -= dmg;
+            if (skill.type === "atk_execute") {
+                if (e.hp <= e.maxHp * 0.3) {
+                    dmg = Math.floor(dmg * 2.0);
+                    logBattle("처형 발동!");
+                }
+            }
 
-            // 애니메이션
-            const eImg = document.getElementById("enemyImg");
-            eImg.classList.add("animate-damage");
-            setTimeout(() => eImg.classList.remove("animate-damage"), 400);
+            if (skill.type === "atk_stun") {
+                e.buffs.stun = 1;
+                logBattle("적을 기절시켰습니다!");
+            }
+
+            if (skill.type === "buff_atk") {
+                p.buffs.atk = 3; // 3턴 지속
+                logBattle("공격력이 증가했습니다!");
+            }
+
+            if (skill.type === "buff_def") {
+                p.buffs.def = 2; // 2턴 지속
+                logBattle("방어 태세를 갖췄습니다!");
+            }
+
+            if (skill.type === "buff_shield") {
+                const shieldAmt = Math.floor(p.maxHp * 0.3 * lvlMult);
+                p.shield += shieldAmt;
+                logBattle(`보호막 ${shieldAmt} 생성!`);
+            }
+
+            if (skill.type.includes("heal")) {
+                const heal = Math.floor(p.maxHp * 0.2 * lvlMult);
+                p.hp = Math.min(p.maxHp, p.hp + heal);
+                logBattle(`HP ${heal} 회복`);
+            }
+
+            // 데미지 적용
+            if (skill.power > 0) {
+                e.hp -= dmg;
+                logBattle(`${skill.name}! ${dmg}의 피해!`);
+                // 애니메이션
+                const eImg = document.getElementById("enemyImg");
+                eImg.classList.add("animate-damage");
+                setTimeout(() => eImg.classList.remove("animate-damage"), 400);
+            }
 
             updateBattleUI();
 
-            if (battleState.enemy.hp <= 0) {
+            if (e.hp <= 0) {
                 setTimeout(winStage, 600);
             } else {
                 setTimeout(enemyTurn, 800);
@@ -663,33 +786,79 @@
         });
     }
 
+    // 적 턴 + 턴 종료 공통 처리
     function enemyTurn() {
         if (!battleState || battleState.enemy.hp <= 0) return;
 
         const p = battleState.player;
         const e = battleState.enemy;
 
+        // 스턴 체크 (스턴이어도 턴 경과 처리는 해야 하므로 return 전에 처리)
+        if (e.buffs.stun > 0) {
+            e.buffs.stun--;
+            logBattle(`${e.name}은(는) 기절하여 움직일 수 없습니다!`);
+            endEnemyTurn(); // 공통 턴 종료 처리
+            return;
+        }
+
         let dmg = Math.max(1, e.atk - Math.floor(p.def * 0.5));
-        p.hp -= dmg;
 
-        logBattle(`${e.name}의 공격! ${dmg} 피해.`);
+        // 플레이어 방어 버프 체크
+        if (p.buffs.def > 0) {
+            dmg = Math.floor(dmg * 0.5); // 데미지 반감
+            logBattle("철벽으로 피해를 줄였습니다.");
+        }
 
-        const pImg = document.getElementById("playerImg");
-        pImg.classList.add("animate-damage");
-        setTimeout(() => pImg.classList.remove("animate-damage"), 400);
+        // 쉴드 체크
+        if (p.shield > 0) {
+            if (p.shield >= dmg) {
+                p.shield -= dmg;
+                dmg = 0;
+                logBattle("보호막이 공격을 막았습니다!");
+            } else {
+                dmg -= p.shield;
+                p.shield = 0;
+                logBattle("보호막이 파괴되었습니다!");
+            }
+        }
 
-        // 쿨다운 감소
-        battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
-
-        updateBattleUI();
+        if (dmg > 0) {
+            p.hp -= dmg;
+            logBattle(`${e.name}의 공격! ${dmg} 피해.`);
+            const pImg = document.getElementById("playerImg");
+            pImg.classList.add("animate-damage");
+            setTimeout(() => pImg.classList.remove("animate-damage"), 400);
+        }
 
         if (p.hp <= 0) {
+            updateBattleUI();
             setTimeout(() => {
+                // 패배 기록
+                if (battleState.mode !== "ghost") {
+                    addHoF({ kind: "lose", stage: battleState.stage, enemy: e.name });
+                }
                 alert(`패배했습니다... 최종 스테이지: ${battleState.stage}`);
                 document.getElementById("battleScreen").classList.remove("active");
                 document.getElementById("lobbyScreen").classList.add("active");
             }, 600);
+            return;
         }
+
+        endEnemyTurn();
+    }
+
+    // 턴 종료 시 공통 처리 (쿨다운 감소, 버프 턴 감소 등)
+    function endEnemyTurn() {
+        const p = battleState.player;
+
+        // 쿨다운 감소
+        battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
+
+        // 플레이어 버프 턴 감소 (적이 스턴이어도 턴은 흐름)
+        if (p.buffs.atk > 0) p.buffs.atk--;
+        if (p.buffs.def > 0) p.buffs.def--;
+
+        updateBattleUI();
     }
 
     function winStage() {
@@ -697,9 +866,25 @@
         const xpGain = 10 + (bs.stage * 5);
         let goldGain = 0;
 
-        // 보스 보상
+        // 보스 보상 (여기서만 골드 지급)
         if (bs.enemy.isBoss) {
             goldGain = 50 + (bs.stage * 10);
+        }
+
+        // 고스트 배틀 승리 처리
+        if (bs.mode === "ghost") {
+            addHoF({ kind: "ghost_win", enemy: bs.enemy.name, level: bs.enemy.level });
+            alert(`승리! 경험치 ${xpGain} 획득!`);
+
+            // 보상 지급 및 종료
+            const hData = gameState.heroes[gameState.selectedClass];
+            hData.xp += xpGain;
+            saveGameData();
+
+            document.getElementById("battleScreen").classList.remove("active");
+            document.getElementById("lobbyScreen").classList.add("active");
+            updateLobbyUI();
+            return;
         }
 
         // 데이터 반영
@@ -726,19 +911,20 @@
             document.getElementById("rewardGoldSection").classList.add("hidden");
         }
 
-        document.getElementById("rewardModal").classList.remove("hidden");
+        showModal("rewardModal");
 
-        // 다음 스테이지 준비 (버튼 클릭 시 실행될 함수는 이미 연결됨)
+        // 다음 스테이지 준비
         document.getElementById("rewardOkBtn").onclick = () => {
-            document.getElementById("rewardModal").classList.add("hidden");
+            hideModal("rewardModal");
 
-            // 플레이어 스탯 갱신 (레벨업 반영 및 소폭 회복)
+            // 플레이어 스탯 갱신
             const newStats = getHeroStats(hData.classId || gameState.selectedClass);
             bs.player.maxHp = newStats.maxHp;
             bs.player.atk = newStats.atk;
-            bs.player.def = newStats.def; // 등등...
+            bs.player.def = newStats.def;
+            bs.player.level = hData.level; // 레벨 동기화
 
-            // 스테이지 클리어 시 30% 회복
+            // 스테이지 클리어 시 HP 30% 회복
             bs.player.hp = Math.min(bs.player.maxHp, bs.player.hp + Math.floor(bs.player.maxHp * 0.3));
 
             bs.stage++;
@@ -747,7 +933,7 @@
     }
 
     /* =========================================
-     * 6. QUIZ LOGIC (Internal & External)
+     * 6. QUIZ LOGIC
      * ========================================= */
     async function loadQuizData() {
         try {
@@ -764,18 +950,21 @@
 
     function openQuiz(cb) {
         quizCallback = cb;
-        let q = generateMathQuiz(); // 기본 구구단
+        let q = generateMathQuiz();
 
         if (externalQuizList.length > 0 && Math.random() < 0.7) {
             const raw = externalQuizList[Math.floor(Math.random() * externalQuizList.length)];
-            // 단순화 매핑
+
+            // 안전한 필드 매핑
+            const choices = raw.choices || raw.options || [];
+            const ansIdx = (raw.answerIndex !== undefined) ? raw.answerIndex : (raw.answer_index || 0);
+
             q = {
-                q: raw.prompt,
-                explain: raw.promptExplain || "퀴즈",
-                choices: raw.choices,
-                answer: raw.choices[raw.answerIndex]
+                q: raw.prompt || raw.question || "문제",
+                explain: raw.promptExplain || raw.explain || "퀴즈",
+                choices: choices,
+                answer: choices[ansIdx]
             };
-            // 셔플 로직 생략 (간결함 위해)
         }
 
         document.getElementById("quizExplain").textContent = q.explain;
@@ -789,13 +978,13 @@
             btn.className = "bg-slate-100 hover:bg-blue-100 border-2 border-slate-200 font-bold py-3 rounded-xl text-lg transition-colors";
             btn.textContent = c;
             btn.onclick = () => {
-                document.getElementById("quizModal").classList.add("hidden");
+                hideModal("quizModal");
                 if (quizCallback) quizCallback(c == q.answer);
             };
             grid.appendChild(btn);
         });
 
-        document.getElementById("quizModal").classList.remove("hidden");
+        showModal("quizModal");
     }
 
     function generateMathQuiz() {
@@ -812,36 +1001,204 @@
     }
 
     /* =========================================
-     * 7. GHOST (QR) SYSTEM
+     * 7. GHOST (QR) & HoF SYSTEM
      * ========================================= */
+    let ghostScanStream = null;
+    let ghostScanFrameId = null;
+
     function openGhostModal() {
-        document.getElementById("ghostModal").classList.remove("hidden");
-        document.getElementById("ghostModal").classList.add("flex");
+        showModal("ghostModal");
+        switchGhostTab('my'); // 기본 내 QR 탭
 
         // 내 QR 생성
         const cid = gameState.selectedClass;
         const hero = gameState.heroes[cid];
         const def = HERO_DEFINITIONS[cid];
+        const stats = getHeroStats(cid);
+
         const payload = {
-            v: 90,
+            v: 92,
             cid: cid,
             lv: hero.level,
             slv: hero.skillLevels,
             nm: def.nameKo,
+            stats: stats, // 스탯 정보 포함
             ts: Date.now()
         };
 
         const jsonStr = JSON.stringify(payload);
-        const encoded = btoa(unescape(encodeURIComponent(jsonStr)));
-        const url = `${location.origin}${location.pathname}?ghost=${encoded}`;
+        const encoded = toBase64UTF8(jsonStr);
+        // ?ghost= 파라미터가 붙은 현재 URL 생성
+        const url = `${window.location.origin}${window.location.pathname}?ghost=${encoded}`;
 
         const canvas = document.getElementById("ghostQrCanvas");
-        QRCode.toCanvas(canvas, url, { width: 200 }, (err) => {});
-        document.getElementById("ghostMySummary").textContent = `${def.nameKo} Lv.${hero.level} (전투력 ${hero.level * 100})`;
+        if(QRCode) QRCode.toCanvas(canvas, url, { width: 200 }, (err) => {});
+        document.getElementById("ghostMySummary").textContent = `${def.nameKo} Lv.${hero.level}`;
     }
 
-    // Ghost Scan 로직은 PRL_v2와 동일하게 jsQR 사용 (생략 가능하나 기능 유지를 위해 포함)
-    // 간단히: 카메라 켜고 -> 스캔되면 -> startGhostBattle(parsedData)
+    function switchGhostTab(tab) {
+        const myPane = document.getElementById("ghostMyPane");
+        const scanPane = document.getElementById("ghostScanPane");
+        const myBtn = document.getElementById("ghostTabMyBtn");
+        const scanBtn = document.getElementById("ghostTabScanBtn");
+
+        if (tab === 'my') {
+            myPane.classList.remove('hidden');
+            scanPane.classList.add('hidden');
+            myBtn.classList.add('bg-slate-800', 'text-white');
+            myBtn.classList.remove('bg-slate-100', 'text-slate-500');
+            scanBtn.classList.add('bg-slate-100', 'text-slate-500');
+            scanBtn.classList.remove('bg-slate-800', 'text-white');
+            stopGhostScan();
+        } else {
+            myPane.classList.add('hidden');
+            scanPane.classList.remove('hidden');
+            scanBtn.classList.add('bg-slate-800', 'text-white');
+            scanBtn.classList.remove('bg-slate-100', 'text-slate-500');
+            myBtn.classList.add('bg-slate-100', 'text-slate-500');
+            myBtn.classList.remove('bg-slate-800', 'text-white');
+        }
+    }
+
+    async function startGhostScan() {
+        const video = document.getElementById("ghostVideo");
+        const statusEl = document.getElementById("ghostScanStatus");
+
+        try {
+            statusEl.textContent = "카메라 시작 중...";
+            const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
+            ghostScanStream = stream;
+            video.srcObject = stream;
+            video.play();
+            statusEl.textContent = "QR 코드를 비춰주세요.";
+            requestAnimationFrame(tickGhostScan);
+        } catch (err) {
+            statusEl.textContent = "카메라 권한 오류";
+        }
+    }
+
+    function tickGhostScan() {
+        if (!ghostScanStream) return;
+        const video = document.getElementById("ghostVideo");
+        const canvas = document.getElementById("ghostScanCanvas");
+
+        if (video.readyState === video.HAVE_ENOUGH_DATA) {
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(video, 0, 0);
+
+            const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+            const code = jsQR(imageData.data, imageData.width, imageData.height);
+
+            if (code) {
+                // QR 내용 파싱
+                const payload = parseGhostFromUrl(code.data);
+                if (payload) {
+                    stopGhostScan();
+                    startGhostBattle(payload);
+                    return;
+                }
+            }
+        }
+        ghostScanFrameId = requestAnimationFrame(tickGhostScan);
+    }
+
+    function stopGhostScan() {
+        if (ghostScanStream) {
+            ghostScanStream.getTracks().forEach(t => t.stop());
+            ghostScanStream = null;
+        }
+        if (ghostScanFrameId) cancelAnimationFrame(ghostScanFrameId);
+    }
+
+    function parseGhostFromUrl(urlStr) {
+        try {
+            const url = new URL(urlStr);
+            const data = url.searchParams.get("ghost");
+            if (data) {
+                const json = fromBase64UTF8(data);
+                return JSON.parse(json);
+            }
+        } catch(e) { return null; }
+        return null;
+    }
+
+    function startGhostBattle(ghostData) {
+        hideModal("ghostModal");
+
+        const myCid = gameState.selectedClass;
+        const myHero = gameState.heroes[myCid];
+        const myDef = HERO_DEFINITIONS[myCid];
+        const myStats = getHeroStats(myCid);
+        const myImg = myHero.skin === "skin" ? myDef.sprites.skin : myDef.sprites.default;
+
+        // 적(고스트) 데이터 구성
+        // ghostData: { cid, lv, slv, nm, stats }
+        const enemyDef = HERO_DEFINITIONS[ghostData.cid] || HERO_DEFINITIONS['knight'];
+        const enemyImg = enemyDef.sprites.default; // 고스트는 기본 스킨만 (간소화)
+
+        // 상대 스탯 (전송된 스탯 or 레벨 기반 계산)
+        const eStats = ghostData.stats || {
+            hp: 100 + ghostData.lv*10, atk: 10 + ghostData.lv, def: 5, spd: 5
+        };
+
+        battleState = {
+            mode: "ghost",
+            stage: 1,
+            player: {
+                ...myStats, maxHp: myStats.maxHp, hp: myStats.maxHp, shield: 0,
+                skills: myDef.skills, skillLevels: myHero.skillLevels,
+                name: myDef.nameKo, img: myImg, classId: myCid, level: myHero.level,
+                buffs: { atk: 0, def: 0 }
+            },
+            enemy: {
+                name: `Ghost ${ghostData.nm}`,
+                maxHp: eStats.maxHp, hp: eStats.maxHp,
+                atk: eStats.atk, def: eStats.def || 5,
+                img: enemyImg,
+                isBoss: true, // 고스트는 보스 취급 (보상 등)
+                level: ghostData.lv,
+                buffs: { stun: 0 }
+            },
+            cooldowns: [0, 0, 0, 0]
+        };
+
+        document.getElementById("lobbyScreen").classList.remove("active");
+        document.getElementById("battleScreen").classList.add("active");
+
+        updateBattleUI();
+        document.getElementById("enemyImg").src = enemyImg;
+        document.getElementById("enemyName").textContent = battleState.enemy.name;
+        document.getElementById("enemyLevel").textContent = `Lv.${battleState.enemy.level}`;
+        logBattle("고스트와의 대결이 시작됩니다!");
+    }
+
+    function renderHoF() {
+        const list = getHoF();
+        const container = document.getElementById("hofList");
+        container.innerHTML = "";
+
+        if (list.length === 0) {
+            container.innerHTML = "<div class='text-center text-slate-500 py-4'>기록이 없습니다.</div>";
+            return;
+        }
+
+        list.forEach(rec => {
+            const row = document.createElement("div");
+            row.className = "bg-white p-3 rounded-xl border border-yellow-200 shadow-sm";
+            let content = "";
+            if (rec.kind === "ghost_win") {
+                content = `<span class="text-purple-600 font-bold">VS 고스트 승리</span> <span class="text-xs text-slate-500">(${rec.enemy} Lv.${rec.level})</span>`;
+            } else if (rec.kind === "lose") {
+                content = `<span class="text-red-500 font-bold">탐험 실패</span> <span class="text-xs text-slate-500">${rec.stage}층 (${rec.enemy})</span>`;
+            } else {
+                content = `<span class="text-slate-700">기록</span> <span class="text-xs">${rec.date}</span>`;
+            }
+            row.innerHTML = `<div class="flex justify-between items-center">${content}<div class="text-[10px] text-slate-400">${rec.date}</div></div>`;
+            container.appendChild(row);
+        });
+    }
 
     /* =========================================
      * INIT
@@ -849,6 +1206,15 @@
     window.onload = () => {
         loadGameData();
         loadQuizData();
+
+        // URL 파라미터 체크 (고스트 배틀 링크)
+        const pendingGhost = parseGhostFromUrl(window.location.href);
+        if (pendingGhost) {
+            if(confirm(`Ghost ${pendingGhost.nm} (Lv.${pendingGhost.lv})와 대결하시겠습니까?`)) {
+                // 약간의 지연 후 시작 (데이터 로드 확보)
+                setTimeout(() => startGhostBattle(pendingGhost), 500);
+            }
+        }
 
         // 버튼 이벤트 연결
         document.getElementById("startButton").onclick = () => {
@@ -872,10 +1238,24 @@
         };
 
         document.getElementById("btnTraining").onclick = openTraining;
-        document.getElementById("closeTrainingBtn").onclick = () => document.getElementById("trainingModal").classList.add("hidden");
+        document.getElementById("closeTrainingBtn").onclick = () => hideModal("trainingModal");
 
         document.getElementById("btnGhost").onclick = openGhostModal;
-        document.getElementById("ghostClose").onclick = () => document.getElementById("ghostModal").classList.add("hidden");
+        document.getElementById("ghostClose").onclick = () => {
+            stopGhostScan();
+            hideModal("ghostModal");
+        };
+
+        document.getElementById("ghostTabMyBtn").onclick = () => switchGhostTab('my');
+        document.getElementById("ghostTabScanBtn").onclick = () => switchGhostTab('scan');
+        document.getElementById("ghostScanStartBtn").onclick = startGhostScan;
+        document.getElementById("ghostScanStopBtn").onclick = stopGhostScan;
+
+        document.getElementById("btnHoF").onclick = () => {
+            renderHoF();
+            showModal("hofModal");
+        };
+        document.getElementById("hofClose").onclick = () => hideModal("hofModal");
 
         document.getElementById("battleGiveUpBtn").onclick = () => {
             if(confirm("정말 포기하시겠습니까? (보상 없음)")) {
@@ -885,7 +1265,7 @@
         };
 
         document.getElementById("quizCancel").onclick = () => {
-            document.getElementById("quizModal").classList.add("hidden");
+            hideModal("quizModal");
             if(quizCallback) quizCallback(false);
         };
     };
