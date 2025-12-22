@@ -58,7 +58,6 @@
         }
         .animate-lunge-enemy { animation: enemyLunge 0.2s ease-out; }
 
-        /* 회피 텍스트 애니메이션 */
         @keyframes floatUp {
             0% { transform: translateY(0); opacity: 1; }
             100% { transform: translateY(-20px); opacity: 0; }
@@ -79,7 +78,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.4</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.5</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -136,7 +135,7 @@
             <button id="btnEnterDungeon" class="col-span-2 bg-gradient-to-r from-slate-800 to-slate-700 text-white p-5 rounded-2xl shadow-lg border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
                 <div class="text-left">
                     <div class="font-bold text-xl">던전 입장</div>
-                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (밸런스 패치)</div>
+                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (스킬 강화 패치)</div>
                 </div>
                 <span class="text-3xl group-hover:scale-110 transition-transform">⚔️</span>
             </button>
@@ -365,7 +364,6 @@
         }
     }
 
-    // Base64 유틸
     function toBase64UTF8(obj) {
         const json = typeof obj === "string" ? obj : JSON.stringify(obj);
         return btoa(unescape(encodeURIComponent(json)));
@@ -377,7 +375,6 @@
         } catch(e) { return null; }
     }
 
-    // 최대공약수
     function gcd(a, b) {
         return b ? gcd(b, a % b) : a;
     }
@@ -392,9 +389,9 @@
             baseStats: { hp: 15, atk: 12, def: 8, spd: 5 },
             sprites: { default: "./png/knight.png", skin: "./png/knight-black.png" },
             skills: [
-                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
+                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격 (CD 0)" },
                 { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 스턴" },
-                { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "2턴간 방어력 2배" },
+                { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "방어력 2배 (레벨UP: 지속시간/CD)" },
                 { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" },
                 { id: "k5", name: "전력 찌르기", type: "atk", power: 1.8, cd: 2, desc: "강력한 일격" },
                 { id: "k6", name: "수호의 빛", type: "buff_shield", power: 0, cd: 4, desc: "체력의 30%+a 쉴드" },
@@ -407,12 +404,12 @@
             baseStats: { hp: 10, atk: 18, def: 4, spd: 10 },
             sprites: { default: "./png/rogue-male.png", skin: "./png/rogue-female.png" },
             skills: [
-                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격" },
+                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격 (CD 0)" },
                 { id: "r2", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "방어 관통 피해" },
-                { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "3턴간 공격력 50% 증가" },
+                { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "공격력 50% 증가" },
                 { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" },
                 { id: "r5", name: "연속 베기", type: "atk", power: 0.8, cd: 1, desc: "쿨타임이 짧은 공격" },
-                { id: "r6", name: "그림자 숨기", type: "buff_evasion", power: 0, cd: 4, desc: "3턴간 회피율 50% 증가" },
+                { id: "r6", name: "그림자 숨기", type: "buff_evasion", power: 0, cd: 4, desc: "50% 확률 완전 회피" },
                 { id: "r7", name: "출혈 단검", type: "atk", power: 1.2, cd: 2, desc: "지속 피해 효과" },
                 { id: "r8", name: "배후 습격", type: "atk_crit", power: 2.5, cd: 4, desc: "높은 치명타 확률" }
             ]
@@ -422,7 +419,7 @@
             baseStats: { hp: 8, atk: 22, def: 3, spd: 6 },
             sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" },
             skills: [
-                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격" },
+                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격 (CD 0)" },
                 { id: "m2", name: "파이어볼", type: "atk_aoe", power: 1.8, cd: 3, desc: "강력한 화염 피해" },
                 { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "체력의 30%+a 쉴드 생성" },
                 { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" },
@@ -548,6 +545,46 @@
         localStorage.setItem(LS_KEYS.HOF, JSON.stringify(list));
     }
 
+    // --- NEW: 스킬 레벨에 따른 스탯 계산 (쿨타임 감소, 지속시간 증가 등) ---
+    function getEffectiveSkillStats(skill, level) {
+        let cd = skill.cd;
+        let power = skill.power;
+
+        // 쿨타임 감소: 5레벨마다 1 감소 (기본 쿨타임이 0인 평타는 제외)
+        if (cd > 0) {
+            let reduction = Math.floor((level - 1) / 5);
+            cd = Math.max(1, cd - reduction);
+        }
+
+        // 지속시간 증가: 3레벨마다 1턴 증가
+        let duration = 0;
+        if(skill.type === 'buff_atk') duration = 3 + Math.floor((level-1)/3);
+        if(skill.type === 'buff_def') duration = 2 + Math.floor((level-1)/3);
+        if(skill.type === 'buff_evasion') duration = 3 + Math.floor((level-1)/3);
+
+        return { cd, duration };
+    }
+
+    function getSkillDesc(skill, lv) {
+        const stats = getEffectiveSkillStats(skill, lv);
+        const lvlMult = 1 + (lv * 0.1);
+        const pct = Math.round(skill.power * lvlMult * 100);
+
+        let txt = "";
+        if(skill.type === 'buff_shield') txt = `HP의 ${Math.round(30 + lv * 5)}% 쉴드`;
+        else if(skill.type === 'buff_evasion') txt = `${stats.duration}턴간 회피율 50%`;
+        else if(skill.type === 'buff_atk') txt = `${stats.duration}턴간 공격력 50% 증가`;
+        else if(skill.type === 'buff_def') txt = `${stats.duration}턴간 방어력 2배`;
+        else if(skill.type === 'atk_heal') txt = `피해의 일부 회복 (위력 ${Math.round(skill.power * lvlMult * 10)/10})`;
+        else if(skill.type.includes('atk')) txt = `공격력의 ${pct}% 피해`;
+        else txt = skill.desc;
+
+        if (skill.cd > 0) {
+            txt += ` (CD:${stats.cd})`;
+        }
+        return txt;
+    }
+
     /* =========================================
      * 3. UI FUNCTIONS (LOBBY & SELECT)
      * ========================================= */
@@ -615,21 +652,6 @@
     function openTraining() {
         renderTrainingList();
         showModal("trainingModal");
-    }
-
-    function getSkillDesc(skill, lv) {
-        // 스킬 설명 생성기 (레벨 반영)
-        const lvlMult = 1 + (lv * 0.1);
-        const pct = Math.round(skill.power * lvlMult * 100);
-
-        if(skill.type === 'buff_shield') return `HP의 ${Math.round(30 + lv * 5)}% 쉴드`;
-        if(skill.type === 'buff_evasion') return `3턴간 회피율 50%`;
-        if(skill.type === 'buff_atk') return `3턴간 공격력 50% 증가`;
-        if(skill.type === 'buff_def') return `2턴간 방어력 2배`;
-        if(skill.type === 'atk_heal') return `피해의 일부 회복`;
-        if(skill.type.includes('atk')) return `공격력의 ${pct}% 피해`;
-
-        return skill.desc;
     }
 
     function renderTrainingList() {
@@ -700,8 +722,8 @@
                         ${skill.name} <span class="text-blue-500 text-xs">Lv.${lv}</span>
                         ${isEquipped ? '<span class="text-[10px] bg-green-500 text-white px-1.5 rounded">장착중</span>' : ''}
                     </div>
-                    <div class="text-[10px] text-slate-500 mt-1">현재: ${currDesc}</div>
-                    <div class="text-[10px] text-blue-400">다음: ${nextDesc}</div>
+                    <div class="text-[10px] text-slate-600 mt-1 font-medium">${currDesc}</div>
+                    <div class="text-[10px] text-blue-500 mt-0.5">⬆️ 다음: ${nextDesc}</div>
                 </div>
                 <button class="px-3 py-1.5 ml-2 bg-yellow-500 hover:bg-yellow-400 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 disabled:bg-slate-300 disabled:text-slate-500" 
                     id="btnTrain_${skill.id}">
@@ -933,6 +955,7 @@
         battleState.player.skills.forEach((skill, idx) => {
             const cd = battleState.cooldowns[idx];
             const lv = battleState.player.skillLevels[skill.id] || 1;
+            const stats = getEffectiveSkillStats(skill, lv); // 동적 스탯 가져오기
 
             const btn = document.createElement("button");
             btn.className = `p-3 rounded-lg border-2 text-left relative overflow-hidden transition-all ${cd > 0 ? 'bg-slate-700 border-slate-600 text-slate-500 cursor-not-allowed' : 'bg-slate-800 border-blue-500 text-white hover:bg-slate-700 active:scale-95'}`;
@@ -971,8 +994,9 @@
             const e = battleState.enemy;
             const skill = p.skills[skillIdx];
             const slv = p.skillLevels[skill.id] || 1;
+            const stats = getEffectiveSkillStats(skill, slv);
 
-            battleState.cooldowns[skillIdx] = (skill.cd || 0) + 1;
+            battleState.cooldowns[skillIdx] = (stats.cd || 0) + 1;
 
             if (skill.type.includes("atk")) {
                 const pImg = document.getElementById("playerImg");
@@ -999,6 +1023,9 @@
         let lvlMult = 1 + (level * 0.1);
         let dmg = Math.floor(attacker.atk * skill.power * lvlMult * mult);
 
+        // 동적 스탯 (지속시간 등)
+        const stats = getEffectiveSkillStats(skill, level);
+
         if (battleState.mode === "ghost" && attacker === battleState.enemy) {
             dmg = Math.floor(dmg * 0.9);
         }
@@ -1019,13 +1046,13 @@
         }
 
         if (skill.type === "buff_atk") {
-            attacker.buffs.atk = 3;
-            logBattle("공격력 증가!");
+            attacker.buffs.atk = stats.duration;
+            logBattle(`공격력 증가! (${stats.duration}턴)`);
         }
 
         if (skill.type === "buff_def") {
-            attacker.buffs.def = 2;
-            logBattle("방어 태세!");
+            attacker.buffs.def = stats.duration;
+            logBattle(`방어 태세! (${stats.duration}턴)`);
         }
 
         if (skill.type === "buff_shield") {
@@ -1035,8 +1062,8 @@
         }
 
         if (skill.type === "buff_evasion") {
-            attacker.buffs.evasion = 3; // 3턴
-            logBattle("회피율 50% 증가!");
+            attacker.buffs.evasion = stats.duration;
+            logBattle(`회피율 증가! (${stats.duration}턴)`);
         }
 
         if (skill.type.includes("heal")) {
@@ -1047,6 +1074,15 @@
         }
 
         if (skill.power > 0) {
+            // 회피 체크 (방어자)
+            if (defender.buffs && defender.buffs.evasion > 0) {
+                if (Math.random() < 0.5) {
+                    logBattle("공격이 빗나갔습니다! (회피)");
+                    if(defender === battleState.player) createFloatingText("MISS!", "player");
+                    return; // 데미지 없음
+                }
+            }
+
             let finalDmg = Math.max(1, dmg - Math.floor(defender.def * 0.5));
             if (defender.buffs && defender.buffs.def > 0) finalDmg = Math.floor(finalDmg * 0.5);
 
@@ -1096,8 +1132,9 @@
                 const idx = usable[Math.floor(Math.random() * usable.length)];
                 const skill = e.skills[idx];
                 const slv = (e.skillLevels && e.skillLevels[skill.id]) ? e.skillLevels[skill.id] : 1;
+                const stats = getEffectiveSkillStats(skill, slv);
 
-                battleState.enemyCooldowns[idx] = (skill.cd || 0) + 1;
+                battleState.enemyCooldowns[idx] = (stats.cd || 0) + 1;
 
                 if(skill.type.includes("atk")) {
                     const eImg = document.getElementById("enemyImg");
@@ -1488,7 +1525,7 @@
                 ...myStats, maxHp: pMaxHp, hp: pMaxHp, shield: 0,
                 skills: mySkills, skillLevels: myHero.skillLevels,
                 name: myDef.nameKo, img: myImg, classId: myCid, level: myHero.level,
-                buffs: { atk: 0, def: 0 }
+                buffs: { atk: 0, def: 0, evasion: 0 }
             },
             enemy: {
                 name: `Ghost ${ghostData.nm}`,
