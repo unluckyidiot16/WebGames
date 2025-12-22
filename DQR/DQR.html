@@ -24,23 +24,31 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 적 스프라이트 반전 (왼쪽 바라보기) */
+        /* 적 Wrapper 반전 (왼쪽 바라보기) */
+        /* 애니메이션과 충돌하지 않도록 정적 transform은 여기서 처리 */
         .enemy-flip { transform: scaleX(-1); }
-        /* 보스일 경우 반전 + 확대 */
         .enemy-flip-boss { transform: scaleX(-1) scale(1.5); }
 
-        /* 애니메이션 */
-        @keyframes damageShake { 0% { transform: translateX(0); } 20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } 40% { transform: translateX(6px) rotate(5deg); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
+        /* 애니메이션 정의 */
+
+        /* 피격 흔들림 */
+        @keyframes damageShake {
+            0% { transform: translateX(0); }
+            20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
+            40% { transform: translateX(6px) rotate(5deg); }
+            60% { transform: translateX(-3px); }
+            80% { transform: translateX(3px); }
+        }
         .animate-damage { animation: damageShake 0.4s ease-in-out; }
 
-        /* 플레이어 공격 (오른쪽으로 돌진) */
-        @keyframes attackRight { 0% { transform: translateX(0); } 50% { transform: translateX(40px); } 100% { transform: translateX(0); } }
-        .animate-attack-player { animation: attackRight 0.3s ease-out; }
-
-        /* 적 공격 (왼쪽으로 돌진 - 기본이 반전된 상태라 로직 주의) */
-        /* 적은 scaleX(-1) 상태이므로, translateX 값을 반대로 주거나 부모 컨테이너를 움직여야 함. 여기선 간단히 translateX 음수 사용 */
-        @keyframes attackLeft { 0% { transform: scaleX(-1) translateX(0); } 50% { transform: scaleX(-1) translateX(40px); } 100% { transform: scaleX(-1) translateX(0); } }
-        .animate-attack-enemy { animation: attackLeft 0.3s ease-out; }
+        /* 공격 돌진 (오른쪽으로 30px) */
+        /* 적은 Wrapper가 반전되어 있으므로, 오른쪽으로 이동하면 시각적으로는 왼쪽으로 이동함 */
+        @keyframes lunge {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(40px); }
+            100% { transform: translateX(0); }
+        }
+        .animate-lunge { animation: lunge 0.2s ease-out; }
 
         .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
@@ -56,7 +64,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.5</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.6</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -177,8 +185,8 @@
                     <div id="enemyHpBar" class="h-full bg-red-500 transition-all duration-500" style="width: 100%"></div>
                 </div>
             </div>
-            <div class="relative">
-                <img id="enemyImg" src="./png/slime-green.png" class="w-32 h-32 pixel-art animate-bounce enemy-flip" style="animation-duration: 2s">
+            <div class="relative" id="enemyWrapper">
+                <img id="enemyImg" src="./png/slime-green.png" class="w-32 h-32 pixel-art animate-bounce" style="animation-duration: 2s">
             </div>
         </div>
 
@@ -739,10 +747,18 @@
         document.getElementById("battleStageText").textContent = bs.stage;
         document.getElementById("enemyName").textContent = bs.enemy.name;
         document.getElementById("enemyLevel").textContent = `Lv.${bs.stage}`;
-        document.getElementById("enemyImg").src = bs.enemy.img;
 
-        // 적 반전 및 보스 확대 적용
-        document.getElementById("enemyImg").className = `w-32 h-32 pixel-art animate-bounce ${isBoss ? 'enemy-flip-boss' : 'enemy-flip'}`;
+        // 적 이미지 설정
+        document.getElementById("enemyImg").src = bs.enemy.img;
+        document.getElementById("enemyImg").className = "w-32 h-32 pixel-art animate-bounce";
+
+        // 적 Wrapper에 반전 클래스 적용
+        const wrapper = document.getElementById("enemyWrapper");
+        if (isBoss) {
+            wrapper.className = "relative enemy-flip-boss";
+        } else {
+            wrapper.className = "relative enemy-flip";
+        }
 
         updateBattleUI();
         logBattle(`${bs.enemy.name} 출현!`);
@@ -823,8 +839,8 @@
             // 플레이어 공격 애니메이션 (공격형 스킬일 때만)
             if (skill.type.includes("atk")) {
                 const pImg = document.getElementById("playerImg");
-                pImg.classList.add("animate-attack-player");
-                setTimeout(() => pImg.classList.remove("animate-attack-player"), 300);
+                pImg.classList.add("animate-lunge");
+                setTimeout(() => pImg.classList.remove("animate-lunge"), 200);
             }
 
             // 데미지 계산 및 효과 적용
@@ -885,8 +901,7 @@
 
         if (skill.type.includes("heal")) {
             // 재생(regen) 스킬은 power가 0이므로 여기서 힐량을 계산해야 함
-            // 기본 힐량(20%) + 레벨 보정
-            const baseHealRatio = (skill.id === 'ms_regen') ? 0.3 : 0.2; // 몬스터 재생은 좀 더 많이
+            const baseHealRatio = (skill.id === 'ms_regen') ? 0.3 : 0.2;
             const heal = Math.floor(attacker.maxHp * baseHealRatio * lvlMult);
             attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
             logBattle(`HP ${heal} 회복`);
@@ -949,8 +964,8 @@
                 // 적 공격 애니메이션
                 if(skill.type.includes("atk")) {
                     const eImg = document.getElementById("enemyImg");
-                    eImg.classList.add("animate-attack-enemy");
-                    setTimeout(() => eImg.classList.remove("animate-attack-enemy"), 300);
+                    eImg.classList.add("animate-lunge");
+                    setTimeout(() => eImg.classList.remove("animate-lunge"), 200);
                 }
 
                 applySkillEffect(e, battleState.player, skill, slv);
@@ -966,8 +981,8 @@
 
         // 적 공격 애니메이션 (일반)
         const eImg = document.getElementById("enemyImg");
-        eImg.classList.add("animate-attack-enemy");
-        setTimeout(() => eImg.classList.remove("animate-attack-enemy"), 300);
+        eImg.classList.add("animate-lunge");
+        setTimeout(() => eImg.classList.remove("animate-lunge"), 200);
 
         if (p.buffs.def > 0) dmg = Math.floor(dmg * 0.5);
 
@@ -1316,7 +1331,11 @@
         updateBattleUI();
         document.getElementById("enemyImg").src = enemyImg;
         // 고스트는 플레이어와 같은 뱡향(오른쪽)을 기본으로 쓰므로, 반전시켜서 마주보게 함
-        document.getElementById("enemyImg").className = "w-32 h-32 pixel-art animate-bounce enemy-flip-boss"; // 고스트 보스 취급
+        document.getElementById("enemyImg").className = "w-32 h-32 pixel-art animate-bounce";
+
+        // 고스트 Wrapper 반전 적용
+        const wrapper = document.getElementById("enemyWrapper");
+        wrapper.className = "relative enemy-flip-boss";
 
         document.getElementById("enemyName").textContent = battleState.enemy.name;
         document.getElementById("enemyLevel").textContent = `Lv.${battleState.enemy.level}`;
