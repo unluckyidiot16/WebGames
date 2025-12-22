@@ -43,7 +43,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.2</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.3</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -1027,9 +1027,10 @@
         };
 
         const jsonStr = JSON.stringify(payload);
-        const encoded = toBase64UTF8(jsonStr);
-        // ?ghost= 파라미터가 붙은 현재 URL 생성
-        const url = `${window.location.origin}${window.location.pathname}?ghost=${encoded}`;
+        const token = toBase64UTF8(jsonStr);
+        // User requested fixed URL
+        const GHOST_ROOT_URL = "https://unluckyidiot16.github.io/WebGames/DQR/DQR.html";
+        const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
 
         const canvas = document.getElementById("ghostQrCanvas");
         if(QRCode) QRCode.toCanvas(canvas, url, { width: 200 }, (err) => {});
