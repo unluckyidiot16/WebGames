@@ -941,12 +941,18 @@
 
     // --- [중요] 데이터 버전 관리 ---
     // 기존 SAVE_KEY를 아래 다중 키 체제로 교체합니다.
-    const LS_KEYS = {
+    const LS_KEY = {
         POINTS: "qz_p_v80",
         OWNED: "qz_o_v80",
         PARTNER: "qz_st_v80",
+        HOF: "qz_hof_v80",
         TICKETS: "qz_t_v80",
-        CHAR_DATA: "qz_c_prog_v80"
+        DUPES: "qz_d_v80",
+        CHAR_DATA: "qz_c_prog_v80",
+        SHINY_SKINS: "qz_shiny_v80",
+        // 아래 두 줄 추가하여 index_patched와 키를 맞춤
+        INVENTORY: "qz_inv_v80",
+        UPGRADES: "qz_upg_v80"
     };
 
     // 1. 공용 키 정의 (PRL_v2와 동일)
