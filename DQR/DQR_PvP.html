@@ -188,7 +188,7 @@
     // 변수명 충돌 방지: supabase -> sb
     let sb = null;
     try {
-        if(SUPABASE_URL === 'https://otzhhhzirasqmrdknhib.supabase.co') {
+        if(SUPABASE_URL === 'YOUR_SUPABASE_URL') {
             alert("Supabase 설정이 필요합니다. html 파일을 열어 URL과 KEY를 입력해주세요.");
         } else {
             sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
