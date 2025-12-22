@@ -941,18 +941,13 @@
 
     // --- [중요] 데이터 버전 관리 ---
     // 기존 SAVE_KEY를 아래 다중 키 체제로 교체합니다.
-    const LS_KEY = {
+    const LS_KEYS = {
         POINTS: "qz_p_v80",
         OWNED: "qz_o_v80",
         PARTNER: "qz_st_v80",
-        HOF: "qz_hof_v80",
-        TICKETS: "qz_t_v80",
-        DUPES: "qz_d_v80",
-        CHAR_DATA: "qz_c_prog_v80",
-        SHINY_SKINS: "qz_shiny_v80",
-        // 아래 두 줄 추가하여 index_patched와 키를 맞춤
-        INVENTORY: "qz_inv_v80",
-        UPGRADES: "qz_upg_v80"
+        INVENTORY: "qz_inv_v80", // 추가
+        UPGRADES: "qz_upg_v80",   // 추가
+        CHAR_DATA: "qz_c_prog_v80" // 추가
     };
 
     // 1. 공용 키 정의 (PRL_v2와 동일)
@@ -1114,12 +1109,14 @@
         }
     }
 
+    // 2. saveGame 함수 수정 (모든 데이터를 저장하도록 변경)
     function saveGame() {
         try {
             localStorage.setItem(LS_KEYS.POINTS, user.points);
             localStorage.setItem(LS_KEYS.OWNED, JSON.stringify(Array.from(user.dex)));
             localStorage.setItem(LS_KEYS.PARTNER, user.partnerId || "0");
-            // 필요한 경우 인벤토리 등도 개별 키로 관리 가능
+            localStorage.setItem(LS_KEYS.INVENTORY, JSON.stringify(user.inventory)); // 인벤토리 저장
+            localStorage.setItem(LS_KEYS.UPGRADES, JSON.stringify(user.upgrades));   // 강화 수치 저장
         } catch(e) { console.error("저장 실패", e); }
     }
 
@@ -1208,20 +1205,32 @@
         }
     }
 
+    // 3. loadGame 함수 수정 (모든 데이터를 불러오도록 변경)
     function loadGame() {
         try {
             const points = localStorage.getItem(LS_KEYS.POINTS);
             const owned = localStorage.getItem(LS_KEYS.OWNED);
             const partner = localStorage.getItem(LS_KEYS.PARTNER);
+            const inventory = localStorage.getItem(LS_KEYS.INVENTORY);
+            const upgrades = localStorage.getItem(LS_KEYS.UPGRADES);
+            const charDataRaw = localStorage.getItem(LS_KEYS.CHAR_DATA);
 
             if (points !== null) user.points = parseInt(points);
             if (owned !== null) user.dex = new Set(JSON.parse(owned));
             if (partner !== null) user.partnerId = parseInt(partner);
 
-            // 상점 업그레이드 데이터 등은 기존 방식을 유지하거나 필요시 확장
+            // 인벤토리(포켓볼) 로드
+            if (inventory !== null) user.inventory = JSON.parse(inventory);
+
+            // 강화 수치 로드
+            if (upgrades !== null) user.upgrades = JSON.parse(upgrades);
+
+            // 캐릭터 성장 데이터(레벨) 로드
+            if (charDataRaw) characterData = JSON.parse(charDataRaw);
+
         } catch(e) { console.warn("불러오기 실패, 초기 데이터 사용"); }
     }
-
+    
     function resetGameData() {
         if(confirm("모든 데이터를 초기화하시겠습니까?")) {
             localStorage.removeItem(SAVE_KEY);
