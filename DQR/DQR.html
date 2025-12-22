@@ -8,7 +8,7 @@
     <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
     <style>
-        /* 모바일 브라우저 높이 대응 (dvh 사용) */
+        /* 모바일 브라우저 높이 대응 */
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
             touch-action: manipulation;
@@ -30,11 +30,11 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 적 Wrapper 반전 (왼쪽 바라보기) */
+        /* 적 반전 */
         .enemy-flip { transform: scaleX(-1); }
         .enemy-flip-boss { transform: scaleX(-1) scale(1.5); }
 
-        /* 애니메이션 정의 */
+        /* 애니메이션 */
         @keyframes damageShake {
             0% { transform: translateX(0); }
             20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -58,6 +58,13 @@
         }
         .animate-lunge-enemy { animation: enemyLunge 0.2s ease-out; }
 
+        /* 회피 텍스트 애니메이션 */
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 1; }
+            100% { transform: translateY(-20px); opacity: 0; }
+        }
+        .animate-float { animation: floatUp 0.8s ease-out forwards; }
+
         .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
 
@@ -72,7 +79,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.3</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.4</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -129,7 +136,7 @@
             <button id="btnEnterDungeon" class="col-span-2 bg-gradient-to-r from-slate-800 to-slate-700 text-white p-5 rounded-2xl shadow-lg border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
                 <div class="text-left">
                     <div class="font-bold text-xl">던전 입장</div>
-                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (평타 쿨타임 수정)</div>
+                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (밸런스 패치)</div>
                 </div>
                 <span class="text-3xl group-hover:scale-110 transition-transform">⚔️</span>
             </button>
@@ -187,8 +194,8 @@
     </div>
 
     <div class="w-full max-w-md flex-1 relative flex flex-col justify-center px-4 z-10 gap-8 md:gap-12">
-        <div class="flex flex-col items-end relative">
-            <div class="bg-slate-900/80 p-3 rounded-xl border border-slate-600 mb-2 w-40 backdrop-blur-md transform translate-x-2">
+        <div class="flex flex-col items-end relative transition-all duration-300" id="enemyContainer">
+            <div id="enemyUiContainer" class="bg-slate-900/80 p-3 rounded-xl border border-slate-600 mb-2 w-40 backdrop-blur-md transform translate-x-2 relative z-30 transition-transform duration-300">
                 <div class="flex justify-between items-baseline mb-1">
                     <span id="enemyName" class="font-bold text-sm text-red-400">Slime</span>
                     <span id="enemyLevel" class="text-[10px] text-slate-400">Lv.1</span>
@@ -198,7 +205,7 @@
                     <div id="enemyHpBar" class="h-full bg-red-500 transition-all duration-500" style="width: 100%"></div>
                 </div>
             </div>
-            <div class="relative" id="enemyWrapper">
+            <div class="relative z-10" id="enemyWrapper">
                 <img id="enemyImg" src="./png/slime-green.png" class="w-28 h-28 md:w-32 md:h-32 pixel-art animate-bounce" style="animation-duration: 2s">
             </div>
         </div>
@@ -206,6 +213,7 @@
         <div class="flex flex-col items-start relative -mt-4 md:-mt-8">
             <div class="relative z-10">
                 <img id="playerImg" src="./png/knight.png" class="w-32 h-32 md:w-40 md:h-40 pixel-art drop-shadow-2xl">
+                <div id="playerFloatText" class="absolute top-0 left-0 w-full h-full flex justify-center items-center pointer-events-none"></div>
             </div>
             <div class="bg-slate-900/80 p-4 rounded-xl border border-blue-500/50 w-48 -mt-6 z-20 transform -translate-x-2 backdrop-blur-md shadow-lg">
                 <div class="flex justify-between items-baseline mb-1">
@@ -384,12 +392,12 @@
             baseStats: { hp: 15, atk: 12, def: 8, spd: 5 },
             sprites: { default: "./png/knight.png", skin: "./png/knight-black.png" },
             skills: [
-                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격 (CD 0)" },
+                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
                 { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 스턴" },
                 { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "2턴간 방어력 2배" },
                 { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" },
                 { id: "k5", name: "전력 찌르기", type: "atk", power: 1.8, cd: 2, desc: "강력한 일격" },
-                { id: "k6", name: "수호의 빛", type: "buff_shield", power: 0, cd: 4, desc: "체력의 40% 쉴드" },
+                { id: "k6", name: "수호의 빛", type: "buff_shield", power: 0, cd: 4, desc: "체력의 30%+a 쉴드" },
                 { id: "k7", name: "반격 태세", type: "buff_atk", power: 0, cd: 3, desc: "공격력 50% 증가" },
                 { id: "k8", name: "심판", type: "atk_execute", power: 3.5, cd: 6, desc: "마무리 일격" }
             ]
@@ -399,12 +407,12 @@
             baseStats: { hp: 10, atk: 18, def: 4, spd: 10 },
             sprites: { default: "./png/rogue-male.png", skin: "./png/rogue-female.png" },
             skills: [
-                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격 (CD 0)" },
+                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격" },
                 { id: "r2", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "방어 관통 피해" },
                 { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "3턴간 공격력 50% 증가" },
                 { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" },
                 { id: "r5", name: "연속 베기", type: "atk", power: 0.8, cd: 1, desc: "쿨타임이 짧은 공격" },
-                { id: "r6", name: "그림자 숨기", type: "buff_def", power: 0, cd: 4, desc: "회피율 증가(방어 상승)" },
+                { id: "r6", name: "그림자 숨기", type: "buff_evasion", power: 0, cd: 4, desc: "3턴간 회피율 50% 증가" },
                 { id: "r7", name: "출혈 단검", type: "atk", power: 1.2, cd: 2, desc: "지속 피해 효과" },
                 { id: "r8", name: "배후 습격", type: "atk_crit", power: 2.5, cd: 4, desc: "높은 치명타 확률" }
             ]
@@ -414,9 +422,9 @@
             baseStats: { hp: 8, atk: 22, def: 3, spd: 6 },
             sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" },
             skills: [
-                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격 (CD 0)" },
+                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격" },
                 { id: "m2", name: "파이어볼", type: "atk_aoe", power: 1.8, cd: 3, desc: "강력한 화염 피해" },
-                { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "HP 30% 만큼 쉴드 생성" },
+                { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "체력의 30%+a 쉴드 생성" },
                 { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" },
                 { id: "m5", name: "아이스 볼트", type: "atk_stun", power: 1.3, cd: 3, desc: "피해 + 동결(스턴)" },
                 { id: "m6", name: "명상", type: "buff_atk", power: 0, cd: 4, desc: "마법 공격력 대폭 증가" },
@@ -609,6 +617,21 @@
         showModal("trainingModal");
     }
 
+    function getSkillDesc(skill, lv) {
+        // 스킬 설명 생성기 (레벨 반영)
+        const lvlMult = 1 + (lv * 0.1);
+        const pct = Math.round(skill.power * lvlMult * 100);
+
+        if(skill.type === 'buff_shield') return `HP의 ${Math.round(30 + lv * 5)}% 쉴드`;
+        if(skill.type === 'buff_evasion') return `3턴간 회피율 50%`;
+        if(skill.type === 'buff_atk') return `3턴간 공격력 50% 증가`;
+        if(skill.type === 'buff_def') return `2턴간 방어력 2배`;
+        if(skill.type === 'atk_heal') return `피해의 일부 회복`;
+        if(skill.type.includes('atk')) return `공격력의 ${pct}% 피해`;
+
+        return skill.desc;
+    }
+
     function renderTrainingList() {
         const cid = gameState.selectedClass;
         const hero = gameState.heroes[cid];
@@ -659,6 +682,9 @@
             const cost = lv * 100;
             const isEquipped = hero.equipped.includes(skill.id);
 
+            const currDesc = getSkillDesc(skill, lv);
+            const nextDesc = getSkillDesc(skill, lv+1);
+
             const row = document.createElement("div");
             row.className = `skill-card rounded-xl p-3 flex justify-between items-center shadow-sm ${isEquipped ? 'equipped' : 'bg-white border-slate-200'}`;
 
@@ -674,7 +700,8 @@
                         ${skill.name} <span class="text-blue-500 text-xs">Lv.${lv}</span>
                         ${isEquipped ? '<span class="text-[10px] bg-green-500 text-white px-1.5 rounded">장착중</span>' : ''}
                     </div>
-                    <div class="text-[10px] text-slate-500 mt-0.5">${skill.desc}</div>
+                    <div class="text-[10px] text-slate-500 mt-1">현재: ${currDesc}</div>
+                    <div class="text-[10px] text-blue-400">다음: ${nextDesc}</div>
                 </div>
                 <button class="px-3 py-1.5 ml-2 bg-yellow-500 hover:bg-yellow-400 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 disabled:bg-slate-300 disabled:text-slate-500" 
                     id="btnTrain_${skill.id}">
@@ -748,7 +775,7 @@
                 img: imgSrc,
                 classId: cid,
                 level: hData.level,
-                buffs: { atk: 0, def: 0 }
+                buffs: { atk: 0, def: 0, evasion: 0 }
             },
             enemy: null,
             cooldowns: [0, 0, 0, 0], // 처음엔 초기화
@@ -804,9 +831,12 @@
 
         const wrapper = document.getElementById("enemyWrapper");
         if (isBoss) {
-            wrapper.className = "relative enemy-flip-boss";
+            wrapper.className = "relative enemy-flip-boss z-10";
+            // 보스일 경우 UI 위치 조정 (겹침 방지)
+            document.getElementById("enemyUiContainer").classList.add("-translate-y-8");
         } else {
-            wrapper.className = "relative enemy-flip";
+            wrapper.className = "relative enemy-flip z-10";
+            document.getElementById("enemyUiContainer").classList.remove("-translate-y-8");
         }
 
         updateBattleUI();
@@ -833,6 +863,16 @@
         saveGameData();
     }
 
+    function createFloatingText(text, target) {
+        const container = document.getElementById("playerFloatText");
+        const el = document.createElement("div");
+        el.className = "absolute text-white font-black text-xl stroke-black animate-float";
+        el.style.textShadow = "2px 2px 0 #000";
+        el.textContent = text;
+        container.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+    }
+
     function updateBattleUI() {
         if(!battleState) return;
         const p = battleState.player;
@@ -851,6 +891,7 @@
         pBuffsEl.innerHTML = "";
         if (p.buffs.atk > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-red-100 text-red-600 px-1 rounded border border-red-200">공격UP ${p.buffs.atk}</span>`;
         if (p.buffs.def > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-blue-100 text-blue-600 px-1 rounded border border-blue-200">방어UP ${p.buffs.def}</span>`;
+        if (p.buffs.evasion > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-green-100 text-green-600 px-1 rounded border border-green-200">회피ON ${p.buffs.evasion}</span>`;
         if (p.shield > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-yellow-100 text-yellow-600 px-1 rounded border border-yellow-200">보호막 ${p.shield}</span>`;
 
         document.getElementById("enemyHpBar").style.width = `${Math.max(0, (e.hp/e.maxHp)*100)}%`;
@@ -988,9 +1029,14 @@
         }
 
         if (skill.type === "buff_shield") {
-            const shieldAmt = Math.floor(attacker.maxHp * 0.3 * lvlMult);
+            const shieldAmt = Math.floor(attacker.maxHp * (0.3 + (level * 0.05)));
             attacker.shield += shieldAmt;
             logBattle(`보호막 ${shieldAmt} 생성!`);
+        }
+
+        if (skill.type === "buff_evasion") {
+            attacker.buffs.evasion = 3; // 3턴
+            logBattle("회피율 50% 증가!");
         }
 
         if (skill.type.includes("heal")) {
@@ -1039,6 +1085,7 @@
             return;
         }
 
+        // 고스트 AI: 70% 확률로 스킬 사용 시도
         if (e.skills && e.skills.length > 0 && Math.random() < 0.7) {
             const usable = [];
             for (let i = 0; i < e.skills.length; i++) {
@@ -1066,6 +1113,17 @@
         }
 
         const p = battleState.player;
+
+        // 회피 체크 (도적 등)
+        if (p.buffs.evasion > 0) {
+            if (Math.random() < 0.5) {
+                logBattle("회피 성공!");
+                createFloatingText("MISS!", "player");
+                endEnemyTurn();
+                return;
+            }
+        }
+
         let dmg = Math.max(1, e.atk - Math.floor(p.def * 0.5));
 
         const eImg = document.getElementById("enemyImg");
@@ -1124,6 +1182,7 @@
 
         if (p.buffs.atk > 0) p.buffs.atk--;
         if (p.buffs.def > 0) p.buffs.def--;
+        if (p.buffs.evasion > 0) p.buffs.evasion--;
 
         updateBattleUI();
     }
