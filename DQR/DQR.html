@@ -72,7 +72,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.1</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.3</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -129,7 +129,7 @@
             <button id="btnEnterDungeon" class="col-span-2 bg-gradient-to-r from-slate-800 to-slate-700 text-white p-5 rounded-2xl shadow-lg border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
                 <div class="text-left">
                     <div class="font-bold text-xl">던전 입장</div>
-                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (쿨타임 유지)</div>
+                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (평타 쿨타임 수정)</div>
                 </div>
                 <span class="text-3xl group-hover:scale-110 transition-transform">⚔️</span>
             </button>
@@ -384,7 +384,7 @@
             baseStats: { hp: 15, atk: 12, def: 8, spd: 5 },
             sprites: { default: "./png/knight.png", skin: "./png/knight-black.png" },
             skills: [
-                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
+                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격 (CD 0)" },
                 { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 스턴" },
                 { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "2턴간 방어력 2배" },
                 { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" },
@@ -399,7 +399,7 @@
             baseStats: { hp: 10, atk: 18, def: 4, spd: 10 },
             sprites: { default: "./png/rogue-male.png", skin: "./png/rogue-female.png" },
             skills: [
-                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격" },
+                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격 (CD 0)" },
                 { id: "r2", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "방어 관통 피해" },
                 { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "3턴간 공격력 50% 증가" },
                 { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" },
@@ -414,7 +414,7 @@
             baseStats: { hp: 8, atk: 22, def: 3, spd: 6 },
             sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" },
             skills: [
-                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격" },
+                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격 (CD 0)" },
                 { id: "m2", name: "파이어볼", type: "atk_aoe", power: 1.8, cd: 3, desc: "강력한 화염 피해" },
                 { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "HP 30% 만큼 쉴드 생성" },
                 { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" },
@@ -461,7 +461,7 @@
      * 2. STATE MANAGEMENT & LOCAL STORAGE
      * ========================================= */
     const LS_KEYS = {
-        DATA: "qz_rpg_v100_data", // 데이터 버전 업
+        DATA: "qz_rpg_v100_data",
         HOF: "qz_rpg_v100_hof"
     };
 
@@ -771,13 +771,11 @@
 
         const monsterSkills = (variant.skills || []).map(k => MONSTER_SKILLS[k]).filter(s => s);
 
-        // 레벨 스케일링: 플레이어 레벨 + 스테이지 보정
         const pLevel = battleState.player.level;
         const enemyLevel = Math.max(1, pLevel + Math.floor((bs.stage - 1) * 0.5));
 
         bs.enemy = {
             name: variant.name + (isBoss ? " (BOSS)" : ""),
-            // 스탯 공식 조정 (플레이어 레벨 비례)
             maxHp: Math.floor((10 + (enemyLevel * 3)) * (variant.hpMult || 1.0)),
             hp: Math.floor((10 + (enemyLevel * 3)) * (variant.hpMult || 1.0)),
             atk: Math.floor((3 + (enemyLevel * 1.5)) * (variant.atkMult || 1.0)),
@@ -789,8 +787,12 @@
             skillLevels: {}
         };
 
-        // 플레이어 쿨타임은 유지 (여기서 초기화 안함)
-        // 적 쿨타임은 리셋
+        // 쿨타임 0인 스킬 강제 초기화 (안전장치)
+        bs.player.skills.forEach((s, i) => {
+            if((s.cd || 0) === 0) bs.cooldowns[i] = 0;
+        });
+
+        // 적 쿨타임 리셋
         bs.enemyCooldowns = new Array(monsterSkills.length).fill(0);
 
         document.getElementById("battleStageText").textContent = bs.stage;
@@ -857,7 +859,6 @@
         eBuffsEl.innerHTML = "";
         if (e.buffs.stun > 0) eBuffsEl.innerHTML += `<span class="text-[9px] bg-purple-100 text-purple-600 px-1 rounded border border-purple-200">기절 ${e.buffs.stun}</span>`;
 
-        // 포션 UI 업데이트
         document.getElementById("battlePotionCount").textContent = gameState.potions;
         const potionBtn = document.getElementById("battlePotionBtn");
         if (gameState.potions <= 0) potionBtn.disabled = true;
@@ -869,6 +870,24 @@
     function renderSkillButtons() {
         const grid = document.getElementById("skillGrid");
         grid.innerHTML = "";
+
+        // 모든 스킬이 쿨타임인지 체크
+        const allCooldown = battleState.player.skills.every((_, i) => battleState.cooldowns[i] > 0);
+
+        if (allCooldown) {
+            grid.className = "flex flex-col gap-2";
+            const btn = document.createElement("button");
+            btn.className = "w-full py-4 bg-slate-700 text-white rounded-xl font-bold border-2 border-slate-600 hover:bg-slate-600 active:scale-95 transition-all";
+            btn.innerHTML = `
+                <div class="text-lg">💤 휴식</div>
+                <div class="text-xs text-slate-400">모든 스킬 쿨타임 중... (턴 넘기기)</div>
+            `;
+            btn.onclick = () => handleSkipTurn();
+            grid.appendChild(btn);
+            return;
+        }
+
+        grid.className = "grid grid-cols-2 gap-2";
 
         battleState.player.skills.forEach((skill, idx) => {
             const cd = battleState.cooldowns[idx];
@@ -888,6 +907,11 @@
             }
             grid.appendChild(btn);
         });
+    }
+
+    function handleSkipTurn() {
+        logBattle("사용 가능한 스킬이 없습니다. 휴식을 취합니다.");
+        setTimeout(enemyTurn, 600);
     }
 
     function logBattle(msg) {
@@ -1015,7 +1039,6 @@
             return;
         }
 
-        // 고스트 AI: 70% 확률로 스킬 사용 시도
         if (e.skills && e.skills.length > 0 && Math.random() < 0.7) {
             const usable = [];
             for (let i = 0; i < e.skills.length; i++) {
@@ -1157,7 +1180,10 @@
             bs.player.atk = newStats.atk;
             bs.player.def = newStats.def;
             bs.player.level = hData.level;
-            // 자동 회복 제거: 현재 체력 유지
+
+            // 턴 종료 보정: 승리 시 한 턴이 지난 것으로 간주하여 쿨타임 감소
+            bs.cooldowns = bs.cooldowns.map(c => Math.max(0, c - 1));
+
             bs.player.hp = Math.min(bs.player.hp, bs.player.maxHp);
             bs.stage++;
             startBattleStage();
