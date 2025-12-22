@@ -25,13 +25,10 @@
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
         /* 적 Wrapper 반전 (왼쪽 바라보기) */
-        /* 애니메이션과 충돌하지 않도록 정적 transform은 여기서 처리 */
         .enemy-flip { transform: scaleX(-1); }
         .enemy-flip-boss { transform: scaleX(-1) scale(1.5); }
 
         /* 애니메이션 정의 */
-
-        /* 피격 흔들림 */
         @keyframes damageShake {
             0% { transform: translateX(0); }
             20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -41,14 +38,19 @@
         }
         .animate-damage { animation: damageShake 0.4s ease-in-out; }
 
-        /* 공격 돌진 (오른쪽으로 30px) */
-        /* 적은 Wrapper가 반전되어 있으므로, 오른쪽으로 이동하면 시각적으로는 왼쪽으로 이동함 */
         @keyframes lunge {
             0% { transform: translateX(0); }
             50% { transform: translateX(40px); }
             100% { transform: translateX(0); }
         }
         .animate-lunge { animation: lunge 0.2s ease-out; }
+
+        @keyframes enemyLunge {
+            0% { transform: translateX(0); }
+            50% { transform: translateX(40px); }
+            100% { transform: translateX(0); }
+        }
+        .animate-lunge-enemy { animation: enemyLunge 0.2s ease-out; }
 
         .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
@@ -64,7 +66,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.6</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.9</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -77,7 +79,7 @@
                 던전 입장
             </button>
         </div>
-        <p class="text-slate-600 text-[10px] mt-8">Local Save: v94_data</p>
+        <p class="text-slate-600 text-[10px] mt-8">Local Save: v99_data</p>
     </div>
 </section>
 
@@ -85,8 +87,13 @@
     <div class="w-full max-w-md flex flex-col gap-4 mt-2 h-full">
         <div class="flex justify-between items-end px-2">
             <h2 class="text-3xl font-black text-slate-800">VILLAGE</h2>
-            <div class="bg-yellow-50 px-4 py-1.5 rounded-full shadow-sm border border-yellow-200 text-sm font-bold flex items-center gap-2">
-                <span class="text-yellow-600">💰</span><span id="lobbyGold">0</span> G
+            <div class="flex gap-2">
+                <div class="bg-red-50 px-3 py-1.5 rounded-full shadow-sm border border-red-200 text-sm font-bold flex items-center gap-2" id="lobbyPotionBadge">
+                    <img src="./png/potion.png" class="w-4 h-4 pixel-art"> <span id="lobbyPotionCount">0</span>/3
+                </div>
+                <div class="bg-yellow-50 px-4 py-1.5 rounded-full shadow-sm border border-yellow-200 text-sm font-bold flex items-center gap-2">
+                    <span class="text-yellow-600">💰</span><span id="lobbyGold">0</span> G
+                </div>
             </div>
         </div>
 
@@ -125,7 +132,7 @@
                 <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-xl">🛡️</div>
                 <div class="text-center">
                     <div class="font-bold text-slate-700">훈련소</div>
-                    <div class="text-[10px] text-slate-400">스킬 장착/강화</div>
+                    <div class="text-[10px] text-slate-400">스킬/포션 상점</div>
                 </div>
             </button>
 
@@ -201,7 +208,7 @@
                 </div>
                 <div id="playerBuffs" class="flex gap-1 mb-1 min-h-[16px]"></div>
                 <div class="flex justify-between text-[10px] text-slate-400 mb-1">
-                    <span>HP</span> <span id="playerHpText">100/100</span>
+                    <span>HP</span> <span id="playerHpText">15/15</span>
                 </div>
                 <div class="w-full h-2.5 bg-slate-700 rounded-full overflow-hidden mb-1">
                     <div id="playerHpBar" class="h-full bg-blue-500 transition-all duration-500" style="width: 100%"></div>
@@ -217,6 +224,14 @@
         <div id="battleLog" class="text-xs text-slate-400 mb-3 h-5 overflow-hidden text-center truncate font-mono">
             전투 시작!
         </div>
+
+        <div class="flex justify-end mb-2 px-1">
+            <button id="battlePotionBtn" class="bg-red-500 hover:bg-red-400 text-white px-4 py-2 rounded-lg text-xs font-bold shadow flex items-center gap-2 active:scale-95 disabled:bg-slate-500 disabled:opacity-50 transition-all" onclick="usePotion()">
+                <img src="./png/potion.png" class="w-4 h-4 pixel-art">
+                회복 (<span id="battlePotionCount">0</span>)
+            </button>
+        </div>
+
         <div id="skillGrid" class="grid grid-cols-2 gap-2">
         </div>
     </div>
@@ -225,7 +240,7 @@
 <div id="trainingModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
         <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
-            <h3 class="font-bold text-lg">🛡️ 훈련소 (스킬 장착)</h3>
+            <h3 class="font-bold text-lg">🛡️ 훈련소 & 상점</h3>
             <button id="closeTrainingBtn" class="text-white/80 hover:text-white">✕</button>
         </div>
         <div class="p-3 bg-slate-50 border-b flex justify-between items-center">
@@ -240,15 +255,15 @@
 <div id="quizModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-[60] p-4">
     <div class="bg-white rounded-2xl shadow-2xl w-full max-w-sm overflow-hidden transform transition-all scale-100">
         <div class="bg-slate-800 p-4 text-white flex justify-between items-center">
-            <h3 class="font-bold text-lg">📝 퀴즈</h3>
+            <h3 class="font-bold text-lg">📝 분수 퀴즈</h3>
             <span class="text-xs bg-blue-600 px-2 py-1 rounded font-bold">정답 시 스킬 발동</span>
         </div>
         <div class="p-6">
             <div class="text-center mb-4">
                 <p class="text-xs text-slate-500 mb-2" id="quizExplain">문제 설명</p>
-                <p class="text-2xl font-black text-slate-800 tracking-tight" id="quizQuestion">3 x 3 = ?</p>
+                <div id="quizVisual" class="flex justify-center items-center py-4 min-h-[120px]"></div>
             </div>
-            <div id="quizChoices" class="grid grid-cols-1 gap-2"></div>
+            <div id="quizChoices" class="grid grid-cols-2 gap-2"></div>
         </div>
         <div class="bg-slate-50 p-3 text-center border-t">
             <button id="quizCancel" class="text-xs text-slate-400 underline hover:text-red-500">포기 (턴 넘기기)</button>
@@ -347,15 +362,19 @@
         } catch(e) { return null; }
     }
 
+    // 최대공약수
+    function gcd(a, b) {
+        return b ? gcd(b, a % b) : a;
+    }
+
     /* =========================================
      * 1. DATA DEFINITIONS (DB)
      * ========================================= */
 
-    // 클래스 정의 (3종) - 스킬 8개로 확장
     const HERO_DEFINITIONS = {
         "knight": {
             id: "knight", name: "Knight", nameKo: "기사",
-            baseStats: { hp: 120, atk: 12, def: 8, spd: 5 },
+            baseStats: { hp: 15, atk: 12, def: 8, spd: 5 },
             sprites: { default: "./png/knight.png", skin: "./png/knight-black.png" },
             skills: [
                 { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
@@ -370,7 +389,7 @@
         },
         "rogue": {
             id: "rogue", name: "Rogue", nameKo: "도적",
-            baseStats: { hp: 80, atk: 18, def: 4, spd: 10 },
+            baseStats: { hp: 10, atk: 18, def: 4, spd: 10 },
             sprites: { default: "./png/rogue-male.png", skin: "./png/rogue-female.png" },
             skills: [
                 { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격" },
@@ -385,7 +404,7 @@
         },
         "mage": {
             id: "mage", name: "Mage", nameKo: "마법사",
-            baseStats: { hp: 70, atk: 22, def: 3, spd: 6 },
+            baseStats: { hp: 8, atk: 22, def: 3, spd: 6 },
             sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" },
             skills: [
                 { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격" },
@@ -400,7 +419,6 @@
         }
     };
 
-    // 몬스터 전용 스킬 정의
     const MONSTER_SKILLS = {
         "bite": { id: "ms_bite", name: "물기", type: "atk", power: 1.0, cd: 0 },
         "scratch": { id: "ms_scratch", name: "할퀴기", type: "atk", power: 1.1, cd: 1 },
@@ -409,13 +427,12 @@
         "bone_throw": { id: "ms_bone", name: "뼈 던지기", type: "atk", power: 1.2, cd: 2 },
         "spook": { id: "ms_spook", name: "놀래키기", type: "atk_stun", power: 0.8, cd: 3 },
         "smash": { id: "ms_smash", name: "내려찍기", type: "atk", power: 1.5, cd: 3 },
-        "regen": { id: "ms_regen", name: "재생", type: "atk_heal", power: 0.0, cd: 4 }, // 공격력 0, 힐만
+        "regen": { id: "ms_regen", name: "재생", type: "atk_heal", power: 0.0, cd: 4 },
         "fireball": { id: "ms_fire", name: "화염구", type: "atk", power: 1.4, cd: 2 },
-        "curse": { id: "ms_curse", name: "저주", type: "atk", power: 1.2, cd: 2 }, // 기본공격보다 셈
+        "curse": { id: "ms_curse", name: "저주", type: "atk", power: 1.2, cd: 2 },
         "doom": { id: "ms_doom", name: "파멸의 일격", type: "atk_execute", power: 2.0, cd: 5 }
     };
 
-    // 적 정의 (확장됨)
     const ENEMY_VARIANTS = [
         { id: "rat", name: "Rat", src: "./png/rat.png", hpMult: 0.8, atkMult: 0.8, skills: ["bite"] },
         { id: "slime_g", name: "Green Slime", src: "./png/slime-green.png", hpMult: 1.0, atkMult: 0.9, skills: ["scratch"] },
@@ -437,13 +454,13 @@
      * 2. STATE MANAGEMENT & LOCAL STORAGE
      * ========================================= */
     const LS_KEYS = {
-        DATA: "qz_rpg_v94_data",
-        HOF: "qz_rpg_v94_hof"
+        DATA: "qz_rpg_v99_data", // 데이터 버전 업 (포션 추가됨)
+        HOF: "qz_rpg_v99_hof"
     };
 
-    // 기본 게임 상태
     let gameState = {
         gold: 0,
+        potions: 0, // 포션 보유량
         unlockedClasses: ["knight", "rogue", "mage"],
         heroes: {
             "knight": { level: 1, xp: 0, skillLevels: { k1:1, k2:1, k3:1, k4:1 }, equipped: ["k1", "k2", "k3", "k4"], skin: "default" },
@@ -457,13 +474,13 @@
     let externalQuizList = [];
     let quizCallback = null;
 
-    // 데이터 로드/저장
     function loadGameData() {
         const raw = localStorage.getItem(LS_KEYS.DATA);
         if (raw) {
             try {
                 const loaded = JSON.parse(raw);
                 gameState = { ...gameState, ...loaded };
+                if(typeof gameState.potions === 'undefined') gameState.potions = 0;
 
                 Object.keys(gameState.heroes).forEach(cid => {
                     const h = gameState.heroes[cid];
@@ -480,7 +497,6 @@
                         if (!h.skillLevels[s.id]) h.skillLevels[s.id] = 1;
                     });
                 });
-
             } catch (e) { console.error("Save load error", e); }
         }
     }
@@ -497,7 +513,7 @@
         const base = def.baseStats;
 
         return {
-            maxHp: Math.floor(base.hp + (level * 10)),
+            maxHp: Math.floor(base.hp + (level * 2)),
             atk: Math.floor(base.atk + (level * 1.5)),
             def: Math.floor(base.def + (level * 0.8)),
             spd: Math.floor(base.spd + (level * 0.5))
@@ -526,6 +542,7 @@
         const def = HERO_DEFINITIONS[curClass];
 
         document.getElementById("lobbyGold").textContent = gameState.gold.toLocaleString();
+        document.getElementById("lobbyPotionCount").textContent = gameState.potions;
         document.getElementById("lobbyClassLabel").textContent = def.name;
         document.getElementById("lobbyHeroName").textContent = def.nameKo;
         document.getElementById("lobbyHeroLevel").textContent = heroData.level;
@@ -578,14 +595,9 @@
     }
 
     /* =========================================
-     * 4. TRAINING SYSTEM (EQUIP & UPGRADE)
+     * 4. TRAINING SYSTEM & SHOP
      * ========================================= */
     function openTraining() {
-        const cid = gameState.selectedClass;
-        const hero = gameState.heroes[cid];
-        const def = HERO_DEFINITIONS[cid];
-
-        document.getElementById("trainingGold").textContent = gameState.gold;
         renderTrainingList();
         showModal("trainingModal");
     }
@@ -599,6 +611,35 @@
 
         document.getElementById("trainingGold").textContent = gameState.gold;
         document.getElementById("trainingEquipCount").textContent = `장착: ${hero.equipped.length}/4`;
+
+        // 포션 상점 (맨 위)
+        const potionRow = document.createElement("div");
+        potionRow.className = "bg-red-50 border border-red-200 rounded-xl p-3 flex justify-between items-center shadow-sm mb-4";
+        potionRow.innerHTML = `
+            <div class="flex items-center gap-3">
+                <img src="./png/potion.png" class="w-8 h-8 pixel-art">
+                <div>
+                    <div class="font-bold text-sm text-red-900">회복 포션 <span class="text-xs text-red-500">(${gameState.potions}/3)</span></div>
+                    <div class="text-[10px] text-red-400">던전에서 즉시 HP 50% 회복</div>
+                </div>
+            </div>
+            <button class="px-3 py-1.5 bg-red-500 hover:bg-red-600 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 disabled:bg-slate-300 disabled:text-slate-500" 
+                id="btnBuyPotion">
+                100 G
+            </button>
+        `;
+        list.appendChild(potionRow);
+
+        const buyBtn = potionRow.querySelector("#btnBuyPotion");
+        if (gameState.potions >= 3 || gameState.gold < 100) buyBtn.disabled = true;
+        buyBtn.onclick = () => {
+            if (gameState.potions < 3 && gameState.gold >= 100) {
+                gameState.gold -= 100;
+                gameState.potions++;
+                saveGameData();
+                renderTrainingList();
+            }
+        };
 
         const skinBtn = document.createElement("button");
         skinBtn.className = "w-full py-2 mb-2 bg-purple-100 text-purple-700 font-bold rounded-lg text-xs border border-purple-200";
@@ -714,29 +755,26 @@
 
     function startBattleStage() {
         const bs = battleState;
-
-        // 스테이지에 따라 적 풀 필터링
         const isBoss = (bs.stage % 5 === 0);
         let availableEnemies = ENEMY_VARIANTS.filter(e => isBoss ? e.bossOnly : !e.bossOnly);
-        if (availableEnemies.length === 0) availableEnemies = ENEMY_VARIANTS; // fallback
+        if (availableEnemies.length === 0) availableEnemies = ENEMY_VARIANTS;
 
         const variant = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
         const stageMult = 1 + (bs.stage * 0.2);
 
-        // 몬스터 전용 스킬 객체 매핑
         const monsterSkills = (variant.skills || []).map(k => MONSTER_SKILLS[k]).filter(s => s);
 
         bs.enemy = {
             name: variant.name + (isBoss ? " (BOSS)" : ""),
-            maxHp: Math.floor(60 * stageMult * (variant.hpMult || 1.0)),
-            hp: Math.floor(60 * stageMult * (variant.hpMult || 1.0)),
-            atk: Math.floor(8 * stageMult * (variant.atkMult || 1.0) * 0.7),
+            maxHp: Math.floor(6 * stageMult * (variant.hpMult || 1.0)),
+            hp: Math.floor(6 * stageMult * (variant.hpMult || 1.0)),
+            atk: Math.floor(2 * stageMult * (variant.atkMult || 1.0)),
             def: Math.floor(2 * stageMult),
             img: variant.src,
             isBoss: isBoss,
             buffs: { stun: 0 },
-            skills: monsterSkills, // 몬스터 스킬 할당
-            skillLevels: {} // 몬스터는 기본 레벨 1
+            skills: monsterSkills,
+            skillLevels: {}
         };
 
         bs.player.shield = 0;
@@ -747,12 +785,9 @@
         document.getElementById("battleStageText").textContent = bs.stage;
         document.getElementById("enemyName").textContent = bs.enemy.name;
         document.getElementById("enemyLevel").textContent = `Lv.${bs.stage}`;
-
-        // 적 이미지 설정
         document.getElementById("enemyImg").src = bs.enemy.img;
         document.getElementById("enemyImg").className = "w-32 h-32 pixel-art animate-bounce";
 
-        // 적 Wrapper에 반전 클래스 적용
         const wrapper = document.getElementById("enemyWrapper");
         if (isBoss) {
             wrapper.className = "relative enemy-flip-boss";
@@ -762,6 +797,26 @@
 
         updateBattleUI();
         logBattle(`${bs.enemy.name} 출현!`);
+    }
+
+    function usePotion() {
+        if (!battleState) return;
+        if (gameState.potions <= 0) {
+            alert("포션이 없습니다!");
+            return;
+        }
+        if (battleState.player.hp >= battleState.player.maxHp) {
+            alert("체력이 이미 가득 찼습니다.");
+            return;
+        }
+
+        gameState.potions--;
+        const heal = Math.floor(battleState.player.maxHp * 0.5); // 50% 회복
+        battleState.player.hp = Math.min(battleState.player.maxHp, battleState.player.hp + heal);
+
+        logBattle(`포션 사용! HP ${heal} 회복.`);
+        updateBattleUI();
+        saveGameData();
     }
 
     function updateBattleUI() {
@@ -789,6 +844,12 @@
         const eBuffsEl = document.getElementById("enemyBuffs");
         eBuffsEl.innerHTML = "";
         if (e.buffs.stun > 0) eBuffsEl.innerHTML += `<span class="text-[9px] bg-purple-100 text-purple-600 px-1 rounded border border-purple-200">기절 ${e.buffs.stun}</span>`;
+
+        // 포션 UI 업데이트
+        document.getElementById("battlePotionCount").textContent = gameState.potions;
+        const potionBtn = document.getElementById("battlePotionBtn");
+        if (gameState.potions <= 0) potionBtn.disabled = true;
+        else potionBtn.disabled = false;
 
         renderSkillButtons();
     }
@@ -836,14 +897,12 @@
 
             battleState.cooldowns[skillIdx] = (skill.cd || 0) + 1;
 
-            // 플레이어 공격 애니메이션 (공격형 스킬일 때만)
             if (skill.type.includes("atk")) {
                 const pImg = document.getElementById("playerImg");
                 pImg.classList.add("animate-lunge");
                 setTimeout(() => pImg.classList.remove("animate-lunge"), 200);
             }
 
-            // 데미지 계산 및 효과 적용
             applySkillEffect(p, e, skill, slv);
 
             updateBattleUI();
@@ -863,7 +922,6 @@
         let lvlMult = 1 + (level * 0.1);
         let dmg = Math.floor(attacker.atk * skill.power * lvlMult * mult);
 
-        // 고스트는 데미지 약간 너프
         if (battleState.mode === "ghost" && attacker === battleState.enemy) {
             dmg = Math.floor(dmg * 0.9);
         }
@@ -900,14 +958,12 @@
         }
 
         if (skill.type.includes("heal")) {
-            // 재생(regen) 스킬은 power가 0이므로 여기서 힐량을 계산해야 함
             const baseHealRatio = (skill.id === 'ms_regen') ? 0.3 : 0.2;
             const heal = Math.floor(attacker.maxHp * baseHealRatio * lvlMult);
             attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
             logBattle(`HP ${heal} 회복`);
         }
 
-        // 데미지 적용
         if (skill.power > 0) {
             let finalDmg = Math.max(1, dmg - Math.floor(defender.def * 0.5));
             if (defender.buffs && defender.buffs.def > 0) finalDmg = Math.floor(finalDmg * 0.5);
@@ -947,7 +1003,6 @@
             return;
         }
 
-        // 몬스터 AI: 스킬이 있으면 50% 확률로 사용 (고스트/일반몹 공통)
         if (e.skills && e.skills.length > 0 && Math.random() < 0.5) {
             const usable = [];
             for (let i = 0; i < e.skills.length; i++) {
@@ -961,11 +1016,10 @@
 
                 battleState.enemyCooldowns[idx] = (skill.cd || 0) + 1;
 
-                // 적 공격 애니메이션
                 if(skill.type.includes("atk")) {
                     const eImg = document.getElementById("enemyImg");
-                    eImg.classList.add("animate-lunge");
-                    setTimeout(() => eImg.classList.remove("animate-lunge"), 200);
+                    eImg.classList.add("animate-lunge-enemy");
+                    setTimeout(() => eImg.classList.remove("animate-lunge-enemy"), 200);
                 }
 
                 applySkillEffect(e, battleState.player, skill, slv);
@@ -975,14 +1029,12 @@
             }
         }
 
-        // 일반 공격
         const p = battleState.player;
         let dmg = Math.max(1, e.atk - Math.floor(p.def * 0.5));
 
-        // 적 공격 애니메이션 (일반)
         const eImg = document.getElementById("enemyImg");
-        eImg.classList.add("animate-lunge");
-        setTimeout(() => eImg.classList.remove("animate-lunge"), 200);
+        eImg.classList.add("animate-lunge-enemy");
+        setTimeout(() => eImg.classList.remove("animate-lunge-enemy"), 200);
 
         if (p.buffs.def > 0) dmg = Math.floor(dmg * 0.5);
 
@@ -1018,7 +1070,7 @@
                     addHoF({ kind: "lose", stage: battleState.stage, enemy: battleState.enemy.name });
                 }
                 alert(`패배했습니다...`);
-                battleState = null; // 상태 초기화
+                battleState = null;
                 document.getElementById("battleScreen").classList.remove("active");
                 document.getElementById("lobbyScreen").classList.add("active");
             }, 600);
@@ -1092,48 +1144,34 @@
             bs.player.atk = newStats.atk;
             bs.player.def = newStats.def;
             bs.player.level = hData.level;
-            bs.player.hp = Math.min(bs.player.maxHp, bs.player.hp + Math.floor(bs.player.maxHp * 0.3));
+            // 자동 회복 제거: 현재 체력 유지 (최대 체력 증가분만 반영 가능하면 반영하되, 여기선 단순화)
+            bs.player.hp = Math.min(bs.player.hp, bs.player.maxHp);
             bs.stage++;
             startBattleStage();
         };
     }
 
     /* =========================================
-     * 6. QUIZ LOGIC
+     * 6. QUIZ LOGIC (FRACTION)
      * ========================================= */
     async function loadQuizData() {
-        try {
-            const res = await fetch("./quiz/quiz.json");
-            if (res.ok) {
-                const data = await res.json();
-                if (data.questions) externalQuizList = data.questions;
-            }
-        } catch (e) { console.log("Quiz load failed."); }
         document.getElementById("startButton").disabled = false;
         document.getElementById("loadingStatus").textContent = "시스템 준비 완료";
     }
 
     function openQuiz(cb) {
         quizCallback = cb;
-        let q = generateMathQuiz();
-        if (externalQuizList.length > 0 && Math.random() < 0.7) {
-            const raw = externalQuizList[Math.floor(Math.random() * externalQuizList.length)];
-            const choices = raw.choices || raw.options || [];
-            const ansIdx = (raw.answerIndex !== undefined) ? raw.answerIndex : (raw.answer_index || 0);
-            q = {
-                q: raw.prompt || raw.question || "문제",
-                explain: raw.promptExplain || raw.explain || "퀴즈",
-                choices: choices,
-                answer: choices[ansIdx]
-            };
-        }
-        document.getElementById("quizExplain").textContent = q.explain;
-        document.getElementById("quizQuestion").textContent = q.q;
+        const q = generateFractionQuiz();
+
+        document.getElementById("quizExplain").textContent = q.q;
+        document.getElementById("quizVisual").innerHTML = q.html;
+        document.getElementById("quizQuestion").textContent = ""; // 텍스트 문제 제거
+
         const grid = document.getElementById("quizChoices");
         grid.innerHTML = "";
         q.choices.forEach(c => {
             const btn = document.createElement("button");
-            btn.className = "bg-slate-100 hover:bg-blue-100 border-2 border-slate-200 font-bold py-3 rounded-xl text-lg transition-colors";
+            btn.className = "bg-slate-100 hover:bg-blue-100 border-2 border-slate-200 font-bold py-4 rounded-xl text-xl transition-colors";
             btn.textContent = c;
             btn.onclick = () => {
                 hideModal("quizModal");
@@ -1144,16 +1182,60 @@
         showModal("quizModal");
     }
 
-    function generateMathQuiz() {
-        const a = Math.floor(Math.random() * 8) + 2;
-        const b = Math.floor(Math.random() * 9) + 1;
-        const ans = a * b;
-        const choices = [ans, ans + a, ans - 1, ans + 10].sort(() => Math.random() - 0.5);
+    function generateFractionQuiz() {
+        const den = Math.floor(Math.random() * 8) + 2; // 2~9
+        const num = Math.floor(Math.random() * (den - 1)) + 1; // 1 ~ den-1
+        const isCircle = Math.random() < 0.5;
+
+        // 시각화 HTML 생성
+        let visualHtml = "";
+        if (isCircle) {
+            // 원형 (Pie Chart) - 하얀색 구분선 추가
+            const percent = (num / den) * 100;
+            // repeating-conic-gradient로 구분선(눈금) 그리기
+            const lineDeg = 360 / den;
+            // 데이터 그라데이션 + 눈금 그라데이션 겹치기
+            visualHtml = `
+                <div class="w-32 h-32 rounded-full border-4 border-slate-700 relative" 
+                     style="background: conic-gradient(#3b82f6 0% ${percent}%, #e2e8f0 ${percent}% 100%);">
+                     <div class="absolute inset-0 rounded-full" 
+                          style="background: repeating-conic-gradient(transparent 0deg ${lineDeg-1}deg, #ffffff ${lineDeg-1}deg ${lineDeg}deg);"></div>
+                </div>`;
+        } else {
+            // 사각형 (Bar Chart)
+            let gridHtml = "";
+            for(let i=0; i<den; i++) {
+                gridHtml += `<div class="border-r border-slate-700 last:border-r-0 ${i < num ? 'bg-blue-500' : 'bg-slate-200'}"></div>`;
+            }
+            visualHtml = `
+                <div class="w-full h-16 border-2 border-slate-700 grid" 
+                     style="grid-template-columns: repeat(${den}, 1fr)">
+                    ${gridHtml}
+                </div>`;
+        }
+
+        const correctVal = num / den;
+        const correctStr = `${num}/${den}`;
+
+        const choices = new Set([correctStr]);
+        const usedValues = new Set([correctVal]); // 값 중복 방지용 (예: 1/2 == 2/4)
+
+        while(choices.size < 4) {
+            const d = Math.floor(Math.random() * 8) + 2;
+            const n = Math.floor(Math.random() * (d - 1)) + 1;
+            const val = n / d;
+
+            if (!usedValues.has(val)) {
+                usedValues.add(val);
+                choices.add(`${n}/${d}`);
+            }
+        }
+
         return {
-            q: `${a} × ${b} = ?`,
-            explain: "구구단 퀴즈",
-            choices: choices,
-            answer: ans
+            q: "색칠한 부분을 분수로 나타내면?",
+            html: visualHtml,
+            choices: Array.from(choices).sort(() => Math.random() - 0.5),
+            answer: correctStr
         };
     }
 
@@ -1173,7 +1255,7 @@
         const stats = getHeroStats(cid);
 
         const payload = {
-            v: 94,
+            v: 99,
             cid: cid,
             lv: hero.level,
             eq: hero.equipped,
@@ -1290,8 +1372,8 @@
         const enemyImg = enemyDef.sprites.default;
 
         const eStatsRaw = ghostData.stats || {};
-        const eMaxHp = Number(eStatsRaw.maxHp ?? eStatsRaw.hp) || Math.floor(100 + ghostData.lv * 10);
-        const eAtk   = Number(eStatsRaw.atk) || Math.floor(10 + ghostData.lv * 1.3);
+        const eMaxHp = Number(eStatsRaw.maxHp ?? eStatsRaw.hp) || Math.floor(10 + ghostData.lv * 2);
+        const eAtk   = Number(eStatsRaw.atk) || Math.floor(2 + ghostData.lv * 1.3);
         const eDef   = Number(eStatsRaw.def) || 5;
 
         let enemySkills = [];
@@ -1330,10 +1412,7 @@
 
         updateBattleUI();
         document.getElementById("enemyImg").src = enemyImg;
-        // 고스트는 플레이어와 같은 뱡향(오른쪽)을 기본으로 쓰므로, 반전시켜서 마주보게 함
         document.getElementById("enemyImg").className = "w-32 h-32 pixel-art animate-bounce";
-
-        // 고스트 Wrapper 반전 적용
         const wrapper = document.getElementById("enemyWrapper");
         wrapper.className = "relative enemy-flip-boss";
 
