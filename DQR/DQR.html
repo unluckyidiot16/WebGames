@@ -17,17 +17,30 @@
         .hero-card.selected { border-color: #3b82f6; background-color: #eff6ff; transform: scale(1.02); box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.5); }
         .hero-card:active { transform: scale(0.98); }
 
+        .skill-card { transition: all 0.2s; border: 2px solid #e2e8f0; }
+        .skill-card.equipped { border-color: #22c55e; background-color: #f0fdf4; box-shadow: 0 0 0 1px #22c55e; }
+
         .pixel-art { image-rendering: pixelated; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* 적 스프라이트 반전 (왼쪽 바라보기) */
+        .enemy-flip { transform: scaleX(-1); }
+        /* 보스일 경우 반전 + 확대 */
+        .enemy-flip-boss { transform: scaleX(-1) scale(1.5); }
+
         /* 애니메이션 */
         @keyframes damageShake { 0% { transform: translateX(0); } 20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); } 40% { transform: translateX(6px) rotate(5deg); } 60% { transform: translateX(-3px); } 80% { transform: translateX(3px); } }
         .animate-damage { animation: damageShake 0.4s ease-in-out; }
-        .animate-attack-player { animation: attackRight 0.2s ease-out; }
-        .animate-attack-enemy { animation: attackLeft 0.2s ease-out; }
-        @keyframes attackRight { 0% { transform: translateX(0) scaleX(1); } 50% { transform: translateX(30px) scaleX(1); } 100% { transform: translateX(0) scaleX(1); } }
-        @keyframes attackLeft { 0% { transform: translateX(0); } 50% { transform: translateX(-30px); } 100% { transform: translateX(0); } }
+
+        /* 플레이어 공격 (오른쪽으로 돌진) */
+        @keyframes attackRight { 0% { transform: translateX(0); } 50% { transform: translateX(40px); } 100% { transform: translateX(0); } }
+        .animate-attack-player { animation: attackRight 0.3s ease-out; }
+
+        /* 적 공격 (왼쪽으로 돌진 - 기본이 반전된 상태라 로직 주의) */
+        /* 적은 scaleX(-1) 상태이므로, translateX 값을 반대로 주거나 부모 컨테이너를 움직여야 함. 여기선 간단히 translateX 음수 사용 */
+        @keyframes attackLeft { 0% { transform: scaleX(-1) translateX(0); } 50% { transform: scaleX(-1) translateX(40px); } 100% { transform: scaleX(-1) translateX(0); } }
+        .animate-attack-enemy { animation: attackLeft 0.3s ease-out; }
 
         .btn-cooldown { background-color: #f1f5f9 !important; border-color: #cbd5e1 !important; color: #94a3b8 !important; cursor: not-allowed; transform: none !important; box-shadow: none !important; }
         .skill-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.5rem; }
@@ -43,7 +56,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.3</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v9.5</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -56,7 +69,7 @@
                 던전 입장
             </button>
         </div>
-        <p class="text-slate-600 text-[10px] mt-8">Local Save: v90_data</p>
+        <p class="text-slate-600 text-[10px] mt-8">Local Save: v94_data</p>
     </div>
 </section>
 
@@ -104,7 +117,7 @@
                 <div class="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-xl">🛡️</div>
                 <div class="text-center">
                     <div class="font-bold text-slate-700">훈련소</div>
-                    <div class="text-[10px] text-slate-400">스킬 강화</div>
+                    <div class="text-[10px] text-slate-400">스킬 장착/강화</div>
                 </div>
             </button>
 
@@ -165,7 +178,7 @@
                 </div>
             </div>
             <div class="relative">
-                <img id="enemyImg" src="./png/slime-green.png" class="w-32 h-32 pixel-art animate-bounce" style="animation-duration: 2s">
+                <img id="enemyImg" src="./png/slime-green.png" class="w-32 h-32 pixel-art animate-bounce enemy-flip" style="animation-duration: 2s">
             </div>
         </div>
 
@@ -202,16 +215,16 @@
 </section>
 
 <div id="trainingModal" class="fixed inset-0 modal-backdrop hidden items-center justify-center z-50 p-4">
-    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[80vh]">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col max-h-[85vh]">
         <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
-            <h3 class="font-bold text-lg">🛡️ 스킬 훈련소</h3>
+            <h3 class="font-bold text-lg">🛡️ 훈련소 (스킬 장착)</h3>
             <button id="closeTrainingBtn" class="text-white/80 hover:text-white">✕</button>
         </div>
-        <div class="p-4 bg-slate-50 border-b flex justify-between items-center">
-            <span class="text-xs text-slate-500">보유 골드</span>
+        <div class="p-3 bg-slate-50 border-b flex justify-between items-center">
+            <span class="text-xs text-slate-500" id="trainingEquipCount">장착: 0/4</span>
             <span class="font-bold text-yellow-600 text-lg">💰 <span id="trainingGold">0</span></span>
         </div>
-        <div id="trainingList" class="p-4 overflow-y-auto space-y-3 flex-1">
+        <div id="trainingList" class="p-4 overflow-y-auto space-y-2 flex-1">
         </div>
     </div>
 </div>
@@ -330,7 +343,7 @@
      * 1. DATA DEFINITIONS (DB)
      * ========================================= */
 
-    // 클래스 정의 (3종) - 이미지 경로 수정됨
+    // 클래스 정의 (3종) - 스킬 8개로 확장
     const HERO_DEFINITIONS = {
         "knight": {
             id: "knight", name: "Knight", nameKo: "기사",
@@ -340,7 +353,11 @@
                 { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
                 { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 스턴" },
                 { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "2턴간 방어력 2배" },
-                { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" }
+                { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" },
+                { id: "k5", name: "전력 찌르기", type: "atk", power: 1.8, cd: 2, desc: "강력한 일격" },
+                { id: "k6", name: "수호의 빛", type: "buff_shield", power: 0, cd: 4, desc: "체력의 40% 쉴드" },
+                { id: "k7", name: "반격 태세", type: "buff_atk", power: 0, cd: 3, desc: "공격력 50% 증가" },
+                { id: "k8", name: "심판", type: "atk_execute", power: 3.5, cd: 6, desc: "마무리 일격" }
             ]
         },
         "rogue": {
@@ -351,36 +368,69 @@
                 { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격" },
                 { id: "r2", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "방어 관통 피해" },
                 { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "3턴간 공격력 50% 증가" },
-                { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" }
+                { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" },
+                { id: "r5", name: "연속 베기", type: "atk", power: 0.8, cd: 1, desc: "쿨타임이 짧은 공격" },
+                { id: "r6", name: "그림자 숨기", type: "buff_def", power: 0, cd: 4, desc: "회피율 증가(방어 상승)" },
+                { id: "r7", name: "출혈 단검", type: "atk", power: 1.2, cd: 2, desc: "지속 피해 효과" },
+                { id: "r8", name: "배후 습격", type: "atk_crit", power: 2.5, cd: 4, desc: "높은 치명타 확률" }
             ]
         },
         "mage": {
             id: "mage", name: "Mage", nameKo: "마법사",
             baseStats: { hp: 70, atk: 22, def: 3, spd: 6 },
-            sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" }, // 마법사는 단일 스킨
+            sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" },
             skills: [
                 { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격" },
                 { id: "m2", name: "파이어볼", type: "atk_aoe", power: 1.8, cd: 3, desc: "강력한 화염 피해" },
                 { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "HP 30% 만큼 쉴드 생성" },
-                { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" }
+                { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" },
+                { id: "m5", name: "아이스 볼트", type: "atk_stun", power: 1.3, cd: 3, desc: "피해 + 동결(스턴)" },
+                { id: "m6", name: "명상", type: "buff_atk", power: 0, cd: 4, desc: "마법 공격력 대폭 증가" },
+                { id: "m7", name: "썬더", type: "atk", power: 2.2, cd: 4, desc: "방어 무시 피해" },
+                { id: "m8", name: "생명력 전환", type: "atk_heal", power: 2.0, cd: 5, desc: "피해의 일부 회복" }
             ]
         }
     };
 
-    // 적 정의 (슬라임 4종) - 이미지 경로 수정됨
+    // 몬스터 전용 스킬 정의
+    const MONSTER_SKILLS = {
+        "bite": { id: "ms_bite", name: "물기", type: "atk", power: 1.0, cd: 0 },
+        "scratch": { id: "ms_scratch", name: "할퀴기", type: "atk", power: 1.1, cd: 1 },
+        "leech": { id: "ms_leech", name: "흡혈", type: "atk_heal", power: 0.8, cd: 3 },
+        "web": { id: "ms_web", name: "거미줄", type: "atk_stun", power: 0.5, cd: 4 },
+        "bone_throw": { id: "ms_bone", name: "뼈 던지기", type: "atk", power: 1.2, cd: 2 },
+        "spook": { id: "ms_spook", name: "놀래키기", type: "atk_stun", power: 0.8, cd: 3 },
+        "smash": { id: "ms_smash", name: "내려찍기", type: "atk", power: 1.5, cd: 3 },
+        "regen": { id: "ms_regen", name: "재생", type: "atk_heal", power: 0.0, cd: 4 }, // 공격력 0, 힐만
+        "fireball": { id: "ms_fire", name: "화염구", type: "atk", power: 1.4, cd: 2 },
+        "curse": { id: "ms_curse", name: "저주", type: "atk", power: 1.2, cd: 2 }, // 기본공격보다 셈
+        "doom": { id: "ms_doom", name: "파멸의 일격", type: "atk_execute", power: 2.0, cd: 5 }
+    };
+
+    // 적 정의 (확장됨)
     const ENEMY_VARIANTS = [
-        { id: "slime_g", name: "Green Slime", src: "./png/slime-green.png", type: "nature" },
-        { id: "slime_b", name: "Blue Slime", src: "./png/slime-blue.png", type: "water" },
-        { id: "slime_r", name: "Red Slime", src: "./png/slime-red.png", type: "fire" },
-        { id: "slime_p", name: "Purple Slime", src: "./png/slime-purple.png", type: "poison" }
+        { id: "rat", name: "Rat", src: "./png/rat.png", hpMult: 0.8, atkMult: 0.8, skills: ["bite"] },
+        { id: "slime_g", name: "Green Slime", src: "./png/slime-green.png", hpMult: 1.0, atkMult: 0.9, skills: ["scratch"] },
+        { id: "slime_b", name: "Blue Slime", src: "./png/slime-blue.png", hpMult: 1.0, atkMult: 0.9, skills: ["scratch"] },
+        { id: "bat", name: "Bat", src: "./png/bat.png", hpMult: 0.7, atkMult: 1.1, skills: ["leech"] },
+        { id: "spider", name: "Spider", src: "./png/spider.png", hpMult: 0.9, atkMult: 1.0, skills: ["web", "bite"] },
+        { id: "skeleton", name: "Skeleton", src: "./png/skeleton.png", hpMult: 1.1, atkMult: 1.1, skills: ["bone_throw"] },
+        { id: "slime_r", name: "Red Slime", src: "./png/slime-red.png", hpMult: 1.1, atkMult: 1.0, skills: ["scratch"] },
+        { id: "slime_p", name: "Purple Slime", src: "./png/slime-purple.png", hpMult: 1.2, atkMult: 1.0, skills: ["scratch"] },
+        { id: "slime_y", name: "Yellow Slime", src: "./png/slime-yellow.png", hpMult: 1.1, atkMult: 1.0, skills: ["scratch"] },
+        { id: "ghost", name: "Ghost", src: "./png/ghost.png", hpMult: 0.8, atkMult: 1.2, skills: ["spook"] },
+        { id: "troll", name: "Troll", src: "./png/troll.png", hpMult: 1.5, atkMult: 1.2, skills: ["smash", "regen"], bossOnly: true },
+        { id: "flame_r", name: "Red Skull", src: "./png/flameSkull-red.png", hpMult: 1.2, atkMult: 1.4, skills: ["fireball"] },
+        { id: "flame_b", name: "Blue Skull", src: "./png/flameSkull-blue.png", hpMult: 1.3, atkMult: 1.5, skills: ["fireball", "curse"], bossOnly: true },
+        { id: "demon", name: "Demon", src: "./png/demon.png", hpMult: 1.8, atkMult: 1.6, skills: ["doom", "fireball"], bossOnly: true }
     ];
 
     /* =========================================
      * 2. STATE MANAGEMENT & LOCAL STORAGE
      * ========================================= */
     const LS_KEYS = {
-        DATA: "qz_rpg_v90_data", // 통합 데이터
-        HOF: "qz_rpg_v90_hof"
+        DATA: "qz_rpg_v94_data",
+        HOF: "qz_rpg_v94_hof"
     };
 
     // 기본 게임 상태
@@ -388,9 +438,9 @@
         gold: 0,
         unlockedClasses: ["knight", "rogue", "mage"],
         heroes: {
-            "knight": { level: 1, xp: 0, skillLevels: [1, 1, 1, 1], skin: "default" },
-            "rogue": { level: 1, xp: 0, skillLevels: [1, 1, 1, 1], skin: "default" },
-            "mage": { level: 1, xp: 0, skillLevels: [1, 1, 1, 1], skin: "default" }
+            "knight": { level: 1, xp: 0, skillLevels: { k1:1, k2:1, k3:1, k4:1 }, equipped: ["k1", "k2", "k3", "k4"], skin: "default" },
+            "rogue": { level: 1, xp: 0, skillLevels: { r1:1, r2:1, r3:1, r4:1 }, equipped: ["r1", "r2", "r3", "r4"], skin: "default" },
+            "mage": { level: 1, xp: 0, skillLevels: { m1:1, m2:1, m3:1, m4:1 }, equipped: ["m1", "m2", "m3", "m4"], skin: "default" }
         },
         selectedClass: "knight"
     };
@@ -405,7 +455,24 @@
         if (raw) {
             try {
                 const loaded = JSON.parse(raw);
-                gameState = { ...gameState, ...loaded, heroes: { ...gameState.heroes, ...loaded.heroes } };
+                gameState = { ...gameState, ...loaded };
+
+                Object.keys(gameState.heroes).forEach(cid => {
+                    const h = gameState.heroes[cid];
+                    const def = HERO_DEFINITIONS[cid];
+                    if (Array.isArray(h.skillLevels)) {
+                        const newSlv = {};
+                        def.skills.slice(0, 4).forEach((s, i) => newSlv[s.id] = h.skillLevels[i] || 1);
+                        h.skillLevels = newSlv;
+                    }
+                    if (!h.equipped || !Array.isArray(h.equipped)) {
+                        h.equipped = def.skills.slice(0, 4).map(s => s.id);
+                    }
+                    def.skills.forEach(s => {
+                        if (!h.skillLevels[s.id]) h.skillLevels[s.id] = 1;
+                    });
+                });
+
             } catch (e) { console.error("Save load error", e); }
         }
     }
@@ -421,7 +488,6 @@
         const level = levelOverride || heroData.level;
         const base = def.baseStats;
 
-        // RPG 스탯 공식: Base + (Lv * Multiplier)
         return {
             maxHp: Math.floor(base.hp + (level * 10)),
             atk: Math.floor(base.atk + (level * 1.5)),
@@ -438,7 +504,6 @@
     function addHoF(record) {
         const list = getHoF();
         list.push({ ts: Date.now(), date: new Date().toLocaleDateString(), ...record });
-        // 최신순 20개 유지
         list.sort((a,b) => b.ts - a.ts);
         if(list.length > 20) list.length = 20;
         localStorage.setItem(LS_KEYS.HOF, JSON.stringify(list));
@@ -453,8 +518,6 @@
         const def = HERO_DEFINITIONS[curClass];
 
         document.getElementById("lobbyGold").textContent = gameState.gold.toLocaleString();
-
-        // 카드 정보 업데이트
         document.getElementById("lobbyClassLabel").textContent = def.name;
         document.getElementById("lobbyHeroName").textContent = def.nameKo;
         document.getElementById("lobbyHeroLevel").textContent = heroData.level;
@@ -462,7 +525,6 @@
         const imgSrc = heroData.skin === "skin" ? def.sprites.skin : def.sprites.default;
         document.getElementById("lobbyHeroImg").src = imgSrc;
 
-        // 경험치 바
         const reqXp = heroData.level * 100;
         const pct = Math.min(100, (heroData.xp / reqXp) * 100);
         document.getElementById("lobbyXpBar").style.width = `${pct}%`;
@@ -508,7 +570,7 @@
     }
 
     /* =========================================
-     * 4. TRAINING SYSTEM (SKILL UPGRADE)
+     * 4. TRAINING SYSTEM (EQUIP & UPGRADE)
      * ========================================= */
     function openTraining() {
         const cid = gameState.selectedClass;
@@ -516,49 +578,92 @@
         const def = HERO_DEFINITIONS[cid];
 
         document.getElementById("trainingGold").textContent = gameState.gold;
+        renderTrainingList();
+        showModal("trainingModal");
+    }
+
+    function renderTrainingList() {
+        const cid = gameState.selectedClass;
+        const hero = gameState.heroes[cid];
+        const def = HERO_DEFINITIONS[cid];
         const list = document.getElementById("trainingList");
         list.innerHTML = "";
 
-        // 상단 스킨 변경 버튼 (보너스 기능)
+        document.getElementById("trainingGold").textContent = gameState.gold;
+        document.getElementById("trainingEquipCount").textContent = `장착: ${hero.equipped.length}/4`;
+
         const skinBtn = document.createElement("button");
-        skinBtn.className = "w-full py-2 mb-4 bg-purple-100 text-purple-700 font-bold rounded-lg text-xs border border-purple-200";
+        skinBtn.className = "w-full py-2 mb-2 bg-purple-100 text-purple-700 font-bold rounded-lg text-xs border border-purple-200";
         skinBtn.textContent = `🎨 스킨 변경 (${hero.skin === 'default' ? '기본' : '어나더'})`;
-        skinBtn.onclick = () => { toggleSkin(cid); openTraining(); };
+        skinBtn.onclick = () => { toggleSkin(cid); renderTrainingList(); };
         list.appendChild(skinBtn);
 
-        def.skills.forEach((skill, idx) => {
-            const lv = hero.skillLevels[idx];
-            const cost = lv * 100; // 강화 비용: 레벨 * 100G
+        def.skills.forEach((skill) => {
+            const lv = hero.skillLevels[skill.id] || 1;
+            const cost = lv * 100;
+            const isEquipped = hero.equipped.includes(skill.id);
 
             const row = document.createElement("div");
-            row.className = "bg-white border border-slate-200 rounded-xl p-3 flex justify-between items-center shadow-sm";
+            row.className = `skill-card rounded-xl p-3 flex justify-between items-center shadow-sm ${isEquipped ? 'equipped' : 'bg-white border-slate-200'}`;
+
+            row.onclick = (e) => {
+                if(e.target.tagName !== 'BUTTON') {
+                    toggleEquip(cid, skill.id);
+                }
+            };
+
             row.innerHTML = `
-                <div>
-                    <div class="font-bold text-sm text-slate-800">${skill.name} <span class="text-blue-500 text-xs">Lv.${lv}</span></div>
-                    <div class="text-[10px] text-slate-500">${skill.desc}</div>
+                <div class="flex-1 cursor-pointer">
+                    <div class="font-bold text-sm text-slate-800 flex items-center gap-2">
+                        ${skill.name} <span class="text-blue-500 text-xs">Lv.${lv}</span>
+                        ${isEquipped ? '<span class="text-[10px] bg-green-500 text-white px-1.5 rounded">장착중</span>' : ''}
+                    </div>
+                    <div class="text-[10px] text-slate-500 mt-0.5">${skill.desc}</div>
                 </div>
-                <button class="px-3 py-1.5 bg-yellow-500 hover:bg-yellow-400 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 disabled:bg-slate-300 disabled:text-slate-500" 
-                    id="btnTrain_${idx}">
+                <button class="px-3 py-1.5 ml-2 bg-yellow-500 hover:bg-yellow-400 text-white text-xs font-bold rounded-lg shadow-sm active:scale-95 disabled:bg-slate-300 disabled:text-slate-500" 
+                    id="btnTrain_${skill.id}">
                     ⚡ ${cost} G
                 </button>
             `;
 
-            const btn = row.querySelector(`#btnTrain_${idx}`);
+            const btn = row.querySelector(`#btnTrain_${skill.id}`);
             if (gameState.gold < cost) btn.disabled = true;
 
-            btn.onclick = () => {
+            btn.onclick = (e) => {
+                e.stopPropagation();
                 if (gameState.gold >= cost) {
                     gameState.gold -= cost;
-                    hero.skillLevels[idx]++;
+                    hero.skillLevels[skill.id]++;
                     saveGameData();
-                    openTraining(); // Refresh
+                    renderTrainingList();
                 }
             };
 
             list.appendChild(row);
         });
+    }
 
-        showModal("trainingModal");
+    function toggleEquip(cid, skillId) {
+        const hero = gameState.heroes[cid];
+        const idx = hero.equipped.indexOf(skillId);
+
+        if (idx >= 0) {
+            if (hero.equipped.length > 1) {
+                hero.equipped.splice(idx, 1);
+            } else {
+                alert("최소 1개의 스킬은 장착해야 합니다.");
+                return;
+            }
+        } else {
+            if (hero.equipped.length < 4) {
+                hero.equipped.push(skillId);
+            } else {
+                alert("최대 4개까지만 장착할 수 있습니다.\n다른 스킬을 해제해주세요.");
+                return;
+            }
+        }
+        saveGameData();
+        renderTrainingList();
     }
 
     /* =========================================
@@ -569,8 +674,9 @@
         const hData = gameState.heroes[cid];
         const def = HERO_DEFINITIONS[cid];
         const stats = getHeroStats(cid);
-
         const imgSrc = hData.skin === "skin" ? def.sprites.skin : def.sprites.default;
+
+        const battleSkills = hData.equipped.map(sid => def.skills.find(s => s.id === sid)).filter(s => s);
 
         battleState = {
             mode: "dungeon",
@@ -580,90 +686,90 @@
                 maxHp: stats.maxHp,
                 hp: stats.maxHp,
                 shield: 0,
-                skills: def.skills,
+                skills: battleSkills,
                 skillLevels: hData.skillLevels,
                 name: def.nameKo,
                 img: imgSrc,
                 classId: cid,
-                level: hData.level, // 레벨 명시적 저장
+                level: hData.level,
                 buffs: { atk: 0, def: 0 }
             },
-            enemy: null, // startBattleStage에서 생성
-            cooldowns: [0, 0, 0, 0]
+            enemy: null,
+            cooldowns: [0, 0, 0, 0],
+            enemyCooldowns: []
         };
 
-        // UI 전환
         document.getElementById("lobbyScreen").classList.remove("active");
         document.getElementById("battleScreen").classList.add("active");
-
         startBattleStage();
     }
 
     function startBattleStage() {
         const bs = battleState;
 
-        // 적 생성 (랜덤 슬라임)
-        const variant = ENEMY_VARIANTS[Math.floor(Math.random() * ENEMY_VARIANTS.length)];
+        // 스테이지에 따라 적 풀 필터링
         const isBoss = (bs.stage % 5 === 0);
+        let availableEnemies = ENEMY_VARIANTS.filter(e => isBoss ? e.bossOnly : !e.bossOnly);
+        if (availableEnemies.length === 0) availableEnemies = ENEMY_VARIANTS; // fallback
 
-        // 적 스탯 스케일링
+        const variant = availableEnemies[Math.floor(Math.random() * availableEnemies.length)];
         const stageMult = 1 + (bs.stage * 0.2);
-        const bossMult = isBoss ? 2.5 : 1.0;
+
+        // 몬스터 전용 스킬 객체 매핑
+        const monsterSkills = (variant.skills || []).map(k => MONSTER_SKILLS[k]).filter(s => s);
 
         bs.enemy = {
             name: variant.name + (isBoss ? " (BOSS)" : ""),
-            maxHp: Math.floor(60 * stageMult * bossMult),
-            hp: Math.floor(60 * stageMult * bossMult),
-            atk: Math.floor(8 * stageMult * bossMult * 0.7), // 플레이어보다 조금 약하게
+            maxHp: Math.floor(60 * stageMult * (variant.hpMult || 1.0)),
+            hp: Math.floor(60 * stageMult * (variant.hpMult || 1.0)),
+            atk: Math.floor(8 * stageMult * (variant.atkMult || 1.0) * 0.7),
             def: Math.floor(2 * stageMult),
             img: variant.src,
             isBoss: isBoss,
-            buffs: { stun: 0 }
+            buffs: { stun: 0 },
+            skills: monsterSkills, // 몬스터 스킬 할당
+            skillLevels: {} // 몬스터는 기본 레벨 1
         };
 
-        // 스테이지 시작 시 플레이어 쉴드/버프 초기화 (매 판 리셋)
         bs.player.shield = 0;
         bs.player.buffs = { atk: 0, def: 0 };
-        bs.cooldowns = [0, 0, 0, 0];
+        bs.cooldowns = new Array(bs.player.skills.length).fill(0);
+        bs.enemyCooldowns = new Array(monsterSkills.length).fill(0);
 
-        // UI 업데이트
         document.getElementById("battleStageText").textContent = bs.stage;
         document.getElementById("enemyName").textContent = bs.enemy.name;
         document.getElementById("enemyLevel").textContent = `Lv.${bs.stage}`;
         document.getElementById("enemyImg").src = bs.enemy.img;
-        if (isBoss) document.getElementById("enemyImg").style.transform = "scale(1.5)";
-        else document.getElementById("enemyImg").style.transform = "scale(1)";
+
+        // 적 반전 및 보스 확대 적용
+        document.getElementById("enemyImg").className = `w-32 h-32 pixel-art animate-bounce ${isBoss ? 'enemy-flip-boss' : 'enemy-flip'}`;
 
         updateBattleUI();
         logBattle(`${bs.enemy.name} 출현!`);
     }
 
     function updateBattleUI() {
+        if(!battleState) return;
         const p = battleState.player;
         const e = battleState.enemy;
 
-        // Player UI
         document.getElementById("playerImg").src = p.img;
         document.getElementById("playerName").textContent = p.name;
-        document.getElementById("playerLevel").textContent = `Lv.${p.level}`; // 레벨 갱신 적용
+        document.getElementById("playerLevel").textContent = `Lv.${p.level}`;
         document.getElementById("playerHpText").textContent = `${p.hp}/${p.maxHp}`;
         document.getElementById("playerHpBar").style.width = `${Math.max(0, (p.hp/p.maxHp)*100)}%`;
 
-        // Shield Bar
         const shieldPct = Math.min(100, (p.shield / p.maxHp) * 100);
         document.getElementById("playerShieldBar").style.width = `${shieldPct}%`;
 
-        // Player Buffs Display
         const pBuffsEl = document.getElementById("playerBuffs");
         pBuffsEl.innerHTML = "";
         if (p.buffs.atk > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-red-100 text-red-600 px-1 rounded border border-red-200">공격UP ${p.buffs.atk}</span>`;
         if (p.buffs.def > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-blue-100 text-blue-600 px-1 rounded border border-blue-200">방어UP ${p.buffs.def}</span>`;
         if (p.shield > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-yellow-100 text-yellow-600 px-1 rounded border border-yellow-200">보호막 ${p.shield}</span>`;
 
-        // Enemy UI
         document.getElementById("enemyHpBar").style.width = `${Math.max(0, (e.hp/e.maxHp)*100)}%`;
 
-        // Enemy Buffs (Stun)
         const eBuffsEl = document.getElementById("enemyBuffs");
         eBuffsEl.innerHTML = "";
         if (e.buffs.stun > 0) eBuffsEl.innerHTML += `<span class="text-[9px] bg-purple-100 text-purple-600 px-1 rounded border border-purple-200">기절 ${e.buffs.stun}</span>`;
@@ -677,7 +783,7 @@
 
         battleState.player.skills.forEach((skill, idx) => {
             const cd = battleState.cooldowns[idx];
-            const lv = battleState.player.skillLevels[idx];
+            const lv = battleState.player.skillLevels[skill.id] || 1;
 
             const btn = document.createElement("button");
             btn.className = `p-3 rounded-lg border-2 text-left relative overflow-hidden transition-all ${cd > 0 ? 'bg-slate-700 border-slate-600 text-slate-500 cursor-not-allowed' : 'bg-slate-800 border-blue-500 text-white hover:bg-slate-700 active:scale-95'}`;
@@ -699,7 +805,6 @@
         document.getElementById("battleLog").textContent = msg;
     }
 
-    // 전투 로직
     function handlePlayerMove(skillIdx) {
         openQuiz((isCorrect) => {
             if (!isCorrect) {
@@ -711,70 +816,19 @@
             const p = battleState.player;
             const e = battleState.enemy;
             const skill = p.skills[skillIdx];
-            const slv = p.skillLevels[skillIdx];
+            const slv = p.skillLevels[skill.id] || 1;
 
-            // 쿨다운 설정
-            battleState.cooldowns[skillIdx] = skill.cd + 1;
+            battleState.cooldowns[skillIdx] = (skill.cd || 0) + 1;
 
-            // 기본 데미지 계산
-            let mult = 1.0;
-            // 공격력 버프 체크
-            if (p.buffs.atk > 0) mult += 0.5; // 50% 증가
-
-            // 스킬 레벨 계수 (레벨당 10% 증가)
-            let lvlMult = 1 + (slv * 0.1);
-
-            let dmg = Math.floor(p.atk * skill.power * lvlMult * mult);
-
-            // 스킬 효과 구현
-            if (skill.type.includes("crit") && Math.random() < 0.4) {
-                dmg = Math.floor(dmg * 1.5);
-                logBattle("치명타 적중!");
+            // 플레이어 공격 애니메이션 (공격형 스킬일 때만)
+            if (skill.type.includes("atk")) {
+                const pImg = document.getElementById("playerImg");
+                pImg.classList.add("animate-attack-player");
+                setTimeout(() => pImg.classList.remove("animate-attack-player"), 300);
             }
 
-            if (skill.type === "atk_execute") {
-                if (e.hp <= e.maxHp * 0.3) {
-                    dmg = Math.floor(dmg * 2.0);
-                    logBattle("처형 발동!");
-                }
-            }
-
-            if (skill.type === "atk_stun") {
-                e.buffs.stun = 1;
-                logBattle("적을 기절시켰습니다!");
-            }
-
-            if (skill.type === "buff_atk") {
-                p.buffs.atk = 3; // 3턴 지속
-                logBattle("공격력이 증가했습니다!");
-            }
-
-            if (skill.type === "buff_def") {
-                p.buffs.def = 2; // 2턴 지속
-                logBattle("방어 태세를 갖췄습니다!");
-            }
-
-            if (skill.type === "buff_shield") {
-                const shieldAmt = Math.floor(p.maxHp * 0.3 * lvlMult);
-                p.shield += shieldAmt;
-                logBattle(`보호막 ${shieldAmt} 생성!`);
-            }
-
-            if (skill.type.includes("heal")) {
-                const heal = Math.floor(p.maxHp * 0.2 * lvlMult);
-                p.hp = Math.min(p.maxHp, p.hp + heal);
-                logBattle(`HP ${heal} 회복`);
-            }
-
-            // 데미지 적용
-            if (skill.power > 0) {
-                e.hp -= dmg;
-                logBattle(`${skill.name}! ${dmg}의 피해!`);
-                // 애니메이션
-                const eImg = document.getElementById("enemyImg");
-                eImg.classList.add("animate-damage");
-                setTimeout(() => eImg.classList.remove("animate-damage"), 400);
-            }
+            // 데미지 계산 및 효과 적용
+            applySkillEffect(p, e, skill, slv);
 
             updateBattleUI();
 
@@ -786,30 +840,137 @@
         });
     }
 
-    // 적 턴 + 턴 종료 공통 처리
+    function applySkillEffect(attacker, defender, skill, level) {
+        let mult = 1.0;
+        if (attacker.buffs && attacker.buffs.atk > 0) mult += 0.5;
+
+        let lvlMult = 1 + (level * 0.1);
+        let dmg = Math.floor(attacker.atk * skill.power * lvlMult * mult);
+
+        // 고스트는 데미지 약간 너프
+        if (battleState.mode === "ghost" && attacker === battleState.enemy) {
+            dmg = Math.floor(dmg * 0.9);
+        }
+
+        if (skill.type.includes("crit") && Math.random() < 0.4) {
+            dmg = Math.floor(dmg * 1.5);
+            logBattle(`${attacker === battleState.player ? "나" : "적"}의 치명타!`);
+        }
+
+        if (skill.type === "atk_execute" && defender.hp <= defender.maxHp * 0.3) {
+            dmg = Math.floor(dmg * 2.0);
+            logBattle("처형 발동!");
+        }
+
+        if (skill.type === "atk_stun") {
+            defender.buffs.stun = 1;
+            logBattle(`${defender === battleState.player ? "나" : "적"} 기절!`);
+        }
+
+        if (skill.type === "buff_atk") {
+            attacker.buffs.atk = 3;
+            logBattle("공격력 증가!");
+        }
+
+        if (skill.type === "buff_def") {
+            attacker.buffs.def = 2;
+            logBattle("방어 태세!");
+        }
+
+        if (skill.type === "buff_shield") {
+            const shieldAmt = Math.floor(attacker.maxHp * 0.3 * lvlMult);
+            attacker.shield += shieldAmt;
+            logBattle(`보호막 ${shieldAmt} 생성!`);
+        }
+
+        if (skill.type.includes("heal")) {
+            // 재생(regen) 스킬은 power가 0이므로 여기서 힐량을 계산해야 함
+            // 기본 힐량(20%) + 레벨 보정
+            const baseHealRatio = (skill.id === 'ms_regen') ? 0.3 : 0.2; // 몬스터 재생은 좀 더 많이
+            const heal = Math.floor(attacker.maxHp * baseHealRatio * lvlMult);
+            attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
+            logBattle(`HP ${heal} 회복`);
+        }
+
+        // 데미지 적용
+        if (skill.power > 0) {
+            let finalDmg = Math.max(1, dmg - Math.floor(defender.def * 0.5));
+            if (defender.buffs && defender.buffs.def > 0) finalDmg = Math.floor(finalDmg * 0.5);
+
+            if (defender.shield > 0) {
+                if (defender.shield >= finalDmg) {
+                    defender.shield -= finalDmg;
+                    finalDmg = 0;
+                    logBattle("보호막으로 방어!");
+                } else {
+                    finalDmg -= defender.shield;
+                    defender.shield = 0;
+                    logBattle("보호막 파괴!");
+                }
+            }
+
+            if (finalDmg > 0) {
+                defender.hp -= finalDmg;
+                logBattle(`${skill.name}! ${finalDmg} 피해.`);
+
+                const targetImg = defender === battleState.player ? document.getElementById("playerImg") : document.getElementById("enemyImg");
+                targetImg.classList.add("animate-damage");
+                setTimeout(() => targetImg.classList.remove("animate-damage"), 400);
+            }
+        }
+    }
+
     function enemyTurn() {
         if (!battleState || battleState.enemy.hp <= 0) return;
 
-        const p = battleState.player;
         const e = battleState.enemy;
 
-        // 스턴 체크 (스턴이어도 턴 경과 처리는 해야 하므로 return 전에 처리)
         if (e.buffs.stun > 0) {
             e.buffs.stun--;
             logBattle(`${e.name}은(는) 기절하여 움직일 수 없습니다!`);
-            endEnemyTurn(); // 공통 턴 종료 처리
+            endEnemyTurn();
             return;
         }
 
-        let dmg = Math.max(1, e.atk - Math.floor(p.def * 0.5));
+        // 몬스터 AI: 스킬이 있으면 50% 확률로 사용 (고스트/일반몹 공통)
+        if (e.skills && e.skills.length > 0 && Math.random() < 0.5) {
+            const usable = [];
+            for (let i = 0; i < e.skills.length; i++) {
+                if ((battleState.enemyCooldowns?.[i] ?? 0) === 0) usable.push(i);
+            }
 
-        // 플레이어 방어 버프 체크
-        if (p.buffs.def > 0) {
-            dmg = Math.floor(dmg * 0.5); // 데미지 반감
-            logBattle("철벽으로 피해를 줄였습니다.");
+            if (usable.length > 0) {
+                const idx = usable[Math.floor(Math.random() * usable.length)];
+                const skill = e.skills[idx];
+                const slv = (e.skillLevels && e.skillLevels[skill.id]) ? e.skillLevels[skill.id] : 1;
+
+                battleState.enemyCooldowns[idx] = (skill.cd || 0) + 1;
+
+                // 적 공격 애니메이션
+                if(skill.type.includes("atk")) {
+                    const eImg = document.getElementById("enemyImg");
+                    eImg.classList.add("animate-attack-enemy");
+                    setTimeout(() => eImg.classList.remove("animate-attack-enemy"), 300);
+                }
+
+                applySkillEffect(e, battleState.player, skill, slv);
+                checkPlayerDeath();
+                if (battleState.player.hp > 0) endEnemyTurn();
+                return;
+            }
         }
 
-        // 쉴드 체크
+        // 일반 공격
+        const p = battleState.player;
+        let dmg = Math.max(1, e.atk - Math.floor(p.def * 0.5));
+
+        // 적 공격 애니메이션 (일반)
+        const eImg = document.getElementById("enemyImg");
+        eImg.classList.add("animate-attack-enemy");
+        setTimeout(() => eImg.classList.remove("animate-attack-enemy"), 300);
+
+        if (p.buffs.def > 0) dmg = Math.floor(dmg * 0.5);
+
         if (p.shield > 0) {
             if (p.shield >= dmg) {
                 p.shield -= dmg;
@@ -830,31 +991,34 @@
             setTimeout(() => pImg.classList.remove("animate-damage"), 400);
         }
 
-        if (p.hp <= 0) {
+        checkPlayerDeath();
+        if (battleState.player.hp > 0) endEnemyTurn();
+    }
+
+    function checkPlayerDeath() {
+        if (battleState.player.hp <= 0) {
             updateBattleUI();
             setTimeout(() => {
-                // 패배 기록
                 if (battleState.mode !== "ghost") {
-                    addHoF({ kind: "lose", stage: battleState.stage, enemy: e.name });
+                    addHoF({ kind: "lose", stage: battleState.stage, enemy: battleState.enemy.name });
                 }
-                alert(`패배했습니다... 최종 스테이지: ${battleState.stage}`);
+                alert(`패배했습니다...`);
+                battleState = null; // 상태 초기화
                 document.getElementById("battleScreen").classList.remove("active");
                 document.getElementById("lobbyScreen").classList.add("active");
             }, 600);
-            return;
         }
-
-        endEnemyTurn();
     }
 
-    // 턴 종료 시 공통 처리 (쿨다운 감소, 버프 턴 감소 등)
     function endEnemyTurn() {
+        if (!battleState) return;
         const p = battleState.player;
 
-        // 쿨다운 감소
         battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
+        if (battleState.enemyCooldowns) {
+            battleState.enemyCooldowns = battleState.enemyCooldowns.map(c => Math.max(0, c - 1));
+        }
 
-        // 플레이어 버프 턴 감소 (적이 스턴이어도 턴은 흐름)
         if (p.buffs.atk > 0) p.buffs.atk--;
         if (p.buffs.def > 0) p.buffs.def--;
 
@@ -862,37 +1026,32 @@
     }
 
     function winStage() {
+        if (!battleState) return;
         const bs = battleState;
         const xpGain = 10 + (bs.stage * 5);
         let goldGain = 0;
 
-        // 보스 보상 (여기서만 골드 지급)
-        if (bs.enemy.isBoss) {
-            goldGain = 50 + (bs.stage * 10);
-        }
+        if (bs.enemy.isBoss) goldGain = 50 + (bs.stage * 10);
 
-        // 고스트 배틀 승리 처리
         if (bs.mode === "ghost") {
             addHoF({ kind: "ghost_win", enemy: bs.enemy.name, level: bs.enemy.level });
             alert(`승리! 경험치 ${xpGain} 획득!`);
 
-            // 보상 지급 및 종료
             const hData = gameState.heroes[gameState.selectedClass];
             hData.xp += xpGain;
             saveGameData();
 
+            battleState = null;
             document.getElementById("battleScreen").classList.remove("active");
             document.getElementById("lobbyScreen").classList.add("active");
             updateLobbyUI();
             return;
         }
 
-        // 데이터 반영
         const hData = gameState.heroes[gameState.selectedClass];
         hData.xp += xpGain;
         gameState.gold += goldGain;
 
-        // 레벨업 체크
         let leveledUp = false;
         while (hData.xp >= hData.level * 100) {
             hData.xp -= hData.level * 100;
@@ -901,9 +1060,7 @@
         }
         saveGameData();
 
-        // UI 표시
         document.getElementById("rewardXpVal").textContent = xpGain + (leveledUp ? " (LEVEL UP!)" : "");
-
         if (goldGain > 0) {
             document.getElementById("rewardGoldVal").textContent = goldGain;
             document.getElementById("rewardGoldSection").classList.remove("hidden");
@@ -913,20 +1070,14 @@
 
         showModal("rewardModal");
 
-        // 다음 스테이지 준비
         document.getElementById("rewardOkBtn").onclick = () => {
             hideModal("rewardModal");
-
-            // 플레이어 스탯 갱신
             const newStats = getHeroStats(hData.classId || gameState.selectedClass);
             bs.player.maxHp = newStats.maxHp;
             bs.player.atk = newStats.atk;
             bs.player.def = newStats.def;
-            bs.player.level = hData.level; // 레벨 동기화
-
-            // 스테이지 클리어 시 HP 30% 회복
+            bs.player.level = hData.level;
             bs.player.hp = Math.min(bs.player.maxHp, bs.player.hp + Math.floor(bs.player.maxHp * 0.3));
-
             bs.stage++;
             startBattleStage();
         };
@@ -942,8 +1093,7 @@
                 const data = await res.json();
                 if (data.questions) externalQuizList = data.questions;
             }
-        } catch (e) { console.log("Quiz load failed, using Math fallback."); }
-
+        } catch (e) { console.log("Quiz load failed."); }
         document.getElementById("startButton").disabled = false;
         document.getElementById("loadingStatus").textContent = "시스템 준비 완료";
     }
@@ -951,14 +1101,10 @@
     function openQuiz(cb) {
         quizCallback = cb;
         let q = generateMathQuiz();
-
         if (externalQuizList.length > 0 && Math.random() < 0.7) {
             const raw = externalQuizList[Math.floor(Math.random() * externalQuizList.length)];
-
-            // 안전한 필드 매핑
             const choices = raw.choices || raw.options || [];
             const ansIdx = (raw.answerIndex !== undefined) ? raw.answerIndex : (raw.answer_index || 0);
-
             q = {
                 q: raw.prompt || raw.question || "문제",
                 explain: raw.promptExplain || raw.explain || "퀴즈",
@@ -966,13 +1112,10 @@
                 answer: choices[ansIdx]
             };
         }
-
         document.getElementById("quizExplain").textContent = q.explain;
         document.getElementById("quizQuestion").textContent = q.q;
-
         const grid = document.getElementById("quizChoices");
         grid.innerHTML = "";
-
         q.choices.forEach(c => {
             const btn = document.createElement("button");
             btn.className = "bg-slate-100 hover:bg-blue-100 border-2 border-slate-200 font-bold py-3 rounded-xl text-lg transition-colors";
@@ -983,7 +1126,6 @@
             };
             grid.appendChild(btn);
         });
-
         showModal("quizModal");
     }
 
@@ -1008,27 +1150,26 @@
 
     function openGhostModal() {
         showModal("ghostModal");
-        switchGhostTab('my'); // 기본 내 QR 탭
+        switchGhostTab('my');
 
-        // 내 QR 생성
         const cid = gameState.selectedClass;
         const hero = gameState.heroes[cid];
         const def = HERO_DEFINITIONS[cid];
         const stats = getHeroStats(cid);
 
         const payload = {
-            v: 92,
+            v: 94,
             cid: cid,
             lv: hero.level,
+            eq: hero.equipped,
             slv: hero.skillLevels,
             nm: def.nameKo,
-            stats: stats, // 스탯 정보 포함
+            stats: stats,
             ts: Date.now()
         };
 
         const jsonStr = JSON.stringify(payload);
         const token = toBase64UTF8(jsonStr);
-        // User requested fixed URL
         const GHOST_ROOT_URL = "https://unluckyidiot16.github.io/WebGames/DQR/DQR.html";
         const url = `${GHOST_ROOT_URL}?ghost=${encodeURIComponent(token)}`;
 
@@ -1064,7 +1205,6 @@
     async function startGhostScan() {
         const video = document.getElementById("ghostVideo");
         const statusEl = document.getElementById("ghostScanStatus");
-
         try {
             statusEl.textContent = "카메라 시작 중...";
             const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
@@ -1082,18 +1222,14 @@
         if (!ghostScanStream) return;
         const video = document.getElementById("ghostVideo");
         const canvas = document.getElementById("ghostScanCanvas");
-
         if (video.readyState === video.HAVE_ENOUGH_DATA) {
             canvas.width = video.videoWidth;
             canvas.height = video.videoHeight;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(video, 0, 0);
-
             const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
             const code = jsQR(imageData.data, imageData.width, imageData.height);
-
             if (code) {
-                // QR 내용 파싱
                 const payload = parseGhostFromUrl(code.data);
                 if (payload) {
                     stopGhostScan();
@@ -1133,36 +1269,45 @@
         const myDef = HERO_DEFINITIONS[myCid];
         const myStats = getHeroStats(myCid);
         const myImg = myHero.skin === "skin" ? myDef.sprites.skin : myDef.sprites.default;
+        const mySkills = myHero.equipped.map(sid => myDef.skills.find(s => s.id === sid));
 
-        // 적(고스트) 데이터 구성
-        // ghostData: { cid, lv, slv, nm, stats }
         const enemyDef = HERO_DEFINITIONS[ghostData.cid] || HERO_DEFINITIONS['knight'];
-        const enemyImg = enemyDef.sprites.default; // 고스트는 기본 스킨만 (간소화)
+        const enemyImg = enemyDef.sprites.default;
 
-        // 상대 스탯 (전송된 스탯 or 레벨 기반 계산)
-        const eStats = ghostData.stats || {
-            hp: 100 + ghostData.lv*10, atk: 10 + ghostData.lv, def: 5, spd: 5
-        };
+        const eStatsRaw = ghostData.stats || {};
+        const eMaxHp = Number(eStatsRaw.maxHp ?? eStatsRaw.hp) || Math.floor(100 + ghostData.lv * 10);
+        const eAtk   = Number(eStatsRaw.atk) || Math.floor(10 + ghostData.lv * 1.3);
+        const eDef   = Number(eStatsRaw.def) || 5;
+
+        let enemySkills = [];
+        if (ghostData.eq && Array.isArray(ghostData.eq)) {
+            enemySkills = ghostData.eq.map(sid => enemyDef.skills.find(s => s.id === sid)).filter(s => s);
+        } else {
+            enemySkills = enemyDef.skills.slice(0, 4);
+        }
 
         battleState = {
             mode: "ghost",
             stage: 1,
             player: {
                 ...myStats, maxHp: myStats.maxHp, hp: myStats.maxHp, shield: 0,
-                skills: myDef.skills, skillLevels: myHero.skillLevels,
+                skills: mySkills, skillLevels: myHero.skillLevels,
                 name: myDef.nameKo, img: myImg, classId: myCid, level: myHero.level,
                 buffs: { atk: 0, def: 0 }
             },
             enemy: {
                 name: `Ghost ${ghostData.nm}`,
-                maxHp: eStats.maxHp, hp: eStats.maxHp,
-                atk: eStats.atk, def: eStats.def || 5,
+                maxHp: eMaxHp, hp: eMaxHp,
+                atk: eAtk, def: eDef,
                 img: enemyImg,
-                isBoss: true, // 고스트는 보스 취급 (보상 등)
+                isBoss: true,
                 level: ghostData.lv,
-                buffs: { stun: 0 }
+                buffs: { stun: 0 },
+                skills: enemySkills,
+                skillLevels: ghostData.slv || {}
             },
-            cooldowns: [0, 0, 0, 0]
+            cooldowns: new Array(mySkills.length).fill(0),
+            enemyCooldowns: new Array(enemySkills.length).fill(0)
         };
 
         document.getElementById("lobbyScreen").classList.remove("active");
@@ -1170,6 +1315,9 @@
 
         updateBattleUI();
         document.getElementById("enemyImg").src = enemyImg;
+        // 고스트는 플레이어와 같은 뱡향(오른쪽)을 기본으로 쓰므로, 반전시켜서 마주보게 함
+        document.getElementById("enemyImg").className = "w-32 h-32 pixel-art animate-bounce enemy-flip-boss"; // 고스트 보스 취급
+
         document.getElementById("enemyName").textContent = battleState.enemy.name;
         document.getElementById("enemyLevel").textContent = `Lv.${battleState.enemy.level}`;
         logBattle("고스트와의 대결이 시작됩니다!");
@@ -1208,16 +1356,13 @@
         loadGameData();
         loadQuizData();
 
-        // URL 파라미터 체크 (고스트 배틀 링크)
         const pendingGhost = parseGhostFromUrl(window.location.href);
         if (pendingGhost) {
             if(confirm(`Ghost ${pendingGhost.nm} (Lv.${pendingGhost.lv})와 대결하시겠습니까?`)) {
-                // 약간의 지연 후 시작 (데이터 로드 확보)
                 setTimeout(() => startGhostBattle(pendingGhost), 500);
             }
         }
 
-        // 버튼 이벤트 연결
         document.getElementById("startButton").onclick = () => {
             document.getElementById("titleScreen").classList.remove("active");
             document.getElementById("lobbyScreen").classList.add("active");
@@ -1260,6 +1405,7 @@
 
         document.getElementById("battleGiveUpBtn").onclick = () => {
             if(confirm("정말 포기하시겠습니까? (보상 없음)")) {
+                battleState = null;
                 document.getElementById("battleScreen").classList.remove("active");
                 document.getElementById("lobbyScreen").classList.add("active");
             }
