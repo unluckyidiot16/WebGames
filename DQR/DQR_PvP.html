@@ -96,6 +96,10 @@
 </section>
 
 <section id="battleView" class="view relative bg-slate-900 justify-between pb-4 overflow-hidden">
+    <button onclick="onSurrenderClick()" class="absolute top-16 left-2 z-30 bg-slate-800/80 text-white text-xs px-2 py-1 rounded border border-slate-600 hover:bg-red-900/80 hover:border-red-500 transition-colors">
+        🏳️ 기권
+    </button>
+
     <div class="w-full max-w-md bg-slate-800/90 backdrop-blur p-2 flex justify-between items-center z-20 border-b border-slate-700 shadow-lg absolute top-0">
         <div class="flex flex-col">
             <div class="text-[10px] text-slate-400 font-bold">MODE</div>
@@ -232,6 +236,38 @@
         }
     }
 
+    function joinRoom(room, host, mode) {
+        if(channel) sb.removeChannel(channel);
+        roomId = room; isHost = host;
+
+        initBattleData(mode);
+
+        channel = sb.channel(room);
+
+        channel
+            .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
+            .on('broadcast', { event: 'skill_selected' }, ({ payload }) => { if(payload.id !== myData.id) checkSkillPhaseEnd(payload); })
+            .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
+            .on('broadcast', { event: 'submit_answer' }, ({ payload }) => { if(payload.id !== myData.id) { gameState.enemyAnswer = payload; checkQuizEnd(); } })
+            // ▼▼▼ [추가] 게임 강제 종료(기권/AFK) 이벤트 수신 ▼▼▼
+            .on('broadcast', { event: 'game_over_force' }, ({ payload }) => {
+                if (payload.loserId !== myData.id) {
+                    // 상대방이 패배(기권/AFK)했으므로 나는 승리
+                    endGameProcess(true, payload.reason);
+                }
+            });
+
+        channel.subscribe(async (s) => {
+            if(s==='SUBSCRIBED') {
+                channel.send({ type: 'broadcast', event: 'ready', payload: myData });
+                const interval = setInterval(() => {
+                    if (enemyData) clearInterval(interval);
+                    else channel.send({ type: 'broadcast', event: 'ready', payload: myData });
+                }, 1000);
+            }
+        });
+    }
+
     // ==========================================
     // 1. 데이터 정의
     // ==========================================
@@ -271,7 +307,14 @@
     let myUUID = localStorage.getItem("dqr_uuid") || crypto.randomUUID();
     localStorage.setItem("dqr_uuid", myUUID);
 
-    let gameState = { round: 1, phase: 'select', timer: 30, myHp: 0, enemyHp: 0, myShield: 0, enemyShield: 0, myBuffs: {}, enemyBuffs: {}, myCooldowns: [0,0,0,0], mySelectedSkillId: null, enemySelectedSkillId: null, myAnswer: null, enemyAnswer: null, currentQuiz: null };
+    let gameState = {
+        round: 1, phase: 'select', timer: 30,
+        myHp: 0, enemyHp: 0, myShield: 0, enemyShield: 0,
+        myBuffs: {}, enemyBuffs: {}, myCooldowns: [0,0,0,0],
+        mySelectedSkillId: null, enemySelectedSkillId: null,
+        myAnswer: null, enemyAnswer: null, currentQuiz: null,
+        afkCount: 0  // <--- 이 부분을 꼭 넣어주세요!
+    };    
     let timerInterval = null;
 
     // ==========================================
@@ -625,11 +668,30 @@
             btn.onclick = () => submitAnswer(c);
             grid.appendChild(btn);
         });
-        startTimer(10, () => submitAnswer(-999));
+        startTimer(10, () => {
+            // 시간 초과 발생
+            gameState.afkCount++;
+
+            if (gameState.afkCount >= 2) {
+                // 2회 연속 시간 초과 시 패배 처리
+                onSurrenderClick('afk');
+            } else {
+                // 1회는 그냥 오답 처리하고 경고
+                showCenterMsg("⚠️ 시간 초과! (경고 1/2)", 2000);
+                submitAnswer(-999);
+            }
+        });
     }
 
     function submitAnswer(val) {
         if (gameState.myAnswer) return;
+
+        // ▼▼▼ [추가] 사용자가 직접 답을 골랐다면(val이 -999가 아님) AFK 카운트 초기화
+        if (val !== -999) {
+            gameState.afkCount = 0;
+        }
+        // ▲▲▲
+
         const correct = val === gameState.currentQuiz.a;
         gameState.myAnswer = { correct, val };
 
@@ -846,6 +908,70 @@
         container.appendChild(el);
         setTimeout(() => el.remove(), 800);
     }
+
+    // --- [추가] 기권 및 강제 종료 로직 ---
+
+    function onSurrenderClick(reason = 'surrender') {
+        let msg = "정말 기권하시겠습니까?";
+        if (reason === 'afk') msg = "장시간 응답이 없어 패배 처리됩니다.";
+
+        // AFK가 아닐 때(버튼 클릭 시)는 확인창 띄우기
+        if (reason === 'surrender' && !confirm(msg)) return;
+
+        // 상대방에게 나의 패배를 알림
+        if (channel) {
+            channel.send({
+                type: 'broadcast',
+                event: 'game_over_force',
+                payload: { loserId: myData.id, reason: reason }
+            });
+        }
+
+        // 나 자신 패배 처리
+        endGameProcess(false, reason);
+    }
+
+    function endGameProcess(isWin, reason) {
+        // 타이머 및 진행 중인 로직 정지
+        clearInterval(timerInterval);
+
+        const modal = document.getElementById('resultModal');
+        const title = document.getElementById('resultTitle');
+        const desc = document.getElementById('resultDesc');
+        const icon = document.getElementById('resultIcon');
+
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        if (isWin) {
+            icon.innerText = "🏆";
+            title.innerText = "VICTORY";
+            if (reason === 'surrender') desc.innerText = "상대방이 기권했습니다.";
+            else if (reason === 'afk') desc.innerText = "상대방의 연결이 끊겼습니다.";
+            else desc.innerText = "상대를 제압했습니다!";
+        } else {
+            icon.innerText = "💀";
+            title.innerText = "DEFEAT";
+            if (reason === 'surrender') desc.innerText = "기권했습니다.";
+            else if (reason === 'afk') desc.innerText = "장시간 미응답으로 패배했습니다.";
+            else desc.innerText = "패배했습니다...";
+        }
+
+        // 채널 정리
+        if(channel) sb.removeChannel(channel);
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+    }
+
+    // 기존 checkGameOver 함수도 endGameProcess를 사용하도록 살짝 수정하면 좋습니다.
+    function checkGameOver() {
+        if (gameState.myHp <= 0 || gameState.enemyHp <= 0) {
+            const win = gameState.myHp > 0;
+            endGameProcess(win, 'normal'); // 수정된 종료 함수 호출
+            return true;
+        }
+        return false;
+    }
+    
 </script>
 </body>
 </html>
