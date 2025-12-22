@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Dungeon Quiz Arena (PvP)</title>
+    <title>Dungeon Quiz Arena (Lobby)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -34,12 +34,17 @@
 
 <section id="lobbyView" class="view active bg-slate-900">
     <h1 class="text-5xl font-black mb-1 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 italic">ARENA</h1>
-    <div class="text-xs text-slate-500 mb-6 font-bold tracking-widest">PVP v13.2</div>
+    <div class="text-xs text-slate-500 mb-6 font-bold tracking-widest">PVP v13.3 (Stable)</div>
 
     <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-sm text-center shadow-2xl relative">
-        <img id="myLobbyImg" src="" class="w-24 h-24 mx-auto mb-2 pixel-art drop-shadow-lg">
+        <div class="relative inline-block">
+            <img id="myLobbyImg" src="" class="w-24 h-24 mx-auto mb-2 pixel-art drop-shadow-lg">
+            <div class="absolute bottom-0 right-0 bg-slate-900 text-xs px-2 py-0.5 rounded border border-slate-600" id="myLobbyLvBadge">Lv.?</div>
+        </div>
         <div class="text-xl font-bold mb-1" id="myLobbyName">Player</div>
-        <div class="text-sm text-slate-400 mb-6">Rating: <span id="myMMR" class="text-yellow-400 font-bold">---</span></div>
+        <div class="text-sm text-slate-400 mb-6 bg-slate-900/50 inline-block px-3 py-1 rounded-full">
+            🏆 Rating: <span id="myMMR" class="text-yellow-400 font-bold">---</span>
+        </div>
 
         <button onclick="startRankedMatch()" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-500 hover:to-blue-600 text-white font-bold py-4 rounded-xl mb-3 shadow-lg border-b-4 border-blue-900 active:border-b-0 active:translate-y-1 transition-all group">
             <div class="flex items-center justify-center gap-2">
@@ -70,7 +75,7 @@
             <div id="roomListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1">
                 <div class="text-center text-slate-500 mt-20 flex flex-col items-center">
                     <span class="text-4xl mb-2">📭</span>
-                    방을 불러오는 중...
+                    방 목록을 불러오는 중...
                 </div>
             </div>
         </div>
@@ -178,26 +183,29 @@
     // ==========================================
     // 0. 설정 및 초기화
     // ==========================================
-    // ⚠️ 아래 두 변수에 본인의 키를 반드시 입력하세요!
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co';
+
+    // ⚠️ 여기를 본인의 키로 교체하세요! ⚠️
+    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // 예: 'https://xyz.supabase.co'
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M';
 
     let sb = null; // 충돌 방지용 변수명 (sb)
 
     function initSupabase() {
         if (typeof supabase === 'undefined') {
-            alert("Supabase 라이브러리 로드 실패. 새로고침 해주세요.");
+            alert("Supabase 라이브러리 로드 실패. 인터넷 연결을 확인하세요.");
             return false;
         }
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL' || SUPABASE_KEY.length < 10) {
-            alert("⚠️ DQR_PvP.html 파일을 열어 Supabase 키를 입력해야 합니다!");
+        if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_SUPABASE_URL') || !SUPABASE_KEY || SUPABASE_KEY.includes('YOUR_SUPABASE_ANON')) {
+            alert("⚠️ DQR_PvP.html 파일을 메모장으로 열어\nSupabase URL과 Key를 입력해야 작동합니다!");
             return false;
         }
         try {
             sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            console.log("Supabase connected");
             return true;
         } catch(e) {
-            alert("Supabase 초기화 오류: " + e.message);
+            alert("Supabase 연결 오류: " + e.message);
+            console.error(e);
             return false;
         }
     }
@@ -248,8 +256,7 @@
     // 2. 초기화 및 로비
     // ==========================================
     window.onload = async () => {
-        if (!initSupabase()) return;
-
+        // 일단 로비 UI부터 그림
         const raw = localStorage.getItem("qz_rpg_v110_data");
         let cid = "knight", sprite = "./png/knight.png";
         let lv = 1;
@@ -267,7 +274,10 @@
         document.getElementById('myLobbyImg').src = sprite;
         document.getElementById('myLobbyName').innerText = cid.toUpperCase();
         document.getElementById('myLobbyLvBadge').innerText = `Lv.${lv}`;
-        document.getElementById('myMMR').innerText = "1000";
+        document.getElementById('myMMR').innerText = "1000"; // 랭킹 DB 연동 전 임시
+
+        // Supabase 초기화 (성공해야 이후 버튼 작동)
+        initSupabase();
     };
 
     function goHome() { window.location.href = "DQR.html"; }
@@ -283,6 +293,7 @@
 
     // --- 공개 로비 시스템 ---
     function enterCustomLobby() {
+        if (!sb && !initSupabase()) return;
         switchView('customLobbyView');
         connectToLobby();
     }
@@ -332,6 +343,7 @@
     }
 
     async function createRoom() {
+        if (!sb && !initSupabase()) return;
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
 
         const newRoomId = `room_${myData.id}_${Date.now()}`;
@@ -373,7 +385,8 @@
 
     // --- 랭킹 매칭 ---
     function startRankedMatch() {
-        if (!sb) return alert("Supabase 연결 실패");
+        if (!sb && !initSupabase()) return;
+
         switchView('waitingView');
         document.getElementById('waitingTitle').innerText = "매칭 중...";
         document.getElementById('waitingDesc').innerText = "비슷한 실력의 상대를 찾는 중...";
@@ -484,7 +497,7 @@
     }
 
     // ==========================================
-    // 4. 전투 루프
+    // 4. 전투 루프 (UI & Logic)
     // ==========================================
     function startBattle() {
         document.getElementById('waitingView').classList.add('hidden');
@@ -625,8 +638,10 @@
         document.getElementById('phaseBadge').className = "text-xs font-bold text-red-500";
 
         const meFirst = (gameState.round % 2 !== 0) === isHost;
+
         await executeAction(meFirst ? 'me' : 'enemy');
         if (checkGameOver()) return;
+
         await executeAction(meFirst ? 'enemy' : 'me');
         if (checkGameOver()) return;
 
@@ -763,6 +778,13 @@
         if(gameState.myBuffs.evade) myBuffTxt += "💨";
         if(gameState.myBuffs.counter) myBuffTxt += "⚔️";
         document.getElementById('myStatus').innerText = myBuffTxt;
+
+        let enBuffTxt = "";
+        if(gameState.enemyBuffs.crit) enBuffTxt += "🗡️";
+        if(gameState.enemyBuffs.invuln) enBuffTxt += "🛡️";
+        if(gameState.enemyBuffs.evade) enBuffTxt += "💨";
+        if(gameState.enemyBuffs.counter) enBuffTxt += "⚔️";
+        document.getElementById('enemyStatus').innerText = enBuffTxt;
     }
 
     function getEffectiveSkillStats(skill, level) {
