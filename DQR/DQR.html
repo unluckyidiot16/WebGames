@@ -24,11 +24,11 @@
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* 적 Wrapper 반전 (왼쪽 바라보기) */
+        /* 적 반전 (왼쪽 바라보기) */
         .enemy-flip { transform: scaleX(-1); }
         .enemy-flip-boss { transform: scaleX(-1) scale(1.5); }
 
-        /* 애니메이션 정의 */
+        /* 애니메이션 */
         @keyframes damageShake {
             0% { transform: translateX(0); }
             20% { transform: translateX(-6px) rotate(-5deg); filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
@@ -262,6 +262,7 @@
             <div class="text-center mb-4">
                 <p class="text-xs text-slate-500 mb-2" id="quizExplain">문제 설명</p>
                 <div id="quizVisual" class="flex justify-center items-center py-4 min-h-[120px]"></div>
+                <p id="quizQuestion" class="hidden"></p>
             </div>
             <div id="quizChoices" class="grid grid-cols-2 gap-2"></div>
         </div>
@@ -362,7 +363,7 @@
         } catch(e) { return null; }
     }
 
-    // 최대공약수
+    // 최대공약수 (중복 답안 방지용)
     function gcd(a, b) {
         return b ? gcd(b, a % b) : a;
     }
@@ -454,13 +455,13 @@
      * 2. STATE MANAGEMENT & LOCAL STORAGE
      * ========================================= */
     const LS_KEYS = {
-        DATA: "qz_rpg_v99_data", // 데이터 버전 업 (포션 추가됨)
+        DATA: "qz_rpg_v99_data", // 데이터 버전 업
         HOF: "qz_rpg_v99_hof"
     };
 
     let gameState = {
         gold: 0,
-        potions: 0, // 포션 보유량
+        potions: 0,
         unlockedClasses: ["knight", "rogue", "mage"],
         heroes: {
             "knight": { level: 1, xp: 0, skillLevels: { k1:1, k2:1, k3:1, k4:1 }, equipped: ["k1", "k2", "k3", "k4"], skin: "default" },
