@@ -28,8 +28,8 @@
         .btn-choice.correct { background: #15803d; border-color: #22c55e; }
         .btn-choice.wrong { background: #b91c1c; border-color: #ef4444; }
 
-        /* 로비 리스트 */
-        .room-item { @apply bg-slate-800 p-4 rounded-xl border border-slate-600 flex justify-between items-center cursor-pointer hover:bg-slate-700 transition-colors; }
+        /* 로비 리스트 아이템 */
+        .room-item { @apply bg-slate-800 p-4 rounded-xl border border-slate-600 flex justify-between items-center cursor-pointer hover:bg-slate-700 transition-colors mb-2; }
         .room-item:active { @apply bg-slate-600 transform scale-95; }
     </style>
 </head>
@@ -37,7 +37,7 @@
 
 <section id="lobbyView" class="view active bg-slate-900">
     <h1 class="text-5xl font-black mb-1 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 italic">ARENA</h1>
-    <div class="text-xs text-slate-500 mb-6 font-bold tracking-widest">LOBBY SYSTEM v13.0</div>
+    <div class="text-xs text-slate-500 mb-6 font-bold tracking-widest">LOBBY SYSTEM v13.1</div>
 
     <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-sm text-center shadow-2xl relative">
         <div class="relative inline-block">
@@ -67,27 +67,32 @@
     </div>
 </section>
 
-<section id="customLobbyView" class="view bg-slate-900">
+<section id="customLobbyView" class="view bg-slate-900 justify-start pt-10">
     <div class="w-full max-w-md h-full flex flex-col p-4">
         <div class="flex justify-between items-center mb-4">
-            <h2 class="text-2xl font-bold">대기실 목록</h2>
-            <button onclick="leaveLobby()" class="text-sm text-slate-400">나가기</button>
+            <h2 class="text-2xl font-bold text-white">대기실 목록</h2>
+            <button onclick="leaveLobby()" class="text-sm text-slate-400 hover:text-white">나가기</button>
         </div>
 
-        <div id="roomListContainer" class="flex-1 overflow-y-auto space-y-2 mb-4 pr-1">
-            <div class="text-center text-slate-500 mt-10">개설된 방이 없습니다.<br>직접 방을 만들어보세요!</div>
+        <div class="flex-1 bg-slate-900/50 rounded-2xl border border-slate-700 p-2 overflow-hidden flex flex-col">
+            <div id="roomListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1">
+                <div class="text-center text-slate-500 mt-20 flex flex-col items-center">
+                    <span class="text-4xl mb-2">📭</span>
+                    개설된 방이 없습니다.<br>아래 버튼을 눌러 방을 만들어보세요!
+                </div>
+            </div>
         </div>
 
-        <button onclick="createRoom()" class="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1">
-            ➕ 방 만들기
+        <button onclick="createRoom()" class="w-full mt-4 bg-green-600 hover:bg-green-500 text-white font-bold py-4 rounded-xl shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1 flex justify-center items-center gap-2">
+            <span class="text-xl">➕</span> 방 만들기
         </button>
     </div>
 </section>
 
-<section id="waitingView" class="view bg-slate-900/95 z-50 fixed inset-0">
+<section id="waitingView" class="view bg-slate-900/95 z-50 fixed inset-0 hidden">
     <div class="text-center">
         <div class="text-6xl mb-6 animate-spin">⏳</div>
-        <h2 class="text-2xl font-bold mb-2" id="waitingTitle">매칭 중...</h2>
+        <h2 class="text-2xl font-bold mb-2 text-white" id="waitingTitle">매칭 중...</h2>
         <p id="waitingDesc" class="text-slate-400 text-sm mb-8">상대를 찾고 있습니다.</p>
         <button onclick="cancelMatching()" class="bg-red-500/20 text-red-400 border border-red-500/50 px-8 py-2 rounded-full hover:bg-red-500/30 font-bold transition-colors">취소</button>
     </div>
@@ -96,14 +101,14 @@
 <section id="battleView" class="view relative bg-slate-900 justify-between pb-4 overflow-hidden">
     <div class="w-full max-w-md bg-slate-800/90 backdrop-blur p-2 flex justify-between items-center z-20 border-b border-slate-700 shadow-lg absolute top-0">
         <div class="flex flex-col">
-            <div class="text-[10px] text-slate-400 font-bold">PHASE</div>
-            <div class="text-xs font-bold text-yellow-400 animate-pulse" id="phaseBadge">SKILL SELECT</div>
+            <div class="text-[10px] text-slate-400 font-bold">MODE</div>
+            <div class="text-xs font-bold text-yellow-400" id="battleModeBadge">RANKED</div>
         </div>
         <div class="flex flex-col items-center">
-            <div class="text-3xl font-black text-white" id="timerDisplay">30</div>
+            <div class="text-3xl font-black text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]" id="timerDisplay">30</div>
         </div>
         <div class="flex flex-col items-end">
-            <div class="text-[10px] text-slate-400 font-bold">ROUND</div>
+            <div class="text-[10px] text-slate-400 font-bold">TURN</div>
             <div class="text-lg font-bold text-white"><span id="turnCount">1</span></div>
         </div>
     </div>
@@ -135,7 +140,6 @@
             </div>
             <div class="relative">
                 <img id="myImg" src="" class="w-40 h-40 pixel-art transition-transform duration-200">
-                <div id="myStatus" class="absolute -top-6 left-0 flex gap-1 text-xs"></div>
                 <div id="myBubble" class="absolute top-10 -right-16 bg-white text-slate-900 text-xs font-bold px-2 py-1 rounded-lg border-2 border-blue-500 hidden z-20 whitespace-nowrap">...</div>
             </div>
         </div>
@@ -178,15 +182,23 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 필수
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 필수
-    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 필수: 본인 URL로 교체
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 필수: 본인 KEY로 교체
+
+    // 변수명 충돌 방지: supabase -> sb
+    let sb = null;
+    try {
+        if(SUPABASE_URL === 'https://otzhhhzirasqmrdknhib.supabase.co') {
+            alert("Supabase 설정이 필요합니다. html 파일을 열어 URL과 KEY를 입력해주세요.");
+        } else {
+            sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        }
+    } catch(e) { console.error("Supabase Init Error:", e); }
 
     // ==========================================
-    // 1. 데이터 정의
+    // 1. 데이터 정의 (v11.0 기반)
     // ==========================================
     const SKILL_DB = {
-        // (기존 스킬 데이터 유지 - 지면 관계상 생략, v11.0과 동일)
         "k1": { name: "수호의 검", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
         "k2": { name: "방패 강타", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 기절" },
         "k3": { name: "반격 태세", type: "buff_counter", power: 0, cd: 4, desc: "피해 50% 경감 및 반사" },
@@ -195,6 +207,7 @@
         "k6": { name: "수호의 결계", type: "buff_shield", power: 0, cd: 4, desc: "보호막 생성" },
         "k7": { name: "징벌의 일격", type: "atk", power: 2.2, cd: 3, desc: "강력한 일격" },
         "k8": { name: "성채 전개", type: "buff_aegis", power: 0, cd: 6, desc: "방어+반격+보호막 (궁극기)" },
+
         "r1": { name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
         "r2": { name: "약점 간파", type: "buff_next_crit", power: 0, cd: 3, desc: "다음 공격 확정 치명타" },
         "r3": { name: "그림자 망토", type: "buff_evasion", power: 0, cd: 5, desc: "회피율 80% 증가" },
@@ -203,6 +216,7 @@
         "r6": { name: "독기 폭주", type: "buff_atk", power: 0, cd: 4, desc: "공격력 증가" },
         "r7": { name: "연속 베기", type: "atk", power: 0.8, cd: 1, desc: "짧은 쿨타임 공격" },
         "r8": { name: "암살", type: "atk_execute", power: 3.0, cd: 6, desc: "체력 낮은 적에게 치명적" },
+
         "m1": { name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
         "m2": { name: "파이어볼", type: "atk", power: 1.8, cd: 2, desc: "메인 딜링" },
         "m3": { name: "마나 장벽", type: "buff_shield_huge", power: 0, cd: 4, desc: "대형 보호막" },
@@ -224,48 +238,54 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 및 로비 시스템
+    // 2. 초기화 및 로비
     // ==========================================
     window.onload = async () => {
         const raw = localStorage.getItem("qz_rpg_v110_data");
         let cid = "knight", sprite = "./png/knight.png";
-
+        let lv = 1;
         if(raw) {
             const d = JSON.parse(raw);
             cid = d.selectedClass;
             const h = d.heroes[cid];
+            lv = h.level;
             if(cid === 'knight') sprite = h.skin === 'skin' ? './png/knight-black.png' : './png/knight.png';
             else if(cid === 'rogue') sprite = h.skin === 'skin' ? './png/rogue-female.png' : './png/rogue-male.png';
             else sprite = './png/wizard.png';
         }
 
-        myData = { id: myUUID, classId: cid, sprite, name: cid.toUpperCase() }; // 기본 정보만
+        myData = { id: myUUID, classId: cid, sprite, name: cid.toUpperCase(), level: lv };
         document.getElementById('myLobbyImg').src = sprite;
         document.getElementById('myLobbyName').innerText = cid.toUpperCase();
-
-        // 랭킹 점수 로드 (임시)
+        document.getElementById('myLobbyLvBadge').innerText = `Lv.${lv}`;
         document.getElementById('myMMR').innerText = "1000";
     };
 
     function goHome() { window.location.href = "DQR.html"; }
-    function switchView(id) { document.querySelectorAll('.view').forEach(v => v.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+    function switchView(id) {
+        document.querySelectorAll('.view').forEach(v => {
+            v.classList.remove('active');
+            if(v.id === 'waitingView') v.classList.add('hidden'); // 모달형 뷰 처리
+        });
+        const target = document.getElementById(id);
+        target.classList.add('active');
+        if(id === 'waitingView') target.classList.remove('hidden');
+    }
 
-    // --- 공개 로비 시스템 (방 목록) ---
+    // --- 공개 로비 시스템 ---
     function enterCustomLobby() {
         switchView('customLobbyView');
         connectToLobby();
     }
 
     function leaveLobby() {
-        if(lobbyChannel) supabase.removeChannel(lobbyChannel);
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
         switchView('lobbyView');
     }
 
     function connectToLobby() {
-        if(lobbyChannel) supabase.removeChannel(lobbyChannel);
-
-        // 'global_rooms' 채널을 구독하여 방 목록 추적
-        lobbyChannel = supabase.channel('global_rooms');
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+        lobbyChannel = sb.channel('global_rooms');
 
         lobbyChannel.on('presence', { event: 'sync' }, () => {
             const state = lobbyChannel.presenceState();
@@ -277,10 +297,10 @@
         const container = document.getElementById('roomListContainer');
         container.innerHTML = "";
 
-        const rooms = Object.values(state).flat().filter(u => u.isHosting);
+        const rooms = Object.values(state).flat().filter(u => u.isHosting && u.id !== myData.id);
 
         if(rooms.length === 0) {
-            container.innerHTML = '<div class="text-center text-slate-500 mt-10">개설된 방이 없습니다.<br>직접 방을 만들어보세요!</div>';
+            container.innerHTML = '<div class="text-center text-slate-500 mt-20 flex flex-col items-center"><span class="text-4xl mb-2">📭</span>개설된 방이 없습니다.<br>직접 방을 만들어보세요!</div>';
             return;
         }
 
@@ -289,27 +309,27 @@
             div.className = "room-item";
             div.innerHTML = `
                 <div class="flex items-center gap-3">
-                    <img src="${room.sprite}" class="w-8 h-8 pixel-art rounded bg-slate-700">
+                    <img src="${room.sprite}" class="w-10 h-10 pixel-art rounded bg-slate-700">
                     <div>
                         <div class="font-bold text-sm text-yellow-400">${room.roomName}</div>
                         <div class="text-[10px] text-slate-400">Host: ${room.hostName}</div>
                     </div>
                 </div>
-                <div class="text-xs bg-green-900 text-green-300 px-2 py-1 rounded">입장</div>
+                <div class="text-xs bg-green-600 hover:bg-green-500 text-white font-bold px-3 py-1.5 rounded transition-colors">입장</div>
             `;
-            div.onclick = () => joinRoom(room.roomId, false);
+            div.onclick = () => joinRoom(room.roomId, false, 'friendly');
             container.appendChild(div);
         });
     }
 
     async function createRoom() {
-        if(lobbyChannel) supabase.removeChannel(lobbyChannel);
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
 
-        // 방장으로서 로비에 Presence 등록
         const newRoomId = `room_${myData.id}_${Date.now()}`;
-        const roomName = `[Lv.?] ${myData.name}의 방`; // 레벨 정보는 실제 데이터 로드 후 업데이트 가능
+        const roomName = `[Lv.${myData.level}] ${myData.name}의 방`;
 
-        lobbyChannel = supabase.channel('global_rooms');
+        // 내 방 등록
+        lobbyChannel = sb.channel('global_rooms');
         lobbyChannel.subscribe(async (status) => {
             if (status === 'SUBSCRIBED') {
                 await lobbyChannel.track({
@@ -320,27 +340,22 @@
                     hostName: myData.name,
                     sprite: myData.sprite
                 });
-
-                // 실제 배틀 방 접속 대기
                 waitForChallenger(newRoomId);
             }
         });
 
-        // 대기 화면 표시
         switchView('waitingView');
         document.getElementById('waitingTitle').innerText = "방 생성 완료";
         document.getElementById('waitingDesc').innerText = "도전자를 기다리는 중입니다...";
     }
 
     function waitForChallenger(roomId) {
-        channel = supabase.channel(roomId);
+        channel = sb.channel(roomId);
         channel.on('presence', {event:'join'}, ({newPresences}) => {
-            // 누군가 들어왔다!
             newPresences.forEach(p => {
                 if(p.id !== myData.id) {
-                    // 방 목록에서 제거하기 위해 로비 채널 untrack (또는 채널 닫기)
-                    if(lobbyChannel) lobbyChannel.untrack();
-                    joinRoom(roomId, true);
+                    if(lobbyChannel) lobbyChannel.untrack(); // 매칭되면 로비에서 제거
+                    joinRoom(roomId, true, 'friendly');
                 }
             });
         }).subscribe(async (s) => {
@@ -354,7 +369,7 @@
         document.getElementById('waitingTitle').innerText = "매칭 중...";
         document.getElementById('waitingDesc').innerText = "비슷한 실력의 상대를 찾는 중...";
 
-        channel = supabase.channel('global_rank_queue');
+        channel = sb.channel('global_rank_queue');
         channel.on('presence', { event: 'sync' }, () => {
             const users = Object.values(channel.presenceState()).flat();
             const opponent = users.find(u => u.id !== myData.id && u.status === 'searching');
@@ -371,13 +386,21 @@
     }
 
     function cancelMatching() {
-        if(channel) supabase.removeChannel(channel);
-        if(lobbyChannel) supabase.removeChannel(lobbyChannel);
-        switchView('lobbyView');
+        if(channel) sb.removeChannel(channel);
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+
+        // 이전 뷰로 복귀
+        if(document.getElementById('customLobbyView').classList.contains('active')) {
+            document.getElementById('waitingView').classList.add('hidden');
+            enterCustomLobby();
+        } else {
+            switchView('lobbyView');
+            document.getElementById('waitingView').classList.add('hidden');
+        }
     }
 
     // ==========================================
-    // 3. 배틀 준비 및 데이터 생성
+    // 3. 배틀 데이터 & 접속
     // ==========================================
     function initBattleData(mode) {
         battleMode = mode;
@@ -394,12 +417,10 @@
             const h = d.heroes[cid];
 
             if (mode === 'friendly') {
-                // 친선전: 내 스펙 그대로
                 level = h.level;
                 equipped = h.equipped || RANKED_SKILL_SETS[cid];
                 skillLevels = h.skillLevels;
             } else {
-                // 랭킹전: 고정 스펙 (Lv.30)
                 level = 30;
                 equipped = RANKED_SKILL_SETS[cid];
                 skillLevels = {};
@@ -409,9 +430,8 @@
 
         const stats = calculateStats(cid, level);
 
-        // 데이터 확정
         myData.level = level;
-        myData.maxHp = stats.maxHp * 5; // PvP HP 보정
+        myData.maxHp = stats.maxHp * 5;
         myData.atk = stats.atk * 3;
         myData.def = stats.def * 2;
         myData.skills = equipped.map(id => ({ ...SKILL_DB[id], id: id, level: skillLevels[id] || 1 }));
@@ -423,7 +443,6 @@
             rogue:  { hp: 10, atk: 18, def: 4 },
             mage:   { hp: 8,  atk: 22, def: 3 }
         }[cid];
-
         return {
             maxHp: Math.floor(base.hp + (lv * 2)),
             atk: Math.floor(base.atk + (lv * 1.5)),
@@ -431,13 +450,13 @@
         };
     }
 
-    function joinRoom(room, host, mode = 'friendly') {
-        if(channel) supabase.removeChannel(channel);
+    function joinRoom(room, host, mode) {
+        if(channel) sb.removeChannel(channel);
         roomId = room; isHost = host;
 
-        initBattleData(mode); // 데이터 생성
+        initBattleData(mode);
 
-        channel = supabase.channel(room);
+        channel = sb.channel(room);
 
         channel
             .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
@@ -448,7 +467,6 @@
         channel.subscribe(async (s) => {
             if(s==='SUBSCRIBED') {
                 channel.send({ type: 'broadcast', event: 'ready', payload: myData });
-                // 상대방이 늦게 올 수 있으므로 핑
                 const interval = setInterval(() => {
                     if (enemyData) clearInterval(interval);
                     else channel.send({ type: 'broadcast', event: 'ready', payload: myData });
@@ -458,19 +476,21 @@
     }
 
     // ==========================================
-    // 4. 전투 루프 (동일)
+    // 4. 전투 루프 (UI & Logic)
     // ==========================================
     function startBattle() {
+        document.getElementById('waitingView').classList.add('hidden');
         switchView('battleView');
+
         document.getElementById('myImg').src = myData.sprite;
         document.getElementById('enemyImg').src = enemyData.sprite;
         document.getElementById('myName').innerText = myData.classId;
         document.getElementById('enemyName').innerText = enemyData.classId;
+        document.getElementById('battleModeBadge').innerText = battleMode === 'ranked' ? 'RANKED' : 'FRIENDLY';
 
         gameState.myHp = myData.maxHp;
         gameState.enemyHp = enemyData.maxHp;
         updateHpUI();
-
         startSkillPhase();
     }
 
@@ -498,7 +518,6 @@
     function renderSkills() {
         const grid = document.getElementById('skillGrid');
         grid.innerHTML = "";
-
         myData.skills.forEach((skill, idx) => {
             const btn = document.createElement('button');
             const cd = gameState.myCooldowns[idx];
@@ -526,8 +545,7 @@
     function autoSelectSkill() {
         if (gameState.mySelectedSkillId === null) {
             const available = myData.skills.map((_, i) => i).filter(i => gameState.myCooldowns[i] === 0);
-            const pick = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : 0;
-            selectSkill(pick);
+            selectSkill(available.length > 0 ? available[0] : 0);
         }
     }
 
@@ -550,12 +568,10 @@
     function startQuizPhase(quiz) {
         gameState.phase = 'quiz';
         gameState.currentQuiz = quiz;
-
         document.getElementById('phaseBadge').innerText = "QUIZ TIME";
         document.getElementById('phaseBadge').className = "text-xs font-bold text-yellow-400 animate-bounce";
         document.getElementById('skillPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('hidden');
-
         document.getElementById('quizQuestion').innerText = quiz.q;
         const grid = document.getElementById('quizChoices');
         grid.innerHTML = "";
@@ -573,12 +589,6 @@
         if (gameState.myAnswer) return;
         const correct = val === gameState.currentQuiz.a;
         gameState.myAnswer = { correct, val };
-
-        const btns = document.querySelectorAll('.btn-choice');
-        btns.forEach(b => {
-            b.disabled = true;
-            if(parseInt(b.innerText)===val) b.classList.add(correct?'correct':'wrong');
-        });
         document.getElementById('myBubble').innerText = "제출 완료!";
         document.getElementById('myBubble').classList.remove('hidden');
         channel.send({ type: 'broadcast', event: 'submit_answer', payload: { id: myData.id, correct } });
@@ -601,10 +611,8 @@
         document.getElementById('phaseBadge').className = "text-xs font-bold text-red-500";
 
         const meFirst = (gameState.round % 2 !== 0) === isHost;
-
         await executeAction(meFirst ? 'me' : 'enemy');
         if (checkGameOver()) return;
-
         await executeAction(meFirst ? 'enemy' : 'me');
         if (checkGameOver()) return;
 
@@ -635,13 +643,12 @@
                 return;
             }
 
-            if (isMe) gameState.myCooldowns[gameState.mySelectedSkillId] = skill.cd + 1;
+            if (isMe) gameState.myCooldowns[gameState.mySelectedSkillId] = getEffectiveSkillStats(skill, level).cd + 1;
 
             let dmg = 0;
             let msg = "";
             let stats = { duration: 3 };
 
-            // 효과 적용
             if (skill.type === 'buff_next_crit') { buffs.nextCrit = true; msg = "치명타 장전!"; }
             if (skill.type === 'buff_next_double') { buffs.nextDouble = true; msg = "마력 증폭!"; }
             if (skill.type === 'buff_atk') { buffs.atk = stats.duration; msg = "공격력 증가!"; }
@@ -651,6 +658,7 @@
             if (skill.type === 'buff_invuln') { buffs.invuln = 1; msg = "무적!"; }
             if (skill.type === 'buff_aegis') { buffs.def=3; buffs.counter=3; const s=Math.floor(actor.maxHp*0.5); if(isMe) gameState.myShield+=s; else gameState.enemyShield+=s; msg="성채 전개!"; }
             if (skill.type === 'dispel') { if(isMe) { gameState.enemyShield=0; gameState.enemyBuffs={}; } else { gameState.myShield=0; gameState.myBuffs={}; } msg="마력 해제!"; }
+
             if (skill.type.includes('shield')) { const s=Math.floor(actor.maxHp*(skill.type==='buff_shield_huge'?0.5:0.3)); if(isMe) gameState.myShield+=s; else gameState.enemyShield+=s; msg=`쉴드 +${s}`; }
             if (skill.type.includes('heal')) {
                 let h=0;
@@ -734,6 +742,19 @@
         document.getElementById('enemyHpBar').style.width = `${enPct}%`;
         document.getElementById('myHpText').innerText = `${Math.floor(gameState.myHp)}/${myData.maxHp}`;
         document.getElementById('myShieldBar').style.width = `${Math.min(100, (gameState.myShield/myData.maxHp)*100)}%`;
+
+        let myBuffTxt = "";
+        if(gameState.myBuffs.crit) myBuffTxt += "🗡️";
+        if(gameState.myBuffs.invuln) myBuffTxt += "🛡️";
+        if(gameState.myBuffs.evade) myBuffTxt += "💨";
+        if(gameState.myBuffs.counter) myBuffTxt += "⚔️";
+        document.getElementById('myStatus').innerText = myBuffTxt;
+    }
+
+    function getEffectiveSkillStats(skill, level) {
+        let cd = skill.cd;
+        if (cd > 0) cd = Math.max(1, cd - Math.floor((level - 1) / 5));
+        return { cd, duration: 3 };
     }
 
     function checkGameOver() {
@@ -744,8 +765,8 @@
             document.getElementById('resultDesc').innerText = win ? "상대를 제압했습니다!" : "패배했습니다...";
             modal.classList.remove('hidden');
             modal.classList.add('flex');
-            if(channel) supabase.removeChannel(channel);
-            if(lobbyChannel) supabase.removeChannel(lobbyChannel);
+            if(channel) sb.removeChannel(channel);
+            if(lobbyChannel) sb.removeChannel(lobbyChannel);
             return true;
         }
         return false;
