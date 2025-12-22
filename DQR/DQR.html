@@ -12,10 +12,10 @@
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
             touch-action: manipulation;
-            height: 100dvh; /* Dynamic Viewport Height */
-            overflow: hidden; /* 스크롤 방지 */
+            height: 100dvh;
+            overflow: hidden;
         }
-        .view { display: none; height: 100%; } /* 부모 높이 상속 */
+        .view { display: none; height: 100%; }
         .view.active { display: flex; }
 
         /* RPG 스타일 카드 */
@@ -72,7 +72,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.0</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.1</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -129,7 +129,7 @@
             <button id="btnEnterDungeon" class="col-span-2 bg-gradient-to-r from-slate-800 to-slate-700 text-white p-5 rounded-2xl shadow-lg border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
                 <div class="text-left">
                     <div class="font-bold text-xl">던전 입장</div>
-                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (레벨 스케일링)</div>
+                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (쿨타임 유지)</div>
                 </div>
                 <span class="text-3xl group-hover:scale-110 transition-transform">⚔️</span>
             </button>
@@ -369,7 +369,7 @@
         } catch(e) { return null; }
     }
 
-    // 최대공약수 (중복 답안 방지용)
+    // 최대공약수
     function gcd(a, b) {
         return b ? gcd(b, a % b) : a;
     }
@@ -751,7 +751,7 @@
                 buffs: { atk: 0, def: 0 }
             },
             enemy: null,
-            cooldowns: [0, 0, 0, 0],
+            cooldowns: [0, 0, 0, 0], // 처음엔 초기화
             enemyCooldowns: []
         };
 
@@ -771,17 +771,15 @@
 
         const monsterSkills = (variant.skills || []).map(k => MONSTER_SKILLS[k]).filter(s => s);
 
+        // 레벨 스케일링: 플레이어 레벨 + 스테이지 보정
         const pLevel = battleState.player.level;
-        // 적 레벨 스케일링: 플레이어 레벨 + (스테이지/2)
         const enemyLevel = Math.max(1, pLevel + Math.floor((bs.stage - 1) * 0.5));
 
         bs.enemy = {
             name: variant.name + (isBoss ? " (BOSS)" : ""),
-            // 스탯 공식 수정: 기본값 + 레벨 보정 (플레이어와 유사하게)
-            // HP: 기본 10 + 레벨*3
+            // 스탯 공식 조정 (플레이어 레벨 비례)
             maxHp: Math.floor((10 + (enemyLevel * 3)) * (variant.hpMult || 1.0)),
             hp: Math.floor((10 + (enemyLevel * 3)) * (variant.hpMult || 1.0)),
-            // ATK: 기본 3 + 레벨*1.5
             atk: Math.floor((3 + (enemyLevel * 1.5)) * (variant.atkMult || 1.0)),
             def: Math.floor(1 + (enemyLevel * 0.5)),
             img: variant.src,
@@ -791,9 +789,8 @@
             skillLevels: {}
         };
 
-        bs.player.shield = 0;
-        bs.player.buffs = { atk: 0, def: 0 };
-        bs.cooldowns = new Array(bs.player.skills.length).fill(0);
+        // 플레이어 쿨타임은 유지 (여기서 초기화 안함)
+        // 적 쿨타임은 리셋
         bs.enemyCooldowns = new Array(monsterSkills.length).fill(0);
 
         document.getElementById("battleStageText").textContent = bs.stage;
@@ -1018,7 +1015,8 @@
             return;
         }
 
-        if (e.skills && e.skills.length > 0 && Math.random() < 0.5) {
+        // 고스트 AI: 70% 확률로 스킬 사용 시도
+        if (e.skills && e.skills.length > 0 && Math.random() < 0.7) {
             const usable = [];
             for (let i = 0; i < e.skills.length; i++) {
                 if ((battleState.enemyCooldowns?.[i] ?? 0) === 0) usable.push(i);
@@ -1159,6 +1157,7 @@
             bs.player.atk = newStats.atk;
             bs.player.def = newStats.def;
             bs.player.level = hData.level;
+            // 자동 회복 제거: 현재 체력 유지
             bs.player.hp = Math.min(bs.player.hp, bs.player.maxHp);
             bs.stage++;
             startBattleStage();
@@ -1179,7 +1178,7 @@
 
         document.getElementById("quizExplain").textContent = q.q;
         document.getElementById("quizVisual").innerHTML = q.html;
-        document.getElementById("quizQuestion").textContent = ""; // 텍스트 문제 제거
+        document.getElementById("quizQuestion").textContent = "";
 
         const grid = document.getElementById("quizChoices");
         grid.innerHTML = "";
@@ -1197,18 +1196,14 @@
     }
 
     function generateFractionQuiz() {
-        const den = Math.floor(Math.random() * 8) + 2; // 2~9
-        const num = Math.floor(Math.random() * (den - 1)) + 1; // 1 ~ den-1
+        const den = Math.floor(Math.random() * 8) + 2;
+        const num = Math.floor(Math.random() * (den - 1)) + 1;
         const isCircle = Math.random() < 0.5;
 
-        // 시각화 HTML 생성
         let visualHtml = "";
         if (isCircle) {
-            // 원형 (Pie Chart) - 하얀색 구분선 추가
             const percent = (num / den) * 100;
-            // repeating-conic-gradient로 구분선(눈금) 그리기
             const lineDeg = 360 / den;
-            // 데이터 그라데이션 + 눈금 그라데이션 겹치기
             visualHtml = `
                 <div class="w-32 h-32 rounded-full border-4 border-slate-700 relative" 
                      style="background: conic-gradient(#3b82f6 0% ${percent}%, #e2e8f0 ${percent}% 100%);">
@@ -1216,7 +1211,6 @@
                           style="background: repeating-conic-gradient(transparent 0deg ${lineDeg-1}deg, #ffffff ${lineDeg-1}deg ${lineDeg}deg);"></div>
                 </div>`;
         } else {
-            // 사각형 (Bar Chart)
             let gridHtml = "";
             for(let i=0; i<den; i++) {
                 gridHtml += `<div class="border-r border-slate-700 last:border-r-0 ${i < num ? 'bg-blue-500' : 'bg-slate-200'}"></div>`;
@@ -1232,7 +1226,7 @@
         const correctStr = `${num}/${den}`;
 
         const choices = new Set([correctStr]);
-        const usedValues = new Set([correctVal]); // 값 중복 방지용 (예: 1/2 == 2/4)
+        const usedValues = new Set([correctVal]);
 
         while(choices.size < 4) {
             const d = Math.floor(Math.random() * 8) + 2;
@@ -1269,7 +1263,7 @@
         const stats = getHeroStats(cid);
 
         const payload = {
-            v: 99,
+            v: 101, // 버전 업데이트
             cid: cid,
             lv: hero.level,
             eq: hero.equipped,
@@ -1386,9 +1380,14 @@
         const enemyImg = enemyDef.sprites.default;
 
         const eStatsRaw = ghostData.stats || {};
-        const eMaxHp = Number(eStatsRaw.maxHp ?? eStatsRaw.hp) || Math.floor(10 + ghostData.lv * 2);
+        // 고스트 배틀 5배 뻥튀기 로직
+        const HP_MULT = 5;
+        const eMaxHp = (Number(eStatsRaw.maxHp ?? eStatsRaw.hp) || Math.floor(10 + ghostData.lv * 2)) * HP_MULT;
         const eAtk   = Number(eStatsRaw.atk) || Math.floor(2 + ghostData.lv * 1.3);
         const eDef   = Number(eStatsRaw.def) || 5;
+
+        // 플레이어 체력도 5배
+        const pMaxHp = myStats.maxHp * HP_MULT;
 
         let enemySkills = [];
         if (ghostData.eq && Array.isArray(ghostData.eq)) {
@@ -1401,7 +1400,7 @@
             mode: "ghost",
             stage: 1,
             player: {
-                ...myStats, maxHp: myStats.maxHp, hp: myStats.maxHp, shield: 0,
+                ...myStats, maxHp: pMaxHp, hp: pMaxHp, shield: 0,
                 skills: mySkills, skillLevels: myHero.skillLevels,
                 name: myDef.nameKo, img: myImg, classId: myCid, level: myHero.level,
                 buffs: { atk: 0, def: 0 }
