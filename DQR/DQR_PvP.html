@@ -2,376 +2,356 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Dungeon Quiz Arena (PvP)</title>
+    <title>Dungeon Quiz Arena (Tactics)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; background-color: #1e293b; color: white; height: 100vh; overflow: hidden; touch-action: manipulation; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; background-color: #0f172a; color: white; height: 100vh; overflow: hidden; touch-action: manipulation; }
         .pixel-art { image-rendering: pixelated; }
         .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .view.active { display: flex; }
 
         /* 애니메이션 */
-        @keyframes damageShake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .anim-damage { animation: damageShake 0.4s; }
-        .btn-skill { transition: all 0.1s; border-bottom: 4px solid #00000030; }
-        .btn-skill:active { transform: translateY(2px); border-bottom: 0; }
-        .btn-skill:disabled { opacity: 0.5; filter: grayscale(1); cursor: not-allowed; transform: none; border-bottom: 4px solid #00000030; }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) saturate(5) hue-rotate(-50deg); }
+        .anim-lunge { transition: transform 0.2s; transform: translateX(60px); }
+        .anim-lunge-back { transition: transform 0.2s; transform: translateX(-60px); }
+
+        /* 스킬 버튼 스타일 */
+        .btn-skill { @apply relative overflow-hidden rounded-xl border-b-4 transition-all duration-100; }
+        .btn-skill:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 0; }
+        .btn-skill.selected { @apply border-yellow-400 ring-2 ring-yellow-400 bg-slate-600; transform: translateY(2px); border-bottom-width: 0; }
+
+        /* 퀴즈 버튼 */
+        .btn-choice { background: #334155; border: 2px solid #475569; border-radius: 12px; padding: 16px; font-weight: bold; }
+        .btn-choice.correct { background: #15803d; border-color: #22c55e; }
+        .btn-choice.wrong { background: #b91c1c; border-color: #ef4444; }
     </style>
 </head>
 <body>
 
-<section id="lobbyView" class="view active">
-    <h1 class="text-4xl font-black mb-2 text-yellow-400 italic">ARENA</h1>
-    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-600 w-full max-w-sm text-center shadow-xl">
-        <img id="myLobbyImg" src="" class="w-24 h-24 mx-auto mb-2 pixel-art">
+<section id="lobbyView" class="view active bg-slate-900">
+    <h1 class="text-5xl font-black mb-1 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 italic">TACTICS</h1>
+    <div class="text-xs text-slate-500 mb-8 font-bold tracking-widest">STRATEGIC PVP v12.0</div>
+
+    <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-sm text-center shadow-2xl">
+        <img id="myLobbyImg" src="" class="w-24 h-24 mx-auto mb-4 pixel-art drop-shadow-lg">
         <div class="text-xl font-bold mb-1" id="myLobbyName">Player</div>
         <div class="text-sm text-slate-400 mb-6">Rating: <span id="myMMR" class="text-yellow-400 font-bold">---</span></div>
 
-        <button onclick="startRankedMatch()" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl mb-3 shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1">
+        <button onclick="startMatching('ranked')" class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold py-4 rounded-xl mb-3 shadow-lg border-b-4 border-blue-800 active:border-b-0 active:translate-y-1">
             ⚔️ 랭킹 매칭 (랜덤)
         </button>
-
         <div class="grid grid-cols-2 gap-2">
-            <button onclick="showCustomRoomUI('create')" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 rounded-xl border-b-4 border-slate-800 active:border-b-0 active:translate-y-1">
-                방 만들기
-            </button>
-            <button onclick="showCustomRoomUI('join')" class="bg-slate-600 hover:bg-slate-500 text-white font-bold py-3 rounded-xl border-b-4 border-slate-800 active:border-b-0 active:translate-y-1">
-                방 참가
-            </button>
+            <button onclick="showCustomRoomUI('create')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl border-b-4 border-slate-900">방 만들기</button>
+            <button onclick="showCustomRoomUI('join')" class="bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-xl border-b-4 border-slate-900">방 참가</button>
         </div>
-
-        <button onclick="goHome()" class="mt-6 text-slate-500 underline text-sm">돌아가기</button>
+        <button onclick="goHome()" class="mt-6 text-slate-500 underline text-xs">나가기</button>
     </div>
 </section>
 
-<section id="matchingView" class="view">
-    <div class="text-6xl mb-6 animate-bounce">🔍</div>
-    <h2 class="text-2xl font-bold mb-2">상대를 찾는 중...</h2>
-    <p id="matchingStatus" class="text-slate-400 text-sm mb-8">대기열에 등록되었습니다.</p>
+<section id="matchingView" class="view bg-slate-900">
+    <div class="text-6xl mb-6 animate-spin">⏳</div>
+    <h2 class="text-2xl font-bold mb-2">매칭 중...</h2>
+    <p id="matchingStatus" class="text-slate-400 text-sm mb-8">상대를 찾고 있습니다.</p>
 
-    <div id="roomCodeDisplay" class="hidden bg-black/30 px-6 py-3 rounded-xl mb-8 border border-white/10">
-        <div class="text-xs text-slate-400 mb-1">ROOM CODE</div>
-        <div class="text-3xl font-mono font-bold tracking-widest text-yellow-400" id="roomCodeText">----</div>
+    <div id="roomUI" class="hidden w-full max-w-xs text-center">
+        <div id="roomCodeDisplay" class="hidden bg-black/50 px-8 py-4 rounded-2xl mb-6 border border-white/10">
+            <div class="text-xs text-slate-400 mb-1">CODE</div>
+            <div class="text-4xl font-mono font-black text-yellow-400" id="roomCodeText">----</div>
+        </div>
+        <div id="roomJoinInput" class="hidden w-full mb-4">
+            <input type="text" id="inputRoomCode" placeholder="코드 4자리" maxlength="4" class="w-full text-center text-2xl p-3 rounded-xl bg-slate-800 text-white border-2 border-slate-600 mb-2 uppercase">
+            <button onclick="joinCustomRoom()" class="w-full bg-green-600 font-bold py-3 rounded-xl">입장</button>
+        </div>
     </div>
-
-    <div id="roomJoinInput" class="hidden w-full max-w-xs mb-4">
-        <input type="text" id="inputRoomCode" placeholder="코드 4자리 입력" maxlength="4" class="w-full text-center text-2xl p-3 rounded-xl bg-slate-700 text-white border-2 border-slate-500 focus:border-blue-500 outline-none font-mono uppercase">
-        <button onclick="joinCustomRoom()" class="w-full mt-2 bg-green-600 py-3 rounded-xl font-bold">입장하기</button>
-    </div>
-
-    <button onclick="cancelMatching()" class="bg-red-500/20 text-red-400 border border-red-500/50 px-6 py-2 rounded-full hover:bg-red-500/30">취소</button>
+    <button onclick="cancelMatching()" class="mt-4 bg-red-500/20 text-red-400 px-8 py-2 rounded-full">취소</button>
 </section>
 
-<section id="battleView" class="view relative bg-slate-900">
-    <div class="absolute top-10 flex flex-col items-center w-full">
-        <div class="relative">
-            <img id="enemyImg" src="" class="w-32 h-32 pixel-art brightness-75 scale-x-[-1]"> <div class="absolute -top-8 left-1/2 -translate-x-1/2 bg-slate-800/80 px-3 py-1 rounded-lg border border-slate-600 text-center w-40">
-            <div class="text-xs text-red-400 font-bold" id="enemyName">Opponent</div>
-            <div class="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
-                <div id="enemyHpBar" class="h-full bg-red-500 w-full transition-all duration-300"></div>
+<section id="battleView" class="view relative bg-slate-900 justify-between pb-4 overflow-hidden">
+    <div class="w-full max-w-md bg-slate-800/90 backdrop-blur p-2 flex justify-between items-center z-20 border-b border-slate-700 shadow-lg absolute top-0">
+        <div class="flex flex-col">
+            <div class="text-[10px] text-slate-400 font-bold">PHASE</div>
+            <div class="text-xs font-bold text-yellow-400 animate-pulse" id="phaseBadge">SKILL SELECT</div>
+        </div>
+        <div class="flex flex-col items-center">
+            <div class="text-3xl font-black text-white" id="timerDisplay">30</div>
+        </div>
+        <div class="flex flex-col items-end">
+            <div class="text-[10px] text-slate-400 font-bold">ROUND</div>
+            <div class="text-lg font-bold text-white"><span id="turnCount">1</span></div>
+        </div>
+    </div>
+
+    <div class="relative w-full max-w-md flex-1 flex flex-col justify-center mt-16 mb-40">
+        <div class="absolute top-4 right-6 flex flex-col items-end z-10 w-full pr-12">
+            <div class="relative">
+                <img id="enemyImg" src="" class="w-32 h-32 pixel-art scale-x-[-1] transition-transform duration-200">
+                <div id="enemyStatus" class="absolute -top-6 right-0 flex gap-1"></div>
+                <div id="enemyBubble" class="absolute top-10 -left-16 bg-white text-slate-900 text-xs font-bold px-2 py-1 rounded-lg border-2 border-red-500 hidden z-20 whitespace-nowrap">...</div>
+            </div>
+            <div class="w-40 bg-slate-800/90 px-2 py-1 rounded border border-slate-600 mt-2 text-right">
+                <div class="text-xs text-red-400 font-bold truncate" id="enemyName">Enemy</div>
+                <div class="w-full h-1.5 bg-slate-700 rounded-full mt-1 overflow-hidden">
+                    <div id="enemyHpBar" class="h-full bg-red-500 w-full transition-all duration-300"></div>
+                </div>
             </div>
         </div>
-        </div>
-    </div>
 
-    <div id="battleMsg" class="z-20 text-yellow-400 font-black text-2xl drop-shadow-md animate-pulse">VS</div>
-
-    <div class="absolute bottom-40 flex flex-col items-center w-full">
-        <div class="relative">
-            <img id="myImg" src="" class="w-40 h-40 pixel-art drop-shadow-2xl">
-            <div class="absolute -top-10 left-1/2 -translate-x-1/2 bg-slate-800/80 px-4 py-2 rounded-xl border border-blue-500/50 text-center w-48">
-                <div class="flex justify-between items-end mb-1">
-                    <span class="text-sm text-blue-300 font-bold" id="myName">Me</span>
-                    <span class="text-xs text-slate-400" id="myHpText">100/100</span>
+        <div class="absolute bottom-4 left-6 flex flex-col items-start z-10 w-full pl-12">
+            <div class="w-40 bg-slate-800/90 px-2 py-1 rounded border border-blue-500/50 mb-2">
+                <div class="flex justify-between items-end">
+                    <span class="text-sm text-blue-300 font-bold truncate" id="myName">Me</span>
+                    <span class="text-[10px] text-slate-400" id="myHpText"></span>
                 </div>
-                <div class="w-full h-3 bg-slate-700 rounded-full overflow-hidden">
+                <div class="w-full h-2 bg-slate-700 rounded-full mt-1 overflow-hidden">
                     <div id="myHpBar" class="h-full bg-blue-500 w-full transition-all duration-300"></div>
                 </div>
+                <div class="w-full h-1 bg-transparent mt-0.5 overflow-hidden"><div id="myShieldBar" class="h-full bg-yellow-400 w-0"></div></div>
             </div>
+            <div class="relative">
+                <img id="myImg" src="" class="w-40 h-40 pixel-art transition-transform duration-200">
+                <div id="myStatus" class="absolute -top-6 left-0 flex gap-1"></div>
+                <div id="myBubble" class="absolute top-10 -right-16 bg-white text-slate-900 text-xs font-bold px-2 py-1 rounded-lg border-2 border-blue-500 hidden z-20 whitespace-nowrap">...</div>
+            </div>
+        </div>
+
+        <div id="centerMsg" class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-30 pointer-events-none text-center w-full px-4 hidden">
+            <div class="text-4xl font-black text-white drop-shadow-[0_4px_0_#000] stroke-2" id="centerMsgText">READY</div>
         </div>
     </div>
 
-    <div class="absolute bottom-0 w-full bg-slate-800 border-t-4 border-slate-700 p-4 pb-8">
-        <div class="text-center text-sm text-slate-400 mb-2" id="turnIndicator">대기 중...</div>
-        <div id="skillGrid" class="grid grid-cols-2 gap-2 max-w-md mx-auto">
+    <div class="absolute bottom-0 w-full max-w-md bg-slate-800 rounded-t-3xl border-t border-slate-600 shadow-2xl z-40 transition-all duration-300 h-64 flex flex-col">
+
+        <div id="skillPanel" class="flex-1 p-4 flex flex-col">
+            <div class="text-center text-sm text-slate-400 mb-2 font-bold">이번 턴에 사용할 기술을 선택하세요</div>
+            <div id="skillGrid" class="grid grid-cols-2 gap-2 flex-1">
+            </div>
+            <div id="waitingMsg" class="hidden absolute inset-0 bg-slate-900/90 rounded-t-3xl flex items-center justify-center flex-col z-50">
+                <div class="text-3xl animate-bounce mb-2">⏳</div>
+                <div class="text-yellow-400 font-bold">상대방 선택 대기 중...</div>
+            </div>
+        </div>
+
+        <div id="quizPanel" class="absolute inset-0 bg-slate-800 rounded-t-3xl p-5 hidden z-50">
+            <div class="mb-4 text-center h-16 flex flex-col justify-center">
+                <p class="text-xs text-slate-400 mb-1">문제를 풀면 기술이 발동합니다!</p>
+                <p class="text-2xl font-black text-white break-keep" id="quizQuestion">3 x 3 = ?</p>
+            </div>
+            <div id="quizChoices" class="grid grid-cols-2 gap-3 h-32"></div>
         </div>
     </div>
 </section>
 
-<div id="resultModal" class="fixed inset-0 bg-black/80 z-50 hidden flex-col items-center justify-center">
-    <div class="bg-white text-slate-900 p-8 rounded-2xl text-center max-w-sm w-full mx-4 shadow-2xl transform scale-100 transition-transform">
+<div id="resultModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
+    <div class="bg-white text-slate-900 p-8 rounded-3xl text-center max-w-sm w-full shadow-2xl animate-[bounce_0.5s]">
         <div class="text-6xl mb-4" id="resultIcon">🏆</div>
-        <h2 class="text-4xl font-black mb-2" id="resultTitle">VICTORY</h2>
-        <p class="text-slate-500 mb-6" id="resultDesc">랭킹 점수 +10</p>
-        <button onclick="location.reload()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold text-lg">로비로 돌아가기</button>
+        <h2 class="text-4xl font-black mb-2" id="resultTitle">WIN</h2>
+        <p class="text-slate-500 mb-6 font-bold" id="resultDesc">점수 +20</p>
+        <button onclick="location.reload()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold">로비로</button>
     </div>
 </div>
 
 <script>
     // ==========================================
-    // 0. 설정 및 데이터
+    // 0. 설정
     // ==========================================
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 교체 필요
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 교체 필요
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // ⚠️ 필수: 본인 URL
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ⚠️ 필수: 본인 KEY
     const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    // DQR.html과 동일한 영웅 데이터 (축약됨)
-    const HERO_DEFINITIONS = {
-        "knight": { sprites: { default: "./png/knight.png" }, skills: [
-                { id: "k1", name: "베기", power: 1.0, cd: 0 }, { id: "k2", name: "방패 가격", power: 1.2, cd: 2 },
-                { id: "k3", name: "철벽", power: 0, cd: 3, type: 'buff' }, { id: "k4", name: "홀리 크로스", power: 2.5, cd: 5 }
-            ]},
-        "rogue": { sprites: { default: "./png/rogue-male.png" }, skills: [
-                { id: "r1", name: "단검 투척", power: 1.0, cd: 0 }, { id: "r2", name: "급소 찌르기", power: 1.5, cd: 2 },
-                { id: "r3", name: "독 바르기", power: 0, cd: 3, type: 'buff' }, { id: "r4", name: "암살", power: 3.0, cd: 5 }
-            ]},
-        "mage": { sprites: { default: "./png/wizard.png" }, skills: [
-                { id: "m1", name: "매직 미사일", power: 1.0, cd: 0 }, { id: "m2", name: "파이어볼", power: 1.8, cd: 3 },
-                { id: "m3", name: "마나 쉴드", power: 0, cd: 4, type: 'buff' }, { id: "m4", name: "메테오", power: 4.0, cd: 6 }
-            ]}
+    // ==========================================
+    // 1. 데이터 정의 (재편성된 스킬)
+    // ==========================================
+
+    // 스킬 DB (타입: normal, def, buff, ult)
+    // normal: 기본공격, def: 방어/반격/회피, buff: 유틸/힐/버프, ult: 필살기
+    const SKILL_DB = {
+        // 기사 (탱커/반사)
+        "k_atk": { name: "베기", type: "normal", power: 1.0, cd: 0, desc: "기본 공격" },
+        "k_def": { name: "반격 태세", type: "def_counter", power: 0, cd: 2, desc: "피격 시 50% 경감 및 반사" },
+        "k_util": { name: "응급 처치", type: "buff_heal", power: 0, cd: 3, desc: "잃은 체력의 30% 회복" },
+        "k_ult": { name: "심판의 검", type: "ult_smite", power: 3.5, cd: 5, desc: "강력한 마무리 일격" },
+
+        // 도적 (회피/치명)
+        "r_atk": { name: "단검 투척", type: "normal", power: 1.0, cd: 0, desc: "기본 공격" },
+        "r_def": { name: "그림자 숨기", type: "def_evade", power: 0, cd: 3, desc: "80% 확률로 완전 회피" },
+        "r_util": { name: "독 바르기", type: "buff_crit", power: 0, cd: 3, desc: "다음 공격 치명타 확정" },
+        "r_ult": { name: "암살", type: "ult_execute", power: 3.0, cd: 5, desc: "적 체력 30% 이하시 2배 피해" },
+
+        // 마법사 (폭딜/무적)
+        "m_atk": { name: "매직 미사일", type: "normal", power: 1.0, cd: 0, desc: "기본 공격" },
+        "m_def": { name: "얼음 방패", type: "def_invuln", power: 0, cd: 4, desc: "이번 턴 무적 (다음 턴 휴식)" },
+        "m_util": { name: "마나 쉴드", type: "buff_shield", power: 0, cd: 3, desc: "체력 30%만큼 보호막 생성" },
+        "m_ult": { name: "메테오", type: "ult_nuke", power: 4.5, cd: 6, desc: "초대형 운석 소환" }
     };
 
-    let myData = null;
-    let enemyData = null;
-    let channel = null;
-    let battleState = { myTurn: false, myHp: 0, enemyHp: 0, cooldowns: [0,0,0,0] };
-    let myUUID = crypto.randomUUID(); // 세션용 임시 ID
+    const CLASS_SKILLS = {
+        "knight": ["k_atk", "k_def", "k_util", "k_ult"],
+        "rogue":  ["r_atk", "r_def", "r_util", "r_ult"],
+        "mage":   ["m_atk", "m_def", "m_util", "m_ult"]
+    };
+
+    // 상태 변수
+    let myData = null, enemyData = null;
+    let channel = null, isHost = false, roomId = null;
+    let myUUID = localStorage.getItem("dqr_uuid") || crypto.randomUUID();
+    localStorage.setItem("dqr_uuid", myUUID);
+
+    let gameState = {
+        round: 1,
+        phase: 'select', // select -> quiz -> resolve
+        timer: 30,
+        myHp: 0, enemyHp: 0,
+        myShield: 0, enemyShield: 0,
+        myBuffs: {}, enemyBuffs: {}, // { counter: bool, evade: bool, invuln: bool, crit: bool }
+        myCooldowns: [0,0,0,0],
+        mySelectedSkillId: null,
+        enemySelectedSkillId: null, // ID만 먼저 받고 내용은 나중에
+        myAnswer: null, enemyAnswer: null,
+        currentQuiz: null
+    };
+
+    let timerInterval = null;
 
     // ==========================================
-    // 1. 초기화 및 로컬 데이터 로드
+    // 2. 초기화 및 매칭
     // ==========================================
     window.onload = async () => {
-        loadMyData();
-        await fetchMyRanking(); // 랭킹 점수 로드
-        renderLobby();
+        // 간단 로비 세팅
+        const raw = localStorage.getItem("qz_rpg_v105_data");
+        let cid = "knight";
+        if(raw) cid = JSON.parse(raw).selectedClass;
+
+        myData = {
+            id: myUUID,
+            classId: cid,
+            sprite: `./png/${cid}.png`, // 이미지 경로 가정
+            skills: CLASS_SKILLS[cid].map(id => ({ ...SKILL_DB[id], id }))
+        };
+        // 흑기사 스킨 등 예외 처리 생략 (기본만)
+
+        document.getElementById('myLobbyImg').src = myData.sprite;
+        document.getElementById('myLobbyName').innerText = cid.toUpperCase();
     };
 
-    function loadMyData() {
-        const raw = localStorage.getItem("qz_rpg_v105_data"); // 최신 버전 키 사용
-        if (raw) {
-            const d = JSON.parse(raw);
-            const cid = d.selectedClass;
-            const hero = d.heroes[cid];
-            myData = {
-                id: myUUID,
-                name: "플레이어", // 이름 저장 기능이 없어서 고정
-                classId: cid,
-                level: hero.level,
-                // 스탯 간소화 계산
-                maxHp: Math.floor(15 + hero.level * 2), // v10.5 밸런스 기준
-                atk: Math.floor(12 + hero.level * 1.5),
-                def: Math.floor(8 + hero.level * 0.8),
-                sprite: HERO_DEFINITIONS[cid].sprites.default,
-                skills: HERO_DEFINITIONS[cid].skills // 실제로는 equipped 배열을 참조해야 함 (간소화)
-            };
-        } else {
-            // 데이터 없으면 테스트용 더미
-            myData = { id: myUUID, name: "Guest", classId: "knight", level: 1, maxHp: 20, atk: 15, def: 5, sprite: "./png/knight.png", skills: HERO_DEFINITIONS.knight.skills };
-        }
+    function startMatching(mode) {
+        document.getElementById('lobbyView').classList.remove('active');
+        document.getElementById('matchingView').classList.add('active');
+        document.getElementById('roomUI').classList.add('hidden'); // 커스텀 UI 숨김
 
-        // PvP 밸런스 보정 (체력 5배)
-        myData.maxHp *= 5;
-    }
-
-    async function fetchMyRanking() {
-        // user_id는 로컬스토리지에 영구 저장된 ID를 사용하거나 생성
-        let permId = localStorage.getItem("dqr_user_id");
-        if (!permId) { permId = crypto.randomUUID(); localStorage.setItem("dqr_user_id", permId); }
-        myData.permId = permId;
-
-        const { data, error } = await supabase.from('dqr_rankings').select('mmr').eq('user_id', permId).single();
-        if (data) {
-            myData.mmr = data.mmr;
-        } else {
-            // 신규 유저 등록
-            await supabase.from('dqr_rankings').insert({ user_id: permId, username: myData.classId, mmr: 1000 });
-            myData.mmr = 1000;
-        }
-        document.getElementById('myMMR').innerText = myData.mmr;
-    }
-
-    function renderLobby() {
-        document.getElementById('myLobbyImg').src = myData.sprite;
-        document.getElementById('myLobbyName').innerText = `${myData.classId.toUpperCase()} (Lv.${myData.level})`;
-    }
-
-    function switchView(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-    }
-
-    function goHome() { window.location.href = "DQR.html"; }
-
-    // ==========================================
-    // 2. 매칭 시스템 (랭킹 / 커스텀)
-    // ==========================================
-
-    // [모드 A] 랭킹 매칭 (Presence 사용)
-    async function startRankedMatch() {
-        switchView('matchingView');
-        document.getElementById('matchingStatus').innerText = "대전 상대를 찾는 중...";
-
-        // 'global_lobby' 채널에서 대기중인 유저 탐색
-        channel = supabase.channel('global_lobby');
-
+        channel = supabase.channel('global_lobby_v4');
         channel.on('presence', { event: 'sync' }, () => {
-            const state = channel.presenceState();
-            const users = Object.values(state).flat();
-
-            // 나 이외의 'searching' 상태인 유저 찾기
+            const users = Object.values(channel.presenceState()).flat();
             const opponent = users.find(u => u.id !== myData.id && u.status === 'searching');
-
-            if (opponent) {
-                // 매칭 성사! (ID가 더 큰 쪽이 방을 만듦 - 충돌 방지)
-                if (myData.id > opponent.id) {
-                    const roomId = `battle_${myData.id}_${opponent.id}`;
-                    channel.send({ type: 'broadcast', event: 'found_match', payload: { targetId: opponent.id, roomId: roomId } });
-                    enterBattleRoom(roomId, true); // 내가 선공(Host)
-                }
+            if (opponent && myData.id > opponent.id) {
+                const room = `btl_${myData.id}_${opponent.id}`;
+                channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myData.id } });
+                joinRoom(room, true);
             }
-        }).on('broadcast', { event: 'found_match' }, ({ payload }) => {
-            if (payload.targetId === myData.id) {
-                enterBattleRoom(payload.roomId, false); // 내가 후공(Guest)
-            }
-        }).subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                await channel.track({ id: myData.id, status: 'searching', mmr: myData.mmr });
-            }
+        }).on('broadcast', { event: 'match' }, ({ payload }) => {
+            if (payload.room.includes(myData.id)) joinRoom(payload.room, payload.host === myData.id);
+        }).subscribe(async (s) => {
+            if(s==='SUBSCRIBED') await channel.track({ id: myData.id, status: 'searching' });
         });
     }
 
-    // [모드 B] 커스텀 방
+    // 커스텀 방 로직은 기존과 동일하므로 생략 (startMatching과 유사)
     function showCustomRoomUI(mode) {
-        switchView('matchingView');
-        if (mode === 'create') {
-            const code = Math.floor(1000 + Math.random() * 9000); // 4자리 코드
-            document.getElementById('roomCodeDisplay').classList.remove('hidden');
+        document.getElementById('lobbyView').classList.remove('active');
+        document.getElementById('matchingView').classList.add('active');
+        document.getElementById('roomUI').classList.remove('hidden');
+        if(mode==='create') {
+            const code = Math.floor(1000+Math.random()*9000);
             document.getElementById('roomCodeText').innerText = code;
-            document.getElementById('matchingStatus').innerText = "상대가 코드를 입력하길 기다리는 중...";
-
+            document.getElementById('roomCodeDisplay').classList.remove('hidden');
             channel = supabase.channel(`room_${code}`);
-            channel.on('presence', { event: 'join' }, ({ newPresences }) => {
-                // 누군가 들어왔다!
-                newPresences.forEach(p => {
-                    if (p.id !== myData.id) enterBattleRoom(`room_${code}`, true);
-                });
-            }).subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') await channel.track({ id: myData.id });
-            });
-
+            channel.on('presence', {event:'join'}, ({newPresences}) => {
+                newPresences.forEach(p => { if(p.id !== myData.id) joinRoom(`room_${code}`, true); });
+            }).subscribe(async (s) => { if(s==='SUBSCRIBED') await channel.track({id:myData.id}); });
         } else {
+            document.getElementById('roomCodeDisplay').classList.add('hidden');
             document.getElementById('roomJoinInput').classList.remove('hidden');
-            document.getElementById('matchingStatus').innerText = "방 코드를 입력하세요.";
         }
     }
-
     function joinCustomRoom() {
         const code = document.getElementById('inputRoomCode').value;
-        if (code.length !== 4) return alert("4자리 코드를 입력하세요.");
-
         channel = supabase.channel(`room_${code}`);
-        channel.subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                await channel.track({ id: myData.id }); // 내 존재 알림
-                enterBattleRoom(`room_${code}`, false);
-            }
-        });
+        channel.subscribe(async(s)=>{ if(s==='SUBSCRIBED'){ await channel.track({id:myData.id}); joinRoom(`room_${code}`, false); }});
     }
+    function cancelMatching() { if(channel) supabase.removeChannel(channel); location.reload(); }
 
-    function cancelMatching() {
-        if (channel) supabase.removeChannel(channel);
-        switchView('lobbyView');
-        document.getElementById('roomCodeDisplay').classList.add('hidden');
-        document.getElementById('roomJoinInput').classList.add('hidden');
-    }
+    function joinRoom(room, host) {
+        if(channel) supabase.removeChannel(channel);
+        roomId = room; isHost = host;
+        channel = supabase.channel(room);
 
-    // ==========================================
-    // 3. 배틀 로직
-    // ==========================================
-    async function enterBattleRoom(roomId, isHost) {
-        if (channel) supabase.removeChannel(channel); // 이전 채널(로비 등) 퇴장
-
-        // 배틀 채널 접속
-        channel = supabase.channel(roomId);
-
-        // 이벤트 리스너 설정
         channel
-            .on('broadcast', { event: 'player_info' }, ({ payload }) => {
-                if (payload.id !== myData.id && !enemyData) {
-                    initBattle(payload, isHost);
-                }
-            })
-            .on('broadcast', { event: 'attack' }, ({ payload }) => {
-                receiveAttack(payload);
-            })
-            .on('broadcast', { event: 'game_over' }, ({ payload }) => {
-                endGame(payload.winnerId === myData.id);
-            });
+            .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
+            .on('broadcast', { event: 'skill_selected' }, ({ payload }) => { if(payload.id !== myData.id) checkSkillPhaseEnd(payload); })
+            .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
+            .on('broadcast', { event: 'submit_answer' }, ({ payload }) => { if(payload.id !== myData.id) { gameState.enemyAnswer = payload; checkQuizEnd(); } });
 
-        channel.subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                // 내 정보 전송 (상대가 받을 때까지 반복 or handshake)
-                channel.send({ type: 'broadcast', event: 'player_info', payload: myData });
+        channel.subscribe(async (s) => {
+            if(s==='SUBSCRIBED') {
+                // 밸런스: 레벨 30 고정 스탯
+                const base = { hp: 100, atk: 15, def: 5 }; // 기본
+                if(myData.classId==='knight') { base.hp=120; base.atk=12; base.def=10; }
+                if(myData.classId==='rogue') { base.hp=90; base.atk=18; base.def=5; }
+                if(myData.classId==='mage') { base.hp=80; base.atk=22; base.def=3; }
+
+                // PvP 체력 뻥튀기 (x5)
+                myData.maxHp = base.hp * 5;
+                myData.atk = base.atk * 3; // 공격력도 약간 보정
+                myData.def = base.def * 2;
+
+                channel.send({ type: 'broadcast', event: 'ready', payload: myData });
             }
         });
-
-        // 핑퐁: 상대가 늦게 들어올 수 있으므로 잠시 주기적으로 내 정보 송출
-        const handshake = setInterval(() => {
-            if (enemyData) clearInterval(handshake);
-            else channel.send({ type: 'broadcast', event: 'player_info', payload: myData });
-        }, 1000);
     }
 
-    function initBattle(enemyInfo, isHost) {
-        enemyData = enemyInfo;
-        switchView('battleView');
+    // ==========================================
+    // 3. 전투 루프 (Select -> Quiz -> Resolve)
+    // ==========================================
+    function startBattle() {
+        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+        document.getElementById('battleView').classList.add('active');
 
-        // UI 세팅
+        // UI 초기화
         document.getElementById('myImg').src = myData.sprite;
-        document.getElementById('myName').innerText = myData.classId.toUpperCase();
         document.getElementById('enemyImg').src = enemyData.sprite;
-        document.getElementById('enemyName').innerText = enemyData.classId.toUpperCase();
+        document.getElementById('myName').innerText = myData.classId;
+        document.getElementById('enemyName').innerText = enemyData.classId;
 
-        // 상태 초기화
-        battleState = {
-            myHp: myData.maxHp,
-            enemyHp: enemyData.maxHp,
-            cooldowns: [0, 0, 0, 0],
-            myTurn: isHost // 방장이 선공
-        };
+        gameState.myHp = myData.maxHp;
+        gameState.enemyHp = enemyData.maxHp;
+        updateHpUI();
 
-        updateBattleUI();
+        startSkillPhase();
+    }
+
+    // --- PHASE 1: SKILL SELECT (30s) ---
+    function startSkillPhase() {
+        gameState.phase = 'select';
+        gameState.mySelectedSkillId = null;
+        gameState.enemySelectedSkillId = null;
+        gameState.myAnswer = null;
+        gameState.enemyAnswer = null;
+
+        document.getElementById('phaseBadge').innerText = "SKILL SELECT";
+        document.getElementById('phaseBadge').className = "text-xs font-bold text-green-400 animate-pulse";
+        document.getElementById('skillPanel').classList.remove('hidden');
+        document.getElementById('quizPanel').classList.add('hidden');
+        document.getElementById('waitingMsg').classList.add('hidden');
+        document.getElementById('myBubble').classList.add('hidden');
+        document.getElementById('enemyBubble').classList.add('hidden');
+
+        // 쿨타임 감소 (라운드 시작 시)
+        gameState.myCooldowns = gameState.myCooldowns.map(c => Math.max(0, c - 1));
+
         renderSkills();
-        updateTurnUI();
-    }
-
-    function updateBattleUI() {
-        const myPct = (battleState.myHp / myData.maxHp) * 100;
-        const enPct = (battleState.enemyHp / enemyData.maxHp) * 100;
-        document.getElementById('myHpBar').style.width = `${Math.max(0, myPct)}%`;
-        document.getElementById('myHpText').innerText = `${Math.max(0, battleState.myHp)}/${myData.maxHp}`;
-        document.getElementById('enemyHpBar').style.width = `${Math.max(0, enPct)}%`;
-    }
-
-    function updateTurnUI() {
-        const ind = document.getElementById('turnIndicator');
-        const grid = document.getElementById('skillGrid');
-
-        if (battleState.myTurn) {
-            ind.innerText = "나의 턴! 행동을 선택하세요.";
-            ind.className = "text-center text-sm text-yellow-400 font-bold mb-2 animate-pulse";
-            grid.classList.remove('opacity-50', 'pointer-events-none');
-
-            // 쿨타임 감소 (내 턴 시작 시)
-            battleState.cooldowns = battleState.cooldowns.map(c => Math.max(0, c - 1));
-            renderSkills();
-        } else {
-            ind.innerText = "상대의 행동을 기다리는 중...";
-            ind.className = "text-center text-sm text-slate-500 mb-2";
-            grid.classList.add('opacity-50', 'pointer-events-none');
-        }
+        startTimer(30, autoSelectSkill);
     }
 
     function renderSkills() {
@@ -380,121 +360,321 @@
 
         myData.skills.forEach((skill, idx) => {
             const btn = document.createElement('button');
-            const cd = battleState.cooldowns[idx];
-
-            btn.className = `btn-skill bg-slate-700 text-white p-3 rounded-lg text-left relative overflow-hidden ${cd > 0 ? '' : 'hover:bg-slate-600'}`;
-            btn.disabled = cd > 0 || !battleState.myTurn;
-
+            const cd = gameState.myCooldowns[idx];
+            btn.className = `btn-skill bg-slate-700 p-3 text-left ${cd > 0 ? 'opacity-50 cursor-not-allowed' : 'hover:bg-slate-600'} border-b-slate-900`;
             btn.innerHTML = `
-                <div class="font-bold text-xs">${skill.name}</div>
-                <div class="text-[10px] text-slate-400">위력 ${skill.power}</div>
-                ${cd > 0 ? `<div class="absolute inset-0 bg-black/60 flex items-center justify-center font-bold text-lg">${cd}</div>` : ''}
+                <div class="text-xs font-bold text-white">${skill.name}</div>
+                <div class="text-[10px] text-slate-400">${skill.desc}</div>
+                ${cd > 0 ? `<div class="absolute inset-0 bg-black/60 flex items-center justify-center font-bold text-white">${cd}</div>` : ''}
             `;
-
-            btn.onclick = () => performAction(idx);
+            btn.disabled = cd > 0;
+            btn.onclick = () => selectSkill(idx);
             grid.appendChild(btn);
         });
     }
 
-    function performAction(skillIdx) {
-        if (!battleState.myTurn) return;
+    function selectSkill(idx) {
+        if (gameState.phase !== 'select' || gameState.mySelectedSkillId !== null) return;
 
-        const skill = myData.skills[skillIdx];
+        gameState.mySelectedSkillId = idx;
+        const skill = myData.skills[idx];
 
-        // 1. 데미지 계산 (간소화 공식)
-        // (공격력 * 스킬위력) - (적방어력 * 0.5)
-        let dmg = Math.floor((myData.atk * skill.power) - (enemyData.def * 0.5));
-        dmg = Math.max(1, dmg); // 최소 데미지 1
-
-        // 2. 내 화면 반영 (즉시성)
-        battleState.enemyHp -= dmg;
-        battleState.cooldowns[skillIdx] = skill.cd + 1; // 사용 시 쿨타임 적용
-        updateBattleUI();
-
-        // 애니메이션
-        const myImg = document.getElementById('myImg');
-        const enemyImg = document.getElementById('enemyImg');
-        myImg.classList.add('translate-x-10', 'transition-transform'); // 돌진
-        setTimeout(() => {
-            myImg.classList.remove('translate-x-10');
-            enemyImg.classList.add('anim-damage', 'brightness-200'); // 피격
-            setTimeout(() => enemyImg.classList.remove('anim-damage', 'brightness-200'), 400);
-        }, 200);
-
-        // 3. 서버 전송
-        channel.send({
-            type: 'broadcast',
-            event: 'attack',
-            payload: { damage: dmg, skillName: skill.name }
+        // UI 피드백
+        const btns = document.querySelectorAll('.btn-skill');
+        btns.forEach((b, i) => {
+            if (i === idx) b.classList.add('selected');
+            else b.disabled = true;
         });
 
-        // 4. 턴 넘김
-        battleState.myTurn = false;
-        updateTurnUI();
+        document.getElementById('waitingMsg').classList.remove('hidden');
 
-        // 5. 승리 체크
-        if (battleState.enemyHp <= 0) {
-            channel.send({ type: 'broadcast', event: 'game_over', payload: { winnerId: myData.id } });
-            endGame(true);
+        // 서버 전송 (ID만 보냄)
+        channel.send({ type: 'broadcast', event: 'skill_selected', payload: { id: myData.id, skillIdx: idx } });
+
+        // 싱글 테스트용 (상대 없으면 바로 진행) - 실제에선 제거 가능
+        // checkSkillPhaseEnd(); 
+    }
+
+    function autoSelectSkill() {
+        if (gameState.mySelectedSkillId === null) {
+            // 사용 가능한 스킬 중 랜덤
+            const available = myData.skills.map((_, i) => i).filter(i => gameState.myCooldowns[i] === 0);
+            const pick = available.length > 0 ? available[Math.floor(Math.random() * available.length)] : 0; // 0번(평타)은 쿨 0 보장
+            selectSkill(pick);
         }
     }
 
-    function receiveAttack({ damage, skillName }) {
-        // 상대가 공격함
-        document.getElementById('turnIndicator').innerText = `적이 ${skillName}(을)를 사용! ${damage} 피해!`;
+    function checkSkillPhaseEnd(payload) {
+        if (payload) gameState.enemySelectedSkillId = payload.skillIdx;
 
-        battleState.myHp -= damage;
-        updateBattleUI();
+        if (gameState.mySelectedSkillId !== null && gameState.enemySelectedSkillId !== null) {
+            clearInterval(timerInterval);
+            if (isHost) {
+                // 퀴즈 생성 후 전송
+                const n1 = Math.floor(Math.random()*8)+2, n2 = Math.floor(Math.random()*9)+1;
+                const ans = n1*n2;
+                const choices = new Set([ans]);
+                while(choices.size < 4) choices.add(ans + (Math.floor(Math.random()*5)-2)*10);
 
-        // 애니메이션
-        const enemyImg = document.getElementById('enemyImg');
-        const myImg = document.getElementById('myImg');
+                const quiz = { q: `${n1} × ${n2} = ?`, a: ans, choices: Array.from(choices).sort(()=>Math.random()-0.5) };
+                channel.send({ type: 'broadcast', event: 'quiz_start', payload: quiz });
+                startQuizPhase(quiz);
+            }
+        }
+    }
 
-        // 적 돌진 (반전 상태라 -X가 전진)
-        enemyImg.style.transform = "scaleX(-1) translateX(-40px)";
+    // --- PHASE 2: QUIZ (10s) ---
+    function startQuizPhase(quiz) {
+        gameState.phase = 'quiz';
+        gameState.currentQuiz = quiz;
+
+        document.getElementById('phaseBadge').innerText = "QUIZ TIME";
+        document.getElementById('phaseBadge').className = "text-xs font-bold text-yellow-400 animate-bounce";
+        document.getElementById('skillPanel').classList.add('hidden');
+        document.getElementById('quizPanel').classList.remove('hidden');
+
+        // 퀴즈 렌더링
+        document.getElementById('quizQuestion').innerText = quiz.q;
+        const grid = document.getElementById('quizChoices');
+        grid.innerHTML = "";
+        quiz.choices.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = "btn-choice text-white";
+            btn.innerText = c;
+            btn.onclick = () => submitAnswer(c);
+            grid.appendChild(btn);
+        });
+
+        startTimer(10, () => submitAnswer(-999)); // 타임아웃 오답
+    }
+
+    function submitAnswer(val) {
+        if (gameState.myAnswer) return;
+        const correct = val === gameState.currentQuiz.a;
+        gameState.myAnswer = { correct, val };
+
+        // UI 잠금
+        const btns = document.querySelectorAll('.btn-choice');
+        btns.forEach(b => {
+            b.disabled = true;
+            if(parseInt(b.innerText)===val) b.classList.add(correct?'correct':'wrong');
+        });
+
+        document.getElementById('myBubble').innerText = "제출 완료!";
+        document.getElementById('myBubble').classList.remove('hidden');
+
+        channel.send({ type: 'broadcast', event: 'submit_answer', payload: { id: myData.id, correct } });
+        checkQuizEnd();
+    }
+
+    function checkQuizEnd() {
+        if (gameState.myAnswer && gameState.enemyAnswer) {
+            clearInterval(timerInterval);
+            setTimeout(resolveRound, 1000);
+        }
+    }
+
+    // --- PHASE 3: RESOLVE (Animation) ---
+    async function resolveRound() {
+        gameState.phase = 'resolve';
+        document.getElementById('quizPanel').classList.add('hidden');
+        document.getElementById('myBubble').classList.add('hidden');
+        document.getElementById('enemyBubble').classList.add('hidden');
+        document.getElementById('phaseBadge').innerText = "BATTLE";
+        document.getElementById('phaseBadge').className = "text-xs font-bold text-red-500";
+
+        // 선공 결정 (랜덤이 아닌, 정답자 우선? 혹은 라운드 홀짝? 여기선 홀짝)
+        const meFirst = (gameState.round % 2 !== 0) === isHost; // 홀수: 호스트 선공
+
+        // 1. 선공 액션
+        await executeAction(meFirst ? 'me' : 'enemy');
+        if (checkGameOver()) return;
+
+        // 2. 후공 액션
+        await executeAction(meFirst ? 'enemy' : 'me');
+        if (checkGameOver()) return;
+
+        // 3. 종료 및 다음 라운드
+        gameState.round++;
+        document.getElementById('turnCount').innerText = gameState.round;
+
+        // 버프 턴 감소 등 처리 필요하지만 여기선 생략(단순화)
+        setTimeout(startSkillPhase, 1500);
+    }
+
+    function executeAction(who) {
+        return new Promise(resolve => {
+            const isMe = who === 'me';
+            const actor = isMe ? myData : enemyData;
+            const skillId = isMe ? actor.skills[gameState.mySelectedSkillId].id : actor.skills[gameState.enemySelectedSkillId].id;
+            const skill = SKILL_DB[skillId];
+            const answer = isMe ? gameState.myAnswer : gameState.enemyAnswer;
+            const buffs = isMe ? gameState.myBuffs : gameState.enemyBuffs;
+            const targetBuffs = isMe ? gameState.enemyBuffs : gameState.myBuffs;
+
+            // 스킬명 표시
+            showCenterMsg(`${actor.name}: ${skill.name}!`, 1000);
+
+            // 상태이상: 다음 턴 휴식(얼음 방패 페널티) 등 구현 가능
+            // 여기선 심플하게: 오답이면 실패
+            if (!answer.correct) {
+                setTimeout(() => {
+                    document.getElementById(isMe?'myBubble':'enemyBubble').innerText = "실수했다!";
+                    document.getElementById(isMe?'myBubble':'enemyBubble').classList.remove('hidden');
+                    resolve();
+                }, 1000);
+                return;
+            }
+
+            // 쿨타임 적용 (내 것만)
+            if (isMe) gameState.myCooldowns[gameState.mySelectedSkillId] = skill.cd + 1; // +1은 이번 턴 소모 포함
+
+            // 로직 실행 (가위바위보 상성)
+            // 방어 계열: 데미지 경감/회피 준비 (이미 활성화된 버프가 아님, 즉발성)
+            // 공격 계열: 데미지 계산
+
+            let dmg = 0;
+            let msg = "";
+
+            if (skill.type.includes('def_')) {
+                if (skill.type === 'def_counter') { buffs.counter = true; msg = "반격 준비!"; }
+                if (skill.type === 'def_evade') { buffs.evade = true; msg = "회피 준비!"; }
+                if (skill.type === 'def_invuln') { buffs.invuln = true; msg = "무적!"; }
+            } else if (skill.type.includes('buff_')) {
+                if (skill.type === 'buff_shield') {
+                    const amt = Math.floor(actor.maxHp * 0.3);
+                    if(isMe) gameState.myShield += amt; else gameState.enemyShield += amt;
+                    msg = `쉴드 +${amt}`;
+                }
+                if (skill.type === 'buff_heal') {
+                    const amt = Math.floor((actor.maxHp - (isMe?gameState.myHp:gameState.enemyHp)) * 0.3); // 잃은체력 비례
+                    if(isMe) gameState.myHp += amt; else gameState.enemyHp += amt;
+                    msg = `회복 +${amt}`;
+                }
+                if (skill.type === 'buff_crit') { buffs.crit = true; msg = "치명타 장전!"; }
+            } else {
+                // 공격 스킬
+                let finalAtk = actor.atk * skill.power;
+                if (buffs.crit) { finalAtk *= 2; buffs.crit = false; msg = "Critical!"; }
+
+                // 상대 방어 스킬 체크
+                if (targetBuffs.invuln) {
+                    dmg = 0; msg = "데미지 무효!"; targetBuffs.invuln = false; // 1회용
+                } else if (targetBuffs.evade) {
+                    if (Math.random() < 0.8) { dmg = 0; msg = "회피함!"; }
+                    else { dmg = Math.floor(finalAtk); msg = "회피 실패!"; }
+                    targetBuffs.evade = false;
+                } else if (targetBuffs.counter) {
+                    dmg = Math.floor(finalAtk * 0.5); // 50% 경감
+                    // 반사 데미지
+                    const reflect = Math.floor(finalAtk * 0.5);
+                    if(isMe) gameState.myHp -= reflect; else gameState.enemyHp -= reflect;
+                    msg = `반격당함 -${reflect}`;
+                    targetBuffs.counter = false;
+                } else {
+                    // 일반 피격
+                    let defense = (isMe ? enemyData.def : myData.def);
+                    dmg = Math.max(1, Math.floor(finalAtk - defense * 0.5));
+                }
+            }
+
+            // 데미지 적용
+            if (dmg > 0) {
+                // 쉴드 차감
+                if (isMe) {
+                    if (gameState.enemyShield > 0) {
+                        if (gameState.enemyShield >= dmg) { gameState.enemyShield -= dmg; dmg = 0; msg = "Blocked"; }
+                        else { dmg -= gameState.enemyShield; gameState.enemyShield = 0; }
+                    }
+                    gameState.enemyHp -= dmg;
+                } else {
+                    if (gameState.myShield > 0) {
+                        if (gameState.myShield >= dmg) { gameState.myShield -= dmg; dmg = 0; msg = "Blocked"; }
+                        else { dmg -= gameState.myShield; gameState.myShield = 0; }
+                    }
+                    gameState.myHp -= dmg;
+                }
+
+                // 애니메이션
+                animAttack(who);
+            }
+
+            document.getElementById(isMe?'myBubble':'enemyBubble').innerText = msg || skill.name;
+            document.getElementById(isMe?'myBubble':'enemyBubble').classList.remove('hidden');
+            updateHpUI();
+
+            setTimeout(resolve, 1500);
+        });
+    }
+
+    function animAttack(who) {
+        const attacker = document.getElementById(who === 'me' ? 'myImg' : 'enemyImg');
+        const victim = document.getElementById(who === 'me' ? 'enemyImg' : 'myImg');
+        attacker.classList.add(who==='me' ? 'anim-lunge' : 'anim-lunge-back');
         setTimeout(() => {
-            enemyImg.style.transform = "scaleX(-1) translateX(0)";
-            myImg.classList.add('anim-damage', 'bg-red-500/50');
-            setTimeout(() => myImg.classList.remove('anim-damage', 'bg-red-500/50'), 400);
+            victim.classList.add('anim-hit');
+            attacker.classList.remove('anim-lunge', 'anim-lunge-back');
+            setTimeout(() => victim.classList.remove('anim-hit'), 400);
         }, 200);
-
-        if (battleState.myHp > 0) {
-            battleState.myTurn = true;
-            setTimeout(updateTurnUI, 1000); // 연출 시간 후 턴 넘김
-        }
     }
 
-    async function endGame(isWin) {
-        if (channel) supabase.removeChannel(channel);
-
-        const modal = document.getElementById('resultModal');
-        const title = document.getElementById('resultTitle');
-        const icon = document.getElementById('resultIcon');
-        const desc = document.getElementById('resultDesc');
-
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
-
-        if (isWin) {
-            title.innerText = "VICTORY";
-            title.className = "text-4xl font-black mb-2 text-yellow-500";
-            icon.innerText = "🏆";
-            desc.innerText = "상대를 압도했습니다! (+20점)";
-
-            // 승리 시 DB 업데이트 (보안 취약하지만 MVP용)
-            const newMMR = myData.mmr + 20;
-            await supabase.from('dqr_rankings').update({ mmr: newMMR, wins: 1 }).eq('user_id', myData.permId); // wins는 increment 필요하나 MVP는 단순 update
-        } else {
-            title.innerText = "DEFEAT";
-            title.className = "text-4xl font-black mb-2 text-slate-500";
-            icon.innerText = "💀";
-            desc.innerText = "아쉽게 패배했습니다... (-10점)";
-
-            const newMMR = Math.max(0, myData.mmr - 10);
-            await supabase.from('dqr_rankings').update({ mmr: newMMR, losses: 1 }).eq('user_id', myData.permId);
-        }
+    // ==========================================
+    // 유틸
+    // ==========================================
+    function startTimer(sec, onTimeout) {
+        clearInterval(timerInterval);
+        gameState.timer = sec;
+        document.getElementById('timerDisplay').innerText = sec;
+        timerInterval = setInterval(() => {
+            gameState.timer--;
+            document.getElementById('timerDisplay').innerText = gameState.timer;
+            if(gameState.timer <= 0) {
+                clearInterval(timerInterval);
+                if(onTimeout) onTimeout();
+            }
+        }, 1000);
     }
 
+    function updateHpUI() {
+        const myPct = Math.max(0, (gameState.myHp / myData.maxHp) * 100);
+        const enPct = Math.max(0, (gameState.enemyHp / enemyData.maxHp) * 100);
+        document.getElementById('myHpBar').style.width = `${myPct}%`;
+        document.getElementById('enemyHpBar').style.width = `${enPct}%`;
+        document.getElementById('myHpText').innerText = `${Math.floor(gameState.myHp)}/${myData.maxHp}`;
+
+        document.getElementById('myShieldBar').style.width = `${Math.min(100, (gameState.myShield/myData.maxHp)*100)}%`;
+
+        // 버프 표시
+        let myBuffTxt = "";
+        if(gameState.myBuffs.crit) myBuffTxt += "🗡️";
+        if(gameState.myBuffs.invuln) myBuffTxt += "🛡️";
+        if(gameState.myBuffs.evade) myBuffTxt += "💨";
+        if(gameState.myBuffs.counter) myBuffTxt += "⚔️";
+        document.getElementById('myStatus').innerText = myBuffTxt;
+    }
+
+    function checkGameOver() {
+        if (gameState.myHp <= 0 || gameState.enemyHp <= 0) {
+            const win = gameState.myHp > 0;
+            const modal = document.getElementById('resultModal');
+            document.getElementById('resultTitle').innerText = win ? "VICTORY" : "DEFEAT";
+            document.getElementById('resultDesc').innerText = win ? "상대를 제압했습니다!" : "패배했습니다...";
+            modal.classList.remove('hidden');
+            modal.classList.add('flex');
+            if(channel) supabase.removeChannel(channel);
+            return true;
+        }
+        return false;
+    }
+
+    function showCenterMsg(text, duration) {
+        const el = document.getElementById('centerMsg');
+        document.getElementById('centerMsgText').innerText = text;
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), duration);
+    }
+
+    function goHome() { location.href = "DQR.html"; }
 </script>
 </body>
 </html>

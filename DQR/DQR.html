@@ -78,7 +78,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v10.5</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v11.0</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -91,7 +91,7 @@
                 던전 입장
             </button>
         </div>
-        <p class="text-slate-600 text-[10px] mt-8">Local Save: v100_data</p>
+        <p class="text-slate-600 text-[10px] mt-8">Local Save: v110_data</p>
     </div>
 </section>
 
@@ -132,10 +132,18 @@
         </div>
 
         <div class="grid grid-cols-2 gap-3 mt-2 pb-8">
+            <button id="btnPvP" class="col-span-2 bg-gradient-to-r from-indigo-800 to-indigo-600 text-white p-4 rounded-2xl shadow-lg border-b-4 border-indigo-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
+                <div class="text-left">
+                    <div class="font-bold text-lg">실시간 투기장</div>
+                    <div class="text-[10px] text-indigo-200">다른 플레이어와 전략 대전!</div>
+                </div>
+                <span class="text-2xl group-hover:scale-110 transition-transform">🏟️</span>
+            </button>
+
             <button id="btnEnterDungeon" class="col-span-2 bg-gradient-to-r from-slate-800 to-slate-700 text-white p-5 rounded-2xl shadow-lg border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
                 <div class="text-left">
                     <div class="font-bold text-xl">던전 입장</div>
-                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (스킬 강화 패치)</div>
+                    <div class="text-xs text-slate-400 group-hover:text-white transition-colors">몬스터 토벌 (v11.0)</div>
                 </div>
                 <span class="text-3xl group-hover:scale-110 transition-transform">⚔️</span>
             </button>
@@ -383,20 +391,21 @@
      * 1. DATA DEFINITIONS (DB)
      * ========================================= */
 
+    // v11.0 스킬 리메이크 (기사/도적/마법사 컨셉 강화)
     const HERO_DEFINITIONS = {
         "knight": {
             id: "knight", name: "Knight", nameKo: "기사",
             baseStats: { hp: 15, atk: 12, def: 8, spd: 5 },
             sprites: { default: "./png/knight.png", skin: "./png/knight-black.png" },
             skills: [
-                { id: "k1", name: "베기", type: "atk", power: 1.0, cd: 0, desc: "기본 공격 (CD 0)" },
-                { id: "k2", name: "방패 가격", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 스턴" },
-                { id: "k3", name: "철벽", type: "buff_def", power: 0, cd: 3, desc: "방어력 2배 (레벨UP: 지속시간/CD)" },
-                { id: "k4", name: "홀리 크로스", type: "atk_heal", power: 2.5, cd: 5, desc: "큰 피해 + HP 회복" },
-                { id: "k5", name: "전력 찌르기", type: "atk", power: 1.8, cd: 2, desc: "강력한 일격" },
-                { id: "k6", name: "수호의 빛", type: "buff_shield", power: 0, cd: 4, desc: "체력의 30%+a 쉴드" },
-                { id: "k7", name: "반격 태세", type: "buff_atk", power: 0, cd: 3, desc: "공격력 50% 증가" },
-                { id: "k8", name: "심판", type: "atk_execute", power: 3.5, cd: 6, desc: "마무리 일격" }
+                { id: "k1", name: "수호의 검", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
+                { id: "k2", name: "방패 강타", type: "atk_stun", power: 1.2, cd: 3, desc: "피해 + 1턴 기절" },
+                { id: "k3", name: "반격 태세", type: "buff_counter", power: 0, cd: 4, desc: "피해 50% 경감 및 반사" },
+                { id: "k4", name: "응급 처치", type: "buff_heal_missing", power: 0, cd: 4, desc: "잃은 HP 비례 회복" },
+                { id: "k5", name: "철벽 수비", type: "buff_def", power: 0, cd: 4, desc: "받는 피해 50% 감소" },
+                { id: "k6", name: "수호의 결계", type: "buff_shield", power: 0, cd: 4, desc: "보호막 생성" },
+                { id: "k7", name: "징벌의 일격", type: "atk", power: 2.2, cd: 3, desc: "강력한 일격" },
+                { id: "k8", name: "성채 전개", type: "buff_aegis", power: 0, cd: 6, desc: "방어+반격+보호막 (궁극기)" }
             ]
         },
         "rogue": {
@@ -404,14 +413,14 @@
             baseStats: { hp: 10, atk: 18, def: 4, spd: 10 },
             sprites: { default: "./png/rogue-male.png", skin: "./png/rogue-female.png" },
             skills: [
-                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "빠른 공격 (CD 0)" },
-                { id: "r2", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "방어 관통 피해" },
-                { id: "r3", name: "독 바르기", type: "buff_atk", power: 0, cd: 3, desc: "공격력 50% 증가" },
-                { id: "r4", name: "암살", type: "atk_execute", power: 3.0, cd: 5, desc: "적 HP 30% 이하 시 2배 피해" },
-                { id: "r5", name: "연속 베기", type: "atk", power: 0.8, cd: 1, desc: "쿨타임이 짧은 공격" },
-                { id: "r6", name: "그림자 숨기", type: "buff_evasion", power: 0, cd: 4, desc: "50% 확률 완전 회피" },
-                { id: "r7", name: "출혈 단검", type: "atk", power: 1.2, cd: 2, desc: "지속 피해 효과" },
-                { id: "r8", name: "배후 습격", type: "atk_crit", power: 2.5, cd: 4, desc: "높은 치명타 확률" }
+                { id: "r1", name: "단검 투척", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
+                { id: "r2", name: "약점 간파", type: "buff_next_crit", power: 0, cd: 3, desc: "다음 공격 확정 치명타" },
+                { id: "r3", name: "그림자 망토", type: "buff_evasion", power: 0, cd: 5, desc: "회피율 80% 증가" },
+                { id: "r4", name: "흡혈 베기", type: "atk_vampire", power: 1.2, cd: 3, desc: "피해의 50% 회복" },
+                { id: "r5", name: "급소 찌르기", type: "atk_crit", power: 1.5, cd: 2, desc: "높은 치명타 확률" },
+                { id: "r6", name: "독기 폭주", type: "buff_atk", power: 0, cd: 4, desc: "공격력 증가" },
+                { id: "r7", name: "연속 베기", type: "atk", power: 0.8, cd: 1, desc: "짧은 쿨타임 공격" },
+                { id: "r8", name: "암살", type: "atk_execute", power: 3.0, cd: 6, desc: "체력 낮은 적에게 치명적" }
             ]
         },
         "mage": {
@@ -419,14 +428,14 @@
             baseStats: { hp: 8, atk: 22, def: 3, spd: 6 },
             sprites: { default: "./png/wizard.png", skin: "./png/wizard.png" },
             skills: [
-                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "원거리 공격 (CD 0)" },
-                { id: "m2", name: "파이어볼", type: "atk_aoe", power: 1.8, cd: 3, desc: "강력한 화염 피해" },
-                { id: "m3", name: "마나 쉴드", type: "buff_shield", power: 0, cd: 4, desc: "체력의 30%+a 쉴드 생성" },
-                { id: "m4", name: "메테오", type: "atk_ult", power: 4.0, cd: 6, desc: "초대형 운석 소환" },
-                { id: "m5", name: "아이스 볼트", type: "atk_stun", power: 1.3, cd: 3, desc: "피해 + 동결(스턴)" },
-                { id: "m6", name: "명상", type: "buff_atk", power: 0, cd: 4, desc: "마법 공격력 대폭 증가" },
-                { id: "m7", name: "썬더", type: "atk", power: 2.2, cd: 4, desc: "방어 무시 피해" },
-                { id: "m8", name: "생명력 전환", type: "atk_heal", power: 2.0, cd: 5, desc: "피해의 일부 회복" }
+                { id: "m1", name: "매직 미사일", type: "atk", power: 1.0, cd: 0, desc: "기본 공격" },
+                { id: "m2", name: "파이어볼", type: "atk", power: 1.8, cd: 2, desc: "메인 딜링" },
+                { id: "m3", name: "마나 장벽", type: "buff_shield_huge", power: 0, cd: 4, desc: "대형 보호막" },
+                { id: "m4", name: "얼음 방패", type: "buff_invuln", power: 0, cd: 6, desc: "1턴간 무적" },
+                { id: "m5", name: "마력 증폭", type: "buff_next_double", power: 0, cd: 4, desc: "다음 스킬 피해 2배" },
+                { id: "m6", name: "아케인 블래스트", type: "atk", power: 2.5, cd: 4, desc: "강력한 단일 폭딜" },
+                { id: "m7", name: "마력 해제", type: "dispel", power: 0, cd: 4, desc: "적 버프/보호막 제거" },
+                { id: "m8", name: "메테오", type: "atk_ult", power: 4.5, cd: 8, desc: "초대형 한 방 (궁극기)" }
             ]
         }
     };
@@ -434,12 +443,12 @@
     const MONSTER_SKILLS = {
         "bite": { id: "ms_bite", name: "물기", type: "atk", power: 1.0, cd: 0 },
         "scratch": { id: "ms_scratch", name: "할퀴기", type: "atk", power: 1.1, cd: 1 },
-        "leech": { id: "ms_leech", name: "흡혈", type: "atk_heal", power: 0.8, cd: 3 },
+        "leech": { id: "ms_leech", name: "흡혈", type: "atk_vampire", power: 0.8, cd: 3 },
         "web": { id: "ms_web", name: "거미줄", type: "atk_stun", power: 0.5, cd: 4 },
         "bone_throw": { id: "ms_bone", name: "뼈 던지기", type: "atk", power: 1.2, cd: 2 },
         "spook": { id: "ms_spook", name: "놀래키기", type: "atk_stun", power: 0.8, cd: 3 },
         "smash": { id: "ms_smash", name: "내려찍기", type: "atk", power: 1.5, cd: 3 },
-        "regen": { id: "ms_regen", name: "재생", type: "atk_heal", power: 0.0, cd: 4 },
+        "regen": { id: "ms_regen", name: "재생", type: "buff_heal_missing", power: 0.0, cd: 4 },
         "fireball": { id: "ms_fire", name: "화염구", type: "atk", power: 1.4, cd: 2 },
         "curse": { id: "ms_curse", name: "저주", type: "atk", power: 1.2, cd: 2 },
         "doom": { id: "ms_doom", name: "파멸의 일격", type: "atk_execute", power: 2.0, cd: 5 }
@@ -466,8 +475,8 @@
      * 2. STATE MANAGEMENT & LOCAL STORAGE
      * ========================================= */
     const LS_KEYS = {
-        DATA: "qz_rpg_v100_data",
-        HOF: "qz_rpg_v100_hof"
+        DATA: "qz_rpg_v110_data", // v11.0 버전 업
+        HOF: "qz_rpg_v110_hof"
     };
 
     let gameState = {
@@ -545,22 +554,20 @@
         localStorage.setItem(LS_KEYS.HOF, JSON.stringify(list));
     }
 
-    // --- NEW: 스킬 레벨에 따른 스탯 계산 (쿨타임 감소, 지속시간 증가 등) ---
+    // --- 스킬 레벨에 따른 스탯 계산 (쿨타임 감소, 지속시간 증가 등) ---
     function getEffectiveSkillStats(skill, level) {
         let cd = skill.cd;
         let power = skill.power;
 
-        // 쿨타임 감소: 5레벨마다 1 감소 (기본 쿨타임이 0인 평타는 제외)
         if (cd > 0) {
             let reduction = Math.floor((level - 1) / 5);
             cd = Math.max(1, cd - reduction);
         }
 
-        // 지속시간 증가: 3레벨마다 1턴 증가
         let duration = 0;
-        if(skill.type === 'buff_atk') duration = 3 + Math.floor((level-1)/3);
-        if(skill.type === 'buff_def') duration = 2 + Math.floor((level-1)/3);
-        if(skill.type === 'buff_evasion') duration = 3 + Math.floor((level-1)/3);
+        if(skill.type.includes('buff_')) duration = 3 + Math.floor((level-1)/3);
+        if(skill.type === 'buff_invuln') duration = 1; // 무적은 1턴 고정
+        if(skill.type === 'buff_aegis') duration = 3; // 궁극기는 3턴
 
         return { cd, duration };
     }
@@ -572,10 +579,16 @@
 
         let txt = "";
         if(skill.type === 'buff_shield') txt = `HP의 ${Math.round(30 + lv * 5)}% 쉴드`;
-        else if(skill.type === 'buff_evasion') txt = `${stats.duration}턴간 회피율 50%`;
+        else if(skill.type === 'buff_shield_huge') txt = `HP의 ${Math.round(50 + lv * 5)}% 쉴드`;
+        else if(skill.type === 'buff_evasion') txt = `${stats.duration}턴간 회피율 80%`;
         else if(skill.type === 'buff_atk') txt = `${stats.duration}턴간 공격력 50% 증가`;
-        else if(skill.type === 'buff_def') txt = `${stats.duration}턴간 방어력 2배`;
-        else if(skill.type === 'atk_heal') txt = `피해의 일부 회복 (위력 ${Math.round(skill.power * lvlMult * 10)/10})`;
+        else if(skill.type === 'buff_def') txt = `${stats.duration}턴간 방어력 2배 (50%경감)`;
+        else if(skill.type === 'buff_counter') txt = `${stats.duration}턴간 반격태세`;
+        else if(skill.type === 'buff_aegis') txt = `성채전개 (방어+반격+쉴드)`;
+        else if(skill.type === 'dispel') txt = `적 버프/쉴드 모두 제거`;
+        else if(skill.type === 'atk_heal') txt = `피해의 일부 회복`;
+        else if(skill.type === 'atk_vampire') txt = `피해의 50% 흡혈`;
+        else if(skill.type === 'buff_heal_missing') txt = `잃은 HP의 30% 회복`;
         else if(skill.type.includes('atk')) txt = `공격력의 ${pct}% 피해`;
         else txt = skill.desc;
 
@@ -797,7 +810,7 @@
                 img: imgSrc,
                 classId: cid,
                 level: hData.level,
-                buffs: { atk: 0, def: 0, evasion: 0 }
+                buffs: { atk: 0, def: 0, evasion: 0, counter: 0, invuln: 0, nextCrit: false, nextDouble: false }
             },
             enemy: null,
             cooldowns: [0, 0, 0, 0], // 처음엔 초기화
@@ -854,7 +867,6 @@
         const wrapper = document.getElementById("enemyWrapper");
         if (isBoss) {
             wrapper.className = "relative enemy-flip-boss z-10";
-            // 보스일 경우 UI 위치 조정 (겹침 방지)
             document.getElementById("enemyUiContainer").classList.add("-translate-y-8");
         } else {
             wrapper.className = "relative enemy-flip z-10";
@@ -914,6 +926,11 @@
         if (p.buffs.atk > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-red-100 text-red-600 px-1 rounded border border-red-200">공격UP ${p.buffs.atk}</span>`;
         if (p.buffs.def > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-blue-100 text-blue-600 px-1 rounded border border-blue-200">방어UP ${p.buffs.def}</span>`;
         if (p.buffs.evasion > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-green-100 text-green-600 px-1 rounded border border-green-200">회피ON ${p.buffs.evasion}</span>`;
+        if (p.buffs.counter > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-orange-100 text-orange-600 px-1 rounded border border-orange-200">반격ON ${p.buffs.counter}</span>`;
+        if (p.buffs.invuln > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-sky-100 text-sky-600 px-1 rounded border border-sky-200">무적 ${p.buffs.invuln}</span>`;
+        if (p.buffs.nextCrit) pBuffsEl.innerHTML += `<span class="text-[9px] bg-purple-100 text-purple-600 px-1 rounded border border-purple-200">치명타확정</span>`;
+        if (p.buffs.nextDouble) pBuffsEl.innerHTML += `<span class="text-[9px] bg-indigo-100 text-indigo-600 px-1 rounded border border-indigo-200">마력증폭</span>`;
+
         if (p.shield > 0) pBuffsEl.innerHTML += `<span class="text-[9px] bg-yellow-100 text-yellow-600 px-1 rounded border border-yellow-200">보호막 ${p.shield}</span>`;
 
         document.getElementById("enemyHpBar").style.width = `${Math.max(0, (e.hp/e.maxHp)*100)}%`;
@@ -955,7 +972,7 @@
         battleState.player.skills.forEach((skill, idx) => {
             const cd = battleState.cooldowns[idx];
             const lv = battleState.player.skillLevels[skill.id] || 1;
-            const stats = getEffectiveSkillStats(skill, lv); // 동적 스탯 가져오기
+            const stats = getEffectiveSkillStats(skill, lv);
 
             const btn = document.createElement("button");
             btn.className = `p-3 rounded-lg border-2 text-left relative overflow-hidden transition-all ${cd > 0 ? 'bg-slate-700 border-slate-600 text-slate-500 cursor-not-allowed' : 'bg-slate-800 border-blue-500 text-white hover:bg-slate-700 active:scale-95'}`;
@@ -1023,68 +1040,108 @@
         let lvlMult = 1 + (level * 0.1);
         let dmg = Math.floor(attacker.atk * skill.power * lvlMult * mult);
 
-        // 동적 스탯 (지속시간 등)
         const stats = getEffectiveSkillStats(skill, level);
 
         if (battleState.mode === "ghost" && attacker === battleState.enemy) {
             dmg = Math.floor(dmg * 0.9);
         }
 
-        if (skill.type.includes("crit") && Math.random() < 0.4) {
-            dmg = Math.floor(dmg * 1.5);
-            logBattle(`${attacker === battleState.player ? "나" : "적"}의 치명타!`);
-        }
+        // --- 버프/스페셜 로직 (v11.0) ---
 
-        if (skill.type === "atk_execute" && defender.hp <= defender.maxHp * 0.3) {
+        // 치명타/2배
+        if (attacker.buffs.nextCrit && skill.type.includes('atk')) {
             dmg = Math.floor(dmg * 2.0);
-            logBattle("처형 발동!");
+            attacker.buffs.nextCrit = false;
+            logBattle("약점 간파! 치명타 적중!");
+        } else if (skill.type.includes("crit") && Math.random() < 0.4) {
+            dmg = Math.floor(dmg * 1.5);
+            logBattle("치명타 적중!");
         }
 
-        if (skill.type === "atk_stun") {
-            defender.buffs.stun = 1;
-            logBattle(`${defender === battleState.player ? "나" : "적"} 기절!`);
+        if (attacker.buffs.nextDouble && skill.type.includes('atk')) {
+            dmg *= 2;
+            attacker.buffs.nextDouble = false;
+            logBattle("마력 폭발! 데미지 2배!");
         }
 
-        if (skill.type === "buff_atk") {
-            attacker.buffs.atk = stats.duration;
-            logBattle(`공격력 증가! (${stats.duration}턴)`);
+        // 유틸/버프
+        if (skill.type === "atk_execute" && defender.hp <= defender.maxHp * 0.3) dmg *= 2;
+        if (skill.type === "atk_stun") defender.buffs.stun = 1;
+
+        if (skill.type === "buff_atk") { attacker.buffs.atk = stats.duration; logBattle("공격력 증가!"); }
+        if (skill.type === "buff_def") { attacker.buffs.def = stats.duration; logBattle("방어 태세!"); }
+        if (skill.type === "buff_evasion") { attacker.buffs.evasion = stats.duration; logBattle("회피율 증가!"); }
+        if (skill.type === "buff_counter") { attacker.buffs.counter = stats.duration; logBattle("반격 태세!"); }
+        if (skill.type === "buff_invuln") { attacker.buffs.invuln = 1; logBattle("무적 상태!"); }
+        if (skill.type === "buff_next_crit") { attacker.buffs.nextCrit = true; logBattle("다음 공격 치명타!"); }
+        if (skill.type === "buff_next_double") { attacker.buffs.nextDouble = true; logBattle("마력 증폭!"); }
+
+        // 신규: 성채 전개 (기사 궁극기)
+        if (skill.type === "buff_aegis") {
+            attacker.buffs.def = 3;
+            attacker.buffs.counter = 3;
+            const s = Math.floor(attacker.maxHp * 0.5);
+            attacker.shield += s;
+            logBattle(`성채 전개! 방어/반격/쉴드(${s})`);
         }
 
-        if (skill.type === "buff_def") {
-            attacker.buffs.def = stats.duration;
-            logBattle(`방어 태세! (${stats.duration}턴)`);
+        // 신규: 마력 해제 (마법사 디스펠)
+        if (skill.type === "dispel") {
+            defender.shield = 0;
+            defender.buffs = { atk:0, def:0, evasion:0, counter:0, invuln:0, nextCrit:false, nextDouble:false };
+            logBattle("적의 버프와 쉴드를 모두 제거했습니다!");
         }
 
-        if (skill.type === "buff_shield") {
-            const shieldAmt = Math.floor(attacker.maxHp * (0.3 + (level * 0.05)));
-            attacker.shield += shieldAmt;
-            logBattle(`보호막 ${shieldAmt} 생성!`);
-        }
-
-        if (skill.type === "buff_evasion") {
-            attacker.buffs.evasion = stats.duration;
-            logBattle(`회피율 증가! (${stats.duration}턴)`);
+        // 쉴드/힐
+        if (skill.type.includes("shield")) {
+            const ratio = skill.type==='buff_shield_huge' ? 0.5 : 0.3;
+            attacker.shield += Math.floor(attacker.maxHp * ratio * lvlMult);
+            logBattle("보호막 생성!");
         }
 
         if (skill.type.includes("heal")) {
-            const baseHealRatio = (skill.id === 'ms_regen') ? 0.3 : 0.2;
-            const heal = Math.floor(attacker.maxHp * baseHealRatio * lvlMult);
+            let heal = 0;
+            if(skill.type === 'buff_heal_missing') heal = Math.floor((attacker.maxHp - attacker.hp) * 0.3 * lvlMult);
+            else {
+                const ratio = (skill.id === 'ms_regen') ? 0.3 : 0.2;
+                heal = Math.floor(attacker.maxHp * ratio * lvlMult);
+            }
             attacker.hp = Math.min(attacker.maxHp, attacker.hp + heal);
             logBattle(`HP ${heal} 회복`);
         }
 
+        // 공격 처리
         if (skill.power > 0) {
-            // 회피 체크 (방어자)
+            // 적 무적/회피 체크
+            if (defender.buffs && defender.buffs.invuln > 0) {
+                logBattle("공격이 무효화되었습니다! (무적)");
+                return;
+            }
             if (defender.buffs && defender.buffs.evasion > 0) {
-                if (Math.random() < 0.5) {
+                if (Math.random() < 0.8) {
                     logBattle("공격이 빗나갔습니다! (회피)");
                     if(defender === battleState.player) createFloatingText("MISS!", "player");
-                    return; // 데미지 없음
+                    return;
                 }
+            }
+
+            // 반격 체크
+            let reflectDmg = 0;
+            if (defender.buffs && defender.buffs.counter > 0) {
+                reflectDmg = Math.floor(dmg * 0.5);
+                dmg = Math.floor(dmg * 0.5); // 50% 경감
+                logBattle("반격당했습니다!");
             }
 
             let finalDmg = Math.max(1, dmg - Math.floor(defender.def * 0.5));
             if (defender.buffs && defender.buffs.def > 0) finalDmg = Math.floor(finalDmg * 0.5);
+
+            // 흡혈
+            if (skill.type === 'atk_vampire') {
+                const drain = Math.floor(finalDmg * 0.5);
+                attacker.hp = Math.min(attacker.maxHp, attacker.hp + drain);
+                logBattle(`${drain} 흡혈!`);
+            }
 
             if (defender.shield > 0) {
                 if (defender.shield >= finalDmg) {
@@ -1101,10 +1158,14 @@
             if (finalDmg > 0) {
                 defender.hp -= finalDmg;
                 logBattle(`${skill.name}! ${finalDmg} 피해.`);
-
                 const targetImg = defender === battleState.player ? document.getElementById("playerImg") : document.getElementById("enemyImg");
                 targetImg.classList.add("animate-damage");
                 setTimeout(() => targetImg.classList.remove("animate-damage"), 400);
+            }
+
+            if (reflectDmg > 0) {
+                attacker.hp -= reflectDmg;
+                logBattle(`반사 피해 ${reflectDmg}를 입었습니다.`);
             }
         }
     }
@@ -1121,7 +1182,6 @@
             return;
         }
 
-        // 고스트 AI: 70% 확률로 스킬 사용 시도
         if (e.skills && e.skills.length > 0 && Math.random() < 0.7) {
             const usable = [];
             for (let i = 0; i < e.skills.length; i++) {
@@ -1151,14 +1211,18 @@
 
         const p = battleState.player;
 
-        // 회피 체크 (도적 등)
         if (p.buffs.evasion > 0) {
-            if (Math.random() < 0.5) {
+            if (Math.random() < 0.8) {
                 logBattle("회피 성공!");
                 createFloatingText("MISS!", "player");
                 endEnemyTurn();
                 return;
             }
+        }
+        if (p.buffs.invuln > 0) {
+            logBattle("무적 상태라 피해를 입지 않습니다.");
+            endEnemyTurn();
+            return;
         }
 
         let dmg = Math.max(1, e.atk - Math.floor(p.def * 0.5));
@@ -1166,6 +1230,13 @@
         const eImg = document.getElementById("enemyImg");
         eImg.classList.add("animate-lunge-enemy");
         setTimeout(() => eImg.classList.remove("animate-lunge-enemy"), 200);
+
+        if (p.buffs.counter > 0) {
+            const reflect = Math.floor(dmg * 0.5);
+            dmg = Math.floor(dmg * 0.5);
+            e.hp -= reflect;
+            logBattle(`반격! ${reflect}의 피해를 돌려주었습니다.`);
+        }
 
         if (p.buffs.def > 0) dmg = Math.floor(dmg * 0.5);
 
@@ -1217,9 +1288,11 @@
             battleState.enemyCooldowns = battleState.enemyCooldowns.map(c => Math.max(0, c - 1));
         }
 
-        if (p.buffs.atk > 0) p.buffs.atk--;
-        if (p.buffs.def > 0) p.buffs.def--;
-        if (p.buffs.evasion > 0) p.buffs.evasion--;
+        // 버프 턴 감소
+        ['atk','def','evasion','counter','invuln'].forEach(k => {
+            if(p.buffs[k] > 0) p.buffs[k]--;
+        });
+        // 일회성 버프는 유지(사용 시 소모)
 
         updateBattleUI();
     }
@@ -1277,9 +1350,7 @@
             bs.player.def = newStats.def;
             bs.player.level = hData.level;
 
-            // 턴 종료 보정: 승리 시 한 턴이 지난 것으로 간주하여 쿨타임 감소
             bs.cooldowns = bs.cooldowns.map(c => Math.max(0, c - 1));
-
             bs.player.hp = Math.min(bs.player.hp, bs.player.maxHp);
             bs.stage++;
             startBattleStage();
@@ -1385,7 +1456,7 @@
         const stats = getHeroStats(cid);
 
         const payload = {
-            v: 101, // 버전 업데이트
+            v: 110, // 버전 업데이트
             cid: cid,
             lv: hero.level,
             eq: hero.equipped,
@@ -1525,7 +1596,7 @@
                 ...myStats, maxHp: pMaxHp, hp: pMaxHp, shield: 0,
                 skills: mySkills, skillLevels: myHero.skillLevels,
                 name: myDef.nameKo, img: myImg, classId: myCid, level: myHero.level,
-                buffs: { atk: 0, def: 0, evasion: 0 }
+                buffs: { atk: 0, def: 0, evasion: 0, counter: 0, invuln: 0, nextCrit: false, nextDouble: false }
             },
             enemy: {
                 name: `Ghost ${ghostData.nm}`,
@@ -1603,6 +1674,11 @@
         };
 
         document.getElementById("btnEnterDungeon").onclick = startDungeon;
+
+        // PvP 버튼 클릭 시 페이지 이동
+        document.getElementById("btnPvP").onclick = () => {
+            window.location.href = "DQR_PvP.html";
+        };
 
         document.getElementById("btnChangeClass").onclick = () => {
             renderClassSelect();
