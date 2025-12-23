@@ -1,0 +1,617 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Pokémon Party Battle</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+            background-color: #202020; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation;
+        }
+        .pixel-art { image-rendering: pixelated; }
+        .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
+        .view.active { display: flex; }
+
+        /* 애니메이션 */
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
+        .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
+        .anim-atk { transition: transform 0.2s; transform: scale(1.2); }
+
+        /* 카드 스타일 */
+        .poke-card { @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all opacity-70; }
+        .poke-card.selected { @apply border-yellow-400 bg-gray-700 opacity-100 ring-2 ring-yellow-400; transform: translateY(-5px); }
+        .poke-card.fainted { filter: grayscale(100%); opacity: 0.5; }
+
+        /* 게이지 바 */
+        .gauge-slot { @apply w-3 h-3 rounded-full bg-gray-600; }
+        .gauge-slot.filled { @apply bg-blue-400 shadow-[0_0_5px_#60a5fa]; }
+
+        .hp-bar-fill { transition: width 0.3s ease-out; }
+    </style>
+</head>
+<body>
+
+<section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
+    <div class="w-full max-w-md p-6 flex flex-col h-full">
+        <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
+        <div class="text-xs text-gray-500 text-center mb-6">3 vs 3 STRATEGY BATTLE</div>
+
+        <div class="bg-gray-800 p-4 rounded-2xl mb-6 flex justify-between items-center shadow-lg">
+            <div>
+                <div class="text-xs text-gray-400">RANKING</div>
+                <div class="text-xl font-bold text-white"><span id="myMMR">1000</span> P</div>
+            </div>
+            <div class="text-right">
+                <div class="text-xs text-gray-400">STATUS</div>
+                <div class="text-green-400 font-bold text-sm">ONLINE</div>
+            </div>
+        </div>
+
+        <div class="flex-1">
+            <div class="text-sm text-gray-300 mb-2 font-bold flex justify-between">
+                <span>파티 편성 (순서대로 출전)</span>
+                <span id="partyCount" class="text-yellow-400">0 / 3</span>
+            </div>
+            <div class="grid grid-cols-4 gap-2 mb-4" id="pokeSelector">
+            </div>
+            <div class="text-[10px] text-gray-500 text-center mb-6">
+                🔥불 > 🌿풀 > 💧물 > 🔥불 (⚡전기는 💧물에 강함)
+            </div>
+        </div>
+
+        <div class="space-y-3 mt-auto">
+            <button onclick="startRankedMatch()" id="btnStart" disabled class="w-full bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-black py-4 rounded-xl shadow-lg border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1 transition-all">
+                랭킹 매칭 시작
+            </button>
+            <button onclick="createRoom()" id="btnCreate" disabled class="w-full bg-gray-700 hover:bg-gray-600 disabled:opacity-50 text-white font-bold py-3 rounded-xl border-b-4 border-gray-900 active:border-b-0 active:translate-y-1">
+                방 만들기 (친선)
+            </button>
+            <button onclick="enterCustomLobby()" class="w-full text-xs text-gray-500 underline py-2">방 목록 보기</button>
+        </div>
+    </div>
+</section>
+
+<section id="waitingView" class="view bg-black/90 fixed inset-0 z-50 hidden">
+    <div class="text-6xl mb-6 animate-spin">😵‍💫</div>
+    <h2 class="text-2xl font-bold mb-2">상대를 찾는 중...</h2>
+    <p class="text-gray-400 text-sm mb-8" id="waitingMsg">잠시만 기다려 주세요.</p>
+    <button onclick="cancelMatching()" class="border border-red-500 text-red-500 px-8 py-2 rounded-full hover:bg-red-500 hover:text-white transition">취소</button>
+</section>
+
+<section id="roomListView" class="view bg-gray-900">
+    <div class="w-full max-w-md h-full flex flex-col p-4">
+        <h2 class="text-xl font-bold mb-4">대기실 목록</h2>
+        <div id="roomList" class="flex-1 overflow-y-auto space-y-2"></div>
+        <button onclick="leaveLobby()" class="mt-4 bg-gray-700 py-3 rounded-xl font-bold">돌아가기</button>
+    </div>
+</section>
+
+<section id="battleView" class="view relative bg-gray-800 justify-between pb-4">
+    <div class="absolute top-4 right-4 flex flex-col items-end w-full pr-4 z-10">
+        <div class="flex gap-1 mb-1" id="enemyPartyIcons">
+        </div>
+        <div class="bg-black/50 px-4 py-2 rounded-lg border border-gray-600 text-right w-48 backdrop-blur-sm">
+            <div class="text-sm font-bold text-red-400" id="enemyName">Enemy</div>
+            <div class="w-full h-2.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                <div id="enemyHpBar" class="hp-bar-fill h-full bg-red-500 w-full"></div>
+            </div>
+            <div class="text-[10px] text-gray-400 mt-1" id="enemyStatusText">Ready</div>
+        </div>
+        <img id="enemyImg" src="" class="w-32 h-32 pixel-art mt-[-10px] drop-shadow-xl transition-transform duration-300">
+    </div>
+
+    <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-20 text-center w-full pointer-events-none">
+        <div class="text-5xl font-black text-white drop-shadow-[0_4px_0_#000]" id="timerDisplay"></div>
+        <div class="text-yellow-400 font-bold text-xl mt-2 animate-pulse hidden" id="turnMsg">YOUR TURN!</div>
+        <div class="text-white font-bold text-lg mt-8 drop-shadow-md hidden" id="damageMsg"></div>
+    </div>
+
+    <div class="absolute bottom-32 left-4 flex flex-col items-start w-full pl-4 z-10">
+        <img id="myImg" src="" class="w-40 h-40 pixel-art mb-[-20px] drop-shadow-xl transition-transform duration-300">
+        <div class="bg-black/50 px-4 py-2 rounded-lg border border-blue-500/50 w-48 backdrop-blur-sm">
+            <div class="text-sm font-bold text-blue-300" id="myName">Me</div>
+            <div class="w-full h-2.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+                <div id="myHpBar" class="hp-bar-fill h-full bg-blue-500 w-full"></div>
+            </div>
+            <div class="flex justify-between items-center mt-1">
+                <div class="text-[10px] text-gray-300" id="myHpText">100/100</div>
+                <div class="flex gap-1" id="myGaugeContainer">
+                    <div class="gauge-slot"></div><div class="gauge-slot"></div><div class="gauge-slot"></div>
+                </div>
+            </div>
+        </div>
+        <div class="flex gap-1 mt-2" id="myPartyIcons"></div>
+    </div>
+
+    <div class="absolute bottom-0 w-full max-w-md bg-gray-900 border-t border-gray-700 p-4 pb-8 z-30">
+        <div id="skillPanel" class="flex gap-3">
+            <button onclick="selectSkill('normal')" id="btnNormal" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">
+                <div class="font-bold text-sm">일반 공격</div>
+                <div class="text-[10px] text-gray-400">게이지 +1</div>
+            </button>
+            <button onclick="selectSkill('special')" id="btnSpecial" disabled class="flex-1 bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white py-4 rounded-xl border-b-4 border-yellow-800 disabled:border-gray-900 active:border-b-0 active:translate-y-1 transition-all">
+                <div class="font-bold text-sm">특수 기술</div>
+                <div class="text-[10px]">게이지 3 필요</div>
+            </button>
+        </div>
+
+        <div id="quizPanel" class="hidden absolute inset-0 bg-gray-900 p-4">
+            <div class="text-center mb-4">
+                <p class="text-xs text-gray-400 mb-1">문제를 맞춰서 공격하세요!</p>
+                <p class="text-xl font-bold text-white" id="quizQuestion">3 x 3 = ?</p>
+            </div>
+            <div id="quizChoices" class="grid grid-cols-2 gap-3 h-24"></div>
+        </div>
+    </div>
+</section>
+
+<div id="resultModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
+    <div class="text-6xl mb-4" id="resIcon">🏆</div>
+    <h2 class="text-4xl font-black text-white mb-2" id="resTitle">WIN</h2>
+    <p class="text-gray-400 mb-8" id="resDesc">상대 파티를 모두 쓰러뜨렸습니다.</p>
+    <button onclick="location.reload()" class="bg-white text-black font-bold py-3 px-8 rounded-full">로비로</button>
+</div>
+
+<script>
+    // ==========================================
+    // 0. 설정 (본인 키 입력 필수)
+    // ==========================================
+    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M';
+
+    let sb = null;
+    let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
+    localStorage.setItem("ppb_uuid", myUUID);
+
+    // ==========================================
+    // 1. 포켓몬 데이터 (4종)
+    // ==========================================
+    const POKEMON_DB = {
+        1:  { name: "이상해씨", type: "grass",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", hp: 120, atk: 18, spec: "덩쿨채찍 (2배)" },
+        4:  { name: "파이리",   type: "fire",     img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png", hp: 110, atk: 22, spec: "화염방사 (2배)" },
+        7:  { name: "꼬부기",   type: "water",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png", hp: 115, atk: 19, spec: "하이드로펌프 (2배)" },
+        25: { name: "피카츄",   type: "electric", img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png", hp: 100, atk: 25, spec: "10만볼트 (2배)" }
+    };
+    const TYPE_CHART = {
+        "fire": { "grass": 1.5, "water": 0.5 },
+        "water": { "fire": 1.5, "electric": 0.5 },
+        "grass": { "water": 1.5, "fire": 0.5 },
+        "electric": { "water": 1.5, "grass": 0.5 }
+    };
+
+    let myParty = []; // 선택한 ID 배열 [1, 25, 4]
+    let myData = null, enemyData = null;
+    let channel = null, lobbyChannel = null;
+    let isHost = false, roomId = null;
+    let battleMode = 'ranked';
+
+    let gameState = {
+        round: 1, phase: 'select', timer: 10,
+        myActiveIdx: 0, enemyActiveIdx: 0,
+        myPartyState: [], enemyPartyState: [], // {id, hp, maxHp, charge}
+        myAnswer: null, enemyAnswer: null, currentQuiz: null
+    };
+    let timerInterval = null;
+
+    // ==========================================
+    // 2. 초기화 & 로비
+    // ==========================================
+    window.onload = () => {
+        if(initSupabase()) {
+            loadRanking();
+            renderPartySelector();
+            connectToLobby();
+        }
+    };
+
+    function initSupabase() {
+        if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR')) {
+            alert("Supabase 키를 설정해주세요."); return false;
+        }
+        sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        return true;
+    }
+
+    async function loadRanking() {
+        const { data } = await sb.from('ppb_rankings').select('mmr').eq('user_id', myUUID).single();
+        if(data) document.getElementById('myMMR').innerText = data.mmr;
+        else await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000 });
+    }
+
+    function renderPartySelector() {
+        const container = document.getElementById('pokeSelector');
+        container.innerHTML = '';
+        Object.keys(POKEMON_DB).forEach(id => {
+            const p = POKEMON_DB[id];
+            const div = document.createElement('div');
+            div.className = "poke-card flex flex-col items-center";
+            div.innerHTML = `<img src="${p.img}" class="w-12 h-12 pixel-art"><div class="text-[10px] font-bold mt-1">${p.name}</div>`;
+            div.onclick = () => togglePartyMember(id, div);
+            container.appendChild(div);
+        });
+    }
+
+    function togglePartyMember(id, el) {
+        id = parseInt(id);
+        const idx = myParty.indexOf(id);
+
+        if (idx >= 0) {
+            myParty.splice(idx, 1); // 제거
+            el.classList.remove('selected');
+        } else {
+            if (myParty.length >= 3) return alert("3마리까지만 선택 가능합니다.");
+            myParty.push(id);
+            el.classList.add('selected');
+        }
+
+        // 순서 표시 업데이트 (선택된 카드들에 순번 배지 달기 - 생략, UI 단순화)
+        document.getElementById('partyCount').innerText = `${myParty.length} / 3`;
+
+        const ready = myParty.length === 3;
+        document.getElementById('btnStart').disabled = !ready;
+        document.getElementById('btnCreate').disabled = !ready;
+    }
+
+    // ==========================================
+    // 3. 매칭 시스템 (간소화)
+    // ==========================================
+    function startRankedMatch() {
+        battleMode = 'ranked';
+        switchView('waitingView');
+        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
+
+        if(channel) sb.removeChannel(channel);
+        channel = sb.channel('ppb_rank_queue');
+
+        channel.on('presence', { event: 'sync' }, () => {
+            const users = Object.values(channel.presenceState()).flat();
+            const opponent = users.find(u => u.id !== myUUID && u.status === 'searching');
+            if (opponent && myUUID > opponent.id) {
+                const room = `ppb_${myUUID}_${opponent.id}`;
+                channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myUUID } });
+                joinRoom(room, true);
+            }
+        }).on('broadcast', { event: 'match' }, ({ payload }) => {
+            if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
+        }).subscribe(async (s) => {
+            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching' });
+        });
+    }
+
+    // --- 커스텀 로비 ---
+    function createRoom() {
+        battleMode = 'friendly';
+        const roomName = `[배틀] ${myUUID.substring(0,4)}의 방`;
+        const roomId = `room_${myUUID}_${Date.now()}`;
+
+        // 로비에 등록
+        lobbyChannel = sb.channel('ppb_lobby');
+        lobbyChannel.subscribe(async (s) => {
+            if (s === 'SUBSCRIBED') {
+                await lobbyChannel.track({ id: myUUID, isHost: true, roomId, name: roomName });
+                waitForChallenger(roomId);
+            }
+        });
+
+        switchView('waitingView');
+        document.getElementById('waitingMsg').innerText = "도전자를 기다리는 중...";
+    }
+
+    function waitForChallenger(roomId) {
+        channel = sb.channel(roomId);
+        channel.on('presence', {event:'join'}, ({newPresences}) => {
+            newPresences.forEach(p => { if(p.id !== myUUID) joinRoom(roomId, true); });
+        }).subscribe(async (s) => { if(s==='SUBSCRIBED') await channel.track({ id: myUUID }); });
+    }
+
+    function enterCustomLobby() {
+        switchView('roomListView');
+        connectToLobby();
+    }
+
+    function connectToLobby() {
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+        lobbyChannel = sb.channel('ppb_lobby');
+        lobbyChannel.on('presence', { event: 'sync' }, () => {
+            const state = lobbyChannel.presenceState();
+            const container = document.getElementById('roomList');
+            container.innerHTML = "";
+            Object.values(state).flat().filter(u => u.isHost).forEach(r => {
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-gray-700 p-3 rounded mb-2 text-left hover:bg-gray-600";
+                btn.innerText = r.name;
+                btn.onclick = () => joinRoom(r.roomId, false);
+                container.appendChild(btn);
+            });
+        }).subscribe();
+    }
+
+    function leaveLobby() {
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+        switchView('lobbyView');
+    }
+
+    // ==========================================
+    // 4. 배틀 로직
+    // ==========================================
+    function joinRoom(room, host) {
+        if(channel) sb.removeChannel(channel);
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+        roomId = room; isHost = host;
+
+        // 내 전투 데이터 준비
+        myData = {
+            id: myUUID,
+            party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp, hp: POKEMON_DB[id].hp, charge: 0 }))
+        };
+
+        channel = sb.channel(room);
+        channel
+            .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
+            .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
+            .on('broadcast', { event: 'submit_action' }, ({ payload }) => { if(payload.id !== myData.id) { gameState.enemyAnswer = payload; checkTurnEnd(); } });
+
+        channel.subscribe(async (s) => {
+            if(s==='SUBSCRIBED') {
+                channel.send({ type: 'broadcast', event: 'ready', payload: myData });
+                // 상대 기다림 핑
+                const ping = setInterval(() => { if(enemyData) clearInterval(ping); else channel.send({ type: 'broadcast', event: 'ready', payload: myData }); }, 1000);
+            }
+        });
+    }
+
+    function startBattle() {
+        switchView('battleView');
+
+        // 상태 초기화
+        gameState.myPartyState = JSON.parse(JSON.stringify(myData.party));
+        gameState.enemyPartyState = JSON.parse(JSON.stringify(enemyData.party));
+        gameState.myActiveIdx = 0;
+        gameState.enemyActiveIdx = 0;
+
+        updateBattleUI();
+
+        if (isHost) {
+            setTimeout(() => startNewRound(), 1500);
+        }
+    }
+
+    function startNewRound() {
+        // 호스트가 퀴즈 생성
+        const n1 = Math.floor(Math.random()*8)+2, n2 = Math.floor(Math.random()*9)+1;
+        const ans = n1*n2;
+        const choices = new Set([ans]);
+        while(choices.size < 4) choices.add(ans + (Math.floor(Math.random()*5)-2)*10);
+
+        const quiz = { q: `${n1} × ${n2} = ?`, a: ans, choices: Array.from(choices).sort(()=>Math.random()-0.5) };
+        channel.send({ type: 'broadcast', event: 'quiz_start', payload: quiz });
+        startQuizPhase(quiz);
+    }
+
+    function startQuizPhase(quiz) {
+        gameState.phase = 'select';
+        gameState.currentQuiz = quiz;
+        gameState.myAnswer = null;
+        gameState.enemyAnswer = null;
+
+        document.getElementById('skillPanel').classList.remove('hidden');
+        document.getElementById('quizPanel').classList.add('hidden');
+        document.getElementById('btnNormal').disabled = false;
+
+        // 게이지 체크
+        const myPoke = gameState.myPartyState[gameState.myActiveIdx];
+        const btnSpecial = document.getElementById('btnSpecial');
+        if (myPoke.charge >= 3) {
+            btnSpecial.disabled = false;
+            btnSpecial.classList.add('animate-pulse', 'ring-2', 'ring-yellow-400');
+        } else {
+            btnSpecial.disabled = true;
+            btnSpecial.classList.remove('animate-pulse', 'ring-2', 'ring-yellow-400');
+        }
+
+        document.getElementById('timerDisplay').innerText = 30; // 선택 시간 넉넉히
+    }
+
+    function selectSkill(type) {
+        gameState.selectedType = type;
+        document.getElementById('skillPanel').classList.add('hidden');
+        document.getElementById('quizPanel').classList.remove('hidden');
+
+        // 퀴즈 렌더링
+        document.getElementById('quizQuestion').innerText = gameState.currentQuiz.q;
+        const grid = document.getElementById('quizChoices');
+        grid.innerHTML = "";
+        gameState.currentQuiz.choices.forEach(c => {
+            const btn = document.createElement('button');
+            btn.className = "btn-choice bg-gray-700 p-4 rounded text-white font-bold hover:bg-gray-600";
+            btn.innerText = c;
+            btn.onclick = () => submitAction(c);
+            grid.appendChild(btn);
+        });
+    }
+
+    function submitAction(val) {
+        if (gameState.myAnswer) return;
+
+        const correct = val === gameState.currentQuiz.a;
+        gameState.myAnswer = { correct, type: gameState.selectedType };
+
+        // 대기 UI
+        document.getElementById('quizPanel').innerHTML = '<div class="text-center text-gray-400 py-10">상대방 기다리는 중...</div>';
+
+        channel.send({ type: 'broadcast', event: 'submit_action', payload: { id: myUUID, correct, type: gameState.selectedType } });
+        checkTurnEnd();
+    }
+
+    function checkTurnEnd() {
+        if (gameState.myAnswer && gameState.enemyAnswer) {
+            resolveTurn();
+        }
+    }
+
+    async function resolveTurn() {
+        gameState.phase = 'resolve';
+        document.getElementById('quizPanel').classList.add('hidden');
+
+        // 선공 결정 (랜덤 or 호스트 우선? 여기선 호스트 우선)
+        const meFirst = isHost;
+
+        await executeAttack(meFirst ? 'me' : 'enemy');
+        if (checkGameOver()) return;
+
+        await executeAttack(meFirst ? 'enemy' : 'me');
+        if (checkGameOver()) return;
+
+        // 다음 라운드
+        if (isHost) setTimeout(startNewRound, 1500);
+    }
+
+    function executeAttack(who) {
+        return new Promise(resolve => {
+            const isMe = who === 'me';
+            const actor = isMe ? gameState.myPartyState[gameState.myActiveIdx] : gameState.enemyPartyState[gameState.enemyActiveIdx];
+            const target = isMe ? gameState.enemyPartyState[gameState.enemyActiveIdx] : gameState.myPartyState[gameState.myActiveIdx];
+            const action = isMe ? gameState.myAnswer : gameState.enemyAnswer;
+
+            if (!action.correct) {
+                showMsg(isMe ? "공격 실패 (오답)" : "상대 공격 실패", "gray");
+                setTimeout(resolve, 1000);
+                return;
+            }
+
+            // 데미지 계산
+            let mult = 1.0;
+            const typeMatch = TYPE_CHART[actor.type];
+            if (typeMatch && typeMatch[target.type]) mult = typeMatch[target.type];
+
+            let power = 1.0;
+            if (action.type === 'special') {
+                power = 2.0;
+                actor.charge = 0; // 게이지 소모
+                showMsg(isMe ? `${actor.spec} 발동!` : `상대 ${actor.spec}!`, "yellow");
+            } else {
+                actor.charge = Math.min(3, actor.charge + 1); // 게이지 충전
+            }
+
+            const damage = Math.floor(actor.atk * power * mult);
+            target.hp -= damage;
+
+            // 연출
+            animAttack(isMe);
+            if (mult > 1.0) showMsg("효과가 굉장했다!", "red");
+
+            updateBattleUI();
+
+            // 기절 체크 및 교체
+            if (target.hp <= 0) {
+                setTimeout(() => {
+                    handleFaint(!isMe); // 상대가 기절했으면 handleFaint(true)
+                    resolve();
+                }, 1000);
+            } else {
+                setTimeout(resolve, 1500);
+            }
+        });
+    }
+
+    function handleFaint(isEnemyFainted) {
+        if (isEnemyFainted) {
+            gameState.enemyActiveIdx++;
+            showMsg(`상대 ${gameState.enemyPartyState[gameState.enemyActiveIdx-1].name} 기절!`, "white");
+        } else {
+            gameState.myActiveIdx++;
+            showMsg(`내 ${gameState.myPartyState[gameState.myActiveIdx-1].name} 기절!`, "white");
+        }
+        updateBattleUI();
+    }
+
+    function checkGameOver() {
+        if (gameState.myActiveIdx >= 3) { endGame(false); return true; }
+        if (gameState.enemyActiveIdx >= 3) { endGame(true); return true; }
+        return false;
+    }
+
+    async function endGame(win) {
+        if (battleMode === 'ranked') {
+            const change = win ? 20 : -10;
+            await sb.from('ppb_rankings').update({ mmr: parseInt(document.getElementById('myMMR').innerText) + change }).eq('user_id', myUUID);
+        }
+
+        document.getElementById('resultModal').classList.remove('hidden');
+        document.getElementById('resultModal').classList.add('flex');
+        document.getElementById('resTitle').innerText = win ? "VICTORY" : "DEFEAT";
+        document.getElementById('resIcon').innerText = win ? "🏆" : "💀";
+        document.getElementById('resDesc').innerText = win ? "승리했습니다!" : "패배했습니다...";
+
+        if(channel) sb.removeChannel(channel);
+    }
+
+    // --- UI 업데이트 ---
+    function updateBattleUI() {
+        const myPoke = gameState.myPartyState[gameState.myActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
+        const enPoke = gameState.enemyPartyState[gameState.enemyActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
+
+        // 내 정보
+        document.getElementById('myImg').src = myPoke.img;
+        document.getElementById('myImg').style.opacity = myPoke.hp > 0 ? 1 : 0.5;
+        document.getElementById('myName').innerText = myPoke.name;
+        document.getElementById('myHpText').innerText = `${Math.max(0, myPoke.hp)}/${myPoke.maxHp}`;
+        document.getElementById('myHpBar').style.width = `${Math.max(0, (myPoke.hp/myPoke.maxHp)*100)}%`;
+
+        // 내 게이지
+        const gaugeContainer = document.getElementById('myGaugeContainer');
+        gaugeContainer.innerHTML = '';
+        for(let i=0; i<3; i++) {
+            gaugeContainer.innerHTML += `<div class="gauge-slot ${i < myPoke.charge ? 'filled' : ''}"></div>`;
+        }
+
+        // 적 정보
+        document.getElementById('enemyImg').src = enPoke.img;
+        document.getElementById('enemyImg').style.opacity = enPoke.hp > 0 ? 1 : 0.5;
+        document.getElementById('enemyName').innerText = enPoke.name;
+        document.getElementById('enemyHpBar').style.width = `${Math.max(0, (enPoke.hp/enPoke.maxHp)*100)}%`;
+
+        // 파티 상태 아이콘 (남은 포켓몬 수)
+        updatePartyIcons('myPartyIcons', gameState.myPartyState, gameState.myActiveIdx);
+        updatePartyIcons('enemyPartyIcons', gameState.enemyPartyState, gameState.enemyActiveIdx);
+    }
+
+    function updatePartyIcons(id, party, activeIdx) {
+        const el = document.getElementById(id);
+        el.innerHTML = '';
+        party.forEach((p, idx) => {
+            const ball = document.createElement('div');
+            ball.className = `w-3 h-3 rounded-full border border-gray-600 ${idx < activeIdx ? 'bg-gray-800' : idx === activeIdx ? 'bg-yellow-400' : 'bg-green-500'}`;
+            el.appendChild(ball);
+        });
+    }
+
+    function animAttack(isMe) {
+        const img = document.getElementById(isMe ? 'myImg' : 'enemyImg');
+        const target = document.getElementById(isMe ? 'enemyImg' : 'myImg');
+        img.classList.add('anim-atk');
+        setTimeout(() => {
+            img.classList.remove('anim-atk');
+            target.classList.add('anim-hit');
+            setTimeout(() => target.classList.remove('anim-hit'), 400);
+        }, 200);
+    }
+
+    function showMsg(text, color) {
+        const el = document.getElementById('damageMsg');
+        el.innerText = text;
+        el.className = `text-${color}-400 font-bold text-lg mt-8 drop-shadow-md animate-bounce`;
+        el.classList.remove('hidden');
+        setTimeout(() => el.classList.add('hidden'), 1500);
+    }
+
+    function cancelMatching() { if(channel) sb.removeChannel(channel); switchView('lobbyView'); }
+    function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id!=='waitingView') document.getElementById('waitingView').classList.add('hidden'); }
+    function goHome() { window.location.href = "DQR.html"; }
+
+</script>
+</body>
+</html>
