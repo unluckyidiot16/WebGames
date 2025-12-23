@@ -71,147 +71,165 @@
 <div id="statusMessage" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-medium hidden shadow-lg z-50"></div>
 
 <script>
-    // ==========================================
-    // [설정] Supabase 키 입력
-    // ==========================================
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
+    // DOM이 완전히 로드된 후 스크립트 실행 (전역 오염 방지)
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ==========================================
+        // [설정] Supabase 키 입력
+        // ==========================================
+        const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
+        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
 
 
-    let supabase;
-    const overlay = document.getElementById('waitOverlay');
-    const formContainer = document.getElementById('formContainer');
-    const inputs = document.querySelectorAll('input, textarea');
-    const btn = document.getElementById('submitBtn');
-    const headerText = document.getElementById('headerText');
-    const statusIcon = document.getElementById('statusIcon');
-    const statusMsg = document.getElementById('statusMessage');
+        // DOM 요소 참조
+        const overlay = document.getElementById('waitOverlay');
+        const formContainer = document.getElementById('formContainer');
+        const submitForm = document.getElementById('submitForm');
+        const inputs = document.querySelectorAll('input, textarea');
+        const btn = document.getElementById('submitBtn');
+        const headerText = document.getElementById('headerText');
+        const statusIcon = document.getElementById('statusIcon');
+        const statusMsg = document.getElementById('statusMessage');
 
-    try {
-        if (SUPABASE_URL.includes('YOUR_')) throw new Error("설정 필요");
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // 1. 초기 상태 확인
-        checkSystemStatus();
-
-        // 2. 실시간 상태 변화 구독
-        subscribeToStatus();
-
-    } catch (e) {
-        console.error(e);
-        alert("Supabase 설정이 필요합니다. 코드를 확인해주세요.");
-    }
-
-    // 시스템 상태 확인 (초기 로드 시)
-    async function checkSystemStatus() {
-        const { data, error } = await supabase
-            .from('system_status')
-            .select('is_active')
-            .eq('id', 1)
-            .single();
-
-        if (data) {
-            toggleForm(data.is_active);
-        }
-    }
-
-    // 시스템 상태 구독 (실시간)
-    function subscribeToStatus() {
-        supabase.channel('public:system_status')
-            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'system_status' }, payload => {
-                console.log('Status changed:', payload.new.is_active);
-                toggleForm(payload.new.is_active);
-            })
-            .subscribe();
-    }
-
-    // 폼 활성화/비활성화 처리 UI 로직
-    function toggleForm(isActive) {
-        if (isActive) {
-            // 활성화 상태
-            overlay.classList.add('opacity-0', 'pointer-events-none');
-            formContainer.classList.remove('locked');
-            formContainer.classList.add('ring-4', 'ring-blue-100'); // 강조 효과
-
-            inputs.forEach(el => {
-                el.disabled = false;
-                el.classList.remove('bg-gray-50');
-                el.classList.add('bg-white');
-                if(el.id === 'name') el.placeholder = "본인의 이름을 입력하세요";
-                if(el.id === 'message') el.placeholder = "발표 내용을 입력하세요";
-            });
-
-            btn.disabled = false;
-            btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
-            btn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'pulse-ring');
-            btn.innerHTML = '<span>🚀 제출하기</span>';
-
-            headerText.textContent = "발표 제출 가능!";
-            statusIcon.textContent = "🎤";
-
-            // 진동 효과 (모바일 지원 시)
-            if(navigator.vibrate) navigator.vibrate(200);
-
-        } else {
-            // 비활성화 상태
-            overlay.classList.remove('opacity-0', 'pointer-events-none');
-            formContainer.classList.add('locked');
-            formContainer.classList.remove('ring-4', 'ring-blue-100');
-
-            inputs.forEach(el => {
-                el.disabled = true;
-                el.classList.add('bg-gray-50');
-            });
-
-            btn.disabled = true;
-            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
-            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'pulse-ring');
-            btn.innerHTML = '<span>🔒 선생님 대기 중</span>';
-
-            headerText.textContent = "발표 준비";
-            statusIcon.textContent = "🔒";
-        }
-    }
-
-    // 제출 로직
-    document.getElementById('submitForm').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        if (!supabase) return;
-
-        const name = document.getElementById('name').value.trim();
-        const message = document.getElementById('message').value.trim();
-
-        if (!name || !message) return;
-
-        btn.disabled = true;
-        btn.textContent = "전송 중...";
+        // Supabase 클라이언트 변수 (안전한 스코프)
+        let supabaseClient = null;
 
         try {
-            const { error } = await supabase
-                .from('submissions')
-                .insert([{ student_name: name, message: message }]);
+            if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_')) {
+                throw new Error("설정 필요");
+            }
 
-            if (error) throw error;
+            // 클라이언트 초기화
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-            showToast("✅ 성공적으로 제출되었습니다!", "success");
-            document.getElementById('message').value = '';
-        } catch (error) {
-            showToast("❌ 제출 실패: " + error.message, "error");
-        } finally {
-            // 제출 후 버튼 복구 (단, 시스템이 활성 상태여야 함)
-            btn.disabled = false;
-            btn.innerHTML = '<span>🚀 제출하기</span>';
+            // 1. 초기 상태 확인
+            checkSystemStatus();
+
+            // 2. 실시간 상태 변화 구독
+            subscribeToStatus();
+
+        } catch (e) {
+            console.error(e);
+            showToast("⚠️ Supabase 설정이 필요합니다. 코드를 확인해주세요.", "error");
+        }
+
+        // 시스템 상태 확인 (초기 로드 시)
+        async function checkSystemStatus() {
+            if (!supabaseClient) return;
+
+            const { data, error } = await supabaseClient
+                .from('system_status')
+                .select('is_active')
+                .eq('id', 1)
+                .single();
+
+            if (data) {
+                toggleForm(data.is_active);
+            }
+        }
+
+        // 시스템 상태 구독 (실시간)
+        function subscribeToStatus() {
+            if (!supabaseClient) return;
+
+            supabaseClient.channel('public:system_status')
+                .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'system_status' }, payload => {
+                    console.log('Status changed:', payload.new.is_active);
+                    toggleForm(payload.new.is_active);
+                })
+                .subscribe();
+        }
+
+        // 폼 활성화/비활성화 처리 UI 로직
+        function toggleForm(isActive) {
+            if (isActive) {
+                // 활성화 상태
+                overlay.classList.add('opacity-0', 'pointer-events-none');
+                formContainer.classList.remove('locked');
+                formContainer.classList.add('ring-4', 'ring-blue-100'); // 강조 효과
+
+                inputs.forEach(el => {
+                    el.disabled = false;
+                    el.classList.remove('bg-gray-50');
+                    el.classList.add('bg-white');
+                    if(el.id === 'name') el.placeholder = "본인의 이름을 입력하세요";
+                    if(el.id === 'message') el.placeholder = "발표 내용을 입력하세요";
+                });
+
+                btn.disabled = false;
+                btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+                btn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'pulse-ring');
+                btn.innerHTML = '<span>🚀 제출하기</span>';
+
+                headerText.textContent = "발표 제출 가능!";
+                statusIcon.textContent = "🎤";
+
+                // 진동 효과 (모바일 지원 시)
+                if(navigator.vibrate) navigator.vibrate(200);
+
+            } else {
+                // 비활성화 상태
+                overlay.classList.remove('opacity-0', 'pointer-events-none');
+                formContainer.classList.add('locked');
+                formContainer.classList.remove('ring-4', 'ring-blue-100');
+
+                inputs.forEach(el => {
+                    el.disabled = true;
+                    el.classList.add('bg-gray-50');
+                });
+
+                btn.disabled = true;
+                btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+                btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'pulse-ring');
+                btn.innerHTML = '<span>🔒 선생님 대기 중</span>';
+
+                headerText.textContent = "발표 준비";
+                statusIcon.textContent = "🔒";
+            }
+        }
+
+        // 제출 로직
+        submitForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            if (!supabaseClient) return;
+
+            const name = document.getElementById('name').value.trim();
+            const message = document.getElementById('message').value.trim();
+
+            if (!name || !message) return;
+
+            btn.disabled = true;
+            btn.textContent = "전송 중...";
+
+            try {
+                const { error } = await supabaseClient
+                    .from('submissions')
+                    .insert([{ student_name: name, message: message }]);
+
+                if (error) throw error;
+
+                showToast("✅ 성공적으로 제출되었습니다!", "success");
+                document.getElementById('message').value = '';
+            } catch (error) {
+                showToast("❌ 제출 실패: " + error.message, "error");
+            } finally {
+                // 제출 후 버튼 복구 (단, 시스템이 활성 상태여야 함)
+                // 현재 상태를 다시 확인할 필요 없이, 전송 완료 시점에서는 보통 활성 상태임
+                // 안전을 위해 버튼 텍스트 복구
+                btn.disabled = false;
+                btn.innerHTML = '<span>🚀 제출하기</span>';
+            }
+        });
+
+        function showToast(msg, type) {
+            statusMsg.textContent = msg;
+            statusMsg.className = `fixed bottom-10 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full text-sm font-medium shadow-lg z-50 transition-all duration-300 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+            statusMsg.classList.remove('hidden');
+            setTimeout(() => {
+                statusMsg.classList.add('hidden');
+            }, 3000);
         }
     });
-
-    function showToast(msg, type) {
-        statusMsg.textContent = msg;
-        statusMsg.className = `fixed bottom-10 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full text-sm font-medium shadow-lg z-50 transition-all duration-300 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
-        statusMsg.classList.remove('hidden');
-        setTimeout(() => {
-            statusMsg.classList.add('hidden');
-        }, 3000);
-    }
 </script>
 </body>
 </html>
