@@ -551,31 +551,6 @@
         };
     }
 
-    function joinRoom(room, host, mode) {
-        if(channel) sb.removeChannel(channel);
-        roomId = room; isHost = host;
-
-        initBattleData(mode);
-
-        channel = sb.channel(room);
-
-        channel
-            .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
-            .on('broadcast', { event: 'skill_selected' }, ({ payload }) => { if(payload.id !== myData.id) checkSkillPhaseEnd(payload); })
-            .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
-            .on('broadcast', { event: 'submit_answer' }, ({ payload }) => { if(payload.id !== myData.id) { gameState.enemyAnswer = payload; checkQuizEnd(); } });
-
-        channel.subscribe(async (s) => {
-            if(s==='SUBSCRIBED') {
-                channel.send({ type: 'broadcast', event: 'ready', payload: myData });
-                const interval = setInterval(() => {
-                    if (enemyData) clearInterval(interval);
-                    else channel.send({ type: 'broadcast', event: 'ready', payload: myData });
-                }, 1000);
-            }
-        });
-    }
-
     // ==========================================
     // 4. 전투 루프 (UI & Logic)
     // ==========================================
