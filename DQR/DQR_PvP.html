@@ -242,7 +242,12 @@
 
         initBattleData(mode);
 
-        channel = sb.channel(room);
+        // config: { broadcast: { self: true } } 옵션을 꼭 추가해야 합니다.
+        channel = sb.channel(room, {
+            config: {
+                broadcast: { self: true }
+            }
+        });
 
         channel
             .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
@@ -435,7 +440,12 @@
     }
 
     function waitForChallenger(roomId) {
-        channel = sb.channel(roomId);
+        // config: { broadcast: { self: true } } 옵션을 꼭 추가해야 합니다.
+        channel = sb.channel(room, {
+            config: {
+                broadcast: { self: true }
+            }
+        });
         channel.on('presence', {event:'join'}, ({newPresences}) => {
             newPresences.forEach(p => {
                 if(p.id !== myData.id) {
@@ -456,7 +466,12 @@
         document.getElementById('waitingTitle').innerText = "매칭 중...";
         document.getElementById('waitingDesc').innerText = "비슷한 실력의 상대를 찾는 중...";
 
-        channel = sb.channel('global_rank_queue');
+        channel = sb.channel('global_rank_queue', {
+            config: {
+                broadcast: { self: true },
+                presence: { key: myData.id }
+            }
+        });
         channel.on('presence', { event: 'sync' }, () => {
             const users = Object.values(channel.presenceState()).flat();
             const opponent = users.find(u => u.id !== myData.id && u.status === 'searching' && u.mode === 'ranked');
