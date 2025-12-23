@@ -305,9 +305,15 @@
         document.getElementById('waitingTitle').innerText = "매칭 중..."; // 타이틀 변경
 
         if(channel) sb.removeChannel(channel);
-        channel = sb.channel('ppb_rank_queue');
-
-        channel.on('presence', { event: 'sync' }, () => {
+        // ✅ onload에서 이미 ppb_lobby를 구독했을 수 있으니 정리 후 재구독(중복 방지)
+        if (lobbyChannel) sb.removeChannel(lobbyChannel);
+        lobbyChannel = sb.channel('ppb_lobby', {
+            config: { presence: { key: myUUID } }
+        });
+        lobbyChannel.on('presence', { event: 'sync' }, () => {
+            renderRoomList(lobbyChannel.presenceState());
+        });
+            lobbyChannel.subscribe(async (s) => {
             const users = Object.values(channel.presenceState()).flat();
             const opponent = users.find(u => u.id !== myUUID && u.status === 'searching');
             if (opponent && myUUID > opponent.id) {
@@ -348,12 +354,21 @@
     }
 
     function connectToLobby() {
-        if(lobbyChannel) sb.removeChannel(lobbyChannel);
-        lobbyChannel = sb.channel('ppb_lobby');
+        if (lobbyChannel) sb.removeChannel(lobbyChannel);
+        lobbyChannel = sb.channel('ppb_lobby', {
+                config: { presence: { key: myUUID } } // ✅ 각 클라 고유 key
+        });
+        
         lobbyChannel.on('presence', { event: 'sync' }, () => {
-            const state = lobbyChannel.presenceState();
-            renderRoomList(state);
-        }).subscribe();
+            renderRoomList(lobbyChannel.presenceState());
+        });
+        
+        lobbyChannel.subscribe(async (s) => {
+            if (s === 'SUBSCRIBED') {
+                // ✅ 방 목록만 보는 클라도 presence에 참여(상태 sync 안정화)
+                await lobbyChannel.track({ id: myUUID, isHost: false });
+            }
+        });
     }
 
     function renderRoomList(state) {
