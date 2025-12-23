@@ -60,11 +60,11 @@
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
         <div class="absolute top-6 right-6 bg-black border border-gray-600 px-3 py-1 text-xs text-gray-400 flex items-center gap-2">
             <div class="w-2 h-2 bg-green-500 animate-pulse"></div>
-            <span id="versionDisplay">v16.4</span>
+            <span id="versionDisplay">v17.0</span>
         </div>
 
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic tracking-tighter">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">TIMER FIX</div>
+        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">NAME UPDATE</div>
 
         <div class="bg-gray-800 p-4 mb-8 flex justify-between items-center shadow-lg border-2 border-gray-600">
             <div>
@@ -72,7 +72,7 @@
                 <div class="text-xl font-bold text-white"><span id="myMMR">---</span> P</div>
             </div>
             <div class="text-right">
-                <div class="text-xs text-gray-400">UUID</div>
+                <div class="text-xs text-gray-400">TRAINER</div>
                 <div class="text-green-400 font-bold text-xs" id="myUUIDDisplay">...</div>
             </div>
         </div>
@@ -80,7 +80,7 @@
         <div class="space-y-4 w-full">
             <button onclick="startRankedMatch()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-black py-5 border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1 transition-all group">
                 <div class="text-lg">⚔️ 랭킹 매칭</div>
-                <div class="text-xs font-normal opacity-70">비슷한 실력의 상대와 대결</div>
+                <div class="text-xs font-normal opacity-70">빠른 매칭 (전체 범위)</div>
             </button>
 
             <div class="grid grid-cols-2 gap-3">
@@ -230,16 +230,17 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const GAME_VERSION = "v16.4";
+    const GAME_VERSION = "v17.0"; // Version Up
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
+    let myName = `Trainer_${myUUID.substring(0,4)}`; // 내 이름 생성
 
     // ==========================================
-    // 1. 데이터 (공격력 4배)
+    // 1. 데이터
     // ==========================================
     const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     const POKEMON_DB = {
@@ -273,7 +274,7 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화
+    // 2. 초기화 & 로비
     // ==========================================
     window.onload = async () => {
         document.getElementById('versionDisplay').innerText = GAME_VERSION;
@@ -281,7 +282,7 @@
         if(initSupabase()) {
             await checkGameVersion();
             loadRanking();
-            document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
+            document.getElementById('myUUIDDisplay').innerText = myName;
             connectToLobby();
             initPickGrid();
         }
@@ -309,12 +310,15 @@
     }
 
     async function loadRanking() {
-        const { data } = await sb.from('ppb_rankings').select('mmr').eq('user_id', myUUID).maybeSingle();
-        if(data) document.getElementById('myMMR').innerText = data.mmr;
-        else {
-            await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000 });
+        const { data } = await sb.from('ppb_rankings').select('mmr, username').eq('user_id', myUUID).maybeSingle();
+        if(data) {
+            document.getElementById('myMMR').innerText = data.mmr;
+            if(data.username) myName = data.username;
+        } else {
+            await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000, username: myName });
             document.getElementById('myMMR').innerText = 1000;
         }
+        document.getElementById('myUUIDDisplay').innerText = myName;
     }
 
     function switchView(id) {
@@ -329,12 +333,12 @@
         }
     }
 
-    // --- 로비 & 매칭 ---
+    // --- 로비 & 매칭 (이름 전송 추가) ---
     function startRankedMatch() {
         battleMode = 'ranked';
         switchView('waitingView');
         document.getElementById('waitingTitle').innerText = "매칭 중...";
-        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
+        document.getElementById('waitingMsg').innerText = "상대를 찾는 중입니다 (범위 확장 중...)";
 
         if(channel) sb.removeChannel(channel);
         channel = sb.channel('ppb_rank_queue');
@@ -350,13 +354,13 @@
         }).on('broadcast', { event: 'match' }, ({ payload }) => {
             if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
         }).subscribe(async (s) => {
-            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching', version: GAME_VERSION });
+            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching', version: GAME_VERSION, name: myName });
         });
     }
 
     function createRoom() {
         battleMode = 'friendly';
-        const roomName = `[대기중] ${myUUID.substring(0,4)}의 방`;
+        const roomName = `[대기] ${myName}의 방`;
         const rId = `room_${myUUID}_${Date.now()}`;
 
         lobbyChannel = sb.channel('ppb_lobby');
@@ -436,7 +440,7 @@
         channel
             .on('broadcast', { event: 'ready' }, ({ payload }) => {
                 if (payload.id !== myUUID) {
-                    enemyData = payload;
+                    enemyData = { id: payload.id, name: payload.name }; // 이름 저장
                     channel.send({ type: 'broadcast', event: 'ready_ack', payload: { to: payload.id } });
                     checkReadyToPick();
                 }
@@ -445,7 +449,7 @@
                 if (payload.to === myUUID) { ackReceived = true; checkReadyToPick(); }
             })
             .on('broadcast', { event: 'party_submit' }, ({ payload }) => {
-                if (payload.id !== myUUID) { enemyData = { ...enemyData, party: payload.party }; checkBattleStart(); }
+                if (payload.id !== myUUID) { enemyData.party = payload.party; checkBattleStart(); }
             })
             .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
             .on('broadcast', { event: 'submit_action' }, ({ payload }) => { if(payload.id !== myUUID) { gameState.enemyAnswer = payload; checkTurnEnd(); } })
@@ -456,7 +460,8 @@
                 await channel.track({ id: myUUID, status: 'playing' });
                 const ping = setInterval(() => {
                     if(ackReceived) clearInterval(ping);
-                    else channel.send({ type: 'broadcast', event: 'ready', payload: { id: myUUID } });
+                    // ready 보낼 때 내 이름도 보냄
+                    else channel.send({ type: 'broadcast', event: 'ready', payload: { id: myUUID, name: myName } });
                 }, 800);
             }
         });
@@ -545,6 +550,7 @@
 
         myData = {
             id: myUUID,
+            // 파티 정보 구성
             party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp * 3, hp: POKEMON_DB[id].hp * 3, charge: 0 }))
         };
 
@@ -570,6 +576,10 @@
         gameState.enemyPartyState = JSON.parse(JSON.stringify(enemyData.party));
         gameState.myActiveIdx = 0;
         gameState.enemyActiveIdx = 0;
+
+        // 이름 표시 업데이트
+        document.getElementById('myName').innerText = myName;
+        document.getElementById('enemyName').innerText = enemyData.name || "Unknown";
 
         updateBattleUI();
 
@@ -612,7 +622,6 @@
             btnSpecial.classList.remove('animate-pulse', 'ring-2', 'ring-yellow-400');
         }
 
-        // [FIX] 타이머 작동
         startTimer(30, () => submitAction(-999));
     }
 
@@ -661,7 +670,7 @@
 
     function checkTurnEnd() {
         if (gameState.myAnswer && gameState.enemyAnswer) {
-            clearInterval(timerInterval); // 타이머 중지
+            clearInterval(timerInterval);
             resolveTurn();
         }
     }
@@ -769,7 +778,7 @@
 
         document.getElementById('myImg').src = myPoke.img || FALLBACK_IMG;
         document.getElementById('myImg').style.opacity = myPoke.hp > 0 ? 1 : 0.5;
-        document.getElementById('myName').innerText = myPoke.name;
+        // 이름 표시 부분은 위에서 업데이트했으므로 HP만
         document.getElementById('myHpText').innerText = `${Math.max(0, myPoke.hp)}/${myPoke.maxHp}`;
         document.getElementById('myHpBar').style.width = `${Math.max(0, (myPoke.hp/myPoke.maxHp)*100)}%`;
 
@@ -781,7 +790,7 @@
 
         document.getElementById('enemyImg').src = enPoke.img || FALLBACK_IMG;
         document.getElementById('enemyImg').style.opacity = enPoke.hp > 0 ? 1 : 0.5;
-        document.getElementById('enemyName').innerText = enPoke.name;
+        // document.getElementById('enemyName').innerText = enPoke.name; // 적 포켓몬 이름은 굳이 안 바꿔도 됨(전략)
         document.getElementById('enemyHpBar').style.width = `${Math.max(0, (enPoke.hp/enPoke.maxHp)*100)}%`;
 
         updatePartyIcons('myPartyIcons', gameState.myPartyState, gameState.myActiveIdx);
