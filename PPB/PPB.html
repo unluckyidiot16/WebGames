@@ -9,7 +9,7 @@
     <style>
         body {
             font-family: 'Courier New', Courier, monospace, sans-serif;
-            background-color: #1a1a1a; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation;
+            background-color: #202020; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation;
         }
         .pixel-art { image-rendering: pixelated; }
         .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
@@ -60,27 +60,27 @@
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
         <div class="absolute top-6 right-6 bg-black border border-gray-600 px-3 py-1 text-xs text-gray-400 flex items-center gap-2">
             <div class="w-2 h-2 bg-green-500 animate-pulse"></div>
-            <span id="versionDisplay">v17.0</span>
+            <span id="versionDisplay">v18.0</span>
         </div>
 
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic tracking-tighter">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">NAME UPDATE</div>
+        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">PROFILE UPDATE</div>
 
-        <div class="bg-gray-800 p-4 mb-8 flex justify-between items-center shadow-lg border-2 border-gray-600">
+        <div onclick="openProfileModal()" class="bg-gray-800 p-4 mb-8 flex justify-between items-center shadow-lg border-2 border-gray-600 cursor-pointer hover:bg-gray-700 transition-colors group">
             <div>
-                <div class="text-xs text-gray-400">RANKING</div>
-                <div class="text-xl font-bold text-white"><span id="myMMR">---</span> P</div>
+                <div class="text-xs text-gray-400 group-hover:text-white">TRAINER (Click to Edit)</div>
+                <div class="text-xl font-bold text-yellow-400" id="myLobbyName">Trainer</div>
             </div>
             <div class="text-right">
-                <div class="text-xs text-gray-400">TRAINER</div>
-                <div class="text-green-400 font-bold text-xs" id="myUUIDDisplay">...</div>
+                <div class="text-xs text-gray-400">RATING</div>
+                <div class="text-white font-bold text-lg"><span id="myMMR">---</span> P</div>
             </div>
         </div>
 
         <div class="space-y-4 w-full">
             <button onclick="startRankedMatch()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-black py-5 border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1 transition-all group">
                 <div class="text-lg">⚔️ 랭킹 매칭</div>
-                <div class="text-xs font-normal opacity-70">빠른 매칭 (전체 범위)</div>
+                <div class="text-xs font-normal opacity-70">비슷한 실력의 상대와 대결</div>
             </button>
 
             <div class="grid grid-cols-2 gap-3">
@@ -208,7 +208,45 @@
     </div>
 </section>
 
-<div id="updateModal" class="fixed inset-0 bg-black/95 z-[60] hidden flex-col items-center justify-center p-6 text-center">
+<div id="profileModal" class="fixed inset-0 bg-black/90 z-[60] hidden flex-col items-center justify-center p-6 backdrop-blur-sm">
+    <div class="bg-gray-800 border-2 border-gray-600 w-full max-w-sm p-6 rounded-none shadow-2xl relative">
+        <button onclick="closeProfileModal()" class="absolute top-2 right-4 text-gray-400 text-2xl hover:text-white">&times;</button>
+
+        <h2 class="text-2xl font-bold text-white mb-6 text-center border-b border-gray-700 pb-2">TRAINER CARD</h2>
+
+        <div class="space-y-4">
+            <div>
+                <label class="text-xs text-gray-400 block mb-1">NICKNAME</label>
+                <div class="flex gap-2">
+                    <input type="text" id="inputNickname" maxlength="8" class="flex-1 bg-gray-900 border border-gray-600 p-2 text-white text-center font-bold tracking-wider outline-none focus:border-yellow-400 uppercase">
+                    <button onclick="saveProfile()" class="bg-blue-600 px-4 text-sm font-bold hover:bg-blue-500">SAVE</button>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-3 gap-2 text-center bg-gray-900 p-3 border border-gray-700">
+                <div>
+                    <div class="text-[10px] text-gray-500">WINS</div>
+                    <div class="text-lg font-bold text-green-400" id="profileWins">0</div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-gray-500">LOSSES</div>
+                    <div class="text-lg font-bold text-red-400" id="profileLosses">0</div>
+                </div>
+                <div>
+                    <div class="text-[10px] text-gray-500">WIN RATE</div>
+                    <div class="text-lg font-bold text-yellow-400" id="profileWinRate">0%</div>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <div class="text-[10px] text-gray-500 mb-1">UUID</div>
+                <div class="text-[10px] text-gray-600 bg-black p-1 truncate" id="profileUUID">...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="updateModal" class="fixed inset-0 bg-black/95 z-[70] hidden flex-col items-center justify-center p-6 text-center">
     <div class="text-6xl mb-4">⚠️</div>
     <h2 class="text-3xl font-black text-white mb-2">업데이트 필요</h2>
     <p class="text-gray-400 mb-6">새로운 패치가 있습니다.<br>최신 버전으로 업데이트 해주세요.</p>
@@ -230,14 +268,14 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const GAME_VERSION = "v17.0"; // Version Up
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
+    const GAME_VERSION = "v18.0";
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // ⚠️ 본인 URL
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ⚠️ 본인 KEY
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
-    let myName = `Trainer_${myUUID.substring(0,4)}`; // 내 이름 생성
+    let myName = "Trainer"; // 기본값
 
     // ==========================================
     // 1. 데이터
@@ -264,6 +302,7 @@
     let battleInitialized = false;
     let ackReceived = false;
     let gameEnded = false;
+    let myStats = { wins: 0, losses: 0, mmr: 1000 };
 
     let gameState = {
         round: 1, phase: 'select', timer: 10,
@@ -274,7 +313,7 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 & 로비
+    // 2. 초기화 & 로비 & 프로필
     // ==========================================
     window.onload = async () => {
         document.getElementById('versionDisplay').innerText = GAME_VERSION;
@@ -282,7 +321,6 @@
         if(initSupabase()) {
             await checkGameVersion();
             loadRanking();
-            document.getElementById('myUUIDDisplay').innerText = myName;
             connectToLobby();
             initPickGrid();
         }
@@ -310,15 +348,57 @@
     }
 
     async function loadRanking() {
-        const { data } = await sb.from('ppb_rankings').select('mmr, username').eq('user_id', myUUID).maybeSingle();
+        const { data } = await sb.from('ppb_rankings').select('*').eq('user_id', myUUID).maybeSingle();
         if(data) {
-            document.getElementById('myMMR').innerText = data.mmr;
-            if(data.username) myName = data.username;
+            myStats = data;
+            myName = data.username || "Trainer";
         } else {
-            await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000, username: myName });
-            document.getElementById('myMMR').innerText = 1000;
+            await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000, username: 'Trainer' });
+            myStats = { wins: 0, losses: 0, mmr: 1000 };
         }
-        document.getElementById('myUUIDDisplay').innerText = myName;
+        updateLobbyProfileUI();
+    }
+
+    function updateLobbyProfileUI() {
+        document.getElementById('myLobbyName').innerText = myName;
+        document.getElementById('myMMR').innerText = myStats.mmr;
+        document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
+    }
+
+    // --- 프로필 모달 관련 ---
+    function openProfileModal() {
+        const modal = document.getElementById('profileModal');
+        modal.classList.remove('hidden');
+        modal.classList.add('flex');
+
+        document.getElementById('inputNickname').value = myName;
+        document.getElementById('profileWins').innerText = myStats.wins;
+        document.getElementById('profileLosses').innerText = myStats.losses;
+        document.getElementById('profileUUID').innerText = myUUID;
+
+        const total = myStats.wins + myStats.losses;
+        const rate = total > 0 ? Math.round((myStats.wins / total) * 100) : 0;
+        document.getElementById('profileWinRate').innerText = `${rate}%`;
+    }
+
+    function closeProfileModal() {
+        document.getElementById('profileModal').classList.add('hidden');
+        document.getElementById('profileModal').classList.remove('flex');
+    }
+
+    async function saveProfile() {
+        const newName = document.getElementById('inputNickname').value.trim();
+        if(!newName) return alert("닉네임을 입력하세요.");
+
+        const { error } = await sb.from('ppb_rankings').update({ username: newName }).eq('user_id', myUUID);
+        if(!error) {
+            myName = newName;
+            updateLobbyProfileUI();
+            closeProfileModal();
+            alert("저장되었습니다.");
+        } else {
+            alert("저장 실패: " + error.message);
+        }
     }
 
     function switchView(id) {
@@ -333,12 +413,12 @@
         }
     }
 
-    // --- 로비 & 매칭 (이름 전송 추가) ---
+    // --- 로비 & 매칭 ---
     function startRankedMatch() {
         battleMode = 'ranked';
         switchView('waitingView');
         document.getElementById('waitingTitle').innerText = "매칭 중...";
-        document.getElementById('waitingMsg').innerText = "상대를 찾는 중입니다 (범위 확장 중...)";
+        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
 
         if(channel) sb.removeChannel(channel);
         channel = sb.channel('ppb_rank_queue');
@@ -403,7 +483,7 @@
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-item";
-            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 rounded">입장</div>`;
+            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 text-white">입장</div>`;
             div.onclick = () => joinRoom(room.roomId, false);
             container.appendChild(div);
         });
@@ -440,7 +520,7 @@
         channel
             .on('broadcast', { event: 'ready' }, ({ payload }) => {
                 if (payload.id !== myUUID) {
-                    enemyData = { id: payload.id, name: payload.name }; // 이름 저장
+                    enemyData = { id: payload.id, name: payload.name || "Unknown" };
                     channel.send({ type: 'broadcast', event: 'ready_ack', payload: { to: payload.id } });
                     checkReadyToPick();
                 }
@@ -460,7 +540,6 @@
                 await channel.track({ id: myUUID, status: 'playing' });
                 const ping = setInterval(() => {
                     if(ackReceived) clearInterval(ping);
-                    // ready 보낼 때 내 이름도 보냄
                     else channel.send({ type: 'broadcast', event: 'ready', payload: { id: myUUID, name: myName } });
                 }, 800);
             }
@@ -550,7 +629,6 @@
 
         myData = {
             id: myUUID,
-            // 파티 정보 구성
             party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp * 3, hp: POKEMON_DB[id].hp * 3, charge: 0 }))
         };
 
@@ -577,9 +655,8 @@
         gameState.myActiveIdx = 0;
         gameState.enemyActiveIdx = 0;
 
-        // 이름 표시 업데이트
         document.getElementById('myName').innerText = myName;
-        document.getElementById('enemyName').innerText = enemyData.name || "Unknown";
+        document.getElementById('enemyName').innerText = enemyData.name;
 
         updateBattleUI();
 
@@ -643,7 +720,7 @@
         gameState.selectedType = type;
         document.getElementById('skillPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('hidden');
-        document.getElementById('quizPanel').classList.add('flex'); // 중앙 모달
+        document.getElementById('quizPanel').classList.add('flex');
 
         document.getElementById('quizQuestion').innerText = gameState.currentQuiz.q;
         document.getElementById('quizStatusMsg').innerText = "문제를 풀면 공격이 나갑니다!";
@@ -756,10 +833,19 @@
 
     async function endGame(win) {
         gameEnded = true;
+
+        // 결과 DB 반영
+        const changeMMR = win ? 20 : -10;
+        const updates = {
+            mmr: myStats.mmr + changeMMR,
+            wins: myStats.wins + (win ? 1 : 0),
+            losses: myStats.losses + (win ? 0 : 1)
+        };
+
         if (battleMode === 'ranked') {
-            const change = win ? 20 : -10;
-            await sb.from('ppb_rankings').update({ mmr: parseInt(document.getElementById('myMMR').innerText) + change }).eq('user_id', myUUID);
+            await sb.from('ppb_rankings').update(updates).eq('user_id', myUUID);
         }
+
         document.getElementById('resultModal').classList.remove('hidden');
         document.getElementById('resultModal').classList.add('flex');
         document.getElementById('resTitle').innerText = win ? "VICTORY" : "DEFEAT";
@@ -778,7 +864,7 @@
 
         document.getElementById('myImg').src = myPoke.img || FALLBACK_IMG;
         document.getElementById('myImg').style.opacity = myPoke.hp > 0 ? 1 : 0.5;
-        // 이름 표시 부분은 위에서 업데이트했으므로 HP만
+        // 닉네임은 startBattle 시점에 설정됨
         document.getElementById('myHpText').innerText = `${Math.max(0, myPoke.hp)}/${myPoke.maxHp}`;
         document.getElementById('myHpBar').style.width = `${Math.max(0, (myPoke.hp/myPoke.maxHp)*100)}%`;
 
@@ -790,7 +876,6 @@
 
         document.getElementById('enemyImg').src = enPoke.img || FALLBACK_IMG;
         document.getElementById('enemyImg').style.opacity = enPoke.hp > 0 ? 1 : 0.5;
-        // document.getElementById('enemyName').innerText = enPoke.name; // 적 포켓몬 이름은 굳이 안 바꿔도 됨(전략)
         document.getElementById('enemyHpBar').style.width = `${Math.max(0, (enPoke.hp/enPoke.maxHp)*100)}%`;
 
         updatePartyIcons('myPartyIcons', gameState.myPartyState, gameState.myActiveIdx);
