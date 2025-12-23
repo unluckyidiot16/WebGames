@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발표 대기열 - 교사용</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.1/lucide.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+
+        /* 카드 등장 애니메이션 */
+        @keyframes slideInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        .card-enter {
+            animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 min-h-screen text-slate-100 flex flex-col">
+
+<!-- 헤더 -->
+<header class="bg-slate-800 border-b border-slate-700 p-6 sticky top-0 z-10 shadow-lg">
+    <div class="max-w-5xl mx-auto flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <i data-lucide="monitor-play" class="w-8 h-8 text-blue-400"></i>
+            <h1 class="text-2xl font-bold tracking-wide">실시간 발표 대기열</h1>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="bg-slate-700 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                실시간 연결됨
+            </div>
+            <button onclick="clearList()" class="text-slate-400 hover:text-white hover:bg-slate-700 p-2 rounded transition" title="목록 비우기 (화면만)">
+                <i data-lucide="trash-2" class="w-5 h-5"></i>
+            </button>
+        </div>
+    </div>
+</header>
+
+<!-- 메인 컨텐츠 영역 -->
+<main class="flex-1 p-6 overflow-y-auto">
+    <div id="messageList" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
+        <!-- 자바스크립트로 카드가 여기에 추가됩니다 -->
+
+        <!-- 빈 상태 메시지 -->
+        <div id="emptyState" class="col-span-1 md:col-span-2 text-center py-20 text-slate-500">
+            <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
+            <p class="text-lg">아직 제출된 발표가 없습니다.</p>
+            <p class="text-sm opacity-70">학생들이 제출하면 여기에 자동으로 나타납니다.</p>
+        </div>
+    </div>
+</main>
+
+<!-- 알림 토스트 (우측 하단) -->
+<div id="notificationToast" class="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
+    새로운 발표가 도착했습니다! 🎉
+</div>
+
+<script>
+    // 아이콘 초기화
+    lucide.createIcons();
+
+    // ==========================================
+    // [설정] Supabase 프로젝트 설정 (학생용과 동일한 키 사용)
+    // ==========================================
+    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
+
+
+    let supabase;
+    const messageList = document.getElementById('messageList');
+    const emptyState = document.getElementById('emptyState');
+
+    // 초기화
+    try {
+        if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE') {
+            throw new Error("설정 필요");
+        }
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        initRealtimeSubscription();
+        fetchExistingMessages();
+    } catch (e) {
+        emptyState.innerHTML = `<p class="text-red-400">⚠️ Supabase 설정이 필요합니다. 코드(teacher.html)를 열어 URL과 KEY를 입력해주세요.</p>`;
+    }
+
+    // 1. 기존 데이터 불러오기 (오늘 날짜 기준 등 필터링 가능)
+    async function fetchExistingMessages() {
+        const { data, error } = await supabase
+            .from('submissions')
+            .select('*')
+            .order('created_at', { ascending: true }); // 먼저 낸 사람이 위로, 혹은 false로 역순 가능
+
+        if (error) console.error('Error fetching:', error);
+
+        if (data && data.length > 0) {
+            emptyState.style.display = 'none';
+            data.forEach(msg => addCardToUI(msg, false));
+        }
+    }
+
+    // 2. 실시간 구독 설정
+    function initRealtimeSubscription() {
+        const channel = supabase
+            .channel('realtime-submissions')
+            .on(
+                'postgres_changes',
+                { event: 'INSERT', schema: 'public', table: 'submissions' },
+                (payload) => {
+                    console.log('New submission:', payload);
+                    emptyState.style.display = 'none';
+                    addCardToUI(payload.new, true);
+                    showNotification();
+                }
+            )
+            .subscribe();
+    }
+
+    // UI에 카드 추가 함수
+    function addCardToUI(data, isNew) {
+        const date = new Date(data.created_at);
+        const timeStr = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+        const card = document.createElement('div');
+        // 스타일링: 그라데이션 보더 효과 및 카드 디자인
+        card.className = `bg-slate-800 rounded-xl p-6 border-l-4 border-blue-500 shadow-lg relative overflow-hidden group hover:bg-slate-750 transition-colors ${isNew ? 'card-enter' : ''}`;
+
+        // 랜덤한 배경 장식 (선택 사항)
+        const randomColor = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-yellow-500'][Math.floor(Math.random() * 4)];
+
+        card.innerHTML = `
+                <div class="flex justify-between items-start mb-3">
+                    <div class="flex items-center gap-2">
+                        <div class="w-8 h-8 rounded-full ${randomColor} flex items-center justify-center text-white font-bold text-sm shadow-md">
+                            ${data.student_name.charAt(0)}
+                        </div>
+                        <h3 class="font-bold text-lg text-white">${data.student_name}</h3>
+                    </div>
+                    <span class="text-xs text-slate-400 font-mono bg-slate-900 px-2 py-1 rounded">${timeStr}</span>
+                </div>
+                <p class="text-slate-300 leading-relaxed text-lg break-words">${escapeHtml(data.message)}</p>
+                
+                <!-- 삭제 버튼 (교사용 로컬 삭제) -->
+                <button onclick="this.parentElement.remove()" class="absolute top-2 right-2 p-1 text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+                </button>
+            `;
+
+        // 목록의 맨 앞에 추가하려면 prepend, 맨 뒤에 추가하려면 append
+        // 발표 순서대로 보려면 append가 적절함
+        messageList.appendChild(card);
+
+        // 새 메시지일 경우 스크롤을 아래로 이동
+        if (isNew) {
+            window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+        }
+    }
+
+    // HTML 엔티티 이스케이프 (XSS 방지)
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#039;")
+            .replace(/\n/g, "<br>");
+    }
+
+    function showNotification() {
+        const toast = document.getElementById('notificationToast');
+        toast.classList.remove('translate-y-20', 'opacity-0');
+        setTimeout(() => {
+            toast.classList.add('translate-y-20', 'opacity-0');
+        }, 3000);
+    }
+
+    function clearList() {
+        if(confirm('화면의 목록을 모두 지우시겠습니까? (DB 데이터는 유지됩니다)')) {
+            messageList.innerHTML = '';
+            emptyState.style.display = 'block';
+            messageList.appendChild(emptyState);
+        }
+    }
+</script>
+</body>
+</html>

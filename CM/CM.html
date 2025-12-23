@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>발표 제출 - 학생용</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; }
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3b82f6;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+
+<div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
+    <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">🎤 발표 제출하기</h1>
+    <p class="text-gray-500 text-sm text-center mb-6">선생님 화면에 실시간으로 전송됩니다.</p>
+
+    <form id="submitForm" class="space-y-4">
+        <div>
+            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">이름</label>
+            <input type="text" id="name" required placeholder="본인의 이름을 입력하세요"
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+        </div>
+
+        <div>
+            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">발표 주제 / 메세지</label>
+            <textarea id="message" required rows="3" placeholder="발표할 내용이나 선생님께 보낼 메세지"
+                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
+        </div>
+
+        <button type="submit" id="submitBtn"
+                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 flex justify-center items-center gap-2">
+            <span>제출하기</span>
+        </button>
+    </form>
+
+    <!-- 상태 메시지 표시 영역 -->
+    <div id="statusMessage" class="mt-4 text-center text-sm font-medium hidden"></div>
+</div>
+
+<script>
+    // ==========================================
+    // [설정] Supabase 프로젝트 설정 (여기에 키를 입력하세요)
+    // ==========================================
+    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
+
+
+    // Supabase 클라이언트 초기화
+    let supabase;
+    try {
+        if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE') {
+            throw new Error("Supabase 설정이 필요합니다. 코드를 열어 URL과 KEY를 입력해주세요.");
+        }
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (e) {
+        document.getElementById('statusMessage').textContent = "⚠️ 설정 오류: 코드를 열어 Supabase 키를 입력해주세요.";
+        document.getElementById('statusMessage').className = "mt-4 text-center text-sm font-medium text-red-600 block";
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
+    }
+
+    const form = document.getElementById('submitForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const statusMsg = document.getElementById('statusMessage');
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!supabase) return;
+
+        const name = document.getElementById('name').value.trim();
+        const message = document.getElementById('message').value.trim();
+
+        if (!name || !message) return;
+
+        // 로딩 상태 표시
+        setLoading(true);
+
+        try {
+            // 데이터베이스에 삽입 ('submissions' 테이블 가정)
+            const { error } = await supabase
+                .from('submissions')
+                .insert([{ student_name: name, message: message }]);
+
+            if (error) throw error;
+
+            showToast("✅ 성공적으로 제출되었습니다!", "success");
+            document.getElementById('message').value = ''; // 이름은 남겨두고 메시지만 초기화
+        } catch (error) {
+            console.error('Error:', error);
+            showToast("❌ 제출 실패: " + error.message, "error");
+        } finally {
+            setLoading(false);
+        }
+    });
+
+    function setLoading(isLoading) {
+        if (isLoading) {
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<div class="loader"></div><span>전송 중...</span>';
+            submitBtn.classList.add('opacity-75');
+        } else {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>제출하기</span>';
+            submitBtn.classList.remove('opacity-75');
+        }
+    }
+
+    function showToast(msg, type) {
+        statusMsg.textContent = msg;
+        statusMsg.className = `mt-4 text-center text-sm font-medium block ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
+
+        // 3초 후 메시지 숨김
+        setTimeout(() => {
+            statusMsg.classList.add('hidden');
+        }, 3000);
+    }
+</script>
+</body>
+</html>
