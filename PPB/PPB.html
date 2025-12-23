@@ -23,7 +23,6 @@
         /* 카드 스타일 */
         .poke-card { @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all opacity-70; }
         .poke-card.selected { @apply border-yellow-400 bg-gray-700 opacity-100 ring-2 ring-yellow-400; transform: translateY(-5px); }
-        .poke-card.fainted { filter: grayscale(100%); opacity: 0.5; }
 
         /* 게이지 바 */
         .gauge-slot { @apply w-3 h-3 rounded-full bg-gray-600; }
@@ -37,12 +36,12 @@
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
     <div class="w-full max-w-md p-6 flex flex-col h-full">
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-6">3 vs 3 STRATEGY BATTLE</div>
+        <div class="text-xs text-gray-500 text-center mb-6">v14.2 STABLE</div>
 
         <div class="bg-gray-800 p-4 rounded-2xl mb-6 flex justify-between items-center shadow-lg">
             <div>
                 <div class="text-xs text-gray-400">RANKING</div>
-                <div class="text-xl font-bold text-white"><span id="myMMR">1000</span> P</div>
+                <div class="text-xl font-bold text-white"><span id="myMMR">---</span> P</div>
             </div>
             <div class="text-right">
                 <div class="text-xs text-gray-400">STATUS</div>
@@ -52,17 +51,16 @@
 
         <div class="flex-1">
             <div class="text-sm text-gray-300 mb-2 font-bold flex justify-between">
-                <span>파티 편성 (순서대로 출전)</span>
+                <span>파티 편성 (3마리 선택)</span>
                 <span id="partyCount" class="text-yellow-400">0 / 3</span>
             </div>
-            <div class="grid grid-cols-4 gap-2 mb-4" id="pokeSelector">
-            </div>
+            <div class="grid grid-cols-4 gap-2 mb-4" id="pokeSelector"></div>
             <div class="text-[10px] text-gray-500 text-center mb-6">
-                🔥불 > 🌿풀 > 💧물 > 🔥불 (⚡전기는 💧물에 강함)
+                상성: 🔥불 > 🌿풀 > 💧물 > 🔥불 (⚡전기 > 💧물)
             </div>
         </div>
 
-        <div class="space-y-3 mt-auto">
+        <div class="space-y-3 mt-auto pb-8">
             <button onclick="startRankedMatch()" id="btnStart" disabled class="w-full bg-yellow-500 hover:bg-yellow-400 disabled:bg-gray-700 disabled:text-gray-500 text-black font-black py-4 rounded-xl shadow-lg border-b-4 border-yellow-700 active:border-b-0 active:translate-y-1 transition-all">
                 랭킹 매칭 시작
             </button>
@@ -76,8 +74,8 @@
 
 <section id="waitingView" class="view bg-black/90 fixed inset-0 z-50 hidden">
     <div class="text-6xl mb-6 animate-spin">😵‍💫</div>
-    <h2 class="text-2xl font-bold mb-2">상대를 찾는 중...</h2>
-    <p class="text-gray-400 text-sm mb-8" id="waitingMsg">잠시만 기다려 주세요.</p>
+    <h2 class="text-2xl font-bold mb-2">접속 중...</h2>
+    <p class="text-gray-400 text-sm mb-8" id="waitingMsg">상대를 찾는 중입니다.</p>
     <button onclick="cancelMatching()" class="border border-red-500 text-red-500 px-8 py-2 rounded-full hover:bg-red-500 hover:text-white transition">취소</button>
 </section>
 
@@ -91,8 +89,7 @@
 
 <section id="battleView" class="view relative bg-gray-800 justify-between pb-4">
     <div class="absolute top-4 right-4 flex flex-col items-end w-full pr-4 z-10">
-        <div class="flex gap-1 mb-1" id="enemyPartyIcons">
-        </div>
+        <div class="flex gap-1 mb-1" id="enemyPartyIcons"></div>
         <div class="bg-black/50 px-4 py-2 rounded-lg border border-gray-600 text-right w-48 backdrop-blur-sm">
             <div class="text-sm font-bold text-red-400" id="enemyName">Enemy</div>
             <div class="w-full h-2.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
@@ -141,7 +138,7 @@
         <div id="quizPanel" class="hidden absolute inset-0 bg-gray-900 p-4">
             <div class="text-center mb-4">
                 <p class="text-xs text-gray-400 mb-1">문제를 맞춰서 공격하세요!</p>
-                <p class="text-xl font-bold text-white" id="quizQuestion">3 x 3 = ?</p>
+                <p class="text-xl font-bold text-white" id="quizQuestion">Loading...</p>
             </div>
             <div id="quizChoices" class="grid grid-cols-2 gap-3 h-24"></div>
         </div>
@@ -151,7 +148,7 @@
 <div id="resultModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
     <div class="text-6xl mb-4" id="resIcon">🏆</div>
     <h2 class="text-4xl font-black text-white mb-2" id="resTitle">WIN</h2>
-    <p class="text-gray-400 mb-8" id="resDesc">상대 파티를 모두 쓰러뜨렸습니다.</p>
+    <p class="text-gray-400 mb-8" id="resDesc">결과 처리 중...</p>
     <button onclick="location.reload()" class="bg-white text-black font-bold py-3 px-8 rounded-full">로비로</button>
 </div>
 
@@ -159,15 +156,15 @@
     // ==========================================
     // 0. 설정 (본인 키 입력 필수)
     // ==========================================
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M';
+    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
 
     // ==========================================
-    // 1. 포켓몬 데이터 (4종)
+    // 1. 포켓몬 데이터
     // ==========================================
     const POKEMON_DB = {
         1:  { name: "이상해씨", type: "grass",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", hp: 120, atk: 18, spec: "덩쿨채찍 (2배)" },
@@ -182,16 +179,17 @@
         "electric": { "water": 1.5, "grass": 0.5 }
     };
 
-    let myParty = []; // 선택한 ID 배열 [1, 25, 4]
+    let myParty = [];
     let myData = null, enemyData = null;
     let channel = null, lobbyChannel = null;
     let isHost = false, roomId = null;
     let battleMode = 'ranked';
+    let battleInitialized = false; // 중복 실행 방지
 
     let gameState = {
         round: 1, phase: 'select', timer: 10,
         myActiveIdx: 0, enemyActiveIdx: 0,
-        myPartyState: [], enemyPartyState: [], // {id, hp, maxHp, charge}
+        myPartyState: [], enemyPartyState: [],
         myAnswer: null, enemyAnswer: null, currentQuiz: null
     };
     let timerInterval = null;
@@ -209,16 +207,21 @@
 
     function initSupabase() {
         if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR')) {
-            alert("Supabase 키를 설정해주세요."); return false;
+            alert("html 파일을 열어 Supabase 키를 설정해주세요."); return false;
         }
         sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         return true;
     }
 
     async function loadRanking() {
-        const { data } = await sb.from('ppb_rankings').select('mmr').eq('user_id', myUUID).single();
+        // .maybeSingle()로 변경하여 406 에러 방지
+        const { data, error } = await sb.from('ppb_rankings').select('mmr').eq('user_id', myUUID).maybeSingle();
         if(data) document.getElementById('myMMR').innerText = data.mmr;
-        else await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000 });
+        else {
+            // 없으면 생성 시도
+            await sb.from('ppb_rankings').insert({ user_id: myUUID, mmr: 1000 });
+            document.getElementById('myMMR').innerText = 1000;
+        }
     }
 
     function renderPartySelector() {
@@ -237,26 +240,20 @@
     function togglePartyMember(id, el) {
         id = parseInt(id);
         const idx = myParty.indexOf(id);
-
         if (idx >= 0) {
-            myParty.splice(idx, 1); // 제거
-            el.classList.remove('selected');
+            myParty.splice(idx, 1); el.classList.remove('selected');
         } else {
             if (myParty.length >= 3) return alert("3마리까지만 선택 가능합니다.");
-            myParty.push(id);
-            el.classList.add('selected');
+            myParty.push(id); el.classList.add('selected');
         }
-
-        // 순서 표시 업데이트 (선택된 카드들에 순번 배지 달기 - 생략, UI 단순화)
         document.getElementById('partyCount').innerText = `${myParty.length} / 3`;
-
         const ready = myParty.length === 3;
         document.getElementById('btnStart').disabled = !ready;
         document.getElementById('btnCreate').disabled = !ready;
     }
 
     // ==========================================
-    // 3. 매칭 시스템 (간소화)
+    // 3. 매칭 시스템 (안정화됨)
     // ==========================================
     function startRankedMatch() {
         battleMode = 'ranked';
@@ -281,13 +278,11 @@
         });
     }
 
-    // --- 커스텀 로비 ---
     function createRoom() {
         battleMode = 'friendly';
-        const roomName = `[배틀] ${myUUID.substring(0,4)}의 방`;
+        const roomName = `[배틀] 트레이너 ${myUUID.substring(0,4)}의 방`;
         const roomId = `room_${myUUID}_${Date.now()}`;
 
-        // 로비에 등록
         lobbyChannel = sb.channel('ppb_lobby');
         lobbyChannel.subscribe(async (s) => {
             if (s === 'SUBSCRIBED') {
@@ -307,11 +302,6 @@
         }).subscribe(async (s) => { if(s==='SUBSCRIBED') await channel.track({ id: myUUID }); });
     }
 
-    function enterCustomLobby() {
-        switchView('roomListView');
-        connectToLobby();
-    }
-
     function connectToLobby() {
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
         lobbyChannel = sb.channel('ppb_lobby');
@@ -329,41 +319,46 @@
         }).subscribe();
     }
 
-    function leaveLobby() {
-        if(lobbyChannel) sb.removeChannel(lobbyChannel);
-        switchView('lobbyView');
-    }
-
     // ==========================================
-    // 4. 배틀 로직
+    // 4. 배틀 로직 (Handshake 강화)
     // ==========================================
     function joinRoom(room, host) {
         if(channel) sb.removeChannel(channel);
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
         roomId = room; isHost = host;
+        battleInitialized = false;
 
-        // 내 전투 데이터 준비
         myData = {
             id: myUUID,
-            party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp, hp: POKEMON_DB[id].hp, charge: 0 }))
+            party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp * 3, hp: POKEMON_DB[id].hp * 3, charge: 0 }))
         };
 
         channel = sb.channel(room);
         channel
-            .on('broadcast', { event: 'ready' }, ({ payload }) => { if (payload.id !== myData.id) { enemyData = payload; startBattle(); } })
+            .on('broadcast', { event: 'ready' }, ({ payload }) => {
+                if (payload.id !== myData.id && !battleInitialized) {
+                    enemyData = payload;
+                    startBattle();
+                }
+            })
             .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
             .on('broadcast', { event: 'submit_action' }, ({ payload }) => { if(payload.id !== myData.id) { gameState.enemyAnswer = payload; checkTurnEnd(); } });
 
         channel.subscribe(async (s) => {
             if(s==='SUBSCRIBED') {
-                channel.send({ type: 'broadcast', event: 'ready', payload: myData });
-                // 상대 기다림 핑
-                const ping = setInterval(() => { if(enemyData) clearInterval(ping); else channel.send({ type: 'broadcast', event: 'ready', payload: myData }); }, 1000);
+                // Handshake: 상대가 내 데이터를 받을 때까지 반복 전송
+                const ping = setInterval(() => {
+                    if(battleInitialized) clearInterval(ping);
+                    else channel.send({ type: 'broadcast', event: 'ready', payload: myData });
+                }, 1000);
             }
         });
     }
 
     function startBattle() {
+        if (battleInitialized) return; // 중복 실행 방지
+        battleInitialized = true;
+
         switchView('battleView');
 
         // 상태 초기화
@@ -374,13 +369,13 @@
 
         updateBattleUI();
 
+        // 호스트는 잠시 대기 후 첫 문제 출제 (상대가 로딩할 시간 확보)
         if (isHost) {
-            setTimeout(() => startNewRound(), 1500);
+            setTimeout(() => startNewRound(), 2000);
         }
     }
 
     function startNewRound() {
-        // 호스트가 퀴즈 생성
         const n1 = Math.floor(Math.random()*8)+2, n2 = Math.floor(Math.random()*9)+1;
         const ans = n1*n2;
         const choices = new Set([ans]);
@@ -392,6 +387,9 @@
     }
 
     function startQuizPhase(quiz) {
+        // [수정] 게임 데이터가 로드되지 않았다면 무시 (charge 에러 방지)
+        if (!battleInitialized || !gameState.myPartyState.length) return;
+
         gameState.phase = 'select';
         gameState.currentQuiz = quiz;
         gameState.myAnswer = null;
@@ -401,10 +399,9 @@
         document.getElementById('quizPanel').classList.add('hidden');
         document.getElementById('btnNormal').disabled = false;
 
-        // 게이지 체크
         const myPoke = gameState.myPartyState[gameState.myActiveIdx];
         const btnSpecial = document.getElementById('btnSpecial');
-        if (myPoke.charge >= 3) {
+        if (myPoke && myPoke.charge >= 3) { // [수정] myPoke 존재 확인
             btnSpecial.disabled = false;
             btnSpecial.classList.add('animate-pulse', 'ring-2', 'ring-yellow-400');
         } else {
@@ -412,7 +409,7 @@
             btnSpecial.classList.remove('animate-pulse', 'ring-2', 'ring-yellow-400');
         }
 
-        document.getElementById('timerDisplay').innerText = 30; // 선택 시간 넉넉히
+        document.getElementById('timerDisplay').innerText = 30;
     }
 
     function selectSkill(type) {
@@ -420,7 +417,6 @@
         document.getElementById('skillPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('hidden');
 
-        // 퀴즈 렌더링
         document.getElementById('quizQuestion').innerText = gameState.currentQuiz.q;
         const grid = document.getElementById('quizChoices');
         grid.innerHTML = "";
@@ -435,13 +431,9 @@
 
     function submitAction(val) {
         if (gameState.myAnswer) return;
-
         const correct = val === gameState.currentQuiz.a;
         gameState.myAnswer = { correct, type: gameState.selectedType };
-
-        // 대기 UI
         document.getElementById('quizPanel').innerHTML = '<div class="text-center text-gray-400 py-10">상대방 기다리는 중...</div>';
-
         channel.send({ type: 'broadcast', event: 'submit_action', payload: { id: myUUID, correct, type: gameState.selectedType } });
         checkTurnEnd();
     }
@@ -456,16 +448,12 @@
         gameState.phase = 'resolve';
         document.getElementById('quizPanel').classList.add('hidden');
 
-        // 선공 결정 (랜덤 or 호스트 우선? 여기선 호스트 우선)
         const meFirst = isHost;
-
         await executeAttack(meFirst ? 'me' : 'enemy');
         if (checkGameOver()) return;
-
         await executeAttack(meFirst ? 'enemy' : 'me');
         if (checkGameOver()) return;
 
-        // 다음 라운드
         if (isHost) setTimeout(startNewRound, 1500);
     }
 
@@ -478,39 +466,30 @@
 
             if (!action.correct) {
                 showMsg(isMe ? "공격 실패 (오답)" : "상대 공격 실패", "gray");
-                setTimeout(resolve, 1000);
-                return;
+                setTimeout(resolve, 1000); return;
             }
 
-            // 데미지 계산
             let mult = 1.0;
             const typeMatch = TYPE_CHART[actor.type];
             if (typeMatch && typeMatch[target.type]) mult = typeMatch[target.type];
 
             let power = 1.0;
             if (action.type === 'special') {
-                power = 2.0;
-                actor.charge = 0; // 게이지 소모
+                power = 2.0; actor.charge = 0;
                 showMsg(isMe ? `${actor.spec} 발동!` : `상대 ${actor.spec}!`, "yellow");
             } else {
-                actor.charge = Math.min(3, actor.charge + 1); // 게이지 충전
+                actor.charge = Math.min(3, actor.charge + 1);
             }
 
             const damage = Math.floor(actor.atk * power * mult);
             target.hp -= damage;
 
-            // 연출
             animAttack(isMe);
             if (mult > 1.0) showMsg("효과가 굉장했다!", "red");
-
             updateBattleUI();
 
-            // 기절 체크 및 교체
             if (target.hp <= 0) {
-                setTimeout(() => {
-                    handleFaint(!isMe); // 상대가 기절했으면 handleFaint(true)
-                    resolve();
-                }, 1000);
+                setTimeout(() => { handleFaint(!isMe); resolve(); }, 1000);
             } else {
                 setTimeout(resolve, 1500);
             }
@@ -537,44 +516,40 @@
     async function endGame(win) {
         if (battleMode === 'ranked') {
             const change = win ? 20 : -10;
-            await sb.from('ppb_rankings').update({ mmr: parseInt(document.getElementById('myMMR').innerText) + change }).eq('user_id', myUUID);
+            const cur = parseInt(document.getElementById('myMMR').innerText) || 1000;
+            await sb.from('ppb_rankings').update({ mmr: cur + change }).eq('user_id', myUUID);
         }
-
         document.getElementById('resultModal').classList.remove('hidden');
         document.getElementById('resultModal').classList.add('flex');
         document.getElementById('resTitle').innerText = win ? "VICTORY" : "DEFEAT";
         document.getElementById('resIcon').innerText = win ? "🏆" : "💀";
         document.getElementById('resDesc').innerText = win ? "승리했습니다!" : "패배했습니다...";
-
         if(channel) sb.removeChannel(channel);
     }
 
-    // --- UI 업데이트 ---
     function updateBattleUI() {
+        if (!battleInitialized) return; // 안전장치
+
         const myPoke = gameState.myPartyState[gameState.myActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
         const enPoke = gameState.enemyPartyState[gameState.enemyActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
 
-        // 내 정보
         document.getElementById('myImg').src = myPoke.img;
         document.getElementById('myImg').style.opacity = myPoke.hp > 0 ? 1 : 0.5;
         document.getElementById('myName').innerText = myPoke.name;
         document.getElementById('myHpText').innerText = `${Math.max(0, myPoke.hp)}/${myPoke.maxHp}`;
         document.getElementById('myHpBar').style.width = `${Math.max(0, (myPoke.hp/myPoke.maxHp)*100)}%`;
 
-        // 내 게이지
         const gaugeContainer = document.getElementById('myGaugeContainer');
         gaugeContainer.innerHTML = '';
         for(let i=0; i<3; i++) {
             gaugeContainer.innerHTML += `<div class="gauge-slot ${i < myPoke.charge ? 'filled' : ''}"></div>`;
         }
 
-        // 적 정보
         document.getElementById('enemyImg').src = enPoke.img;
         document.getElementById('enemyImg').style.opacity = enPoke.hp > 0 ? 1 : 0.5;
         document.getElementById('enemyName').innerText = enPoke.name;
         document.getElementById('enemyHpBar').style.width = `${Math.max(0, (enPoke.hp/enPoke.maxHp)*100)}%`;
 
-        // 파티 상태 아이콘 (남은 포켓몬 수)
         updatePartyIcons('myPartyIcons', gameState.myPartyState, gameState.myActiveIdx);
         updatePartyIcons('enemyPartyIcons', gameState.enemyPartyState, gameState.enemyActiveIdx);
     }
@@ -610,7 +585,8 @@
 
     function cancelMatching() { if(channel) sb.removeChannel(channel); switchView('lobbyView'); }
     function switchView(id) { document.querySelectorAll('.view').forEach(v=>v.classList.remove('active')); document.getElementById(id).classList.add('active'); if(id!=='waitingView') document.getElementById('waitingView').classList.add('hidden'); }
-    function goHome() { window.location.href = "DQR.html"; }
+    function enterCustomLobby() { switchView('roomListView'); connectToLobby(); }
+    function leaveLobby() { if(lobbyChannel) sb.removeChannel(lobbyChannel); switchView('lobbyView'); }
 
 </script>
 </body>
