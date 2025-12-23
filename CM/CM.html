@@ -9,76 +9,172 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         body { font-family: 'Noto Sans KR', sans-serif; }
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3b82f6;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
+
+        /* 비활성화 오버레이 애니메이션 */
+        .overlay { transition: all 0.5s ease; }
+        .locked { filter: grayscale(100%); pointer-events: none; opacity: 0.6; }
+
+        .pulse-ring {
+            animation: ring 2s infinite;
         }
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+        @keyframes ring {
+            0% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7); }
+            70% { box-shadow: 0 0 0 10px rgba(59, 130, 246, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(59, 130, 246, 0); }
         }
     </style>
 </head>
 <body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
 
-<div class="bg-white p-6 rounded-xl shadow-lg w-full max-w-md">
-    <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">🎤 발표 제출하기</h1>
-    <p class="text-gray-500 text-sm text-center mb-6">선생님 화면에 실시간으로 전송됩니다.</p>
+<div class="relative w-full max-w-md">
 
-    <form id="submitForm" class="space-y-4">
-        <div>
-            <label for="name" class="block text-sm font-medium text-gray-700 mb-1">이름</label>
-            <input type="text" id="name" required placeholder="본인의 이름을 입력하세요"
-                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition">
+    <!-- 대기 상태 오버레이 (잠겨있을 때 표시) -->
+    <div id="waitOverlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/80 backdrop-blur-sm rounded-xl transition-opacity duration-500">
+        <div class="bg-yellow-100 p-4 rounded-full mb-4">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+            </svg>
         </div>
+        <h2 class="text-xl font-bold text-gray-800">선생님 신호 대기 중...</h2>
+        <p class="text-gray-500 text-sm mt-2">발표 시작 신호가 오면 입력이 가능해집니다.</p>
+    </div>
 
-        <div>
-            <label for="message" class="block text-sm font-medium text-gray-700 mb-1">발표 주제 / 메세지</label>
-            <textarea id="message" required rows="3" placeholder="발표할 내용이나 선생님께 보낼 메세지"
-                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none"></textarea>
-        </div>
+    <!-- 메인 폼 컨테이너 -->
+    <div id="formContainer" class="bg-white p-6 rounded-xl shadow-lg w-full transition-all duration-500 locked">
+        <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center flex items-center justify-center gap-2">
+            <span id="statusIcon">🔒</span>
+            <span id="headerText">발표 준비</span>
+        </h1>
 
-        <button type="submit" id="submitBtn"
-                class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg transition duration-200 flex justify-center items-center gap-2">
-            <span>제출하기</span>
-        </button>
-    </form>
+        <form id="submitForm" class="space-y-4 mt-6">
+            <div>
+                <label for="name" class="block text-sm font-medium text-gray-700 mb-1">이름</label>
+                <input type="text" id="name" disabled placeholder="대기 중입니다..."
+                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition bg-gray-50">
+            </div>
 
-    <!-- 상태 메시지 표시 영역 -->
-    <div id="statusMessage" class="mt-4 text-center text-sm font-medium hidden"></div>
+            <div>
+                <label for="message" class="block text-sm font-medium text-gray-700 mb-1">발표 주제 / 메세지</label>
+                <textarea id="message" disabled rows="3" placeholder="선생님이 시작 버튼을 누르면 입력할 수 있습니다."
+                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition resize-none bg-gray-50"></textarea>
+            </div>
+
+            <button type="submit" id="submitBtn" disabled
+                    class="w-full bg-gray-400 text-white font-bold py-3 rounded-lg transition duration-200 flex justify-center items-center gap-2 cursor-not-allowed">
+                <span>제출 대기</span>
+            </button>
+        </form>
+    </div>
 </div>
+
+<!-- 알림 토스트 -->
+<div id="statusMessage" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white px-6 py-3 rounded-full text-sm font-medium hidden shadow-lg z-50"></div>
 
 <script>
     // ==========================================
-    // [설정] Supabase 프로젝트 설정 (여기에 키를 입력하세요)
+    // [설정] Supabase 키 입력
     // ==========================================
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
 
 
-    // Supabase 클라이언트 초기화
     let supabase;
-    try {
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE') {
-            throw new Error("Supabase 설정이 필요합니다. 코드를 열어 URL과 KEY를 입력해주세요.");
-        }
-        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    } catch (e) {
-        document.getElementById('statusMessage').textContent = "⚠️ 설정 오류: 코드를 열어 Supabase 키를 입력해주세요.";
-        document.getElementById('statusMessage').className = "mt-4 text-center text-sm font-medium text-red-600 block";
-        document.getElementById('submitBtn').disabled = true;
-        document.getElementById('submitBtn').classList.add('opacity-50', 'cursor-not-allowed');
-    }
-
-    const form = document.getElementById('submitForm');
-    const submitBtn = document.getElementById('submitBtn');
+    const overlay = document.getElementById('waitOverlay');
+    const formContainer = document.getElementById('formContainer');
+    const inputs = document.querySelectorAll('input, textarea');
+    const btn = document.getElementById('submitBtn');
+    const headerText = document.getElementById('headerText');
+    const statusIcon = document.getElementById('statusIcon');
     const statusMsg = document.getElementById('statusMessage');
 
-    form.addEventListener('submit', async (e) => {
+    try {
+        if (SUPABASE_URL.includes('YOUR_')) throw new Error("설정 필요");
+        supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // 1. 초기 상태 확인
+        checkSystemStatus();
+
+        // 2. 실시간 상태 변화 구독
+        subscribeToStatus();
+
+    } catch (e) {
+        console.error(e);
+        alert("Supabase 설정이 필요합니다. 코드를 확인해주세요.");
+    }
+
+    // 시스템 상태 확인 (초기 로드 시)
+    async function checkSystemStatus() {
+        const { data, error } = await supabase
+            .from('system_status')
+            .select('is_active')
+            .eq('id', 1)
+            .single();
+
+        if (data) {
+            toggleForm(data.is_active);
+        }
+    }
+
+    // 시스템 상태 구독 (실시간)
+    function subscribeToStatus() {
+        supabase.channel('public:system_status')
+            .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'system_status' }, payload => {
+                console.log('Status changed:', payload.new.is_active);
+                toggleForm(payload.new.is_active);
+            })
+            .subscribe();
+    }
+
+    // 폼 활성화/비활성화 처리 UI 로직
+    function toggleForm(isActive) {
+        if (isActive) {
+            // 활성화 상태
+            overlay.classList.add('opacity-0', 'pointer-events-none');
+            formContainer.classList.remove('locked');
+            formContainer.classList.add('ring-4', 'ring-blue-100'); // 강조 효과
+
+            inputs.forEach(el => {
+                el.disabled = false;
+                el.classList.remove('bg-gray-50');
+                el.classList.add('bg-white');
+                if(el.id === 'name') el.placeholder = "본인의 이름을 입력하세요";
+                if(el.id === 'message') el.placeholder = "발표 내용을 입력하세요";
+            });
+
+            btn.disabled = false;
+            btn.classList.remove('bg-gray-400', 'cursor-not-allowed');
+            btn.classList.add('bg-blue-600', 'hover:bg-blue-700', 'pulse-ring');
+            btn.innerHTML = '<span>🚀 제출하기</span>';
+
+            headerText.textContent = "발표 제출 가능!";
+            statusIcon.textContent = "🎤";
+
+            // 진동 효과 (모바일 지원 시)
+            if(navigator.vibrate) navigator.vibrate(200);
+
+        } else {
+            // 비활성화 상태
+            overlay.classList.remove('opacity-0', 'pointer-events-none');
+            formContainer.classList.add('locked');
+            formContainer.classList.remove('ring-4', 'ring-blue-100');
+
+            inputs.forEach(el => {
+                el.disabled = true;
+                el.classList.add('bg-gray-50');
+            });
+
+            btn.disabled = true;
+            btn.classList.add('bg-gray-400', 'cursor-not-allowed');
+            btn.classList.remove('bg-blue-600', 'hover:bg-blue-700', 'pulse-ring');
+            btn.innerHTML = '<span>🔒 선생님 대기 중</span>';
+
+            headerText.textContent = "발표 준비";
+            statusIcon.textContent = "🔒";
+        }
+    }
+
+    // 제출 로직
+    document.getElementById('submitForm').addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!supabase) return;
 
@@ -87,11 +183,10 @@
 
         if (!name || !message) return;
 
-        // 로딩 상태 표시
-        setLoading(true);
+        btn.disabled = true;
+        btn.textContent = "전송 중...";
 
         try {
-            // 데이터베이스에 삽입 ('submissions' 테이블 가정)
             const { error } = await supabase
                 .from('submissions')
                 .insert([{ student_name: name, message: message }]);
@@ -99,32 +194,20 @@
             if (error) throw error;
 
             showToast("✅ 성공적으로 제출되었습니다!", "success");
-            document.getElementById('message').value = ''; // 이름은 남겨두고 메시지만 초기화
+            document.getElementById('message').value = '';
         } catch (error) {
-            console.error('Error:', error);
             showToast("❌ 제출 실패: " + error.message, "error");
         } finally {
-            setLoading(false);
+            // 제출 후 버튼 복구 (단, 시스템이 활성 상태여야 함)
+            btn.disabled = false;
+            btn.innerHTML = '<span>🚀 제출하기</span>';
         }
     });
 
-    function setLoading(isLoading) {
-        if (isLoading) {
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<div class="loader"></div><span>전송 중...</span>';
-            submitBtn.classList.add('opacity-75');
-        } else {
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = '<span>제출하기</span>';
-            submitBtn.classList.remove('opacity-75');
-        }
-    }
-
     function showToast(msg, type) {
         statusMsg.textContent = msg;
-        statusMsg.className = `mt-4 text-center text-sm font-medium block ${type === 'success' ? 'text-green-600' : 'text-red-600'}`;
-
-        // 3초 후 메시지 숨김
+        statusMsg.className = `fixed bottom-10 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-full text-sm font-medium shadow-lg z-50 transition-all duration-300 ${type === 'success' ? 'bg-green-600 text-white' : 'bg-red-600 text-white'}`;
+        statusMsg.classList.remove('hidden');
         setTimeout(() => {
             statusMsg.classList.add('hidden');
         }, 3000);

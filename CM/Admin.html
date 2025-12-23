@@ -11,35 +11,20 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap');
         body { font-family: 'Noto Sans KR', sans-serif; }
 
-        /* 카드 등장 애니메이션 */
+        .card-enter { animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         @keyframes slideInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px) scale(0.95);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0) scale(1);
-            }
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
         }
 
-        .card-enter {
-            animation: slideInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        /* 카운트다운 애니메이션 */
+        .countdown-text {
+            animation: popIn 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
-
-        /* 스크롤바 커스텀 */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 4px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #94a3b8;
+        @keyframes popIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
         }
     </style>
 </head>
@@ -47,17 +32,33 @@
 
 <!-- 헤더 -->
 <header class="bg-slate-800 border-b border-slate-700 p-6 sticky top-0 z-10 shadow-lg">
-    <div class="max-w-5xl mx-auto flex justify-between items-center">
+    <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
         <div class="flex items-center gap-3">
-            <i data-lucide="monitor-play" class="w-8 h-8 text-blue-400"></i>
-            <h1 class="text-2xl font-bold tracking-wide">실시간 발표 대기열</h1>
-        </div>
-        <div class="flex items-center gap-4">
-            <div class="bg-slate-700 px-4 py-2 rounded-full text-sm font-medium flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                실시간 연결됨
+            <div class="bg-blue-600 p-2 rounded-lg">
+                <i data-lucide="monitor-play" class="w-6 h-6 text-white"></i>
             </div>
-            <button onclick="clearList()" class="text-slate-400 hover:text-white hover:bg-slate-700 p-2 rounded transition" title="목록 비우기 (화면만)">
+            <div>
+                <h1 class="text-2xl font-bold tracking-wide">실시간 발표 시스템</h1>
+                <div id="connectionStatus" class="flex items-center gap-2 text-xs text-slate-400 mt-1">
+                    <span class="w-2 h-2 rounded-full bg-red-500" id="statusDot"></span>
+                    <span id="statusText">연결 대기중...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 컨트롤 패널 -->
+        <div class="flex items-center gap-3 bg-slate-750 p-1.5 rounded-xl border border-slate-700">
+            <button id="startBtn" onclick="startSession()" class="flex items-center gap-2 px-6 py-3 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition-all shadow-lg hover:shadow-green-500/20 active:scale-95">
+                <i data-lucide="play" class="w-5 h-5"></i>
+                <span>3초 후 시작</span>
+            </button>
+
+            <button id="resetBtn" onclick="resetSession()" class="flex items-center gap-2 px-4 py-3 bg-slate-700 hover:bg-slate-600 text-slate-200 font-medium rounded-lg transition-all active:scale-95 border border-slate-600">
+                <i data-lucide="refresh-ccw" class="w-5 h-5"></i>
+                <span>초기화 & 잠금</span>
+            </button>
+
+            <button onclick="clearUI()" class="flex items-center gap-2 px-4 py-3 text-slate-400 hover:text-white hover:bg-slate-700 rounded-lg transition-all" title="화면만 지우기">
                 <i data-lucide="trash-2" class="w-5 h-5"></i>
             </button>
         </div>
@@ -65,30 +66,43 @@
 </header>
 
 <!-- 메인 컨텐츠 영역 -->
-<main class="flex-1 p-6 overflow-y-auto">
-    <div id="messageList" class="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-6 pb-20">
-        <!-- 자바스크립트로 카드가 여기에 추가됩니다 -->
+<main class="flex-1 p-6 overflow-y-auto bg-slate-900 relative">
+    <div id="messageList" class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-20">
+        <!-- 카드가 여기에 추가됩니다 -->
+    </div>
 
-        <!-- 빈 상태 메시지 -->
-        <div id="emptyState" class="col-span-1 md:col-span-2 text-center py-20 text-slate-500">
-            <i data-lucide="inbox" class="w-16 h-16 mx-auto mb-4 opacity-50"></i>
-            <p class="text-lg">아직 제출된 발표가 없습니다.</p>
-            <p class="text-sm opacity-70">학생들이 제출하면 여기에 자동으로 나타납니다.</p>
+    <!-- 빈 상태 메시지 -->
+    <div id="emptyState" class="absolute inset-0 flex flex-col items-center justify-center text-slate-500 pointer-events-none">
+        <div class="bg-slate-800 p-8 rounded-full mb-6 ring-4 ring-slate-800/50">
+            <i data-lucide="inbox" class="w-16 h-16 opacity-50 text-blue-400"></i>
         </div>
+        <p class="text-xl font-bold text-slate-400">제출 대기 중</p>
+        <p class="text-sm opacity-60 mt-2">상단의 '시작' 버튼을 누르면 학생들이 제출할 수 있습니다.</p>
     </div>
 </main>
 
-<!-- 알림 토스트 (우측 하단) -->
-<div id="notificationToast" class="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-3 rounded-lg shadow-2xl transform translate-y-20 opacity-0 transition-all duration-300 pointer-events-none">
-    새로운 발표가 도착했습니다! 🎉
+<!-- 3초 카운트다운 오버레이 -->
+<div id="countdownOverlay" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm">
+    <div class="text-center">
+        <div id="countdownNum" class="text-9xl font-black text-white countdown-text drop-shadow-[0_0_15px_rgba(59,130,246,0.5)]">3</div>
+        <p class="text-2xl text-blue-300 mt-8 font-bold">잠시 후 학생들의 입력이 활성화됩니다!</p>
+    </div>
+</div>
+
+<!-- 알림 토스트 -->
+<div id="notificationToast" class="fixed bottom-6 right-6 bg-blue-600 text-white px-6 py-4 rounded-xl shadow-2xl transform translate-y-32 opacity-0 transition-all duration-500 flex items-center gap-3">
+    <span class="bg-white/20 p-2 rounded-lg"><i data-lucide="bell" class="w-5 h-5"></i></span>
+    <div>
+        <p class="font-bold text-sm">새로운 발표 도착!</p>
+        <p class="text-xs opacity-90">방금 학생이 내용을 제출했습니다.</p>
+    </div>
 </div>
 
 <script>
-    // 아이콘 초기화
     lucide.createIcons();
 
     // ==========================================
-    // [설정] Supabase 프로젝트 설정 (학생용과 동일한 키 사용)
+    // [설정] Supabase 키 입력 (학생용과 동일)
     // ==========================================
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
@@ -97,117 +111,198 @@
     let supabase;
     const messageList = document.getElementById('messageList');
     const emptyState = document.getElementById('emptyState');
+    const countdownOverlay = document.getElementById('countdownOverlay');
+    const countdownNum = document.getElementById('countdownNum');
+    const startBtn = document.getElementById('startBtn');
+    const statusDot = document.getElementById('statusDot');
+    const statusText = document.getElementById('statusText');
 
     // 초기화
     try {
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL_HERE') {
-            throw new Error("설정 필요");
-        }
+        if (SUPABASE_URL.includes('YOUR_')) throw new Error("설정 필요");
         supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        initRealtimeSubscription();
-        fetchExistingMessages();
+
+        initSystem();
+
     } catch (e) {
-        emptyState.innerHTML = `<p class="text-red-400">⚠️ Supabase 설정이 필요합니다. 코드(teacher.html)를 열어 URL과 KEY를 입력해주세요.</p>`;
+        console.error(e);
+        alert("Supabase 설정을 확인해주세요.");
     }
 
-    // 1. 기존 데이터 불러오기 (오늘 날짜 기준 등 필터링 가능)
+    async function initSystem() {
+        // 1. 현재 시스템 활성 상태 확인
+        await checkActiveStatus();
+
+        // 2. 제출된 메시지 구독
+        initSubmissionSubscription();
+
+        // 3. 기존 메시지 로드
+        fetchExistingMessages();
+    }
+
+    async function checkActiveStatus() {
+        const { data } = await supabase.from('system_status').select('is_active').eq('id', 1).single();
+        updateStatusUI(data?.is_active || false);
+    }
+
+    function updateStatusUI(isActive) {
+        if(isActive) {
+            statusDot.className = "w-2 h-2 rounded-full bg-green-500 animate-pulse";
+            statusDot.style.boxShadow = "0 0 10px #22c55e";
+            statusText.textContent = "입력 활성화됨 (진행 중)";
+            statusText.className = "text-green-400 font-bold";
+            startBtn.classList.add('opacity-50', 'cursor-not-allowed');
+            startBtn.disabled = true;
+            startBtn.innerHTML = `<i data-lucide="check" class="w-5 h-5"></i> <span>진행 중</span>`;
+            lucide.createIcons();
+        } else {
+            statusDot.className = "w-2 h-2 rounded-full bg-red-500";
+            statusDot.style.boxShadow = "none";
+            statusText.textContent = "입력 잠김 (대기 중)";
+            statusText.className = "text-slate-400";
+            startBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            startBtn.disabled = false;
+            startBtn.innerHTML = `<i data-lucide="play" class="w-5 h-5"></i> <span>3초 후 시작</span>`;
+            lucide.createIcons();
+        }
+    }
+
+    // ==========================================
+    // [핵심] 시작 로직 (3초 카운트다운)
+    // ==========================================
+    async function startSession() {
+        if(startBtn.disabled) return;
+
+        // 1. 카운트다운 시작
+        countdownOverlay.classList.remove('hidden');
+        let count = 3;
+        countdownNum.innerText = count;
+
+        // 카운트다운 애니메이션 루프
+        const timer = setInterval(() => {
+            count--;
+            if(count > 0) {
+                // 애니메이션 리셋을 위해 클래스 제거 후 다시 추가
+                countdownNum.classList.remove('countdown-text');
+                void countdownNum.offsetWidth; // 리플로우 강제
+                countdownNum.classList.add('countdown-text');
+                countdownNum.innerText = count;
+            } else {
+                clearInterval(timer);
+                finishCountdown();
+            }
+        }, 1000);
+    }
+
+    async function finishCountdown() {
+        // 2. 카운트다운 종료 후 DB 업데이트
+        countdownOverlay.classList.add('hidden');
+
+        // Supabase 상태 업데이트 -> 학생들 화면 열림
+        const { error } = await supabase
+            .from('system_status')
+            .upsert({ id: 1, is_active: true });
+
+        if(error) {
+            alert("상태 업데이트 실패: " + error.message);
+        } else {
+            updateStatusUI(true);
+            // 효과음 재생 (선택사항)
+            new Audio('https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3').play().catch(()=>{});
+        }
+    }
+
+    // ==========================================
+    // [핵심] 초기화 로직
+    // ==========================================
+    async function resetSession() {
+        if(!confirm("초기화 하시겠습니까?\n\n1. 학생 입력을 잠급니다.\n2. 현재 화면의 메시지를 지웁니다.\n(DB 데이터는 보존됩니다)")) return;
+
+        // 1. 상태 잠금으로 변경
+        await supabase.from('system_status').upsert({ id: 1, is_active: false });
+
+        // 2. UI 초기화
+        updateStatusUI(false);
+        clearUI();
+    }
+
+    function clearUI() {
+        messageList.innerHTML = '';
+        emptyState.style.display = 'flex';
+    }
+
+    // ==========================================
+    // 데이터 수신 및 렌더링
+    // ==========================================
+    function initSubmissionSubscription() {
+        supabase.channel('realtime-submissions')
+            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'submissions' }, (payload) => {
+                emptyState.style.display = 'none';
+                addCard(payload.new, true);
+                showNotification();
+            })
+            .subscribe();
+    }
+
     async function fetchExistingMessages() {
         const { data, error } = await supabase
             .from('submissions')
             .select('*')
-            .order('created_at', { ascending: true }); // 먼저 낸 사람이 위로, 혹은 false로 역순 가능
-
-        if (error) console.error('Error fetching:', error);
+            .order('created_at', { ascending: true }); // 먼저 낸 순서
 
         if (data && data.length > 0) {
             emptyState.style.display = 'none';
-            data.forEach(msg => addCardToUI(msg, false));
+            data.forEach(msg => addCard(msg, false));
+            // 최신 메시지로 스크롤
+            setTimeout(() => {
+                window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
+            }, 500);
         }
     }
 
-    // 2. 실시간 구독 설정
-    function initRealtimeSubscription() {
-        const channel = supabase
-            .channel('realtime-submissions')
-            .on(
-                'postgres_changes',
-                { event: 'INSERT', schema: 'public', table: 'submissions' },
-                (payload) => {
-                    console.log('New submission:', payload);
-                    emptyState.style.display = 'none';
-                    addCardToUI(payload.new, true);
-                    showNotification();
-                }
-            )
-            .subscribe();
-    }
-
-    // UI에 카드 추가 함수
-    function addCardToUI(data, isNew) {
+    function addCard(data, isNew) {
         const date = new Date(data.created_at);
         const timeStr = date.toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 
         const card = document.createElement('div');
-        // 스타일링: 그라데이션 보더 효과 및 카드 디자인
-        card.className = `bg-slate-800 rounded-xl p-6 border-l-4 border-blue-500 shadow-lg relative overflow-hidden group hover:bg-slate-750 transition-colors ${isNew ? 'card-enter' : ''}`;
+        // 색상 랜덤 배정
+        const colors = ['border-blue-500', 'border-purple-500', 'border-pink-500', 'border-indigo-500', 'border-teal-500'];
+        const randomColor = colors[Math.floor(Math.random() * colors.length)];
+        const avatarColor = randomColor.replace('border-', 'bg-');
 
-        // 랜덤한 배경 장식 (선택 사항)
-        const randomColor = ['bg-blue-500', 'bg-purple-500', 'bg-green-500', 'bg-yellow-500'][Math.floor(Math.random() * 4)];
+        card.className = `bg-slate-800 rounded-xl p-5 border-t-4 ${randomColor} shadow-lg relative hover:transform hover:-translate-y-1 transition-all duration-300 ${isNew ? 'card-enter' : ''}`;
 
         card.innerHTML = `
-                <div class="flex justify-between items-start mb-3">
-                    <div class="flex items-center gap-2">
-                        <div class="w-8 h-8 rounded-full ${randomColor} flex items-center justify-center text-white font-bold text-sm shadow-md">
-                            ${data.student_name.charAt(0)}
-                        </div>
-                        <h3 class="font-bold text-lg text-white">${data.student_name}</h3>
+                <div class="flex items-center gap-3 mb-3 pb-3 border-b border-slate-700">
+                    <div class="w-10 h-10 rounded-full ${avatarColor} flex items-center justify-center text-white font-bold shadow-inner">
+                        ${data.student_name.slice(0,1)}
                     </div>
-                    <span class="text-xs text-slate-400 font-mono bg-slate-900 px-2 py-1 rounded">${timeStr}</span>
+                    <div>
+                        <h3 class="font-bold text-lg text-white leading-none">${data.student_name}</h3>
+                        <span class="text-xs text-slate-400 font-mono mt-1 block">${timeStr}</span>
+                    </div>
                 </div>
-                <p class="text-slate-300 leading-relaxed text-lg break-words">${escapeHtml(data.message)}</p>
-                
-                <!-- 삭제 버튼 (교사용 로컬 삭제) -->
-                <button onclick="this.parentElement.remove()" class="absolute top-2 right-2 p-1 text-slate-600 hover:text-red-400 opacity-0 group-hover:opacity-100 transition">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
-                </button>
+                <p class="text-slate-200 leading-relaxed break-words text-lg font-medium">${escapeHtml(data.message)}</p>
             `;
 
-        // 목록의 맨 앞에 추가하려면 prepend, 맨 뒤에 추가하려면 append
-        // 발표 순서대로 보려면 append가 적절함
         messageList.appendChild(card);
 
-        // 새 메시지일 경우 스크롤을 아래로 이동
-        if (isNew) {
+        if(isNew) {
             window.scrollTo({ top: document.body.scrollHeight, behavior: 'smooth' });
         }
     }
 
-    // HTML 엔티티 이스케이프 (XSS 방지)
-    function escapeHtml(text) {
-        if (!text) return "";
-        return text
-            .replace(/&/g, "&amp;")
-            .replace(/</g, "&lt;")
-            .replace(/>/g, "&gt;")
-            .replace(/"/g, "&quot;")
-            .replace(/'/g, "&#039;")
-            .replace(/\n/g, "<br>");
-    }
-
     function showNotification() {
         const toast = document.getElementById('notificationToast');
-        toast.classList.remove('translate-y-20', 'opacity-0');
+        toast.classList.remove('translate-y-32', 'opacity-0');
         setTimeout(() => {
-            toast.classList.add('translate-y-20', 'opacity-0');
+            toast.classList.add('translate-y-32', 'opacity-0');
         }, 3000);
     }
 
-    function clearList() {
-        if(confirm('화면의 목록을 모두 지우시겠습니까? (DB 데이터는 유지됩니다)')) {
-            messageList.innerHTML = '';
-            emptyState.style.display = 'block';
-            messageList.appendChild(emptyState);
-        }
+    function escapeHtml(text) {
+        if (!text) return "";
+        return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;").replace(/\n/g, "<br>");
     }
 </script>
 </body>
