@@ -14,6 +14,7 @@
             touch-action: manipulation;
             height: 100dvh;
             overflow: hidden;
+            padding-bottom: env(safe-area-inset-bottom, 0);
         }
         .view { display: none; height: 100%; }
         .view.active { display: flex; }
@@ -131,7 +132,7 @@
             <div class="text-[9px] text-right text-slate-400 mt-1">NEXT LEVEL</div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3 mt-2 pb-8">
+        <div class="grid grid-cols-2 gap-3 mt-2 pb-24">
             <button id="btnPvP" class="col-span-2 bg-gradient-to-r from-indigo-800 to-indigo-600 text-white p-4 rounded-2xl shadow-lg border-b-4 border-indigo-900 active:border-b-0 active:translate-y-1 transition-all flex items-center justify-between group">
                 <div class="text-left">
                     <div class="font-bold text-lg">실시간 투기장</div>
