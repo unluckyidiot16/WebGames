@@ -50,6 +50,13 @@
         .btn-choice.correct { @apply bg-green-700 border-green-400 text-green-100; }
         .btn-choice.wrong { @apply bg-red-700 border-red-400 text-red-100; }
 
+        /* 리더보드 스타일 */
+        .rank-row { @apply flex items-center p-3 border-b border-gray-700 text-sm; }
+        .rank-row:last-child { border-bottom: none; }
+        .rank-1 { color: #fbbf24; font-weight: 900; }
+        .rank-2 { color: #9ca3af; font-weight: 800; }
+        .rank-3 { color: #b45309; font-weight: 800; }
+
         #myImg { transform: scaleX(-1); }
         #enemyImg { transform: scaleX(1); }
     </style>
@@ -60,15 +67,15 @@
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
         <div class="absolute top-6 right-6 bg-black border border-gray-600 px-3 py-1 text-xs text-gray-400 flex items-center gap-2">
             <div class="w-2 h-2 bg-green-500 animate-pulse"></div>
-            <span id="versionDisplay">v18.0</span>
+            <span id="versionDisplay">v20.0</span>
         </div>
 
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic tracking-tighter">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">PROFILE UPDATE</div>
+        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">FAST MATCHING</div>
 
-        <div onclick="openProfileModal()" class="bg-gray-800 p-4 mb-8 flex justify-between items-center shadow-lg border-2 border-gray-600 cursor-pointer hover:bg-gray-700 transition-colors group">
+        <div onclick="openProfileModal()" class="bg-gray-800 p-4 mb-4 flex justify-between items-center shadow-lg border-2 border-gray-600 cursor-pointer hover:bg-gray-700 transition-colors group">
             <div>
-                <div class="text-xs text-gray-400 group-hover:text-white">TRAINER (Click to Edit)</div>
+                <div class="text-xs text-gray-400 group-hover:text-white">TRAINER (Edit)</div>
                 <div class="text-xl font-bold text-yellow-400" id="myLobbyName">Trainer</div>
             </div>
             <div class="text-right">
@@ -77,10 +84,15 @@
             </div>
         </div>
 
+        <button onclick="openLeaderboard()" class="w-full bg-slate-800 hover:bg-slate-700 text-gray-300 font-bold py-3 mb-8 border border-gray-600 flex justify-center items-center gap-2 transition-all">
+            <span>🏆</span> 전체 랭킹 보기
+        </button>
+
         <div class="space-y-4 w-full">
-            <button onclick="startRankedMatch()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-black py-5 border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1 transition-all group">
-                <div class="text-lg">⚔️ 랭킹 매칭</div>
-                <div class="text-xs font-normal opacity-70">비슷한 실력의 상대와 대결</div>
+            <button onclick="startRankedMatch()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-black py-6 border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1 transition-all group relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 bg-white/20"></div>
+                <div class="text-xl animate-pulse">⚔️ 빠른 매칭</div>
+                <div class="text-xs font-normal opacity-80 mt-1">모든 유저와 대결 (MMR 무관)</div>
             </button>
 
             <div class="grid grid-cols-2 gap-3">
@@ -208,12 +220,23 @@
     </div>
 </section>
 
+<div id="leaderboardModal" class="fixed inset-0 bg-black/90 z-[65] hidden flex-col items-center justify-center p-6 backdrop-blur-sm">
+    <div class="bg-gray-800 border-2 border-gray-600 w-full max-w-sm h-3/4 flex flex-col shadow-2xl relative">
+        <button onclick="closeLeaderboard()" class="absolute top-2 right-4 text-gray-400 text-2xl hover:text-white">&times;</button>
+        <h2 class="text-2xl font-bold text-white p-4 border-b border-gray-700 text-center">TOP RANKING</h2>
+        <div class="grid grid-cols-4 gap-2 text-[10px] text-gray-500 px-4 py-2 border-b border-gray-700 text-center font-bold">
+            <div>RANK</div>
+            <div class="col-span-2 text-left pl-2">TRAINER</div>
+            <div>RATING</div>
+        </div>
+        <div id="leaderboardList" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+    </div>
+</div>
+
 <div id="profileModal" class="fixed inset-0 bg-black/90 z-[60] hidden flex-col items-center justify-center p-6 backdrop-blur-sm">
-    <div class="bg-gray-800 border-2 border-gray-600 w-full max-w-sm p-6 rounded-none shadow-2xl relative">
+    <div class="bg-gray-800 border-2 border-gray-600 w-full max-w-sm p-6 shadow-2xl relative">
         <button onclick="closeProfileModal()" class="absolute top-2 right-4 text-gray-400 text-2xl hover:text-white">&times;</button>
-
         <h2 class="text-2xl font-bold text-white mb-6 text-center border-b border-gray-700 pb-2">TRAINER CARD</h2>
-
         <div class="space-y-4">
             <div>
                 <label class="text-xs text-gray-400 block mb-1">NICKNAME</label>
@@ -222,26 +245,12 @@
                     <button onclick="saveProfile()" class="bg-blue-600 px-4 text-sm font-bold hover:bg-blue-500">SAVE</button>
                 </div>
             </div>
-
             <div class="grid grid-cols-3 gap-2 text-center bg-gray-900 p-3 border border-gray-700">
-                <div>
-                    <div class="text-[10px] text-gray-500">WINS</div>
-                    <div class="text-lg font-bold text-green-400" id="profileWins">0</div>
-                </div>
-                <div>
-                    <div class="text-[10px] text-gray-500">LOSSES</div>
-                    <div class="text-lg font-bold text-red-400" id="profileLosses">0</div>
-                </div>
-                <div>
-                    <div class="text-[10px] text-gray-500">WIN RATE</div>
-                    <div class="text-lg font-bold text-yellow-400" id="profileWinRate">0%</div>
-                </div>
+                <div><div class="text-[10px] text-gray-500">WINS</div><div class="text-lg font-bold text-green-400" id="profileWins">0</div></div>
+                <div><div class="text-[10px] text-gray-500">LOSSES</div><div class="text-lg font-bold text-red-400" id="profileLosses">0</div></div>
+                <div><div class="text-[10px] text-gray-500">WIN RATE</div><div class="text-lg font-bold text-yellow-400" id="profileWinRate">0%</div></div>
             </div>
-
-            <div class="text-center">
-                <div class="text-[10px] text-gray-500 mb-1">UUID</div>
-                <div class="text-[10px] text-gray-600 bg-black p-1 truncate" id="profileUUID">...</div>
-            </div>
+            <div class="text-center"><div class="text-[10px] text-gray-500 mb-1">UUID</div><div class="text-[10px] text-gray-600 bg-black p-1 truncate" id="profileUUID">...</div></div>
         </div>
     </div>
 </div>
@@ -250,11 +259,8 @@
     <div class="text-6xl mb-4">⚠️</div>
     <h2 class="text-3xl font-black text-white mb-2">업데이트 필요</h2>
     <p class="text-gray-400 mb-6">새로운 패치가 있습니다.<br>최신 버전으로 업데이트 해주세요.</p>
-    <div class="text-yellow-400 font-bold mb-6 text-xl">
-        현재: <span id="currentVerDisplay"></span> <br>
-        최신: <span id="serverVerDisplay"></span>
-    </div>
-    <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-500">새로고침</button>
+    <div class="text-yellow-400 font-bold mb-6 text-xl">현재: <span id="currentVerDisplay"></span> <br> 최신: <span id="serverVerDisplay"></span></div>
+    <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-3 px-8 hover:bg-blue-500">새로고침</button>
 </div>
 
 <div id="resultModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
@@ -268,14 +274,15 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const GAME_VERSION = "v18.0";
+    const GAME_VERSION = "v20.0"; // Version Up
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
+
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
-    let myName = "Trainer"; // 기본값
+    let myName = "Trainer";
 
     // ==========================================
     // 1. 데이터
@@ -303,6 +310,7 @@
     let ackReceived = false;
     let gameEnded = false;
     let myStats = { wins: 0, losses: 0, mmr: 1000 };
+    let matchInterval = null; // 매칭 주기 체크용
 
     let gameState = {
         round: 1, phase: 'select', timer: 10,
@@ -313,7 +321,7 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 & 로비 & 프로필
+    // 2. 초기화 & 로비
     // ==========================================
     window.onload = async () => {
         document.getElementById('versionDisplay').innerText = GAME_VERSION;
@@ -365,84 +373,110 @@
         document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
     }
 
-    // --- 프로필 모달 관련 ---
-    function openProfileModal() {
-        const modal = document.getElementById('profileModal');
+    // --- 리더보드 ---
+    async function openLeaderboard() {
+        const modal = document.getElementById('leaderboardModal');
         modal.classList.remove('hidden');
         modal.classList.add('flex');
 
+        const list = document.getElementById('leaderboardList');
+        list.innerHTML = '<div class="text-center text-gray-500 mt-10">불러오는 중...</div>';
+
+        const { data, error } = await sb
+            .from('ppb_rankings')
+            .select('username, mmr, user_id')
+            .order('mmr', { ascending: false })
+            .limit(50);
+
+        if(error || !data) { list.innerHTML = '<div class="text-center text-red-500">실패</div>'; return; }
+
+        list.innerHTML = '';
+        data.forEach((user, idx) => {
+            const rank = idx + 1;
+            let rankClass = "text-gray-400";
+            if (rank === 1) rankClass = "rank-1";
+            if (rank === 2) rankClass = "rank-2";
+            if (rank === 3) rankClass = "rank-3";
+            const isMe = user.user_id === myUUID ? "bg-slate-700 border-yellow-600" : "hover:bg-gray-700 border-gray-800";
+            const row = document.createElement('div');
+            row.className = `rank-row ${isMe} grid grid-cols-4 gap-2 text-center items-center rounded`;
+            row.innerHTML = `<div class="${rankClass}">${rank}</div><div class="col-span-2 text-left pl-2 font-bold text-white truncate">${user.username}</div><div class="text-yellow-400 font-mono">${user.mmr}</div>`;
+            list.appendChild(row);
+        });
+    }
+    function closeLeaderboard() { document.getElementById('leaderboardModal').classList.add('hidden'); document.getElementById('leaderboardModal').classList.remove('flex'); }
+
+    // --- 프로필 모달 ---
+    function openProfileModal() {
+        const modal = document.getElementById('profileModal');
+        modal.classList.remove('hidden'); modal.classList.add('flex');
         document.getElementById('inputNickname').value = myName;
         document.getElementById('profileWins').innerText = myStats.wins;
         document.getElementById('profileLosses').innerText = myStats.losses;
         document.getElementById('profileUUID').innerText = myUUID;
-
         const total = myStats.wins + myStats.losses;
         const rate = total > 0 ? Math.round((myStats.wins / total) * 100) : 0;
         document.getElementById('profileWinRate').innerText = `${rate}%`;
     }
-
-    function closeProfileModal() {
-        document.getElementById('profileModal').classList.add('hidden');
-        document.getElementById('profileModal').classList.remove('flex');
-    }
-
+    function closeProfileModal() { document.getElementById('profileModal').classList.add('hidden'); document.getElementById('profileModal').classList.remove('flex'); }
     async function saveProfile() {
         const newName = document.getElementById('inputNickname').value.trim();
         if(!newName) return alert("닉네임을 입력하세요.");
-
         const { error } = await sb.from('ppb_rankings').update({ username: newName }).eq('user_id', myUUID);
-        if(!error) {
-            myName = newName;
-            updateLobbyProfileUI();
-            closeProfileModal();
-            alert("저장되었습니다.");
-        } else {
-            alert("저장 실패: " + error.message);
-        }
+        if(!error) { myName = newName; updateLobbyProfileUI(); closeProfileModal(); alert("저장되었습니다."); }
     }
 
     function switchView(id) {
-        document.querySelectorAll('.view').forEach(v=>{
-            v.classList.remove('active');
-            if(id!=='waitingView') document.getElementById('waitingView').classList.add('hidden');
-        });
+        document.querySelectorAll('.view').forEach(v=>{ v.classList.remove('active'); if(id!=='waitingView') document.getElementById('waitingView').classList.add('hidden'); });
         const target = document.getElementById(id);
-        if(target) {
-            target.classList.add('active');
-            if(id==='waitingView') target.classList.remove('hidden');
-        }
+        if(target) { target.classList.add('active'); if(id==='waitingView') target.classList.remove('hidden'); }
     }
 
-    // --- 로비 & 매칭 ---
+    // --- 로비 & 매칭 (무작위 매칭 적용) ---
     function startRankedMatch() {
         battleMode = 'ranked';
         switchView('waitingView');
-        document.getElementById('waitingTitle').innerText = "매칭 중...";
-        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
+        document.getElementById('waitingTitle').innerText = "무작위 매칭 중...";
+        document.getElementById('waitingMsg').innerText = "접속 중인 모든 유저를 찾는 중입니다.";
 
         if(channel) sb.removeChannel(channel);
         channel = sb.channel('ppb_rank_queue');
 
-        channel.on('presence', { event: 'sync' }, () => {
-            const users = Object.values(channel.presenceState()).flat();
+        // 매칭 시도 함수
+        const tryMatch = () => {
+            const state = channel.presenceState();
+            const users = Object.values(state).flat();
+            // 필터링: 나 제외, 검색중인 유저, 버전 일치 (MMR 체크 제거)
             const opponent = users.find(u => u.id !== myUUID && u.status === 'searching' && u.version === GAME_VERSION);
-            if (opponent && myUUID > opponent.id) {
-                const room = `ppb_${myUUID}_${opponent.id}`;
-                channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myUUID } });
-                joinRoom(room, true);
+
+            if (opponent) {
+                // ID가 큰 쪽이 방장 (중복 생성 방지)
+                if (myUUID > opponent.id) {
+                    const room = `ppb_${myUUID}_${opponent.id}`;
+                    channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myUUID } });
+                    joinRoom(room, true);
+                }
             }
-        }).on('broadcast', { event: 'match' }, ({ payload }) => {
-            if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
-        }).subscribe(async (s) => {
-            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching', version: GAME_VERSION, name: myName });
-        });
+        };
+
+        channel.on('presence', { event: 'sync' }, tryMatch)
+            .on('broadcast', { event: 'match' }, ({ payload }) => {
+                if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
+            })
+            .subscribe(async (s) => {
+                if(s==='SUBSCRIBED') {
+                    await channel.track({ id: myUUID, status: 'searching', version: GAME_VERSION, name: myName });
+                    // 1초마다 능동적 체크 (속도 향상)
+                    if(matchInterval) clearInterval(matchInterval);
+                    matchInterval = setInterval(tryMatch, 1000);
+                }
+            });
     }
 
     function createRoom() {
         battleMode = 'friendly';
         const roomName = `[대기] ${myName}의 방`;
         const rId = `room_${myUUID}_${Date.now()}`;
-
         lobbyChannel = sb.channel('ppb_lobby');
         lobbyChannel.subscribe(async (s) => {
             if (s === 'SUBSCRIBED') {
@@ -450,7 +484,6 @@
                 waitForChallenger(rId);
             }
         });
-
         switchView('waitingView');
         document.getElementById('waitingTitle').innerText = "대기실";
         document.getElementById('waitingMsg').innerText = "도전자를 기다리는 중...";
@@ -476,14 +509,11 @@
         if(!container) return;
         container.innerHTML = "";
         const rooms = Object.values(state).flat().filter(u => u.isHost && u.version === GAME_VERSION);
-        if(rooms.length === 0) {
-            container.innerHTML = '<div class="text-center text-gray-500 mt-20 flex flex-col items-center"><span class="text-4xl mb-2">📭</span>개설된 방이 없습니다.</div>';
-            return;
-        }
+        if(rooms.length === 0) { container.innerHTML = '<div class="text-center text-gray-500 mt-20">개설된 방이 없습니다.</div>'; return; }
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-item";
-            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 text-white">입장</div>`;
+            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 rounded">입장</div>`;
             div.onclick = () => joinRoom(room.roomId, false);
             container.appendChild(div);
         });
@@ -491,7 +521,11 @@
 
     function enterCustomLobby() { switchView('customLobbyView'); connectToLobby(); }
     function leaveLobby() { if(lobbyChannel) sb.removeChannel(lobbyChannel); switchView('lobbyView'); }
-    function cancelMatching() { if(channel) sb.removeChannel(channel); switchView('lobbyView'); }
+    function cancelMatching() {
+        if(channel) sb.removeChannel(channel);
+        if(matchInterval) clearInterval(matchInterval); // 인터벌 해제
+        switchView('lobbyView');
+    }
 
     // ==========================================
     // 4. 접속 & 픽 페이즈
@@ -499,15 +533,13 @@
     function joinRoom(room, host) {
         if(channel) sb.removeChannel(channel);
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
-        roomId = room; isHost = host;
+        if(matchInterval) clearInterval(matchInterval); // 매칭 중단
 
-        ackReceived = false;
-        battleInitialized = false;
-        gameEnded = false;
+        roomId = room; isHost = host;
+        ackReceived = false; battleInitialized = false; gameEnded = false;
         myData = null; enemyData = null;
 
         channel = sb.channel(room);
-
         channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
             leftPresences.forEach(p => {
                 if (p.id !== myUUID && !gameEnded && battleInitialized) {
@@ -592,22 +624,16 @@
     function togglePick(id, el) {
         id = parseInt(id);
         const idx = myParty.indexOf(id);
-
         if (idx >= 0) {
-            myParty.splice(idx, 1);
-            el.classList.remove('selected');
-            const badge = el.querySelector('.check-badge');
-            if(badge) badge.remove();
+            myParty.splice(idx, 1); el.classList.remove('selected');
+            const badge = el.querySelector('.check-badge'); if(badge) badge.remove();
         } else {
             if (myParty.length >= 3) return;
-            myParty.push(id);
-            el.classList.add('selected');
+            myParty.push(id); el.classList.add('selected');
             const badge = document.createElement('div');
             badge.className = "check-badge absolute top-1 right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-sm";
-            badge.innerText = "✓";
-            el.appendChild(badge);
+            badge.innerText = "✓"; el.appendChild(badge);
         }
-
         document.getElementById('pickCount').innerText = `${myParty.length} / 3`;
         document.getElementById('btnConfirmPick').disabled = (myParty.length !== 3);
     }
@@ -615,9 +641,7 @@
     function autoPick() {
         if (myParty.length < 3) {
             const remaining = Object.keys(POKEMON_DB).map(Number).filter(id => !myParty.includes(id));
-            while (myParty.length < 3 && remaining.length > 0) {
-                myParty.push(remaining.pop());
-            }
+            while (myParty.length < 3 && remaining.length > 0) { myParty.push(remaining.pop()); }
         }
         confirmParty();
     }
@@ -626,22 +650,17 @@
         clearInterval(timerInterval);
         document.getElementById('btnConfirmPick').innerText = "대기 중...";
         document.getElementById('btnConfirmPick').disabled = true;
-
         myData = {
             id: myUUID,
             party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp * 3, hp: POKEMON_DB[id].hp * 3, charge: 0 }))
         };
-
         channel.send({ type: 'broadcast', event: 'party_submit', payload: myData });
         checkBattleStart();
     }
 
     function checkBattleStart() {
-        if (myData && myData.party && enemyData && enemyData.party) {
-            startBattle();
-        } else if (myData && myData.party) {
-            document.getElementById('opponentPickStatus').classList.remove('hidden');
-        }
+        if (myData && myData.party && enemyData && enemyData.party) startBattle();
+        else if (myData && myData.party) document.getElementById('opponentPickStatus').classList.remove('hidden');
     }
 
     // ==========================================
@@ -649,20 +668,14 @@
     // ==========================================
     function startBattle() {
         switchView('battleView');
-
         gameState.myPartyState = JSON.parse(JSON.stringify(myData.party));
         gameState.enemyPartyState = JSON.parse(JSON.stringify(enemyData.party));
         gameState.myActiveIdx = 0;
         gameState.enemyActiveIdx = 0;
-
         document.getElementById('myName').innerText = myName;
         document.getElementById('enemyName').innerText = enemyData.name;
-
         updateBattleUI();
-
-        if (isHost) {
-            setTimeout(() => startNewRound(), 2000);
-        }
+        if (isHost) setTimeout(() => startNewRound(), 2000);
     }
 
     function startNewRound() {
@@ -670,7 +683,6 @@
         const ans = n1*n2;
         const choices = new Set([ans]);
         while(choices.size < 4) choices.add(ans + (Math.floor(Math.random()*5)-2)*10);
-
         const quiz = { q: `${n1} × ${n2} = ?`, a: ans, choices: Array.from(choices).sort(()=>Math.random()-0.5) };
         channel.send({ type: 'broadcast', event: 'quiz_start', payload: quiz });
         startQuizPhase(quiz);
@@ -678,12 +690,10 @@
 
     function startQuizPhase(quiz) {
         if (!gameState.myPartyState.length) return;
-
         gameState.phase = 'select';
         gameState.currentQuiz = quiz;
         gameState.myAnswer = null;
         gameState.enemyAnswer = null;
-
         document.getElementById('skillPanel').classList.remove('hidden');
         document.getElementById('quizPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('flex');
@@ -698,7 +708,6 @@
             btnSpecial.disabled = true;
             btnSpecial.classList.remove('animate-pulse', 'ring-2', 'ring-yellow-400');
         }
-
         startTimer(30, () => submitAction(-999));
     }
 
@@ -721,7 +730,6 @@
         document.getElementById('skillPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('hidden');
         document.getElementById('quizPanel').classList.add('flex');
-
         document.getElementById('quizQuestion').innerText = gameState.currentQuiz.q;
         document.getElementById('quizStatusMsg').innerText = "문제를 풀면 공격이 나갑니다!";
         const grid = document.getElementById('quizChoices');
@@ -740,7 +748,6 @@
         const correct = val === gameState.currentQuiz.a;
         gameState.myAnswer = { correct, type: gameState.selectedType };
         document.getElementById('quizStatusMsg').innerText = "상대방 기다리는 중...";
-
         channel.send({ type: 'broadcast', event: 'submit_action', payload: { id: myUUID, correct, type: gameState.selectedType } });
         checkTurnEnd();
     }
@@ -756,13 +763,11 @@
         gameState.phase = 'resolve';
         document.getElementById('quizPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('flex');
-
         const meFirst = isHost;
         await executeAttack(meFirst ? 'me' : 'enemy');
         if (checkGameOver()) return;
         await executeAttack(meFirst ? 'enemy' : 'me');
         if (checkGameOver()) return;
-
         if (isHost) setTimeout(startNewRound, 1500);
     }
 
@@ -798,10 +803,7 @@
             updateBattleUI();
 
             if (target.hp <= 0) {
-                setTimeout(() => {
-                    handleFaint(isMe);
-                    resolve();
-                }, 1000);
+                setTimeout(() => { handleFaint(isMe); resolve(); }, 1000);
             } else {
                 setTimeout(resolve, 1500);
             }
@@ -833,11 +835,9 @@
 
     async function endGame(win) {
         gameEnded = true;
-
-        // 결과 DB 반영
         const changeMMR = win ? 20 : -10;
         const updates = {
-            mmr: myStats.mmr + changeMMR,
+            mmr: Math.max(0, myStats.mmr + changeMMR),
             wins: myStats.wins + (win ? 1 : 0),
             losses: myStats.losses + (win ? 0 : 1)
         };
@@ -854,6 +854,7 @@
 
         if(channel) sb.removeChannel(channel);
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
+        if(matchInterval) clearInterval(matchInterval);
     }
 
     function updateBattleUI() {
@@ -864,7 +865,6 @@
 
         document.getElementById('myImg').src = myPoke.img || FALLBACK_IMG;
         document.getElementById('myImg').style.opacity = myPoke.hp > 0 ? 1 : 0.5;
-        // 닉네임은 startBattle 시점에 설정됨
         document.getElementById('myHpText').innerText = `${Math.max(0, myPoke.hp)}/${myPoke.maxHp}`;
         document.getElementById('myHpBar').style.width = `${Math.max(0, (myPoke.hp/myPoke.maxHp)*100)}%`;
 
