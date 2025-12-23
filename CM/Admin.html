@@ -13,7 +13,6 @@
         .card-enter { animation: slideUp 0.5s ease forwards; }
         @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* 랭킹 배지 스타일 */
         .rank-badge { position: absolute; top: -10px; left: -10px; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; color: white; border: 2px solid white; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.3); z-index: 10; }
         .rank-1 { background: linear-gradient(135deg, #FFD700, #FFA500); font-size: 1.2rem; transform: scale(1.1); }
         .rank-2 { background: linear-gradient(135deg, #C0C0C0, #808080); }
@@ -31,24 +30,21 @@
         </div>
 
         <div class="flex items-center gap-2">
-            <!-- 1. 시작 버튼 -->
+            <!-- 버튼들 -->
             <button id="startBtn" class="flex items-center gap-2 px-5 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg transition shadow-lg">
                 <i data-lucide="play" class="w-4 h-4"></i> 3초 후 시작
             </button>
 
-            <!-- 2. 잠금 버튼 (메시지는 유지, 입력만 막음) -->
             <button id="lockBtn" class="flex items-center gap-2 px-5 py-2 bg-yellow-600 hover:bg-yellow-700 text-white font-bold rounded-lg transition shadow-lg hidden">
                 <i data-lucide="lock" class="w-4 h-4"></i> 입력 잠금
             </button>
 
             <div class="h-8 w-px bg-slate-600 mx-2"></div>
 
-            <!-- 3. 초기화 버튼 (데이터 삭제) -->
             <button id="resetBtn" class="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-red-600 text-slate-200 hover:text-white font-medium rounded-lg transition border border-slate-600">
                 <i data-lucide="trash-2" class="w-4 h-4"></i> 전체 삭제
             </button>
 
-            <!-- 4. 학생 관리 팝업 버튼 -->
             <button onclick="openUserManager()" class="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-medium rounded-lg transition ml-2">
                 <i data-lucide="users" class="w-4 h-4"></i> 학생 관리
             </button>
@@ -65,7 +61,6 @@
     </div>
 </main>
 
-<!-- 카운트다운 오버레이 -->
 <div id="countdownOverlay" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center hidden backdrop-blur-sm">
     <div id="countdownNum" class="text-9xl font-black text-white">3</div>
 </div>
@@ -74,8 +69,11 @@
     document.addEventListener('DOMContentLoaded', () => {
         if(window.lucide) window.lucide.createIcons();
 
-        const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M';
+        // ==========================================
+        // [설정] Supabase 키 (반드시 입력!)
+        // ==========================================
+        const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // 고객님의 URL
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // 고객님의 KEY
 
         let supabase;
         const messageList = document.getElementById('messageList');
@@ -85,9 +83,8 @@
         const resetBtn = document.getElementById('resetBtn');
         const statusBadge = document.getElementById('statusBadge');
 
-        // 전역 함수로 등록 (팝업 열기용)
+        // 팝업 열기 함수
         window.openUserManager = function() {
-            // 팝업 창 크기 및 위치 설정
             const width = 500;
             const height = 600;
             const left = (window.screen.width / 2) - (width / 2);
@@ -96,21 +93,26 @@
         };
 
         try {
-            if (SUPABASE_URL.includes('YOUR_')) throw new Error("Supabase 설정 필요");
+            if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_')) {
+                throw new Error("Supabase URL 및 KEY를 설정해주세요.");
+            }
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
             init();
         } catch (e) {
-            alert("설정 오류: 코드를 확인해주세요.");
+            console.error(e);
+            alert("설정 오류: " + e.message + "\n코드를 열어 키가 올바른지 확인해주세요.");
         }
 
         function init() {
-            // 버튼 이벤트
+            // 이벤트 연결
             startBtn.onclick = startSession;
             lockBtn.onclick = lockSession;
             resetBtn.onclick = resetData;
 
-            // 초기 데이터 로드
+            // 데이터 불러오기
             fetchMessages();
+
+            // [수정] 이 함수가 정의되어 있어야 합니다.
             checkSystemStatus();
 
             // 실시간 구독
@@ -123,6 +125,13 @@
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'system_status' },
                     payload => { updateStatusUI(payload.new.is_active); })
                 .subscribe();
+        }
+
+        // --- [추가됨] 시스템 상태 확인 함수 ---
+        async function checkSystemStatus() {
+            const { data } = await supabase.from('system_status').select('is_active').eq('id', 1).single();
+            // 데이터가 없으면 false, 있으면 값 적용
+            updateStatusUI(data ? data.is_active : false);
         }
 
         // --- 세션 제어 로직 ---
@@ -151,13 +160,9 @@
         async function resetData() {
             if(!confirm("모든 발표 데이터를 영구 삭제하시겠습니까? (잠금 상태로 전환됩니다)")) return;
 
-            // 1. 잠금
             await supabase.from('system_status').upsert({ id: 1, is_active: false });
 
-            // 2. 데이터 삭제 (Submissions 테이블 truncate가 안되므로, delete all)
-            // *주의: RLS가 켜져있으면 정책에 따라 삭제가 안될 수 있습니다. 
-            // 간단한 구현을 위해 여기선 REST API로 삭제 요청
-            const { error } = await supabase.from('submissions').delete().neq('id', 0); // 모든 id 삭제
+            const { error } = await supabase.from('submissions').delete().neq('id', 0);
 
             if(!error) {
                 messageList.innerHTML = '';
@@ -181,7 +186,7 @@
             }
         }
 
-        // --- 메시지 렌더링 로직 (등수 포함) ---
+        // --- 메시지 렌더링 로직 ---
         async function fetchMessages() {
             const { data } = await supabase.from('submissions').select('*').order('created_at', { ascending: true });
             if(data && data.length > 0) data.forEach(addCard);
@@ -190,7 +195,6 @@
         function addCard(data) {
             emptyState.style.display = 'none';
 
-            // 현재 카드 개수 + 1 = 등수
             const rank = messageList.children.length + 1;
             let rankClass = 'rank-other';
             let rankText = rank + '등';
