@@ -10,33 +10,19 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;600;700&display=swap');
         body { font-family: 'Pretendard', sans-serif; }
-
-        /* 부드러운 전환 효과 */
         .transition-all-custom { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-
-        /* 잠금 상태 스타일 */
-        .locked-blur {
-            filter: blur(4px);
-            pointer-events: none;
-            user-select: none;
-        }
-
-        /* 펄스 애니메이션 */
+        .locked-blur { filter: blur(4px); pointer-events: none; user-select: none; }
         @keyframes subtle-pulse {
             0%, 100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.4); }
             50% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
         }
-        .animate-submit-pulse {
-            animation: subtle-pulse 2s infinite;
-        }
+        .animate-submit-pulse { animation: subtle-pulse 2s infinite; }
     </style>
 </head>
 <body class="bg-gradient-to-br from-indigo-50 via-white to-purple-50 min-h-screen flex items-center justify-center p-4">
 
 <!-- 메인 카드 -->
 <div class="w-full max-w-md bg-white/80 backdrop-blur-xl rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-white/50 overflow-hidden relative transition-all-custom">
-
-    <!-- 상단 헤더 & 상태 배지 -->
     <div class="p-6 pb-2 flex justify-between items-center">
         <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
             <i data-lucide="send" class="w-6 h-6 text-indigo-600"></i>
@@ -48,7 +34,6 @@
         </div>
     </div>
 
-    <!-- 잠금 오버레이 (잠겼을 때 나타남) -->
     <div id="lockOverlay" class="absolute inset-0 z-20 flex flex-col items-center justify-center bg-white/60 backdrop-blur-sm transition-opacity duration-500 opacity-100">
         <div class="bg-white p-5 rounded-full shadow-lg mb-4 animate-bounce">
             <i data-lucide="lock" class="w-8 h-8 text-slate-400"></i>
@@ -57,12 +42,9 @@
         <p class="text-slate-500 text-sm mt-2">선생님의 시작 신호를 대기 중입니다</p>
     </div>
 
-    <!-- 입력 폼 -->
     <div id="formContent" class="p-6 pt-4 space-y-5 transition-all-custom locked-blur">
         <p class="text-slate-500 text-sm">발표할 내용을 작성하여 선생님께 전송하세요.</p>
-
         <form id="submitForm" class="space-y-4">
-            <!-- 이름 입력 -->
             <div class="group">
                 <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">이름</label>
                 <div class="relative">
@@ -74,8 +56,6 @@
                            placeholder="본인의 이름을 입력하세요">
                 </div>
             </div>
-
-            <!-- 내용 입력 -->
             <div class="group">
                 <label class="block text-xs font-semibold text-slate-500 mb-1.5 ml-1">발표 내용</label>
                 <div class="relative">
@@ -87,8 +67,6 @@
                               placeholder="발표할 내용을 입력하세요"></textarea>
                 </div>
             </div>
-
-            <!-- 제출 버튼 -->
             <button type="submit" id="submitBtn" disabled
                     class="w-full py-4 rounded-xl font-bold text-white shadow-lg shadow-indigo-200 transition-all duration-300 transform active:scale-95 disabled:opacity-50 disabled:shadow-none flex justify-center items-center gap-2 bg-slate-400 cursor-not-allowed">
                 <span id="btnText">제출 대기 중</span>
@@ -96,27 +74,21 @@
             </button>
         </form>
     </div>
-
-    <!-- 하단 장식 -->
     <div class="h-1.5 w-full bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500"></div>
 </div>
 
-<!-- 토스트 알림 -->
-<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-xl z-50 transition-all duration-300 transform translate-y-20 opacity-0 flex items-center gap-2 backdrop-blur-md">
-    <!-- JS로 내용 채움 -->
-</div>
+<div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-xl z-50 transition-all duration-300 transform translate-y-20 opacity-0 flex items-center gap-2 backdrop-blur-md"></div>
 
 <script>
-    // 아이콘 초기화
-    lucide.createIcons();
+    document.addEventListener('DOMContentLoaded', () => {
+        // 아이콘 초기화
+        if(window.lucide) window.lucide.createIcons();
 
-    document.addEventListener('DOMContentLoaded', async () => {
         // ==========================================
-        // [설정] Supabase 키 (반드시 입력!)
+        // [설정] Supabase 키 (적용 완료)
         // ==========================================
-        const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
-
+        const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M';
 
         let supabase;
         let myClientId = localStorage.getItem('student_client_id');
@@ -125,54 +97,56 @@
             localStorage.setItem('student_client_id', myClientId);
         }
 
-        // UI 요소 참조
+        // DOM 요소 참조
         const lockOverlay = document.getElementById('lockOverlay');
         const formContent = document.getElementById('formContent');
         const statusBadge = document.getElementById('statusBadge');
         const submitBtn = document.getElementById('submitBtn');
         const btnText = document.getElementById('btnText');
-        const btnIcon = document.getElementById('btnIcon'); // 아이콘 요소는 lucide가 svg로 바꾸므로 부모를 타겟팅하거나 다시 생성해야 함.
-        const inputs = document.querySelectorAll('input, textarea');
         const nameInput = document.getElementById('name');
         const messageInput = document.getElementById('message');
 
-        // 버튼 내부 아이콘 갱신 헬퍼 함수
+        // 버튼 아이콘 업데이트 헬퍼
         function updateBtnIcon(iconName) {
-            // 기존 아이콘 제거
             const oldIcon = submitBtn.querySelector('svg');
             if (oldIcon) oldIcon.remove();
-
-            // 새 아이콘 추가
             const i = document.createElement('i');
             i.setAttribute('data-lucide', iconName);
             i.className = "w-4 h-4";
             submitBtn.appendChild(i);
-            lucide.createIcons();
+            if(window.lucide) window.lucide.createIcons();
         }
 
+        // 1. Supabase 초기화 (설정 오류 체크)
         try {
             if (!SUPABASE_URL || SUPABASE_URL.includes('YOUR_')) {
-                throw new Error("설정 필요");
+                throw new Error("Supabase URL 설정을 확인해주세요.");
             }
             supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-            // 1. 초기 상태 확인 및 구독
-            setupSystemStatus();
-
-            // 2. 실시간 접속(Presence) 알림
-            setupPresence();
-
         } catch (e) {
-            showToast("⚠️ Supabase 설정 코드를 확인해주세요", "error");
+            showToast("⚠️ 설정 오류: " + e.message, "error");
             console.error(e);
+            return; // 초기화 실패 시 중단
         }
 
-        function setupSystemStatus() {
-            // 초기 상태 로드
-            supabase.from('system_status').select('is_active').eq('id', 1).single()
-                .then(({ data }) => toggleUI(data?.is_active));
+        // 2. 시스템 실행 (데이터 통신)
+        try {
+            setupSystemStatus();
+            setupPresence();
+        } catch(e) {
+            console.error("실행 중 오류:", e);
+        }
 
-            // 실시간 변경 감지
+        async function setupSystemStatus() {
+            const { data, error } = await supabase.from('system_status').select('is_active').eq('id', 1).single();
+
+            if (error && error.code !== 'PGRST116') { // PGRST116: 결과 없음 (첫 실행 시 발생 가능, 무시)
+                console.error("상태 확인 실패:", error);
+            }
+
+            toggleUI(data?.is_active || false);
+
+            // 실시간 구독
             supabase.channel('public:system_status')
                 .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'system_status' },
                     payload => toggleUI(payload.new.is_active))
@@ -182,14 +156,10 @@
         let presenceChannel;
         function setupPresence() {
             presenceChannel = supabase.channel('class_room');
-
             presenceChannel.subscribe(async (status) => {
-                if (status === 'SUBSCRIBED') {
-                    await trackPresence();
-                }
+                if (status === 'SUBSCRIBED') await trackPresence();
             });
 
-            // 이름 입력 시 상태 업데이트 (Debounce 적용)
             let timeout;
             nameInput.addEventListener('input', () => {
                 clearTimeout(timeout);
@@ -208,69 +178,45 @@
 
         function toggleUI(isActive) {
             if (isActive) {
-                // 활성화 상태 (잠금 해제)
                 lockOverlay.classList.remove('opacity-100');
                 lockOverlay.classList.add('opacity-0', 'pointer-events-none');
-
                 formContent.classList.remove('locked-blur');
-
                 statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-indigo-100 text-indigo-600 flex items-center gap-1.5 shadow-sm";
                 statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>제출 가능`;
-
-                inputs.forEach(el => el.disabled = false);
-
-                submitBtn.disabled = false;
+                [nameInput, messageInput, submitBtn].forEach(el => el.disabled = false);
                 submitBtn.className = "w-full py-4 rounded-xl font-bold text-white shadow-lg shadow-indigo-200 transition-all duration-300 transform hover:-translate-y-1 hover:shadow-indigo-300 bg-gradient-to-r from-indigo-500 to-purple-600 animate-submit-pulse flex justify-center items-center gap-2";
                 btnText.textContent = "발표 내용 제출하기";
                 updateBtnIcon('rocket');
-
             } else {
-                // 비활성화 상태 (잠금)
                 lockOverlay.classList.remove('opacity-0', 'pointer-events-none');
                 lockOverlay.classList.add('opacity-100');
-
                 formContent.classList.add('locked-blur');
-
                 statusBadge.className = "px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-500 flex items-center gap-1.5";
                 statusBadge.innerHTML = `<span class="w-2 h-2 rounded-full bg-slate-400"></span>대기 중`;
-
-                inputs.forEach(el => el.disabled = true);
-
-                submitBtn.disabled = true;
+                [nameInput, messageInput, submitBtn].forEach(el => el.disabled = true);
                 submitBtn.className = "w-full py-4 rounded-xl font-bold text-white shadow-none transition-all duration-300 bg-slate-300 cursor-not-allowed flex justify-center items-center gap-2";
                 btnText.textContent = "선생님 대기 중";
                 updateBtnIcon('lock');
             }
         }
 
-        // 제출 로직
         document.getElementById('submitForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             const name = nameInput.value.trim();
             const msg = messageInput.value.trim();
-
             if (!name || !msg) return;
 
-            // 1. 밴 확인
-            const { data: banData } = await supabase
-                .from('banned_users')
-                .select('*')
-                .eq('client_id', myClientId)
-                .gt('banned_until', new Date().toISOString())
-                .single();
-
+            // 밴 확인
+            const { data: banData } = await supabase.from('banned_users').select('*').eq('client_id', myClientId).gt('banned_until', new Date().toISOString()).single();
             if (banData) {
                 const until = new Date(banData.banned_until).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
                 showToast(`🚫 전송이 차단되었습니다 (${until}까지)`, "error");
                 return;
             }
 
-            // 2. 제출
             submitBtn.disabled = true;
             btnText.textContent = "전송 중...";
-            updateBtnIcon('loader-2'); // 로딩 아이콘 (스핀 효과는 css로 추가하거나 단순 아이콘으로)
-
-            // 로딩 아이콘 회전 추가
+            updateBtnIcon('loader-2');
             const loadingIcon = submitBtn.querySelector('svg');
             if(loadingIcon) loadingIcon.classList.add('animate-spin');
 
@@ -283,16 +229,12 @@
                 updateBtnIcon('rocket');
             } else {
                 showToast("✅ 성공적으로 제출되었습니다!", "success");
-                messageInput.value = ''; // 이름은 유지, 내용만 초기화
-
-                // 버튼 잠시 완료 상태로
+                messageInput.value = '';
                 btnText.textContent = "제출 완료!";
                 updateBtnIcon('check');
                 submitBtn.classList.replace('from-indigo-500', 'from-green-500');
                 submitBtn.classList.replace('to-purple-600', 'to-emerald-600');
-
                 setTimeout(() => {
-                    // 버튼 원상복구
                     submitBtn.disabled = false;
                     btnText.textContent = "발표 내용 제출하기";
                     updateBtnIcon('rocket');
@@ -305,13 +247,8 @@
         function showToast(msg, type) {
             const toast = document.getElementById('toast');
             toast.textContent = msg;
-
-            if (type === 'success') {
-                toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-xl z-50 transition-all duration-300 transform translate-y-0 opacity-100 flex items-center gap-2 backdrop-blur-md bg-green-500/90";
-            } else {
-                toast.className = "fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-xl z-50 transition-all duration-300 transform translate-y-0 opacity-100 flex items-center gap-2 backdrop-blur-md bg-red-500/90";
-            }
-
+            const baseClass = "fixed bottom-8 left-1/2 -translate-x-1/2 px-6 py-3 rounded-full text-white text-sm font-bold shadow-xl z-50 transition-all duration-300 transform translate-y-0 opacity-100 flex items-center gap-2 backdrop-blur-md";
+            toast.className = type === 'success' ? `${baseClass} bg-green-500/90` : `${baseClass} bg-red-500/90`;
             setTimeout(() => {
                 toast.classList.remove('translate-y-0', 'opacity-100');
                 toast.classList.add('translate-y-20', 'opacity-0');
