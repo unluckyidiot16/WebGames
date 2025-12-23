@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>학생 관리 & 밴</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-100 p-4">
+
+<div class="bg-white rounded-lg shadow-lg overflow-hidden min-h-[500px]">
+    <div class="bg-indigo-600 p-4 flex justify-between items-center text-white">
+        <h1 class="font-bold text-lg">접속 학생 관리</h1>
+        <span id="userCount" class="bg-indigo-800 px-2 py-1 rounded text-sm">0명 접속 중</span>
+    </div>
+
+    <div class="p-4">
+        <p class="text-sm text-gray-500 mb-4">현재 페이지에 접속 중인 학생 목록입니다.<br>버튼을 눌러 일정 시간 메시지 전송을 차단할 수 있습니다.</p>
+
+        <ul id="userList" class="space-y-2 max-h-[400px] overflow-y-auto">
+            <!-- 사용자 목록 아이템 -->
+        </ul>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
+
+        let supabase;
+        const userListEl = document.getElementById('userList');
+        const userCountEl = document.getElementById('userCount');
+
+        try {
+            supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            initPresence();
+        } catch(e) {
+            userListEl.innerHTML = '<li class="text-red-500">Supabase 설정 오류</li>';
+        }
+
+        function initPresence() {
+            const channel = supabase.channel('class_room');
+
+            channel.on('presence', { event: 'sync' }, () => {
+                const state = channel.presenceState();
+                renderUserList(state);
+            }).subscribe();
+        }
+
+        function renderUserList(state) {
+            userListEl.innerHTML = '';
+            let totalUsers = 0;
+
+            // Presence State는 객체 형태 { "unique_id": [ {payload}, ... ] }
+            for (const key in state) {
+                const users = state[key]; // 동일 키로 여러 탭을 띄울 수 있으므로 배열임
+                users.forEach(user => {
+                    totalUsers++;
+                    const li = document.createElement('li');
+                    li.className = "flex items-center justify-between bg-gray-50 p-3 rounded border border-gray-200 hover:bg-gray-100";
+
+                    const name = user.student_name || '익명';
+                    const time = new Date(user.online_at).toLocaleTimeString();
+                    const clientId = user.client_id;
+
+                    li.innerHTML = `
+                            <div>
+                                <div class="font-bold text-gray-800">${escapeHtml(name)}</div>
+                                <div class="text-xs text-gray-500">접속: ${time}</div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button onclick="banUser('${clientId}', '${escapeHtml(name)}', 1)" class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs rounded border border-yellow-300 hover:bg-yellow-200">1분 밴</button>
+                                <button onclick="banUser('${clientId}', '${escapeHtml(name)}', 3)" class="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded border border-orange-300 hover:bg-orange-200">3분 밴</button>
+                                <button onclick="banUser('${clientId}', '${escapeHtml(name)}', 5)" class="px-2 py-1 bg-red-100 text-red-700 text-xs rounded border border-red-300 hover:bg-red-200">5분 밴</button>
+                            </div>
+                        `;
+                    userListEl.appendChild(li);
+                });
+            }
+            userCountEl.textContent = `${totalUsers}명 접속 중`;
+        }
+
+        // 전역 함수로 등록하여 onclick에서 사용 가능하게 함
+        window.banUser = async function(clientId, name, minutes) {
+            if(!confirm(`[${name}] 학생을 ${minutes}분 동안 차단하시겠습니까?`)) return;
+
+            const bannedUntil = new Date();
+            bannedUntil.setMinutes(bannedUntil.getMinutes() + minutes);
+
+            const { error } = await supabase.from('banned_users').upsert({
+                client_id: clientId,
+                student_name: name,
+                banned_until: bannedUntil.toISOString()
+            });
+
+            if(error) alert("오류: " + error.message);
+            else alert(`${name} 학생이 ${minutes}분간 차단되었습니다.`);
+        };
+
+        function escapeHtml(text) {
+            return text ? text.replace(/</g, "&lt;").replace(/>/g, "&gt;") : "";
+        }
+    });
+</script>
+</body>
+</html>
