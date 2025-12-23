@@ -7,15 +7,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; 
-            background-color: #0f172a; 
-            color: white; 
-            height: 100dvh; 
-            overflow: hidden; 
-            touch-action: manipulation;
-            padding-bottom: env(safe-area-inset-bottom, 0);
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; background-color: #0f172a; color: white; height: 100vh; overflow: hidden; touch-action: manipulation; }
         .pixel-art { image-rendering: pixelated; }
         .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .view.active { display: flex; }
@@ -42,7 +34,7 @@
 
 <section id="lobbyView" class="view active bg-slate-900">
     <h1 class="text-5xl font-black mb-1 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 italic">ARENA</h1>
-    <div class="text-xs text-slate-500 mb-6 font-bold tracking-widest">PVP v14.0 (DB Connected)</div>
+    <div class="text-xs text-slate-500 mb-6 font-bold tracking-widest">PVP v13.3 (Stable)</div>
 
     <div class="bg-slate-800 p-6 rounded-2xl border border-slate-700 w-full max-w-sm text-center shadow-2xl relative">
         <div class="relative inline-block">
@@ -182,8 +174,8 @@
         </div>
     </div>
 
-    <div class="absolute bottom-0 w-full max-w-md bg-slate-800 rounded-t-3xl border-t border-slate-600 shadow-2xl z-40 transition-all duration-300 flex flex-col" style="height: calc(14rem + env(safe-area-inset-bottom, 0px)); padding-bottom: env(safe-area-inset-bottom, 0px);">
-        <div id="skillPanel" class="flex-1 p-3 flex flex-col">
+    <div class="absolute bottom-0 w-full max-w-md bg-slate-800 rounded-t-3xl border-t border-slate-600 shadow-2xl z-40 transition-all duration-300 h-64 flex flex-col">
+        <div id="skillPanel" class="flex-1 p-4 flex flex-col">
             <div class="text-center text-sm text-slate-400 mb-2 font-bold">이번 턴에 사용할 기술을 선택하세요</div>
             <div id="skillGrid" class="grid grid-cols-2 gap-2 flex-1"></div>
             <div id="waitingMsg" class="hidden absolute inset-0 bg-slate-900/90 rounded-t-3xl flex items-center justify-center flex-col z-50">
@@ -192,12 +184,12 @@
             </div>
         </div>
 
-        <div id="quizPanel" class="absolute inset-0 bg-slate-800 rounded-t-3xl p-4 hidden z-50" style="padding-bottom: env(safe-area-inset-bottom, 0px);">
-            <div class="mb-3 text-center h-14 flex flex-col justify-center">
+        <div id="quizPanel" class="absolute inset-0 bg-slate-800 rounded-t-3xl p-5 hidden z-50">
+            <div class="mb-4 text-center h-16 flex flex-col justify-center">
                 <p class="text-xs text-slate-400 mb-1">문제를 풀면 기술이 발동합니다!</p>
-                <p class="text-xl font-black text-white break-keep" id="quizQuestion">3 x 3 = ?</p>
+                <p class="text-2xl font-black text-white break-keep" id="quizQuestion">3 x 3 = ?</p>
             </div>
-            <div id="quizChoices" class="grid grid-cols-2 gap-2 h-28"></div>
+            <div id="quizChoices" class="grid grid-cols-2 gap-3 h-32"></div>
         </div>
     </div>
 </section>
@@ -206,11 +198,7 @@
     <div class="bg-white text-slate-900 p-8 rounded-3xl text-center max-w-sm w-full shadow-2xl animate-[bounce_0.5s]">
         <div class="text-6xl mb-4" id="resultIcon">🏆</div>
         <h2 class="text-4xl font-black mb-2" id="resultTitle">WIN</h2>
-        <p class="text-slate-500 mb-2 font-bold" id="resultDesc">점수 +20</p>
-        <div id="mmrChangeSection" class="mb-4 hidden">
-            <div class="text-sm text-slate-400">Rating 변화</div>
-            <div class="text-2xl font-black" id="mmrChangeText">+25</div>
-        </div>
+        <p class="text-slate-500 mb-6 font-bold" id="resultDesc">점수 +20</p>
         <button onclick="location.reload()" class="w-full bg-slate-900 text-white py-4 rounded-xl font-bold hover:bg-slate-700 transition-colors">로비로 돌아가기</button>
     </div>
 </div>
@@ -227,7 +215,6 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M';
 
     let sb = null; // 충돌 방지용 변수명 (sb)
-    let myRankingData = { mmr: 1000, wins: 0, losses: 0 }; // 랭킹 데이터
 
     function initSupabase() {
         if (typeof supabase === 'undefined') {
@@ -246,92 +233,6 @@
             alert("Supabase 연결 오류: " + e.message);
             console.error(e);
             return false;
-        }
-    }
-
-    // ==========================================
-    // 랭킹 DB 연동 함수들
-    // ==========================================
-    async function loadMyRanking() {
-        if (!sb) return;
-        try {
-            // 기존 데이터 조회
-            const { data, error } = await sb
-                .from('dqr_rankings')
-                .select('*')
-                .eq('user_id', myUUID)
-                .single();
-
-            if (error && error.code === 'PGRST116') {
-                // 데이터가 없으면 새로 생성
-                const { data: newData, error: insertError } = await sb
-                    .from('dqr_rankings')
-                    .insert({
-                        user_id: myUUID,
-                        username: myData?.name || 'Player',
-                        mmr: 1000,
-                        wins: 0,
-                        losses: 0
-                    })
-                    .select()
-                    .single();
-
-                if (insertError) {
-                    console.error('랭킹 생성 실패:', insertError);
-                    return;
-                }
-                myRankingData = { mmr: 1000, wins: 0, losses: 0 };
-            } else if (error) {
-                console.error('랭킹 조회 실패:', error);
-                return;
-            } else if (data) {
-                myRankingData = {
-                    mmr: data.mmr || 1000,
-                    wins: data.wins || 0,
-                    losses: data.losses || 0
-                };
-            }
-
-            // UI 업데이트
-            document.getElementById('myMMR').innerText = myRankingData.mmr;
-            console.log('랭킹 로드 완료:', myRankingData);
-        } catch (e) {
-            console.error('랭킹 로드 오류:', e);
-        }
-    }
-
-    async function updateRanking(isWin) {
-        if (!sb || battleMode !== 'ranked') return null;
-
-        const mmrChange = isWin ? 25 : -20;
-        const newMmr = Math.max(0, myRankingData.mmr + mmrChange);
-
-        try {
-            const { error } = await sb
-                .from('dqr_rankings')
-                .update({
-                    mmr: newMmr,
-                    wins: myRankingData.wins + (isWin ? 1 : 0),
-                    losses: myRankingData.losses + (isWin ? 0 : 1),
-                    username: myData?.name || 'Player',
-                    updated_at: new Date().toISOString()
-                })
-                .eq('user_id', myUUID);
-
-            if (error) {
-                console.error('랭킹 업데이트 실패:', error);
-                return null;
-            }
-
-            myRankingData.mmr = newMmr;
-            if (isWin) myRankingData.wins++;
-            else myRankingData.losses++;
-
-            console.log('랭킹 업데이트 완료:', { mmrChange, newMmr });
-            return mmrChange;
-        } catch (e) {
-            console.error('랭킹 업데이트 오류:', e);
-            return null;
         }
     }
 
@@ -354,10 +255,10 @@
             .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
             .on('broadcast', { event: 'submit_answer' }, ({ payload }) => { if(payload.id !== myData.id) { gameState.enemyAnswer = payload; checkQuizEnd(); } })
             // ▼▼▼ [추가] 게임 강제 종료(기권/AFK) 이벤트 수신 ▼▼▼
-            .on('broadcast', { event: 'game_over_force' }, async ({ payload }) => {
+            .on('broadcast', { event: 'game_over_force' }, ({ payload }) => {
                 if (payload.loserId !== myData.id) {
                     // 상대방이 패배(기권/AFK)했으므로 나는 승리
-                    await endGameProcess(true, payload.reason);
+                    endGameProcess(true, payload.reason);
                 }
             });
 
@@ -443,11 +344,10 @@
         document.getElementById('myLobbyImg').src = sprite;
         document.getElementById('myLobbyName').innerText = cid.toUpperCase();
         document.getElementById('myLobbyLvBadge').innerText = `Lv.${lv}`;
+        document.getElementById('myMMR').innerText = "1000"; // 랭킹 DB 연동 전 임시
 
-        // Supabase 초기화 및 랭킹 로드
-        if (initSupabase()) {
-            await loadMyRanking();
-        }
+        // Supabase 초기화 (성공해야 이후 버튼 작동)
+        initSupabase();
     };
 
     function goHome() { window.location.href = "DQR.html"; }
@@ -1001,7 +901,7 @@
 
     // --- [추가] 기권 및 강제 종료 로직 ---
 
-    async function onSurrenderClick(reason = 'surrender') {
+    function onSurrenderClick(reason = 'surrender') {
         let msg = "정말 기권하시겠습니까?";
         if (reason === 'afk') msg = "장시간 응답이 없어 패배 처리됩니다.";
 
@@ -1018,10 +918,10 @@
         }
 
         // 나 자신 패배 처리
-        await endGameProcess(false, reason);
+        endGameProcess(false, reason);
     }
 
-    async function endGameProcess(isWin, reason) {
+    function endGameProcess(isWin, reason) {
         // 타이머 및 진행 중인 로직 정지
         clearInterval(timerInterval);
 
@@ -1029,14 +929,6 @@
         const title = document.getElementById('resultTitle');
         const desc = document.getElementById('resultDesc');
         const icon = document.getElementById('resultIcon');
-        const mmrSection = document.getElementById('mmrChangeSection');
-        const mmrText = document.getElementById('mmrChangeText');
-
-        // 랭킹 업데이트 (ranked 모드일 때만)
-        let mmrChange = null;
-        if (battleMode === 'ranked') {
-            mmrChange = await updateRanking(isWin);
-        }
 
         modal.classList.remove('hidden');
         modal.classList.add('flex');
@@ -1055,25 +947,16 @@
             else desc.innerText = "패배했습니다...";
         }
 
-        // MMR 변화량 표시
-        if (mmrChange !== null && battleMode === 'ranked') {
-            mmrSection.classList.remove('hidden');
-            mmrText.innerText = mmrChange >= 0 ? `+${mmrChange}` : `${mmrChange}`;
-            mmrText.className = `text-2xl font-black ${mmrChange >= 0 ? 'text-green-500' : 'text-red-500'}`;
-        } else {
-            mmrSection.classList.add('hidden');
-        }
-
         // 채널 정리
         if(channel) sb.removeChannel(channel);
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
     }
 
     // 기존 checkGameOver 함수도 endGameProcess를 사용하도록 살짝 수정하면 좋습니다.
-    async function checkGameOver() {
+    function checkGameOver() {
         if (gameState.myHp <= 0 || gameState.enemyHp <= 0) {
             const win = gameState.myHp > 0;
-            await endGameProcess(win, 'normal'); // 수정된 종료 함수 호출
+            endGameProcess(win, 'normal'); // 수정된 종료 함수 호출
             return true;
         }
         return false;

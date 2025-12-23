@@ -78,7 +78,7 @@
         <h1 class="text-5xl md:text-6xl font-black text-white tracking-tighter mb-2 drop-shadow-lg">
             <span class="text-blue-500">Quiz</span> Dungeon
         </h1>
-        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v11.1</div>
+        <div class="text-slate-400 text-xs font-bold mb-8 tracking-widest">RPG EDITION v11.0</div>
 
         <div class="bg-slate-800 p-8 rounded-3xl shadow-2xl border-4 border-slate-700 max-w-sm mx-auto">
             <div class="flex justify-center gap-4 mb-6">
@@ -301,7 +301,7 @@
             <div class="text-2xl font-bold text-blue-600">+<span id="rewardXpVal">0</span> EXP</div>
         </div>
         <div id="rewardGoldSection" class="my-2 hidden">
-            <div class="text-sm text-slate-500">전투 보상</div>
+            <div class="text-sm text-slate-500">보스 보상</div>
             <div class="text-xl font-bold text-yellow-500">+<span id="rewardGoldVal">0</span> G</div>
         </div>
         <button id="rewardOkBtn" class="w-full bg-slate-800 text-white py-3 rounded-xl font-bold shadow-lg mt-4">다음 스테이지</button>
@@ -1301,9 +1301,9 @@
         if (!battleState) return;
         const bs = battleState;
         const xpGain = 10 + (bs.stage * 5);
-        let goldGain = 10; // 기본 10G 보상
+        let goldGain = 0;
 
-        if (bs.enemy.isBoss) goldGain = 50 + (bs.stage * 10); // 보스는 추가 보상
+        if (bs.enemy.isBoss) goldGain = 50 + (bs.stage * 10);
 
         if (bs.mode === "ghost") {
             addHoF({ kind: "ghost_win", enemy: bs.enemy.name, level: bs.enemy.level });
