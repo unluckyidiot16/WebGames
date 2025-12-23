@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>Pokémon Party Battle</title>
+    <title>Pokémon Party Battle (Stable)</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -40,7 +40,7 @@
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center">
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8">v15.0 DRAFT MODE</div>
+        <div class="text-xs text-gray-500 text-center mb-8">v15.1 STABLE MATCHING</div>
 
         <div class="bg-gray-800 p-4 rounded-2xl mb-8 flex justify-between items-center shadow-lg border border-gray-700">
             <div>
@@ -87,7 +87,7 @@
 
 <section id="waitingView" class="view bg-black/90 fixed inset-0 z-50 hidden">
     <div class="text-6xl mb-6 animate-spin">😵‍💫</div>
-    <h2 class="text-2xl font-bold mb-2">매칭 중...</h2>
+    <h2 class="text-2xl font-bold mb-2">접속 중...</h2>
     <p class="text-gray-400 text-sm mb-8" id="waitingMsg">상대를 찾는 중입니다.</p>
     <button onclick="cancelMatching()" class="border border-red-500 text-red-500 px-8 py-2 rounded-full hover:bg-red-500 hover:text-white transition">취소</button>
 </section>
@@ -119,7 +119,6 @@
         <div id="opponentPickStatus" class="text-center text-sm text-gray-500 mt-4 hidden">상대방이 선택 중입니다...</div>
     </div>
 </section>
-
 
 <section id="battleView" class="view relative bg-gray-800 justify-between pb-4">
     <div class="absolute top-4 right-4 flex flex-col items-end w-full pr-4 z-10">
@@ -219,9 +218,10 @@
     let isHost = false, roomId = null;
     let battleMode = 'ranked';
     let battleInitialized = false;
+    let ackReceived = false; // 핸드셰이크용
 
     let gameState = {
-        round: 1, phase: 'select',
+        round: 1, phase: 'select', timer: 10,
         myActiveIdx: 0, enemyActiveIdx: 0,
         myPartyState: [], enemyPartyState: [],
         myAnswer: null, enemyAnswer: null, currentQuiz: null
@@ -229,7 +229,7 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화
+    // 2. 초기화 & 로비
     // ==========================================
     window.onload = () => {
         if(initSupabase()) {
@@ -265,7 +265,7 @@
     }
 
     // ==========================================
-    // 3. 매칭 및 로비 시스템
+    // 3. 매칭 시스템 (핸드셰이크 추가)
     // ==========================================
     function startRankedMatch() {
         battleMode = 'ranked';
@@ -322,11 +322,11 @@
             const container = document.getElementById('roomList');
             container.innerHTML = "";
             Object.values(state).flat().filter(u => u.isHost).forEach(r => {
-                const div = document.createElement('div');
-                div.className = "room-item";
-                div.innerHTML = `<span class="font-bold text-yellow-400">${r.name}</span><span class="text-xs bg-green-600 px-2 py-1 rounded">입장</span>`;
-                div.onclick = () => joinRoom(r.roomId, false);
-                container.appendChild(div);
+                const btn = document.createElement('button');
+                btn.className = "w-full bg-gray-700 p-3 rounded mb-2 text-left hover:bg-gray-600";
+                btn.innerText = r.name;
+                btn.onclick = () => joinRoom(r.roomId, false);
+                container.appendChild(btn);
             });
         }).subscribe();
     }
@@ -336,41 +336,76 @@
     function cancelMatching() { if(channel) sb.removeChannel(channel); switchView('lobbyView'); }
 
     // ==========================================
-    // 4. 접속 -> 픽 페이즈 (NEW)
+    // 4. 접속 & 핸드셰이크 (안정화)
     // ==========================================
     function joinRoom(room, host) {
         if(channel) sb.removeChannel(channel);
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
         roomId = room; isHost = host;
 
-        channel = sb.channel(room);
-        channel.subscribe(async (s) => {
-            if(s==='SUBSCRIBED') {
-                startPickPhase();
-            }
-        });
+        // 리셋
+        ackReceived = false;
+        battleInitialized = false;
+        myData = null; enemyData = null; // 초기화
 
+        channel = sb.channel(room);
         channel
+            // [중요] 상대가 Ready를 보내면 -> 데이터 저장 + ACK 발송
+            .on('broadcast', { event: 'ready' }, ({ payload }) => {
+                if (payload.id !== myUUID) {
+                    enemyData = payload; // 저장
+                    channel.send({ type: 'broadcast', event: 'ready_ack', payload: { to: payload.id } }); // 응답
+                    checkReadyToPick(); // 시작 체크
+                }
+            })
+            // [중요] 상대가 내 ACK를 보내면 -> 확인 표시
+            .on('broadcast', { event: 'ready_ack' }, ({ payload }) => {
+                if (payload.to === myUUID) {
+                    ackReceived = true;
+                    checkReadyToPick(); // 시작 체크
+                }
+            })
             .on('broadcast', { event: 'party_submit' }, ({ payload }) => {
                 if (payload.id !== myUUID) {
-                    enemyData = payload; // 상대 파티 정보 저장
+                    enemyData.party = payload.party; // 파티 정보 업데이트
                     checkBattleStart();
                 }
             })
-            // 전투 관련 이벤트 핸들러
             .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
             .on('broadcast', { event: 'submit_action' }, ({ payload }) => { if(payload.id !== myUUID) { gameState.enemyAnswer = payload; checkTurnEnd(); } });
+
+        channel.subscribe(async (s) => {
+            if(s==='SUBSCRIBED') {
+                // 접속 기본 데이터 전송 (ID 확인용)
+                const baseData = { id: myUUID };
+                // ACK 받을 때까지 반복 전송 (핑)
+                const ping = setInterval(() => {
+                    if(ackReceived) clearInterval(ping);
+                    else channel.send({ type: 'broadcast', event: 'ready', payload: baseData });
+                }, 800);
+            }
+        });
     }
 
+    function checkReadyToPick() {
+        // 나도 ACK 받았고, 상대 데이터도 있어야 픽 페이즈 진입
+        if (enemyData && ackReceived && !battleInitialized) {
+            battleInitialized = true; // 중복 진입 방지
+            startPickPhase();
+        }
+    }
+
+    // ==========================================
+    // 5. 픽 페이즈
+    // ==========================================
     function startPickPhase() {
         switchView('pickView');
-        myParty = []; // 파티 초기화
+        myParty = [];
         document.getElementById('pickCount').innerText = "0 / 3";
         document.getElementById('btnConfirmPick').disabled = true;
         document.getElementById('opponentPickStatus').classList.add('hidden');
-        renderPartySelector(); // 리셋된 선택창
+        renderPartySelector();
 
-        // 30초 타이머
         let pickTime = 30;
         document.getElementById('pickTimer').innerText = pickTime;
         clearInterval(timerInterval);
@@ -379,14 +414,12 @@
             document.getElementById('pickTimer').innerText = pickTime;
             if(pickTime <= 0) {
                 clearInterval(timerInterval);
-                autoPick(); // 시간 초과시 자동 선택
+                autoPick();
             }
         }, 1000);
     }
 
-    function initPickGrid() {
-        // 로비에서는 미리 렌더링 안함 (startPickPhase에서 호출)
-    }
+    function initPickGrid() { }
 
     function renderPartySelector() {
         const container = document.getElementById('pickGrid');
@@ -433,32 +466,29 @@
         document.getElementById('btnConfirmPick').innerText = "대기 중...";
         document.getElementById('btnConfirmPick').disabled = true;
 
-        // 데이터 준비
         myData = {
             id: myUUID,
             party: myParty.map(id => ({ ...POKEMON_DB[id], maxHp: POKEMON_DB[id].hp * 3, hp: POKEMON_DB[id].hp * 3, charge: 0 }))
         };
 
-        // 전송
+        // 파티 정보 전송
         channel.send({ type: 'broadcast', event: 'party_submit', payload: myData });
-
         checkBattleStart();
     }
 
     function checkBattleStart() {
-        // 나도 선택했고, 상대도 선택했으면 전투 시작
-        if (myData && enemyData && !battleInitialized) {
+        // myData(내 파티), enemyData.party(상대 파티) 모두 있어야 함
+        if (myData && myData.party && enemyData && enemyData.party) {
             startBattle();
-        } else if (myData && !enemyData) {
+        } else if (myData && myData.party) {
             document.getElementById('opponentPickStatus').classList.remove('hidden');
         }
     }
 
     // ==========================================
-    // 5. 배틀 로직
+    // 6. 전투 로직
     // ==========================================
     function startBattle() {
-        battleInitialized = true;
         switchView('battleView');
 
         gameState.myPartyState = JSON.parse(JSON.stringify(myData.party));
@@ -485,7 +515,7 @@
     }
 
     function startQuizPhase(quiz) {
-        if (!battleInitialized) return;
+        if (!gameState.myPartyState.length) return; // 데이터 로드 전 방지
 
         gameState.phase = 'select';
         gameState.currentQuiz = quiz;
@@ -498,6 +528,7 @@
 
         const myPoke = gameState.myPartyState[gameState.myActiveIdx];
         const btnSpecial = document.getElementById('btnSpecial');
+        // 예외처리: 포켓몬 데이터가 없을 때
         if (myPoke && myPoke.charge >= 3) {
             btnSpecial.disabled = false;
             btnSpecial.classList.add('animate-pulse', 'ring-2', 'ring-yellow-400');
@@ -506,13 +537,14 @@
             btnSpecial.classList.remove('animate-pulse', 'ring-2', 'ring-yellow-400');
         }
 
-        document.getElementById('battleTimerDisplay').innerText = 30;
+        document.getElementById('timerDisplay').innerText = 30; // 턴 시간
     }
 
     function selectSkill(type) {
         gameState.selectedType = type;
         document.getElementById('skillPanel').classList.add('hidden');
         document.getElementById('quizPanel').classList.remove('hidden');
+
         document.getElementById('quizQuestion').innerText = gameState.currentQuiz.q;
         const grid = document.getElementById('quizChoices');
         grid.innerHTML = "";
@@ -593,10 +625,10 @@
     function handleFaint(isEnemyFainted) {
         if (isEnemyFainted) {
             gameState.enemyActiveIdx++;
-            showMsg(`상대 ${gameState.enemyPartyState[gameState.enemyActiveIdx-1].name} 기절!`, "white");
+            showMsg(`상대 기절!`, "white");
         } else {
             gameState.myActiveIdx++;
-            showMsg(`내 ${gameState.myPartyState[gameState.myActiveIdx-1].name} 기절!`, "white");
+            showMsg(`내 포켓몬 기절!`, "white");
         }
         updateBattleUI();
     }
@@ -610,8 +642,7 @@
     async function endGame(win) {
         if (battleMode === 'ranked') {
             const change = win ? 20 : -10;
-            const cur = parseInt(document.getElementById('myMMR').innerText) || 1000;
-            await sb.from('ppb_rankings').update({ mmr: cur + change }).eq('user_id', myUUID);
+            await sb.from('ppb_rankings').update({ mmr: parseInt(document.getElementById('myMMR').innerText) + change }).eq('user_id', myUUID);
         }
         document.getElementById('resultModal').classList.remove('hidden');
         document.getElementById('resultModal').classList.add('flex');
@@ -622,7 +653,8 @@
     }
 
     function updateBattleUI() {
-        if (!battleInitialized) return;
+        if (!gameState.myPartyState.length) return; // 안전장치
+
         const myPoke = gameState.myPartyState[gameState.myActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
         const enPoke = gameState.enemyPartyState[gameState.enemyActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
 
