@@ -7,38 +7,24 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
-            background-color: #202020; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation;
-        }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; background-color: #202020; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation; }
         .pixel-art { image-rendering: pixelated; }
         .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .view.active { display: flex; }
 
-        /* 애니메이션 */
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
         .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
         .anim-atk { transition: transform 0.2s; transform: scale(1.2); }
 
-        /* 카드 스타일 */
-        .poke-card {
-            @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all duration-200 flex flex-col items-center relative;
-        }
+        .poke-card { @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all duration-200 flex flex-col items-center relative; }
         .poke-card:hover { @apply bg-gray-700; }
-        .poke-card.selected {
-            @apply bg-yellow-600 border-yellow-300 ring-2 ring-yellow-400 scale-110 z-10 opacity-100 shadow-xl;
-        }
+        .poke-card.selected { @apply bg-yellow-600 border-yellow-300 ring-2 ring-yellow-400 scale-110 z-10 opacity-100 shadow-xl; }
         .poke-card.disabled { @apply opacity-30 cursor-not-allowed filter grayscale; }
 
-        /* 게이지 바 */
         .gauge-slot { @apply w-3 h-3 rounded-full bg-gray-600; }
         .gauge-slot.filled { @apply bg-blue-400 shadow-[0_0_5px_#60a5fa]; }
-
         .hp-bar-fill { transition: width 0.3s ease-out; }
-
         .room-item { @apply bg-gray-800 p-4 rounded-xl border border-gray-600 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors mb-2; }
-
-        /* 퀴즈 버튼 */
         .btn-choice { @apply bg-gray-700 p-4 rounded-xl text-white font-bold hover:bg-gray-600 border-2 border-gray-600 transition-all active:scale-95; }
         .btn-choice.correct { @apply bg-green-600 border-green-400 ring-2 ring-green-400; }
         .btn-choice.wrong { @apply bg-red-600 border-red-400 ring-2 ring-red-400; }
@@ -47,7 +33,12 @@
 <body>
 
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
-    <div class="w-full max-w-md p-6 flex flex-col h-full justify-center">
+    <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
+        <div class="absolute top-6 right-6 bg-gray-800 border border-gray-600 px-3 py-1 rounded-full text-xs text-gray-400 flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span id="versionDisplay">v16.2</span>
+        </div>
+
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
         <div class="text-xs text-gray-500 text-center mb-8">v16.2 BUG FIX</div>
 
@@ -110,19 +101,15 @@
             <div class="text-sm text-gray-400">전투에 나갈 3마리를 선택하세요</div>
             <div class="text-4xl font-bold text-white mt-4" id="pickTimer">30</div>
         </div>
-
         <div class="flex justify-between items-center mb-2 px-2">
             <span class="text-sm font-bold text-gray-300">MY PARTY</span>
             <span id="pickCount" class="text-yellow-400 font-bold">0 / 3</span>
         </div>
-
         <div class="grid grid-cols-4 gap-3 mb-8" id="pickGrid"></div>
-
         <div class="bg-gray-800 p-3 rounded-lg text-xs text-gray-400 text-center mb-8">
             <span class="text-red-400 font-bold">🔥불</span> &gt; <span class="text-green-400 font-bold">🌿풀</span> &gt; <span class="text-blue-400 font-bold">💧물</span> &gt; <span class="text-red-400 font-bold">🔥불</span><br>
             (<span class="text-yellow-400 font-bold">⚡전기</span> &gt; <span class="text-blue-400 font-bold">💧물</span>)
         </div>
-
         <button onclick="confirmParty()" id="btnConfirmPick" disabled class="w-full bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold py-4 rounded-xl shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all">
             선택 완료
         </button>
@@ -199,6 +186,10 @@
     <div class="text-6xl mb-4">⚠️</div>
     <h2 class="text-3xl font-black text-white mb-2">업데이트 필요</h2>
     <p class="text-gray-400 mb-6">새로운 패치가 있습니다.<br>최신 버전으로 업데이트 해주세요.</p>
+    <div class="text-yellow-400 font-bold mb-6 text-xl">
+        현재: <span id="currentVerDisplay"></span> <br>
+        최신: <span id="serverVerDisplay"></span>
+    </div>
     <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-500">새로고침</button>
 </div>
 
@@ -213,21 +204,19 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const GAME_VERSION = "v16.1";
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
-
+    const GAME_VERSION = "v16.2"; // ✅ 버전 업데이트
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // ⚠️ 본인 URL 입력
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ⚠️ 본인 KEY 입력
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
 
     // ==========================================
-    // 1. 데이터
+    // 1. 데이터 (공격력 4배 상향)
     // ==========================================
     const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     const POKEMON_DB = {
-        // 공격력 4배 상향 적용
         1:  { name: "이상해씨", type: "grass",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", hp: 120, atk: 72, spec: "덩쿨채찍 (2배)" },
         4:  { name: "파이리",   type: "fire",     img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png", hp: 110, atk: 88, spec: "화염방사 (2배)" },
         7:  { name: "꼬부기",   type: "water",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png", hp: 115, atk: 76, spec: "하이드로펌프 (2배)" },
@@ -258,11 +247,13 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화
+    // 2. 초기화 & 버전 체크
     // ==========================================
     window.onload = async () => {
+        document.getElementById('versionDisplay').innerText = GAME_VERSION;
+
         if(initSupabase()) {
-            await checkGameVersion();
+            await checkGameVersion(); // 버전 체크
             loadRanking();
             document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
             connectToLobby();
@@ -281,10 +272,14 @@
     async function checkGameVersion() {
         try {
             const { data, error } = await sb.from('game_info').select('latest_version').eq('id', 1).maybeSingle();
-            if (data && data.latest_version && data.latest_version !== GAME_VERSION) {
-                document.getElementById('updateModal').classList.remove('hidden');
-                document.getElementById('updateModal').classList.add('flex');
-                throw new Error("Version mismatch");
+            if (data && data.latest_version) {
+                if (data.latest_version !== GAME_VERSION) {
+                    document.getElementById('currentVerDisplay').innerText = GAME_VERSION;
+                    document.getElementById('serverVerDisplay').innerText = data.latest_version;
+                    document.getElementById('updateModal').classList.remove('hidden');
+                    document.getElementById('updateModal').classList.add('flex');
+                    throw new Error("Version mismatch");
+                }
             }
         } catch (e) { if(e.message === "Version mismatch") throw e; }
     }
@@ -310,14 +305,12 @@
         }
     }
 
-    // ==========================================
-    // 3. 매칭
-    // ==========================================
+    // --- 로비 & 매칭 ---
     function startRankedMatch() {
         battleMode = 'ranked';
         switchView('waitingView');
-        document.getElementById('waitingTitle').innerText = "매칭 중...";
         document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
+        document.getElementById('waitingTitle').innerText = "매칭 중...";
 
         if(channel) sb.removeChannel(channel);
         channel = sb.channel('ppb_rank_queue');
@@ -373,15 +366,12 @@
     function renderRoomList(state) {
         const container = document.getElementById('roomListContainer');
         if(!container) return;
-
         container.innerHTML = "";
         const rooms = Object.values(state).flat().filter(u => u.isHost && u.version === GAME_VERSION);
-
         if(rooms.length === 0) {
             container.innerHTML = '<div class="text-center text-gray-500 mt-20 flex flex-col items-center"><span class="text-4xl mb-2">📭</span>개설된 방이 없습니다.</div>';
             return;
         }
-
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-item";
@@ -683,8 +673,7 @@
 
             if (target.hp <= 0) {
                 setTimeout(() => {
-                    // 버그 수정: 내가 공격했을 때(isMe) 적이 죽었으면 handleFaint(true=EnemyFainted)
-                    // 적이 공격했을 때(!isMe) 내가 죽었으면 handleFaint(false=EnemyFainted)
+                    // [BUG FIX]: 내가 공격했을 때(isMe) 적이 죽었으므로 handleFaint(true = isEnemyFainted) 호출
                     handleFaint(isMe);
                     resolve();
                 }, 1000);
@@ -721,8 +710,7 @@
         gameEnded = true;
         if (battleMode === 'ranked') {
             const change = win ? 20 : -10;
-            const cur = parseInt(document.getElementById('myMMR').innerText) || 1000;
-            await sb.from('ppb_rankings').update({ mmr: cur + change }).eq('user_id', myUUID);
+            await sb.from('ppb_rankings').update({ mmr: parseInt(document.getElementById('myMMR').innerText) + change }).eq('user_id', myUUID);
         }
         document.getElementById('resultModal').classList.remove('hidden');
         document.getElementById('resultModal').classList.add('flex');
