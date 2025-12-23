@@ -7,42 +7,83 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif; background-color: #202020; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation; }
+        body {
+            font-family: 'Courier New', Courier, monospace, sans-serif; /* 레트로 폰트 느낌 */
+            background-color: #1a1a1a; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation;
+        }
         .pixel-art { image-rendering: pixelated; }
         .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .view.active { display: flex; }
 
-        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-5px); } 75% { transform: translateX(5px); } }
-        .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
-        .anim-atk { transition: transform 0.2s; transform: scale(1.2); }
+        /* --- 애니메이션 정의 --- */
 
-        .poke-card { @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all duration-200 flex flex-col items-center relative; }
+        /* 피격: 흔들림 + 번쩍임 */
+        @keyframes damage-shake {
+            0% { transform: translate(0, 0); filter: brightness(1); }
+            20% { transform: translate(-5px, 0); filter: brightness(5) sepia(1) saturate(0); }
+            40% { transform: translate(5px, 0); filter: brightness(5) sepia(1) saturate(0); }
+            60% { transform: translate(-5px, 0); filter: brightness(1); }
+            80% { transform: translate(5px, 0); }
+            100% { transform: translate(0, 0); }
+        }
+        .anim-hit { animation: damage-shake 0.4s ease-out; }
+
+        /* 내 공격: 오른쪽으로 돌진 (이미지 반전 상태 유지) */
+        .anim-atk-me { transition: transform 0.1s; transform: translateX(80px) scaleX(-1) !important; }
+
+        /* 적 공격: 왼쪽으로 돌진 */
+        .anim-atk-enemy { transition: transform 0.1s; transform: translateX(-80px) !important; }
+
+        /* --- UI 스타일 --- */
+
+        /* 사각형 카드 스타일 */
+        .poke-card {
+            @apply bg-gray-800 border-2 border-gray-600 p-2 cursor-pointer transition-all duration-100 flex flex-col items-center relative;
+            border-radius: 0; /* 사각형 */
+        }
         .poke-card:hover { @apply bg-gray-700; }
-        .poke-card.selected { @apply bg-yellow-600 border-yellow-300 ring-2 ring-yellow-400 scale-110 z-10 opacity-100 shadow-xl; }
+
+        /* 선택됨: 두꺼운 노란 테두리 (사각형) */
+        .poke-card.selected {
+            @apply bg-gray-700 border-4 border-yellow-400 z-10 opacity-100;
+            box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
+        }
         .poke-card.disabled { @apply opacity-30 cursor-not-allowed filter grayscale; }
 
-        .gauge-slot { @apply w-3 h-3 rounded-full bg-gray-600; }
-        .gauge-slot.filled { @apply bg-blue-400 shadow-[0_0_5px_#60a5fa]; }
+        /* 게이지 & 체력바 */
+        .gauge-slot { @apply w-3 h-3 bg-gray-600 border border-gray-500; border-radius: 0; }
+        .gauge-slot.filled { @apply bg-blue-400 border-blue-300 shadow-[0_0_5px_#60a5fa]; }
         .hp-bar-fill { transition: width 0.3s ease-out; }
-        .room-item { @apply bg-gray-800 p-4 rounded-xl border border-gray-600 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors mb-2; }
-        .btn-choice { @apply bg-gray-700 p-4 rounded-xl text-white font-bold hover:bg-gray-600 border-2 border-gray-600 transition-all active:scale-95; }
-        .btn-choice.correct { @apply bg-green-600 border-green-400 ring-2 ring-green-400; }
-        .btn-choice.wrong { @apply bg-red-600 border-red-400 ring-2 ring-red-400; }
+
+        .room-item { @apply bg-gray-800 p-4 border border-gray-600 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors mb-2; border-radius: 0; }
+
+        /* 퀴즈 버튼 (사각형) */
+        .btn-choice {
+            @apply bg-gray-700 p-4 text-white font-bold hover:bg-gray-600 border-2 border-gray-500 transition-all active:scale-95;
+            border-radius: 0;
+        }
+        .btn-choice.correct { @apply bg-green-700 border-green-400 text-green-100; }
+        .btn-choice.wrong { @apply bg-red-700 border-red-400 text-red-100; }
+
+        /* 스프라이트 방향 (중요) */
+        #myImg { transform: scaleX(-1); /* 나는 오른쪽을 봄 */ }
+        #enemyImg { transform: scaleX(1); /* 적은 왼쪽을 봄 (기본) */ }
+
     </style>
 </head>
 <body>
 
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
-        <div class="absolute top-6 right-6 bg-gray-800 border border-gray-600 px-3 py-1 rounded-full text-xs text-gray-400 flex items-center gap-2">
-            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <span id="versionDisplay">v16.2</span>
+        <div class="absolute top-6 right-6 bg-black border border-gray-600 px-3 py-1 text-xs text-gray-400 flex items-center gap-2">
+            <div class="w-2 h-2 bg-green-500 animate-pulse"></div>
+            <span id="versionDisplay">v16.3</span>
         </div>
 
-        <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8">v16.2 BUG FIX</div>
+        <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic tracking-tighter">POKÉ PARTY</h1>
+        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">VISUAL UPDATE</div>
 
-        <div class="bg-gray-800 p-4 rounded-2xl mb-8 flex justify-between items-center shadow-lg border border-gray-700">
+        <div class="bg-gray-800 p-4 mb-8 flex justify-between items-center shadow-lg border-2 border-gray-600">
             <div>
                 <div class="text-xs text-gray-400">RANKING</div>
                 <div class="text-xl font-bold text-white"><span id="myMMR">---</span> P</div>
@@ -54,16 +95,16 @@
         </div>
 
         <div class="space-y-4 w-full">
-            <button onclick="startRankedMatch()" class="w-full bg-gradient-to-r from-yellow-600 to-yellow-500 hover:from-yellow-500 hover:to-yellow-400 text-black font-black py-5 rounded-xl shadow-lg border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1 transition-all group">
+            <button onclick="startRankedMatch()" class="w-full bg-yellow-600 hover:bg-yellow-500 text-black font-black py-5 border-b-4 border-yellow-800 active:border-b-0 active:translate-y-1 transition-all group">
                 <div class="text-lg">⚔️ 랭킹 매칭</div>
                 <div class="text-xs font-normal opacity-70">비슷한 실력의 상대와 대결</div>
             </button>
 
             <div class="grid grid-cols-2 gap-3">
-                <button onclick="createRoom()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 rounded-xl border-b-4 border-gray-900 active:border-b-0 active:translate-y-1">
+                <button onclick="createRoom()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 border-b-4 border-gray-900 active:border-b-0 active:translate-y-1">
                     방 만들기
                 </button>
-                <button onclick="enterCustomLobby()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 rounded-xl border-b-4 border-gray-900 active:border-b-0 active:translate-y-1">
+                <button onclick="enterCustomLobby()" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-4 border-b-4 border-gray-900 active:border-b-0 active:translate-y-1">
                     방 목록
                 </button>
             </div>
@@ -77,7 +118,7 @@
             <h2 class="text-xl font-bold text-white">대기실 목록</h2>
             <button onclick="leaveLobby()" class="text-sm text-gray-400 hover:text-white">나가기</button>
         </div>
-        <div class="flex-1 bg-gray-800/50 rounded-2xl border border-gray-700 p-2 overflow-hidden flex flex-col">
+        <div class="flex-1 bg-gray-800/50 border-2 border-gray-700 p-2 overflow-hidden flex flex-col">
             <div id="roomListContainer" class="flex-1 overflow-y-auto space-y-2 pr-1">
                 <div class="text-center text-gray-500 mt-20">방을 불러오는 중...</div>
             </div>
@@ -90,7 +131,7 @@
         <div class="text-7xl mb-6 animate-pulse">⏳</div>
         <h2 class="text-2xl font-bold mb-2 text-white" id="waitingTitle">매칭 중...</h2>
         <p class="text-gray-400 text-sm mb-8" id="waitingMsg">상대를 찾는 중입니다.</p>
-        <button onclick="cancelMatching()" class="border border-red-500 text-red-500 px-8 py-2 rounded-full hover:bg-red-500 hover:text-white transition">취소</button>
+        <button onclick="cancelMatching()" class="border border-red-500 text-red-500 px-8 py-2 hover:bg-red-500 hover:text-white transition">취소</button>
     </div>
 </section>
 
@@ -101,16 +142,20 @@
             <div class="text-sm text-gray-400">전투에 나갈 3마리를 선택하세요</div>
             <div class="text-4xl font-bold text-white mt-4" id="pickTimer">30</div>
         </div>
+
         <div class="flex justify-between items-center mb-2 px-2">
             <span class="text-sm font-bold text-gray-300">MY PARTY</span>
             <span id="pickCount" class="text-yellow-400 font-bold">0 / 3</span>
         </div>
+
         <div class="grid grid-cols-4 gap-3 mb-8" id="pickGrid"></div>
-        <div class="bg-gray-800 p-3 rounded-lg text-xs text-gray-400 text-center mb-8">
+
+        <div class="bg-gray-800 p-3 border border-gray-600 text-xs text-gray-400 text-center mb-8">
             <span class="text-red-400 font-bold">🔥불</span> &gt; <span class="text-green-400 font-bold">🌿풀</span> &gt; <span class="text-blue-400 font-bold">💧물</span> &gt; <span class="text-red-400 font-bold">🔥불</span><br>
             (<span class="text-yellow-400 font-bold">⚡전기</span> &gt; <span class="text-blue-400 font-bold">💧물</span>)
         </div>
-        <button onclick="confirmParty()" id="btnConfirmPick" disabled class="w-full bg-green-600 hover:bg-green-500 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold py-4 rounded-xl shadow-lg border-b-4 border-green-800 active:border-b-0 active:translate-y-1 transition-all">
+
+        <button onclick="confirmParty()" id="btnConfirmPick" disabled class="w-full bg-green-700 hover:bg-green-600 disabled:bg-gray-700 disabled:text-gray-500 text-white font-bold py-4 shadow-lg border-b-4 border-green-900 active:border-b-0 active:translate-y-1 transition-all">
             선택 완료
         </button>
         <div id="opponentPickStatus" class="text-center text-sm text-gray-500 mt-4 hidden">상대방이 선택 중입니다...</div>
@@ -118,15 +163,15 @@
 </section>
 
 <section id="battleView" class="view relative bg-gray-800 justify-between pb-4">
-    <button onclick="surrenderGame()" class="absolute top-4 left-4 z-50 bg-gray-900/80 text-white text-xs border border-gray-600 px-3 py-1.5 rounded-full hover:bg-red-900/80 hover:border-red-500 transition-colors">
+    <button onclick="surrenderGame()" class="absolute top-4 left-4 z-50 bg-gray-900/90 text-white text-xs border border-gray-500 px-3 py-1 hover:bg-red-900 hover:border-red-500 transition-colors">
         🏳️ 기권
     </button>
 
     <div class="absolute top-4 right-4 flex flex-col items-end w-full pr-4 z-10">
         <div class="flex gap-1 mb-1" id="enemyPartyIcons"></div>
-        <div class="bg-black/50 px-4 py-2 rounded-lg border border-gray-600 text-right w-48 backdrop-blur-sm">
+        <div class="bg-black/60 px-4 py-2 border-2 border-gray-600 text-right w-48 backdrop-blur-sm">
             <div class="text-sm font-bold text-red-400" id="enemyName">Enemy</div>
-            <div class="w-full h-2.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+            <div class="w-full h-2.5 bg-gray-700 mt-1 overflow-hidden border border-gray-600">
                 <div id="enemyHpBar" class="hp-bar-fill h-full bg-red-500 w-full"></div>
             </div>
             <div class="text-[10px] text-gray-400 mt-1" id="enemyStatusText">Ready</div>
@@ -142,28 +187,26 @@
 
     <div class="absolute bottom-32 left-4 flex flex-col items-start w-full pl-4 z-10">
         <img id="myImg" src="" class="w-40 h-40 pixel-art mb-[-20px] drop-shadow-xl transition-transform duration-300">
-        <div class="bg-black/50 px-4 py-2 rounded-lg border border-blue-500/50 w-48 backdrop-blur-sm">
+        <div class="bg-black/60 px-4 py-2 border-2 border-blue-500/50 w-48 backdrop-blur-sm">
             <div class="text-sm font-bold text-blue-300" id="myName">Me</div>
-            <div class="w-full h-2.5 bg-gray-700 rounded-full mt-1 overflow-hidden">
+            <div class="w-full h-2.5 bg-gray-700 mt-1 overflow-hidden border border-gray-600">
                 <div id="myHpBar" class="hp-bar-fill h-full bg-blue-500 w-full"></div>
             </div>
             <div class="flex justify-between items-center mt-1">
                 <div class="text-[10px] text-gray-300" id="myHpText">100/100</div>
-                <div class="flex gap-1" id="myGaugeContainer">
-                    <div class="gauge-slot"></div><div class="gauge-slot"></div><div class="gauge-slot"></div>
-                </div>
+                <div class="flex gap-1" id="myGaugeContainer"></div>
             </div>
         </div>
         <div class="flex gap-1 mt-2" id="myPartyIcons"></div>
     </div>
 
-    <div class="absolute bottom-0 w-full max-w-md bg-gray-900 border-t border-gray-700 p-4 pb-8 z-30">
+    <div class="absolute bottom-0 w-full max-w-md bg-gray-900 border-t-2 border-gray-700 p-4 pb-8 z-30">
         <div id="skillPanel" class="flex gap-3">
-            <button onclick="selectSkill('normal')" id="btnNormal" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 rounded-xl border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">
+            <button onclick="selectSkill('normal')" id="btnNormal" class="flex-1 bg-slate-700 hover:bg-slate-600 text-white py-4 border-b-4 border-slate-900 active:border-b-0 active:translate-y-1 transition-all">
                 <div class="font-bold text-sm">일반 공격</div>
                 <div class="text-[10px] text-gray-400">게이지 +1</div>
             </button>
-            <button onclick="selectSkill('special')" id="btnSpecial" disabled class="flex-1 bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white py-4 rounded-xl border-b-4 border-yellow-800 disabled:border-gray-900 active:border-b-0 active:translate-y-1 transition-all">
+            <button onclick="selectSkill('special')" id="btnSpecial" disabled class="flex-1 bg-yellow-600 hover:bg-yellow-500 disabled:bg-gray-800 disabled:text-gray-600 text-white py-4 border-b-4 border-yellow-800 disabled:border-gray-900 active:border-b-0 active:translate-y-1 transition-all">
                 <div class="font-bold text-sm">특수 기술</div>
                 <div class="text-[10px]">게이지 3 필요</div>
             </button>
@@ -171,7 +214,7 @@
     </div>
 
     <div id="quizPanel" class="fixed inset-0 bg-black/80 z-50 hidden flex flex-col items-center justify-center p-4 backdrop-blur-sm">
-        <div class="bg-gray-800 border-2 border-gray-600 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative animate-[bounce_0.3s]">
+        <div class="bg-gray-800 border-4 border-white p-6 w-full max-w-sm shadow-2xl relative animate-[bounce_0.3s]">
             <div class="text-center mb-6">
                 <p class="text-xs text-gray-400 mb-1">BRAIN POWER!</p>
                 <p class="text-2xl font-black text-white break-keep leading-tight" id="quizQuestion">Loading...</p>
@@ -197,24 +240,23 @@
     <div class="text-6xl mb-4" id="resIcon">🏆</div>
     <h2 class="text-4xl font-black text-white mb-2" id="resTitle">WIN</h2>
     <p class="text-gray-400 mb-8" id="resDesc">결과 처리 중...</p>
-    <button onclick="location.reload()" class="bg-white text-black font-bold py-3 px-8 rounded-full">로비로</button>
+    <button onclick="location.reload()" class="bg-white text-black font-bold py-3 px-8 border-2 border-white">로비로</button>
 </div>
 
 <script>
     // ==========================================
     // 0. 설정
     // ==========================================
-    const GAME_VERSION = "v16.2"; // ✅ 버전 업데이트
+    const GAME_VERSION = "v16.3"; // ✅ 버전 업데이트
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
-
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
 
     // ==========================================
-    // 1. 데이터 (공격력 4배 상향)
+    // 1. 데이터
     // ==========================================
     const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     const POKEMON_DB = {
@@ -248,13 +290,13 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 & 버전 체크
+    // 2. 초기화 & 로비
     // ==========================================
     window.onload = async () => {
         document.getElementById('versionDisplay').innerText = GAME_VERSION;
 
         if(initSupabase()) {
-            await checkGameVersion(); // 버전 체크
+            await checkGameVersion();
             loadRanking();
             document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
             connectToLobby();
@@ -273,14 +315,12 @@
     async function checkGameVersion() {
         try {
             const { data, error } = await sb.from('game_info').select('latest_version').eq('id', 1).maybeSingle();
-            if (data && data.latest_version) {
-                if (data.latest_version !== GAME_VERSION) {
-                    document.getElementById('currentVerDisplay').innerText = GAME_VERSION;
-                    document.getElementById('serverVerDisplay').innerText = data.latest_version;
-                    document.getElementById('updateModal').classList.remove('hidden');
-                    document.getElementById('updateModal').classList.add('flex');
-                    throw new Error("Version mismatch");
-                }
+            if (data && data.latest_version && data.latest_version !== GAME_VERSION) {
+                document.getElementById('currentVerDisplay').innerText = GAME_VERSION;
+                document.getElementById('serverVerDisplay').innerText = data.latest_version;
+                document.getElementById('updateModal').classList.remove('hidden');
+                document.getElementById('updateModal').classList.add('flex');
+                throw new Error("Version mismatch");
             }
         } catch (e) { if(e.message === "Version mismatch") throw e; }
     }
@@ -376,7 +416,7 @@
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-item";
-            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 rounded">입장</div>`;
+            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 text-white">입장</div>`;
             div.onclick = () => joinRoom(room.roomId, false);
             container.appendChild(div);
         });
@@ -538,7 +578,7 @@
     }
 
     // ==========================================
-    // 5. 배틀 로직
+    // 5. 배틀 로직 (애니메이션 개선)
     // ==========================================
     function startBattle() {
         switchView('battleView');
@@ -668,13 +708,12 @@
             const damage = Math.floor(actor.atk * power * mult);
             target.hp -= damage;
 
-            animAttack(isMe);
+            animAttack(isMe); // 🆕 돌진 애니메이션
             if (mult > 1.0) showMsg("효과가 굉장했다!", "red");
             updateBattleUI();
 
             if (target.hp <= 0) {
                 setTimeout(() => {
-                    // [BUG FIX]: 내가 공격했을 때(isMe) 적이 죽었으므로 handleFaint(true = isEnemyFainted) 호출
                     handleFaint(isMe);
                     resolve();
                 }, 1000);
@@ -682,6 +721,23 @@
                 setTimeout(resolve, 1500);
             }
         });
+    }
+
+    function animAttack(isMe) {
+        const attacker = document.getElementById(isMe ? 'myImg' : 'enemyImg');
+        const target = document.getElementById(isMe ? 'enemyImg' : 'myImg');
+
+        // 돌진
+        attacker.classList.add(isMe ? 'anim-atk-me' : 'anim-atk-enemy');
+
+        // 타격 타이밍
+        setTimeout(() => {
+            target.classList.add('anim-hit');
+            // 복귀
+            attacker.classList.remove('anim-atk-me', 'anim-atk-enemy');
+
+            setTimeout(() => target.classList.remove('anim-hit'), 400);
+        }, 200);
     }
 
     function handleFaint(isEnemyFainted) {
@@ -758,17 +814,6 @@
             ball.className = `w-3 h-3 rounded-full border border-gray-600 ${idx < activeIdx ? 'bg-gray-800' : idx === activeIdx ? 'bg-yellow-400' : 'bg-green-500'}`;
             el.appendChild(ball);
         });
-    }
-
-    function animAttack(isMe) {
-        const img = document.getElementById(isMe ? 'myImg' : 'enemyImg');
-        const target = document.getElementById(isMe ? 'enemyImg' : 'myImg');
-        img.classList.add('anim-atk');
-        setTimeout(() => {
-            img.classList.remove('anim-atk');
-            target.classList.add('anim-hit');
-            setTimeout(() => target.classList.remove('anim-hit'), 400);
-        }, 200);
     }
 
     function showMsg(text, color) {
