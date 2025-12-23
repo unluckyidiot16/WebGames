@@ -20,18 +20,14 @@
         .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
         .anim-atk { transition: transform 0.2s; transform: scale(1.2); }
 
-        /* 카드 스타일 (가시성 대폭 강화) */
+        /* 카드 스타일 */
         .poke-card {
             @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all duration-200 flex flex-col items-center relative;
         }
         .poke-card:hover { @apply bg-gray-700; }
-
-        /* 선택 시 배경색 변경 + 확대 + 링 효과 */
         .poke-card.selected {
             @apply bg-yellow-600 border-yellow-300 ring-2 ring-yellow-400 scale-110 z-10 opacity-100 shadow-xl;
         }
-        /* 선택 뱃지 (가상 요소 대신 DOM으로 처리 예정) */
-
         .poke-card.disabled { @apply opacity-30 cursor-not-allowed filter grayscale; }
 
         /* 게이지 바 */
@@ -53,7 +49,7 @@
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center">
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8">v16.1 VISUAL FIX</div>
+        <div class="text-xs text-gray-500 text-center mb-8">v16.2 BUG FIX</div>
 
         <div class="bg-gray-800 p-4 rounded-2xl mb-8 flex justify-between items-center shadow-lg border border-gray-700">
             <div>
@@ -120,8 +116,7 @@
             <span id="pickCount" class="text-yellow-400 font-bold">0 / 3</span>
         </div>
 
-        <div class="grid grid-cols-4 gap-3 mb-8" id="pickGrid">
-        </div>
+        <div class="grid grid-cols-4 gap-3 mb-8" id="pickGrid"></div>
 
         <div class="bg-gray-800 p-3 rounded-lg text-xs text-gray-400 text-center mb-8">
             <span class="text-red-400 font-bold">🔥불</span> &gt; <span class="text-green-400 font-bold">🌿풀</span> &gt; <span class="text-blue-400 font-bold">💧물</span> &gt; <span class="text-red-400 font-bold">🔥불</span><br>
@@ -194,12 +189,18 @@
                 <p class="text-xs text-gray-400 mb-1">BRAIN POWER!</p>
                 <p class="text-2xl font-black text-white break-keep leading-tight" id="quizQuestion">Loading...</p>
             </div>
-            <div id="quizChoices" class="grid grid-cols-2 gap-3">
-            </div>
+            <div id="quizChoices" class="grid grid-cols-2 gap-3"></div>
             <div class="mt-4 text-center text-xs text-gray-500" id="quizStatusMsg">문제를 풀면 공격이 나갑니다!</div>
         </div>
     </div>
 </section>
+
+<div id="updateModal" class="fixed inset-0 bg-black/95 z-[60] hidden flex-col items-center justify-center p-6 text-center">
+    <div class="text-6xl mb-4">⚠️</div>
+    <h2 class="text-3xl font-black text-white mb-2">업데이트 필요</h2>
+    <p class="text-gray-400 mb-6">새로운 패치가 있습니다.<br>최신 버전으로 업데이트 해주세요.</p>
+    <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-500">새로고침</button>
+</div>
 
 <div id="resultModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
     <div class="text-6xl mb-4" id="resIcon">🏆</div>
@@ -212,9 +213,9 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
-
+    const GAME_VERSION = "v16.1";
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // ⚠️ 필수: 본인 URL
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ⚠️ 필수: 본인 KEY
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
@@ -223,10 +224,9 @@
     // ==========================================
     // 1. 데이터
     // ==========================================
-    // 이미지 로딩 실패 시 투명 픽셀 사용
     const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     const POKEMON_DB = {
-        // atk: 4배 상향 적용 (18*4=72, 25*4=100)
+        // 공격력 4배 상향 적용
         1:  { name: "이상해씨", type: "grass",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", hp: 120, atk: 72, spec: "덩쿨채찍 (2배)" },
         4:  { name: "파이리",   type: "fire",     img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png", hp: 110, atk: 88, spec: "화염방사 (2배)" },
         7:  { name: "꼬부기",   type: "water",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png", hp: 115, atk: 76, spec: "하이드로펌프 (2배)" },
@@ -257,10 +257,11 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 & 로비
+    // 2. 초기화
     // ==========================================
-    window.onload = () => {
+    window.onload = async () => {
         if(initSupabase()) {
+            await checkGameVersion();
             loadRanking();
             document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
             connectToLobby();
@@ -274,6 +275,17 @@
         }
         sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         return true;
+    }
+
+    async function checkGameVersion() {
+        try {
+            const { data, error } = await sb.from('game_info').select('latest_version').eq('id', 1).maybeSingle();
+            if (data && data.latest_version && data.latest_version !== GAME_VERSION) {
+                document.getElementById('updateModal').classList.remove('hidden');
+                document.getElementById('updateModal').classList.add('flex');
+                throw new Error("Version mismatch");
+            }
+        } catch (e) { if(e.message === "Version mismatch") throw e; }
     }
 
     async function loadRanking() {
@@ -297,25 +309,21 @@
         }
     }
 
-    // --- 로비 & 매칭 ---
+    // ==========================================
+    // 3. 매칭
+    // ==========================================
     function startRankedMatch() {
         battleMode = 'ranked';
         switchView('waitingView');
+        document.getElementById('waitingTitle').innerText = "매칭 중...";
         document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
-        document.getElementById('waitingTitle').innerText = "매칭 중..."; // 타이틀 변경
 
         if(channel) sb.removeChannel(channel);
-        // ✅ onload에서 이미 ppb_lobby를 구독했을 수 있으니 정리 후 재구독(중복 방지)
-        if (lobbyChannel) sb.removeChannel(lobbyChannel);
-        lobbyChannel = sb.channel('ppb_lobby', {
-            config: { presence: { key: myUUID } }
-        });
-        lobbyChannel.on('presence', { event: 'sync' }, () => {
-            renderRoomList(lobbyChannel.presenceState());
-        });
-            lobbyChannel.subscribe(async (s) => {
+        channel = sb.channel('ppb_rank_queue');
+
+        channel.on('presence', { event: 'sync' }, () => {
             const users = Object.values(channel.presenceState()).flat();
-            const opponent = users.find(u => u.id !== myUUID && u.status === 'searching');
+            const opponent = users.find(u => u.id !== myUUID && u.status === 'searching' && u.version === GAME_VERSION);
             if (opponent && myUUID > opponent.id) {
                 const room = `ppb_${myUUID}_${opponent.id}`;
                 channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myUUID } });
@@ -324,7 +332,7 @@
         }).on('broadcast', { event: 'match' }, ({ payload }) => {
             if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
         }).subscribe(async (s) => {
-            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching' });
+            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching', version: GAME_VERSION });
         });
     }
 
@@ -336,7 +344,7 @@
         lobbyChannel = sb.channel('ppb_lobby');
         lobbyChannel.subscribe(async (s) => {
             if (s === 'SUBSCRIBED') {
-                await lobbyChannel.track({ id: myUUID, isHost: true, roomId: rId, name: roomName });
+                await lobbyChannel.track({ id: myUUID, isHost: true, roomId: rId, name: roomName, version: GAME_VERSION });
                 waitForChallenger(rId);
             }
         });
@@ -354,21 +362,11 @@
     }
 
     function connectToLobby() {
-        if (lobbyChannel) sb.removeChannel(lobbyChannel);
-        lobbyChannel = sb.channel('ppb_lobby', {
-                config: { presence: { key: myUUID } } // ✅ 각 클라 고유 key
-        });
-        
+        if(lobbyChannel) sb.removeChannel(lobbyChannel);
+        lobbyChannel = sb.channel('ppb_lobby');
         lobbyChannel.on('presence', { event: 'sync' }, () => {
             renderRoomList(lobbyChannel.presenceState());
-        });
-        
-        lobbyChannel.subscribe(async (s) => {
-            if (s === 'SUBSCRIBED') {
-                // ✅ 방 목록만 보는 클라도 presence에 참여(상태 sync 안정화)
-                await lobbyChannel.track({ id: myUUID, isHost: false });
-            }
-        });
+        }).subscribe();
     }
 
     function renderRoomList(state) {
@@ -376,7 +374,7 @@
         if(!container) return;
 
         container.innerHTML = "";
-        const rooms = Object.values(state).flat().filter(u => u.isHost);
+        const rooms = Object.values(state).flat().filter(u => u.isHost && u.version === GAME_VERSION);
 
         if(rooms.length === 0) {
             container.innerHTML = '<div class="text-center text-gray-500 mt-20 flex flex-col items-center"><span class="text-4xl mb-2">📭</span>개설된 방이 없습니다.</div>';
@@ -441,7 +439,6 @@
         channel.subscribe(async (s) => {
             if(s==='SUBSCRIBED') {
                 await channel.track({ id: myUUID, status: 'playing' });
-
                 const ping = setInterval(() => {
                     if(ackReceived) clearInterval(ping);
                     else channel.send({ type: 'broadcast', event: 'ready', payload: { id: myUUID } });
@@ -487,7 +484,7 @@
             const p = POKEMON_DB[id];
             const div = document.createElement('div');
             div.className = "poke-card";
-            div.innerHTML = `<img src="${p.img}" class="w-12 h-12 pixel-art" onerror="this.src='${FALLBACK_IMG}'"><div class="text-[10px] font-bold mt-1">${p.name}</div>`;
+            div.innerHTML = `<img src="${p.img}" class="w-12 h-12 pixel-art" onerror="this.src='${FALLBACK_IMG}'"><div class="text-[10px] font-bold mt-1 text-white">${p.name}</div>`;
             div.onclick = () => togglePick(id, div);
             container.appendChild(div);
         });
@@ -500,14 +497,12 @@
         if (idx >= 0) {
             myParty.splice(idx, 1);
             el.classList.remove('selected');
-            // 체크 아이콘 제거
             const badge = el.querySelector('.check-badge');
             if(badge) badge.remove();
         } else {
             if (myParty.length >= 3) return;
             myParty.push(id);
             el.classList.add('selected');
-            // 체크 아이콘 추가 (가시성 강화)
             const badge = document.createElement('div');
             badge.className = "check-badge absolute top-1 right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-sm";
             badge.innerText = "✓";
@@ -686,7 +681,12 @@
             updateBattleUI();
 
             if (target.hp <= 0) {
-                setTimeout(() => { handleFaint(!isMe); resolve(); }, 1000);
+                setTimeout(() => {
+                    // 버그 수정: 내가 공격했을 때(isMe) 적이 죽었으면 handleFaint(true=EnemyFainted)
+                    // 적이 공격했을 때(!isMe) 내가 죽었으면 handleFaint(false=EnemyFainted)
+                    handleFaint(isMe);
+                    resolve();
+                }, 1000);
             } else {
                 setTimeout(resolve, 1500);
             }
@@ -720,7 +720,8 @@
         gameEnded = true;
         if (battleMode === 'ranked') {
             const change = win ? 20 : -10;
-            await sb.from('ppb_rankings').update({ mmr: parseInt(document.getElementById('myMMR').innerText) + change }).eq('user_id', myUUID);
+            const cur = parseInt(document.getElementById('myMMR').innerText) || 1000;
+            await sb.from('ppb_rankings').update({ mmr: cur + change }).eq('user_id', myUUID);
         }
         document.getElementById('resultModal').classList.remove('hidden');
         document.getElementById('resultModal').classList.add('flex');
