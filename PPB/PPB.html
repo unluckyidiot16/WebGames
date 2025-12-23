@@ -20,7 +20,7 @@
         .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
         .anim-atk { transition: transform 0.2s; transform: scale(1.2); }
 
-        /* 카드 스타일 (선택 효과 강화) */
+        /* 카드 및 버튼 스타일 */
         .poke-card { @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all opacity-70 flex flex-col items-center; }
         .poke-card:hover { @apply bg-gray-700; }
         .poke-card.selected {
@@ -29,15 +29,11 @@
         }
         .poke-card.disabled { @apply opacity-30 cursor-not-allowed filter grayscale; }
 
-        /* 게이지 바 */
         .gauge-slot { @apply w-3 h-3 rounded-full bg-gray-600; }
         .gauge-slot.filled { @apply bg-blue-400 shadow-[0_0_5px_#60a5fa]; }
-
         .hp-bar-fill { transition: width 0.3s ease-out; }
 
         .room-item { @apply bg-gray-800 p-4 rounded-xl border border-gray-600 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors mb-2; }
-
-        /* 퀴즈 버튼 스타일 */
         .btn-choice { @apply bg-gray-700 p-4 rounded-xl text-white font-bold hover:bg-gray-600 border-2 border-gray-600 transition-all active:scale-95; }
         .btn-choice.correct { @apply bg-green-600 border-green-400 ring-2 ring-green-400; }
         .btn-choice.wrong { @apply bg-red-600 border-red-400 ring-2 ring-red-400; }
@@ -46,9 +42,14 @@
 <body>
 
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
-    <div class="w-full max-w-md p-6 flex flex-col h-full justify-center">
+    <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
+        <div class="absolute top-6 right-6 bg-gray-800 border border-gray-600 px-3 py-1 rounded-full text-xs text-gray-400 flex items-center gap-2">
+            <div class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
+            <span id="versionDisplay">Ver Checking...</span>
+        </div>
+
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8">v15.3 QUIZ MODAL FIX</div>
+        <div class="text-xs text-gray-500 text-center mb-8">REAL-TIME STRATEGY</div>
 
         <div class="bg-gray-800 p-4 rounded-2xl mb-8 flex justify-between items-center shadow-lg border border-gray-700">
             <div>
@@ -190,6 +191,17 @@
     </div>
 </section>
 
+<div id="updateModal" class="fixed inset-0 bg-black/95 z-[60] hidden flex-col items-center justify-center p-6 text-center">
+    <div class="text-6xl mb-4">⚠️</div>
+    <h2 class="text-3xl font-black text-white mb-2">업데이트 필요</h2>
+    <p class="text-gray-400 mb-6">새로운 패치가 있습니다.<br>최신 버전으로 업데이트 해주세요.</p>
+    <div class="text-yellow-400 font-bold mb-6 text-xl">
+        현재: <span id="currentVerDisplay"></span> <br>
+        최신: <span id="serverVerDisplay"></span>
+    </div>
+    <button onclick="location.reload()" class="bg-blue-600 text-white font-bold py-3 px-8 rounded-xl hover:bg-blue-500">새로고침</button>
+</div>
+
 <div id="resultModal" class="fixed inset-0 bg-black/90 z-50 hidden flex-col items-center justify-center p-4">
     <div class="text-6xl mb-4" id="resIcon">🏆</div>
     <h2 class="text-4xl font-black text-white mb-2" id="resTitle">WIN</h2>
@@ -199,10 +211,11 @@
 
 <script>
     // ==========================================
-    // 0. 설정 (본인 키 입력 필수)
+    // 0. 설정 및 버전 관리
     // ==========================================
-    const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
+    const GAME_VERSION = "v15.4"; // 현재 클라이언트 버전
+    const SUPABASE_URL = 'YOUR_SUPABASE_URL'; // ⚠️ 본인 URL
+    const SUPABASE_KEY = 'YOUR_SUPABASE_ANON_KEY'; // ⚠️ 본인 KEY
 
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
@@ -241,13 +254,16 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 & 로비
+    // 2. 초기화 & 버전 체크
     // ==========================================
-    window.onload = () => {
+    window.onload = async () => {
+        document.getElementById('versionDisplay').innerText = GAME_VERSION;
+
         if(initSupabase()) {
+            await checkGameVersion(); // 버전 체크 우선
             loadRanking();
             document.getElementById('myUUIDDisplay').innerText = myUUID.substring(0,8);
-            connectToLobby(); // 미리 연결
+            connectToLobby();
             initPickGrid();
         }
     };
@@ -258,6 +274,29 @@
         }
         sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         return true;
+    }
+
+    // 버전 체크 함수 (핵심)
+    async function checkGameVersion() {
+        try {
+            const { data, error } = await sb.from('game_info').select('latest_version').eq('id', 1).maybeSingle();
+
+            if (data && data.latest_version) {
+                if (data.latest_version !== GAME_VERSION) {
+                    // 버전 불일치 -> 업데이트 모달 표시
+                    document.getElementById('currentVerDisplay').innerText = GAME_VERSION;
+                    document.getElementById('serverVerDisplay').innerText = data.latest_version;
+                    document.getElementById('updateModal').classList.remove('hidden');
+                    document.getElementById('updateModal').classList.add('flex');
+                    throw new Error("Version mismatch"); // 실행 중단
+                }
+            } else {
+                console.log("No version info on server. Skipping check.");
+            }
+        } catch (e) {
+            if (e.message === "Version mismatch") throw e;
+            console.warn("Version check failed:", e);
+        }
     }
 
     async function loadRanking() {
@@ -272,37 +311,74 @@
     function switchView(id) {
         document.querySelectorAll('.view').forEach(v=>{
             v.classList.remove('active');
-            // waitingView와 resultModal은 뷰가 아니라 오버레이이므로 별도 처리
-            if(id !== 'waitingView') document.getElementById('waitingView').classList.add('hidden');
+            if(id!=='waitingView') document.getElementById('waitingView').classList.add('hidden');
         });
-
-        // 특수 뷰 처리
         const target = document.getElementById(id);
-        if(!target) return;
-
-        if (id === 'waitingView') {
-            target.classList.remove('hidden');
-        } else {
+        if(target) {
             target.classList.add('active');
+            if(id==='waitingView') target.classList.remove('hidden');
         }
     }
 
-    // --- 공개 로비 시스템 ---
-    function enterCustomLobby() {
-        if (!sb && !initSupabase()) return;
-        switchView('customLobbyView');
-        connectToLobby();
+    // ==========================================
+    // 3. 매칭 시스템 (버전 필터링 추가)
+    // ==========================================
+    function startRankedMatch() {
+        battleMode = 'ranked';
+        switchView('waitingView');
+        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
+
+        if(channel) sb.removeChannel(channel);
+        channel = sb.channel('ppb_rank_queue');
+
+        channel.on('presence', { event: 'sync' }, () => {
+            const users = Object.values(channel.presenceState()).flat();
+            // 버전이 같은 유저만 필터링
+            const opponent = users.find(u => u.id !== myUUID && u.status === 'searching' && u.version === GAME_VERSION);
+
+            if (opponent && myUUID > opponent.id) {
+                const room = `ppb_${myUUID}_${opponent.id}`;
+                channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myUUID } });
+                joinRoom(room, true);
+            }
+        }).on('broadcast', { event: 'match' }, ({ payload }) => {
+            if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
+        }).subscribe(async (s) => {
+            // 트래킹 시 버전 정보 포함
+            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching', version: GAME_VERSION });
+        });
     }
 
-    function leaveLobby() {
-        if(lobbyChannel) sb.removeChannel(lobbyChannel);
-        switchView('lobbyView');
+    function createRoom() {
+        battleMode = 'friendly';
+        const roomName = `[대기중] ${myUUID.substring(0,4)}의 방`;
+        const rId = `room_${myUUID}_${Date.now()}`;
+
+        lobbyChannel = sb.channel('ppb_lobby');
+        lobbyChannel.subscribe(async (s) => {
+            if (s === 'SUBSCRIBED') {
+                await lobbyChannel.track({
+                    id: myUUID, isHost: true, roomId: rId, name: roomName,
+                    version: GAME_VERSION // 방 정보에 버전 포함
+                });
+                waitForChallenger(rId);
+            }
+        });
+
+        switchView('waitingView');
+        document.getElementById('waitingMsg').innerText = "도전자를 기다리는 중...";
+    }
+
+    function waitForChallenger(rId) {
+        channel = sb.channel(rId);
+        channel.on('presence', {event:'join'}, ({newPresences}) => {
+            newPresences.forEach(p => { if(p.id !== myUUID) joinRoom(rId, true); });
+        }).subscribe(async (s) => { if(s==='SUBSCRIBED') await channel.track({ id: myUUID }); });
     }
 
     function connectToLobby() {
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
-        lobbyChannel = sb.channel('global_rooms');
-
+        lobbyChannel = sb.channel('ppb_lobby');
         lobbyChannel.on('presence', { event: 'sync' }, () => {
             const state = lobbyChannel.presenceState();
             renderRoomList(state);
@@ -314,7 +390,8 @@
         if(!container) return;
 
         container.innerHTML = "";
-        const rooms = Object.values(state).flat().filter(u => u.isHost);
+        // 버전이 다른 방은 필터링하거나 표시해줌 (여기선 필터링)
+        const rooms = Object.values(state).flat().filter(u => u.isHost && u.version === GAME_VERSION);
 
         if(rooms.length === 0) {
             container.innerHTML = '<div class="text-center text-gray-500 mt-20 flex flex-col items-center"><span class="text-4xl mb-2">📭</span>개설된 방이 없습니다.<br>직접 방을 만들어보세요!</div>';
@@ -339,87 +416,9 @@
         });
     }
 
-    async function createRoom() {
-        if (!sb && !initSupabase()) return;
-        if(lobbyChannel) sb.removeChannel(lobbyChannel);
-        if(channel) sb.removeChannel(channel);
-
-        const newRoomId = `room_${myUUID}_${Date.now()}`;
-        const roomName = `[대기중] ${myUUID.substring(0,4)}의 방`;
-
-        roomId = newRoomId;
-        isHost = true;
-
-        // 방장 채널 구독
-        channel = sb.channel(newRoomId, { config: { broadcast: { self: true } } });
-
-        // 상대방 접속 감지
-        channel.on('broadcast', { event: 'ready' }, ({ payload }) => {
-            if (payload.id !== myUUID && !battleInitialized) {
-                // 접속자 발견 -> 로비에서 방 내리기
-                if(lobbyChannel) lobbyChannel.untrack();
-                // 데이터 교환 시작
-                joinRoom(newRoomId, true);
-            }
-        });
-
-        channel.subscribe(async (status) => {
-            if (status === 'SUBSCRIBED') {
-                // 로비에 등록
-                lobbyChannel = sb.channel('global_rooms');
-                lobbyChannel.subscribe(async (s) => {
-                    if (s === 'SUBSCRIBED') {
-                        await lobbyChannel.track({
-                            id: myUUID,
-                            isHost: true,
-                            roomId: newRoomId,
-                            name: roomName
-                        });
-                    }
-                });
-            }
-        });
-
-        switchView('waitingView');
-        document.getElementById('waitingMsg').innerText = "도전자를 기다리는 중...";
-    }
-
-    // --- 랭킹 매칭 ---
-    function startRankedMatch() {
-        if (!sb && !initSupabase()) return;
-
-        switchView('waitingView');
-        document.getElementById('waitingMsg').innerText = "매칭 중...";
-
-        if(channel) sb.removeChannel(channel);
-        channel = sb.channel('ppb_rank_queue');
-
-        channel.on('presence', { event: 'sync' }, () => {
-            const users = Object.values(channel.presenceState()).flat();
-            const opponent = users.find(u => u.id !== myUUID && u.status === 'searching');
-            if (opponent && myUUID > opponent.id) {
-                const room = `ppb_${myUUID}_${opponent.id}`;
-                channel.send({ type: 'broadcast', event: 'match', payload: { room, host: myUUID } });
-                joinRoom(room, true);
-            }
-        }).on('broadcast', { event: 'match' }, ({ payload }) => {
-            if (payload.room.includes(myUUID)) joinRoom(payload.room, payload.host === myUUID);
-        }).subscribe(async (s) => {
-            if(s==='SUBSCRIBED') await channel.track({ id: myUUID, status: 'searching' });
-        });
-    }
-
-    function cancelMatching() {
-        if(channel) sb.removeChannel(channel);
-        if(lobbyChannel) sb.removeChannel(lobbyChannel);
-
-        if(document.getElementById('customLobbyView').classList.contains('active')) {
-            document.getElementById('waitingView').classList.add('hidden');
-            connectToLobby();
-        } else {
-            switchView('lobbyView');
-        }
-    }
+    function enterCustomLobby() { switchView('customLobbyView'); connectToLobby(); }
+    function leaveLobby() { if(lobbyChannel) sb.removeChannel(lobbyChannel); switchView('lobbyView'); }
+    function cancelMatching() { if(channel) sb.removeChannel(channel); switchView('lobbyView'); }
 
     // ==========================================
     // 4. 접속 & 픽 페이즈
@@ -597,7 +596,7 @@
         gameState.enemyAnswer = null;
 
         document.getElementById('skillPanel').classList.remove('hidden');
-        document.getElementById('quizPanel').classList.add('hidden'); // 모달 숨김
+        document.getElementById('quizPanel').classList.add('hidden');
         document.getElementById('btnNormal').disabled = false;
 
         const myPoke = gameState.myPartyState[gameState.myActiveIdx];
@@ -616,8 +615,8 @@
     function selectSkill(type) {
         gameState.selectedType = type;
         document.getElementById('skillPanel').classList.add('hidden');
-        document.getElementById('quizPanel').classList.remove('hidden'); // 모달 표시
-        document.getElementById('quizPanel').classList.add('flex'); // Flex로 변경하여 중앙 정렬
+        document.getElementById('quizPanel').classList.remove('hidden');
+        document.getElementById('quizPanel').classList.add('flex'); // 중앙 정렬
 
         document.getElementById('quizQuestion').innerText = gameState.currentQuiz.q;
         document.getElementById('quizStatusMsg').innerText = "문제를 풀면 공격이 나갑니다!";
