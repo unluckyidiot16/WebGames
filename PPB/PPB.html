@@ -8,16 +8,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body {
-            font-family: 'Courier New', Courier, monospace, sans-serif; /* 레트로 폰트 느낌 */
+            font-family: 'Courier New', Courier, monospace, sans-serif;
             background-color: #1a1a1a; color: white; height: 100dvh; overflow: hidden; touch-action: manipulation;
         }
         .pixel-art { image-rendering: pixelated; }
         .view { display: none; height: 100%; flex-direction: column; align-items: center; justify-content: center; }
         .view.active { display: flex; }
 
-        /* --- 애니메이션 정의 --- */
-
-        /* 피격: 흔들림 + 번쩍임 */
         @keyframes damage-shake {
             0% { transform: translate(0, 0); filter: brightness(1); }
             20% { transform: translate(-5px, 0); filter: brightness(5) sepia(1) saturate(0); }
@@ -27,37 +24,25 @@
             100% { transform: translate(0, 0); }
         }
         .anim-hit { animation: damage-shake 0.4s ease-out; }
-
-        /* 내 공격: 오른쪽으로 돌진 (이미지 반전 상태 유지) */
         .anim-atk-me { transition: transform 0.1s; transform: translateX(80px) scaleX(-1) !important; }
-
-        /* 적 공격: 왼쪽으로 돌진 */
         .anim-atk-enemy { transition: transform 0.1s; transform: translateX(-80px) !important; }
 
-        /* --- UI 스타일 --- */
-
-        /* 사각형 카드 스타일 */
         .poke-card {
             @apply bg-gray-800 border-2 border-gray-600 p-2 cursor-pointer transition-all duration-100 flex flex-col items-center relative;
-            border-radius: 0; /* 사각형 */
+            border-radius: 0;
         }
         .poke-card:hover { @apply bg-gray-700; }
-
-        /* 선택됨: 두꺼운 노란 테두리 (사각형) */
         .poke-card.selected {
             @apply bg-gray-700 border-4 border-yellow-400 z-10 opacity-100;
             box-shadow: 0 0 15px rgba(250, 204, 21, 0.4);
         }
         .poke-card.disabled { @apply opacity-30 cursor-not-allowed filter grayscale; }
 
-        /* 게이지 & 체력바 */
         .gauge-slot { @apply w-3 h-3 bg-gray-600 border border-gray-500; border-radius: 0; }
         .gauge-slot.filled { @apply bg-blue-400 border-blue-300 shadow-[0_0_5px_#60a5fa]; }
         .hp-bar-fill { transition: width 0.3s ease-out; }
-
         .room-item { @apply bg-gray-800 p-4 border border-gray-600 flex justify-between items-center cursor-pointer hover:bg-gray-700 transition-colors mb-2; border-radius: 0; }
 
-        /* 퀴즈 버튼 (사각형) */
         .btn-choice {
             @apply bg-gray-700 p-4 text-white font-bold hover:bg-gray-600 border-2 border-gray-500 transition-all active:scale-95;
             border-radius: 0;
@@ -65,10 +50,8 @@
         .btn-choice.correct { @apply bg-green-700 border-green-400 text-green-100; }
         .btn-choice.wrong { @apply bg-red-700 border-red-400 text-red-100; }
 
-        /* 스프라이트 방향 (중요) */
-        #myImg { transform: scaleX(-1); /* 나는 오른쪽을 봄 */ }
-        #enemyImg { transform: scaleX(1); /* 적은 왼쪽을 봄 (기본) */ }
-
+        #myImg { transform: scaleX(-1); }
+        #enemyImg { transform: scaleX(1); }
     </style>
 </head>
 <body>
@@ -77,11 +60,11 @@
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center relative">
         <div class="absolute top-6 right-6 bg-black border border-gray-600 px-3 py-1 text-xs text-gray-400 flex items-center gap-2">
             <div class="w-2 h-2 bg-green-500 animate-pulse"></div>
-            <span id="versionDisplay">v16.3</span>
+            <span id="versionDisplay">v16.4</span>
         </div>
 
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic tracking-tighter">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">VISUAL UPDATE</div>
+        <div class="text-xs text-gray-500 text-center mb-8 tracking-widest">TIMER FIX</div>
 
         <div class="bg-gray-800 p-4 mb-8 flex justify-between items-center shadow-lg border-2 border-gray-600">
             <div>
@@ -247,7 +230,7 @@
     // ==========================================
     // 0. 설정
     // ==========================================
-    const GAME_VERSION = "v16.3"; // ✅ 버전 업데이트
+    const GAME_VERSION = "v16.4";
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
 
@@ -256,7 +239,7 @@
     localStorage.setItem("ppb_uuid", myUUID);
 
     // ==========================================
-    // 1. 데이터
+    // 1. 데이터 (공격력 4배)
     // ==========================================
     const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     const POKEMON_DB = {
@@ -290,7 +273,7 @@
     let timerInterval = null;
 
     // ==========================================
-    // 2. 초기화 & 로비
+    // 2. 초기화
     // ==========================================
     window.onload = async () => {
         document.getElementById('versionDisplay').innerText = GAME_VERSION;
@@ -350,8 +333,8 @@
     function startRankedMatch() {
         battleMode = 'ranked';
         switchView('waitingView');
-        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
         document.getElementById('waitingTitle').innerText = "매칭 중...";
+        document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
 
         if(channel) sb.removeChannel(channel);
         channel = sb.channel('ppb_rank_queue');
@@ -416,7 +399,7 @@
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-item";
-            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 text-white">입장</div>`;
+            div.innerHTML = `<div class="font-bold text-sm text-yellow-400">${room.name}</div><div class="text-xs bg-green-600 px-3 py-1 rounded">입장</div>`;
             div.onclick = () => joinRoom(room.roomId, false);
             container.appendChild(div);
         });
@@ -578,7 +561,7 @@
     }
 
     // ==========================================
-    // 5. 배틀 로직 (애니메이션 개선)
+    // 5. 배틀 로직
     // ==========================================
     function startBattle() {
         switchView('battleView');
@@ -629,7 +612,22 @@
             btnSpecial.classList.remove('animate-pulse', 'ring-2', 'ring-yellow-400');
         }
 
-        document.getElementById('battleTimerDisplay').innerText = 30;
+        // [FIX] 타이머 작동
+        startTimer(30, () => submitAction(-999));
+    }
+
+    function startTimer(sec, onTimeout) {
+        clearInterval(timerInterval);
+        gameState.timer = sec;
+        document.getElementById('battleTimerDisplay').innerText = sec;
+        timerInterval = setInterval(() => {
+            gameState.timer--;
+            document.getElementById('battleTimerDisplay').innerText = gameState.timer;
+            if (gameState.timer <= 0) {
+                clearInterval(timerInterval);
+                if (onTimeout) onTimeout();
+            }
+        }, 1000);
     }
 
     function selectSkill(type) {
@@ -663,6 +661,7 @@
 
     function checkTurnEnd() {
         if (gameState.myAnswer && gameState.enemyAnswer) {
+            clearInterval(timerInterval); // 타이머 중지
             resolveTurn();
         }
     }
@@ -708,7 +707,7 @@
             const damage = Math.floor(actor.atk * power * mult);
             target.hp -= damage;
 
-            animAttack(isMe); // 🆕 돌진 애니메이션
+            animAttack(isMe);
             if (mult > 1.0) showMsg("효과가 굉장했다!", "red");
             updateBattleUI();
 
@@ -721,23 +720,6 @@
                 setTimeout(resolve, 1500);
             }
         });
-    }
-
-    function animAttack(isMe) {
-        const attacker = document.getElementById(isMe ? 'myImg' : 'enemyImg');
-        const target = document.getElementById(isMe ? 'enemyImg' : 'myImg');
-
-        // 돌진
-        attacker.classList.add(isMe ? 'anim-atk-me' : 'anim-atk-enemy');
-
-        // 타격 타이밍
-        setTimeout(() => {
-            target.classList.add('anim-hit');
-            // 복귀
-            attacker.classList.remove('anim-atk-me', 'anim-atk-enemy');
-
-            setTimeout(() => target.classList.remove('anim-hit'), 400);
-        }, 200);
     }
 
     function handleFaint(isEnemyFainted) {
@@ -814,6 +796,17 @@
             ball.className = `w-3 h-3 rounded-full border border-gray-600 ${idx < activeIdx ? 'bg-gray-800' : idx === activeIdx ? 'bg-yellow-400' : 'bg-green-500'}`;
             el.appendChild(ball);
         });
+    }
+
+    function animAttack(isMe) {
+        const img = document.getElementById(isMe ? 'myImg' : 'enemyImg');
+        const target = document.getElementById(isMe ? 'enemyImg' : 'myImg');
+        img.classList.add(isMe ? 'anim-atk-me' : 'anim-atk-enemy');
+        setTimeout(() => {
+            img.classList.remove(isMe ? 'anim-atk-me' : 'anim-atk-enemy');
+            target.classList.add('anim-hit');
+            setTimeout(() => target.classList.remove('anim-hit'), 400);
+        }, 200);
     }
 
     function showMsg(text, color) {
