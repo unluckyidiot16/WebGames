@@ -441,7 +441,7 @@
 
     function waitForChallenger(roomId) {
         // config: { broadcast: { self: true } } 옵션을 꼭 추가해야 합니다.
-        channel = sb.channel(room, {
+        channel = sb.channel(roomId, {
             config: {
                 broadcast: { self: true }
             }
