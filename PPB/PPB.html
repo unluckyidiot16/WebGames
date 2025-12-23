@@ -20,18 +20,18 @@
         .anim-hit { animation: shake 0.4s; filter: brightness(2) sepia(1) hue-rotate(-50deg) saturate(5); }
         .anim-atk { transition: transform 0.2s; transform: scale(1.2); }
 
-        /* 카드 스타일 (테두리 강화) */
+        /* 카드 스타일 (가시성 대폭 강화) */
         .poke-card {
-            @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all opacity-70 flex flex-col items-center transform;
+            @apply bg-gray-800 border-2 border-gray-600 rounded-xl p-2 cursor-pointer transition-all duration-200 flex flex-col items-center relative;
         }
         .poke-card:hover { @apply bg-gray-700; }
 
-        /* 선택된 카드: 두꺼운 노란 테두리 + 광채 + 확대 */
+        /* 선택 시 배경색 변경 + 확대 + 링 효과 */
         .poke-card.selected {
-            @apply border-4 border-yellow-400 bg-gray-700 opacity-100 ring-4 ring-yellow-500/30 scale-105 shadow-[0_0_20px_rgba(250,204,21,0.6)];
-            transform: translateY(-5px);
-            z-index: 10;
+            @apply bg-yellow-600 border-yellow-300 ring-2 ring-yellow-400 scale-110 z-10 opacity-100 shadow-xl;
         }
+        /* 선택 뱃지 (가상 요소 대신 DOM으로 처리 예정) */
+
         .poke-card.disabled { @apply opacity-30 cursor-not-allowed filter grayscale; }
 
         /* 게이지 바 */
@@ -53,7 +53,7 @@
 <section id="lobbyView" class="view active bg-gray-900 overflow-y-auto">
     <div class="w-full max-w-md p-6 flex flex-col h-full justify-center">
         <h1 class="text-4xl font-black text-yellow-400 mb-1 text-center italic">POKÉ PARTY</h1>
-        <div class="text-xs text-gray-500 text-center mb-8">v16.0 FINAL PVP</div>
+        <div class="text-xs text-gray-500 text-center mb-8">v16.1 VISUAL FIX</div>
 
         <div class="bg-gray-800 p-4 rounded-2xl mb-8 flex justify-between items-center shadow-lg border border-gray-700">
             <div>
@@ -101,7 +101,7 @@
 <section id="waitingView" class="view bg-black/90 fixed inset-0 z-50 hidden">
     <div class="text-center">
         <div class="text-7xl mb-6 animate-pulse">⏳</div>
-        <h2 class="text-2xl font-bold mb-2 text-white">매칭 중...</h2>
+        <h2 class="text-2xl font-bold mb-2 text-white" id="waitingTitle">매칭 중...</h2>
         <p class="text-gray-400 text-sm mb-8" id="waitingMsg">상대를 찾는 중입니다.</p>
         <button onclick="cancelMatching()" class="border border-red-500 text-red-500 px-8 py-2 rounded-full hover:bg-red-500 hover:text-white transition">취소</button>
     </div>
@@ -215,15 +215,18 @@
     const SUPABASE_URL = 'https://otzhhhzirasqmrdknhib.supabase.co'; // ⚠️ 본인 URL 입력
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im90emhoaHppcmFzcW1yZGtuaGliIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMxMDQ3MjMsImV4cCI6MjA3ODY4MDcyM30.ky1jeShjnEPsUkbGI_ZRtXbdWxiPFEYqRSUiizD98_M'; // ⚠️ 본인 KEY 입력
 
+
     let sb = null;
     let myUUID = localStorage.getItem("ppb_uuid") || crypto.randomUUID();
     localStorage.setItem("ppb_uuid", myUUID);
 
     // ==========================================
-    // 1. 데이터 (공격력 4배 상향)
+    // 1. 데이터
     // ==========================================
+    // 이미지 로딩 실패 시 투명 픽셀 사용
+    const FALLBACK_IMG = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
     const POKEMON_DB = {
-        // atk: 기존 값 * 4
+        // atk: 4배 상향 적용 (18*4=72, 25*4=100)
         1:  { name: "이상해씨", type: "grass",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png", hp: 120, atk: 72, spec: "덩쿨채찍 (2배)" },
         4:  { name: "파이리",   type: "fire",     img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png", hp: 110, atk: 88, spec: "화염방사 (2배)" },
         7:  { name: "꼬부기",   type: "water",    img: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png", hp: 115, atk: 76, spec: "하이드로펌프 (2배)" },
@@ -299,6 +302,7 @@
         battleMode = 'ranked';
         switchView('waitingView');
         document.getElementById('waitingMsg').innerText = "비슷한 실력의 상대를 찾는 중...";
+        document.getElementById('waitingTitle').innerText = "매칭 중..."; // 타이틀 변경
 
         if(channel) sb.removeChannel(channel);
         channel = sb.channel('ppb_rank_queue');
@@ -332,6 +336,7 @@
         });
 
         switchView('waitingView');
+        document.getElementById('waitingTitle').innerText = "대기실";
         document.getElementById('waitingMsg').innerText = "도전자를 기다리는 중...";
     }
 
@@ -346,19 +351,23 @@
         if(lobbyChannel) sb.removeChannel(lobbyChannel);
         lobbyChannel = sb.channel('ppb_lobby');
         lobbyChannel.on('presence', { event: 'sync' }, () => {
-            renderRoomList(lobbyChannel.presenceState());
+            const state = lobbyChannel.presenceState();
+            renderRoomList(state);
         }).subscribe();
     }
 
     function renderRoomList(state) {
         const container = document.getElementById('roomListContainer');
         if(!container) return;
+
         container.innerHTML = "";
         const rooms = Object.values(state).flat().filter(u => u.isHost);
+
         if(rooms.length === 0) {
             container.innerHTML = '<div class="text-center text-gray-500 mt-20 flex flex-col items-center"><span class="text-4xl mb-2">📭</span>개설된 방이 없습니다.</div>';
             return;
         }
+
         rooms.forEach(room => {
             const div = document.createElement('div');
             div.className = "room-item";
@@ -382,17 +391,16 @@
 
         ackReceived = false;
         battleInitialized = false;
-        gameEnded = false; // 게임 시작
+        gameEnded = false;
         myData = null; enemyData = null;
 
         channel = sb.channel(room);
 
-        // 연결 끊김(탈주) 감지
         channel.on('presence', { event: 'leave' }, ({ leftPresences }) => {
             leftPresences.forEach(p => {
                 if (p.id !== myUUID && !gameEnded && battleInitialized) {
                     alert("상대방의 연결이 끊어졌습니다.");
-                    endGame(true); // 승리 처리
+                    endGame(true);
                 }
             });
         });
@@ -413,11 +421,10 @@
             })
             .on('broadcast', { event: 'quiz_start' }, ({ payload }) => { startQuizPhase(payload); })
             .on('broadcast', { event: 'submit_action' }, ({ payload }) => { if(payload.id !== myUUID) { gameState.enemyAnswer = payload; checkTurnEnd(); } })
-            .on('broadcast', { event: 'surrender' }, () => { endGame(true); }); // 기권 패배 수신
+            .on('broadcast', { event: 'surrender' }, () => { endGame(true); });
 
         channel.subscribe(async (s) => {
             if(s==='SUBSCRIBED') {
-                // Presence로 내 상태 추적 (탈주 감지용)
                 await channel.track({ id: myUUID, status: 'playing' });
 
                 const ping = setInterval(() => {
@@ -465,7 +472,7 @@
             const p = POKEMON_DB[id];
             const div = document.createElement('div');
             div.className = "poke-card";
-            div.innerHTML = `<img src="${p.img}" class="w-12 h-12 pixel-art"><div class="text-[10px] font-bold mt-1">${p.name}</div>`;
+            div.innerHTML = `<img src="${p.img}" class="w-12 h-12 pixel-art" onerror="this.src='${FALLBACK_IMG}'"><div class="text-[10px] font-bold mt-1">${p.name}</div>`;
             div.onclick = () => togglePick(id, div);
             container.appendChild(div);
         });
@@ -478,10 +485,18 @@
         if (idx >= 0) {
             myParty.splice(idx, 1);
             el.classList.remove('selected');
+            // 체크 아이콘 제거
+            const badge = el.querySelector('.check-badge');
+            if(badge) badge.remove();
         } else {
             if (myParty.length >= 3) return;
             myParty.push(id);
             el.classList.add('selected');
+            // 체크 아이콘 추가 (가시성 강화)
+            const badge = document.createElement('div');
+            badge.className = "check-badge absolute top-1 right-1 bg-green-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs font-bold shadow-sm";
+            badge.innerText = "✓";
+            el.appendChild(badge);
         }
 
         document.getElementById('pickCount').innerText = `${myParty.length} / 3`;
@@ -708,7 +723,7 @@
         const myPoke = gameState.myPartyState[gameState.myActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
         const enPoke = gameState.enemyPartyState[gameState.enemyActiveIdx] || { name: "", hp: 0, maxHp: 1, charge: 0, img: "" };
 
-        document.getElementById('myImg').src = myPoke.img;
+        document.getElementById('myImg').src = myPoke.img || FALLBACK_IMG;
         document.getElementById('myImg').style.opacity = myPoke.hp > 0 ? 1 : 0.5;
         document.getElementById('myName').innerText = myPoke.name;
         document.getElementById('myHpText').innerText = `${Math.max(0, myPoke.hp)}/${myPoke.maxHp}`;
@@ -720,7 +735,7 @@
             gaugeContainer.innerHTML += `<div class="gauge-slot ${i < myPoke.charge ? 'filled' : ''}"></div>`;
         }
 
-        document.getElementById('enemyImg').src = enPoke.img;
+        document.getElementById('enemyImg').src = enPoke.img || FALLBACK_IMG;
         document.getElementById('enemyImg').style.opacity = enPoke.hp > 0 ? 1 : 0.5;
         document.getElementById('enemyName').innerText = enPoke.name;
         document.getElementById('enemyHpBar').style.width = `${Math.max(0, (enPoke.hp/enPoke.maxHp)*100)}%`;
