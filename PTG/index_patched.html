@@ -595,7 +595,7 @@
                     <div class="shop-price">500 P</div>
                     <button class="buy-btn" onclick="buyItem('ball', 'special', 500)">구매하기</button>
                 </div>
-                
+
                 <div class="shop-item"><div>마스터볼</div><div class="shop-price">3000 P</div><button class="buy-btn" onclick="buyItem('ball', 'master', 3000)">구매하기</button></div>
             </div>
         </div>
@@ -613,7 +613,7 @@
                     <div class="shop-price">1200 P</div>
                     <button class="buy-btn" id="btn-buy-rare" onclick="buyUpgrade('rareRate', 1200)">강화하기</button>
                 </div>
-                
+
                 <div class="shop-item">
                     <div>⏳ 시간 연장<br>
                         <span style="font-size:12px; color:#94a3b8;" id="lv-timer">Lv.0</span>
@@ -956,7 +956,7 @@
         OWNED: "qz_o_v80",
         PARTNER: "qz_st_v80"
     };
-    
+
     // Pixel(색칠)로 이동: index와 동일 오리진이면 localStorage를 자동 공유
     const PIXEL_URL = "Pixel_patched_auto_link.html";
     // v7으로 업데이트 (인벤토리 구조 변경 때문)
@@ -1039,8 +1039,8 @@
         updateLobbyUI();
     }
 
-    
-    
+
+
     async function loadQuizData() {
         try {
             // [캐시 방지] 타임스탬프 + 헤더
@@ -1230,7 +1230,7 @@
 
         } catch(e) { console.warn("불러오기 실패, 초기 데이터 사용"); }
     }
-    
+
     function resetGameData() {
         if(confirm("모든 데이터를 초기화하시겠습니까?")) {
             localStorage.removeItem(SAVE_KEY);
@@ -1239,49 +1239,88 @@
     }
 
     function generateGuGuDan() {
-        // 10, 20, 30, ..., 90 중 하나를 선택
-        const num1 = (Math.floor(Math.random() * 9) + 1) * 10;
-        const num2 = (Math.floor(Math.random() * 9) + 1) * 10;
-        const ans = num1 * num2;
+        // 분모가 같은 분수의 덧셈/뺄셈 문제 생성
+        // 조건: 대분수/가분수 사용, 수는 0~10 범위, 답은 0 이상
 
-        let choices = new Set();
-        choices.add(ans);
+        const denominator = Math.floor(Math.random() * 9) + 2; // 분모: 2~10
+        const isAddition = Math.random() < 0.5;
 
-        while(choices.size < 4) {
-            let wrong;
-            const coinFlip = Math.random();
+        let num1, num2, resultNumerator;
+        if (isAddition) {
+            num1 = Math.floor(Math.random() * 11);
+            num2 = Math.floor(Math.random() * 11);
+            resultNumerator = num1 + num2;
+        } else {
+            num1 = Math.floor(Math.random() * 11);
+            num2 = Math.floor(Math.random() * (num1 + 1));
+            resultNumerator = num1 - num2;
+        }
 
-            if (coinFlip < 0.4) {
-                // 1. 정답에서 100이나 200 정도 차이 나는 숫자 생성
-                const offset = (Math.floor(Math.random() * 5) - 2) * 100;
-                wrong = ans + (offset === 0 ? 100 : offset);
-            } else if (coinFlip < 0.7) {
-                // 2. 다른 10단 단위의 무작위 곱셈 결과 생성
-                const w1 = (Math.floor(Math.random() * 9) + 1) * 10;
-                const w2 = (Math.floor(Math.random() * 9) + 1) * 10;
-                wrong = w1 * w2;
-            } else {
-                // 3. 숫자가 비슷해 보이도록 정답에 10을 더하거나 뺀 결과
-                wrong = ans + (Math.random() < 0.5 ? 10 : -10);
+        function fractionToString(numerator, denom) {
+            if (numerator === 0) return "0";
+            if (numerator % denom === 0) return String(numerator / denom);
+            const useMixed = Math.random() < 0.5 && numerator > denom;
+            if (useMixed) {
+                const whole = Math.floor(numerator / denom);
+                const remainder = numerator % denom;
+                if (remainder === 0) return String(whole);
+                return whole + "과 " + remainder + "/" + denom;
             }
+            return numerator + "/" + denom;
+        }
 
-            if (wrong > 0 && wrong !== ans) {
-                choices.add(wrong);
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+        function answerToString(numerator, denom) {
+            if (numerator === 0) return "0";
+            const g = gcd(numerator, denom);
+            const reducedNum = numerator / g;
+            const reducedDenom = denom / g;
+            if (reducedDenom === 1) return String(reducedNum);
+            if (reducedNum > reducedDenom) {
+                const whole = Math.floor(reducedNum / reducedDenom);
+                const remainder = reducedNum % reducedDenom;
+                if (remainder === 0) return String(whole);
+                return whole + "과 " + remainder + "/" + reducedDenom;
+            }
+            return reducedNum + "/" + reducedDenom;
+        }
+
+        const frac1Str = fractionToString(num1, denominator);
+        const frac2Str = fractionToString(num2, denominator);
+        const operator = isAddition ? "+" : "-";
+        const prompt = frac1Str + " " + operator + " " + frac2Str + " = ?";
+        const correctAnswer = answerToString(resultNumerator, denominator);
+
+        let choices = new Set([correctAnswer]);
+        while (choices.size < 4) {
+            let wrongNumerator;
+            const wrongType = Math.random();
+            if (wrongType < 0.3) {
+                const offset = Math.floor(Math.random() * 3) + 1;
+                wrongNumerator = resultNumerator + (Math.random() < 0.5 ? offset : -offset);
+            } else if (wrongType < 0.6) {
+                wrongNumerator = Math.floor(Math.random() * 16);
+            } else {
+                wrongNumerator = isAddition ? Math.abs(num1 - num2) : (num1 + num2);
+            }
+            if (wrongNumerator >= 0) {
+                const wrongStr = answerToString(wrongNumerator, denominator);
+                if (wrongStr !== correctAnswer) choices.add(wrongStr);
             }
         }
 
         let finalChoices = Array.from(choices);
-        // 보기 섞기
         for (let i = finalChoices.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [finalChoices[i], finalChoices[j]] = [finalChoices[j], finalChoices[i]];
         }
 
         return {
-            prompt: `${num1} × ${num2} = ?`,
-            promptExplain: "큰 수의 곱셈을 해보자!",
+            prompt: prompt,
+            promptExplain: "분모가 같은 분수의 계산!",
             choices: finalChoices,
-            answerIndex: finalChoices.indexOf(ans)
+            answerIndex: finalChoices.indexOf(correctAnswer)
         };
     }
 
@@ -1934,7 +1973,7 @@
             rareBtn.disabled = false;
             rareBtn.textContent = "강화하기";
         }
-        
+
     }
 
     function buyItem(cat, type, cost) {

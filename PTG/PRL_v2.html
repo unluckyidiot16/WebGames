@@ -267,7 +267,7 @@
             <h3 class="text-lg font-bold text-white">🏪 상점</h3>
             <button id="shopClose" class="text-white/80 text-xs font-bold hover:text-white">닫기</button>
         </div>
-        
+
         <div class="p-4 bg-slate-50 border-b">
             <div class="flex justify-center gap-4 text-sm">
                 <div class="bg-white px-4 py-2 rounded-full shadow-sm border">
@@ -695,11 +695,11 @@
 
         const dexId = id;
         const baseId = Math.floor(Number(id) || 1);
-        
-        
+
+
         const nameBase = POKE_NAMES[baseId - 1] || `No.${baseId}`;
         const name = (POKE_NAMES && POKE_NAMES[baseId - 1]) ? POKE_NAMES[baseId - 1] : `No.${String(baseId).padStart(3, '0')}`;
-        
+
         // 타입 결정 (poke_db.json에서 가져오기)
         let typeName = "노말";
         if (POKE_DB && POKE_DB.pokemon && POKE_DB.pokemon[baseId - 1]) {
@@ -733,7 +733,7 @@
         // BST 차이를 살리되 티어별 목표 BST 기준으로 비율 조정
         const config = TIER_CONFIG[rarity] || { targetBst: bst, bonus: 0 };
         const ratio = config.targetBst / Math.max(1, bst);
-        
+
         // 이로치 스킨 보유 시 스탯 보정 (+15)
         const shinyBonus = isShiny ? 15 : 0;
 
@@ -810,7 +810,7 @@
             console.error("Migration error:", e);
         }
     }
-    
+
     // 진화 가능 여부 체크
     function canEvolve(pokemonId, level) {
         const evoInfo = EVOLUTION_MAP[pokemonId];
@@ -904,18 +904,18 @@
     function saveOwned(set) { localStorage.setItem(LS_KEY.OWNED, JSON.stringify([...set])); }
     function getDupes() { try { return JSON.parse(localStorage.getItem(LS_KEY.DUPES) || "{}"); } catch { return {}; } }
     function saveDupes(d) { localStorage.setItem(LS_KEY.DUPES, JSON.stringify(d)); }
-    
+
     // 이로치 스킨 관련 함수들
-    function getShinySkins() { 
-        try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.SHINY_SKINS) || "[]")); } 
-        catch { return new Set(); } 
+    function getShinySkins() {
+        try { return new Set(JSON.parse(localStorage.getItem(LS_KEY.SHINY_SKINS) || "[]")); }
+        catch { return new Set(); }
     }
     function saveShinySkins(set) { localStorage.setItem(LS_KEY.SHINY_SKINS, JSON.stringify([...set])); }
     function hasShinySkin(id) { return getShinySkins().has(id); }
-    function addShinySkin(id) { 
-        const skins = getShinySkins(); 
-        skins.add(id); 
-        saveShinySkins(skins); 
+    function addShinySkin(id) {
+        const skins = getShinySkins();
+        skins.add(id);
+        saveShinySkins(skins);
     }
 
     /* =========================================
@@ -2006,46 +2006,80 @@
     }
 
     function generateMath() {
-        // 10, 20, 30, ..., 90 중 하나를 선택
-        const num1 = (Math.floor(Math.random() * 9) + 1) * 10;
-        const num2 = (Math.floor(Math.random() * 9) + 1) * 10;
-        const a = num1 * num2; // 정답
-        const q = `${num1} × ${num2} = ?`; // 문제 텍스트
+        // 분모가 같은 분수의 덧셈/뺄셈 문제 생성
+        // 조건: 대분수/가분수 사용, 수는 0~10 범위, 답은 0 이상
 
-        let s = new Set([a]);
+        const denominator = Math.floor(Math.random() * 9) + 2; // 분모: 2~10
+        const isAddition = Math.random() < 0.5; // 덧셈 또는 뺄셈
 
-        while(s.size < 4) {
-            let wrong;
-            const coinFlip = Math.random();
+        let num1, num2, resultNumerator;
 
-            if (coinFlip < 0.4) {
-                // 1. 정답에서 100이나 200 정도 차이 나는 숫자 생성
-                const offset = (Math.floor(Math.random() * 5) - 2) * 100;
-                wrong = a + (offset === 0 ? 100 : offset);
-            } else if (coinFlip < 0.7) {
-                // 2. 다른 10단 단위의 무작위 곱셈 결과 생성
-                const w1 = (Math.floor(Math.random() * 9) + 1) * 10;
-                const w2 = (Math.floor(Math.random() * 9) + 1) * 10;
-                wrong = w1 * w2;
-            } else {
-                // 3. 숫자가 비슷해 보이도록 정답에 10을 더하거나 뺀 결과
-                wrong = a + (Math.random() < 0.5 ? 10 : -10);
+        if (isAddition) {
+            num1 = Math.floor(Math.random() * 11); // 0~10
+            num2 = Math.floor(Math.random() * 11); // 0~10
+            resultNumerator = num1 + num2;
+        } else {
+            num1 = Math.floor(Math.random() * 11); // 0~10
+            num2 = Math.floor(Math.random() * (num1 + 1)); // 0~num1
+            resultNumerator = num1 - num2;
+        }
+
+        function fractionToString(numerator, denom) {
+            if (numerator === 0) return "0";
+            if (numerator % denom === 0) return String(numerator / denom);
+            const useMixed = Math.random() < 0.5 && numerator > denom;
+            if (useMixed) {
+                const whole = Math.floor(numerator / denom);
+                const remainder = numerator % denom;
+                if (remainder === 0) return String(whole);
+                return whole + "과 " + remainder + "/" + denom;
             }
+            return numerator + "/" + denom;
+        }
 
-            if (wrong > 0 && wrong !== a) {
-                s.add(wrong);
+        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
+
+        function answerToString(numerator, denom) {
+            if (numerator === 0) return "0";
+            const g = gcd(numerator, denom);
+            const reducedNum = numerator / g;
+            const reducedDenom = denom / g;
+            if (reducedDenom === 1) return String(reducedNum);
+            if (reducedNum > reducedDenom) {
+                const whole = Math.floor(reducedNum / reducedDenom);
+                const remainder = reducedNum % reducedDenom;
+                if (remainder === 0) return String(whole);
+                return whole + "과 " + remainder + "/" + reducedDenom;
+            }
+            return reducedNum + "/" + reducedDenom;
+        }
+
+        const frac1Str = fractionToString(num1, denominator);
+        const frac2Str = fractionToString(num2, denominator);
+        const operator = isAddition ? "+" : "-";
+        const q = frac1Str + " " + operator + " " + frac2Str + " = ?";
+        const a = answerToString(resultNumerator, denominator);
+
+        let choices = new Set([a]);
+        while (choices.size < 4) {
+            let wrongNumerator;
+            const wrongType = Math.random();
+            if (wrongType < 0.3) {
+                const offset = Math.floor(Math.random() * 3) + 1;
+                wrongNumerator = resultNumerator + (Math.random() < 0.5 ? offset : -offset);
+            } else if (wrongType < 0.6) {
+                wrongNumerator = Math.floor(Math.random() * 16);
+            } else {
+                wrongNumerator = isAddition ? Math.abs(num1 - num2) : (num1 + num2);
+            }
+            if (wrongNumerator >= 0) {
+                const wrongStr = answerToString(wrongNumerator, denominator);
+                if (wrongStr !== a) choices.add(wrongStr);
             }
         }
 
-        // 보기 섞기 및 배열 변환
-        const choices = Array.from(s).sort(() => Math.random() - 0.5);
-
-        return {
-            q,
-            a,
-            explain: "큰 수의 곱셈을 해보자!",
-            choices
-        };
+        const choicesArray = Array.from(choices).sort(() => Math.random() - 0.5);
+        return { q, a, explain: "분모가 같은 분수의 계산!", choices: choicesArray };
     }
 
     /* =========================================
@@ -2326,7 +2360,7 @@
     function updateShopUI() {
         document.getElementById("shopPoints").textContent = getPoints().toLocaleString();
         document.getElementById("shopTickets").textContent = getTickets().toLocaleString();
-        
+
         const pid = getStarterId();
         const statusEl = document.getElementById("rareCandyStatus");
         if (pid > 0) {
@@ -2337,7 +2371,7 @@
         } else {
             statusEl.textContent = "스타터를 먼저 선택하세요";
         }
-        
+
         renderOwnedShinySkins();
     }
 
@@ -2345,34 +2379,34 @@
         const prices = { 1: 500, 5: 2000, 10: 3500 };
         const cost = prices[levels];
         const currentPoints = getPoints();
-        
+
         if (currentPoints < cost) {
             alert("포인트가 부족합니다!");
             return;
         }
-        
+
         const pid = getStarterId();
         if (!pid) {
             alert("스타터를 먼저 선택하세요!");
             return;
         }
-        
+
         const info = getPokeInfo(pid);
         const charData = getCharData();
         const currentData = charData[pid] || { level: 1, xp: 0 };
-        
+
         // 레벨업
         currentData.level = (currentData.level || 1) + levels;
         charData[pid] = currentData;
         saveCharData(charData);
-        
+
         // 포인트 차감
         setPoints(currentPoints - cost);
-        
+
         // 진화 체크
         let evolutionOccurred = false;
         let currentPokemonId = pid;
-        
+
         while (true) {
             const evoCheck = canEvolve(currentPokemonId, currentData.level);
             if (evoCheck) {
@@ -2381,11 +2415,11 @@
                     charData[nextId] = { level: currentData.level, xp: currentData.xp || 0 };
                     saveCharData(charData);
                     setStarterId(nextId);
-                    
+
                     const fromInfo = getPokeInfo(currentPokemonId);
                     const toInfo = getPokeInfo(nextId);
                     alert(`🎉 ${fromInfo.name}이(가) ${toInfo.name}(으)로 진화했습니다!`);
-                    
+
                     currentPokemonId = nextId;
                     evolutionOccurred = true;
                 } else {
@@ -2395,11 +2429,11 @@
                 break;
             }
         }
-        
+
         if (!evolutionOccurred) {
             alert(`🍬 레어캔디 사용!\n${info.name}의 레벨이 ${levels} 상승했습니다!`);
         }
-        
+
         updateShopUI();
         updateLobbyPartner();
         updateResUI();
@@ -2409,40 +2443,40 @@
         const costs = { 1: 1, 3: 2 };
         const cost = costs[count];
         const currentTickets = getTickets();
-        
+
         if (currentTickets < cost) {
             alert("티켓이 부족합니다!");
             return;
         }
-        
+
         const owned = getOwned();
         if (owned.size === 0) {
             alert("보유한 포켓몬이 없습니다!");
             return;
         }
-        
+
         const shinySkins = getShinySkins();
         const available = [...owned].filter(id => !shinySkins.has(id));
-        
+
         if (available.length === 0) {
             alert("모든 포켓몬의 이로치 스킨을 보유중입니다!");
             return;
         }
-        
+
         setTickets(currentTickets - cost);
-        
+
         const results = [];
         for (let i = 0; i < count; i++) {
             if (available.length === 0) break;
-            
+
             const randomIdx = Math.floor(Math.random() * available.length);
             const drawnId = available[randomIdx];
             available.splice(randomIdx, 1);
-            
+
             addShinySkin(drawnId);
             results.push(drawnId);
         }
-        
+
         const resultContainer = document.getElementById("shinyDrawResult");
         if (results.length > 0) {
             resultContainer.innerHTML = results.map(id => {
@@ -2457,7 +2491,7 @@
         } else {
             resultContainer.innerHTML = '<span class="text-slate-500 text-xs">더 이상 뽑을 스킨이 없습니다</span>';
         }
-        
+
         updateShopUI();
         updateResUI();
         renderCodex();
@@ -2466,12 +2500,12 @@
     function renderOwnedShinySkins() {
         const container = document.getElementById("ownedShinyList");
         const skins = getShinySkins();
-        
+
         if (skins.size === 0) {
             container.innerHTML = '<span class="text-slate-400 text-xs col-span-5 text-center py-4">아직 없음</span>';
             return;
         }
-        
+
         container.innerHTML = [...skins].map(id => {
             const info = getPokeInfo(id);
             return `<div class="flex flex-col items-center p-1 bg-yellow-50 rounded-lg border border-yellow-200">
@@ -2548,7 +2582,7 @@
         // 🏪 상점 버튼
         const shopBtn = document.getElementById("lobbyShopBtn");
         if (shopBtn) shopBtn.onclick = () => openShopModal();
-        
+
         const shopClose = document.getElementById("shopClose");
         if (shopClose) shopClose.onclick = () => closeShopModal();
 
