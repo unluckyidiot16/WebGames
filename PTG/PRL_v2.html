@@ -2006,11 +2006,11 @@
     }
 
     function generateMath() {
-        // 분모가 같은 분수의 덧셈/뺄셈 문제 생성
+        // 분모가 같은 분수의 덧셈/뺄셈 문제 생성 (약분 없음)
         // 조건: 대분수/가분수 사용, 수는 0~10 범위, 답은 0 이상
 
         const denominator = Math.floor(Math.random() * 9) + 2; // 분모: 2~10
-        const isAddition = Math.random() < 0.5; // 덧셈 또는 뺄셈
+        const isAddition = Math.random() < 0.5;
 
         let num1, num2, resultNumerator;
 
@@ -2024,56 +2024,38 @@
             resultNumerator = num1 - num2;
         }
 
+        // 분수를 문자열로 (약분 없이 그대로)
         function fractionToString(numerator, denom) {
             if (numerator === 0) return "0";
             if (numerator % denom === 0) return String(numerator / denom);
-            const useMixed = Math.random() < 0.5 && numerator > denom;
-            if (useMixed) {
+            if (numerator > denom) {
                 const whole = Math.floor(numerator / denom);
                 const remainder = numerator % denom;
-                if (remainder === 0) return String(whole);
                 return whole + "과 " + remainder + "/" + denom;
             }
             return numerator + "/" + denom;
-        }
-
-        function gcd(a, b) { return b === 0 ? a : gcd(b, a % b); }
-
-        function answerToString(numerator, denom) {
-            if (numerator === 0) return "0";
-            const g = gcd(numerator, denom);
-            const reducedNum = numerator / g;
-            const reducedDenom = denom / g;
-            if (reducedDenom === 1) return String(reducedNum);
-            if (reducedNum > reducedDenom) {
-                const whole = Math.floor(reducedNum / reducedDenom);
-                const remainder = reducedNum % reducedDenom;
-                if (remainder === 0) return String(whole);
-                return whole + "과 " + remainder + "/" + reducedDenom;
-            }
-            return reducedNum + "/" + reducedDenom;
         }
 
         const frac1Str = fractionToString(num1, denominator);
         const frac2Str = fractionToString(num2, denominator);
         const operator = isAddition ? "+" : "-";
         const q = frac1Str + " " + operator + " " + frac2Str + " = ?";
-        const a = answerToString(resultNumerator, denominator);
+        const a = fractionToString(resultNumerator, denominator);
 
         let choices = new Set([a]);
         while (choices.size < 4) {
             let wrongNumerator;
             const wrongType = Math.random();
-            if (wrongType < 0.3) {
+            if (wrongType < 0.4) {
                 const offset = Math.floor(Math.random() * 3) + 1;
                 wrongNumerator = resultNumerator + (Math.random() < 0.5 ? offset : -offset);
-            } else if (wrongType < 0.6) {
+            } else if (wrongType < 0.7) {
                 wrongNumerator = Math.floor(Math.random() * 16);
             } else {
                 wrongNumerator = isAddition ? Math.abs(num1 - num2) : (num1 + num2);
             }
             if (wrongNumerator >= 0) {
-                const wrongStr = answerToString(wrongNumerator, denominator);
+                const wrongStr = fractionToString(wrongNumerator, denominator);
                 if (wrongStr !== a) choices.add(wrongStr);
             }
         }
