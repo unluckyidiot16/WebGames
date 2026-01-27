@@ -281,6 +281,17 @@
         const s=Math.min(window.innerWidth*0.9/(currentZoomQuad.w*CELL_SCALE), 4);
         zoomCanvas.width=currentZoomQuad.w*CELL_SCALE*s; zoomCanvas.height=currentZoomQuad.h*CELL_SCALE*s;
         drawQuad(currentZoomQuad, zoomCanvas.getContext('2d'), CELL_SCALE*s, true);
+
+        // 줌 모달에 팔레트 버튼 추가
+        const zoomPalette = document.getElementById('zoomPalette');
+        zoomPalette.innerHTML='';
+        for(let j=1;j<paletteMap.length;j++){
+            const b=document.createElement('button'); b.className='palette-button'; b.style.backgroundColor=paletteMap[j]; b.textContent=j;
+            if(j===selectedColorIndex) b.classList.add('selected');
+            b.onclick=()=>{ selectedColorIndex=j; document.querySelectorAll('.palette-button').forEach(el=>el.classList.toggle('selected', el.textContent==String(j))); };
+            zoomPalette.appendChild(b);
+        }
+
         document.getElementById('zoomOverlay').style.display='flex';
     }
 
