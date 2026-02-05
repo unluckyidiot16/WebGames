@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>사과 합 10 만들기 - Apple Sum 10</title>
+    <style>
+        :root {
+            --bg-color: #fcebc5;
+            --apple-color: #e74c3c;
+            --apple-shadow: #c0392b;
+            --highlight-bg: rgba(52, 152, 219, 0.3);
+            --highlight-border: #3498db;
+            --text-color: #2c3e50;
+        }
+
+        * { box-sizing: border-box; touch-action: none; user-select: none; -webkit-user-select: none; }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* --- UI Overlay (Title, Result) --- */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            transition: opacity 0.3s;
+        }
+        .hidden { opacity: 0; pointer-events: none; z-index: -1; }
+
+        h1 { font-size: 2.5rem; color: #d35400; margin-bottom: 10px; text-shadow: 2px 2px 0px #fff; }
+        p.desc { font-size: 1.1rem; color: #555; margin-bottom: 30px; text-align: center; line-height: 1.5; }
+
+        button.btn-primary {
+            padding: 15px 40px;
+            font-size: 1.5rem;
+            background: #27ae60;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            transition: transform 0.1s, background 0.2s;
+        }
+        button.btn-primary:active { transform: scale(0.95); }
+        button.btn-primary:hover { background: #2ecc71; }
+
+        /* --- Game HUD --- */
+        .hud {
+            width: 95%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            margin-bottom: 10px;
+            z-index: 10;
+        }
+        .score-box, .timer-box { font-size: 1.2rem; font-weight: bold; color: var(--text-color); }
+        .timer-bar-bg {
+            width: 150px; height: 10px; background: #eee; border-radius: 5px; overflow: hidden; margin-top: 5px;
+        }
+        .timer-bar-fill {
+            width: 100%; height: 100%; background: #e67e22; transition: width 0.1s linear;
+        }
+        .best-score { font-size: 0.9rem; color: #888; }
+        .settings-btn { font-size: 1.2rem; background: none; border: none; cursor: pointer; }
+
+        /* --- Game Board --- */
+        #game-container {
+            position: relative;
+            background: #fff8e1;
+            padding: 10px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            /* Aspect ratio handling for 17 cols x 10 rows */
+            display: grid;
+            grid-template-columns: repeat(17, 1fr);
+            grid-template-rows: repeat(10, 1fr);
+            gap: 2px;
+            width: 95vw;
+            height: 55.8vw; /* 10/17 ratio approx */
+            max-width: 850px;
+            max-height: 500px;
+        }
+
+        .cell {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+
+        /* The Apple */
+        .apple {
+            width: 85%;
+            height: 85%;
+            background: radial-gradient(circle at 30% 30%, #ff7675, var(--apple-color));
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: clamp(12px, 2vw, 24px);
+            font-weight: bold;
+            color: white;
+            box-shadow: inset -2px -2px 5px rgba(0,0,0,0.2), 1px 2px 3px rgba(0,0,0,0.15);
+            transition: transform 0.2s, opacity 0.3s;
+        }
+        /* Stem */
+        .apple::before {
+            content: ''; position: absolute; top: 0;
+            width: 3px; height: 6px; background: #6d4c41; border-radius: 2px;
+        }
+
+        .cell.selected { background-color: var(--highlight-bg); }
+        .cell.dead .apple { transform: scale(0); opacity: 0; }
+        .cell.dead { pointer-events: auto; /* Allow dragging through empty space */ }
+
+        /* Selection Box (Visual only) */
+        #selection-box {
+            position: absolute;
+            border: 2px solid var(--highlight-border);
+            background: rgba(52, 152, 219, 0.1);
+            pointer-events: none;
+            display: none;
+            z-index: 5;
+            border-radius: 5px;
+        }
+
+        /* Drag Preview Label */
+        #drag-preview {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 1rem;
+            pointer-events: none;
+            display: none;
+            z-index: 20;
+            transform: translate(15px, -15px);
+        }
+        #drag-preview.valid { background: #27ae60; }
+        #drag-preview.invalid { background: #c0392b; }
+
+        /* Animations */
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.4); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        .pop-anim { animation: pop 0.3s forwards; }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            50% { transform: translateX(5px); }
+            75% { transform: translateX(-5px); }
+            100% { transform: translateX(0); }
+        }
+        .shake { animation: shake 0.3s; border: 2px solid red !important; }
+
+        /* Color Blind / Low Saturation Mode */
+        body.low-color { filter: saturate(0.5) contrast(1.1); }
+
+        /* Settings Panel */
+        #settings-panel {
+            position: absolute; bottom: 10px; right: 10px;
+            background: white; padding: 10px; border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            display: none; flex-direction: column; gap: 5px; font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+
+<!-- Start Screen -->
+<div id="start-screen" class="screen">
+    <h1>🍎 사과 합 10 만들기</h1>
+    <p class="desc">
+        마우스나 터치로 사과를 드래그하여<br>
+        <strong>숫자의 합을 정확히 10</strong>으로 만드세요.<br>
+        제한 시간 2분!
+    </p>
+    <button class="btn-primary" onclick="game.start()">게임 시작</button>
+</div>
+
+<!-- Result Screen -->
+<div id="result-screen" class="screen hidden">
+    <h1>Game Over</h1>
+    <p class="desc">
+        최종 점수: <strong id="final-score" style="font-size: 1.5rem; color:#e74c3c">0</strong>점<br>
+        <span id="new-record-msg" style="color: gold; display:none; font-weight:bold;">🏆 최고 기록 갱신! 🏆</span>
+    </p>
+    <button class="btn-primary" onclick="game.start()">다시 하기</button>
+</div>
+
+<!-- HUD -->
+<div class="hud">
+    <div class="score-box">
+        Score: <span id="score-display">0</span>
+        <div class="best-score">Best: <span id="best-display">0</span></div>
+    </div>
+    <div class="timer-box">
+        <div id="time-text">120s</div>
+        <div class="timer-bar-bg"><div id="timer-bar" class="timer-bar-fill"></div></div>
+    </div>
+    <div>
+        <button class="settings-btn" onclick="toggleSettings()">⚙️</button>
+    </div>
+</div>
+
+<!-- Settings (Mini) -->
+<div id="settings-panel">
+    <label><input type="checkbox" id="chk-sound" checked> 사운드 ON</label>
+    <label><input type="checkbox" id="chk-color" onchange="toggleColorMode()"> 저채도 모드</label>
+</div>
+
+<!-- Game Board -->
+<div id="game-container">
+    <!-- Cells generated by JS -->
+    <div id="selection-box"></div>
+</div>
+
+<!-- Drag Preview Tooltip -->
+<div id="drag-preview">SUM: 0</div>
+
+<script>
+    /**
+     * Simple Synthesizer for Sound Effects (No external files)
+     */
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const sound = {
+        playTone: (freq, type, duration) => {
+            if (!document.getElementById('chk-sound').checked) return;
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        },
+        pop: () => {
+            // High pitch ping
+            sound.playTone(800, 'sine', 0.1);
+            setTimeout(() => sound.playTone(1200, 'sine', 0.1), 50);
+        },
+        fail: () => {
+            // Low pitch buzz
+            sound.playTone(150, 'sawtooth', 0.2);
+        },
+        click: () => {
+            sound.playTone(400, 'triangle', 0.05);
+        }
+    };
+
+    /**
+     * Game Constants & Logic
+     */
+    const ROWS = 10;
+    const COLS = 17;
+    const TARGET_SUM = 10;
+    const GAME_TIME = 120; // seconds
+
+    const game = {
+        state: 'title', // title, playing, result
+        score: 0,
+        timeLeft: GAME_TIME,
+        timerId: null,
+        grid: [], // Stores cell data {id, r, c, val, alive, el}
+
+        // Drag State
+        isDragging: false,
+        startCell: null, // {r, c}
+        endCell: null,   // {r, c}
+
+        // DOM Elements
+        container: document.getElementById('game-container'),
+        selectionBox: document.getElementById('selection-box'),
+        previewTooltip: document.getElementById('drag-preview'),
+
+        init: function() {
+            // Load Best Score
+            const best = localStorage.getItem('fruitBoxBest') || 0;
+            document.getElementById('best-display').innerText = best;
+
+            // Initialize Grid HTML
+            this.container.innerHTML = '<div id="selection-box"></div>'; // Reset
+            this.grid = [];
+
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'cell';
+                    cell.dataset.r = r;
+                    cell.dataset.c = c;
+
+                    const apple = document.createElement('div');
+                    apple.className = 'apple';
+
+                    cell.appendChild(apple);
+                    this.container.appendChild(cell);
+
+                    this.grid.push({
+                        r: r, c: c,
+                        val: 0,
+                        alive: true,
+                        el: cell,
+                        appleEl: apple
+                    });
+                }
+            }
+
+            this.bindEvents();
+        },
+
+        bindEvents: function() {
+            // Pointer Events for Dragging (Mouse + Touch)
+            this.container.addEventListener('pointerdown', (e) => this.onPointerDown(e));
+            window.addEventListener('pointermove', (e) => this.onPointerMove(e));
+            window.addEventListener('pointerup', (e) => this.onPointerUp(e));
+            window.addEventListener('pointercancel', (e) => this.onPointerUp(e));
+        },
+
+        start: function() {
+            this.state = 'playing';
+            this.score = 0;
+            this.timeLeft = GAME_TIME;
+            document.getElementById('score-display').innerText = 0;
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('result-screen').classList.add('hidden');
+
+            this.fillBoard();
+            this.startTimer();
+            sound.click();
+        },
+
+        fillBoard: function() {
+            // Generate Random Numbers (1-9)
+            // Optimization: Usually pure random 1-9 is fine for this density.
+            this.grid.forEach(cell => {
+                cell.val = Math.floor(Math.random() * 9) + 1;
+                cell.alive = true;
+                cell.el.className = 'cell'; // Reset classes
+                cell.appleEl.innerText = cell.val;
+                cell.appleEl.style.transform = 'scale(1)';
+                cell.appleEl.style.opacity = '1';
+            });
+        },
+
+        startTimer: function() {
+            if (this.timerId) clearInterval(this.timerId);
+            this.updateTimerUI();
+
+            this.timerId = setInterval(() => {
+                this.timeLeft--;
+                this.updateTimerUI();
+                if (this.timeLeft <= 0) {
+                    this.endGame();
+                }
+            }, 1000);
+        },
+
+        updateTimerUI: function() {
+            const pct = (this.timeLeft / GAME_TIME) * 100;
+            document.getElementById('timer-bar').style.width = pct + '%';
+            document.getElementById('time-text').innerText = this.timeLeft + 's';
+
+            // Color change warning
+            if (this.timeLeft <= 10) document.getElementById('timer-bar').style.background = '#c0392b';
+            else document.getElementById('timer-bar').style.background = '#e67e22';
+        },
+
+        endGame: function() {
+            clearInterval(this.timerId);
+            this.state = 'result';
+
+            // Save Score
+            const currentBest = parseInt(localStorage.getItem('fruitBoxBest') || 0);
+            const isNewRecord = this.score > currentBest;
+            if (isNewRecord) {
+                localStorage.setItem('fruitBoxBest', this.score);
+                document.getElementById('best-display').innerText = this.score;
+            }
+
+            document.getElementById('final-score').innerText = this.score;
+            document.getElementById('new-record-msg').style.display = isNewRecord ? 'inline' : 'none';
+            document.getElementById('result-screen').classList.remove('hidden');
+            sound.playTone(600, 'square', 0.1); // Game over sound
+        },
+
+        // --- Interaction Logic ---
+
+        getCellFromEvent: function(e) {
+            // Standardize touch/mouse coordinates
+            const clientX = e.clientX;
+            const clientY = e.clientY;
+
+            // We need to calculate which cell is under the point manually
+            // because elementFromPoint might return the selection box or dragged element
+            // Simple math based on grid container bounding box
+            const rect = this.container.getBoundingClientRect();
+            const cellWidth = rect.width / COLS;
+            const cellHeight = rect.height / ROWS;
+
+            const relativeX = clientX - rect.left;
+            const relativeY = clientY - rect.top;
+
+            // Check bounds
+            if (relativeX < 0 || relativeX > rect.width || relativeY < 0 || relativeY > rect.height) {
+                return null;
+            }
+
+            const c = Math.floor(relativeX / cellWidth);
+            const r = Math.floor(relativeY / cellHeight);
+
+            return { r, c };
+        },
+
+        onPointerDown: function(e) {
+            if (this.state !== 'playing') return;
+
+            const pos = this.getCellFromEvent(e);
+            if (!pos) return;
+
+            // Valid start
+            this.isDragging = true;
+            this.startCell = pos;
+            this.endCell = pos;
+
+            // Setup visual box
+            this.selectionBox.style.display = 'block';
+            this.previewTooltip.style.display = 'block';
+
+            // Initial update
+            this.updateSelectionVisuals();
+        },
+
+        onPointerMove: function(e) {
+            if (!this.isDragging) return;
+
+            const pos = this.getCellFromEvent(e);
+
+            // Update tooltip position near cursor
+            this.previewTooltip.style.top = e.clientY + 'px';
+            this.previewTooltip.style.left = e.clientX + 'px';
+
+            if (pos) {
+                // Only update if cell changed
+                if (pos.r !== this.endCell.r || pos.c !== this.endCell.c) {
+                    this.endCell = pos;
+                    this.updateSelectionVisuals();
+                }
+            }
+        },
+
+        onPointerUp: function(e) {
+            if (!this.isDragging) return;
+
+            this.isDragging = false;
+            this.selectionBox.style.display = 'none';
+            this.previewTooltip.style.display = 'none';
+
+            // Calculate final result
+            const selection = this.getSelectionBounds();
+            const sum = this.calculateSum(selection);
+
+            if (sum === TARGET_SUM) {
+                this.processSuccess(selection);
+            } else {
+                this.processFail();
+            }
+
+            // Clear highlights
+            this.grid.forEach(c => c.el.classList.remove('selected'));
+        },
+
+        getSelectionBounds: function() {
+            const r1 = Math.min(this.startCell.r, this.endCell.r);
+            const r2 = Math.max(this.startCell.r, this.endCell.r);
+            const c1 = Math.min(this.startCell.c, this.endCell.c);
+            const c2 = Math.max(this.startCell.c, this.endCell.c);
+            return { r1, r2, c1, c2 };
+        },
+
+        calculateSum: function(bounds) {
+            let sum = 0;
+            for (let r = bounds.r1; r <= bounds.r2; r++) {
+                for (let c = bounds.c1; c <= bounds.c2; c++) {
+                    const idx = r * COLS + c;
+                    if (this.grid[idx].alive) {
+                        sum += this.grid[idx].val;
+                    }
+                }
+            }
+            return sum;
+        },
+
+        updateSelectionVisuals: function() {
+            const bounds = this.getSelectionBounds();
+            const sum = this.calculateSum(bounds);
+
+            // 1. Position the Selection Box Overlay
+            const startIdx = bounds.r1 * COLS + bounds.c1;
+            const endIdx = bounds.r2 * COLS + bounds.c2;
+            const startEl = this.grid[startIdx].el;
+            const endEl = this.grid[endIdx].el;
+
+            const contRect = this.container.getBoundingClientRect();
+            const sRect = startEl.getBoundingClientRect();
+            const eRect = endEl.getBoundingClientRect();
+
+            // Calculate relative to container
+            const left = sRect.left - contRect.left;
+            const top = sRect.top - contRect.top;
+            const width = eRect.right - sRect.left;
+            const height = eRect.bottom - sRect.top;
+
+            this.selectionBox.style.left = left + 'px';
+            this.selectionBox.style.top = top + 'px';
+            this.selectionBox.style.width = width + 'px';
+            this.selectionBox.style.height = height + 'px';
+
+            // Color hint for box border
+            if (sum === TARGET_SUM) {
+                this.selectionBox.style.borderColor = '#2ecc71';
+                this.selectionBox.style.backgroundColor = 'rgba(46, 204, 113, 0.2)';
+            } else if (sum > TARGET_SUM) {
+                this.selectionBox.style.borderColor = '#e74c3c';
+                this.selectionBox.style.backgroundColor = 'rgba(231, 76, 60, 0.2)';
+            } else {
+                this.selectionBox.style.borderColor = '#3498db';
+                this.selectionBox.style.backgroundColor = 'rgba(52, 152, 219, 0.2)';
+            }
+
+            // 2. Highlight cells & Update Tooltip
+            this.grid.forEach(c => c.el.classList.remove('selected'));
+
+            for (let r = bounds.r1; r <= bounds.r2; r++) {
+                for (let c = bounds.c1; c <= bounds.c2; c++) {
+                    const idx = r * COLS + c;
+                    this.grid[idx].el.classList.add('selected');
+                }
+            }
+
+            this.previewTooltip.innerText = `SUM: ${sum}`;
+            if (sum === 10) {
+                this.previewTooltip.className = 'valid';
+            } else if (sum > 10) {
+                this.previewTooltip.className = 'invalid';
+            } else {
+                this.previewTooltip.className = '';
+            }
+        },
+
+        processSuccess: function(bounds) {
+            let count = 0;
+            for (let r = bounds.r1; r <= bounds.r2; r++) {
+                for (let c = bounds.c1; c <= bounds.c2; c++) {
+                    const idx = r * COLS + c;
+                    const cell = this.grid[idx];
+                    if (cell.alive) {
+                        cell.alive = false;
+                        cell.el.classList.add('dead');
+                        // Add pop animation to the apple element specifically
+                        cell.appleEl.classList.add('pop-anim');
+                        count++;
+                    }
+                }
+            }
+
+            if (count > 0) {
+                this.score += count;
+                document.getElementById('score-display').innerText = this.score;
+                sound.pop();
+            }
+        },
+
+        processFail: function() {
+            // Visual feedback for failure (shake the selection box?)
+            // Since the box disappears instantly, we shake the container briefly or play sound
+            sound.fail();
+            this.container.classList.add('shake');
+            setTimeout(() => this.container.classList.remove('shake'), 300);
+        }
+    };
+
+    // --- Settings & Utils ---
+    function toggleSettings() {
+        const el = document.getElementById('settings-panel');
+        el.style.display = el.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function toggleColorMode() {
+        const chk = document.getElementById('chk-color');
+        if (chk.checked) document.body.classList.add('low-color');
+        else document.body.classList.remove('low-color');
+    }
+
+    // Initialize on load
+    window.onload = () => game.init();
+
+</script>
+</body>
+</html>
