@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>정다각형 진화 (초등용)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic+Coding:wght@700&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            /* 눈이 편한 파스텔 그린 배경 */
+            background-color: #E8F5E9;
+            font-family: 'Jua', sans-serif; /* 귀여운 폰트 적용 */
+            touch-action: none;
+            user-select: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            /* 캔버스 배경: 따뜻한 아이보리 */
+            background: #FEFDF5;
+            max-width: 95%;
+            border: 8px solid #8D6E63; /* 나무색 테두리 */
+        }
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(232, 245, 233, 0.9); /* 배경색과 어우러지는 반투명 */
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            text-align: center;
+        }
+        .ui-panel {
+            position: absolute;
+            top: 25px;
+            pointer-events: none;
+            width: 420px;
+            max-width: 90%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        .info-box {
+            background: #FFF9C4; /* 연한 노랑 */
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 3px solid #FFD54F;
+            box-shadow: 0 4px 0 rgba(255, 193, 7, 0.5);
+            pointer-events: auto;
+            color: #5D4037;
+        }
+        #evolution-guide {
+            position: absolute;
+            right: 20px;
+            top: 120px;
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #AED581;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .guide-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        .guide-shape {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #555;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        .danger-line {
+            position: absolute;
+            top: 18%; /* 위치 조정 */
+            width: 380px;
+            height: 4px;
+            border-top: 4px dashed #FF7043;
+            pointer-events: none;
+            opacity: 0.6;
+        }
+        .warning-active {
+            animation: blink 0.5s infinite;
+            border-color: #D32F2F;
+            opacity: 1;
+        }
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        /* 버튼 스타일 */
+        .btn-start {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 6px 0 #2E7D32;
+            transition: transform 0.1s;
+            cursor: pointer;
+        }
+        .btn-start:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2E7D32;
+        }
+        .btn-restart {
+            background-color: #FF7043;
+            box-shadow: 0 6px 0 #D84315;
+        }
+        .btn-restart:active {
+            box-shadow: 0 2px 0 #D84315;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- UI 패널 -->
+    <div class="ui-panel">
+        <div class="info-box">
+            <p class="text-sm font-bold opacity-70">점수</p>
+            <p id="score" class="text-2xl font-black">0</p>
+        </div>
+        <div class="info-box text-right">
+            <p class="text-sm font-bold opacity-70">다음 도형</p>
+            <div id="next-shape-display" class="mt-1 flex justify-end items-center h-8"></div>
+        </div>
+    </div>
+
+    <!-- 타이틀 화면 -->
+    <div id="title-screen" class="overlay">
+        <h1 class="text-5xl text-[#2E7D32] mb-4 drop-shadow-sm" style="text-shadow: 2px 2px 0 #fff;">도형 합치기</h1>
+        <p class="text-xl text-[#558B2F] mb-10 bg-white px-4 py-2 rounded-full shadow-sm">
+            🔷 같은 모양끼리 쾅! 🔴
+        </p>
+
+        <div class="bg-[#FFF9C4] p-6 rounded-3xl border-4 border-[#FFD54F] mb-10 w-64 shadow-md">
+            <p class="text-sm font-bold text-[#8D6E63] mb-1">최고 기록 🏆</p>
+            <p id="best-score" class="text-4xl font-black text-[#F57F17]">0</p>
+        </div>
+
+        <button id="start-btn" class="btn-start">
+            게임 시작! ▶
+        </button>
+    </div>
+
+    <!-- 게임 오버 화면 -->
+    <div id="gameover-screen" class="overlay" style="display: none;">
+        <h2 class="text-5xl text-[#D32F2F] mb-4 drop-shadow-md">앗, 꽉 찼어요!</h2>
+        <p id="final-score-msg" class="text-2xl text-[#5D4037] mb-8 font-bold">점수: 0</p>
+        <button onclick="location.reload()" class="btn-start btn-restart">
+            다시 하기 🔄
+        </button>
+    </div>
+
+    <!-- 진화 가이드 (PC용) -->
+    <div id="evolution-guide" class="hidden md:flex">
+        <p class="text-sm text-[#558B2F] font-bold mb-2 text-center">진화 순서</p>
+    </div>
+
+    <!-- 경고 라인 -->
+    <div id="visual-limit-line" class="danger-line"></div>
+</div>
+
+<script>
+    const CONFIG = {
+        width: 400,
+        height: 640,
+        limitY: 120, // 상단 여유 공간 확보
+        shapes: [
+            { sides: 3, radius: 25, color: '#FF8A80', name: '삼각형' },   // 파스텔 레드
+            { sides: 4, radius: 36, color: '#FFD180', name: '사각형' },   // 파스텔 오렌지
+            { sides: 5, radius: 47, color: '#FFFF8D', name: '오각형' },   // 파스텔 옐로우
+            { sides: 6, radius: 58, color: '#CCFF90', name: '육각형' },   // 파스텔 그린
+            { sides: 7, radius: 69, color: '#A7FFEB', name: '칠각형' },   // 파스텔 민트
+            { sides: 8, radius: 80, color: '#80D8FF', name: '팔각형' },   // 파스텔 블루
+            { sides: 10, radius: 91, color: '#82B1FF', name: '십각형' },  // 파스텔 인디고
+            { sides: 12, radius: 102, color: '#B388FF', name: '십이각형' }, // 파스텔 퍼플
+            { sides: 0, radius: 115, color: '#FF80AB', name: '왕수박(원)' } // 파스텔 핑크
+        ],
+        spawnRange: [0, 1, 2]
+    };
+
+    const { Engine, Render, Runner, Bodies, Composite, Events, Body, Vector } = Matter;
+
+    let engine, render, runner;
+    let score = 0;
+    let bestScore = localStorage.getItem('polygon-suika-kids-best') || 0;
+    let isGameOver = false;
+    let isGameStarted = false;
+    let currentShapeIndex = 0;
+    let nextShapeIndex = 0;
+    let canDrop = true;
+    let previewBody = null;
+    let warningTimer = null;
+
+    document.getElementById('best-score').innerText = bestScore;
+
+    function initGame() {
+        engine = Engine.create();
+        engine.gravity.y = 1.3; // 중력을 조금 낮춰서 더 부드럽게
+
+        render = Render.create({
+            element: document.getElementById('game-container'),
+            engine: engine,
+            options: {
+                width: CONFIG.width,
+                height: CONFIG.height,
+                wireframes: false,
+                background: '#FEFDF5' // 따뜻한 미색 배경
+            }
+        });
+
+        // 벽 생성 (나무 색상)
+        const wallColor = '#8D6E63';
+        const ground = Bodies.rectangle(CONFIG.width / 2, CONFIG.height + 30, CONFIG.width, 60, { isStatic: true, render: { fillStyle: wallColor } });
+        const leftWall = Bodies.rectangle(-30, CONFIG.height / 2, 60, CONFIG.height * 2, { isStatic: true, render: { fillStyle: wallColor } });
+        const rightWall = Bodies.rectangle(CONFIG.width + 30, CONFIG.height / 2, 60, CONFIG.height * 2, { isStatic: true, render: { fillStyle: wallColor } });
+
+        Composite.add(engine.world, [ground, leftWall, rightWall]);
+
+        Render.run(render);
+        runner = Runner.create();
+
+        setupEvents();
+        createGuide();
+        setNextShape();
+    }
+
+    function createGuide() {
+        const guide = document.getElementById('evolution-guide');
+        CONFIG.shapes.forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'guide-item';
+            item.innerHTML = `
+                <div class="guide-shape" style="background:${s.color}; border-radius:${s.sides === 0 ? '50%' : '4px'}"></div>
+                <span style="font-family:'Jua'">${s.name}</span>
+            `;
+            guide.appendChild(item);
+        });
+    }
+
+    function createPolygon(x, y, index, isStatic = false) {
+        const conf = CONFIG.shapes[index];
+        const options = {
+            friction: 0.3,
+            restitution: 0.2, // 덜 튕기게 설정
+            isStatic: isStatic,
+            label: 'polygon',
+            render: {
+                fillStyle: conf.color,
+                strokeStyle: '#5D4037', // 도형 테두리도 부드러운 갈색
+                lineWidth: 3
+            }
+        };
+
+        const body = conf.sides === 0
+            ? Bodies.circle(x, y, conf.radius, options)
+            : Bodies.polygon(x, y, conf.sides, conf.radius, options);
+
+        body.gameData = { index: index };
+        return body;
+    }
+
+    function setNextShape() {
+        currentShapeIndex = nextShapeIndex;
+        nextShapeIndex = CONFIG.spawnRange[Math.floor(Math.random() * CONFIG.spawnRange.length)];
+
+        const nextConf = CONFIG.shapes[nextShapeIndex];
+        const nextDisplay = document.getElementById('next-shape-display');
+        nextDisplay.innerHTML = `<div style="width:28px; height:28px; background:${nextConf.color}; border:2px solid #5D4037; border-radius:${nextConf.sides === 0 ? '50%' : '4px'}"></div>`;
+    }
+
+    function setupEvents() {
+        // 합치기 로직
+        Events.on(engine, 'collisionStart', (event) => {
+            event.pairs.forEach((pair) => {
+                const { bodyA, bodyB } = pair;
+                if (bodyA.gameData && bodyB.gameData &&
+                    bodyA.gameData.index === bodyB.gameData.index &&
+                    bodyA.gameData.index < CONFIG.shapes.length - 1) {
+
+                    const nextIndex = bodyA.gameData.index + 1;
+                    const pos = Vector.div(Vector.add(bodyA.position, bodyB.position), 2);
+
+                    Composite.remove(engine.world, [bodyA, bodyB]);
+                    const newBody = createPolygon(pos.x, pos.y, nextIndex);
+                    Composite.add(engine.world, newBody);
+
+                    score += (nextIndex + 1) * 10;
+                    document.getElementById('score').innerText = score;
+                }
+            });
+        });
+
+        // 게임 오버 체크
+        Events.on(engine, 'afterUpdate', () => {
+            if (isGameOver || !isGameStarted) return;
+
+            const polygons = Composite.allBodies(engine.world).filter(b => b.label === 'polygon' && !b.isStatic);
+            let isViolating = false;
+
+            for (let body of polygons) {
+                if (body.position.y > CONFIG.limitY + 100) body.hasSettled = true;
+
+                if (body.hasSettled && body.bounds.min.y < CONFIG.limitY) {
+                    isViolating = true;
+                    break;
+                }
+            }
+
+            const lineEl = document.getElementById('visual-limit-line');
+            if (isViolating) {
+                lineEl.classList.add('warning-active');
+                if (!warningTimer) {
+                    warningTimer = setTimeout(() => {
+                        gameOver();
+                    }, 2500); // 아이들을 위해 조금 더 여유롭게 (2.5초)
+                }
+            } else {
+                lineEl.classList.remove('warning-active');
+                clearTimeout(warningTimer);
+                warningTimer = null;
+            }
+        });
+
+        // 입력 처리
+        const gameCanvas = render.canvas;
+        const handleMove = (e) => {
+            if (!isGameStarted || isGameOver || !canDrop) return;
+            const x = getEventX(e);
+            const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
+
+            if (!previewBody) {
+                previewBody = createPolygon(clampedX, CONFIG.limitY - 40, currentShapeIndex, true);
+                Composite.add(engine.world, previewBody);
+            } else {
+                Body.setPosition(previewBody, { x: clampedX, y: CONFIG.limitY - 40 });
+            }
+        };
+
+        const handleEnd = (e) => {
+            if (!isGameStarted || isGameOver || !canDrop) return;
+            const x = getEventX(e);
+            const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
+
+            if (previewBody) {
+                Composite.remove(engine.world, previewBody);
+                previewBody = null;
+            }
+
+            const dropBody = createPolygon(clampedX, CONFIG.limitY - 40, currentShapeIndex);
+            Composite.add(engine.world, dropBody);
+
+            canDrop = false;
+            setTimeout(() => {
+                if(!isGameOver) {
+                    canDrop = true;
+                    setNextShape();
+                }
+            }, 600);
+        };
+
+        gameCanvas.addEventListener('mousemove', handleMove);
+        gameCanvas.addEventListener('touchstart', handleMove);
+        gameCanvas.addEventListener('mousedown', handleEnd);
+        gameCanvas.addEventListener('touchend', handleEnd);
+    }
+
+    function getEventX(e) {
+        const rect = render.canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        return (clientX - rect.left) * (CONFIG.width / rect.width);
+    }
+
+    function gameOver() {
+        isGameOver = true;
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('polygon-suika-kids-best', bestScore);
+        }
+        document.getElementById('final-score-msg').innerText = `내 점수: ${score}`;
+        document.getElementById('gameover-screen').style.display = 'flex';
+        Runner.stop(runner);
+    }
+
+    document.getElementById('start-btn').onclick = () => {
+        document.getElementById('title-screen').style.display = 'none';
+        isGameStarted = true;
+        Runner.run(runner, engine);
+    };
+
+    initGame();
+</script>
+</body>
+</html>
