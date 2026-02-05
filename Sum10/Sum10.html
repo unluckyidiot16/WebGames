@@ -367,6 +367,10 @@
                 cell.val = Math.floor(Math.random() * 9) + 1;
                 cell.alive = true;
                 cell.el.className = 'cell'; // Reset classes
+
+                // Reset Apple Element: Remove animation class to ensure visibility
+                cell.appleEl.classList.remove('pop-anim');
+
                 cell.appleEl.innerText = cell.val;
                 cell.appleEl.style.transform = 'scale(1)';
                 cell.appleEl.style.opacity = '1';
