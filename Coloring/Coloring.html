@@ -162,7 +162,15 @@
             image-rendering: pixelated;
             background: #f8fafc;
             display: block;
+            transition: filter 0.3s;
         }
+
+        /* [추가] 색칠되지 않은 이미지 회색조 처리 */
+        .card img.uncolored {
+            filter: grayscale(1) brightness(0.9);
+            opacity: 0.7;
+        }
+
         .card-label {
             text-align: center;
             font-size: .78rem;
@@ -597,8 +605,13 @@
             label.className = 'card-label';
             label.textContent = it.name;
 
+            // [수정된 부분] 색칠 완료 여부에 따른 스타일 적용
             if (fully.has(it.idx)) {
                 card.classList.add('colored');
+                // 컬러 이미지 유지
+            } else {
+                // 색칠 미완료 시 회색조 적용
+                img.classList.add('uncolored');
             }
 
             card.addEventListener('click', () => startGame(it.url, it.idx));
