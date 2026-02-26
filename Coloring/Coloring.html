@@ -1,0 +1,985 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>픽셀 컬러링</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700;900&family=Fredoka:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #f0f4f8;
+            --card-bg: #ffffff;
+            --accent: #3b82f6;
+            --accent-hover: #2563eb;
+            --text: #1e293b;
+            --text-sub: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 2px 12px rgba(0,0,0,.06);
+            --shadow-hover: 0 8px 24px rgba(0,0,0,.1);
+            --radius: 14px;
+        }
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            touch-action: manipulation;
+        }
+
+        /* ===== Views ===== */
+        .view { display:none; width:100%; min-height:100vh; }
+        .view.active { display:flex; }
+
+        /* ===== Title Screen ===== */
+        #titleScreen {
+            background: linear-gradient(160deg, #dbeafe 0%, #ede9fe 50%, #fce7f3 100%);
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 32px;
+            padding: 24px;
+            text-align: center;
+        }
+        .title-icon { font-size: 72px; filter: drop-shadow(0 4px 8px rgba(0,0,0,.1)); }
+        .title-text {
+            font-family: 'Fredoka', 'Noto Sans KR', sans-serif;
+            font-size: clamp(2.5rem, 8vw, 4.5rem);
+            font-weight: 700;
+            background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            line-height: 1.2;
+        }
+        .title-sub {
+            color: var(--text-sub);
+            font-size: clamp(0.85rem, 2.5vw, 1.1rem);
+        }
+        .start-btn {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            border: none;
+            padding: 16px 48px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(99,102,241,.35);
+            transition: transform .2s, box-shadow .2s;
+            font-family: inherit;
+        }
+        .start-btn:hover { transform: translateY(-2px) scale(1.03); box-shadow: 0 8px 28px rgba(99,102,241,.45); }
+        .start-btn:active { transform: scale(.97); }
+
+        /* ===== Book (Gallery) Screen ===== */
+        #bookScreen {
+            flex-direction: column;
+            align-items: center;
+            padding: 20px 16px 40px;
+        }
+        .book-header {
+            width: 100%;
+            max-width: 1200px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .book-title {
+            font-family: 'Fredoka', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--text);
+        }
+        .book-stats {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .stat-badge {
+            font-size: .8rem;
+            padding: 6px 14px;
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            box-shadow: var(--shadow);
+            color: var(--text-sub);
+            font-weight: 700;
+        }
+        .stat-badge b { color: var(--accent); }
+
+        .search-bar {
+            width: 100%;
+            max-width: 1200px;
+            margin-bottom: 16px;
+        }
+        .search-bar input {
+            width: 100%;
+            padding: 12px 18px;
+            border: 2px solid var(--border);
+            border-radius: 12px;
+            font-size: 1rem;
+            font-family: inherit;
+            background: var(--card-bg);
+            outline: none;
+            transition: border-color .2s;
+        }
+        .search-bar input:focus { border-color: var(--accent); }
+        .search-bar input::placeholder { color: #94a3b8; }
+
+        .book-grid {
+            width: 100%;
+            max-width: 1200px;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 12px;
+        }
+        @media (min-width: 640px) {
+            .book-grid { grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); }
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform .2s, box-shadow .2s, border-color .2s;
+            position: relative;
+        }
+        .card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-hover);
+            border-color: var(--accent);
+        }
+        .card img {
+            width: 100%;
+            aspect-ratio: 1/1;
+            object-fit: contain;
+            image-rendering: pixelated;
+            background: #f8fafc;
+            display: block;
+        }
+        .card-label {
+            text-align: center;
+            font-size: .78rem;
+            font-weight: 700;
+            padding: 6px 4px;
+            color: var(--text-sub);
+        }
+        .card.colored {
+            border-color: #22c55e;
+            border-width: 3px;
+        }
+        .card.colored::after {
+            content: "✓";
+            position: absolute;
+            top: 6px;
+            right: 6px;
+            background: #22c55e;
+            color: #fff;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: 900;
+            box-shadow: 0 2px 6px rgba(34,197,94,.4);
+        }
+        .reset-btn {
+            background: #f1f5f9;
+            color: var(--text-sub);
+            border: 1px solid var(--border);
+            padding: 6px 14px;
+            font-size: .8rem;
+            font-weight: 700;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: background .2s;
+        }
+        .reset-btn:hover { background: #e2e8f0; }
+
+        /* ===== Game Screen ===== */
+        #gameScreen {
+            flex-direction: column;
+            align-items: center;
+            padding: 16px;
+        }
+        .game-header {
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .back-btn {
+            background: var(--card-bg);
+            border: 2px solid var(--border);
+            padding: 10px 20px;
+            font-size: .9rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+            color: var(--text);
+        }
+        .back-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+        .game-body {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            width: 100%;
+            max-width: 960px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas { display:block; image-rendering:pixelated; cursor:pointer; background:#fff; }
+        .composite { display:flex; justify-content:center; overflow:auto; border:3px solid #334155; border-radius:12px; }
+        .grid-2x2 { display:inline-grid; grid-template-columns:max-content max-content; grid-template-rows:max-content max-content; gap:0; }
+
+        /* Palette */
+        .palette-scroll {
+            display: grid;
+            grid-auto-flow: column;
+            grid-auto-columns: max-content;
+            gap: 8px;
+            width: 100%;
+            padding: 8px 4px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            scrollbar-width: thin;
+        }
+        .palette-button {
+            width: 46px;
+            height: 46px;
+            border: 3px solid #cbd5e1;
+            border-radius: 10px;
+            color: #fff;
+            font-weight: 800;
+            font-size: .8rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-shadow: 0 1px 3px rgba(0,0,0,.5);
+            cursor: pointer;
+            transition: transform .15s, box-shadow .15s, border-color .15s;
+            flex-shrink: 0;
+        }
+        .palette-button.selected {
+            border-color: var(--accent);
+            transform: scale(1.12);
+            box-shadow: 0 0 16px rgba(59,130,246,.5);
+        }
+        #zoomPalette .palette-button { width: 40px; height: 40px; }
+
+        /* Progress */
+        .progress-wrap { width: 100%; max-width: 400px; margin-top: 16px; }
+        .progress-track { width:100%; background:#e2e8f0; border-radius:999px; height:10px; overflow:hidden; }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #3b82f6, #8b5cf6);
+            border-radius: 999px;
+            transition: width .3s;
+        }
+        .progress-label { text-align:center; font-size:.85rem; color:var(--text-sub); margin-top:6px; font-weight:700; }
+
+        /* Loading */
+        .spinner {
+            text-align: center;
+            padding: 48px 16px;
+        }
+        .spinner svg { animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ===== Zoom Overlay ===== */
+        #zoomOverlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(15,23,42,.55);
+            backdrop-filter: blur(4px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+        }
+        #zoomCard {
+            background: var(--card-bg);
+            border-radius: 18px;
+            box-shadow: 0 16px 48px rgba(0,0,0,.2);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+            max-width: 95vw;
+            max-height: 92vh;
+        }
+        #zoomCanvas { border: 2px solid var(--accent); border-radius: 10px; }
+        .zoom-close-btn {
+            background: #f1f5f9;
+            border: 2px solid var(--border);
+            padding: 10px 24px;
+            font-size: .9rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .2s;
+            color: var(--text);
+        }
+        .zoom-close-btn:hover { background: #e2e8f0; }
+
+        /* ===== Modal ===== */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            z-index: 1100;
+            inset: 0;
+            background: rgba(15,23,42,.45);
+            backdrop-filter: blur(4px);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-box {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: 18px;
+            width: 90%;
+            max-width: 420px;
+            text-align: center;
+            box-shadow: 0 16px 48px rgba(0,0,0,.2);
+        }
+        .modal-box h2 { font-size: 1.25rem; font-weight: 900; margin-bottom: 12px; }
+        .modal-box p { color: var(--text-sub); line-height: 1.6; white-space: pre-line; margin-bottom: 20px; }
+        .modal-ok-btn {
+            background: linear-gradient(135deg, #3b82f6, #6366f1);
+            color: #fff;
+            border: none;
+            padding: 12px 36px;
+            font-size: 1rem;
+            font-weight: 700;
+            border-radius: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            transition: transform .15s;
+        }
+        .modal-ok-btn:hover { transform: scale(1.04); }
+
+        /* Shake */
+        @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-3px,0)} 50%{transform:translate(3px,0)} 75%{transform:translate(-3px,0)} }
+        .shake { animation: shake .25s; }
+
+        /* Fade-in for cards */
+        @keyframes fadeUp { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+        .fade-up { animation: fadeUp .35s ease-out both; }
+    </style>
+</head>
+<body>
+
+<!-- ===== Title Screen ===== -->
+<div id="titleScreen" class="view active">
+    <div class="title-icon">🎨</div>
+    <div class="title-text">픽셀 컬러링</div>
+    <p class="title-sub">좋아하는 포켓몬을 골라 색칠해 보세요!</p>
+    <button id="startButton" class="start-btn">시작하기</button>
+</div>
+
+<!-- ===== Book (Gallery) Screen ===== -->
+<div id="bookScreen" class="view">
+    <div class="book-header">
+        <div class="book-title">🖼️ 도감</div>
+        <div class="book-stats">
+            <span id="colorRateText" class="stat-badge">색칠 완료: <b>0/0</b></span>
+            <button id="resetBtn" class="reset-btn">🗑️ 초기화</button>
+        </div>
+    </div>
+    <div class="search-bar">
+        <input type="text" id="searchInput" placeholder="번호로 검색 (예: 25)">
+    </div>
+    <div id="bookGrid" class="book-grid"></div>
+</div>
+
+<!-- ===== Game Screen ===== -->
+<div id="gameScreen" class="view">
+    <div class="game-header">
+        <button id="backButton" class="back-btn">← 도감으로</button>
+        <span class="stat-badge" style="font-size:.8rem; color:#94a3b8;">진행은 자동 저장됩니다</span>
+    </div>
+    <div class="game-body">
+        <div id="loadingSpinner" class="spinner">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3">
+                <circle cx="12" cy="12" r="10" opacity=".25"/>
+                <path d="M4 12a8 8 0 018-8" stroke-linecap="round" opacity=".75"/>
+            </svg>
+            <p style="margin-top:12px; color:var(--text-sub);">이미지 분석 중...</p>
+        </div>
+        <div class="composite" style="width:100%;">
+            <div id="quadGrid" class="grid-2x2"></div>
+        </div>
+        <div id="paletteContainer" class="palette-scroll" style="width:100%; margin-top:12px;"></div>
+        <div class="progress-wrap">
+            <div class="progress-track">
+                <div id="progressBar" class="progress-fill" style="width:0%;"></div>
+            </div>
+            <p id="progressText" class="progress-label">0%</p>
+        </div>
+    </div>
+</div>
+
+<!-- ===== Zoom Overlay ===== -->
+<div id="zoomOverlay">
+    <div id="zoomCard">
+        <canvas id="zoomCanvas"></canvas>
+        <div id="zoomPalette" class="palette-scroll" style="width:100%;"></div>
+        <button id="zoomCloseBtn" class="zoom-close-btn">닫기 (Esc)</button>
+    </div>
+</div>
+
+<!-- ===== Message Modal ===== -->
+<div id="messageModal" class="modal-overlay">
+    <div class="modal-box">
+        <h2 id="modalTitle"></h2>
+        <p id="modalMessage"></p>
+        <button id="modalCloseButton" class="modal-ok-btn">확인</button>
+    </div>
+</div>
+
+<script>
+    /* =========================
+       설정
+    ========================= */
+    const CODEX_PNG_BASE = './png/';
+    const HIDDEN_IMAGE_BASE = 'https://unluckyidiot16.github.io/WebGames/Pixel/Hidden/';
+    const MAX_NORMAL_IMAGES = 415;
+    const MAX_HIDDEN_IMAGES = 40;
+
+    /* =========================
+       DOM
+    ========================= */
+    const allViews = document.querySelectorAll('.view');
+    const startButton = document.getElementById('startButton');
+    const bookGrid = document.getElementById('bookGrid');
+    const searchInput = document.getElementById('searchInput');
+    const colorRateText = document.getElementById('colorRateText');
+    const resetBtn = document.getElementById('resetBtn');
+    const backButton = document.getElementById('backButton');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const quadGrid = document.getElementById('quadGrid');
+    const paletteContainer = document.getElementById('paletteContainer');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    const messageModal = document.getElementById('messageModal');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalMessage = document.getElementById('modalMessage');
+    const modalCloseButton = document.getElementById('modalCloseButton');
+    const zoomOverlay = document.getElementById('zoomOverlay');
+    const zoomCanvas = document.getElementById('zoomCanvas');
+    const zoomPalette = document.getElementById('zoomPalette');
+    const zoomCloseBtn = document.getElementById('zoomCloseBtn');
+    const zoomCtx = zoomCanvas.getContext('2d');
+    zoomCtx.imageSmoothingEnabled = false;
+
+    /* =========================
+       상태 & 저장
+    ========================= */
+    const LS_PROGRESS_PREFIX = 'pixel.progress.';
+    const LS_FULLY_COLORED = 'pixel.fullyColored';
+    function progressKey(idx) { return `${LS_PROGRESS_PREFIX}${idx}`; }
+
+    function getFullyColoredSet() {
+        try {
+            return new Set(JSON.parse(localStorage.getItem(LS_FULLY_COLORED) || '[]').map(Number));
+        } catch { return new Set(); }
+    }
+    function saveFullyColoredSet(set) {
+        localStorage.setItem(LS_FULLY_COLORED, JSON.stringify(Array.from(set)));
+    }
+
+    /* =========================
+       이미지 리스트
+    ========================= */
+    let IMAGE_LIST = [];
+    let HIDDEN_IMAGE_LIST = [];
+
+    function loadImages() {
+        IMAGE_LIST = [];
+        for (let i = 1; i <= MAX_NORMAL_IMAGES; i++) {
+            IMAGE_LIST.push({ url: `${CODEX_PNG_BASE}${i}.png`, name: `No.${i}`, idx: i });
+        }
+        HIDDEN_IMAGE_LIST = [];
+        for (let i = 1; i <= MAX_HIDDEN_IMAGES; i++) {
+            HIDDEN_IMAGE_LIST.push({ url: `${HIDDEN_IMAGE_BASE}${i}.png`, name: `H${i}`, idx: -i });
+        }
+    }
+
+    /* =========================
+       유틸
+    ========================= */
+    function showView(id) {
+        allViews.forEach(v => v.classList.remove('active'));
+        document.getElementById(id).classList.add('active');
+    }
+    function enableHorizontalWheel(el) {
+        if (!el) return;
+        el.addEventListener('wheel', (e) => {
+            if (Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                el.scrollLeft += e.deltaY; e.preventDefault();
+            }
+        }, { passive: false });
+    }
+
+    /* =========================
+       모달
+    ========================= */
+    let modalCloseHandler = null;
+    modalCloseButton.onclick = () => {
+        messageModal.style.display = 'none';
+        if (typeof modalCloseHandler === 'function') {
+            const cb = modalCloseHandler;
+            modalCloseHandler = null;
+            cb();
+        }
+    };
+    function showModal(title, msg, onClose) {
+        modalTitle.textContent = title;
+        modalMessage.textContent = msg;
+        modalCloseHandler = onClose || null;
+        messageModal.style.display = 'flex';
+    }
+
+    /* =========================
+       도감 화면
+    ========================= */
+    function syncColorStats() {
+        const total = IMAGE_LIST.length + HIDDEN_IMAGE_LIST.length;
+        const fully = getFullyColoredSet();
+        if (colorRateText) {
+            colorRateText.innerHTML = `색칠 완료: <b>${fully.size}/${total}</b>`;
+        }
+    }
+
+    function populateBook(filter = '') {
+        const fully = getFullyColoredSet();
+        bookGrid.innerHTML = '';
+
+        const allItems = [
+            ...IMAGE_LIST,
+            ...HIDDEN_IMAGE_LIST,
+        ];
+
+        allItems.forEach((it, i) => {
+            // 검색 필터
+            if (filter && !it.name.toLowerCase().includes(filter.toLowerCase())) return;
+
+            const card = document.createElement('div');
+            card.className = 'card fade-up';
+            card.style.animationDelay = `${Math.min(i, 30) * 15}ms`;
+
+            const img = document.createElement('img');
+            img.src = it.url;
+            img.alt = it.name;
+            img.loading = 'lazy';
+
+            const label = document.createElement('div');
+            label.className = 'card-label';
+            label.textContent = it.name;
+
+            if (fully.has(it.idx)) {
+                card.classList.add('colored');
+            }
+
+            card.addEventListener('click', () => startGame(it.url, it.idx));
+            card.appendChild(img);
+            card.appendChild(label);
+            bookGrid.appendChild(card);
+        });
+
+        syncColorStats();
+    }
+
+    /* =========================
+       색칠 엔진
+    ========================= */
+    const CELL_SCALE = 15;
+    let imgWidth, imgHeight, sourceImage;
+    let palette = {};
+    let paletteMap = [null];
+    let numberGrid = [];
+    let completedGrid = [];
+    let totalCells = 0;
+    let completedCells = 0;
+    let selectedColorIndex = 0;
+    const quadrants = [];
+    let currentStageIndex = 1;
+    let currentZoomQuad = null;
+
+    function serializeCompletedGrid() {
+        const total = imgWidth * imgHeight;
+        const bytes = new Uint8Array(Math.ceil(total / 8));
+        let k = 0;
+        for (let y = 0; y < imgHeight; y++) {
+            for (let x = 0; x < imgWidth; x++) {
+                if (completedGrid[y][x]) bytes[k >> 3] |= (1 << (k & 7));
+                k++;
+            }
+        }
+        let s = "";
+        for (let i = 0; i < bytes.length; i++) s += String.fromCharCode(bytes[i]);
+        return btoa(s);
+    }
+
+    function deserializeCompletedGrid(b64) {
+        const bin = atob(b64);
+        const bytes = new Uint8Array(bin.length);
+        for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+        let k = 0;
+        completedCells = 0;
+        for (let y = 0; y < imgHeight; y++) {
+            for (let x = 0; x < imgWidth; x++) {
+                const done = (bytes[k >> 3] >> (k & 7)) & 1;
+                completedGrid[y][x] = !!done;
+                if (done && numberGrid[y][x] !== 0) completedCells++;
+                k++;
+            }
+        }
+    }
+
+    function saveCurrentProgress() {
+        const payload = { w: imgWidth, h: imgHeight, bits: serializeCompletedGrid() };
+        localStorage.setItem(progressKey(currentStageIndex), JSON.stringify(payload));
+    }
+
+    function restoreProgress(stageIdx) {
+        const raw = localStorage.getItem(progressKey(stageIdx));
+        if (!raw) return;
+        try {
+            const p = JSON.parse(raw);
+            if (p && p.w === imgWidth && p.h === imgHeight && typeof p.bits === 'string') {
+                deserializeCompletedGrid(p.bits);
+            }
+        } catch (_) {}
+    }
+
+    function drawQuadToContext(q, ctx, scale, showGridNumbers) {
+        ctx.clearRect(0, 0, q.w * scale, q.h * scale);
+        if (showGridNumbers) {
+            ctx.strokeStyle = '#e2e8f0';
+            const fontSize = Math.max(6, Math.floor(scale * 0.5));
+            ctx.font = `bold ${fontSize}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+        }
+        for (let y = q.y; y < q.y + q.h; y++) {
+            for (let x = q.x; x < q.x + q.w; x++) {
+                const cellX = (x - q.x) * scale, cellY = (y - q.y) * scale;
+                const idx = (numberGrid[y] && numberGrid[y][x] !== undefined) ? numberGrid[y][x] : 0;
+                if (completedGrid[y][x]) {
+                    ctx.fillStyle = (idx === 0) ? '#f5f5f5' : paletteMap[idx];
+                    ctx.fillRect(cellX, cellY, scale, scale);
+                } else {
+                    ctx.fillStyle = '#ffffff';
+                    ctx.fillRect(cellX, cellY, scale, scale);
+                    if (showGridNumbers) {
+                        ctx.strokeRect(cellX, cellY, scale, scale);
+                        ctx.fillStyle = '#64748b';
+                        ctx.fillText(idx, cellX + scale / 2, cellY + scale / 2 + 1);
+                    }
+                }
+            }
+        }
+    }
+
+    function drawQuad(q, showGridNumbers) { drawQuadToContext(q, q.ctx, CELL_SCALE, showGridNumbers); }
+    function updateAllQuads(show = true) { quadrants.forEach(q => drawQuad(q, show)); }
+
+    function updateProgress() {
+        if (!totalCells) return;
+        const percent = Math.floor((completedCells / totalCells) * 100);
+        progressBar.style.width = `${percent}%`;
+        progressText.textContent = `${percent}%`;
+    }
+
+    function drawCellOnQuad(q, gx, gy) {
+        const ctx = q.ctx;
+        const cellX = (gx - q.x) * CELL_SCALE, cellY = (gy - q.y) * CELL_SCALE;
+        const idx = numberGrid[gy][gx];
+        ctx.fillStyle = (idx === 0) ? '#f5f5f5' : paletteMap[idx];
+        ctx.fillRect(cellX, cellY, CELL_SCALE, CELL_SCALE);
+    }
+
+    function drawCellOnZoom(q, gx, gy) {
+        const zoomScale = zoomCanvas.width / (q.w * CELL_SCALE);
+        const cellScale = CELL_SCALE * zoomScale;
+        const cellX = (gx - q.x) * cellScale;
+        const cellY = (gy - q.y) * cellScale;
+        const idx = numberGrid[gy][gx];
+        zoomCtx.fillStyle = (idx === 0) ? '#f5f5f5' : paletteMap[idx];
+        zoomCtx.fillRect(cellX, cellY, cellScale, cellScale);
+    }
+
+    function computeZoomScale(q) {
+        const maxW = Math.floor(window.innerWidth * 0.95);
+        const maxH = Math.floor(window.innerHeight * 0.85);
+        const baseW = q.w * CELL_SCALE, baseH = q.h * CELL_SCALE;
+        return Math.max(1, Math.min(Math.floor(maxW / baseW), Math.floor(maxH / baseH)));
+    }
+
+    function startGame(imageUrl, idx) {
+        currentStageIndex = idx;
+        showView('gameScreen');
+        loadingSpinner.style.display = 'block';
+        quadGrid.innerHTML = '';
+        paletteContainer.innerHTML = '';
+        progressBar.style.width = '0%';
+        progressText.textContent = '0%';
+        palette = {};
+        paletteMap = [null];
+        numberGrid = [];
+        completedGrid = [];
+        totalCells = 0;
+        completedCells = 0;
+        selectedColorIndex = 0;
+        quadrants.length = 0;
+
+        for (let i = 0; i < 4; i++) {
+            const c = document.createElement('canvas');
+            const ctx = c.getContext('2d');
+            ctx.imageSmoothingEnabled = false;
+            const wrap = document.createElement('div');
+            wrap.appendChild(c);
+            quadGrid.appendChild(wrap);
+            const q = { id: i, canvas: c, ctx, x: 0, y: 0, w: 0, h: 0 };
+            c.onclick = () => openZoom(i);
+            quadrants.push(q);
+        }
+        loadImageAndProcess(imageUrl);
+    }
+
+    async function loadImageAndProcess(url) {
+        try {
+            sourceImage = await new Promise((resolve, reject) => {
+                const im = new Image();
+                im.crossOrigin = 'Anonymous';
+                im.src = url;
+                im.onload = () => resolve(im);
+                im.onerror = () => reject(new Error('이미지를 불러올 수 없습니다.'));
+            });
+            imgWidth = sourceImage.width;
+            imgHeight = sourceImage.height;
+            const hc = document.createElement('canvas');
+            hc.width = imgWidth;
+            hc.height = imgHeight;
+            const hctx = hc.getContext('2d');
+            hctx.drawImage(sourceImage, 0, 0);
+            const data = hctx.getImageData(0, 0, imgWidth, imgHeight).data;
+
+            let colorIndex = 1;
+            for (let y = 0; y < imgHeight; y++) {
+                numberGrid[y] = [];
+                completedGrid[y] = [];
+                for (let x = 0; x < imgWidth; x++) {
+                    const i = (y * imgWidth + x) * 4;
+                    const r = data[i], g = data[i + 1], b = data[i + 2], a = data[i + 3];
+                    if (a < 128) {
+                        numberGrid[y][x] = 0;
+                        completedGrid[y][x] = true;
+                    } else {
+                        const rgba = `rgba(${r},${g},${b},${a / 255})`;
+                        if (!palette[rgba]) { palette[rgba] = colorIndex; paletteMap[colorIndex] = rgba; colorIndex++; }
+                        numberGrid[y][x] = palette[rgba];
+                        completedGrid[y][x] = false;
+                        totalCells++;
+                    }
+                }
+            }
+
+            const halfW = Math.floor(imgWidth / 2), halfH = Math.floor(imgHeight / 2);
+            const geoms = [
+                { x: 0, y: 0, w: halfW, h: halfH },
+                { x: halfW, y: 0, w: imgWidth - halfW, h: halfH },
+                { x: 0, y: halfH, w: halfW, h: imgHeight - halfH },
+                { x: halfW, y: halfH, w: imgWidth - halfW, h: imgHeight - halfH },
+            ];
+            geoms.forEach((g, i) => {
+                const q = quadrants[i];
+                q.x = g.x; q.y = g.y; q.w = g.w; q.h = g.h;
+                q.canvas.width = g.w * CELL_SCALE;
+                q.canvas.height = g.h * CELL_SCALE;
+                q.canvas.style.width = q.canvas.width + 'px';
+                q.canvas.style.height = q.canvas.height + 'px';
+            });
+
+            restoreProgress(currentStageIndex);
+            updateProgress();
+            loadingSpinner.style.display = 'none';
+            updateAllQuads(true);
+            buildPaletteUI();
+        } catch (err) {
+            console.error(err);
+            showModal('오류', err.message + ' 도감으로 돌아갑니다.');
+            showView('bookScreen');
+        }
+    }
+
+    function buildPaletteUIInto(containerEl) {
+        containerEl.innerHTML = '';
+        const count = Math.max(1, paletteMap.length - 1);
+        for (let i = 1; i <= count; i++) {
+            const color = paletteMap[i];
+            const btn = document.createElement('button');
+            btn.className = 'palette-button';
+            btn.style.backgroundColor = color;
+            btn.textContent = i;
+            btn.dataset.colorIndex = i;
+            btn.addEventListener('click', () => {
+                selectedColorIndex = i;
+                document.querySelectorAll('.palette-button')
+                    .forEach(b => b.classList.toggle('selected', parseInt(b.dataset.colorIndex, 10) === i));
+            });
+            containerEl.appendChild(btn);
+        }
+    }
+
+    function buildPaletteUI() {
+        buildPaletteUIInto(paletteContainer);
+        buildPaletteUIInto(zoomPalette);
+    }
+
+    /* =========================
+       줌 오버레이
+    ========================= */
+    function openZoom(quadIndex) {
+        const q = quadrants[quadIndex];
+        currentZoomQuad = q;
+        const s = computeZoomScale(q);
+        zoomCanvas.width = q.w * CELL_SCALE * s;
+        zoomCanvas.height = q.h * CELL_SCALE * s;
+        drawQuadToContext(q, zoomCtx, CELL_SCALE * s, true);
+        buildPaletteUIInto(zoomPalette);
+        if (selectedColorIndex > 0) {
+            document.querySelectorAll('.palette-button')
+                .forEach(b => b.classList.toggle('selected', parseInt(b.dataset.colorIndex, 10) === selectedColorIndex));
+        }
+        zoomOverlay.style.display = 'flex';
+        window.addEventListener('resize', onResizeZoom, { passive: true });
+    }
+
+    function onResizeZoom() {
+        if (!currentZoomQuad || zoomOverlay.style.display === 'none') return;
+        const q = currentZoomQuad, s = computeZoomScale(q);
+        zoomCanvas.width = q.w * CELL_SCALE * s;
+        zoomCanvas.height = q.h * CELL_SCALE * s;
+        drawQuadToContext(q, zoomCtx, CELL_SCALE * s, true);
+    }
+
+    function closeZoom() {
+        zoomOverlay.style.display = 'none';
+        window.removeEventListener('resize', onResizeZoom);
+        currentZoomQuad = null;
+    }
+
+    zoomCloseBtn.addEventListener('click', closeZoom);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeZoom(); });
+
+    /* 줌 캔버스 클릭 → 색칠 */
+    zoomCanvas.addEventListener('click', (e) => {
+        if (!currentZoomQuad) return;
+        if (selectedColorIndex === 0) {
+            showModal('색상 선택', '아래 팔레트에서 색상을 먼저 선택하세요.');
+            return;
+        }
+        const q = currentZoomQuad;
+        const rect = zoomCanvas.getBoundingClientRect();
+        const scaleX = zoomCanvas.width / rect.width, scaleY = zoomCanvas.height / rect.height;
+        const lx = (e.clientX - rect.left) * scaleX, ly = (e.clientY - rect.top) * scaleY;
+        const zoomScale = zoomCanvas.width / (q.w * CELL_SCALE);
+        const cellScale = CELL_SCALE * zoomScale;
+        const gx = q.x + Math.floor(lx / cellScale);
+        const gy = q.y + Math.floor(ly / cellScale);
+        if (gx < q.x || gx >= q.x + q.w || gy < q.y || gy >= q.y + q.h) return;
+
+        const idx = numberGrid[gy][gx];
+        if (completedGrid[gy][gx] || idx === 0) return;
+        if (idx === selectedColorIndex) {
+            completedGrid[gy][gx] = true;
+            completedCells++;
+            drawCellOnZoom(q, gx, gy);
+            drawCellOnQuad(q, gx, gy);
+            updateProgress();
+            checkCompletion();
+            saveCurrentProgress();
+        } else {
+            zoomCanvas.classList.add('shake');
+            setTimeout(() => zoomCanvas.classList.remove('shake'), 250);
+        }
+    });
+
+    /* =========================
+       완성 체크
+    ========================= */
+    function checkCompletion() {
+        if (completedCells === totalCells) {
+            updateAllQuads(false);
+            const fully = getFullyColoredSet();
+            let extra = '';
+            if (!fully.has(currentStageIndex)) {
+                fully.add(currentStageIndex);
+                saveFullyColoredSet(fully);
+                extra = '\n\n🎉 처음으로 완성한 그림입니다!';
+            }
+            const label = (currentStageIndex < 0) ? `H${-currentStageIndex}` : `No.${currentStageIndex}`;
+            showModal('완성!', `${label} 그림을 완성했습니다!${extra}`);
+        }
+    }
+
+    /* =========================
+       이벤트 바인딩
+    ========================= */
+    enableHorizontalWheel(paletteContainer);
+    enableHorizontalWheel(zoomPalette);
+
+    startButton.addEventListener('click', () => {
+        loadImages();
+        populateBook();
+        showView('bookScreen');
+    });
+
+    backButton.addEventListener('click', () => {
+        saveCurrentProgress();
+        showView('bookScreen');
+        populateBook(searchInput.value.trim());
+    });
+
+    searchInput.addEventListener('input', () => {
+        populateBook(searchInput.value.trim());
+    });
+
+    resetBtn.addEventListener('click', () => {
+        if (!confirm('색칠 기록을 모두 초기화할까요?')) return;
+        localStorage.removeItem(LS_FULLY_COLORED);
+        for (let i = 0; i < localStorage.length;) {
+            const k = localStorage.key(i);
+            if (k && k.startsWith(LS_PROGRESS_PREFIX)) localStorage.removeItem(k);
+            else i++;
+        }
+        populateBook(searchInput.value.trim());
+        showModal('초기화 완료', '색칠 기록을 초기화했습니다.');
+    });
+
+    showView('titleScreen');
+</script>
+</body>
+</html>

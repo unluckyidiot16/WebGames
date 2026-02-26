@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>픽셀 컬러링 — 도감</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: ui-sans-serif, system-ui; touch-action: manipulation; }
+        .view { display: none; width: 100%; min-height: 100vh; }
+        .view.active { display: flex; }
+        canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
+        .card { border:2px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#fff; cursor:pointer; transition:.2s; }
+        #bookGrid .card.colored { border-width:3px; }
+        #bookGrid .card.colored.rarity-C { border-color:#9ca3af; }
+        #bookGrid .card.colored.rarity-R { border-color:#60a5fa; }
+        #bookGrid .card.colored.rarity-SR { border-color:#fbbf24; }
+        #bookGrid .card:hover { transform:translateY(-2px); box-shadow:0 8px 20px rgba(0,0,0,.08); }
+        #bookGrid img { image-rendering:pixelated; width:100%; aspect-ratio:1/1; object-fit:contain; background:#f9fafb; }
+        .locked { position:relative; filter:grayscale(1) opacity(.8); }
+        .locked::after{
+            content:"🔒"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+            font-size:28px; color:#fff; text-shadow:0 0 5px #000; background:rgba(0,0,0,.35);
+        }
+        #zoomOverlay { position:fixed; inset:0; background:rgba(0,0,0,.45); display:none; align-items:center; justify-content:center; z-index:1000; }
+        #zoomCard { background:#fff; border-radius:14px; box-shadow:0 10px 30px rgba(0,0,0,.25); padding:16px;
+            display:flex; flex-direction:column; align-items:center; gap:12px; max-width:95vw; max-height:90vh; }
+        #zoomCanvas { image-rendering: pixelated; border:2px solid #0ea5e9; border-radius:8px; }
+        #paletteContainer, #zoomPalette {
+            display:grid; grid-auto-flow:column; grid-auto-columns:max-content; gap:10px; width:100%;
+            padding:0 8px 8px; overflow-x:auto; overflow-y:hidden; white-space:nowrap; scrollbar-gutter:stable both-edges;
+        }
+        .palette-button{ width:50px; height:50px; border:2px solid #d1d5db; border-radius:8px; color:#fff; font-weight:700;
+            display:flex; align-items:center; justify-content:center; text-shadow:0 0 2px #000; cursor:pointer;
+            transition:transform .15s, box-shadow .15s, border-color .15s; }
+        .palette-button.selected{ border-color:#0ea5e9; transform:scale(1.08); box-shadow:0 0 15px rgba(14,165,233,.45); }
+        .composite{ display:flex; justify-content:center; overflow:auto; border:3px solid #374151; border-radius:14px; }
+        .grid-2x2{ display:inline-grid; grid-template-columns:max-content max-content; grid-template-rows:max-content max-content; gap:0; }
+        .modal{ display:none; position:fixed; z-index:1100; left:0; top:0; width:100%; height:100%; background:rgba(0,0,0,.4); justify-content:center; align-items:center; }
+        .modal-content{ background:#fff; margin:auto; padding:24px; border-radius:12px; width:90%; max-width:520px; text-align:center; }
+        @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-3px,0)} 50%{transform:translate(3px,0)} 75%{transform:translate(-3px,0)} }
+        .shake { animation:shake .25s; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen">
+
+<div id="titleScreen" class="view active flex-col items-center justify-center p-4">
+    <h1 class="text-5xl md:text-7xl font-extrabold text-gray-800 mb-8 animate-pulse">픽셀 컬러링</h1>
+    <button id="startButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg hover:scale-105">
+        시작하기
+    </button>
+</div>
+
+<div id="lobbyScreen" class="view flex-col items-center justify-center p-4 md:p-8">
+    <div class="w-full max-w-4xl flex flex-col gap-8">
+        <div class="text-center">
+            <h1 class="text-3xl md:text-4xl font-extrabold text-gray-800 mb-2">무엇부터 시작할까요?</h1>
+            <p class="text-sm md:text-base text-gray-500">
+                탐험에서 포켓몬을 잡으면 색칠 도감이 해금됩니다.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <button id="lobbyCodexBtn"
+                    class="flex flex-col items-center justify-between gap-2 bg-white rounded-2xl shadow-lg border border-slate-200 px-6 py-6 hover:shadow-xl hover:-translate-y-1 transition">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-xl font-bold text-gray-800">도감 &amp; 색칠</span>
+                    <span class="text-xs text-gray-500 text-center">해금한 픽셀 이미지를 선택해 색칠을 할 수 있어요.</span>
+                </div>
+                <span class="mt-2 inline-flex items-center justify-center rounded-full bg-slate-900 text-white text-sm font-semibold px-4 py-1">도감 이동</span>
+            </button>
+
+            <button id="lobbyGachaBtn"
+                    class="flex flex-col items-center justify-between gap-2 w-full bg-white rounded-2xl shadow-lg border-2 border-sky-100 px-6 py-6 hover:shadow-xl hover:-translate-y-1 transition">
+                <div class="flex flex-col items-center gap-1">
+                    <span class="text-xl font-bold text-sky-700">탐험으로 이동</span>
+                    <span class="text-xs text-gray-500 text-center">포켓몬을 잡으면 픽셀 도감이 해금돼요.</span>
+                </div>
+                <span class="mt-2 inline-flex items-center justify-center rounded-full bg-sky-600 text-white text-sm font-semibold px-4 py-1">탐험 시작</span>
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="bookScreen" class="view flex-col items-center p-4 md:p-8">
+    <div class="w-full max-w-6xl flex flex-col gap-4">
+        <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+            <h1 class="text-3xl md:text-4xl font-bold text-gray-800">도감</h1>
+            <div class="flex flex-wrap items-center gap-2">
+                <span id="collectionText" class="text-xs md:text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">수집률: 0/0 (0%)</span>
+                <span id="colorRateText" class="text-xs md:text-sm px-3 py-2 bg-white rounded-lg border shadow-sm">색칠률: 0/0 (0%)</span>
+                <button id="toLobbyBtn" class="bg-slate-200 hover:bg-slate-300 text-gray-800 text-sm font-semibold py-2 px-3 rounded-lg shadow">로비로</button>
+                <button id="toExploreBtn" class="bg-sky-500 hover:bg-sky-600 text-white text-sm font-semibold py-2 px-3 rounded-lg shadow">탐험으로</button>
+            </div>
+        </div>
+        <div id="bookGrid" class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4"></div>
+    </div>
+</div>
+
+<div id="gameScreen" class="view flex-col items-center p-4">
+    <div class="w-full max-w-5xl flex flex-col md:flex-row md:items-center md:justify-between gap-3 mb-4">
+        <button id="backButton" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow">&larr; 도감으로</button>
+        <span class="text-sm text-gray-500">진행은 브라우저에 자동 저장됩니다</span>
+    </div>
+
+    <div class="bg-white p-4 md:p-6 rounded-lg shadow-lg w-full max-w-5xl flex flex-col items-center">
+        <div id="loadingSpinner" class="text-center p-8">
+            <svg class="animate-spin h-10 w-10 text-sky-500 mx-auto" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+            <p class="mt-3 text-gray-600">이미지 분석 중...</p>
+        </div>
+        <div class="composite w-full"><div id="quadGrid" class="grid-2x2"></div></div>
+        <div id="paletteContainer" class="w-full mt-4"></div>
+        <div id="progressContainer" class="w-full max-w-md mt-4">
+            <div class="w-full bg-gray-200 rounded-full h-2.5"><div id="progressBar" class="bg-sky-500 h-2.5 rounded-full" style="width:0%; transition:width .3s;"></div></div>
+            <p id="progressText" class="text-center text-sm text-gray-600 mt-1">0%</p>
+        </div>
+    </div>
+</div>
+
+<div id="zoomOverlay">
+    <div id="zoomCard">
+        <canvas id="zoomCanvas"></canvas>
+        <div id="zoomPalette" class="w-full"></div>
+        <div class="flex gap-2"><button id="zoomCloseBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded-lg shadow">닫기(Esc)</button></div>
+    </div>
+</div>
+
+<div id="messageModal" class="modal">
+    <div class="modal-content">
+        <h2 id="modalTitle" class="text-xl font-bold mb-2"></h2>
+        <p id="modalMessage" class="text-gray-700"></p>
+        <button id="modalCloseButton" class="bg-sky-500 hover:bg-sky-600 text-white font-bold py-2 px-4 rounded-lg shadow mt-4">확인</button>
+    </div>
+</div>
+
+<script>
+    const CODEX_PNG_BASE = './png/';
+    const INDEX_SAVE_KEY = "poke_spell_game_data_v7";
+    const INDEX_PATCHED_URL = new URL("../PS/index_patched.html", location.href).href;
+    const MAX_NORMAL_IMAGES = 415;
+
+    const LS_FULLY_COLORED = 'pixel.fullyColored';
+    const LS_PROGRESS_PREFIX = 'pixel.progress.';
+    function progressKey(idx){ return `${LS_PROGRESS_PREFIX}${idx}`; }
+
+    function getIndexDexSet(){
+        try{
+            const data = JSON.parse(localStorage.getItem(INDEX_SAVE_KEY) || '{}');
+            const arr = data.dex || data.dexIds || [];
+            return new Set(arr.map(v => parseInt(v, 10)).filter(n => n > 0));
+        }catch(_){ return new Set(); }
+    }
+
+    function getFullyColoredSet(){
+        try{ return new Set(JSON.parse(localStorage.getItem(LS_FULLY_COLORED) || '[]').map(Number)); }
+        catch(_){ return new Set(); }
+    }
+
+    function syncCollectionStats(){
+        const owned = getIndexDexSet();
+        const fully = getFullyColoredSet();
+        const total = MAX_NORMAL_IMAGES;
+        document.getElementById('collectionText').textContent = `수집률: ${owned.size}/${total} (${Math.round((owned.size/total)*100)}%)`;
+        document.getElementById('colorRateText').textContent = `색칠률: ${fully.size}/${total} (${Math.round((fully.size/total)*100)}%)`;
+    }
+
+    function loadCodexImages(){
+        const owned = getIndexDexSet();
+        const fully = getFullyColoredSet();
+        const grid = document.getElementById('bookGrid');
+        grid.innerHTML = '';
+        for (let i = 1; i <= MAX_NORMAL_IMAGES; i++) {
+            const isOwned = owned.has(i);
+            const card = document.createElement('div');
+            card.className = 'card';
+            const img = document.createElement('img');
+            img.src = `${CODEX_PNG_BASE}${i}.png`;
+            if (!isOwned){
+                img.classList.add('locked');
+                card.onclick = () => window.location.href = INDEX_PATCHED_URL;
+            } else {
+                card.onclick = () => startGame(`${CODEX_PNG_BASE}${i}.png`, i);
+            }
+            if (fully.has(i)){
+                const tier = i > 390 ? 'SR' : (i > 300 ? 'R' : 'C');
+                card.classList.add('colored', `rarity-${tier}`);
+            }
+            const title = document.createElement('p');
+            title.className = 'text-center text-sm font-semibold text-gray-700 p-2';
+            title.textContent = `No.${i}`;
+            card.appendChild(img); card.appendChild(title); grid.appendChild(card);
+        }
+        syncCollectionStats();
+    }
+
+    /* --- 게임 로직 --- */
+    const CELL_SCALE = 15;
+    let imgWidth, imgHeight, paletteMap=[null], numberGrid=[], completedGrid=[], totalCells=0, completedCells=0, selectedColorIndex=0, currentStageIndex=1, currentZoomQuad=null;
+    const quadrants = [];
+
+    function startGame(url, idx){
+        currentStageIndex = idx;
+        document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+        document.getElementById('gameScreen').classList.add('active');
+        document.getElementById('loadingSpinner').style.display='block';
+        document.getElementById('quadGrid').innerHTML='';
+        document.getElementById('paletteContainer').innerHTML='';
+        paletteMap=[null]; numberGrid=[]; completedGrid=[]; totalCells=0; completedCells=0; quadrants.length=0;
+
+        for (let i=0;i<4;i++){
+            const c = document.createElement('canvas'); const ctx = c.getContext('2d');
+            document.getElementById('quadGrid').appendChild(c);
+            const q = {id:i, canvas:c, ctx, x:0,y:0,w:0,h:0}; c.onclick = ()=> openZoom(i); quadrants.push(q);
+        }
+        const img = new Image(); img.crossOrigin='Anonymous'; img.src = url;
+        img.onload = () => {
+            imgWidth=img.width; imgHeight=img.height;
+            const hc=document.createElement('canvas'); hc.width=imgWidth; hc.height=imgHeight;
+            const hctx=hc.getContext('2d'); hctx.drawImage(img,0,0);
+            const data=hctx.getImageData(0,0,imgWidth,imgHeight).data;
+            let colorMap={}; let cIdx=1;
+            for(let y=0;y<imgHeight;y++){
+                numberGrid[y]=[]; completedGrid[y]=[];
+                for(let x=0;x<imgWidth;x++){
+                    const i=(y*imgWidth+x)*4;
+                    if(data[i+3]<128){ numberGrid[y][x]=0; completedGrid[y][x]=true; }
+                    else {
+                        const rgb=`rgb(${data[i]},${data[i+1]},${data[i+2]})`;
+                        if(!colorMap[rgb]){ colorMap[rgb]=cIdx; paletteMap[cIdx]=rgb; cIdx++; }
+                        numberGrid[y][x]=colorMap[rgb]; completedGrid[y][x]=false; totalCells++;
+                    }
+                }
+            }
+            const hW=Math.floor(imgWidth/2), hH=Math.floor(imgHeight/2);
+            const geoms=[{x:0,y:0,w:hW,h:hH},{x:hW,y:0,w:imgWidth-hW,h:hH},{x:0,y:hH,w:hW,h:imgHeight-hH},{x:hW,y:hH,w:imgWidth-hW,h:imgHeight-hH}];
+            geoms.forEach((g,i)=>{
+                const q=quadrants[i]; q.x=g.x; q.y=g.y; q.w=g.w; q.h=g.h;
+                q.canvas.width=g.w*CELL_SCALE; q.canvas.height=g.h*CELL_SCALE;
+            });
+            restoreProgress();
+            document.getElementById('loadingSpinner').style.display='none';
+            updateAllQuads();
+            buildPalette();
+        };
+    }
+
+    function buildPalette(){
+        const container = document.getElementById('paletteContainer');
+        container.innerHTML='';
+        for(let i=1;i<paletteMap.length;i++){
+            const b=document.createElement('button'); b.className='palette-button'; b.style.backgroundColor=paletteMap[i]; b.textContent=i;
+            b.onclick=()=>{ selectedColorIndex=i; document.querySelectorAll('.palette-button').forEach(el=>el.classList.toggle('selected', el.textContent==i)); };
+            container.appendChild(b);
+        }
+    }
+
+    function updateAllQuads(){ quadrants.forEach(q=>drawQuad(q, q.ctx, CELL_SCALE, true)); }
+    function drawQuad(q, ctx, scale, nums){
+        ctx.clearRect(0,0,q.w*scale,q.h*scale);
+        for(let y=q.y;y<q.y+q.h;y++){
+            for(let x=q.x;x<q.x+q.w;x++){
+                const idx=numberGrid[y][x];
+                ctx.fillStyle=completedGrid[y][x]?(idx==0?'#f5f5f5':paletteMap[idx]):'#fff';
+                ctx.fillRect((x-q.x)*scale, (y-q.y)*scale, scale, scale);
+                if(!completedGrid[y][x] && nums && idx!=0){
+                    ctx.fillStyle='#999'; ctx.font='8px sans-serif'; ctx.textAlign='center';
+                    ctx.fillText(idx, (x-q.x)*scale+scale/2, (y-q.y)*scale+scale/2+3);
+                }
+            }
+        }
+    }
+
+    function openZoom(i){
+        currentZoomQuad=quadrants[i];
+        const zoomCanvas = document.getElementById('zoomCanvas');
+        const s=Math.min(window.innerWidth*0.9/(currentZoomQuad.w*CELL_SCALE), 4);
+        zoomCanvas.width=currentZoomQuad.w*CELL_SCALE*s; zoomCanvas.height=currentZoomQuad.h*CELL_SCALE*s;
+        drawQuad(currentZoomQuad, zoomCanvas.getContext('2d'), CELL_SCALE*s, true);
+        document.getElementById('zoomOverlay').style.display='flex';
+    }
+
+    document.getElementById('zoomCanvas').onclick=(e)=>{
+        if(!selectedColorIndex) return;
+        const canvas = e.target; const rect=canvas.getBoundingClientRect();
+        const s=canvas.width/(currentZoomQuad.w*CELL_SCALE);
+        const gx=currentZoomQuad.x+Math.floor((e.clientX-rect.left)/(CELL_SCALE*s*rect.width/canvas.width));
+        const gy=currentZoomQuad.y+Math.floor((e.clientY-rect.top)/(CELL_SCALE*s*rect.height/canvas.height));
+        if(numberGrid[gy][gx]===selectedColorIndex && !completedGrid[gy][gx]){
+            completedGrid[gy][gx]=true; completedCells++;
+            drawQuad(currentZoomQuad, canvas.getContext('2d'), CELL_SCALE*s, true);
+            drawQuad(currentZoomQuad, currentZoomQuad.ctx, CELL_SCALE, true);
+            const p=Math.floor(completedCells/totalCells*100);
+            document.getElementById('progressBar').style.width=p+'%';
+            document.getElementById('progressText').textContent=p+'%';
+            if(p===100){
+                const f=getFullyColoredSet(); f.add(currentStageIndex); localStorage.setItem(LS_FULLY_COLORED, JSON.stringify(Array.from(f)));
+                showModal('완성!', '그림을 완성했습니다!');
+            }
+            const bits=[]; for(let y=0;y<imgHeight;y++) for(let x=0;x<imgWidth;x++) bits.push(completedGrid[y][x]?1:0);
+            localStorage.setItem(progressKey(currentStageIndex), JSON.stringify({w:imgWidth,h:imgHeight,b:bits}));
+        }
+    };
+
+    function restoreProgress(){
+        const p = JSON.parse(localStorage.getItem(progressKey(currentStageIndex)) || '{}');
+        if(p.w===imgWidth && p.h===imgHeight){
+            completedCells=0;
+            for(let y=0;y<imgHeight;y++) for(let x=0;x<imgWidth;x++){
+                completedGrid[y][x]=!!p.b[y*imgWidth+x];
+                if(completedGrid[y][x] && numberGrid[y][x]!=0) completedCells++;
+            }
+            const pct=Math.floor(completedCells/totalCells*100);
+            document.getElementById('progressBar').style.width=pct+'%';
+            document.getElementById('progressText').textContent=pct+'%';
+        }
+    }
+
+    function showModal(t,m){ document.getElementById('modalTitle').textContent=t; document.getElementById('modalMessage').textContent=m; document.getElementById('messageModal').style.display='flex'; }
+    document.getElementById('modalCloseButton').onclick=()=>document.getElementById('messageModal').style.display='none';
+    document.getElementById('zoomCloseBtn').onclick=()=>document.getElementById('zoomOverlay').style.display='none';
+    document.getElementById('backButton').onclick=()=>{ document.getElementById('bookScreen').classList.add('active'); document.getElementById('gameScreen').classList.remove('active'); loadCodexImages(); };
+    document.getElementById('toLobbyBtn').onclick=()=>{ document.getElementById('lobbyScreen').classList.add('active'); document.getElementById('bookScreen').classList.remove('active'); };
+    document.getElementById('lobbyCodexBtn').onclick=()=> { document.getElementById('bookScreen').classList.add('active'); document.getElementById('lobbyScreen').classList.remove('active'); loadCodexImages(); };
+    document.getElementById('toExploreBtn').onclick=()=>window.location.href=INDEX_PATCHED_URL;
+    document.getElementById('lobbyGachaBtn').onclick=()=>window.location.href=INDEX_PATCHED_URL;
+    document.getElementById('startButton').onclick=()=>{ loadCodexImages(); document.getElementById('lobbyScreen').classList.add('active'); document.getElementById('titleScreen').classList.remove('active'); };
+
+    window.onload=()=>{
+        const sp=new URLSearchParams(location.search);
+        if(sp.get('poke')){
+            const id=parseInt(sp.get('poke'));
+            if(getIndexDexSet().has(id)) startGame(`${CODEX_PNG_BASE}${id}.png`, id);
+        }
+    };
+</script>
+</body>
+</html>
