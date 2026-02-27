@@ -165,7 +165,6 @@
             transition: filter 0.3s;
         }
 
-        /* [추가] 색칠되지 않은 이미지 회색조 처리 */
         .card img.uncolored {
             filter: grayscale(1) brightness(0.9);
             opacity: 0.7;
@@ -589,7 +588,6 @@
         ];
 
         allItems.forEach((it, i) => {
-            // 검색 필터
             if (filter && !it.name.toLowerCase().includes(filter.toLowerCase())) return;
 
             const card = document.createElement('div');
@@ -605,12 +603,9 @@
             label.className = 'card-label';
             label.textContent = it.name;
 
-            // [수정된 부분] 색칠 완료 여부에 따른 스타일 적용
             if (fully.has(it.idx)) {
                 card.classList.add('colored');
-                // 컬러 이미지 유지
             } else {
-                // 색칠 미완료 시 회색조 적용
                 img.classList.add('uncolored');
             }
 
@@ -663,8 +658,15 @@
         for (let y = 0; y < imgHeight; y++) {
             for (let x = 0; x < imgWidth; x++) {
                 const done = (bytes[k >> 3] >> (k & 7)) & 1;
-                completedGrid[y][x] = !!done;
-                if (done && numberGrid[y][x] !== 0) completedCells++;
+
+                // [수정] 복원 시에도 1번 색상은 항상 무조건 true 처리
+                if (numberGrid[y][x] === 1) {
+                    completedGrid[y][x] = true;
+                } else {
+                    completedGrid[y][x] = !!done;
+                }
+
+                if (completedGrid[y][x] && numberGrid[y][x] !== 0) completedCells++;
                 k++;
             }
         }
@@ -813,7 +815,15 @@
                         const rgba = `rgba(${r},${g},${b},${a / 255})`;
                         if (!palette[rgba]) { palette[rgba] = colorIndex; paletteMap[colorIndex] = rgba; colorIndex++; }
                         numberGrid[y][x] = palette[rgba];
-                        completedGrid[y][x] = false;
+
+                        // [수정] 1번 색상은 무조건 자동으로 완료 처리
+                        if (palette[rgba] === 1) {
+                            completedGrid[y][x] = true;
+                            completedCells++;
+                        } else {
+                            completedGrid[y][x] = false;
+                        }
+
                         totalCells++;
                     }
                 }
@@ -840,6 +850,10 @@
             loadingSpinner.style.display = 'none';
             updateAllQuads(true);
             buildPaletteUI();
+
+            // 만약 1번 색상밖에 없는 이미지라면 즉시 완성 처리
+            if (completedCells === totalCells) checkCompletion();
+
         } catch (err) {
             console.error(err);
             showModal('오류', err.message + ' 도감으로 돌아갑니다.');
@@ -857,6 +871,14 @@
             btn.style.backgroundColor = color;
             btn.textContent = i;
             btn.dataset.colorIndex = i;
+
+            // [추가] 1번 색상은 처음부터 색이 채워져 있으므로 약간의 투명도로 완료된 느낌을 줄 수 있음
+            if (i === 1) {
+                btn.style.opacity = '0.5';
+                btn.style.cursor = 'default';
+                btn.title = "자동으로 색칠되었습니다.";
+            }
+
             btn.addEventListener('click', () => {
                 selectedColorIndex = i;
                 document.querySelectorAll('.palette-button')
