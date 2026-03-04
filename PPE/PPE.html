@@ -12,6 +12,7 @@
             font-family: 'Jua', sans-serif;
             background-color: #f0fdf4; /* 연한 초록색 배경 */
             touch-action: manipulation; /* 모바일 더블탭 줌 방지 */
+            overflow: hidden; /* 스크롤 방지 */
         }
 
         /* 하트 흔들림 애니메이션 */
@@ -36,7 +37,17 @@
             animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
         }
 
-        /* 별가루 애니메이션 (승리 시) */
+        /* 하트 회복 애니메이션 */
+        @keyframes heal {
+            0% { transform: scale(1); filter: brightness(1); }
+            50% { transform: scale(1.5); filter: brightness(1.5); }
+            100% { transform: scale(1); filter: brightness(1); }
+        }
+        .animate-heal {
+            animation: heal 0.6s ease-out;
+        }
+
+        /* 별가루 애니메이션 */
         @keyframes star-fall {
             0% { transform: translateY(-50px) scale(0); opacity: 1; }
             100% { transform: translateY(100px) scale(1.5); opacity: 0; }
@@ -90,60 +101,108 @@
             border-color: #ef4444 !important;
             opacity: 0.7;
         }
+
+        /* 화면 전환 유틸리티 */
+        .screen {
+            display: none;
+            width: 100%;
+            height: 100%;
+        }
+        .screen.active {
+            display: flex;
+        }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
 
-<!-- 메인 게임 컨테이너 -->
-<div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden border-4 border-green-400 relative">
+<!-- 게임 컨테이너 -->
+<div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden border-4 border-green-400 relative h-[700px] max-h-[90vh]">
 
-    <!-- 상단 상태바 -->
-    <div class="bg-green-100 p-4 flex justify-between items-center border-b-2 border-green-200">
-        <div class="flex flex-col">
-            <span class="text-green-700 text-sm font-bold">연속 정답: <span id="streakDisplay" class="text-xl text-green-600">0</span></span>
+    <!-- ================= 타이틀 화면 ================= -->
+    <div id="titleScreen" class="screen active flex-col items-center justify-center bg-green-50 text-center p-6 relative">
+        <!-- 장식용 하트 -->
+        <div class="absolute top-10 left-10 text-4xl transform -rotate-12 animate-bounce">❤️</div>
+        <div class="absolute top-20 right-10 text-3xl transform rotate-12">💔</div>
+        <div class="absolute bottom-32 left-16 text-2xl text-yellow-400">⭐</div>
+
+        <h1 class="text-4xl sm:text-5xl font-bold text-green-600 mb-2 leading-tight drop-shadow-sm">영단어 팡팡!</h1>
+        <h2 class="text-2xl text-green-500 mb-8 font-bold bg-white px-4 py-1 rounded-full border-2 border-green-200 inline-block shadow-sm">생명력을 지켜라</h2>
+
+        <div class="bg-white p-6 rounded-2xl shadow-md border-2 border-blue-100 w-full mb-8">
+            <p class="text-lg text-gray-500 mb-1">나의 최고 기록</p>
+            <p class="text-4xl text-blue-600 font-bold"><span id="bestStageDisplay">1</span> <span class="text-2xl">스테이지</span></p>
+            <p class="text-sm text-gray-400 mt-2">하트를 지키며 멀리멀리 가보자!</p>
         </div>
-        <!-- 생명력(하트) UI -->
-        <div id="heartsContainer" class="flex gap-1 text-2xl drop-shadow-sm">
-            <!-- JS로 하트가 채워집니다 -->
+
+        <button id="startChallengeBtn" class="w-full max-w-xs bg-green-500 hover:bg-green-600 text-white py-4 rounded-2xl text-2xl font-bold shadow-[0_6px_0_#16a34a] active:translate-y-2 active:shadow-none transition-all flex items-center justify-center gap-2">
+            <span>🚀 도전하기!</span>
+        </button>
+    </div>
+
+    <!-- ================= 메인 게임 화면 ================= -->
+    <div id="gameScreen" class="screen flex-col h-full bg-white relative">
+        <!-- 상단 상태바 -->
+        <div class="bg-green-100 p-4 flex justify-between items-center border-b-2 border-green-200 shrink-0">
+            <div class="flex flex-col">
+                    <span class="bg-green-500 text-white px-3 py-1 rounded-full text-sm font-bold shadow-sm">
+                        스테이지 <span id="currentStageDisplay" class="text-lg">1</span>
+                    </span>
+            </div>
+            <!-- 생명력(하트) UI -->
+            <div id="heartsContainer" class="flex gap-1 text-2xl drop-shadow-sm">
+                <!-- JS로 하트가 채워집니다 -->
+            </div>
+        </div>
+
+        <!-- 문제 영역 -->
+        <div class="p-6 flex flex-col items-center flex-grow">
+            <!-- 주제 태그 -->
+            <div class="inline-block bg-blue-100 text-blue-600 px-4 py-1 rounded-full text-sm mb-4 font-bold shadow-sm border border-blue-200" id="categoryTag">
+                주제
+            </div>
+
+            <!-- 한글 뜻 힌트 -->
+            <div class="h-10 mb-6 flex items-center justify-center w-full">
+                <button id="hintBtn" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-2 rounded-full text-sm shadow-md transition-colors font-bold flex items-center gap-1">
+                    <span>💡 힌트 보기</span>
+                </button>
+                <span id="hintText" class="hidden text-xl text-gray-700 font-bold bg-yellow-100 px-5 py-2 rounded-full border border-yellow-300"></span>
+            </div>
+
+            <!-- 단어 표시 영역 -->
+            <div id="wordContainer" class="flex flex-wrap justify-center gap-2 mb-2 min-h-[4rem]">
+                <!-- JS로 글자 칸이 생성됩니다 -->
+            </div>
+        </div>
+
+        <!-- A-Z 키보드 영역 -->
+        <div class="bg-gray-50 p-4 border-t-2 border-gray-100 pb-6 shrink-0">
+            <div id="keyboardContainer" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+                <!-- JS로 A~Z 버튼이 생성됩니다 -->
+            </div>
         </div>
     </div>
 
-    <!-- 문제 영역 -->
-    <div class="p-6 flex flex-col items-center">
-        <!-- 주제 태그 -->
-        <div class="inline-block bg-blue-100 text-blue-600 px-4 py-1 rounded-full text-sm mb-2 font-bold shadow-sm border border-blue-200" id="categoryTag">
-            주제
-        </div>
+    <!-- ================= 결과 오버레이 (정답/오답 시 표시) ================= -->
+    <div id="resultOverlay" class="absolute inset-0 bg-black/50 hidden flex items-center justify-center backdrop-blur-sm z-50">
+        <div id="resultBox" class="bg-white p-6 rounded-3xl shadow-2xl text-center transform scale-0 transition-transform duration-300 border-4 w-10/12 max-w-sm">
 
-        <!-- 한글 뜻 힌트 (기본은 가려짐, 버튼 누르면 보임) -->
-        <div class="h-8 mb-4 flex items-center justify-center w-full">
-            <button id="hintBtn" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded-full text-sm shadow-md transition-colors font-bold">
-                💡 힌트 보기 (한글 뜻)
-            </button>
-            <span id="hintText" class="hidden text-xl text-gray-700 font-bold bg-yellow-100 px-4 py-1 rounded-full border border-yellow-300"></span>
-        </div>
+            <div id="resultIcon" class="text-6xl mb-2">🎉</div>
+            <h2 id="resultTitle" class="text-3xl mb-1 text-gray-800 font-bold">스테이지 클리어!</h2>
+            <p id="resultWordContainer" class="text-lg text-gray-600 mb-2">정답은 <strong id="resultWord" class="text-green-500 text-2xl">CAT</strong></p>
 
-        <!-- 단어 표시 영역 (_ _ _) -->
-        <div id="wordContainer" class="flex flex-wrap justify-center gap-2 mb-6 min-h-[4rem]">
-            <!-- JS로 글자 칸이 생성됩니다 -->
-        </div>
-    </div>
+            <!-- 하트 회복 메시지 (정답 시에만 보임) -->
+            <div id="healMessage" class="hidden bg-red-50 text-red-500 font-bold py-2 rounded-xl mb-4 border border-red-100 text-sm">
+                💖 생명력 1개 회복!
+            </div>
 
-    <!-- A-Z 키보드 영역 -->
-    <div class="bg-gray-50 p-4 border-t-2 border-gray-100">
-        <div id="keyboardContainer" class="grid grid-cols-7 gap-1.5 sm:gap-2">
-            <!-- JS로 A~Z 버튼이 생성됩니다 -->
-        </div>
-    </div>
+            <!-- 최종 기록 (오답 시에만 보임) -->
+            <div id="finalScoreMessage" class="hidden bg-blue-50 text-blue-600 font-bold py-3 rounded-xl mb-4 border border-blue-100 text-lg">
+                최종 도달: <span id="finalStageNumber">1</span> 스테이지
+            </div>
 
-    <!-- 결과 오버레이 (정답/오답 시 표시) -->
-    <div id="resultOverlay" class="absolute inset-0 bg-black/40 hidden flex items-center justify-center backdrop-blur-sm z-50 rounded-3xl">
-        <div id="resultBox" class="bg-white p-8 rounded-2xl shadow-2xl text-center transform scale-0 transition-transform duration-300 border-4 w-10/12">
-            <div id="resultIcon" class="text-6xl mb-4">🎉</div>
-            <h2 id="resultTitle" class="text-3xl mb-2 text-gray-800">정답!</h2>
-            <p id="resultMessage" class="text-xl text-gray-600 mb-6">정답은 <strong id="resultWord" class="text-green-500 text-2xl">CAT</strong></p>
-            <button id="nextBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-xl font-bold shadow-[0_4px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all">
-                다음 문제 도전!
+            <button id="nextBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl text-xl font-bold shadow-[0_5px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all">
+                다음 스테이지로
             </button>
         </div>
     </div>
@@ -160,55 +219,84 @@
         { word: "FISH", hint_kr: "물고기", category: "🐶 동물", level: 1 },
         { word: "BEAR", hint_kr: "곰", category: "🐶 동물", level: 1 },
         { word: "LION", hint_kr: "사자", category: "🐶 동물", level: 1 },
+        { word: "BIRD", hint_kr: "새", category: "🐶 동물", level: 1 },
         // 음식 (Lv1~2)
         { word: "MILK", hint_kr: "우유", category: "🍔 음식", level: 1 },
         { word: "RICE", hint_kr: "쌀, 밥", category: "🍔 음식", level: 1 },
         { word: "CAKE", hint_kr: "케이크", category: "🍔 음식", level: 1 },
         { word: "APPLE", hint_kr: "사과", category: "🍔 음식", level: 2 },
         { word: "WATER", hint_kr: "물", category: "🍔 음식", level: 2 },
+        { word: "BREAD", hint_kr: "빵", category: "🍔 음식", level: 2 },
         // 학교/물건 (Lv1~2)
         { word: "PEN", hint_kr: "펜", category: "🏫 학교", level: 1 },
         { word: "BOOK", hint_kr: "책", category: "🏫 학교", level: 1 },
         { word: "DESK", hint_kr: "책상", category: "🏫 학교", level: 1 },
         { word: "BAG", hint_kr: "가방", category: "🏫 학교", level: 1 },
+        { word: "ERASER", hint_kr: "지우개", category: "🏫 학교", level: 3 },
         // 색깔/자연 (Lv1~2)
         { word: "RED", hint_kr: "빨간색", category: "🌈 색깔/자연", level: 1 },
         { word: "BLUE", hint_kr: "파란색", category: "🌈 색깔/자연", level: 2 },
         { word: "STAR", hint_kr: "별", category: "🌈 색깔/자연", level: 1 },
         { word: "TREE", hint_kr: "나무", category: "🌈 색깔/자연", level: 1 },
-        { word: "SUN", hint_kr: "태양", category: "🌈 색깔/자연", level: 1 }
+        { word: "SUN", hint_kr: "태양", category: "🌈 색깔/자연", level: 1 },
+        { word: "MOON", hint_kr: "달", category: "🌈 색깔/자연", level: 1 }
     ];
 
     // --- 2. 상태 관리 ---
+    const MAX_LIVES = 5;
     let currentWordObj = null;
     let answerWord = "";
-    let revealedLetters = []; // ['C', null, 'T'] 형태
-    let lives = 5;
-    const MAX_LIVES = 5;
+    let revealedLetters = [];
+    let lives = MAX_LIVES;
     let usedLetters = new Set();
-    let streak = 0;
-    let gameState = 'playing'; // playing, win, lose
+    let currentStage = 1;
+    let gameState = 'title'; // title, playing, roundEnd
+
+    // 최고 기록 불러오기 (로컬 스토리지)
+    let maxStageRecord = localStorage.getItem('kidsHangmanMaxStage') || 1;
 
     // DOM 요소
-    const streakDisplay = document.getElementById('streakDisplay');
+    const screens = {
+        title: document.getElementById('titleScreen'),
+        game: document.getElementById('gameScreen')
+    };
+
+    // 타이틀 요소
+    const bestStageDisplay = document.getElementById('bestStageDisplay');
+    const startChallengeBtn = document.getElementById('startChallengeBtn');
+
+    // 게임 요소
+    const currentStageDisplay = document.getElementById('currentStageDisplay');
     const heartsContainer = document.getElementById('heartsContainer');
     const categoryTag = document.getElementById('categoryTag');
     const wordContainer = document.getElementById('wordContainer');
     const keyboardContainer = document.getElementById('keyboardContainer');
     const hintBtn = document.getElementById('hintBtn');
     const hintText = document.getElementById('hintText');
+
+    // 결과 모달 요소
     const resultOverlay = document.getElementById('resultOverlay');
     const resultBox = document.getElementById('resultBox');
     const resultIcon = document.getElementById('resultIcon');
     const resultTitle = document.getElementById('resultTitle');
-    const resultMessage = document.getElementById('resultMessage');
+    const resultWordContainer = document.getElementById('resultWordContainer');
     const resultWord = document.getElementById('resultWord');
+    const healMessage = document.getElementById('healMessage');
+    const finalScoreMessage = document.getElementById('finalScoreMessage');
+    const finalStageNumber = document.getElementById('finalStageNumber');
     const nextBtn = document.getElementById('nextBtn');
 
-    // --- 3. 간단한 효과음 생성 (Web Audio API) ---
-    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-    function playSound(type) {
+    // --- 3. 오디오 관리 (Web Audio API) ---
+    let audioCtx;
+    function initAudio() {
+        if (!audioCtx) {
+            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        }
         if (audioCtx.state === 'suspended') audioCtx.resume();
+    }
+
+    function playSound(type) {
+        if (!audioCtx) return;
         const osc = audioCtx.createOscillator();
         const gain = audioCtx.createGain();
         osc.connect(gain);
@@ -226,8 +314,8 @@
             osc.stop(now + 0.1);
         } else if (type === 'correct') {
             osc.type = 'triangle';
-            osc.frequency.setValueAtTime(523.25, now); // C5
-            osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+            osc.frequency.setValueAtTime(523.25, now);
+            osc.frequency.setValueAtTime(659.25, now + 0.1);
             gain.gain.setValueAtTime(0.3, now);
             gain.gain.linearRampToValueAtTime(0, now + 0.3);
             osc.start(now);
@@ -240,9 +328,8 @@
             gain.gain.linearRampToValueAtTime(0, now + 0.3);
             osc.start(now);
             osc.stop(now + 0.3);
-        } else if (type === 'win') {
+        } else if (type === 'win') { // 스테이지 클리어
             osc.type = 'square';
-            // 아르페지오 느낌
             [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
                 osc.frequency.setValueAtTime(freq, now + (i * 0.1));
             });
@@ -250,24 +337,44 @@
             gain.gain.linearRampToValueAtTime(0, now + 0.5);
             osc.start(now);
             osc.stop(now + 0.5);
+        } else if (type === 'gameover') { // 게임 오버
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(100, now + 0.8);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.8);
+            osc.start(now);
+            osc.stop(now + 0.8);
         }
     }
 
-    // --- 4. 초기화 및 렌더링 함수 ---
+    // --- 4. 화면 전환 및 렌더링 ---
+    function switchScreen(screenName) {
+        Object.values(screens).forEach(s => s.classList.remove('active'));
+        screens[screenName].classList.add('active');
+    }
+
+    function updateBestRecord() {
+        if (currentStage > maxStageRecord) {
+            maxStageRecord = currentStage;
+            localStorage.setItem('kidsHangmanMaxStage', maxStageRecord);
+        }
+        bestStageDisplay.textContent = maxStageRecord;
+    }
+
     function initKeyboard() {
         keyboardContainer.innerHTML = '';
         for (let i = 65; i <= 90; i++) {
             const letter = String.fromCharCode(i);
             const btn = document.createElement('button');
             btn.textContent = letter;
-            // 기본 키보드 스타일
             btn.className = `key-btn bg-white border-2 border-gray-200 text-gray-700 font-bold text-xl py-2 rounded-lg`;
             btn.onclick = () => onLetterClick(letter, btn);
             keyboardContainer.appendChild(btn);
         }
     }
 
-    function renderHearts() {
+    function renderHearts(isHeal = false) {
         heartsContainer.innerHTML = '';
         for (let i = 0; i < MAX_LIVES; i++) {
             const heart = document.createElement('span');
@@ -276,31 +383,61 @@
 
             if (i < lives) {
                 heart.textContent = '❤️';
+                // 회복 연출: 가장 마지막에 채워진 하트에 애니메이션 적용
+                if (isHeal && i === lives - 1) {
+                    heart.classList.add('animate-heal');
+                }
             } else {
-                heart.textContent = '🖤'; // 이미 잃은 생명력
+                heart.textContent = '🖤';
+                heart.style.transform = 'scale(0.8)';
+                heart.style.opacity = '0.5';
             }
             heartsContainer.appendChild(heart);
         }
     }
 
-    function startNewRound() {
-        // 초기화
-        usedLetters.clear();
+    function updateWordView() {
+        wordContainer.innerHTML = '';
+        revealedLetters.forEach((char) => {
+            const box = document.createElement('div');
+            box.className = 'letter-box';
+            if (char) {
+                box.textContent = char;
+                box.classList.add('animate-pop');
+            }
+            wordContainer.appendChild(box);
+        });
+    }
+
+    // --- 5. 게임 로직 흐름 ---
+    function startGame() {
+        initAudio();
+        playSound('click');
+
+        // 새 게임 초기화
+        currentStage = 1;
         lives = MAX_LIVES;
+        switchScreen('game');
+        startStage();
+    }
+
+    function startStage() {
         gameState = 'playing';
+        usedLetters.clear();
+
+        // UI 초기화
         hintBtn.classList.remove('hidden');
         hintText.classList.add('hidden');
         resultOverlay.classList.add('hidden');
         resultBox.classList.remove('scale-100');
         resultBox.classList.add('scale-0');
+        currentStageDisplay.textContent = currentStage;
 
-        // 랜덤 단어 선택
+        // 랜덤 단어 선택 (나중에는 스테이지에 따라 난이도 조절 가능)
         currentWordObj = wordsDB[Math.floor(Math.random() * wordsDB.length)];
         answerWord = currentWordObj.word;
         revealedLetters = Array(answerWord.length).fill(null);
 
-        // UI 업데이트
-        streakDisplay.textContent = streak;
         categoryTag.textContent = currentWordObj.category;
         hintText.textContent = `💡 ${currentWordObj.hint_kr}`;
 
@@ -309,20 +446,6 @@
         updateWordView();
     }
 
-    function updateWordView() {
-        wordContainer.innerHTML = '';
-        revealedLetters.forEach((char, index) => {
-            const box = document.createElement('div');
-            box.className = 'letter-box';
-            if (char) {
-                box.textContent = char;
-                box.classList.add('animate-pop'); // 맞춘 글자 등장 애니메이션
-            }
-            wordContainer.appendChild(box);
-        });
-    }
-
-    // --- 5. 게임 로직 ---
     function onLetterClick(letter, btnElement) {
         if (gameState !== 'playing' || usedLetters.has(letter)) return;
 
@@ -331,7 +454,6 @@
 
         let isCorrect = false;
 
-        // 정답 체크 (중복 글자 모두 찾기)
         for (let i = 0; i < answerWord.length; i++) {
             if (answerWord[i] === letter) {
                 revealedLetters[i] = letter;
@@ -357,7 +479,6 @@
         lives--;
         const heartEl = document.getElementById(`heart-${lives}`);
 
-        // 하트 깨짐 연출 ❤️ -> 💔 -> (0.3초 후) 🖤
         if (heartEl) {
             heartEl.textContent = '💔';
             heartEl.classList.add('animate-shake');
@@ -366,7 +487,6 @@
                 if (gameState === 'playing') {
                     heartEl.textContent = '🖤';
                     heartEl.classList.remove('animate-shake');
-                    // 살짝 작아지는 효과 추가
                     heartEl.style.transform = 'scale(0.8)';
                     heartEl.style.opacity = '0.5';
                 }
@@ -374,22 +494,21 @@
         }
 
         if (lives <= 0) {
-            endGame(false);
+            endRound(false);
         }
     }
 
     function checkWinCondition() {
         if (!revealedLetters.includes(null)) {
-            endGame(true);
+            endRound(true);
         }
     }
 
-    // 별가루 파티 이펙트
     function createStarFall() {
-        for(let i=0; i<10; i++) {
+        for(let i=0; i<15; i++) {
             const star = document.createElement('div');
-            star.textContent = '⭐';
-            star.className = 'star';
+            star.textContent = ['⭐', '🌟', '✨'][Math.floor(Math.random()*3)];
+            star.className = 'star text-2xl';
             star.style.left = Math.random() * 100 + '%';
             star.style.top = (Math.random() * 50) + '%';
             star.style.animationDelay = (Math.random() * 0.5) + 's';
@@ -398,61 +517,90 @@
         }
     }
 
-    function endGame(isWin) {
-        gameState = isWin ? 'win' : 'lose';
+    function endRound(isWin) {
+        gameState = 'roundEnd';
+        updateBestRecord();
 
         setTimeout(() => {
             resultOverlay.classList.remove('hidden');
 
-            // 애니메이션 트리거를 위해 약간의 딜레이
             setTimeout(() => {
                 resultBox.classList.remove('scale-0');
                 resultBox.classList.add('scale-100');
             }, 50);
 
+            resultWord.textContent = answerWord;
+
             if (isWin) {
+                // 스테이지 클리어
                 playSound('win');
                 createStarFall();
-                streak++;
+
                 resultIcon.textContent = '🎉';
-                resultTitle.textContent = '정답입니다!';
-                resultTitle.className = 'text-3xl mb-2 text-blue-600 font-bold';
-                resultWord.textContent = answerWord;
-                resultWord.className = 'text-blue-500 text-3xl';
+                resultTitle.textContent = `스테이지 ${currentStage} 클리어!`;
+                resultTitle.className = 'text-3xl mb-1 text-blue-600 font-bold';
                 resultBox.classList.add('border-blue-400');
                 resultBox.classList.remove('border-red-400');
-                nextBtn.textContent = '다음 문제 도전!';
-                nextBtn.className = 'w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-xl font-bold shadow-[0_4px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all';
+
+                finalScoreMessage.classList.add('hidden');
+
+                // 보너스 생명력 (최대치 미만일 때만)
+                if (lives < MAX_LIVES) {
+                    healMessage.classList.remove('hidden');
+                    nextBtn.onclick = () => {
+                        lives++; // 다음 스테이지 시작 시 회복 반영
+                        currentStage++;
+                        playSound('click');
+                        startStage();
+                    };
+                } else {
+                    healMessage.classList.add('hidden');
+                    nextBtn.onclick = () => {
+                        currentStage++;
+                        playSound('click');
+                        startStage();
+                    };
+                }
+
+                nextBtn.textContent = '다음 스테이지로';
+                nextBtn.className = 'w-full bg-blue-500 hover:bg-blue-600 text-white py-4 rounded-xl text-xl font-bold shadow-[0_5px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all mt-2';
+
             } else {
-                streak = 0; // 연속 정답 초기화
+                // 게임 오버
+                playSound('gameover');
+
                 resultIcon.textContent = '😭';
-                resultTitle.textContent = '아깝다!';
-                resultTitle.className = 'text-3xl mb-2 text-red-600 font-bold';
-                resultWord.textContent = answerWord;
-                resultWord.className = 'text-red-500 text-3xl';
+                resultTitle.textContent = '게임 오버';
+                resultTitle.className = 'text-4xl mb-1 text-red-600 font-bold';
                 resultBox.classList.add('border-red-400');
                 resultBox.classList.remove('border-blue-400');
-                nextBtn.textContent = '다시하기';
-                nextBtn.className = 'w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl text-xl font-bold shadow-[0_4px_0_#dc2626] active:translate-y-1 active:shadow-none transition-all';
+
+                healMessage.classList.add('hidden');
+                finalScoreMessage.classList.remove('hidden');
+                finalStageNumber.textContent = currentStage;
+
+                nextBtn.textContent = '메인 화면으로';
+                nextBtn.className = 'w-full bg-red-500 hover:bg-red-600 text-white py-4 rounded-xl text-xl font-bold shadow-[0_5px_0_#dc2626] active:translate-y-1 active:shadow-none transition-all mt-2';
+
+                nextBtn.onclick = () => {
+                    playSound('click');
+                    updateBestRecord();
+                    switchScreen('title');
+                };
             }
-        }, 300);
+        }, 400);
     }
 
-    // --- 6. 이벤트 리스너 ---
+    // --- 6. 초기 이벤트 바인딩 ---
+    bestStageDisplay.textContent = maxStageRecord;
+
+    startChallengeBtn.addEventListener('click', startGame);
+
     hintBtn.addEventListener('click', () => {
         playSound('click');
         hintBtn.classList.add('hidden');
         hintText.classList.remove('hidden');
-        // 힌트 사용 시 페널티를 주려면 여기에 로직 추가 (현재는 초3용이라 페널티 없음)
     });
-
-    nextBtn.addEventListener('click', () => {
-        playSound('click');
-        startNewRound();
-    });
-
-    // 게임 시작
-    startNewRound();
 
 </script>
 </body>
