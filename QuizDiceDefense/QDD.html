@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>다이스 랜덤 퀴즈 디펜스 (v3.3b)</title>
     <link rel="preload"
-          href="https://unluckyidiot16.github.io/WebGames/QuizDiceDefense/QuizPack/quizpack.json?v=20251112"
+          href="https://unluckyidiot16.github.io/WebGames/QuizDiceDefense/QuizPack/quizpack.json"
           as="fetch"
           crossorigin="anonymous">
     <style>
@@ -1001,6 +1001,14 @@
 
     // --- 6. 퀴즈 로직 (HTML UI 제어) ---
     function loadQuiz() {
+        // [FIX] 퀴즈팩 로딩이 아직 완료되지 않았으면 대기 후 재시도
+        if (window.__quizPackReady && typeof window.__quizPackReady.then === 'function') {
+            const p = window.__quizPackReady;
+            window.__quizPackReady = null; // 1회만 대기
+            p.then(() => loadQuiz()).catch(() => loadQuiz());
+            return;
+        }
+
         quizFeedback.textContent = '';
         answerOptionsEl.innerHTML = '';
 
@@ -1073,7 +1081,7 @@
         try {
             if (window.ClassHubBridge &&
                 window.ClassHubBridge.inEmbed &&
-                typeof window.ClassHubBridge.reportAnswer === 'function') {                 
+                typeof window.ClassHubBridge.reportAnswer === 'function') {
                 const q = currentQuiz || {};
                 const totalTime = (typeof q.time === 'number') ? q.time : timeLeft;
                 const spent = (typeof totalTime === 'number')
@@ -1094,7 +1102,7 @@
         } catch (e) {
             console.warn('[QDD] reportAnswer failed', e);
         }
-        
+
         setTimeout(loadQuiz, 1500);
     }
 
@@ -1110,18 +1118,18 @@
                 typeof window.ClassHubBridge.reportAnswer === 'function') {
                 const q = currentQuiz || {};
                 window.ClassHubBridge.reportAnswer({
-                        questionId: q.id || q.questionId || String(
-                            currentQuizIndex >= 0 ? currentQuizIndex : ''
-                        ),
-                        correct: false,
-                        answerIndex: null,
-                        timeMs: null,
+                    questionId: q.id || q.questionId || String(
+                        currentQuizIndex >= 0 ? currentQuizIndex : ''
+                    ),
+                    correct: false,
+                    answerIndex: null,
+                    timeMs: null,
                 });
             }
         } catch (e) {
             console.warn('[QDD] reportAnswer(skip) failed', e);
         }
-        
+
         setTimeout(loadQuiz, 500);
     }
     skipBtn.onclick = skipQuiz;
@@ -1791,11 +1799,11 @@
                 window.ClassHubBridge.inEmbed &&
                 typeof window.ClassHubBridge.reportSummary === 'function') {
                 window.ClassHubBridge.reportSummary({
-                        outcome: "defeat",
-                        wave,
-                        pointsEarned,
-                        totalKnowledgePoints,
-                        timestamp: Date.now(),
+                    outcome: "defeat",
+                    wave,
+                    pointsEarned,
+                    totalKnowledgePoints,
+                    timestamp: Date.now(),
                 });
             }
         } catch (e) {
@@ -1821,11 +1829,11 @@
                 window.ClassHubBridge.inEmbed &&
                 typeof window.ClassHubBridge.reportSummary === 'function') {
                 window.ClassHubBridge.reportSummary({
-                        outcome: "victory",
-                        wave,
-                        pointsEarned,
-                        totalKnowledgePoints,
-                        timestamp: Date.now(),
+                    outcome: "victory",
+                    wave,
+                    pointsEarned,
+                    totalKnowledgePoints,
+                    timestamp: Date.now(),
                 });
             }
         } catch (e) {
@@ -2278,7 +2286,7 @@
             };
         })();
         // === 추가 끝 ===
-        
+
         const qpParam = params.get("qp");     // 전체 URL 지정용
         const packParam = params.get("pack"); // 파일명 지정용 (예: Eng5_9)
 
@@ -2318,7 +2326,7 @@
                 ? raw
                 : (raw && Array.isArray(raw.questions) ? raw.questions : null);
             if (!src) return null;
-            
+
             return src.map((q, idx) => {
                 const question =
                     q.question ||
@@ -2330,7 +2338,7 @@
                     q.choices ||
                     q.answers ||
                     [];
-                
+
                 let answerIndex;
                 if (typeof q.answerIndex === "number") {
                     // v1 quizpack.json 형식 (0-base)
@@ -2341,16 +2349,16 @@
                 } else {
                     answerIndex = 0;
                 }
-                
+
                 return {
                     question,
-                        options,
-                        answer: answerIndex,
-                        difficulty: q.difficulty || "normal",
-                        reward: q.reward || 50,
-                        time: q.time || 15,
+                    options,
+                    answer: answerIndex,
+                    difficulty: q.difficulty || "normal",
+                    reward: q.reward || 50,
+                    time: q.time || 15,
                     // Supabase 쪽 question_id가 있으면 그대로 사용
-                        id: q.id || q.questionId || String(idx),
+                    id: q.id || q.questionId || String(idx),
                 };
             });
         }
@@ -2379,33 +2387,33 @@
                 if (window.ClassHubBridge &&
                     window.ClassHubBridge.inEmbed &&
                     typeof window.ClassHubBridge.onQuizpackReady === 'function') {
-                                       try {
-                                           const qp = await new Promise((resolve) => {
-                                               let done = false;
-                                               const timeout = setTimeout(() => {
-                                                   if (done) return;
-                                                   done = true;
-                                                   console.warn("[QDD] ClassHub quizpack timeout, fallback to network.");
-                                                   resolve(null);
-                                               }, 3000); // 3초 정도 기다린 뒤 네트워크로 폴백
-                                               window.ClassHubBridge.onQuizpackReady((pack) => {
-                                                   if (done) return;
-                                                   done = true;
-                                                   clearTimeout(timeout);
-                                                   resolve(pack);
-                                               });
-                                               // 혹시 game 쪽에서 직접 요청 안 하는 경우 대비
-                                               window.ClassHubBridge.requestQuizpack();
-                                           });
-                                           const normalizedFromHost = qp && normalizeQuizpackForQDD(qp);
-                                           if (normalizedFromHost && normalizedFromHost.length) {
-                                               quizData.splice(0, quizData.length, ...normalizedFromHost);
-                                               console.log("[QDD] QuizPack loaded via ClassHubBridge:", normalizedFromHost.length);
-                                               return;
-                                           }
-                                       } catch (e) {
-                                           console.warn("[QDD] ClassHub quizpack failed, fallback to network.", e);
-                                       }
+                    try {
+                        const qp = await new Promise((resolve) => {
+                            let done = false;
+                            const timeout = setTimeout(() => {
+                                if (done) return;
+                                done = true;
+                                console.warn("[QDD] ClassHub quizpack timeout, fallback to network.");
+                                resolve(null);
+                            }, 3000); // 3초 정도 기다린 뒤 네트워크로 폴백
+                            window.ClassHubBridge.onQuizpackReady((pack) => {
+                                if (done) return;
+                                done = true;
+                                clearTimeout(timeout);
+                                resolve(pack);
+                            });
+                            // 혹시 game 쪽에서 직접 요청 안 하는 경우 대비
+                            window.ClassHubBridge.requestQuizpack();
+                        });
+                        const normalizedFromHost = qp && normalizeQuizpackForQDD(qp);
+                        if (normalizedFromHost && normalizedFromHost.length) {
+                            quizData.splice(0, quizData.length, ...normalizedFromHost);
+                            console.log("[QDD] QuizPack loaded via ClassHubBridge:", normalizedFromHost.length);
+                            return;
+                        }
+                    } catch (e) {
+                        console.warn("[QDD] ClassHub quizpack failed, fallback to network.", e);
+                    }
                 }
                 // 2) ClassHub에서 못 받았으면 기존 네트워크-first 로직
                 try {
@@ -2417,7 +2425,7 @@
                                 .map(k => caches.delete(k))
                         );
                     } catch (_){
-                        
+
                     }
                     const remote = await loadNetworkFirst(QUIZ_PACK_URL);
                     const normalized = normalizeQuizpackForQDD(remote)
@@ -2434,7 +2442,8 @@
             return _ready;
         }
 
-        document.addEventListener("DOMContentLoaded", () => { try { ensureQuizPack(); } catch(_){} });
+        // 전역 프로미스 노출: loadQuiz 등에서 대기 가능
+        window.__quizPackReady = ensureQuizPack();
 
         const __initGame__ = window.initGame;
         if (typeof __initGame__ === "function") {
@@ -2442,6 +2451,16 @@
                 try { await ensureQuizPack(); } catch (_) {}
                 return __initGame__.apply(this, arguments);
             };
+            // [FIX] 이미 바인딩된 버튼 핸들러를 래핑된 initGame으로 재연결
+            const _rebind = () => {
+                const btn = document.getElementById('start-game-btn');
+                if (btn) btn.onclick = window.initGame;
+            };
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', _rebind);
+            } else {
+                _rebind();
+            }
         }
     })();
 </script>
