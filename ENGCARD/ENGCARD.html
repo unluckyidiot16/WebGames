@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>A-Z 알파벳 메모리 배틀</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        :root {
+            --card-scale: 1; /* 카드 크기 조절 변수 */
+        }
+
+        body {
+            font-family: 'Jua', sans-serif;
+            transition: background-color 0.5s ease;
+            overflow-x: hidden;
+            touch-action: manipulation; /* 더블탭 줌 방지 */
+        }
+
+        .card {
+            perspective: 1000px;
+            width: calc(60px * var(--card-scale));
+            aspect-ratio: 2/3;
+            margin: auto;
+        }
+
+        /* 반응형 카드 크기 기본값 */
+        @media (min-width: 768px) {
+            .card { width: calc(80px * var(--card-scale)); }
+        }
+
+        .card-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            text-align: center;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            cursor: pointer;
+        }
+
+        .card.flipped .card-inner {
+            transform: rotateY(180deg);
+        }
+
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-back {
+            background: linear-gradient(135deg, #6366f1 0%, #a855f7 100%);
+            color: white;
+            font-size: calc(1.2rem * var(--card-scale));
+        }
+
+        .card-front {
+            background-color: white;
+            color: #1e1b4b;
+            transform: rotateY(180deg);
+            font-size: calc(1.8rem * var(--card-scale));
+            border: 2px solid #e2e8f0;
+        }
+
+        .matched {
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .player-panel {
+            transition: all 0.3s ease;
+            border: 4px solid transparent;
+        }
+
+        .active-player {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.5);
+        }
+
+        .status-msg {
+            animation: pop 0.5s ease-out forwards;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.5); opacity: 0; }
+            50% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        /* 카드 그리드 컨테이너 최적화 */
+        #board {
+            display: grid;
+            justify-content: center;
+            align-content: center;
+            gap: 10px;
+            padding: 10px;
+        }
+
+        /* 컨트롤 패널 하단 고정 스타일 */
+        .controls-footer {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen flex flex-col">
+
+<!-- 로비 화면 -->
+<div id="lobby" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 bg-opacity-95 p-4">
+    <h1 class="text-5xl md:text-7xl mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-black text-center">A-Z MEMORY</h1>
+    <p class="text-lg md:text-xl mb-12 text-slate-300 text-center px-4">알파벳 순서대로 카드를 찾아 점수를 획득하세요!<br>패드 사용 시 하단 슬라이더로 크기를 조절할 수 있습니다.</p>
+
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-4xl">
+        <button onclick="startGame(1)" class="bg-blue-600 hover:bg-blue-500 p-6 md:p-8 rounded-2xl text-xl md:text-2xl font-bold transition-all transform hover:-translate-y-1">1인 플레이</button>
+        <button onclick="startGame(2)" class="bg-purple-600 hover:bg-purple-500 p-6 md:p-8 rounded-2xl text-xl md:text-2xl font-bold transition-all transform hover:-translate-y-1">2인 배틀</button>
+        <button onclick="startGame(4)" class="bg-pink-600 hover:bg-pink-500 p-6 md:p-8 rounded-2xl text-xl md:text-2xl font-bold transition-all transform hover:-translate-y-1">4인 배틀</button>
+    </div>
+</div>
+
+<!-- 게임 화면 -->
+<div id="game-ui" class="hidden flex-grow flex flex-col overflow-hidden">
+
+    <!-- 상단 목표 및 정보 -->
+    <div class="flex flex-col items-center py-4 bg-black bg-opacity-20">
+        <div id="target-display" class="bg-white text-slate-900 px-6 py-1 md:px-10 md:py-2 rounded-full text-2xl md:text-3xl font-black shadow-lg mb-2">
+            NOW: A
+        </div>
+        <div id="progress-bar" class="flex flex-wrap justify-center gap-1 text-[10px] md:text-xs opacity-70 px-4">
+            <!-- A to Z 스몰 리스트 -->
+        </div>
+    </div>
+
+    <!-- 플레이어 패널 -->
+    <div id="player-container" class="grid gap-2 p-4">
+        <!-- 플레이어 카드들이 여기에 생성됨 -->
+    </div>
+
+    <!-- 보드판 (스크롤 가능 영역) -->
+    <div class="flex-grow overflow-y-auto overflow-x-hidden p-2 flex items-center justify-center">
+        <div id="board">
+            <!-- 카드들이 여기에 생성됨 -->
+        </div>
+    </div>
+
+    <!-- 하단 컨트롤 및 해상도 조정 -->
+    <div class="controls-footer p-4 flex flex-wrap items-center justify-center gap-6">
+        <div class="flex items-center gap-3 bg-white bg-opacity-10 px-4 py-2 rounded-xl">
+            <span class="text-sm font-bold whitespace-nowrap">카드 크기</span>
+            <input type="range" id="scale-slider" min="0.5" max="1.5" step="0.1" value="1"
+                   oninput="adjustScale(this.value)" class="w-24 md:w-40 accent-purple-500">
+        </div>
+
+        <div class="flex gap-2">
+            <button id="hint-btn" onclick="showHint()" class="bg-amber-500 hover:bg-amber-400 px-4 py-2 rounded-lg text-slate-900 font-bold text-sm shadow-md transition-colors">힌트</button>
+            <button onclick="location.reload()" class="bg-slate-700 hover:bg-slate-600 px-4 py-2 rounded-lg text-sm shadow-md transition-colors">포기</button>
+        </div>
+    </div>
+</div>
+
+<!-- 결과 팝업 -->
+<div id="result-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-80 p-4">
+    <div class="bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center border-4 border-purple-500 shadow-2xl">
+        <h2 class="text-4xl font-black mb-6">GAME OVER!</h2>
+        <div id="final-scores" class="space-y-3 mb-8">
+            <!-- 점수 결과 -->
+        </div>
+        <button onclick="location.reload()" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 py-4 rounded-xl text-xl font-bold shadow-lg hover:brightness-110 transition-all">다시 하기</button>
+    </div>
+</div>
+
+<script>
+    const ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+    const PLAYER_COLORS = [
+        { name: 'P1', bg: '#1e3a8a', border: '#3b82f6' },
+        { name: 'P2', bg: '#701a75', border: '#d946ef' },
+        { name: 'P3', bg: '#065f46', border: '#10b981' },
+        { name: 'P4', bg: '#92400e', border: '#f59e0b' }
+    ];
+
+    let state = {
+        playerCount: 1,
+        players: [],
+        currentPlayerIndex: 0,
+        targetLetterIndex: 0,
+        deck: [],
+        selectedIndices: [],
+        stashedPairs: 0,
+        isProcessing: false,
+        cardsRemaining: 0
+    };
+
+    // 해상도 조절 함수
+    function adjustScale(val) {
+        document.documentElement.style.setProperty('--card-scale', val);
+        // 카드 크기 변경 후 그리드 재정렬이 필요할 수 있음
+        renderBoard();
+    }
+
+    function startGame(count) {
+        state.playerCount = count;
+        document.getElementById('lobby').classList.add('hidden');
+        document.getElementById('game-ui').classList.remove('hidden');
+
+        initPlayers();
+        initDeck();
+        updateUI();
+
+        // 기기 해상도에 따른 자동 스케일 조정 (옵션)
+        if (window.innerWidth > 1024) adjustScale(1.2);
+        else if (window.innerWidth < 640) adjustScale(0.8);
+
+        showAllCardsBriefly(2500);
+    }
+
+    function initPlayers() {
+        const container = document.getElementById('player-container');
+        container.innerHTML = '';
+
+        if (state.playerCount === 1) container.className = "grid grid-cols-1 max-w-xs mx-auto";
+        else if (state.playerCount === 2) container.className = "grid grid-cols-2 max-w-2xl mx-auto";
+        else container.className = "grid grid-cols-2 md:grid-cols-4 max-w-6xl mx-auto";
+
+        state.players = [];
+        for (let i = 0; i < state.playerCount; i++) {
+            state.players.push({ id: i, score: 0, name: `Player ${i + 1}` });
+
+            const panel = document.createElement('div');
+            panel.id = `player-panel-${i}`;
+            panel.className = `player-panel p-3 rounded-xl bg-slate-800 bg-opacity-50 flex flex-col items-center`;
+            panel.innerHTML = `
+                    <div class="text-[10px] font-bold opacity-70">${PLAYER_COLORS[i].name}</div>
+                    <div class="text-2xl font-black" id="p-score-${i}">0</div>
+                    <div class="text-[10px] mt-1" id="p-stash-${i}">Stash: 0</div>
+                    <div id="p-feedback-${i}" class="h-4 text-[10px] font-bold mt-1"></div>
+                `;
+            container.appendChild(panel);
+        }
+
+        const prog = document.getElementById('progress-bar');
+        prog.innerHTML = ALPHABET.map(l => `<span id="prog-${l}" class="px-0.5">${l}</span>`).join('');
+    }
+
+    function initDeck() {
+        const copies = state.playerCount === 4 ? 4 : 2;
+        let cards = [];
+
+        ALPHABET.forEach((letter) => {
+            for (let i = 0; i < copies; i++) {
+                cards.push({
+                    letter: letter,
+                    id: `${letter}-${i}`,
+                    isMatched: false,
+                    isFlipped: false
+                });
+            }
+        });
+
+        state.deck = cards.sort(() => Math.random() - 0.5);
+        state.cardsRemaining = state.deck.length;
+        renderBoard();
+    }
+
+    function renderBoard() {
+        const board = document.getElementById('board');
+        board.innerHTML = '';
+
+        // 화면 너비와 카드 크기에 따른 동적 열 계산
+        const cardWidth = 60 * parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--card-scale'));
+        const containerWidth = window.innerWidth - 40;
+        let cols = Math.floor(containerWidth / (cardWidth + 10));
+
+        // 최소/최대 열 제한
+        if (state.playerCount === 4) cols = Math.max(8, Math.min(cols, 13));
+        else cols = Math.max(4, Math.min(cols, 9));
+
+        board.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+
+        state.deck.forEach((card, index) => {
+            const cardEl = document.createElement('div');
+            cardEl.id = `card-${index}`;
+            cardEl.className = `card ${card.isMatched ? 'matched' : ''} ${card.isFlipped ? 'flipped' : ''}`;
+            cardEl.innerHTML = `
+                    <div class="card-inner" onclick="handleCardClick(${index})">
+                        <div class="card-back">?</div>
+                        <div class="card-front">${card.letter}</div>
+                    </div>
+                `;
+            board.appendChild(cardEl);
+        });
+    }
+
+    async function handleCardClick(index) {
+        if (state.isProcessing) return;
+        if (state.deck[index].isMatched || state.deck[index].isFlipped) return;
+        if (state.selectedIndices.length >= 2) return;
+
+        state.deck[index].isFlipped = true;
+        state.selectedIndices.push(index);
+        updateCardVisuals();
+
+        if (state.selectedIndices.length === 2) {
+            state.isProcessing = true;
+            setTimeout(checkMatch, 800);
+        }
+    }
+
+    function checkMatch() {
+        const [idx1, idx2] = state.selectedIndices;
+        const card1 = state.deck[idx1];
+        const card2 = state.deck[idx2];
+        const targetLetter = ALPHABET[state.targetLetterIndex];
+
+        if (card1.letter === targetLetter && card2.letter === targetLetter) {
+            handleSuccess(idx1, idx2);
+        } else {
+            handleFailure(idx1, idx2);
+        }
+
+        state.selectedIndices = [];
+        state.isProcessing = false;
+    }
+
+    function handleSuccess(idx1, idx2) {
+        state.deck[idx1].isMatched = true;
+        state.deck[idx2].isMatched = true;
+        state.cardsRemaining -= 2;
+        state.stashedPairs++;
+
+        showFeedback("NICE! +1", true);
+
+        const remainingOfThisLetter = state.deck.filter(c => c.letter === ALPHABET[state.targetLetterIndex] && !c.isMatched).length;
+        if (remainingOfThisLetter === 0) {
+            state.targetLetterIndex++;
+        }
+
+        updateCardVisuals();
+        updateUI();
+
+        if (state.cardsRemaining === 0 || state.targetLetterIndex >= 26) {
+            setTimeout(endGame, 1000);
+        }
+    }
+
+    function handleFailure(idx1, idx2) {
+        state.deck[idx1].isFlipped = false;
+        state.deck[idx2].isFlipped = false;
+
+        showFeedback("OOPS!", false);
+
+        state.players[state.currentPlayerIndex].score += state.stashedPairs;
+        state.stashedPairs = 0;
+
+        setTimeout(() => {
+            updateCardVisuals();
+            if (state.playerCount > 1) {
+                state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.playerCount;
+            }
+            updateUI();
+        }, 500);
+    }
+
+    function updateCardVisuals() {
+        state.deck.forEach((card, index) => {
+            const el = document.getElementById(`card-${index}`);
+            if (!el) return;
+            if (card.isFlipped) el.classList.add('flipped');
+            else el.classList.remove('flipped');
+
+            if (card.isMatched) el.classList.add('matched');
+        });
+    }
+
+    function updateUI() {
+        const currentPlayer = state.players[state.currentPlayerIndex];
+        const colorInfo = PLAYER_COLORS[state.currentPlayerIndex];
+
+        document.body.style.backgroundColor = colorInfo.bg;
+
+        state.players.forEach((p, i) => {
+            const panel = document.getElementById(`player-panel-${i}`);
+            const scoreEl = document.getElementById(`p-score-${i}`);
+            const stashEl = document.getElementById(`p-stash-${i}`);
+
+            scoreEl.innerText = p.score;
+
+            if (i === state.currentPlayerIndex) {
+                panel.classList.add('active-player');
+                panel.classList.remove('bg-opacity-50');
+                panel.style.borderColor = PLAYER_COLORS[i].border;
+                stashEl.innerText = `이번 턴: ${state.stashedPairs}`;
+                stashEl.classList.add('text-yellow-300', 'font-bold');
+            } else {
+                panel.classList.remove('active-player');
+                panel.classList.add('bg-opacity-50');
+                panel.style.borderColor = 'transparent';
+                stashEl.innerText = `점수: ${p.score}`;
+                stashEl.classList.remove('text-yellow-300', 'font-bold');
+            }
+        });
+
+        const targetEl = document.getElementById('target-display');
+        if (state.targetLetterIndex < 26) {
+            const target = ALPHABET[state.targetLetterIndex];
+            targetEl.innerText = `NOW: ${target}`;
+
+            ALPHABET.forEach(l => {
+                const el = document.getElementById(`prog-${l}`);
+                if (!el) return;
+                if (l === target) {
+                    el.className = "text-white font-bold text-sm scale-125 transition-transform opacity-100";
+                } else if (ALPHABET.indexOf(l) < state.targetLetterIndex) {
+                    el.className = "text-green-400 line-through opacity-30";
+                } else {
+                    el.className = "opacity-30";
+                }
+            });
+        } else {
+            targetEl.innerText = "FINISH!";
+        }
+    }
+
+    function showFeedback(text, isPositive) {
+        const feedbackEl = document.getElementById(`p-feedback-${state.currentPlayerIndex}`);
+        if (!feedbackEl) return;
+        feedbackEl.innerText = text;
+        feedbackEl.className = `h-4 text-[10px] font-bold mt-1 status-msg ${isPositive ? 'text-green-400' : 'text-red-400'}`;
+
+        setTimeout(() => {
+            feedbackEl.innerText = "";
+        }, 1000);
+    }
+
+    function showAllCardsBriefly(ms) {
+        state.isProcessing = true;
+        state.deck.forEach((c, i) => {
+            document.getElementById(`card-${i}`).classList.add('flipped');
+        });
+
+        setTimeout(() => {
+            state.deck.forEach((c, i) => {
+                if (!c.isMatched) document.getElementById(`card-${i}`).classList.remove('flipped');
+            });
+            state.isProcessing = false;
+        }, ms);
+    }
+
+    function showHint() {
+        if (state.isProcessing) return;
+        const target = ALPHABET[state.targetLetterIndex];
+        const hintCardIdx = state.deck.findIndex(c => c.letter === target && !c.isMatched && !c.isFlipped);
+
+        if (hintCardIdx !== -1) {
+            const el = document.getElementById(`card-${hintCardIdx}`);
+            el.classList.add('flipped');
+            state.isProcessing = true;
+            setTimeout(() => {
+                el.classList.remove('flipped');
+                state.isProcessing = false;
+            }, 1000);
+        }
+    }
+
+    function endGame() {
+        state.players[state.currentPlayerIndex].score += state.stashedPairs;
+
+        const modal = document.getElementById('result-modal');
+        const scoreContainer = document.getElementById('final-scores');
+        modal.classList.remove('hidden');
+
+        const sortedPlayers = [...state.players].sort((a, b) => b.score - a.score);
+
+        scoreContainer.innerHTML = sortedPlayers.map((p, i) => `
+                <div class="flex justify-between items-center bg-slate-700 p-4 rounded-xl ${i === 0 ? 'ring-2 ring-yellow-400' : ''}">
+                    <span class="text-xl font-bold">${i === 0 ? '👑' : ''} ${p.name}</span>
+                    <span class="text-2xl font-black">${p.score}</span>
+                </div>
+            `).join('');
+    }
+
+    // 반응형 그리드 재계산
+    window.addEventListener('resize', () => {
+        if (state.deck.length > 0) renderBoard();
+    });
+</script>
+</body>
+</html>
