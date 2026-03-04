@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>영단어 팡팡! 생명력을 지켜라</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #f0fdf4; /* 연한 초록색 배경 */
+            touch-action: manipulation; /* 모바일 더블탭 줌 방지 */
+        }
+
+        /* 하트 흔들림 애니메이션 */
+        @keyframes shake {
+            0%, 100% { transform: translateX(0) rotate(0); }
+            20% { transform: translateX(-4px) rotate(-10deg); }
+            40% { transform: translateX(4px) rotate(10deg); }
+            60% { transform: translateX(-4px) rotate(-10deg); }
+            80% { transform: translateX(4px) rotate(10deg); }
+        }
+        .animate-shake {
+            animation: shake 0.4s ease-in-out;
+        }
+
+        /* 팝 애니메이션 (정답 시) */
+        @keyframes pop {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop {
+            animation: pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* 별가루 애니메이션 (승리 시) */
+        @keyframes star-fall {
+            0% { transform: translateY(-50px) scale(0); opacity: 1; }
+            100% { transform: translateY(100px) scale(1.5); opacity: 0; }
+        }
+        .star {
+            position: absolute;
+            color: #fbbf24;
+            animation: star-fall 1s ease-out forwards;
+        }
+
+        /* 글자 칸 스타일 */
+        .letter-box {
+            width: 3rem;
+            height: 3.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border-bottom: 4px solid #4ade80;
+            color: #1f2937;
+            text-transform: uppercase;
+            margin: 0 0.2rem;
+            background: white;
+            border-radius: 0.5rem 0.5rem 0 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        /* A-Z 버튼 스타일 */
+        .key-btn {
+            transition: all 0.1s;
+            box-shadow: 0 4px 0 #cbd5e1;
+        }
+        .key-btn:active:not(:disabled) {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 #cbd5e1;
+        }
+        .key-btn:disabled {
+            box-shadow: none;
+            transform: translateY(2px);
+            cursor: not-allowed;
+        }
+        .key-correct {
+            background-color: #4ade80 !important;
+            color: white !important;
+            border-color: #22c55e !important;
+        }
+        .key-wrong {
+            background-color: #f87171 !important;
+            color: white !important;
+            border-color: #ef4444 !important;
+            opacity: 0.7;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+<!-- 메인 게임 컨테이너 -->
+<div class="bg-white rounded-3xl shadow-xl w-full max-w-md overflow-hidden border-4 border-green-400 relative">
+
+    <!-- 상단 상태바 -->
+    <div class="bg-green-100 p-4 flex justify-between items-center border-b-2 border-green-200">
+        <div class="flex flex-col">
+            <span class="text-green-700 text-sm font-bold">연속 정답: <span id="streakDisplay" class="text-xl text-green-600">0</span></span>
+        </div>
+        <!-- 생명력(하트) UI -->
+        <div id="heartsContainer" class="flex gap-1 text-2xl drop-shadow-sm">
+            <!-- JS로 하트가 채워집니다 -->
+        </div>
+    </div>
+
+    <!-- 문제 영역 -->
+    <div class="p-6 flex flex-col items-center">
+        <!-- 주제 태그 -->
+        <div class="inline-block bg-blue-100 text-blue-600 px-4 py-1 rounded-full text-sm mb-2 font-bold shadow-sm border border-blue-200" id="categoryTag">
+            주제
+        </div>
+
+        <!-- 한글 뜻 힌트 (기본은 가려짐, 버튼 누르면 보임) -->
+        <div class="h-8 mb-4 flex items-center justify-center w-full">
+            <button id="hintBtn" class="bg-yellow-400 hover:bg-yellow-500 text-white px-4 py-1 rounded-full text-sm shadow-md transition-colors font-bold">
+                💡 힌트 보기 (한글 뜻)
+            </button>
+            <span id="hintText" class="hidden text-xl text-gray-700 font-bold bg-yellow-100 px-4 py-1 rounded-full border border-yellow-300"></span>
+        </div>
+
+        <!-- 단어 표시 영역 (_ _ _) -->
+        <div id="wordContainer" class="flex flex-wrap justify-center gap-2 mb-6 min-h-[4rem]">
+            <!-- JS로 글자 칸이 생성됩니다 -->
+        </div>
+    </div>
+
+    <!-- A-Z 키보드 영역 -->
+    <div class="bg-gray-50 p-4 border-t-2 border-gray-100">
+        <div id="keyboardContainer" class="grid grid-cols-7 gap-1.5 sm:gap-2">
+            <!-- JS로 A~Z 버튼이 생성됩니다 -->
+        </div>
+    </div>
+
+    <!-- 결과 오버레이 (정답/오답 시 표시) -->
+    <div id="resultOverlay" class="absolute inset-0 bg-black/40 hidden flex items-center justify-center backdrop-blur-sm z-50 rounded-3xl">
+        <div id="resultBox" class="bg-white p-8 rounded-2xl shadow-2xl text-center transform scale-0 transition-transform duration-300 border-4 w-10/12">
+            <div id="resultIcon" class="text-6xl mb-4">🎉</div>
+            <h2 id="resultTitle" class="text-3xl mb-2 text-gray-800">정답!</h2>
+            <p id="resultMessage" class="text-xl text-gray-600 mb-6">정답은 <strong id="resultWord" class="text-green-500 text-2xl">CAT</strong></p>
+            <button id="nextBtn" class="w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-xl font-bold shadow-[0_4px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all">
+                다음 문제 도전!
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    // --- 1. 데이터 설계 (단어장) ---
+    const wordsDB = [
+        // 동물 (Lv1)
+        { word: "CAT", hint_kr: "고양이", category: "🐶 동물", level: 1 },
+        { word: "DOG", hint_kr: "강아지", category: "🐶 동물", level: 1 },
+        { word: "PIG", hint_kr: "돼지", category: "🐶 동물", level: 1 },
+        { word: "FISH", hint_kr: "물고기", category: "🐶 동물", level: 1 },
+        { word: "BEAR", hint_kr: "곰", category: "🐶 동물", level: 1 },
+        { word: "LION", hint_kr: "사자", category: "🐶 동물", level: 1 },
+        // 음식 (Lv1~2)
+        { word: "MILK", hint_kr: "우유", category: "🍔 음식", level: 1 },
+        { word: "RICE", hint_kr: "쌀, 밥", category: "🍔 음식", level: 1 },
+        { word: "CAKE", hint_kr: "케이크", category: "🍔 음식", level: 1 },
+        { word: "APPLE", hint_kr: "사과", category: "🍔 음식", level: 2 },
+        { word: "WATER", hint_kr: "물", category: "🍔 음식", level: 2 },
+        // 학교/물건 (Lv1~2)
+        { word: "PEN", hint_kr: "펜", category: "🏫 학교", level: 1 },
+        { word: "BOOK", hint_kr: "책", category: "🏫 학교", level: 1 },
+        { word: "DESK", hint_kr: "책상", category: "🏫 학교", level: 1 },
+        { word: "BAG", hint_kr: "가방", category: "🏫 학교", level: 1 },
+        // 색깔/자연 (Lv1~2)
+        { word: "RED", hint_kr: "빨간색", category: "🌈 색깔/자연", level: 1 },
+        { word: "BLUE", hint_kr: "파란색", category: "🌈 색깔/자연", level: 2 },
+        { word: "STAR", hint_kr: "별", category: "🌈 색깔/자연", level: 1 },
+        { word: "TREE", hint_kr: "나무", category: "🌈 색깔/자연", level: 1 },
+        { word: "SUN", hint_kr: "태양", category: "🌈 색깔/자연", level: 1 }
+    ];
+
+    // --- 2. 상태 관리 ---
+    let currentWordObj = null;
+    let answerWord = "";
+    let revealedLetters = []; // ['C', null, 'T'] 형태
+    let lives = 5;
+    const MAX_LIVES = 5;
+    let usedLetters = new Set();
+    let streak = 0;
+    let gameState = 'playing'; // playing, win, lose
+
+    // DOM 요소
+    const streakDisplay = document.getElementById('streakDisplay');
+    const heartsContainer = document.getElementById('heartsContainer');
+    const categoryTag = document.getElementById('categoryTag');
+    const wordContainer = document.getElementById('wordContainer');
+    const keyboardContainer = document.getElementById('keyboardContainer');
+    const hintBtn = document.getElementById('hintBtn');
+    const hintText = document.getElementById('hintText');
+    const resultOverlay = document.getElementById('resultOverlay');
+    const resultBox = document.getElementById('resultBox');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultMessage = document.getElementById('resultMessage');
+    const resultWord = document.getElementById('resultWord');
+    const nextBtn = document.getElementById('nextBtn');
+
+    // --- 3. 간단한 효과음 생성 (Web Audio API) ---
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    function playSound(type) {
+        if (audioCtx.state === 'suspended') audioCtx.resume();
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        const now = audioCtx.currentTime;
+
+        if (type === 'click') {
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(600, now);
+            osc.frequency.exponentialRampToValueAtTime(800, now + 0.1);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+            osc.start(now);
+            osc.stop(now + 0.1);
+        } else if (type === 'correct') {
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(523.25, now); // C5
+            osc.frequency.setValueAtTime(659.25, now + 0.1); // E5
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === 'wrong') {
+            osc.type = 'sawtooth';
+            osc.frequency.setValueAtTime(300, now);
+            osc.frequency.linearRampToValueAtTime(150, now + 0.3);
+            gain.gain.setValueAtTime(0.3, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.3);
+            osc.start(now);
+            osc.stop(now + 0.3);
+        } else if (type === 'win') {
+            osc.type = 'square';
+            // 아르페지오 느낌
+            [523.25, 659.25, 783.99, 1046.50].forEach((freq, i) => {
+                osc.frequency.setValueAtTime(freq, now + (i * 0.1));
+            });
+            gain.gain.setValueAtTime(0.2, now);
+            gain.gain.linearRampToValueAtTime(0, now + 0.5);
+            osc.start(now);
+            osc.stop(now + 0.5);
+        }
+    }
+
+    // --- 4. 초기화 및 렌더링 함수 ---
+    function initKeyboard() {
+        keyboardContainer.innerHTML = '';
+        for (let i = 65; i <= 90; i++) {
+            const letter = String.fromCharCode(i);
+            const btn = document.createElement('button');
+            btn.textContent = letter;
+            // 기본 키보드 스타일
+            btn.className = `key-btn bg-white border-2 border-gray-200 text-gray-700 font-bold text-xl py-2 rounded-lg`;
+            btn.onclick = () => onLetterClick(letter, btn);
+            keyboardContainer.appendChild(btn);
+        }
+    }
+
+    function renderHearts() {
+        heartsContainer.innerHTML = '';
+        for (let i = 0; i < MAX_LIVES; i++) {
+            const heart = document.createElement('span');
+            heart.id = `heart-${i}`;
+            heart.className = 'transition-all duration-300 inline-block';
+
+            if (i < lives) {
+                heart.textContent = '❤️';
+            } else {
+                heart.textContent = '🖤'; // 이미 잃은 생명력
+            }
+            heartsContainer.appendChild(heart);
+        }
+    }
+
+    function startNewRound() {
+        // 초기화
+        usedLetters.clear();
+        lives = MAX_LIVES;
+        gameState = 'playing';
+        hintBtn.classList.remove('hidden');
+        hintText.classList.add('hidden');
+        resultOverlay.classList.add('hidden');
+        resultBox.classList.remove('scale-100');
+        resultBox.classList.add('scale-0');
+
+        // 랜덤 단어 선택
+        currentWordObj = wordsDB[Math.floor(Math.random() * wordsDB.length)];
+        answerWord = currentWordObj.word;
+        revealedLetters = Array(answerWord.length).fill(null);
+
+        // UI 업데이트
+        streakDisplay.textContent = streak;
+        categoryTag.textContent = currentWordObj.category;
+        hintText.textContent = `💡 ${currentWordObj.hint_kr}`;
+
+        renderHearts();
+        initKeyboard();
+        updateWordView();
+    }
+
+    function updateWordView() {
+        wordContainer.innerHTML = '';
+        revealedLetters.forEach((char, index) => {
+            const box = document.createElement('div');
+            box.className = 'letter-box';
+            if (char) {
+                box.textContent = char;
+                box.classList.add('animate-pop'); // 맞춘 글자 등장 애니메이션
+            }
+            wordContainer.appendChild(box);
+        });
+    }
+
+    // --- 5. 게임 로직 ---
+    function onLetterClick(letter, btnElement) {
+        if (gameState !== 'playing' || usedLetters.has(letter)) return;
+
+        usedLetters.add(letter);
+        btnElement.disabled = true;
+
+        let isCorrect = false;
+
+        // 정답 체크 (중복 글자 모두 찾기)
+        for (let i = 0; i < answerWord.length; i++) {
+            if (answerWord[i] === letter) {
+                revealedLetters[i] = letter;
+                isCorrect = true;
+            }
+        }
+
+        if (isCorrect) {
+            playSound('correct');
+            btnElement.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+            btnElement.classList.add('key-correct');
+            updateWordView();
+            checkWinCondition();
+        } else {
+            playSound('wrong');
+            btnElement.classList.remove('bg-white', 'text-gray-700', 'border-gray-200');
+            btnElement.classList.add('key-wrong');
+            loseLife();
+        }
+    }
+
+    function loseLife() {
+        lives--;
+        const heartEl = document.getElementById(`heart-${lives}`);
+
+        // 하트 깨짐 연출 ❤️ -> 💔 -> (0.3초 후) 🖤
+        if (heartEl) {
+            heartEl.textContent = '💔';
+            heartEl.classList.add('animate-shake');
+
+            setTimeout(() => {
+                if (gameState === 'playing') {
+                    heartEl.textContent = '🖤';
+                    heartEl.classList.remove('animate-shake');
+                    // 살짝 작아지는 효과 추가
+                    heartEl.style.transform = 'scale(0.8)';
+                    heartEl.style.opacity = '0.5';
+                }
+            }, 400);
+        }
+
+        if (lives <= 0) {
+            endGame(false);
+        }
+    }
+
+    function checkWinCondition() {
+        if (!revealedLetters.includes(null)) {
+            endGame(true);
+        }
+    }
+
+    // 별가루 파티 이펙트
+    function createStarFall() {
+        for(let i=0; i<10; i++) {
+            const star = document.createElement('div');
+            star.textContent = '⭐';
+            star.className = 'star';
+            star.style.left = Math.random() * 100 + '%';
+            star.style.top = (Math.random() * 50) + '%';
+            star.style.animationDelay = (Math.random() * 0.5) + 's';
+            resultOverlay.appendChild(star);
+            setTimeout(() => star.remove(), 1000);
+        }
+    }
+
+    function endGame(isWin) {
+        gameState = isWin ? 'win' : 'lose';
+
+        setTimeout(() => {
+            resultOverlay.classList.remove('hidden');
+
+            // 애니메이션 트리거를 위해 약간의 딜레이
+            setTimeout(() => {
+                resultBox.classList.remove('scale-0');
+                resultBox.classList.add('scale-100');
+            }, 50);
+
+            if (isWin) {
+                playSound('win');
+                createStarFall();
+                streak++;
+                resultIcon.textContent = '🎉';
+                resultTitle.textContent = '정답입니다!';
+                resultTitle.className = 'text-3xl mb-2 text-blue-600 font-bold';
+                resultWord.textContent = answerWord;
+                resultWord.className = 'text-blue-500 text-3xl';
+                resultBox.classList.add('border-blue-400');
+                resultBox.classList.remove('border-red-400');
+                nextBtn.textContent = '다음 문제 도전!';
+                nextBtn.className = 'w-full bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-xl text-xl font-bold shadow-[0_4px_0_#2563eb] active:translate-y-1 active:shadow-none transition-all';
+            } else {
+                streak = 0; // 연속 정답 초기화
+                resultIcon.textContent = '😭';
+                resultTitle.textContent = '아깝다!';
+                resultTitle.className = 'text-3xl mb-2 text-red-600 font-bold';
+                resultWord.textContent = answerWord;
+                resultWord.className = 'text-red-500 text-3xl';
+                resultBox.classList.add('border-red-400');
+                resultBox.classList.remove('border-blue-400');
+                nextBtn.textContent = '다시하기';
+                nextBtn.className = 'w-full bg-red-500 hover:bg-red-600 text-white py-3 rounded-xl text-xl font-bold shadow-[0_4px_0_#dc2626] active:translate-y-1 active:shadow-none transition-all';
+            }
+        }, 300);
+    }
+
+    // --- 6. 이벤트 리스너 ---
+    hintBtn.addEventListener('click', () => {
+        playSound('click');
+        hintBtn.classList.add('hidden');
+        hintText.classList.remove('hidden');
+        // 힌트 사용 시 페널티를 주려면 여기에 로직 추가 (현재는 초3용이라 페널티 없음)
+    });
+
+    nextBtn.addEventListener('click', () => {
+        playSound('click');
+        startNewRound();
+    });
+
+    // 게임 시작
+    startNewRound();
+
+</script>
+</body>
+</html>
