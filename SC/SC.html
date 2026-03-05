@@ -146,37 +146,41 @@
     // --- 단어 데이터 (중복 답안 처리를 위해 리스트 보강) ---
     const wordData = {
         1: [
-            {w: "cat", m: "고양이"}, {w: "act", m: "행동하다"}, {w: "dog", m: "개"}, {w: "pig", m: "돼지"},
-            {w: "cow", m: "소"}, {w: "ant", m: "개미"}, {w: "bee", m: "벌"}, {w: "hen", m: "암탉"},
-            {w: "fox", m: "여우"}, {w: "bus", m: "버스"}, {w: "car", m: "자동차"}, {w: "pen", m: "펜"},
-            {w: "cup", m: "컵"}, {w: "bag", m: "가방"}, {w: "box", m: "상자"}, {w: "hat", m: "모자"},
-            {w: "cap", m: "모자"}, {w: "sun", m: "태양"}, {w: "sky", m: "하늘"}, {w: "sea", m: "바다"},
-            {w: "map", m: "지도"}, {w: "bed", m: "침대"}, {w: "key", m: "열쇠"}, {w: "egg", m: "달걀"},
-            {w: "jam", m: "잼"}, {w: "ice", m: "얼음"}, {w: "tea", m: "차"}, {w: "eat", m: "먹다"},
-            {w: "boy", m: "소년"}, {w: "mom", m: "엄마"}, {w: "dad", m: "아빠"}, {w: "ear", m: "귀"},
-            {w: "eye", m: "눈"}, {w: "arm", m: "팔"}, {w: "leg", m: "다리"}, {w: "toy", m: "장난감"},
+            {w: "cat", m: "고양이"}, {w: "act", m: "행동하다"}, {w: "dog", m: "개"}, {w: "god", m: "신"},
+            {w: "pig", m: "돼지"}, {w: "cow", m: "소"}, {w: "ant", m: "개미"}, {w: "tan", m: "황갈색"},
+            {w: "bee", m: "벌"}, {w: "hen", m: "암탉"}, {w: "fox", m: "여우"}, {w: "bus", m: "버스"},
+            {w: "car", m: "자동차"}, {w: "arc", m: "호, 둥근 모양"}, {w: "pen", m: "펜"}, {w: "cup", m: "컵"},
+            {w: "bag", m: "가방"}, {w: "box", m: "상자"}, {w: "hat", m: "모자"}, {w: "cap", m: "모자"},
+            {w: "sun", m: "태양"}, {w: "sky", m: "하늘"}, {w: "sea", m: "바다"}, {w: "map", m: "지도"},
+            {w: "bed", m: "침대"}, {w: "key", m: "열쇠"}, {w: "egg", m: "달걀"}, {w: "jam", m: "잼"},
+            {w: "ice", m: "얼음"}, {w: "tea", m: "차"}, {w: "eat", m: "먹다"}, {w: "ate", m: "먹었다"},
+            {w: "boy", m: "소년"}, {w: "mom", m: "엄마"}, {w: "dad", m: "아빠"}, {w: "add", m: "더하다"},
+            {w: "ear", m: "귀"}, {w: "are", m: "~이다"}, {w: "eye", m: "눈"}, {w: "arm", m: "팔"},
+            {w: "leg", m: "다리"}, {w: "gel", m: "젤"}, {w: "toy", m: "장난감"},
             {w: "was", m: "~였다"}, {w: "saw", m: "보았다"}
         ],
         2: [
             {w: "book", m: "책"}, {w: "desk", m: "책상"}, {w: "milk", m: "우유"}, {w: "fish", m: "물고기"},
             {w: "bird", m: "새"}, {w: "duck", m: "오리"}, {w: "frog", m: "개구리"}, {w: "lion", m: "사자"},
-            {w: "bear", m: "곰"}, {w: "shoe", m: "신발"}, {w: "door", m: "문"}, {w: "tree", m: "나무"},
-            {w: "ball", m: "공"}, {w: "game", m: "게임"}, {w: "hand", m: "손"}, {w: "foot", m: "발"},
-            {w: "face", m: "얼굴"}, {w: "hair", m: "머리카락"}, {w: "nose", m: "코"}, {w: "home", m: "집"},
-            {w: "room", m: "방"}, {w: "town", m: "마을"}, {w: "ship", m: "배"}, {w: "rain", m: "비"},
-            {w: "snow", m: "눈"}, {w: "wind", m: "바람"}, {w: "time", m: "시간"}, {w: "day", m: "날"},
-            {w: "week", m: "주"}, {w: "girl", m: "소녀"}, {w: "red", m: "빨간색"}, {w: "blue", m: "파란색"},
-            {w: "read", m: "읽다"}
+            {w: "bear", m: "곰"}, {w: "bare", m: "벌거벗은"}, {w: "shoe", m: "신발"}, {w: "door", m: "문"},
+            {w: "tree", m: "나무"}, {w: "ball", m: "공"}, {w: "game", m: "게임"}, {w: "hand", m: "손"},
+            {w: "foot", m: "발"}, {w: "face", m: "얼굴"}, {w: "cafe", m: "카페"}, {w: "hair", m: "머리카락"},
+            {w: "nose", m: "코"}, {w: "home", m: "집"}, {w: "room", m: "방"}, {w: "town", m: "마을"},
+            {w: "ship", m: "배"}, {w: "rain", m: "비"}, {w: "snow", m: "눈"}, {w: "wind", m: "바람"},
+            {w: "time", m: "시간"}, {w: "item", m: "물건"}, {w: "day", m: "날"}, {w: "week", m: "주"},
+            {w: "girl", m: "소녀"}, {w: "red", m: "빨간색"}, {w: "blue", m: "파란색"}, {w: "read", m: "읽다"},
+            {w: "dear", m: "친애하는"}
         ],
         3: [
-            {w: "apple", m: "사과"}, {w: "house", m: "집"}, {w: "water", m: "물"}, {w: "bread", m: "빵"},
+            {w: "apple", m: "사과"}, {w: "house", m: "집"}, {w: "water", m: "물"}, {w: "bread", m: "빵"}, {w: "beard", m: "수염"},
             {w: "chair", m: "의자"}, {w: "table", m: "탁자"}, {w: "money", m: "돈"}, {w: "happy", m: "행복한"},
-            {w: "smile", m: "미소"}, {w: "sorry", m: "미안한"}, {w: "hello", m: "안녕"}, {w: "world", m: "세계"},
-            {w: "train", m: "기차"}, {w: "truck", m: "트럭"}, {w: "pizza", m: "피자"}, {w: "juice", m: "주스"},
-            {w: "candy", m: "사탕"}, {w: "music", m: "음악"}, {w: "smart", m: "똑똑한"}, {w: "black", m: "검은색"},
-            {w: "white", m: "흰색"}, {w: "green", m: "초록색"}, {w: "peach", m: "복숭아"}, {w: "grape", m: "포도"},
-            {w: "onion", m: "양파"}, {w: "robot", m: "로봇"}, {w: "story", m: "이야기"}, {w: "sleep", m: "자다"},
-            {w: "drink", m: "마시다"}, {w: "write", m: "쓰다"}, {w: "socks", m: "양말"}
+            {w: "smile", m: "미소"}, {w: "slime", m: "슬라임"}, {w: "miles", m: "거리 단위(마일)"}, {w: "sorry", m: "미안한"},
+            {w: "hello", m: "안녕"}, {w: "world", m: "세계"}, {w: "train", m: "기차"}, {w: "truck", m: "트럭"},
+            {w: "pizza", m: "피자"}, {w: "juice", m: "주스"}, {w: "candy", m: "사탕"}, {w: "music", m: "음악"},
+            {w: "smart", m: "똑똑한"}, {w: "black", m: "검은색"}, {w: "white", m: "흰색"}, {w: "green", m: "초록색"},
+            {w: "peach", m: "복숭아"}, {w: "cheap", m: "값이 싼"}, {w: "grape", m: "포도"}, {w: "onion", m: "양파"},
+            {w: "robot", m: "로봇"}, {w: "story", m: "이야기"}, {w: "sleep", m: "자다"}, {w: "drink", m: "마시다"},
+            {w: "write", m: "쓰다"}, {w: "socks", m: "양말"}
         ]
     };
 
