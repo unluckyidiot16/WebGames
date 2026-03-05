@@ -1,0 +1,875 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ABC 팡!</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Fredoka+One&family=Jua&display=swap');
+
+        :root {
+            --board-size: 8;
+            --tile-size: 11.5vw;
+            --max-tile-size: 55px;
+            --bg-color: #f0f8ff;
+            --text-color: #333;
+            --primary-color: #ff7b80;
+            --secondary-color: #4fc3f7;
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--bg-color);
+            font-family: 'Jua', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: var(--text-color);
+        }
+
+        #game-container {
+            width: 100%;
+            max-width: 500px;
+            height: 100%;
+            position: relative;
+            background: white;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Screens */
+        .screen {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            z-index: 10;
+            transition: opacity 0.3s;
+        }
+        .hidden { display: none !important; opacity: 0; pointer-events: none; }
+
+        /* Title Screen */
+        #screen-title {
+            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+            justify-content: center;
+            align-items: center;
+            color: white;
+            text-align: center;
+        }
+        .game-logo {
+            font-family: 'Fredoka One', cursive;
+            font-size: 4rem;
+            color: #ffeb3b;
+            text-shadow: 3px 3px 0 #ff5722, 6px 6px 0 rgba(0,0,0,0.2);
+            margin-bottom: 20px;
+            animation: bounce 2s infinite;
+        }
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% {transform: translateY(0);}
+            40% {transform: translateY(-30px);}
+            60% {transform: translateY(-15px);}
+        }
+
+        /* Lobby Screen */
+        #screen-lobby {
+            background: #e0f7fa;
+        }
+        .lobby-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            font-size: 2rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        .lobby-grid {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            padding: 20px;
+            align-content: start;
+        }
+        .stage-btn {
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            text-align: center;
+            box-shadow: 0 4px 0 #ccc;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.1s;
+        }
+        .stage-btn:active { transform: translateY(4px); box-shadow: 0 0 0 #ccc; }
+        .stage-btn.locked {
+            background: #bdbdbd;
+            box-shadow: 0 4px 0 #9e9e9e;
+            color: #757575;
+            cursor: not-allowed;
+        }
+        .stage-btn.locked:active { transform: none; box-shadow: 0 4px 0 #9e9e9e; }
+        .stage-num { font-size: 1.5rem; font-family: 'Fredoka One', cursive; }
+        .stage-stars { font-size: 0.8rem; color: #ffc107; margin-top: 5px; height: 15px; }
+
+        /* Game Screen */
+        #screen-game {
+            background: white;
+        }
+
+        /* Top HUD */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 20px;
+            background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 100%);
+            color: white;
+            font-size: 1.2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+            border-bottom: 4px solid #ff7b80;
+        }
+        .hud-box { display: flex; flex-direction: column; align-items: center; }
+        .hud-value { font-size: 1.6rem; font-family: 'Fredoka One', cursive; }
+        .hud-moves { color: #ffeb3b; font-size: 2rem; }
+
+        #progress-container { width: 100%; height: 10px; background: #eee; }
+        #progress-bar { height: 100%; width: 0%; background: #4caf50; transition: width 0.3s; }
+
+        /* Board Area */
+        #board-wrapper {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #e0f7fa;
+            padding: 10px;
+            position: relative;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(var(--board-size), 1fr);
+            grid-template-rows: repeat(var(--board-size), 1fr);
+            gap: 2px;
+            background-color: rgba(255, 255, 255, 0.5);
+            padding: 4px;
+            border-radius: 12px;
+            width: calc(var(--tile-size) * var(--board-size));
+            height: calc(var(--tile-size) * var(--board-size));
+            max-width: calc(var(--max-tile-size) * var(--board-size));
+            max-height: calc(var(--max-tile-size) * var(--board-size));
+            position: relative;
+        }
+
+        .tile {
+            width: 100%;
+            height: 100%;
+            background-color: #fff;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Fredoka One', cursive;
+            font-size: clamp(20px, 6vw, 32px);
+            cursor: pointer;
+            box-shadow: 0 4px 0 #ccc;
+            transition: transform 0.2s, background-color 0.2s;
+            position: relative;
+            z-index: 1;
+        }
+        .tile:active { transform: translateY(4px); box-shadow: 0 0 0 #ccc; }
+        .tile.selected { border: 3px solid #ff5722; transform: scale(1.1); z-index: 10; }
+
+        /* Special Tiles styling */
+        .tile.special-h::after, .tile.special-v::after {
+            content: ''; position: absolute; background: rgba(255, 255, 0, 0.5); z-index: -1;
+        }
+        .tile.special-h::after { width: 120%; height: 20%; }
+        .tile.special-v::after { width: 20%; height: 120%; }
+        .tile.special-bomb {
+            background: radial-gradient(circle, #ffeb3b, #ff9800);
+            color: white; text-shadow: 1px 1px 0 #000; border: 2px solid #f44336;
+        }
+        .tile.empty { background-color: transparent; box-shadow: none; cursor: default; }
+
+        /* Overlays (Intro, Result) */
+        .overlay {
+            position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            color: white; z-index: 100; text-align: center; padding: 20px;
+        }
+
+        .btn {
+            background: #ffeb3b; color: #d32f2f; border: none;
+            padding: 15px 30px; font-size: 1.5rem; font-family: 'Jua', sans-serif;
+            border-radius: 30px; margin: 10px; cursor: pointer;
+            box-shadow: 0 5px 0 #fbc02d; transition: transform 0.1s;
+        }
+        .btn:active { transform: translateY(5px); box-shadow: none; }
+        .btn-blue { background: #4fc3f7; color: white; box-shadow: 0 5px 0 #0288d1; }
+
+        .stage-title { font-size: 3rem; margin-bottom: 10px; color: #ffeb3b; }
+        .stage-desc { font-size: 1.5rem; margin-bottom: 20px; line-height: 1.5; }
+        .alphabet-pool {
+            font-size: 2rem; color: #4fc3f7; font-family: 'Fredoka One', cursive;
+            letter-spacing: 2px; background: rgba(255,255,255,0.2);
+            padding: 10px 20px; border-radius: 10px;
+        }
+
+        .result-stars { font-size: 3rem; color: #ffc107; margin-bottom: 20px; letter-spacing: 5px;}
+        .result-score { font-size: 2rem; margin-bottom: 30px; font-family: 'Fredoka One', cursive;}
+
+        /* Floating Text */
+        .floating-text {
+            position: absolute; color: #ffeb3b; font-size: 2rem;
+            font-family: 'Fredoka One', cursive; text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none; animation: floatUp 1s ease-out forwards; z-index: 50;
+        }
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(1); opacity: 1; }
+            100% { transform: translateY(-50px) scale(1.5); opacity: 0; }
+        }
+
+        /* Top Left Lobby Button in Game */
+        #btn-back-lobby {
+            position: absolute; top: 15px; left: 20px; z-index: 20;
+            background: rgba(255,255,255,0.3); border: none; color: white;
+            padding: 5px 10px; border-radius: 10px; cursor: pointer; font-family: 'Jua', sans-serif;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+
+    <!-- Title Screen -->
+    <div id="screen-title" class="screen">
+        <div class="game-logo">ABC 팡!</div>
+        <p style="font-size: 1.5rem; margin-bottom: 40px;">알파벳 매치 퍼즐</p>
+        <button class="btn" id="btn-start-title">게임 시작</button>
+    </div>
+
+    <!-- Lobby Screen -->
+    <div id="screen-lobby" class="screen hidden">
+        <div class="lobby-header">스테이지 선택</div>
+        <div class="lobby-grid" id="lobby-grid">
+            <!-- 스테이지 버튼들이 JS로 생성됨 -->
+        </div>
+    </div>
+
+    <!-- Game Screen -->
+    <div id="screen-game" class="screen hidden">
+        <button id="btn-back-lobby">로비로</button>
+        <div id="hud">
+            <div class="hud-box" style="margin-left: 60px;">
+                <span>STAGE</span>
+                <span class="hud-value" id="stage-display">1</span>
+            </div>
+            <div class="hud-box">
+                <span>SCORE</span>
+                <span class="hud-value" id="score-display">0</span>
+                <span style="font-size:0.8rem">/ <span id="target-display">2000</span></span>
+            </div>
+            <div class="hud-box">
+                <span>MOVES</span>
+                <span class="hud-value hud-moves" id="moves-display">15</span>
+            </div>
+        </div>
+        <div id="progress-container">
+            <div id="progress-bar"></div>
+        </div>
+        <div id="board-wrapper">
+            <div id="board"></div>
+        </div>
+    </div>
+
+    <!-- Intro Overlay -->
+    <div id="screen-stage-intro" class="overlay hidden">
+        <h1 class="stage-title" id="intro-stage-num">Stage 1</h1>
+        <p class="stage-desc">이번 판에 나오는 알파벳!</p>
+        <div class="alphabet-pool" id="intro-pool">A - C</div>
+        <p class="stage-desc" style="margin-top:20px; color:#ffcc80;" id="intro-mission">목표: 2000점 / 남은 횟수: 15</p>
+    </div>
+
+    <!-- Result Overlay -->
+    <div id="screen-result" class="overlay hidden">
+        <h1 class="stage-title" id="result-title">Stage Clear!</h1>
+        <div class="result-stars" id="result-stars">⭐⭐⭐</div>
+        <p class="stage-desc" id="result-desc">잘했어요!</p>
+        <div class="result-score" id="result-score">Score: 2500</div>
+
+        <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+            <button class="btn btn-blue" id="btn-result-lobby">로비로</button>
+            <button class="btn" id="btn-result-next">다음 스테이지</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    /**
+     * ABC팡 V2 - 횟수 제한 & 로비 & 무한콤보 방지 시스템 적용
+     */
+
+// 1~30 스테이지 기획 데이터 (시간 대신 moves 횟수로 변경)
+    const STAGE_DATA = [
+        { target: 2000, moves: 15, pool: "ABC" },
+        { target: 2400, moves: 16, pool: "ABCD" },
+        { target: 2800, moves: 17, pool: "ABCDE" },
+        { target: 3200, moves: 18, pool: "ABCDEF" },
+        { target: 3800, moves: 19, pool: "ABCDEF" },
+        { target: 4200, moves: 20, pool: "ABCDEFG" },
+        { target: 4700, moves: 21, pool: "ABCDEFGH" },
+        { target: 5200, moves: 22, pool: "ABCDEFGHI" },
+        { target: 5800, moves: 23, pool: "ABCDEFGHIJ" },
+        { target: 6500, moves: 24, pool: "ABCDEFGHIJ" },
+        { target: 7200, moves: 25, pool: "ABCDEFGHIJK" },
+        { target: 8000, moves: 25, pool: "ABCDEFGHIJKL" },
+        { target: 8800, moves: 26, pool: "ABCDEFGHIJKLM" },
+        { target: 9700, moves: 26, pool: "ABCDEFGHIJKLMN" },
+        { target: 10800, moves: 27, pool: "ABCDEFGHIJKLMN" },
+        { target: 11800, moves: 27, pool: "ABCDEFGHIJKLMNO" },
+        { target: 13000, moves: 28, pool: "ABCDEFGHIJKLMNOP" },
+        { target: 14300, moves: 28, pool: "ABCDEFGHIJKLMNOPQ" },
+        { target: 15700, moves: 29, pool: "ABCDEFGHIJKLMNOPQR" },
+        { target: 17500, moves: 29, pool: "ABCDEFGHIJKLMNOPQRST" },
+        { target: 19000, moves: 30, pool: "ABCDEFGHIJKLMNOPQRSTU" },
+        { target: 20800, moves: 30, pool: "ABCDEFGHIJKLMNOPQRSTUV" },
+        { target: 22800, moves: 31, pool: "ABCDEFGHIJKLMNOPQRSTUVW" },
+        { target: 25000, moves: 32, pool: "ABCDEFGHIJKLMNOPQRSTUVWX" },
+        { target: 28000, moves: 33, pool: "ABCDEFGHIJKLMNOPQRSTUVWXYZ" },
+        // 26~30 스테이지: 대소문자 혼합
+        { target: 30000, moves: 35, pool: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", mixCase: true },
+        { target: 33000, moves: 35, pool: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", mixCase: true },
+        { target: 36500, moves: 36, pool: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", mixCase: true },
+        { target: 40500, moves: 38, pool: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", mixCase: true },
+        { target: 45000, moves: 40, pool: "ABCDEFGHIJKLMNOPQRSTUVWXYZ", mixCase: true }
+    ];
+
+    const BOARD_SIZE = 8;
+    const TILE_TYPES = { NORMAL: 0, LINE_H: 1, LINE_V: 2, BOMB: 3 };
+
+    // 유저 진행 데이터
+    let unlockedStageIndex = 0; // 0번(스테이지1)부터 시작
+    let stageStars = new Array(30).fill(0); // 0: 클리어 못함, 1~3: 별 개수
+
+    // 게임 상태
+    let currentStageIndex = 0;
+    let score = 0;
+    let movesLeft = 0;
+    let board = [];
+    let isAnimating = false;
+    let selectedTile = null;
+    let currentPool = [];
+    let comboCount = 0;
+
+    // DOM Elements
+    const elTitle = document.getElementById('screen-title');
+    const elLobby = document.getElementById('screen-lobby');
+    const elGame = document.getElementById('screen-game');
+    const elLobbyGrid = document.getElementById('lobby-grid');
+
+    const elBoard = document.getElementById('board');
+    const elScore = document.getElementById('score-display');
+    const elTarget = document.getElementById('target-display');
+    const elMoves = document.getElementById('moves-display');
+    const elStage = document.getElementById('stage-display');
+    const elProgressBar = document.getElementById('progress-bar');
+    const elBoardWrapper = document.getElementById('board-wrapper');
+
+    const screenIntro = document.getElementById('screen-stage-intro');
+    const screenResult = document.getElementById('screen-result');
+
+    // Events
+    document.getElementById('btn-start-title').addEventListener('click', () => {
+        elTitle.classList.add('hidden');
+        renderLobby();
+        elLobby.classList.remove('hidden');
+    });
+
+    document.getElementById('btn-back-lobby').addEventListener('click', () => {
+        elGame.classList.add('hidden');
+        renderLobby();
+        elLobby.classList.remove('hidden');
+    });
+
+    document.getElementById('btn-result-lobby').addEventListener('click', () => {
+        screenResult.classList.add('hidden');
+        elGame.classList.add('hidden');
+        renderLobby();
+        elLobby.classList.remove('hidden');
+    });
+
+    document.getElementById('btn-result-next').addEventListener('click', () => {
+        screenResult.classList.add('hidden');
+        if (score >= STAGE_DATA[currentStageIndex].target) {
+            startStage(currentStageIndex + 1);
+        } else {
+            startStage(currentStageIndex); // 재도전
+        }
+    });
+
+    function renderLobby() {
+        elLobbyGrid.innerHTML = '';
+        for (let i = 0; i < STAGE_DATA.length; i++) {
+            const btn = document.createElement('div');
+            btn.className = 'stage-btn';
+
+            let starsHTML = '';
+            if (i <= unlockedStageIndex) {
+                // Unlocked
+                let stars = stageStars[i];
+                starsHTML = '⭐'.repeat(stars) + '☆'.repeat(3 - stars);
+                if(stars === 0) starsHTML = '도전!';
+
+                btn.innerHTML = `<div class="stage-num">${i + 1}</div><div class="stage-stars">${starsHTML}</div>`;
+                btn.onclick = () => startStage(i);
+            } else {
+                // Locked
+                btn.classList.add('locked');
+                btn.innerHTML = `<div class="stage-num">🔒</div><div class="stage-stars">잠김</div>`;
+            }
+            elLobbyGrid.appendChild(btn);
+        }
+    }
+
+    function getStageConfig() {
+        return STAGE_DATA[currentStageIndex] || STAGE_DATA[STAGE_DATA.length - 1];
+    }
+
+    function getCharColor(char) {
+        const code = char.toUpperCase().charCodeAt(0) - 65;
+        const hue = (code * 137.5) % 360;
+        return `hsl(${hue}, 70%, 45%)`;
+    }
+
+    function getRandomChar() {
+        const config = getStageConfig();
+        const char = currentPool[Math.floor(Math.random() * currentPool.length)];
+        if (config.mixCase && Math.random() > 0.5) return char.toLowerCase();
+        return char;
+    }
+
+    function startStage(index) {
+        if (index >= STAGE_DATA.length) index = STAGE_DATA.length - 1;
+        currentStageIndex = index;
+        const config = getStageConfig();
+
+        currentPool = config.pool.split('');
+        score = 0;
+        movesLeft = config.moves;
+        comboCount = 0;
+        isAnimating = false;
+        selectedTile = null;
+
+        // 화면 전환
+        elLobby.classList.add('hidden');
+        elGame.classList.remove('hidden');
+        screenResult.classList.add('hidden');
+
+        updateHUD();
+
+        // Intro 띄우기
+        document.getElementById('intro-stage-num').innerText = `Stage ${currentStageIndex + 1}`;
+        let poolText = `${currentPool[0]} ~ ${currentPool[currentPool.length-1]}`;
+        if(config.mixCase) poolText += " (대소문자)";
+        document.getElementById('intro-pool').innerText = poolText;
+        document.getElementById('intro-mission').innerText = `목표: ${config.target}점 / 남은 횟수: ${config.moves}`;
+
+        screenIntro.classList.remove('hidden');
+
+        setTimeout(() => {
+            screenIntro.classList.add('hidden');
+            initBoard();
+        }, 1500);
+    }
+
+    function updateHUD() {
+        const config = getStageConfig();
+        elStage.innerText = currentStageIndex + 1;
+        elScore.innerText = score;
+        elTarget.innerText = config.target;
+        elMoves.innerText = movesLeft;
+
+        if (movesLeft <= 5) elMoves.style.color = '#f44336';
+        else elMoves.style.color = '#ffeb3b';
+
+        let progress = (score / config.target) * 100;
+        if (progress > 100) progress = 100;
+        elProgressBar.style.width = `${progress}%`;
+        elProgressBar.style.backgroundColor = progress >= 100 ? '#4caf50' : '#2196f3';
+    }
+
+    function initBoard() {
+        elBoard.innerHTML = '';
+        board = [];
+
+        for (let y = 0; y < BOARD_SIZE; y++) {
+            board[y] = [];
+            for (let x = 0; x < BOARD_SIZE; x++) {
+                let char;
+                do {
+                    char = getRandomChar();
+                } while (
+                    (x >= 2 && char.toUpperCase() === board[y][x-1].char.toUpperCase() && char.toUpperCase() === board[y][x-2].char.toUpperCase()) ||
+                    (y >= 2 && char.toUpperCase() === board[y-1][x].char.toUpperCase() && char.toUpperCase() === board[y-2][x].char.toUpperCase())
+                    );
+                board[y][x] = createTile(x, y, char, TILE_TYPES.NORMAL);
+            }
+        }
+        renderBoard();
+    }
+
+    function createTile(x, y, char, type) {
+        return { x, y, char, type, element: null };
+    }
+
+    function renderBoard() {
+        elBoard.innerHTML = '';
+        for (let y = 0; y < BOARD_SIZE; y++) {
+            for (let x = 0; x < BOARD_SIZE; x++) {
+                const tileData = board[y][x];
+                if (tileData) {
+                    const el = document.createElement('div');
+                    el.className = 'tile';
+                    el.innerText = tileData.char;
+                    el.style.color = getCharColor(tileData.char);
+                    el.dataset.x = x; el.dataset.y = y;
+
+                    if(tileData.type === TILE_TYPES.LINE_H) el.classList.add('special-h');
+                    if(tileData.type === TILE_TYPES.LINE_V) el.classList.add('special-v');
+                    if(tileData.type === TILE_TYPES.BOMB) {
+                        el.classList.add('special-bomb'); el.innerText = '★';
+                    }
+
+                    el.addEventListener('mousedown', handleInput);
+                    el.addEventListener('touchstart', handleInput, {passive: false});
+
+                    tileData.element = el;
+                    elBoard.appendChild(el);
+                }
+            }
+        }
+    }
+
+    function handleInput(e) {
+        e.preventDefault();
+        if (isAnimating || movesLeft <= 0) return;
+
+        const target = e.currentTarget;
+        const x = parseInt(target.dataset.x);
+        const y = parseInt(target.dataset.y);
+
+        if (!selectedTile) {
+            selectedTile = {x, y, element: target};
+            target.classList.add('selected');
+        } else {
+            const dx = Math.abs(selectedTile.x - x);
+            const dy = Math.abs(selectedTile.y - y);
+            selectedTile.element.classList.remove('selected');
+
+            if ((dx === 1 && dy === 0) || (dx === 0 && dy === 1)) {
+                trySwap(selectedTile.x, selectedTile.y, x, y);
+            }
+            selectedTile = null;
+        }
+    }
+
+    function isMatch(char1, char2) {
+        if(!char1 || !char2) return false;
+        return char1.toUpperCase() === char2.toUpperCase();
+    }
+
+    async function trySwap(x1, y1, x2, y2) {
+        isAnimating = true;
+        comboCount = 0;
+
+        // Swap data
+        let temp = board[y1][x1];
+        board[y1][x1] = board[y2][x2];
+        board[y2][x2] = temp;
+        board[y1][x1].x = x1; board[y1][x1].y = y1;
+        board[y2][x2].x = x2; board[y2][x2].y = y2;
+
+        renderBoard();
+        await sleep(200);
+
+        const isHorizontalSwap = (y1 === y2);
+        let matches = findMatches();
+
+        if (matches.length === 0) {
+            // 매치가 없으면 되돌리기 (횟수 차감 안함)
+            temp = board[y1][x1];
+            board[y1][x1] = board[y2][x2];
+            board[y2][x2] = temp;
+            board[y1][x1].x = x1; board[y1][x1].y = y1;
+            board[y2][x2].x = x2; board[y2][x2].y = y2;
+            renderBoard();
+            isAnimating = false;
+            return;
+        }
+
+        // 유효한 매치 시 남은 횟수 감소
+        movesLeft--;
+        updateHUD();
+
+        await processMatches(matches, x1, y1, x2, y2, isHorizontalSwap);
+    }
+
+    function findMatches() {
+        let matchedSets = [];
+
+        for (let y = 0; y < BOARD_SIZE; y++) {
+            let matchLen = 1;
+            for (let x = 0; x < BOARD_SIZE; x++) {
+                let current = board[y][x];
+                let next = (x < BOARD_SIZE - 1) ? board[y][x+1] : null;
+                if (current && next && isMatch(current.char, next.char)) {
+                    matchLen++;
+                } else {
+                    if (matchLen >= 3) {
+                        let set = [];
+                        for(let i=0; i<matchLen; i++) set.push({x: x-i, y: y});
+                        matchedSets.push(set);
+                    }
+                    matchLen = 1;
+                }
+            }
+        }
+
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            let matchLen = 1;
+            for (let y = 0; y < BOARD_SIZE; y++) {
+                let current = board[y][x];
+                let next = (y < BOARD_SIZE - 1) ? board[y+1][x] : null;
+                if (current && next && isMatch(current.char, next.char)) {
+                    matchLen++;
+                } else {
+                    if (matchLen >= 3) {
+                        let set = [];
+                        for(let i=0; i<matchLen; i++) set.push({x: x, y: y-i});
+                        matchedSets.push(set);
+                    }
+                    matchLen = 1;
+                }
+            }
+        }
+        return matchedSets;
+    }
+
+    async function processMatches(matchedSets, swapX1, swapY1, swapX2, swapY2, isHorizontalSwap) {
+        let toRemove = new Set();
+        let specialTilesToCreate = [];
+        let baseCharForCombo = "";
+
+        matchedSets.forEach(set => {
+            let len = set.length;
+            baseCharForCombo = board[set[0].y][set[0].x].char.toUpperCase();
+
+            if (len === 4) {
+                let target = set.find(p => (p.x === swapX1 && p.y === swapY1) || (p.x === swapX2 && p.y === swapY2)) || set[1];
+                specialTilesToCreate.push({
+                    x: target.x, y: target.y, char: board[target.y][target.x].char,
+                    type: isHorizontalSwap ? TILE_TYPES.LINE_V : TILE_TYPES.LINE_H
+                });
+            } else if (len >= 5) {
+                let target = set.find(p => (p.x === swapX1 && p.y === swapY1) || (p.x === swapX2 && p.y === swapY2)) || set[2];
+                specialTilesToCreate.push({
+                    x: target.x, y: target.y, char: board[target.y][target.x].char, type: TILE_TYPES.BOMB
+                });
+            }
+            set.forEach(p => toRemove.add(`${p.x},${p.y}`));
+        });
+
+        if (toRemove.size === 0) {
+            // 타겟 점수 체크 및 남은 횟수 소진 체크
+            checkEndGameConditions();
+            return;
+        }
+
+        comboCount++;
+        let points = (toRemove.size * 50) * comboCount;
+        score += points;
+        updateHUD();
+
+        if (comboCount > 1) {
+            let msg = comboCount >= 3 ? "Amazing!" : "Great!";
+            showFloatingText(`${msg} ${baseCharForCombo} 반복!`, elBoardWrapper);
+        }
+
+        let finalRemoveCoords = new Set(toRemove);
+        toRemove.forEach(coordStr => {
+            let [x, y] = coordStr.split(',').map(Number);
+            let tile = board[y][x];
+            if(!tile) return;
+
+            if (tile.type === TILE_TYPES.LINE_H) {
+                for(let cx=0; cx<BOARD_SIZE; cx++) finalRemoveCoords.add(`${cx},${y}`);
+                showFloatingText("가로 팡!", elBoardWrapper);
+            }
+            if (tile.type === TILE_TYPES.LINE_V) {
+                for(let cy=0; cy<BOARD_SIZE; cy++) finalRemoveCoords.add(`${x},${cy}`);
+                showFloatingText("세로 팡!", elBoardWrapper);
+            }
+            if (tile.type === TILE_TYPES.BOMB) {
+                let targetChar = tile.char;
+                for(let cy=0; cy<BOARD_SIZE; cy++) {
+                    for(let cx=0; cx<BOARD_SIZE; cx++) {
+                        if(board[cy][cx] && isMatch(board[cy][cx].char, targetChar)) {
+                            finalRemoveCoords.add(`${cx},${cy}`);
+                        }
+                    }
+                }
+                showFloatingText(`${targetChar.toUpperCase()} 집중 폭발!`, elBoardWrapper);
+            }
+        });
+
+        finalRemoveCoords.forEach(coordStr => {
+            let [x, y] = coordStr.split(',').map(Number);
+            if(board[y][x] && board[y][x].element) board[y][x].element.style.transform = 'scale(0)';
+        });
+
+        await sleep(300);
+
+        finalRemoveCoords.forEach(coordStr => {
+            let [x, y] = coordStr.split(',').map(Number);
+            board[y][x] = null;
+        });
+
+        specialTilesToCreate.forEach(st => {
+            board[st.y][st.x] = createTile(st.x, st.y, st.char, st.type);
+        });
+
+        applyGravity();
+        renderBoard();
+
+        await sleep(400);
+
+        // [핵심 변경] 목표 달성 시 무한 콤보 강제 중단 및 즉시 클리어 처리
+        if (score >= getStageConfig().target) {
+            isAnimating = false;
+            showResultScreen(true);
+            return;
+        }
+
+        let chainMatches = findMatches();
+        if (chainMatches.length > 0) {
+            await processMatches(chainMatches, -1, -1, -1, -1, false);
+        } else {
+            checkEndGameConditions();
+        }
+    }
+
+    function checkEndGameConditions() {
+        isAnimating = false;
+        const config = getStageConfig();
+
+        // 점수 달성 시 클리어
+        if (score >= config.target) {
+            showResultScreen(true);
+        }
+        // 점수 미달성 & 횟수 소진 시 실패
+        else if (movesLeft <= 0) {
+            showResultScreen(false);
+        }
+    }
+
+    function showResultScreen(isWin) {
+        const config = getStageConfig();
+        screenResult.classList.remove('hidden');
+
+        const titleEl = document.getElementById('result-title');
+        const descEl = document.getElementById('result-desc');
+        const starsEl = document.getElementById('result-stars');
+        const scoreEl = document.getElementById('result-score');
+        const btnNext = document.getElementById('btn-result-next');
+
+        if (isWin) {
+            // 보너스 점수 (남은 횟수 * 300)
+            let bonus = movesLeft * 300;
+            score += bonus;
+
+            // 별 계산 (1.5배 이상이면 3별, 1.2배 이상 2별)
+            let earnedStars = 1;
+            if (score >= config.target * 1.5) earnedStars = 3;
+            else if (score >= config.target * 1.2) earnedStars = 2;
+
+            // 진행도 저장
+            if (earnedStars > stageStars[currentStageIndex]) {
+                stageStars[currentStageIndex] = earnedStars;
+            }
+            if (currentStageIndex === unlockedStageIndex && currentStageIndex < 29) {
+                unlockedStageIndex++;
+            }
+
+            titleEl.innerText = "Stage Clear!";
+            titleEl.style.color = "#4caf50";
+            starsEl.innerText = '⭐'.repeat(earnedStars) + '☆'.repeat(3 - earnedStars);
+            descEl.innerText = movesLeft > 0 ? `남은 횟수 보너스 +${bonus}점!` : "멋진 플레이!";
+            scoreEl.innerText = `Final Score: ${score}`;
+
+            btnNext.innerText = "다음 스테이지";
+            btnNext.style.color = '#2e7d32';
+        } else {
+            titleEl.innerText = "Game Over";
+            titleEl.style.color = "#f44336";
+            starsEl.innerText = "☆☆☆";
+            descEl.innerText = `아쉬워요. ${currentPool[0]}~${currentPool[currentPool.length-1]} 구간을 연습해봐요.`;
+            scoreEl.innerText = `Score: ${score} / ${config.target}`;
+
+            btnNext.innerText = "다시 하기";
+            btnNext.style.color = '#d32f2f';
+        }
+    }
+
+    function applyGravity() {
+        for (let x = 0; x < BOARD_SIZE; x++) {
+            let emptySpots = 0;
+            for (let y = BOARD_SIZE - 1; y >= 0; y--) {
+                if (board[y][x] === null) emptySpots++;
+                else if (emptySpots > 0) {
+                    board[y + emptySpots][x] = board[y][x];
+                    board[y + emptySpots][x].y = y + emptySpots;
+                    board[y][x] = null;
+                }
+            }
+            for (let y = 0; y < emptySpots; y++) {
+                board[y][x] = createTile(x, y, getRandomChar(), TILE_TYPES.NORMAL);
+            }
+        }
+    }
+
+    function showFloatingText(text, parent) {
+        const el = document.createElement('div');
+        el.className = 'floating-text';
+        el.innerText = text;
+        const offsetX = (Math.random() - 0.5) * 50;
+        el.style.left = `calc(50% + ${offsetX}px)`;
+        el.style.top = '40%';
+        parent.appendChild(el);
+        setTimeout(() => el.remove(), 1000);
+    }
+
+    function sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    // 타이틀 화면에서 대기
+</script>
+</body>
+</html>

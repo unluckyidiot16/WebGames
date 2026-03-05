@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>영단어 스크램블</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+
+        body {
+            font-family: 'Noto Sans KR', sans-serif;
+            background-color: #f0f9ff;
+            touch-action: manipulation;
+        }
+        .font-jua { font-family: 'Jua', sans-serif; }
+
+        .tile {
+            width: 60px;
+            height: 60px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            font-weight: bold;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            user-select: none;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        .tile:active { transform: translateY(2px); box-shadow: none; }
+        .tile-placeholder {
+            width: 60px;
+            height: 60px;
+            border: 3px dashed #cbd5e1;
+            border-radius: 12px;
+        }
+        .progress-bar { transition: width 0.1s linear; }
+
+        .correct-flash { animation: flashGreen 0.5s; }
+        @keyframes flashGreen {
+            0%, 100% { background-color: transparent; }
+            50% { background-color: #86efac; }
+        }
+    </style>
+</head>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center p-4">
+
+<!-- 타이틀 화면 -->
+<div id="title-screen" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative flex flex-col items-center justify-center p-8 min-h-[500px]">
+    <div class="text-6xl mb-4 animate__animated animate__bounceIn">🔤</div>
+    <h1 class="text-4xl font-jua text-blue-600 mb-8 text-center leading-snug">초3 영단어<br>스크램블</h1>
+
+    <div class="bg-blue-50 rounded-2xl p-6 w-full mb-8 text-center border-2 border-blue-100 shadow-inner">
+        <div class="mb-5">
+            <span class="text-sm text-gray-500 font-bold tracking-wider">🏆 최고 점수</span>
+            <div id="best-score-display" class="text-4xl font-jua text-orange-500 mt-1">0</div>
+        </div>
+        <div class="w-full h-px bg-blue-200 mb-5"></div>
+        <div>
+            <span class="text-sm text-gray-500 font-bold tracking-wider">🌟 최고 스테이지</span>
+            <div class="text-2xl font-jua text-green-500 mt-1">Stage <span id="best-stage-display">1</span></div>
+        </div>
+    </div>
+
+    <button onclick="startGameFromTitle()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl shadow-lg transform transition active:scale-95 animate__animated animate__pulse animate__infinite">
+        게임 시작!
+    </button>
+</div>
+
+<!-- 게임 컨테이너 -->
+<div id="game-container" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative hidden">
+
+    <!-- 상단 바 -->
+    <div class="bg-blue-500 p-4 text-white flex justify-between items-center shadow-md">
+        <div class="flex flex-col">
+            <span class="text-xs opacity-80">SCORE</span>
+            <span id="score-display" class="text-2xl font-jua">0</span>
+        </div>
+        <div id="combo-container" class="invisible bg-yellow-400 text-blue-900 px-3 py-1 rounded-full font-bold text-sm animate__animated">
+            COMBO <span id="combo-display">0</span>
+        </div>
+        <div class="flex flex-col items-end">
+            <span class="text-xs opacity-80 text-right">HEARTS</span>
+            <div id="hearts-display" class="text-xl flex gap-1">❤️❤️❤️</div>
+        </div>
+    </div>
+
+    <!-- 스테이지 및 타이머 -->
+    <div class="p-4 bg-blue-100 flex justify-between items-center">
+        <div id="stage-info" class="font-bold text-blue-700">Stage 1 (3 Letters)</div>
+        <div class="w-32 bg-white rounded-full h-4 overflow-hidden border border-blue-300">
+            <div id="timer-bar" class="progress-bar bg-red-400 h-full w-full"></div>
+        </div>
+    </div>
+
+    <!-- 메인 게임 구역 -->
+    <div id="play-area" class="p-6 min-h-[400px] flex flex-col items-center justify-center gap-8">
+        <div id="meaning-hint" class="h-8 text-xl font-bold text-gray-600 opacity-0 transition-opacity">
+            뜻 힌트 표시
+        </div>
+
+        <!-- 정답 슬롯 -->
+        <div id="answer-slots" class="flex gap-2 justify-center flex-wrap"></div>
+
+        <!-- 알파벳 카드 풀 -->
+        <div id="letter-pool" class="flex gap-2 justify-center flex-wrap mt-4 p-4 bg-gray-50 rounded-2xl w-full border border-gray-100 min-h-[100px]"></div>
+
+        <!-- 힌트 버튼 -->
+        <div class="grid grid-cols-3 gap-2 w-full mt-4">
+            <button onclick="useHint('first')" class="hint-btn flex flex-col items-center p-2 bg-purple-100 hover:bg-purple-200 rounded-xl border border-purple-200 transition">
+                <span class="text-xs font-bold text-purple-700">첫 글자 고정</span>
+                <span class="text-[10px] text-purple-500">-2점</span>
+            </button>
+            <button onclick="useHint('random')" class="hint-btn flex flex-col items-center p-2 bg-green-100 hover:bg-green-200 rounded-xl border border-green-200 transition">
+                <span class="text-xs font-bold text-green-700">랜덤 글자</span>
+                <span class="text-[10px] text-green-500">-4점</span>
+            </button>
+            <button onclick="useHint('meaning')" class="hint-btn flex flex-col items-center p-2 bg-orange-100 hover:bg-orange-200 rounded-xl border border-orange-200 transition">
+                <span class="text-xs font-bold text-orange-700">뜻 보기</span>
+                <span class="text-[10px] text-orange-500">-2점</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- 확인 버튼 -->
+    <div class="p-6 pt-0">
+        <button id="check-btn" onclick="checkAnswer()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-2xl shadow-lg transform transition active:scale-95">
+            정답 확인!
+        </button>
+    </div>
+
+    <!-- 모달 오버레이 -->
+    <div id="modal-overlay" class="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-6 text-center hidden">
+        <div id="modal-content" class="bg-white rounded-3xl p-8 w-full animate__animated animate__zoomIn">
+            <h2 id="modal-title" class="text-3xl font-jua mb-4 text-blue-600"></h2>
+            <p id="modal-body" class="mb-6 text-gray-600"></p>
+            <button id="modal-btn" class="w-full py-3 bg-blue-500 text-white rounded-xl font-bold text-lg shadow-md"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // --- 단어 데이터 (중복 답안 처리를 위해 리스트 보강) ---
+    const wordData = {
+        1: [
+            {w: "cat", m: "고양이"}, {w: "act", m: "행동하다"}, {w: "dog", m: "개"}, {w: "pig", m: "돼지"},
+            {w: "cow", m: "소"}, {w: "ant", m: "개미"}, {w: "bee", m: "벌"}, {w: "hen", m: "암탉"},
+            {w: "fox", m: "여우"}, {w: "bus", m: "버스"}, {w: "car", m: "자동차"}, {w: "pen", m: "펜"},
+            {w: "cup", m: "컵"}, {w: "bag", m: "가방"}, {w: "box", m: "상자"}, {w: "hat", m: "모자"},
+            {w: "cap", m: "모자"}, {w: "sun", m: "태양"}, {w: "sky", m: "하늘"}, {w: "sea", m: "바다"},
+            {w: "map", m: "지도"}, {w: "bed", m: "침대"}, {w: "key", m: "열쇠"}, {w: "egg", m: "달걀"},
+            {w: "jam", m: "잼"}, {w: "ice", m: "얼음"}, {w: "tea", m: "차"}, {w: "eat", m: "먹다"},
+            {w: "boy", m: "소년"}, {w: "mom", m: "엄마"}, {w: "dad", m: "아빠"}, {w: "ear", m: "귀"},
+            {w: "eye", m: "눈"}, {w: "arm", m: "팔"}, {w: "leg", m: "다리"}, {w: "toy", m: "장난감"},
+            {w: "was", m: "~였다"}, {w: "saw", m: "보았다"}
+        ],
+        2: [
+            {w: "book", m: "책"}, {w: "desk", m: "책상"}, {w: "milk", m: "우유"}, {w: "fish", m: "물고기"},
+            {w: "bird", m: "새"}, {w: "duck", m: "오리"}, {w: "frog", m: "개구리"}, {w: "lion", m: "사자"},
+            {w: "bear", m: "곰"}, {w: "shoe", m: "신발"}, {w: "door", m: "문"}, {w: "tree", m: "나무"},
+            {w: "ball", m: "공"}, {w: "game", m: "게임"}, {w: "hand", m: "손"}, {w: "foot", m: "발"},
+            {w: "face", m: "얼굴"}, {w: "hair", m: "머리카락"}, {w: "nose", m: "코"}, {w: "home", m: "집"},
+            {w: "room", m: "방"}, {w: "town", m: "마을"}, {w: "ship", m: "배"}, {w: "rain", m: "비"},
+            {w: "snow", m: "눈"}, {w: "wind", m: "바람"}, {w: "time", m: "시간"}, {w: "day", m: "날"},
+            {w: "week", m: "주"}, {w: "girl", m: "소녀"}, {w: "red", m: "빨간색"}, {w: "blue", m: "파란색"},
+            {w: "read", m: "읽다"}
+        ],
+        3: [
+            {w: "apple", m: "사과"}, {w: "house", m: "집"}, {w: "water", m: "물"}, {w: "bread", m: "빵"},
+            {w: "chair", m: "의자"}, {w: "table", m: "탁자"}, {w: "money", m: "돈"}, {w: "happy", m: "행복한"},
+            {w: "smile", m: "미소"}, {w: "sorry", m: "미안한"}, {w: "hello", m: "안녕"}, {w: "world", m: "세계"},
+            {w: "train", m: "기차"}, {w: "truck", m: "트럭"}, {w: "pizza", m: "피자"}, {w: "juice", m: "주스"},
+            {w: "candy", m: "사탕"}, {w: "music", m: "음악"}, {w: "smart", m: "똑똑한"}, {w: "black", m: "검은색"},
+            {w: "white", m: "흰색"}, {w: "green", m: "초록색"}, {w: "peach", m: "복숭아"}, {w: "grape", m: "포도"},
+            {w: "onion", m: "양파"}, {w: "robot", m: "로봇"}, {w: "story", m: "이야기"}, {w: "sleep", m: "자다"},
+            {w: "drink", m: "마시다"}, {w: "write", m: "쓰다"}, {w: "socks", m: "양말"}
+        ]
+    };
+
+    let currentStage = 1;
+    let score = 0;
+    let hearts = 3;
+    let combo = 0;
+    let currentWord = null;
+    let currentScramble = [];
+    let userSelection = [];
+    let timer = null;
+    let timeLeft = 0;
+    let maxTime = 10;
+    let isChecking = false;
+
+    // 최고 기록 데이터 불러오기
+    let bestScore = localStorage.getItem('ws_bestScore') || 0;
+    let bestStage = localStorage.getItem('ws_bestStage') || 1;
+
+    const scoreEl = document.getElementById('score-display');
+    const comboEl = document.getElementById('combo-display');
+    const comboCont = document.getElementById('combo-container');
+    const heartsEl = document.getElementById('hearts-display');
+    const stageInfoEl = document.getElementById('stage-info');
+    const timerBar = document.getElementById('timer-bar');
+    const letterPoolEl = document.getElementById('letter-pool');
+    const answerSlotsEl = document.getElementById('answer-slots');
+    const meaningEl = document.getElementById('meaning-hint');
+    const overlay = document.getElementById('modal-overlay');
+
+    window.onload = () => {
+        // 초기 타이틀 화면에 최고 기록 표시
+        document.getElementById('best-score-display').innerText = bestScore;
+        document.getElementById('best-stage-display').innerText = bestStage;
+    };
+
+    // 타이틀에서 게임 시작
+    function startGameFromTitle() {
+        document.getElementById('title-screen').classList.add('hidden');
+        document.getElementById('game-container').classList.remove('hidden');
+        resetGame();
+    }
+
+    // 최고 기록 업데이트 및 저장
+    function updateBestStats() {
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('ws_bestScore', bestScore);
+        }
+        if (currentStage > bestStage) {
+            bestStage = currentStage;
+            localStorage.setItem('ws_bestStage', bestStage);
+        }
+    }
+
+    // 타이틀로 돌아가기
+    function returnToTitle() {
+        overlay.classList.add('hidden');
+        document.getElementById('game-container').classList.add('hidden');
+        document.getElementById('title-screen').classList.remove('hidden');
+
+        // 타이틀 화면 기록 갱신
+        document.getElementById('best-score-display').innerText = bestScore;
+        document.getElementById('best-stage-display').innerText = bestStage;
+    }
+
+    function startNewLevel() {
+        if (hearts <= 0) resetGame();
+        overlay.classList.add('hidden');
+        loadWord();
+    }
+
+    function loadWord() {
+        isChecking = false;
+        const pool = wordData[currentStage];
+        currentWord = pool[Math.floor(Math.random() * pool.length)];
+
+        if (currentStage === 1) maxTime = 10;
+        else if (currentStage === 2) maxTime = 12;
+        else maxTime = 15;
+
+        timeLeft = maxTime;
+        userSelection = Array(currentWord.w.length).fill(null);
+
+        currentScramble = currentWord.w.split('').sort(() => Math.random() - 0.5);
+        if (currentScramble.join('') === currentWord.w) {
+            currentScramble.sort(() => Math.random() - 0.5);
+        }
+
+        renderGame();
+        startTimer();
+
+        meaningEl.innerText = currentWord.m;
+        meaningEl.classList.add('opacity-0');
+        stageInfoEl.innerText = `Stage ${currentStage} (${currentWord.w.length} Letters)`;
+    }
+
+    function renderGame() {
+        letterPoolEl.innerHTML = '';
+        currentScramble.forEach((char, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'tile bg-white text-blue-600 border-2 border-blue-200 hover:bg-blue-50';
+            btn.innerText = char;
+            btn.onclick = () => selectLetter(char, idx, btn);
+            letterPoolEl.appendChild(btn);
+        });
+        renderGameSlots();
+    }
+
+    function selectLetter(char, idx, el) {
+        const emptyIdx = userSelection.indexOf(null);
+        if (emptyIdx !== -1) {
+            userSelection[emptyIdx] = char;
+            el.style.visibility = 'hidden';
+            el.setAttribute('data-pool-idx', idx);
+            renderGameSlots();
+        }
+    }
+
+    function renderGameSlots() {
+        answerSlotsEl.innerHTML = '';
+        userSelection.forEach((char, idx) => {
+            const slot = document.createElement('div');
+            if (char === null) {
+                slot.className = 'tile-placeholder';
+            } else {
+                slot.className = 'tile bg-blue-500 text-white animate__animated animate__bounceIn';
+                slot.innerText = char;
+                slot.onclick = () => resetInput();
+            }
+            answerSlotsEl.appendChild(slot);
+        });
+    }
+
+    function resetInput() {
+        userSelection = Array(currentWord.w.length).fill(null);
+        const tiles = letterPoolEl.querySelectorAll('.tile');
+        tiles.forEach(t => t.style.visibility = 'visible');
+        renderGameSlots();
+    }
+
+    function startTimer() {
+        clearInterval(timer);
+        timer = setInterval(() => {
+            timeLeft -= 0.1;
+            const percent = Math.max(0, (timeLeft / maxTime) * 100);
+            timerBar.style.width = percent + '%';
+            if (timeLeft <= 0) {
+                clearInterval(timer);
+                handleWrong("시간 초과!");
+            }
+        }, 100);
+    }
+
+    // --- 정답 확인 로직 (중복 답안 인정 기능 추가) ---
+    function checkAnswer() {
+        if (isChecking) return;
+        const userTyped = userSelection.join('');
+
+        if (userSelection.includes(null)) return; // 빈칸이 있으면 무시
+
+        // 1. 현재 제시된 알파벳의 구성을 정렬하여 기준 생성
+        const targetSorted = currentWord.w.split('').sort().join('');
+        const userSorted = userTyped.split('').sort().join('');
+
+        // 2. 유저가 입력한 단어가 전체 단어 리스트(동일 스테이지)에 있고, 알파벳 구성이 같은지 확인
+        // 즉, 'a, c, t'를 가지고 'act'를 만들든 'cat'을 만들든 둘 다 사전에 있는 단어라면 정답 처리
+        const isAnyValidWord = wordData[currentStage].some(item =>
+            item.w === userTyped &&
+            item.w.split('').sort().join('') === targetSorted
+        );
+
+        if (isAnyValidWord) {
+            // 만약 유저가 다른 뜻의 단어를 맞혔다면 뜻 힌트 업데이트
+            const matchedObj = wordData[currentStage].find(item => item.w === userTyped);
+            meaningEl.innerText = `${matchedObj.m} (정답!)`;
+            meaningEl.classList.remove('opacity-0');
+            handleCorrect();
+        } else {
+            handleWrong("틀렸어요!");
+        }
+    }
+
+    function handleCorrect() {
+        isChecking = true;
+        clearInterval(timer);
+
+        let gainedScore = 10;
+        combo++;
+        if (combo >= 2) {
+            const comboBonus = Math.min((combo - 1) * 2, 8);
+            gainedScore += comboBonus;
+            showCombo();
+        }
+
+        const ratio = timeLeft / maxTime;
+        if (ratio >= 0.8) gainedScore += 4;
+        else if (ratio >= 0.5) gainedScore += 2;
+
+        score += gainedScore;
+        scoreEl.innerText = score;
+
+        answerSlotsEl.childNodes.forEach(node => node.classList.add('bg-green-500'));
+
+        setTimeout(() => {
+            if (score >= currentStage * 150 && currentStage < 3) {
+                currentStage++;
+                showModal(`Level UP!`, `Stage ${currentStage}로 진입합니다!`, "다음 단계로", loadWord);
+            } else {
+                loadWord();
+            }
+        }, 1000);
+    }
+
+    function handleWrong(msg) {
+        isChecking = true;
+        clearInterval(timer);
+        combo = 0;
+        comboCont.classList.add('invisible');
+
+        hearts--;
+        updateHearts();
+
+        answerSlotsEl.childNodes.forEach(node => {
+            if(node.classList.contains('tile')) {
+                node.classList.add('bg-red-500', 'animate__shakeX');
+            }
+        });
+
+        setTimeout(() => {
+            if (hearts <= 0) {
+                updateBestStats();
+                showModal("GAME OVER", `최종 점수: ${score}점<br>도달 스테이지: Stage ${currentStage}`, "타이틀로 돌아가기", returnToTitle);
+            } else {
+                loadWord();
+            }
+        }, 1200);
+    }
+
+    function updateHearts() {
+        heartsEl.innerText = "❤️".repeat(hearts) + "🖤".repeat(3 - hearts);
+    }
+
+    function showCombo() {
+        comboEl.innerText = combo;
+        comboCont.classList.remove('invisible');
+        comboCont.classList.add('animate__bounceIn');
+        setTimeout(() => comboCont.classList.remove('animate__bounceIn'), 500);
+    }
+
+    function resetGame() {
+        score = 0;
+        hearts = 3;
+        combo = 0;
+        currentStage = 1;
+        scoreEl.innerText = "0";
+        updateHearts();
+        comboCont.classList.add('invisible');
+        loadWord();
+    }
+
+    function useHint(type) {
+        if (isChecking) return;
+        switch(type) {
+            case 'first':
+                if (score < 2) return;
+                score -= 2;
+                userSelection[0] = currentWord.w[0];
+                renderGameSlots();
+                break;
+            case 'random':
+                if (score < 4) return;
+                score -= 4;
+                const emptyIndices = userSelection.map((v, i) => v === null ? i : null).filter(v => v !== null);
+                if (emptyIndices.length > 0) {
+                    const target = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+                    userSelection[target] = currentWord.w[target];
+                    renderGameSlots();
+                }
+                break;
+            case 'meaning':
+                if (score < 2) return;
+                score -= 2;
+                meaningEl.classList.remove('opacity-0');
+                break;
+        }
+        scoreEl.innerText = score;
+    }
+
+    function showModal(title, body, btnText, callback) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-body').innerHTML = body;
+        const btn = document.getElementById('modal-btn');
+        btn.innerText = btnText;
+        btn.onclick = callback;
+        overlay.classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
