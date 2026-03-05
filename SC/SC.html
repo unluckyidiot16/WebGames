@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>영단어 스크램블</title>
+    <title>초3 영단어 스크램블</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
     <style>
@@ -384,7 +384,7 @@
         setTimeout(() => {
             if (score >= currentStage * 150 && currentStage < 3) {
                 currentStage++;
-                showModal(`Level UP!`, `Stage ${currentStage}로 진입합니다!`, "다음 단계로", loadWord);
+                showModal(`Level UP!`, `Stage ${currentStage}로 진입합니다!`, "다음 단계로", startNewLevel);
             } else {
                 loadWord();
             }
