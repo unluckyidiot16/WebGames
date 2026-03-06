@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>A-Z 알파벳 메모리 배틀 (이미지 버전)</title>
+    <title>A-Z 알파벳 메모리 배틀 (글자+이미지 매칭)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
@@ -71,7 +71,11 @@
             border: 2px solid #e2e8f0;
         }
 
-        /* 이미지 폴백용 텍스트 스타일 */
+        .card-letter-display {
+            font-size: calc(2.5rem * var(--card-scale));
+            font-weight: 900;
+        }
+
         .card-letter-fallback {
             position: absolute;
             font-size: calc(2rem * var(--card-scale));
@@ -141,7 +145,7 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen flex flex-col">
 
-<!-- 로비 화면 -->
+<!-- Lobby Screen -->
 <div id="lobby" class="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-900 bg-opacity-95 p-4 overflow-y-auto">
     <h1 class="text-5xl md:text-7xl mb-4 text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500 font-black text-center">A-Z MEMORY</h1>
 
@@ -174,10 +178,8 @@
     </div>
 </div>
 
-<!-- 게임 화면 -->
+<!-- Game UI -->
 <div id="game-ui" class="hidden flex-grow flex flex-col overflow-hidden">
-
-    <!-- 상단 목표 및 정보 -->
     <div class="flex flex-col items-center py-4 bg-black bg-opacity-20 shadow-md">
         <div id="target-display" class="bg-white text-slate-900 px-8 py-1 rounded-full text-2xl md:text-3xl font-black shadow-lg mb-2">
             NOW: A
@@ -185,15 +187,12 @@
         <div id="progress-bar" class="flex flex-wrap justify-center gap-1 text-[10px] md:text-xs opacity-70 px-4 max-w-3xl"></div>
     </div>
 
-    <!-- 플레이어 패널 -->
     <div id="player-container" class="grid gap-2 p-3"></div>
 
-    <!-- 보드판 -->
     <div class="flex-grow overflow-y-auto overflow-x-hidden p-2 flex items-center justify-center">
         <div id="board"></div>
     </div>
 
-    <!-- 하단 컨트롤 -->
     <div class="controls-footer p-4 flex flex-wrap items-center justify-center gap-4 md:gap-8">
         <div class="flex items-center gap-3 bg-white bg-opacity-10 px-4 py-2 rounded-xl">
             <span class="text-xs font-bold whitespace-nowrap opacity-60">크기 조정</span>
@@ -208,7 +207,7 @@
     </div>
 </div>
 
-<!-- 결과 팝업 -->
+<!-- Result Modal -->
 <div id="result-modal" class="hidden fixed inset-0 z-[60] flex items-center justify-center bg-black bg-opacity-80 p-4">
     <div class="bg-slate-800 p-8 rounded-3xl max-w-md w-full text-center border-4 border-purple-500 shadow-2xl">
         <h2 class="text-4xl font-black mb-6">GAME OVER!</h2>
@@ -301,13 +300,25 @@
     }
 
     function initDeck() {
-        const copies = state.playerCount === 4 && state.level === 'A-Z' ? 4 : 2;
+        // 4인용이고 전체 모드면 카드 수가 너무 많아질 수 있으므로, 4인용 보너스 룰 대신 2장씩 매칭 고정 (요청사항 반영)
+        const repeatCount = state.playerCount === 4 && state.level === 'A-Z' ? 2 : 1;
         let cards = [];
+
         state.currentAlphabet.forEach((letter) => {
-            for (let i = 0; i < copies; i++) {
+            for(let r = 0; r < repeatCount; r++) {
+                // 글자 카드 1장
                 cards.push({
                     letter: letter,
-                    id: `${letter}-${i}`,
+                    type: 'TEXT',
+                    id: `${letter}-text-${r}`,
+                    isMatched: false,
+                    isFlipped: false
+                });
+                // 이미지 카드 1장
+                cards.push({
+                    letter: letter,
+                    type: 'IMAGE',
+                    id: `${letter}-img-${r}`,
                     isMatched: false,
                     isFlipped: false
                 });
@@ -336,16 +347,23 @@
             cardEl.id = `card-${index}`;
             cardEl.className = `card ${card.isMatched ? 'matched' : ''} ${card.isFlipped ? 'flipped' : ''}`;
 
-            // 로컬 이미지 경로: /PIC/알파벳.png (예: /PIC/A.png)
-            // onerror 시 이미지를 숨기고 텍스트 폴백이 보이도록 설정
+            let frontContent = '';
+            if (card.type === 'TEXT') {
+                // 글자 카드: 알파벳 텍스트를 크게 표시
+                frontContent = `<span class="card-letter-display text-indigo-900">${card.letter}</span>`;
+            } else {
+                // 이미지 카드: PIC 폴더 이미지 표시
+                frontContent = `
+                        <span class="card-letter-fallback text-slate-300">${card.letter}</span>
+                        <img src="PIC/${card.letter}.png" class="card-img" 
+                             onerror="this.classList.add('hidden'); this.parentElement.querySelector('.card-letter-fallback').classList.remove('text-slate-300'); this.parentElement.querySelector('.card-letter-fallback').classList.add('text-indigo-900');">
+                    `;
+            }
+
             cardEl.innerHTML = `
                     <div class="card-inner" onclick="handleCardClick(${index})">
                         <div class="card-back">?</div>
-                        <div class="card-front">
-                            <span class="card-letter-fallback text-slate-300">${card.letter}</span>
-                            <img src="/PIC/${card.letter}.png" class="card-img" 
-                                 onerror="this.classList.add('hidden'); this.parentElement.querySelector('.card-letter-fallback').classList.remove('text-slate-300'); this.parentElement.querySelector('.card-letter-fallback').classList.add('text-indigo-900');">
-                        </div>
+                        <div class="card-front">${frontContent}</div>
                     </div>
                 `;
             board.appendChild(cardEl);
@@ -502,6 +520,7 @@
     function showHint() {
         if (state.isProcessing) return;
         const target = state.currentAlphabet[state.targetLetterIndex];
+        // 힌트 사용 시 아직 매칭되지 않은 타겟 알파벳 카드 중 하나를 보여줌
         const hintCardIdx = state.deck.findIndex(c => c.letter === target && !c.isMatched && !c.isFlipped);
         if (hintCardIdx !== -1) {
             const el = document.getElementById(`card-${hintCardIdx}`);
