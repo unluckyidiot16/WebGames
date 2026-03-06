@@ -25,15 +25,9 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .game-card.unlocked:hover {
+        .game-card:hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-
-        .game-card.locked {
-            filter: grayscale(100%);
-            opacity: 0.7;
-            cursor: not-allowed;
         }
     </style>
 </head>
@@ -42,101 +36,52 @@
 <!-- Header -->
 <header class="text-center mb-12 animate-bounce">
     <h1 class="text-5xl md:text-6xl text-green-600 drop-shadow-md mb-2">🌟 3학년 영어 게임 🌟</h1>
-    <p class="text-xl text-green-800">차례대로 미션을 클리어하고 모든 게임을 열어보세요!</p>
+    <p class="text-xl text-green-800">원하는 게임을 골라서 재미있게 즐겨보세요!</p>
 </header>
 
-<!-- Game List Container -->
-<main class="w-full max-w-4xl grid grid-cols-1 md:grid-cols-2 gap-6" id="game-container">
+<!-- Game List Container (총 6개 게임을 위해 3열 그리드 추가) -->
+<main class="w-full max-w-5xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="game-container">
     <!-- 게임 카드들이 JavaScript를 통해 여기에 생성됩니다. -->
 </main>
 
-<!-- Admin / Developer Controls (테스트용) -->
-<div class="mt-16 p-6 bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-4xl">
-    <div class="flex items-center justify-between mb-4">
-        <h2 class="text-2xl text-gray-700 flex items-center gap-2">
-            <i data-lucide="settings" class="w-6 h-6"></i> 선생님 / 테스트 메뉴
-        </h2>
-        <button onclick="toggleInstructions()" class="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-            연동 가이드 보기
-        </button>
-    </div>
-    <div class="flex flex-wrap gap-3">
-        <button onclick="simulateClear(1)" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg shadow hover:bg-yellow-300 transition">1단계 클리어 테스트</button>
-        <button onclick="simulateClear(2)" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg shadow hover:bg-yellow-300 transition">2단계 클리어 테스트</button>
-        <button onclick="simulateClear(3)" class="px-4 py-2 bg-yellow-400 text-yellow-900 rounded-lg shadow hover:bg-yellow-300 transition">3단계 클리어 테스트</button>
-        <button onclick="resetProgress()" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-400 transition ml-auto">진행 상황 초기화</button>
-    </div>
-
-    <!-- 개발자 연동 가이드 (기본 숨김) -->
-    <div id="instruction-panel" class="hidden mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200 text-left">
-        <h3 class="text-xl text-blue-800 mb-2">💡 실제 게임 페이지 연동 방법</h3>
-        <p class="text-gray-700 mb-2">이 인덱스 페이지가 정상적으로 해금 기능을 작동하려면, <strong>각 게임(.html)이 끝났을 때(클리어 시)</strong> 아래의 자바스크립트 코드를 실행하도록 게임 코드를 수정해야 합니다.</p>
-        <ul class="list-disc list-inside text-gray-700 space-y-2">
-            <li><strong>1번 게임 (ABC 팡) 클리어 시:</strong> <code class="bg-white px-2 py-1 rounded text-red-500">localStorage.setItem('game1_cleared', 'true');</code></li>
-            <li><strong>2번 게임 (AtoZ) 클리어 시:</strong> <code class="bg-white px-2 py-1 rounded text-red-500">localStorage.setItem('game2_cleared', 'true');</code></li>
-            <li><strong>3번 게임 (영어단어 스크램블) 클리어 시:</strong> <code class="bg-white px-2 py-1 rounded text-red-500">localStorage.setItem('game3_cleared', 'true');</code></li>
-            <li><strong>4번 게임 (영단어 팡) 클리어 시:</strong> <code class="bg-white px-2 py-1 rounded text-red-500">localStorage.setItem('game4_cleared', 'true');</code></li>
-        </ul>
-        <p class="mt-3 text-sm text-gray-500">※ 주의: 이 인덱스 페이지와 게임 페이지들은 모두 같은 도메인(unluckyidiot16.github.io)에 있어야 진행 상황이 정상적으로 공유됩니다.</p>
-    </div>
-</div>
-
 <script>
-    // 게임 데이터 정의
+    // 게임 데이터 정의 (기억력 게임, 알파뱀 추가)
     const games = [
         { id: 1, title: 'ABC 팡', url: 'https://unluckyidiot16.github.io/WebGames/ABCP/ABCP.html', color: 'from-pink-400 to-rose-400', icon: 'gamepad-2' },
         { id: 2, title: 'AtoZ', url: 'https://unluckyidiot16.github.io/WebGames/AM/AM.html', color: 'from-orange-400 to-amber-400', icon: 'spell-check' },
         { id: 3, title: '영어단어 스크램블', url: 'https://unluckyidiot16.github.io/WebGames/SC/SC.html', color: 'from-emerald-400 to-teal-400', icon: 'shuffle' },
-        { id: 4, title: '영단어 팡', url: 'https://unluckyidiot16.github.io/WebGames/PPE/PPE.html', color: 'from-blue-400 to-indigo-400', icon: 'bomb' }
+        { id: 4, title: '영단어 팡', url: 'https://unluckyidiot16.github.io/WebGames/PPE/PPE.html', color: 'from-blue-400 to-indigo-400', icon: 'bomb' },
+        { id: 5, title: '기억력 게임', url: 'https://unluckyidiot16.github.io/WebGames/AZM/AZM.html', color: 'from-purple-400 to-violet-400', icon: 'brain' },
+        { id: 6, title: '알파뱀', url: 'https://unluckyidiot16.github.io/WebGames/AS/AS.html', color: 'from-lime-400 to-green-500', icon: 'puzzle' }
     ];
 
-    // UI 렌더링 함수
+    // UI 렌더링 함수 (해금 로직 제거, 모두 바로 플레이 가능)
     function renderGames() {
         const container = document.getElementById('game-container');
         container.innerHTML = '';
 
-        games.forEach((game, index) => {
-            // 해금 조건 확인 로직
-            // 1번 게임은 항상 해금, 그 외는 이전 게임이 클리어 되어야 해금
-            const isUnlocked = index === 0 || localStorage.getItem(`game${index}_cleared`) === 'true';
-            // 현재 게임이 클리어 되었는지 확인
-            const isCleared = localStorage.getItem(`game${game.id}_cleared`) === 'true';
-
+        games.forEach((game) => {
             const card = document.createElement('a');
 
-            if (isUnlocked) {
-                card.href = game.url;
-                // 새 창에서 열리게 하려면 아래 주석 해제 (같은 창 이동을 추천하여 돌아올때 갱신되게 함)
-                // card.target = "_blank"; 
-                card.className = `game-card unlocked relative block p-6 rounded-3xl shadow-lg bg-gradient-to-br ${game.color} text-white overflow-hidden`;
-            } else {
-                card.className = `game-card locked relative block p-6 rounded-3xl shadow-lg bg-gray-300 text-gray-500 overflow-hidden`;
-                card.onclick = (e) => {
-                    e.preventDefault();
-                    alert(`이전 단계를 먼저 클리어해야 열 수 있어요!`);
-                };
-            }
+            card.href = game.url;
+            card.className = `game-card relative block p-6 rounded-3xl shadow-lg bg-gradient-to-br ${game.color} text-white overflow-hidden`;
 
             card.innerHTML = `
                     <div class="flex justify-between items-start mb-4 relative z-10">
                         <span class="text-xl font-bold bg-white/30 px-3 py-1 rounded-full border border-white/50 shadow-sm text-white">
-                            Stage ${game.id}
+                            Game ${game.id}
                         </span>
-                        ${isCleared ? `<i data-lucide="star" class="w-8 h-8 text-yellow-300 fill-yellow-300 drop-shadow"></i>` : ''}
-                        ${!isUnlocked ? `<i data-lucide="lock" class="w-8 h-8"></i>` : ''}
                     </div>
                     
                     <div class="flex flex-col items-center justify-center py-4 relative z-10">
                         <div class="bg-white/20 p-4 rounded-full mb-3 shadow-inner">
-                            <i data-lucide="${isUnlocked ? game.icon : 'lock'}" class="w-12 h-12 text-white drop-shadow-md"></i>
+                            <i data-lucide="${game.icon}" class="w-12 h-12 text-white drop-shadow-md"></i>
                         </div>
                         <h2 class="text-3xl font-bold text-center drop-shadow-md">${game.title}</h2>
                     </div>
 
-                    ${isUnlocked ? `
                     <div class="absolute -bottom-4 -right-4 bg-white/20 w-32 h-32 rounded-full blur-2xl"></div>
                     <div class="absolute -top-4 -left-4 bg-white/20 w-24 h-24 rounded-full blur-xl"></div>
-                    ` : ''}
                 `;
 
             container.appendChild(card);
@@ -145,30 +90,6 @@
         // 아이콘 렌더링
         lucide.createIcons();
     }
-
-    // 테스트용 함수들
-    function simulateClear(stageId) {
-        localStorage.setItem(`game${stageId}_cleared`, 'true');
-        renderGames();
-    }
-
-    function resetProgress() {
-        if(confirm('모든 진행 상황을 초기화 할까요?')) {
-            localStorage.removeItem('game1_cleared');
-            localStorage.removeItem('game2_cleared');
-            localStorage.removeItem('game3_cleared');
-            localStorage.removeItem('game4_cleared');
-            renderGames();
-        }
-    }
-
-    function toggleInstructions() {
-        const panel = document.getElementById('instruction-panel');
-        panel.classList.toggle('hidden');
-    }
-
-    // 페이지 포커스 시 상태 업데이트 (다른 탭에서 게임 클리어 후 돌아왔을 때 자동 갱신)
-    window.addEventListener('focus', renderGames);
 
     // 초기 렌더링
     renderGames();
