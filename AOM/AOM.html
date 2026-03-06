@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>알파벳 도둑잡기 Pro - 최종본</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@600;800;900&display=swap');
+
+        body {
+            font-family: 'Pretendard', sans-serif;
+            background: #f8fafc;
+            user-select: none;
+            overflow: hidden;
+            touch-action: manipulation;
+        }
+
+        .screen {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            position: absolute;
+            top: 0; left: 0;
+            background: #f8fafc;
+        }
+
+        .card {
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            aspect-ratio: 2/3;
+            width: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.6rem;
+            font-weight: 900;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            border: 3px solid #fff;
+            position: relative;
+        }
+
+        .card.selected {
+            transform: translateY(-15px);
+            border-color: #6366f1;
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
+            background-color: #f5f3ff;
+        }
+
+        .card.ai-hidden {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            border-color: #475569;
+        }
+
+        .card.player-front {
+            background: white;
+            color: #1e293b;
+        }
+
+        .card.joker {
+            background: linear-gradient(135deg, #be123c 0%, #fb7185 100%) !important;
+            color: white !important;
+        }
+
+        .scroll-hide::-webkit-scrollbar { display: none; }
+        .scroll-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+            padding: 1rem 2rem;
+            border-radius: 1.25rem;
+            font-weight: 800;
+            box-shadow: 0 8px 0 #4338ca;
+            transition: all 0.1s;
+        }
+        .btn-primary:active {
+            transform: translateY(4px);
+            box-shadow: 0 4px 0 #4338ca;
+        }
+
+        .world-tab {
+            flex: 1;
+            text-align: center;
+            padding: 0.8rem;
+            font-weight: 800;
+            border-radius: 0.8rem;
+            color: #64748b;
+        }
+        .world-tab.active {
+            background: white;
+            color: #6366f1;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        #feedback-layer {
+            z-index: 100;
+        }
+    </style>
+</head>
+<body>
+
+<!-- 타이틀 -->
+<div id="screen-title" class="screen p-8 justify-between z-10">
+    <div class="mt-24 text-center">
+        <h1 class="text-6xl font-black text-slate-800 tracking-tighter">
+            ALPHABET<br><span class="text-indigo-600">THIEF</span>
+        </h1>
+        <p class="text-slate-500 mt-4 font-bold">도둑을 피해 알파벳 짝을 맞추자!</p>
+    </div>
+    <div class="flex flex-col gap-3 mb-16">
+        <button onclick="showMap()" class="btn-primary text-2xl py-6">모험 시작</button>
+        <div id="challenge-unlock-msg" class="text-center text-xs font-bold text-slate-400">모든 스테이지 클리어 시 도전 모드 오픈</div>
+        <button id="btn-challenge" onclick="startChallengeMode()" class="hidden bg-slate-900 text-white py-5 rounded-2xl font-black text-xl shadow-xl">도전 모드 (A~Z) 🃏</button>
+        <button onclick="resetData()" class="text-[10px] text-slate-300 mt-4">데이터 초기화</button>
+    </div>
+</div>
+
+<!-- 맵 -->
+<div id="screen-map" class="screen hidden p-6 overflow-y-auto scroll-hide">
+    <div class="flex items-center justify-between mb-8">
+        <h2 class="text-3xl font-black text-slate-800">월드 선택</h2>
+        <button onclick="showScreen('screen-title')" class="bg-slate-200 px-4 py-2 rounded-xl font-bold text-sm">홈으로</button>
+    </div>
+
+    <div class="flex bg-slate-200 p-1.5 rounded-2xl mb-8">
+        <button onclick="switchWorld(1)" id="tab-1" class="world-tab active text-sm">W1: 대문자</button>
+        <button onclick="switchWorld(2)" id="tab-2" class="world-tab text-sm">W2: 대소문자</button>
+        <button onclick="switchWorld(3)" id="tab-3" class="world-tab text-sm">W3: 단어그림</button>
+    </div>
+
+    <div id="stage-list" class="flex flex-col gap-4"></div>
+</div>
+
+<!-- 게임 화면 -->
+<div id="screen-game" class="screen hidden bg-slate-100">
+    <!-- AI 구역 -->
+    <div class="bg-slate-800 p-4 pt-10 text-white shadow-lg">
+        <div class="flex items-center justify-between w-full mb-6 px-2">
+            <div class="flex items-center gap-3">
+                <div id="ai-avatar" class="text-4xl bg-white/10 w-14 h-14 flex items-center justify-center rounded-full">🤖</div>
+                <div>
+                    <div id="ai-name" class="font-black text-lg">보통 AI</div>
+                    <div id="difficulty-badge" class="text-[10px] bg-indigo-500 text-white px-2 py-0.5 rounded font-black uppercase tracking-widest">NORMAL</div>
+                </div>
+            </div>
+            <div class="text-right">
+                <div class="text-[10px] text-slate-400 font-bold mb-1">상대 손패</div>
+                <div id="ai-count" class="text-3xl font-black text-white">0</div>
+            </div>
+        </div>
+        <div id="ai-hand" class="flex flex-wrap justify-center gap-2 min-h-[110px] w-full max-w-md mx-auto"></div>
+    </div>
+
+    <!-- 중앙 구역 -->
+    <div class="flex-1 flex flex-col items-center justify-center relative">
+        <div id="turn-indicator" class="text-center p-6 rounded-3xl bg-white/50 backdrop-blur-sm border border-white">
+            <div id="turn-text" class="text-3xl font-black text-slate-300 mb-1">준비...</div>
+            <div id="status-msg" class="text-sm text-slate-500 font-bold">잠시만 기다려주세요.</div>
+        </div>
+        <div id="feedback-layer" class="absolute pointer-events-none w-full flex items-center justify-center"></div>
+    </div>
+
+    <!-- 플레이어 구역 -->
+    <div class="bg-white p-5 pb-12 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] rounded-t-[3rem]">
+        <div class="flex justify-between items-end mb-6 px-4">
+            <div>
+                <span class="text-[10px] font-black text-slate-400 tracking-widest block mb-1">MY CARDS</span>
+                <span id="player-count" class="text-4xl font-black text-indigo-600">0</span>
+            </div>
+            <button id="btn-end-turn" onclick="nextPhase()" class="hidden bg-slate-900 text-white px-10 py-4 rounded-2xl font-black shadow-xl animate-bounce">턴 종료</button>
+        </div>
+        <div id="player-hand" class="flex flex-wrap justify-center gap-3 max-h-[250px] overflow-y-auto scroll-hide py-2"></div>
+    </div>
+</div>
+
+<!-- 결과 -->
+<div id="screen-result" class="screen hidden bg-slate-900/95 z-50 flex items-center justify-center p-8 backdrop-blur-lg">
+    <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center flex flex-col items-center shadow-2xl">
+        <div id="result-emoji" class="text-9xl mb-8">🏆</div>
+        <h2 id="result-title" class="text-5xl font-black text-slate-800 mb-4">WINNER</h2>
+        <p id="result-desc" class="text-slate-500 font-medium mb-10 leading-relaxed">알파벳의 신이 나타났습니다!</p>
+        <div class="flex flex-col gap-4 w-full">
+            <button onclick="showMap()" class="bg-indigo-600 text-white py-5 rounded-2xl font-black text-xl shadow-lg shadow-indigo-200">다음 목적지로</button>
+            <button onclick="retryGame()" class="bg-slate-100 text-slate-500 py-4 rounded-2xl font-bold">다시 도전</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const ALPHABET = [
+        { c: 'A', w: 'Apple' }, { c: 'B', w: 'Ball' }, { c: 'C', w: 'Cat' },
+        { c: 'D', w: 'Dog' }, { c: 'E', w: 'Egg' }, { c: 'F', w: 'Fish' },
+        { c: 'G', w: 'Goat' }, { c: 'H', w: 'Hat' }, { c: 'I', w: 'Ice' },
+        { c: 'J', w: 'Jam' }, { c: 'K', w: 'King' }, { c: 'L', w: 'Lion' },
+        { c: 'M', w: 'Moon' }, { c: 'N', w: 'Net' }, { c: 'O', w: 'Owl' },
+        { c: 'P', w: 'Pig' }, { c: 'Q', w: 'Queen' }, { c: 'R', w: 'Rabbit' },
+        { c: 'S', w: 'Sun' }, { c: 'T', w: 'Tiger' }, { c: 'U', w: 'Umbrella' },
+        { c: 'V', w: 'Van' }, { c: 'W', w: 'Wolf' }, { c: 'X', w: 'Xylophone' },
+        { c: 'Y', w: 'Yo-yo' }, { c: 'Z', w: 'Zebra' }
+    ];
+
+    let state = {
+        unlocked: parseInt(localStorage.getItem('abc_v3_unlocked') || '1'),
+        world: 1,
+        stage: 1,
+        mode: 'stage',
+        difficulty: 'normal',
+        pHand: [],
+        aiHand: [],
+        selected: [],
+        phase: 'start',
+        isProcessing: false
+    };
+
+    window.onload = () => {
+        refreshUnlockUI();
+        showScreen('screen-title');
+    };
+
+    function refreshUnlockUI() {
+        if (state.unlocked > 15) {
+            document.getElementById('challenge-unlock-msg').classList.add('hidden');
+            document.getElementById('btn-challenge').classList.remove('hidden');
+        }
+    }
+
+    function showScreen(id) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.add('hidden'));
+        document.getElementById(id).classList.remove('hidden');
+    }
+
+    function showMap() {
+        switchWorld(state.world);
+        showScreen('screen-map');
+    }
+
+    function switchWorld(w) {
+        state.world = w;
+        document.querySelectorAll('.world-tab').forEach(t => t.classList.remove('active'));
+        document.getElementById(`tab-${w}`).classList.add('active');
+
+        const list = document.getElementById('stage-list');
+        list.innerHTML = '';
+
+        for (let i = 1; i <= 5; i++) {
+            const sNum = (w - 1) * 5 + i;
+            const isLocked = sNum > state.unlocked;
+            const btn = document.createElement('button');
+            btn.className = `flex items-center justify-between p-6 rounded-2xl border-b-[6px] transition-all ${isLocked ? 'bg-slate-100 text-slate-300 border-slate-200 pointer-events-none' : 'bg-white border-slate-200 text-slate-800 active:translate-y-1 active:border-b-0'}`;
+
+            let subText = "같은 대문자";
+            if(w === 2) subText = "대문자 & 소문자";
+            if(w === 3) subText = "대문자 & 그림";
+
+            btn.innerHTML = `
+                    <div class="flex items-center gap-5">
+                        <span class="text-3xl font-black opacity-10">${sNum}</span>
+                        <div class="text-left">
+                            <div class="font-black text-xl">STAGE ${sNum}</div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-tight">${subText}</div>
+                        </div>
+                    </div>
+                    ${isLocked ? '🔒' : '➡️'}
+                `;
+            if (!isLocked) btn.onclick = () => startStage(w, i);
+            list.appendChild(btn);
+        }
+    }
+
+    function startStage(w, s) {
+        state.mode = 'stage';
+        state.world = w;
+        state.stage = s;
+        state.difficulty = s <= 3 ? 'normal' : 'hard';
+        setupGame();
+    }
+
+    function startChallengeMode() {
+        state.mode = 'challenge';
+        state.difficulty = 'challenge';
+        setupGame();
+    }
+
+    function setupGame() {
+        state.pHand = [];
+        state.aiHand = [];
+        state.selected = [];
+        state.isProcessing = false;
+
+        if (state.mode === 'stage') {
+            const alpCount = 4 + state.stage;
+            const subset = ALPHABET.slice(0, Math.min(alpCount, 26));
+
+            // 스테이지 모드: 1명당 1장씩 강제 분배 (페어 분리)
+            subset.forEach((item, idx) => {
+                const pairId = `p_${idx}`;
+                state.pHand.push(createCardObj(item, 1, pairId));
+                state.aiHand.push(createCardObj(item, 2, pairId));
+            });
+
+            const joker = { id: 'joker', isJoker: true, pair: 'NONE', display: '🃏' };
+            if (Math.random() > 0.5) state.pHand.push(joker);
+            else state.aiHand.push(joker);
+
+            state.pHand.sort(() => Math.random() - 0.5);
+            state.aiHand.sort(() => Math.random() - 0.5);
+        } else {
+            // 도전 모드: A~Z 중 랜덤 10쌍 + 조커 = 21장
+            const randomAlps = [...ALPHABET].sort(() => Math.random() - 0.5).slice(0, 10);
+            let pool = [];
+            randomAlps.forEach((item, idx) => {
+                const pairId = `p_${idx}`;
+                // 도전모드는 월드3 규칙(그림) + 랜덤배분
+                pool.push(createCardObj(item, 1, pairId));
+                pool.push(createCardObj(item, 2, pairId));
+            });
+            pool.push({ id: 'joker', isJoker: true, pair: 'NONE', display: '🃏' });
+            pool.sort(() => Math.random() - 0.5);
+
+            pool.forEach((c, i) => {
+                if (i % 2 === 0) state.pHand.push(c);
+                else state.aiHand.push(c);
+            });
+        }
+
+        renderGame();
+        showScreen('screen-game');
+        setPhase('pick');
+    }
+
+    function createCardObj(item, type, pairId) {
+        let display = item.c;
+        let isImg = false;
+        let char = item.c;
+
+        // World 1: 무조건 대문자 (Cat 등이 섞이지 않도록 명시)
+        if (state.world === 1) {
+            display = item.c;
+        }
+        // World 2: 타입 2만 소문자
+        else if (state.world === 2) {
+            display = (type === 2) ? item.c.toLowerCase() : item.c;
+        }
+        // World 3: 타입 2만 이미지(폴백:단어)
+        else if (state.world === 3 || state.mode === 'challenge') {
+            if (type === 2) {
+                display = item.w;
+                isImg = true;
+            } else {
+                display = item.c;
+            }
+        }
+        return { id: Math.random().toString(36).substr(2,9), display, pair: pairId, isImg, char };
+    }
+
+    function setPhase(p) {
+        state.phase = p;
+        const turnText = document.getElementById('turn-text');
+        const statusMsg = document.getElementById('status-msg');
+        const endBtn = document.getElementById('btn-end-turn');
+
+        endBtn.classList.add('hidden');
+
+        if (p === 'pick') {
+            turnText.innerText = "나의 차례";
+            turnText.className = "text-3xl font-black text-indigo-600";
+            statusMsg.innerText = "상대의 카드 1장을 뽑으세요.";
+        } else if (p === 'match') {
+            turnText.innerText = "짝 맞추기";
+            turnText.className = "text-3xl font-black text-indigo-500";
+            statusMsg.innerText = "짝이 맞는 카드 2장을 골라주세요.";
+            endBtn.classList.remove('hidden');
+        } else if (p === 'ai') {
+            turnText.innerText = "상대 차례";
+            turnText.className = "text-3xl font-black text-slate-400";
+            statusMsg.innerText = "AI가 생각 중입니다...";
+            setTimeout(aiTurn, 1200);
+        }
+
+        document.getElementById('ai-name').innerText = state.difficulty.toUpperCase() + " AI";
+        document.getElementById('difficulty-badge').innerText = state.difficulty;
+    }
+
+    function renderGame() {
+        const aiArea = document.getElementById('ai-hand');
+        const pArea = document.getElementById('player-hand');
+        aiArea.innerHTML = '';
+        pArea.innerHTML = '';
+
+        state.aiHand.forEach((c, idx) => {
+            const div = document.createElement('div');
+            div.className = `card ai-hidden`;
+            div.innerHTML = `<span class="opacity-10 text-3xl font-black">?</span>`;
+            div.onclick = () => { if(state.phase === 'pick' && !state.isProcessing) pickCard(idx); };
+            aiArea.appendChild(div);
+        });
+
+        state.pHand.forEach((c, idx) => {
+            const div = document.createElement('div');
+            div.className = `card player-front ${state.selected.includes(idx) ? 'selected' : ''} ${c.isJoker ? 'joker' : ''}`;
+
+            if (c.isImg) {
+                div.innerHTML = `
+                        <div class="flex flex-col items-center p-1">
+                            <img src="/PIC ${c.char}.png" class="w-12 h-12 object-contain mb-1" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span class="text-[10px] leading-none uppercase font-black text-center" style="display:none">${c.display}</span>
+                        </div>
+                    `;
+            } else {
+                div.innerText = c.display;
+            }
+
+            div.onclick = () => { if(state.phase === 'match') toggleSelect(idx); };
+            pArea.appendChild(div);
+        });
+
+        document.getElementById('ai-count').innerText = state.aiHand.length;
+        document.getElementById('player-count').innerText = state.pHand.length;
+    }
+
+    async function pickCard(idx) {
+        state.isProcessing = true;
+        const card = state.aiHand.splice(idx, 1)[0];
+        state.pHand.push(card);
+        renderGame();
+        showFeedback("카드 획득!", "text-indigo-600");
+        await sleep(600);
+        state.isProcessing = false;
+        setPhase('match');
+    }
+
+    function toggleSelect(idx) {
+        if (state.pHand[idx].isJoker) return;
+
+        if (state.selected.includes(idx)) {
+            state.selected = state.selected.filter(i => i !== idx);
+        } else {
+            state.selected.push(idx);
+        }
+
+        if (state.selected.length === 2) {
+            const [i1, i2] = state.selected;
+            if (state.pHand[i1].pair === state.pHand[i2].pair) {
+                showFeedback(`Perfect Match! ✨`, "text-green-500");
+                const id1 = state.pHand[i1].id;
+                const id2 = state.pHand[i2].id;
+                state.pHand = state.pHand.filter(c => c.id !== id1 && c.id !== id2);
+                state.selected = [];
+            } else {
+                showFeedback("No Match!", "text-rose-500");
+                state.selected = [];
+            }
+        }
+        renderGame();
+        checkGameOver();
+    }
+
+    function nextPhase() {
+        if (state.phase === 'match') setPhase('ai');
+    }
+
+    async function aiTurn() {
+        if (state.pHand.length === 0) return;
+
+        let targetIdx = 0;
+        const jokerIdx = state.pHand.findIndex(c => c.isJoker);
+
+        if (state.difficulty === 'normal') {
+            targetIdx = Math.floor(Math.random() * state.pHand.length);
+        } else {
+            // Hard/Challenge: 조커 회피 (85%~95%)
+            const prob = state.difficulty === 'hard' ? 0.85 : 0.95;
+            if (jokerIdx !== -1 && Math.random() < prob) {
+                let cands = state.pHand.map((_, i) => i).filter(i => i !== jokerIdx);
+                targetIdx = cands.length > 0 ? cands[Math.floor(Math.random() * cands.length)] : jokerIdx;
+            } else {
+                targetIdx = Math.floor(Math.random() * state.pHand.length);
+            }
+        }
+
+        const card = state.pHand.splice(targetIdx, 1)[0];
+        state.aiHand.push(card);
+        renderGame();
+        showFeedback("상대가 카드를 가져갔어요.", "text-slate-600");
+
+        await sleep(1000);
+
+        // AI 매칭 로직
+        let found = true;
+        while(found) {
+            found = false;
+            for(let i=0; i<state.aiHand.length; i++) {
+                for(let j=i+1; j<state.aiHand.length; j++) {
+                    if(!state.aiHand[i].isJoker && state.aiHand[i].pair === state.aiHand[j].pair) {
+                        state.aiHand.splice(j,1);
+                        state.aiHand.splice(i,1);
+                        showFeedback("상대가 짝을 맞췄습니다.", "text-indigo-400");
+                        found = true; break;
+                    }
+                }
+                if(found) break;
+            }
+        }
+
+        renderGame();
+        if(!checkGameOver()) setPhase('pick');
+    }
+
+    function checkGameOver() {
+        if (state.pHand.length === 0 || state.aiHand.length === 0) {
+            let win = state.pHand.length === 0;
+
+            if (win && state.mode === 'stage') {
+                const currentS = (state.world - 1) * 5 + state.stage;
+                if (currentS === state.unlocked) {
+                    state.unlocked++;
+                    localStorage.setItem('abc_v3_unlocked', state.unlocked);
+                    refreshUnlockUI();
+                }
+            }
+            showResult(win);
+            return true;
+        }
+        return false;
+    }
+
+    function showResult(win) {
+        const sc = document.getElementById('screen-result');
+        const title = document.getElementById('result-title');
+        const emoji = document.getElementById('result-emoji');
+        const desc = document.getElementById('result-desc');
+
+        emoji.innerText = win ? "🏆" : "🃏";
+        title.innerText = win ? "PERFECT!" : "DEFEAT";
+        title.className = `text-5xl font-black mb-4 ${win ? 'text-indigo-600' : 'text-slate-800'}`;
+        desc.innerText = win ? "모든 카드를 성공적으로 버렸습니다!" : "조커가 당신의 손에 남았습니다...";
+
+        sc.classList.remove('hidden');
+    }
+
+    function retryGame() {
+        setupGame();
+        showScreen('screen-game');
+    }
+
+    function showFeedback(text, color) {
+        const layer = document.getElementById('feedback-layer');
+        const el = document.createElement('div');
+        el.className = `text-2xl font-black animate-bounce ${color} bg-white/90 px-6 py-3 rounded-3xl shadow-2xl border border-white`;
+        el.innerText = text;
+        layer.innerHTML = '';
+        layer.appendChild(el);
+        setTimeout(() => { if(layer.firstChild === el) layer.innerHTML = ''; }, 1800);
+    }
+
+    function resetData() {
+        if(confirm("모든 데이터를 초기화할까요?")) {
+            localStorage.removeItem('abc_v3_unlocked');
+            location.reload();
+        }
+    }
+
+    function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+</script>
+</body>
+</html>
