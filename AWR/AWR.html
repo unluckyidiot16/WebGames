@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>알파워드 레이싱 PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f3f4f6; }
+        .tile { transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); cursor: pointer; user-select: none; }
+        .tile:hover:not(.disabled) { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        .tile.selected { border: 4px solid #3b82f6; background-color: #eff6ff; transform: translateY(-8px); }
+        .tile.disabled { cursor: not-allowed; opacity: 0.6; }
+        .rare-char { color: #f43f5e; font-weight: 900; }
+        .scroll-custom::-webkit-scrollbar { width: 4px; }
+        .scroll-custom::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .card-pop { animation: cardPop 0.3s ease-out; }
+        @keyframes cardPop { 0% { transform: scale(0.8); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4">
+
+<!-- Header -->
+<header class="w-full max-w-5xl flex justify-between items-center mb-6 bg-white p-5 rounded-3xl shadow-sm border border-slate-200">
+    <div class="flex items-center gap-4">
+        <div class="bg-blue-600 text-white w-12 h-12 rounded-2xl flex items-center justify-center text-2xl shadow-lg">🔤</div>
+        <div>
+            <h1 class="text-xl font-black text-slate-800 leading-tight">ALPHA WORD RACING</h1>
+            <p id="game-status" class="text-xs font-bold text-blue-500 uppercase tracking-widest mt-1">Ready to start</p>
+        </div>
+    </div>
+    <div class="flex gap-4">
+        <div class="bg-blue-50 px-5 py-2 rounded-2xl border border-blue-100 text-center min-w-[80px]">
+            <p class="text-[10px] text-blue-400 font-black">PLAYER</p>
+            <p id="player-score" class="text-2xl font-black text-blue-700">0</p>
+        </div>
+        <div class="bg-slate-50 px-5 py-2 rounded-2xl border border-slate-200 text-center min-w-[80px]">
+            <p class="text-[10px] text-slate-400 font-black">AI (CPU)</p>
+            <p id="ai-score" class="text-2xl font-black text-slate-600">0</p>
+        </div>
+    </div>
+</header>
+
+<main class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-12 gap-8">
+
+    <!-- Sidebar -->
+    <div class="lg:col-span-3 space-y-4">
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200">
+            <h3 class="font-black text-slate-800 mb-3 text-sm flex items-center gap-2">
+                <span class="text-blue-500 font-bold">🎯</span> 경기 목표: <span id="goal-display">20</span>점
+            </h3>
+            <p id="deck-count-text" class="text-xs font-bold text-slate-400">남은 카드: -장</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-[2rem] shadow-sm border border-slate-200 h-[320px] flex flex-col">
+            <h3 class="font-black text-slate-800 mb-2 text-sm">경기 로그</h3>
+            <ul id="game-log" class="text-[11px] space-y-2 text-slate-500 overflow-y-auto scroll-custom flex-grow pr-1">
+                <li class="p-2 bg-slate-50 rounded-xl">대결을 시작하세요!</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Game Board -->
+    <div class="lg:col-span-9 space-y-6">
+
+        <!-- AI Area -->
+        <div class="bg-slate-100 p-5 rounded-[2.5rem] flex flex-col items-center gap-3 border-2 border-slate-200 border-dashed opacity-80">
+            <div id="ai-hand" class="flex gap-1.5 min-h-[50px]">
+                <!-- AI Cards -->
+            </div>
+            <span id="ai-thinking" class="text-[10px] font-black text-slate-400 uppercase tracking-widest">AI가 패를 계산 중입니다</span>
+        </div>
+
+        <!-- Central Pile -->
+        <div class="flex justify-center items-center gap-16 py-4">
+            <div class="text-center">
+                <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Draw (Deck)</p>
+                <div onclick="pickAction('deck')" id="draw-pile" class="w-24 h-32 bg-blue-600 rounded-2xl shadow-xl flex items-center justify-center cursor-pointer hover:bg-blue-700 transition-all border-4 border-blue-400 active:scale-95">
+                    <span class="text-white font-black text-4xl">?</span>
+                </div>
+            </div>
+
+            <div class="text-center">
+                <p class="text-[10px] font-black text-slate-400 mb-3 uppercase tracking-widest">Take (Discard)</p>
+                <div onclick="pickAction('discard')" id="discard-pile" class="w-24 h-32 bg-white border-4 border-dashed border-slate-200 rounded-2xl flex items-center justify-center text-4xl font-black text-slate-300 cursor-pointer hover:border-blue-400 hover:text-blue-200 transition-all">
+                    -
+                </div>
+            </div>
+        </div>
+
+        <!-- Player Area -->
+        <div class="bg-white p-6 md:p-8 rounded-[3rem] shadow-xl border border-slate-100 space-y-6">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+                <div class="flex items-center gap-3">
+                    <span class="text-sm font-black text-slate-800">나의 패</span>
+                    <span id="hand-count" class="bg-blue-100 px-3 py-1 rounded-full text-xs font-bold text-blue-600">0/7</span>
+                </div>
+
+                <div class="flex flex-col items-center">
+                    <div id="word-preview" class="text-4xl font-black text-blue-600 tracking-[0.2em] uppercase h-10 flex items-center"></div>
+                    <div id="word-info" class="text-[10px] font-bold text-slate-400 h-4 mt-1"></div>
+                </div>
+
+                <div class="flex gap-2">
+                    <button onclick="submitAction()" id="btn-submit" class="bg-green-500 text-white px-8 py-3.5 rounded-2xl font-black text-sm hover:bg-green-600 disabled:opacity-30 shadow-lg shadow-green-100 transition-all">SUBMIT</button>
+                    <button onclick="discardAction()" id="btn-discard" class="bg-slate-800 text-white px-8 py-3.5 rounded-2xl font-black text-sm hover:bg-slate-900 disabled:opacity-30 transition-all">THROW</button>
+                </div>
+            </div>
+
+            <div id="player-hand" class="flex flex-wrap justify-center gap-3 min-h-[110px] p-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100">
+                <!-- Player Tiles -->
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Overlays -->
+<div id="start-overlay" class="fixed inset-0 bg-slate-900/95 flex items-center justify-center z-50 p-6 backdrop-blur-sm">
+    <div class="bg-white p-10 rounded-[3.5rem] max-w-md w-full text-center shadow-2xl">
+        <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center mx-auto mb-6 text-4xl">🏁</div>
+        <h2 class="text-3xl font-black text-slate-800 mb-2">알파워드 레이싱 PRO</h2>
+        <p class="text-slate-500 text-sm mb-10 font-medium">초등 영단어로 즐기는 고속 단어 레이스!</p>
+
+        <div class="text-left mb-8">
+            <p class="text-xs font-black text-slate-400 mb-3 uppercase tracking-widest ml-1">목표 점수 선택</p>
+            <div class="grid grid-cols-3 gap-3">
+                <button onclick="selectGoal(15)" class="goal-btn py-3 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 transition-all">15점</button>
+                <button onclick="selectGoal(20)" class="goal-btn py-3 rounded-2xl border-2 border-blue-600 bg-blue-50 font-bold text-blue-600 transition-all">20점</button>
+                <button onclick="selectGoal(30)" class="goal-btn py-3 rounded-2xl border-2 border-slate-100 font-bold text-slate-400 hover:bg-slate-50 transition-all">30점</button>
+            </div>
+        </div>
+
+        <button onclick="startGame()" class="w-full bg-blue-600 text-white py-5 rounded-3xl font-black text-xl hover:bg-blue-700 shadow-xl shadow-blue-200 transition-all active:scale-95">경기 시작하기</button>
+    </div>
+</div>
+
+<div id="end-overlay" class="hidden fixed inset-0 bg-slate-900/98 flex items-center justify-center z-50 p-6 text-center backdrop-blur-xl">
+    <div class="bg-white p-12 rounded-[4rem] max-w-sm w-full shadow-2xl">
+        <div id="end-icon" class="text-8xl mb-6">🏆</div>
+        <h2 id="end-title" class="text-4xl font-black mb-3 text-slate-800">우승!</h2>
+        <p id="end-msg" class="text-slate-500 mb-10 leading-relaxed font-medium">단어 조합 능력이 정말 훌륭합니다!</p>
+        <button onclick="location.reload()" class="w-full bg-slate-900 text-white py-5 rounded-[2rem] font-black text-lg hover:bg-black">다시 도전</button>
+    </div>
+</div>
+
+<script>
+    // 1. Data & Config
+    const apiKey = "";
+    const RARE_LETTERS = ['V', 'J', 'Q', 'X', 'Z'];
+    const ELEMENTARY_DIST = {
+        'A': 12, 'E': 14, 'I': 10, 'O': 10, 'U': 6,
+        'T': 8, 'N': 7, 'R': 7, 'S': 7, 'L': 6, 'D': 5, 'C': 5, 'M': 5, 'P': 5,
+        'B': 3, 'G': 3, 'H': 4, 'F': 3, 'K': 2, 'W': 2, 'Y': 2,
+        'V': 1, 'J': 1, 'Q': 1, 'X': 1, 'Z': 1
+    };
+
+    // Local Local AI Dictionary (Standard Elementary Words)
+    const LOCAL_DICT = ["ACT","ADD","AIR","ALL","AND","ANT","ANY","APPLE","ARM","ART","ASK","BABY","BACK","BAD","BAG","BALL","BANK","BASE","BEAR","BED","BEE","BELL","BEST","BIG","BIKE","BIRD","BLUE","BOAT","BODY","BOOK","BOY","BOX","BUS","BUY","CAKE","CALL","CAMP","CAN","CAP","CAR","CARD","CARE","CAT","CITY","COLD","COME","COOK","COOL","COPY","CORN","COW","CRY","CUP","CUT","DAD","DARK","DAY","DEAD","DEEP","DESK","DIE","DIG","DOG","DOOR","DOWN","DRAW","DRINK","DRUM","DRY","DUST","DUTY","EACH","EAR","EAT","EGG","END","EYE","FACE","FACT","FAIL","FAIR","FALL","FAMILY","FAN","FAR","FARM","FAST","FAT","FEAR","FEED","FEEL","FEET","FILE","FILL","FILM","FIND","FINE","FIRE","FISH","FIVE","FLAT","FLOW","FLY","FOOD","FOOT","FOR","FORM","FREE","FROG","FROM","FULL","GAME","GATE","GIFT","GIRL","GIVE","GLAD","GO","GOAL","GOAT","GOLD","GOOD","GRAY","GROW","HAIR","HALF","HALL","HAND","HANG","HARD","HAT","HAVE","HEAD","HEAR","HEAT","HELP","HERE","HIGH","HILL","HIT","HOLD","HOLE","HOME","HOPE","HOT","HOUR","HOUSE","HOW","HUGE","HUNT","HURT","ICE","IDEA","INK","IRON","ITEM","JAM","JET","JOB","JOY","JUMP","JUST","KEEP","KEY","KICK","KIND","KING","KISS","KNEE","KNOW","LADY","LAKE","LAMP","LAND","LAST","LATE","LAW","LEAD","LEAF","LEFT","LEG","LEND","LIFE","LIFT","LIKE","LINE","LINK","LIST","LIVE","LONG","LOOK","LOVE","LOW","LUCK","MAIL","MAIN","MAKE","MALE","MANY","MAP","MARK","ME","MEAL","MEAN","MEAT","MEET","MEN","MENU","MILK","MIND","MINE","MISS","MIX","MOM","MOON","MOST","MOVE","MUCH","MUST","NAME","NEAR","NECK","NEED","NEW","NEWS","NEXT","NICE","NINE","NO","NOT","NOW","OIL","OLD","ONE","ONLY","OPEN","OR","OUT","OVER","OWN","PAGE","PAIN","PAIR","PAN","PAPER","PARK","PART","PASS","PAST","PATH","PAY","PEN","PET","PICK","PIE","PIG","PINK","PLAN","PLAY","PLUS","POEM","POOL","POOR","PORT","POST","POT","PULL","PUSH","PUT","QUIT","RACE","RAIN","RARE","RATE","READ","REAL","RED","REST","RICE","RICH","RIDE","RING","RISE","RISK","ROAD","ROCK","ROOF","ROOM","ROOT","ROPE","ROSE","RULE","RUN","SAD","SAFE","SAIL","SALE salt same sand save say sea see seed send sent set ship shoe shop shot show shut sick side sign silk sing sit size skin sky sleep slow snow soft soil some song soon sort soul soup spot star stay step stop such suit sun sure swim tail take talk tall tape task tea team tear tell ten tent term test text than that the them then they thin this thus tick tide till time tiny tire to told toll tone too tool top tour town toy tree trip true tube tune turn two type unit upon us use van very view vote wait wake walk wall want war warm wash water wave way we weak wear web week well went west wet what when who why wide wife wild will win wind wine wing wish with wood word work worm wrap yard year yellow yes yet you your zero zone zoo"];
+
+    // 2. State
+    let state = {
+        goalScore: 20,
+        playerScore: 0,
+        aiScore: 0,
+        playerHand: [],
+        aiHand: [],
+        deck: [],
+        discardPile: [],
+        selectedIndices: [],
+        phase: 'pick', // 'pick' or 'action'
+        isPlayerTurn: true,
+        usedWords: new Set(),
+        gameActive: false,
+        isValidating: false
+    };
+
+    // 3. Logic
+    function selectGoal(g) {
+        state.goalScore = g;
+        document.querySelectorAll('.goal-btn').forEach(btn => {
+            btn.classList.remove('border-blue-600', 'bg-blue-50', 'text-blue-600');
+            btn.classList.add('border-slate-100', 'text-slate-400');
+        });
+        event.target.classList.add('border-blue-600', 'bg-blue-50', 'text-blue-600');
+        event.target.classList.remove('border-slate-100', 'text-slate-400');
+    }
+
+    function initDeck() {
+        let d = [];
+        for (let char in ELEMENTARY_DIST) {
+            for (let i = 0; i < ELEMENTARY_DIST[char]; i++) d.push(char);
+        }
+        for (let i = d.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [d[i], d[j]] = [d[j], d[i]];
+        }
+        state.deck = d;
+    }
+
+    function startGame() {
+        initDeck();
+        state.playerHand = [];
+        state.aiHand = [];
+        for (let i = 0; i < 7; i++) {
+            state.playerHand.push(state.deck.pop());
+            state.aiHand.push(state.deck.pop());
+        }
+        state.gameActive = true;
+        state.phase = 'pick';
+        state.playerScore = 0;
+        state.aiScore = 0;
+        state.isPlayerTurn = true;
+        document.getElementById('start-overlay').classList.add('hidden');
+        document.getElementById('goal-display').innerText = state.goalScore;
+        updateUI();
+        log("경기를 시작합니다! 덱이나 버림 더미에서 카드를 하나 선택하세요.");
+    }
+
+    function pickAction(source) {
+        if (!state.isPlayerTurn || state.phase !== 'pick' || !state.gameActive) return;
+
+        if (source === 'deck') {
+            if (state.deck.length === 0) return;
+            state.playerHand.push(state.deck.pop());
+            log("덱에서 카드를 가져왔습니다.");
+        } else {
+            if (state.discardPile.length === 0) return;
+            const char = state.discardPile.pop();
+            state.playerHand.push(char);
+            log(`버림 더미에서 '${char}'를 가져왔습니다.`);
+        }
+
+        state.phase = 'action';
+        updateUI();
+    }
+
+    function toggleSelect(idx) {
+        if (!state.isPlayerTurn || state.phase !== 'action' || state.isValidating) return;
+        const pos = state.selectedIndices.indexOf(idx);
+        if (pos > -1) state.selectedIndices.splice(pos, 1);
+        else state.selectedIndices.push(idx);
+        updateUI();
+    }
+
+    async function submitAction() {
+        const word = state.selectedIndices.map(i => state.playerHand[i]).join('');
+        if (word.length < 2) return;
+        if (state.usedWords.has(word)) {
+            log(`'${word}'은(는) 이미 사용한 단어입니다.`);
+            return;
+        }
+
+        state.isValidating = true;
+        updateUI();
+
+        // Validate with Gemini
+        const result = await validateWord(word);
+        state.isValidating = false;
+
+        if (result.valid) {
+            const score = calculateScore(word);
+            state.playerScore += score;
+            state.usedWords.add(word);
+
+            // Remove tiles
+            state.playerHand = state.playerHand.filter((_, i) => !state.selectedIndices.includes(i));
+            state.selectedIndices = [];
+
+            log(`[성공] ${word} (+${score}점): ${result.meaning}`);
+            refillHand(state.playerHand);
+            checkWin();
+            if (state.gameActive) endTurn();
+        } else {
+            log(`[실패] '${word}'은(는) 유효하지 않은 단어입니다.`);
+        }
+        updateUI();
+    }
+
+    function discardAction() {
+        if (state.selectedIndices.length !== 1) {
+            log("버릴 카드 1장을 선택해주세요.");
+            return;
+        }
+        const idx = state.selectedIndices[0];
+        const char = state.playerHand.splice(idx, 1)[0];
+        state.discardPile.push(char);
+        state.selectedIndices = [];
+        log(`카드 '${char}'를 버렸습니다.`);
+
+        refillHand(state.playerHand);
+        endTurn();
+    }
+
+    function refillHand(hand) {
+        while (hand.length < 7 && state.deck.length > 0) {
+            hand.push(state.deck.pop());
+        }
+    }
+
+    function endTurn() {
+        state.isPlayerTurn = false;
+        state.phase = 'pick';
+        state.selectedIndices = [];
+        updateUI();
+        setTimeout(aiMove, 1000);
+    }
+
+    // Local Logic AI (Rule-based)
+    function aiMove() {
+        if (!state.gameActive) return;
+
+        // 1. Pick (AI logic: if top discard is vowel or rare, take it)
+        let topDiscard = state.discardPile.length > 0 ? state.discardPile[state.discardPile.length - 1] : null;
+        if (topDiscard && (['A','E','I','O','U'].includes(topDiscard) || RARE_LETTERS.includes(topDiscard))) {
+            state.aiHand.push(state.discardPile.pop());
+            log("AI가 버림 더미에서 카드를 가져갔습니다.");
+        } else {
+            state.aiHand.push(state.deck.pop());
+            log("AI가 덱에서 카드를 뽑았습니다.");
+        }
+        updateUI();
+
+        setTimeout(() => {
+            // 2. Action (Search best word from local dict)
+            let bestWord = null;
+            let bestScore = -1;
+
+            const handStr = state.aiHand.join('');
+            // Shuffle local dict slightly for variety
+            const shuffledDict = [...LOCAL_DICT].sort(() => Math.random() - 0.5);
+
+            for (let word of shuffledDict) {
+                if (state.usedWords.has(word)) continue;
+                if (canForm(word, state.aiHand)) {
+                    const s = calculateScore(word);
+                    if (s > bestScore) {
+                        bestScore = s;
+                        bestWord = word;
+                    }
+                }
+            }
+
+            if (bestWord && (bestScore >= 3 || Math.random() > 0.3)) {
+                state.aiScore += bestScore;
+                state.usedWords.add(bestWord);
+                // Remove from hand
+                let tempHand = [...state.aiHand];
+                for (let c of bestWord) {
+                    tempHand.splice(tempHand.indexOf(c), 1);
+                }
+                state.aiHand = tempHand;
+                log(`AI가 '${bestWord}'를 제출했습니다! (+${bestScore}점)`);
+            } else {
+                // Just discard a letter
+                const dIdx = Math.floor(Math.random() * state.aiHand.length);
+                const char = state.aiHand.splice(dIdx, 1)[0];
+                state.discardPile.push(char);
+                log(`AI가 '${char}'를 버렸습니다.`);
+            }
+
+            refillHand(state.aiHand);
+            checkWin();
+
+            if (state.gameActive) {
+                state.isPlayerTurn = true;
+                state.phase = 'pick';
+                log("나의 차례입니다.");
+                updateUI();
+            }
+        }, 800);
+    }
+
+    function canForm(word, hand) {
+        let h = [...hand];
+        for (let c of word) {
+            const i = h.indexOf(c);
+            if (i === -1) return false;
+            h.splice(i, 1);
+        }
+        return true;
+    }
+
+    // 4. API & Utils
+    async function validateWord(word) {
+        const systemPrompt = "Judge English words for elementary students. Respond ONLY in JSON: { 'valid': boolean, 'meaning': 'Korean meaning' }.";
+        const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    contents: [{ parts: [{ text: `Is "${word}" a valid elementary-level English word?` }] }],
+                    systemInstruction: { parts: [{ text: systemPrompt }] },
+                    generationConfig: { responseMimeType: "application/json" }
+                })
+            });
+            const data = await response.json();
+            return JSON.parse(data.candidates[0].content.parts[0].text);
+        } catch (e) {
+            // Fallback to local dict check if API fails
+            return { valid: LOCAL_DICT.includes(word), meaning: "사전 확인" };
+        }
+    }
+
+    function calculateScore(word) {
+        const len = word.length;
+        let s = 0;
+        if (len === 2) s = 1;
+        else if (len === 3) s = 3;
+        else if (len === 4) s = 5;
+        else if (len === 5) s = 8;
+        else if (len >= 6) s = 12;
+
+        const counts = {};
+        let double = false;
+        let rare = false;
+        for (let c of word) {
+            counts[c] = (counts[c] || 0) + 1;
+            if (counts[c] >= 2) double = true;
+            if (RARE_LETTERS.includes(c)) rare = true;
+        }
+        if (double) s += 1;
+        if (rare) s += 2;
+        return s;
+    }
+
+    function checkWin() {
+        if (state.playerScore >= state.goalScore) endShow(true);
+        else if (state.aiScore >= state.goalScore) endShow(false);
+    }
+
+    function endShow(win) {
+        state.gameActive = false;
+        const overlay = document.getElementById('end-overlay');
+        overlay.classList.remove('hidden');
+        document.getElementById('end-icon').innerText = win ? "🏆" : "💀";
+        document.getElementById('end-title').innerText = win ? "승리하였습니다!" : "패배하였습니다...";
+        document.getElementById('end-msg').innerText = win ? `대단합니다! ${state.playerScore}점으로 우승했습니다.` : `AI가 먼저 ${state.aiScore}점에 도달했습니다.`;
+    }
+
+    function updateUI() {
+        document.getElementById('player-score').innerText = state.playerScore;
+        document.getElementById('ai-score').innerText = state.aiScore;
+        document.getElementById('deck-count-text').innerText = `남은 카드: ${state.deck.length}장`;
+        document.getElementById('hand-count').innerText = `${state.playerHand.length}/7`;
+
+        const statusEl = document.getElementById('game-status');
+        statusEl.innerText = state.isPlayerTurn ? `Player Turn (${state.phase})` : "AI Thinking...";
+        statusEl.className = state.isPlayerTurn ? "text-xs font-bold text-blue-500 uppercase tracking-widest mt-1" : "text-xs font-bold text-rose-500 uppercase tracking-widest mt-1";
+
+        const discardEl = document.getElementById('discard-pile');
+        if (state.discardPile.length > 0) {
+            discardEl.innerText = state.discardPile[state.discardPile.length - 1];
+            discardEl.classList.remove('text-slate-300', 'border-dashed');
+            discardEl.classList.add('text-slate-800', 'border-solid', 'bg-white', 'shadow-md');
+        } else {
+            discardEl.innerText = "-";
+            discardEl.classList.add('text-slate-300', 'border-dashed');
+            discardEl.classList.remove('text-slate-800', 'border-solid', 'bg-white', 'shadow-md');
+        }
+
+        const handEl = document.getElementById('player-hand');
+        handEl.innerHTML = '';
+        state.playerHand.forEach((char, i) => {
+            const isSel = state.selectedIndices.includes(i);
+            const tile = document.createElement('div');
+            const isAct = state.isPlayerTurn && state.phase === 'action';
+            tile.className = `tile w-12 h-16 bg-white rounded-xl shadow-sm flex items-center justify-center text-2xl font-black border-2 ${isSel ? 'selected' : 'border-slate-100'} ${!isAct ? 'disabled' : ''}`;
+            tile.innerHTML = RARE_LETTERS.includes(char) ? `<span class="rare-char">${char}</span>` : char;
+            tile.onclick = () => toggleSelect(i);
+            handEl.appendChild(tile);
+        });
+
+        const aiHandEl = document.getElementById('ai-hand');
+        aiHandEl.innerHTML = '';
+        state.aiHand.forEach(() => {
+            const back = document.createElement('div');
+            back.className = "w-10 h-14 bg-slate-300 rounded-lg border border-slate-400";
+            aiHandEl.appendChild(back);
+        });
+
+        const currentWord = state.selectedIndices.map(i => state.playerHand[i]).join('');
+        document.getElementById('word-preview').innerText = currentWord;
+
+        const infoEl = document.getElementById('word-info');
+        if (state.isValidating) {
+            infoEl.innerText = "제미나이 판정 중...";
+            infoEl.className = "text-[10px] font-bold text-blue-500 animate-pulse";
+        } else if (currentWord.length >= 2) {
+            infoEl.innerText = "단어 제출 가능";
+            infoEl.className = "text-[10px] font-bold text-green-500";
+        } else {
+            infoEl.innerText = "";
+        }
+
+        document.getElementById('btn-submit').disabled = !state.isPlayerTurn || state.phase !== 'action' || currentWord.length < 2 || state.isValidating;
+        document.getElementById('btn-discard').disabled = !state.isPlayerTurn || state.phase !== 'action' || state.selectedIndices.length !== 1 || state.isValidating;
+        document.getElementById('draw-pile').style.opacity = (state.isPlayerTurn && state.phase === 'pick') ? "1" : "0.3";
+        document.getElementById('ai-thinking').className = state.isPlayerTurn ? "text-[10px] font-black text-slate-400 uppercase tracking-widest" : "text-[10px] font-black text-rose-400 uppercase tracking-widest animate-pulse";
+    }
+
+    function log(msg) {
+        const el = document.getElementById('game-log');
+        const li = document.createElement('li');
+        li.className = "p-3 bg-white rounded-2xl border border-slate-100 shadow-sm card-pop";
+        li.innerHTML = `<span class="text-blue-500 mr-2 font-black">#</span>${msg}`;
+        el.prepend(li);
+    }
+</script>
+</body>
+</html>
