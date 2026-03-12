@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>알파벳 런 (Alphabet Run) Pro</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #f0f9ff;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
+            user-select: none;
+        }
+        canvas {
+            display: block;
+            background: linear-gradient(to bottom, #87ceeb, #e0f2fe);
+            transition: transform 0.1s;
+        }
+        .shake { animation: shake-animation 0.5s; }
+        @keyframes shake-animation {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-8px); }
+            50% { transform: translateX(8px); }
+            75% { transform: translateX(-8px); }
+            100% { transform: translateX(0); }
+        }
+        .ui-panel { pointer-events: none; position: absolute; inset: 0; display: flex; flex-direction: column; }
+        .interactive { pointer-events: auto; }
+        .screen {
+            position: absolute;
+            inset: 0;
+            background: rgba(240, 249, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+        }
+        .hidden { display: none !important; }
+        .btn {
+            transition: all 0.2s;
+            cursor: pointer;
+            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
+        }
+        .btn:active { transform: translateY(2px); box-shadow: 0 2px 0 rgba(0,0,0,0.1); }
+        .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            padding: 20px;
+            width: 100%;
+            max-width: 360px;
+        }
+        .stage-item {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 1.2rem;
+            border: 3px solid #ddd;
+            background: #fff;
+            color: #ccc;
+            cursor: not-allowed;
+            position: relative;
+        }
+        .stage-item.unlocked {
+            border-color: #3b82f6;
+            color: #3b82f6;
+            cursor: pointer;
+            background: #eff6ff;
+        }
+        .stage-item.unlocked:hover { background: #3b82f6; color: white; }
+    </style>
+</head>
+<body class="flex items-center justify-center h-screen">
+
+<div id="game-container" class="relative w-full h-full max-w-md overflow-hidden bg-white shadow-2xl">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- UI Layers -->
+    <div id="ui-layer" class="ui-panel">
+
+        <!-- 1. 타이틀 화면 -->
+        <div id="screen-title" class="screen">
+            <div class="text-6xl mb-4">🏃‍♂️🔠</div>
+            <h1 class="text-5xl text-blue-600 mb-8 font-bold">알파벳 런</h1>
+            <p class="text-blue-400 mb-12 animate-pulse">터치하여 모험을 시작하세요</p>
+            <button onclick="showLobby()" class="btn interactive bg-blue-500 text-white text-2xl px-12 py-4 rounded-full shadow-lg">시작하기</button>
+        </div>
+
+        <!-- 2. 로비 화면 -->
+        <div id="screen-lobby" class="screen hidden">
+            <h2 class="text-3xl text-blue-700 mb-10">메인 로비</h2>
+            <div class="flex flex-col gap-4 w-64">
+                <button onclick="showStages()" class="btn interactive bg-blue-500 text-white py-4 rounded-2xl text-xl font-bold">스테이지 모드</button>
+                <button id="infinite-btn" onclick="startInfinite()" class="btn interactive bg-purple-500 text-white py-4 rounded-2xl text-xl font-bold opacity-50 cursor-not-allowed" disabled>무한 모드 (잠김)</button>
+                <button onclick="showTitle()" class="btn interactive bg-gray-400 text-white py-3 rounded-2xl text-lg">홈으로</button>
+            </div>
+            <p id="unlock-hint" class="mt-6 text-gray-500 text-sm text-center px-6 leading-relaxed">스테이지 20을 클리어하면<br>무한 모드가 해금됩니다!</p>
+        </div>
+
+        <!-- 3. 스테이지 선택 화면 -->
+        <div id="screen-stages" class="screen hidden overflow-y-auto">
+            <h2 class="text-3xl text-blue-700 mt-8 mb-4">스테이지 선택</h2>
+            <div id="stage-grid" class="stage-grid interactive mb-8"></div>
+            <button onclick="showLobby()" class="btn interactive bg-gray-400 text-white py-3 px-10 rounded-2xl mb-8">뒤로가기</button>
+        </div>
+
+        <!-- 4. 인게임 HUD -->
+        <div id="hud" class="hidden flex justify-between items-start p-4">
+            <div class="flex flex-col">
+                <div class="text-white text-xl drop-shadow-md bg-blue-500 px-3 py-1 rounded-full">점수: <span id="score-display">0</span></div>
+                <div class="flex mt-2 gap-1" id="hearts-container"></div>
+            </div>
+            <div class="flex flex-col items-end">
+                <div id="stage-info" class="text-blue-800 text-lg font-bold bg-white/80 px-3 py-1 rounded-lg border-2 border-blue-400">Stage 1</div>
+                <div id="target-display" class="mt-2 text-2xl bg-white px-4 py-2 rounded-xl border-4 border-blue-600 animate-bounce flex items-center gap-2">
+                    <span>Target:</span>
+                    <img id="target-img-ui" src="" class="w-8 h-8 object-contain hidden">
+                    <span id="target-text-ui">A</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- 5. 결과 모달 -->
+        <div id="clear-modal" class="hidden absolute inset-0 flex items-center justify-center bg-black/40 interactive z-[60]">
+            <div class="bg-white p-8 text-center rounded-3xl shadow-2xl max-w-[80%]">
+                <h2 class="text-3xl text-green-500 mb-4 font-bold">참 잘했어요! ✨</h2>
+                <p id="clear-msg" class="text-gray-700 mb-6 text-lg whitespace-pre-line"></p>
+                <button onclick="nextStageAction()" class="btn bg-blue-500 text-white py-3 px-8 rounded-xl text-xl w-full">다음 단계로</button>
+            </div>
+        </div>
+
+        <div id="gameover-modal" class="hidden absolute inset-0 flex items-center justify-center bg-black/60 interactive z-[60]">
+            <div class="bg-white p-8 text-center rounded-3xl shadow-2xl max-w-[80%]">
+                <h2 class="text-3xl text-red-500 mb-4 font-bold">아쉬워요! 💪</h2>
+                <p id="final-score" class="text-xl mb-6 text-gray-700"></p>
+                <button onclick="showLobby()" class="btn bg-blue-500 text-white py-3 px-8 rounded-xl text-xl w-full">다시 도전하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    /**
+     * 알파벳 런 Pro - 자석 아이템 제거 버전
+     */
+
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const container = document.getElementById('game-container');
+
+    // --- GAME STATE ---
+    let state = {
+        isRunning: false,
+        isInfinite: false,
+        score: 0,
+        hearts: 3,
+        combo: 0,
+        stage: 1,
+        unlockedStage: parseInt(localStorage.getItem('alphabet_run_unlocked') || 1),
+        targetIndex: 0,
+        targets: [],
+        currentMode: 'sequence',
+        player: {
+            x: 0,
+            y: 0,
+            w: 70,
+            h: 70,
+            targetX: 0,
+            img: new Image()
+        },
+        groundY: 0,
+        floorHeight: 80,
+        objects: [],
+        lastSpawnTime: 0,
+        slowTimer: 0, shieldTimer: 0,
+        gameTime: 0
+    };
+
+    // --- STAGE CONFIG ---
+    function getStageConfig(id) {
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        const lettersCount = Math.min(2 + id, 26);
+        let targets = alphabet.substring(0, lettersCount).split("");
+        let mode = 'sequence';
+
+        if (id >= 16) {
+            const words = ["CAT", "DOG", "SUN", "MAP", "APPLE", "BANANA", "PIG", "HAT"];
+            const word = words[(id - 16) % words.length];
+            targets = word.split("");
+            mode = 'word';
+        } else if (id >= 11) {
+            mode = 'case';
+        }
+
+        return {
+            id, targets, mode,
+            spawnInterval: Math.max(1200 - (id * 35), 500),
+            speed: 1.6 + (id * 0.12),
+            rotate: 0.02 + (id * 0.005)
+        };
+    }
+
+    // --- SCREEN NAVIGATION ---
+    function hideAllScreens() {
+        const screens = ['screen-title', 'screen-lobby', 'screen-stages', 'hud', 'clear-modal', 'gameover-modal'];
+        screens.forEach(s => document.getElementById(s).classList.add('hidden'));
+    }
+
+    function showTitle() {
+        hideAllScreens();
+        document.getElementById('screen-title').classList.remove('hidden');
+        state.isRunning = false;
+    }
+
+    function showLobby() {
+        hideAllScreens();
+        document.getElementById('screen-lobby').classList.remove('hidden');
+
+        const infBtn = document.getElementById('infinite-btn');
+        const hint = document.getElementById('unlock-hint');
+        if (state.unlockedStage > 20) {
+            infBtn.disabled = false;
+            infBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            infBtn.innerText = "무한 모드 🔥";
+            hint.innerText = "최고 기록에 도전하세요!";
+        }
+    }
+
+    function showStages() {
+        hideAllScreens();
+        const grid = document.getElementById('stage-grid');
+        grid.innerHTML = '';
+
+        for (let i = 1; i <= 20; i++) {
+            const item = document.createElement('div');
+            item.innerText = i;
+            item.className = 'stage-item';
+            if (i <= state.unlockedStage) {
+                item.classList.add('unlocked');
+                item.onclick = () => startGame(i);
+            } else {
+                item.innerHTML = `<span>${i}</span><span class="text-[10px] absolute bottom-1 right-1">🔒</span>`;
+            }
+            grid.appendChild(item);
+        }
+        document.getElementById('screen-stages').classList.remove('hidden');
+    }
+
+    // --- CHARACTER IMAGE LOGIC ---
+    function updatePlayerSprite() {
+        const currentTarget = state.targets[state.targetIndex];
+        if (!currentTarget) return;
+
+        const charName = currentTarget.toUpperCase();
+        state.player.img.src = `/PIC ${charName}.png`;
+
+        const uiImg = document.getElementById('target-img-ui');
+        const uiText = document.getElementById('target-text-ui');
+        uiImg.src = `/PIC ${charName}.png`;
+        uiImg.classList.remove('hidden');
+        uiText.innerText = currentTarget;
+
+        state.player.img.onerror = () => {
+            uiImg.classList.add('hidden');
+        };
+    }
+
+    // --- ENTITIES ---
+    class Alphabet {
+        constructor(char, isTarget, itemType = null) {
+            this.char = char;
+            this.isTarget = isTarget;
+            this.itemType = itemType;
+            this.w = 48;
+            this.h = 48;
+            this.x = Math.random() * (canvas.width - this.w) + this.w / 2;
+            this.y = -50;
+            this.rotation = 0;
+            this.rotationSpeed = (Math.random() - 0.5) * 0.08;
+            this.processed = false;
+
+            const config = state.isInfinite ? getStageConfig(20) : getStageConfig(state.stage);
+            this.speed = config.speed + (Math.random() * 0.4);
+        }
+
+        update() {
+            if (this.processed) return;
+
+            let currentSpeed = this.speed;
+            if (state.slowTimer > 0) currentSpeed *= 0.6;
+            this.y += currentSpeed;
+            this.rotation += this.rotationSpeed;
+
+            if (this.y + this.h / 2 >= state.groundY) {
+                this.processed = true;
+            }
+        }
+
+        draw() {
+            if (this.processed) return;
+            ctx.save();
+            ctx.translate(this.x, this.y);
+            ctx.rotate(this.rotation);
+
+            ctx.fillStyle = this.itemType ? '#fffbeb' : 'white';
+            ctx.shadowBlur = 4;
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.beginPath();
+            ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 10);
+            ctx.fill();
+
+            ctx.strokeStyle = this.itemType ? '#f59e0b' : '#3b82f6';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            if (this.itemType) {
+                const icons = { slow: '⏰', shield: '🛡️', heart: '💖' }; // 자석 제거
+                ctx.font = '28px Arial';
+                ctx.fillText(icons[this.itemType], 0, 0);
+            } else {
+                ctx.font = 'bold 28px Jua';
+                ctx.fillStyle = '#1e3a8a';
+                ctx.fillText(this.char, 0, 0);
+            }
+            ctx.restore();
+        }
+    }
+
+    // --- CORE SYSTEM ---
+    function resize() {
+        const rect = container.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        state.groundY = canvas.height - state.floorHeight;
+        state.player.y = state.groundY - (state.player.h);
+    }
+
+    function handleMove(clientX) {
+        const rect = container.getBoundingClientRect();
+        const x = clientX - rect.left;
+        state.player.targetX = Math.max(state.player.w/2, Math.min(canvas.width - state.player.w/2, x));
+    }
+
+    function startGame(stageId, infinite = false) {
+        hideAllScreens();
+        state = {
+            ...state,
+            isRunning: true,
+            isInfinite: infinite,
+            stage: stageId,
+            hearts: 3,
+            combo: 0,
+            targetIndex: 0,
+            objects: [],
+            gameTime: 0,
+            slowTimer: 0, shieldTimer: 0
+        };
+
+        const config = getStageConfig(stageId);
+        state.targets = config.targets;
+        state.currentMode = config.mode;
+
+        document.getElementById('hud').classList.remove('hidden');
+        updatePlayerSprite();
+        updateHUD();
+        updateHeartsUI();
+        requestAnimationFrame(gameLoop);
+    }
+
+    function startInfinite() {
+        startGame(21, true);
+    }
+
+    function gameLoop() {
+        if (!state.isRunning) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawBackground();
+
+        state.gameTime++;
+
+        if (state.slowTimer > 0) state.slowTimer--;
+        if (state.shieldTimer > 0) state.shieldTimer--;
+
+        state.player.x += (state.player.targetX - state.player.x) * 0.25;
+
+        ctx.save();
+        if (state.shieldTimer > 0) {
+            ctx.beginPath();
+            ctx.arc(state.player.x, state.player.y + state.player.h/2, 50, 0, Math.PI*2);
+            ctx.fillStyle = 'rgba(59,130,246,0.15)';
+            ctx.fill();
+            ctx.strokeStyle = '#3b82f6';
+            ctx.stroke();
+        }
+
+        try {
+            if (state.player.img.complete && state.player.img.naturalWidth !== 0) {
+                ctx.drawImage(
+                    state.player.img,
+                    state.player.x - state.player.w/2,
+                    state.player.y,
+                    state.player.w,
+                    state.player.h
+                );
+            } else {
+                ctx.font = '40px Jua';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#3b82f6';
+                ctx.fillText(state.targets[state.targetIndex] || '?', state.player.x, state.player.y + state.player.h/2);
+            }
+        } catch(e) {
+            ctx.fillText('🏃', state.player.x, state.player.y + state.player.h/2);
+        }
+        ctx.restore();
+
+        const config = state.isInfinite ? getStageConfig(20) : getStageConfig(state.stage);
+        let interval = config.spawnInterval;
+        if (state.isInfinite) interval = Math.max(450, 950 - (state.gameTime / 12));
+
+        if (Date.now() - state.lastSpawnTime > interval) {
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const isTarget = Math.random() < 0.45;
+            const char = isTarget ? state.targets[state.targetIndex] : alphabet[Math.floor(Math.random() * 26)];
+
+            let item = null;
+            if (Math.random() < 0.06) item = ['slow', 'shield', 'heart'][Math.floor(Math.random() * 3)];
+
+            state.objects.push(new Alphabet(char, isTarget && !item, item));
+            state.lastSpawnTime = Date.now();
+        }
+
+        for (let i = state.objects.length - 1; i >= 0; i--) {
+            const obj = state.objects[i];
+            obj.update();
+            obj.draw();
+
+            if (!obj.processed) {
+                const dist = Math.hypot(obj.x - state.player.x, obj.y - (state.player.y + state.player.h/2));
+                if (dist < 45) {
+                    obj.processed = true;
+                    handleCatch(obj);
+                    state.objects.splice(i, 1);
+                }
+            } else if (obj.y > state.groundY + 20) {
+                state.objects.splice(i, 1);
+            }
+        }
+
+        if (state.isInfinite) {
+            const sec = Math.floor(state.gameTime / 60);
+            if (sec > 90) state.currentMode = 'word';
+            else if (sec > 45) state.currentMode = 'case';
+        }
+
+        requestAnimationFrame(gameLoop);
+    }
+
+    function drawBackground() {
+        ctx.fillStyle = '#4ade80';
+        ctx.fillRect(0, state.groundY, canvas.width, state.floorHeight);
+
+        ctx.strokeStyle = '#22c55e';
+        ctx.lineWidth = 6;
+        ctx.beginPath();
+        ctx.moveTo(0, state.groundY);
+        ctx.lineTo(canvas.width, state.groundY);
+        ctx.stroke();
+
+        ctx.fillStyle = '#16a34a';
+        for(let i=0; i<canvas.width; i+=50) {
+            ctx.beginPath();
+            ctx.arc(i + (state.gameTime % 50), state.groundY + 15, 3, 0, Math.PI*2);
+            ctx.fill();
+        }
+    }
+
+    function handleCatch(obj) {
+        if (obj.itemType) {
+            state.score += 50;
+            if (obj.itemType === 'slow') state.slowTimer = 400;
+            if (obj.itemType === 'shield') state.shieldTimer = 400;
+            if (obj.itemType === 'heart') {
+                state.hearts = Math.min(3, state.hearts + 1);
+                updateHeartsUI();
+            }
+            return;
+        }
+
+        const goal = state.targets[state.targetIndex];
+        const match = state.currentMode === 'case'
+            ? obj.char.toLowerCase() === goal.toLowerCase()
+            : obj.char === goal;
+
+        if (match) {
+            state.score += 100 + (state.combo * 20);
+            state.combo++;
+            state.targetIndex++;
+
+            if (state.targetIndex >= state.targets.length) {
+                if (state.isInfinite) {
+                    state.targetIndex = 0;
+                    state.score += 1000;
+                } else {
+                    finishStage();
+                    return;
+                }
+            }
+            updatePlayerSprite();
+            updateHUD();
+        } else {
+            takeDamage();
+        }
+    }
+
+    function takeDamage() {
+        if (state.shieldTimer > 0) {
+            state.shieldTimer = 0;
+            return;
+        }
+
+        state.hearts--;
+        state.combo = 0;
+        updateHeartsUI();
+
+        canvas.classList.remove('shake');
+        void canvas.offsetWidth;
+        canvas.classList.add('shake');
+        setTimeout(() => canvas.classList.remove('shake'), 500);
+
+        if (state.hearts <= 0) endGame();
+    }
+
+    function updateHUD() {
+        document.getElementById('score-display').innerText = state.score.toLocaleString();
+        document.getElementById('stage-info').innerText = state.isInfinite ? "무한 모드" : `Stage ${state.stage}`;
+    }
+
+    function updateHeartsUI() {
+        const box = document.getElementById('hearts-container');
+        box.innerHTML = '';
+        for (let i = 0; i < 3; i++) {
+            const s = document.createElement('span');
+            s.innerText = i < state.hearts ? '❤️' : '🖤';
+            s.style.fontSize = '24px';
+            box.appendChild(s);
+        }
+    }
+
+    function finishStage() {
+        state.isRunning = false;
+        if (state.stage >= state.unlockedStage) {
+            state.unlockedStage = state.stage + 1;
+            localStorage.setItem('alphabet_run_unlocked', state.unlockedStage);
+        }
+        document.getElementById('clear-msg').innerText = `스테이지 ${state.stage} 완료!\n획득 점수: ${state.score.toLocaleString()}`;
+        document.getElementById('clear-modal').classList.remove('hidden');
+    }
+
+    function nextStageAction() {
+        if (state.stage < 20) startGame(state.stage + 1);
+        else showLobby();
+    }
+
+    function endGame() {
+        state.isRunning = false;
+        document.getElementById('final-score').innerText = `최종 점수: ${state.score.toLocaleString()}`;
+        document.getElementById('gameover-modal').classList.remove('hidden');
+    }
+
+    window.onload = () => {
+        resize();
+        window.addEventListener('resize', resize);
+
+        container.addEventListener('mousemove', (e) => handleMove(e.clientX));
+        container.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            handleMove(e.touches[0].clientX);
+        }, { passive: false });
+
+        showTitle();
+    };
+
+</script>
+</body>
+</html>
