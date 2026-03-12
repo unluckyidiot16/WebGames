@@ -1,0 +1,179 @@
+import React, { useState, useEffect } from 'react';
+import { Play, RotateCcw, Sparkles } from 'lucide-react';
+
+const ALPHABETS = Array.from({ length: 26 }, (_, i) => String.fromCharCode(65 + i));
+const INITIAL_POOL = [...ALPHABETS, '★']; // A~Z + 조커
+const MAX_TURNS = 15;
+
+export default function App() {
+const [gameState, setGameState] = useState('start'); // 'start', 'playing', 'end'
+const [pool, setPool] = useState([]);
+const [drawnTiles, setDrawnTiles] = useState([]);
+const [currentTile, setCurrentTile] = useState(null);
+const [isAnimating, setIsAnimating] = useState(false);
+
+// 게임 초기화 및 시작
+const startGame = () => {
+setPool([...INITIAL_POOL]);
+setDrawnTiles([]);
+setCurrentTile(null);
+setGameState('playing');
+};
+
+// 타일 뽑기 로직
+const drawTile = () => {
+if (drawnTiles.length >= MAX_TURNS || pool.length === 0) return;
+
+setIsAnimating(true);
+
+// 약간의 딜레이를 주어 애니메이션 효과 극대화
+setTimeout(() => {
+const randomIndex = Math.floor(Math.random() * pool.length);
+const selectedTile = pool[randomIndex];
+
+const newPool = [...pool];
+newPool.splice(randomIndex, 1); // 뽑힌 타일 풀에서 제거
+
+setPool(newPool);
+setCurrentTile(selectedTile);
+setDrawnTiles((prev) => [...prev, selectedTile]);
+setIsAnimating(false);
+
+if (drawnTiles.length + 1 >= MAX_TURNS) {
+setTimeout(() => setGameState('end'), 1000); // 마지막 타일 뽑고 1초 뒤 종료 화면
+}
+}, 300);
+};
+
+// 현재 뽑힌 타일의 색상 결정 (조커는 특별한 색상)
+const getTileColor = (tile) => {
+if (tile === '★') return 'text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)]';
+return 'text-slate-800';
+};
+
+return (
+<div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col items-center justify-center p-4">
+
+    {/* 시작 화면 */}
+    {gameState === 'start' && (
+    <div className="flex flex-col items-center justify-center max-w-md w-full text-center space-y-8 animate-in fade-in zoom-in duration-500">
+        <div className="bg-white p-8 rounded-3xl shadow-xl border-4 border-teal-500 w-full relative overflow-hidden">
+            <div className="absolute top-0 left-0 w-full h-4 bg-teal-500"></div>
+            <h1 className="text-4xl md:text-5xl font-extrabold text-teal-600 mb-4 tracking-tight">
+                미니 스트림스<br/><span className="text-orange-500 text-3xl">알파벳 에디션</span>
+            </h1>
+            <p className="text-slate-500 mb-8 font-medium">
+                A~Z와 조커(★) 중 무작위로<br/>15개의 타일을 뽑습니다!
+            </p>
+            <button
+                    onClick={startGame}
+                    className="flex items-center justify-center w-full gap-2 bg-teal-500 hover:bg-teal-600 text-white text-xl font-bold py-4 px-8 rounded-2xl transition-all transform hover:scale-105 active:scale-95 shadow-lg shadow-teal-500/30"
+            >
+                <Play className="w-6 h-6" fill="currentColor" />
+                게임 시작하기
+            </button>
+        </div>
+    </div>
+    )}
+
+    {/* 게임 진행 & 종료 화면 */}
+    {(gameState === 'playing' || gameState === 'end') && (
+    <div className="max-w-5xl w-full flex flex-col md:flex-row gap-6 animate-in fade-in duration-500">
+
+        {/* 메인 영역 (중앙) */}
+        <div className="flex-1 flex flex-col items-center justify-between bg-white rounded-3xl shadow-xl border-4 border-slate-200 p-6 md:p-10 min-h-[500px]">
+
+            {/* 상단 정보 */}
+            <div className="w-full flex justify-between items-center mb-8">
+                <h2 className="text-2xl font-bold text-slate-700 flex items-center gap-2">
+                    <Sparkles className="text-orange-500" />
+                    미니 스트림스
+                </h2>
+                <div className="bg-orange-100 text-orange-600 px-4 py-2 rounded-full font-bold text-lg">
+                    진행: {drawnTiles.length} / {MAX_TURNS}
+                </div>
+            </div>
+
+            {/* 현재 뽑힌 알파벳 표시 영역 */}
+            <div className="flex-1 flex items-center justify-center w-full relative">
+                {currentTile ? (
+                <div
+                        className={`flex items-center justify-center w-64 h-64 md:w-80 md:h-80 bg-white rounded-3xl border-8 ${currentTile === '★' ? 'border-yellow-400 bg-yellow-50' : 'border-teal-500'} shadow-2xl transform transition-all duration-300 ${isAnimating ? 'scale-50 opacity-0 rotate-12' : 'scale-100 opacity-100 rotate-0'}`}
+                >
+                <span className={`text-9xl md:text-[160px] font-black ${getTileColor(currentTile)}`}>
+                    {currentTile}
+                  </span>
+            </div>
+            ) : (
+            <div className="flex items-center justify-center w-64 h-64 md:w-80 md:h-80 bg-slate-100 rounded-3xl border-8 border-dashed border-slate-300">
+                  <span className="text-slate-400 text-2xl font-bold text-center">
+                    아래 버튼을 눌러<br/>첫 타일을 뽑으세요!
+                  </span>
+            </div>
+            )}
+        </div>
+
+        {/* 하단 컨트롤 영역 */}
+        <div className="w-full mt-10">
+            {gameState === 'playing' ? (
+            <button
+                    onClick={drawTile}
+                    disabled={isAnimating}
+                    className="w-full bg-orange-500 hover:bg-orange-600 disabled:bg-orange-300 text-white text-3xl font-black py-6 rounded-2xl shadow-lg shadow-orange-500/30 transition-all transform hover:-translate-y-1 active:translate-y-1"
+            >
+                {currentTile ? '다음 알파벳 뽑기!' : '첫 알파벳 뽑기!'}
+            </button>
+            ) : (
+            <div className="w-full flex flex-col gap-4">
+                <div className="text-center text-2xl font-bold text-teal-600 bg-teal-50 py-4 rounded-2xl border-2 border-teal-200">
+                    🎉 15개의 타일을 모두 뽑았습니다!
+                </div>
+                <button
+                        onClick={startGame}
+                        className="w-full flex items-center justify-center gap-2 bg-slate-800 hover:bg-slate-900 text-white text-xl font-bold py-4 rounded-2xl transition-all"
+                >
+                    <RotateCcw className="w-6 h-6" />
+                    새 게임 시작하기
+                </button>
+            </div>
+            )}
+        </div>
+    </div>
+
+    {/* 히스토리 영역 (우측) */}
+    <div className="w-full md:w-80 bg-slate-100 rounded-3xl p-6 shadow-inner border-2 border-slate-200 flex flex-col max-h-[600px] md:max-h-none">
+        <h3 className="text-xl font-bold text-slate-700 mb-4 pb-4 border-b-2 border-slate-200 flex items-center gap-2">
+            📝 뽑힌 순서
+        </h3>
+
+        <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
+            {drawnTiles.length === 0 ? (
+            <p className="text-slate-400 text-center mt-10 font-medium">
+                아직 뽑힌 타일이 없습니다.
+            </p>
+            ) : (
+            <div className="grid grid-cols-3 gap-3">
+                {drawnTiles.map((tile, index) => (
+                <div
+                        key={index}
+                        className={`flex flex-col items-center justify-center p-3 rounded-xl shadow-sm border-2 animate-in slide-in-from-bottom-4 fade-in duration-300
+                        ${tile === '★'
+                ? 'bg-yellow-100 border-yellow-300 text-yellow-600'
+                : 'bg-white border-slate-200 text-slate-700'
+                }
+                `}
+                >
+                <span className="text-xs font-bold opacity-50 mb-1">{index + 1}</span>
+                <span className="text-2xl font-black">{tile}</span>
+            </div>
+            ))}
+        </div>
+        )}
+    </div>
+</div>
+
+</div>
+)}
+</div>
+);
+}
