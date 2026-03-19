@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>정다각형 진화 (초등용)</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Nanum+Gothic+Coding:wght@700&display=swap');
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #E8F5E9;
+            font-family: 'Jua', sans-serif;
+            touch-action: none;
+            user-select: none;
+        }
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        canvas {
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            background: #FEFDF5;
+            max-width: 95%;
+            border: 8px solid #8D6E63;
+        }
+        .overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(232, 245, 233, 0.9);
+            backdrop-filter: blur(5px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 200;
+            text-align: center;
+        }
+        .ui-panel {
+            position: absolute;
+            top: 25px;
+            pointer-events: none;
+            width: 420px;
+            max-width: 90%;
+            display: flex;
+            justify-content: space-between;
+            z-index: 10;
+        }
+        .info-box {
+            background: #FFF9C4;
+            padding: 10px 20px;
+            border-radius: 20px;
+            border: 3px solid #FFD54F;
+            box-shadow: 0 4px 0 rgba(255, 193, 7, 0.5);
+            pointer-events: auto;
+            color: #5D4037;
+        }
+        #evolution-guide {
+            position: absolute;
+            right: 20px;
+            top: 120px;
+            background: rgba(255,255,255,0.8);
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #AED581;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .guide-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #555;
+        }
+        .guide-shape {
+            width: 20px;
+            height: 20px;
+            border: 2px solid #555;
+            box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+        .danger-line {
+            position: absolute;
+            /* top은 JS에서 설정함 */
+            width: 380px;
+            max-width: 90%;
+            height: 4px;
+            border-top: 4px dashed #FF7043;
+            pointer-events: none;
+            opacity: 0.6;
+            z-index: 5;
+        }
+        .danger-label {
+            position: absolute;
+            right: 0;
+            top: -25px;
+            background: #FF7043;
+            color: white;
+            font-size: 12px;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+        .warning-active {
+            animation: blink 0.5s infinite;
+            border-color: #D32F2F;
+            opacity: 1;
+        }
+        @keyframes blink {
+            0% { opacity: 0.3; }
+            50% { opacity: 1; }
+            100% { opacity: 0.3; }
+        }
+        .btn-start {
+            background-color: #4CAF50;
+            color: white;
+            font-size: 1.5rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            border: none;
+            box-shadow: 0 6px 0 #2E7D32;
+            transition: transform 0.1s;
+            cursor: pointer;
+        }
+        .btn-start:active {
+            transform: translateY(4px);
+            box-shadow: 0 2px 0 #2E7D32;
+        }
+        .btn-restart {
+            background-color: #FF7043;
+            box-shadow: 0 6px 0 #D84315;
+        }
+        .btn-restart:active {
+            box-shadow: 0 2px 0 #D84315;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div class="ui-panel">
+        <div class="info-box">
+            <p class="text-sm font-bold opacity-70">점수</p>
+            <p id="score" class="text-2xl font-black">0</p>
+        </div>
+        <div class="info-box text-right">
+            <p class="text-sm font-bold opacity-70">다음 도형</p>
+            <div id="next-shape-display" class="mt-1 flex justify-end items-center h-8"></div>
+        </div>
+    </div>
+
+    <div id="title-screen" class="overlay">
+        <h1 class="text-5xl text-[#2E7D32] mb-4 drop-shadow-sm" style="text-shadow: 2px 2px 0 #fff;">도형 합치기</h1>
+        <p class="text-xl text-[#558B2F] mb-10 bg-white px-4 py-2 rounded-full shadow-sm">
+            🔷 같은 모양끼리 쾅! 🔴
+        </p>
+        <div class="bg-[#FFF9C4] p-6 rounded-3xl border-4 border-[#FFD54F] mb-10 w-64 shadow-md">
+            <p class="text-sm font-bold text-[#8D6E63] mb-1">최고 기록 🏆</p>
+            <p id="best-score" class="text-4xl font-black text-[#F57F17]">0</p>
+        </div>
+        <button id="start-btn" class="btn-start">게임 시작! ▶</button>
+    </div>
+
+    <div id="gameover-screen" class="overlay" style="display: none;">
+        <h2 class="text-5xl text-[#D32F2F] mb-4 drop-shadow-md">앗, 꽉 찼어요!</h2>
+        <p id="final-score-msg" class="text-2xl text-[#5D4037] mb-8 font-bold">점수: 0</p>
+        <button onclick="location.reload()" class="btn-start btn-restart">다시 하기 🔄</button>
+    </div>
+
+    <div id="evolution-guide" class="hidden md:flex">
+        <p class="text-sm text-[#558B2F] font-bold mb-2 text-center">진화 순서</p>
+    </div>
+
+    <div id="visual-limit-line" class="danger-line">
+        <div class="danger-label">여기 넘으면 안돼요!</div>
+    </div>
+</div>
+
+<script>
+    const CONFIG = {
+        width: 400,
+        height: 640,
+        limitY: 200, // 게임오버 선을 더 아래로 내림 (Y값이 클수록 아래)
+        spawnY: 50,  // 도형이 생성되어 떨어지는 위치 (선보다 훨씬 위)
+        shapes: [
+            { sides: 3, radius: 25, color: '#FF8A80', name: '삼각형' },
+            { sides: 4, radius: 36, color: '#FFD180', name: '사각형' },
+            { sides: 5, radius: 47, color: '#FFFF8D', name: '오각형' },
+            { sides: 6, radius: 58, color: '#CCFF90', name: '육각형' },
+            { sides: 7, radius: 69, color: '#A7FFEB', name: '칠각형' },
+            { sides: 8, radius: 80, color: '#80D8FF', name: '팔각형' },
+            { sides: 10, radius: 91, color: '#82B1FF', name: '십각형' },
+            { sides: 12, radius: 102, color: '#B388FF', name: '십이각형' },
+            { sides: 0, radius: 115, color: '#FF80AB', name: '왕수박(원)' }
+        ],
+        spawnRange: [0, 1, 2]
+    };
+
+    const { Engine, Render, Runner, Bodies, Composite, Events, Body, Vector } = Matter;
+
+    let engine, render, runner;
+    let score = 0;
+    let bestScore = localStorage.getItem('polygon-suika-kids-best') || 0;
+    let isGameOver = false;
+    let isGameStarted = false;
+    let currentShapeIndex = 0;
+    let nextShapeIndex = 0;
+    let canDrop = true;
+    let previewBody = null;
+    let warningTimer = null;
+
+    document.getElementById('best-score').innerText = bestScore;
+
+    function initGame() {
+        engine = Engine.create();
+        engine.gravity.y = 1.3;
+
+        render = Render.create({
+            element: document.getElementById('game-container'),
+            engine: engine,
+            options: {
+                width: CONFIG.width,
+                height: CONFIG.height,
+                wireframes: false,
+                background: '#FEFDF5'
+            }
+        });
+
+        // 벽 생성
+        const wallColor = '#8D6E63';
+        const ground = Bodies.rectangle(CONFIG.width / 2, CONFIG.height + 30, CONFIG.width, 60, { isStatic: true, render: { fillStyle: wallColor } });
+        const leftWall = Bodies.rectangle(-30, CONFIG.height / 2, 60, CONFIG.height * 2, { isStatic: true, render: { fillStyle: wallColor } });
+        const rightWall = Bodies.rectangle(CONFIG.width + 30, CONFIG.height / 2, 60, CONFIG.height * 2, { isStatic: true, render: { fillStyle: wallColor } });
+
+        Composite.add(engine.world, [ground, leftWall, rightWall]);
+
+        Render.run(render);
+        runner = Runner.create();
+
+        // 시각적 한계선 위치 동기화
+        const canvasRect = render.canvas.getBoundingClientRect();
+        // 캔버스 내부에서의 비율 계산 (CSS position용)
+        // 실제 게임 내 좌표계와 화면 표시 좌표계 매칭
+        // 간단하게 top offset을 캔버스 크기 비율에 맞춤
+        const lineEl = document.getElementById('visual-limit-line');
+        // canvas가 중앙 정렬되어 있으므로, 캔버스 상단 기준 오프셋 계산 필요
+        // 하지만 여기선 심플하게 %로 근사치 혹은 JS로 직접 픽셀 지정
+        // CSS에서 position: absolute는 game-container 기준임.
+        // game-container 높이가 100vh이므로 캔버스 높이와 다를 수 있음.
+        // 따라서 캔버스의 상단 위치를 구해서 더해줘야 함.
+
+        // 더 쉬운 방법: 캔버스 렌더링 루프에서 선을 그리는 것이지만, 
+        // HTML 요소로 표시하려면 캔버스 위에 덮어씌워야 함.
+        // 여기서는 game-container가 flex center이므로 캔버스가 중앙에 옴.
+        // line의 top을 계산하기 위해 렌더링 직후 위치 조정
+        updateLimitLinePosition();
+        window.addEventListener('resize', updateLimitLinePosition);
+
+        setupEvents();
+        createGuide();
+        setNextShape();
+    }
+
+    function updateLimitLinePosition() {
+        const lineEl = document.getElementById('visual-limit-line');
+        const canvas = document.querySelector('canvas');
+        if(canvas) {
+            // 캔버스 내에서의 Y좌표 비율
+            const ratio = CONFIG.limitY / CONFIG.height;
+            // 캔버스 실제 표시 높이
+            const displayHeight = canvas.clientHeight;
+            // 캔버스 상단 여백 (Flex container center 정렬 시)
+            const offsetTop = canvas.offsetTop;
+
+            lineEl.style.top = (offsetTop + displayHeight * ratio) + 'px';
+            lineEl.style.width = canvas.clientWidth + 'px';
+        }
+    }
+
+    function createGuide() {
+        const guide = document.getElementById('evolution-guide');
+        CONFIG.shapes.forEach(s => {
+            const item = document.createElement('div');
+            item.className = 'guide-item';
+            item.innerHTML = `
+                <div class="guide-shape" style="background:${s.color}; border-radius:${s.sides === 0 ? '50%' : '4px'}"></div>
+                <span style="font-family:'Jua'">${s.name}</span>
+            `;
+            guide.appendChild(item);
+        });
+    }
+
+    function createPolygon(x, y, index, isStatic = false) {
+        const conf = CONFIG.shapes[index];
+        const options = {
+            friction: 0.3,
+            restitution: 0.2,
+            isStatic: isStatic,
+            label: 'polygon',
+            render: {
+                fillStyle: conf.color,
+                strokeStyle: '#5D4037',
+                lineWidth: 3
+            }
+        };
+
+        const body = conf.sides === 0
+            ? Bodies.circle(x, y, conf.radius, options)
+            : Bodies.polygon(x, y, conf.sides, conf.radius, options);
+
+        body.createdAt = Date.now();
+        body.gameData = { index: index };
+        return body;
+    }
+
+    function setNextShape() {
+        currentShapeIndex = nextShapeIndex;
+        nextShapeIndex = CONFIG.spawnRange[Math.floor(Math.random() * CONFIG.spawnRange.length)];
+
+        const nextConf = CONFIG.shapes[nextShapeIndex];
+        const nextDisplay = document.getElementById('next-shape-display');
+        nextDisplay.innerHTML = `<div style="width:28px; height:28px; background:${nextConf.color}; border:2px solid #5D4037; border-radius:${nextConf.sides === 0 ? '50%' : '4px'}"></div>`;
+    }
+
+    function setupEvents() {
+        Events.on(engine, 'collisionStart', (event) => {
+            event.pairs.forEach((pair) => {
+                const { bodyA, bodyB } = pair;
+                if (bodyA.gameData && bodyB.gameData &&
+                    bodyA.gameData.index === bodyB.gameData.index) {
+
+                    const currentIndex = bodyA.gameData.index;
+                    const maxIndex = CONFIG.shapes.length - 1;
+
+                    if (currentIndex < maxIndex) {
+                        const nextIndex = currentIndex + 1;
+                        const pos = Vector.div(Vector.add(bodyA.position, bodyB.position), 2);
+                        Composite.remove(engine.world, [bodyA, bodyB]);
+                        const newBody = createPolygon(pos.x, pos.y, nextIndex);
+                        Composite.add(engine.world, newBody);
+                        score += (nextIndex + 1) * 10;
+                    } else if (currentIndex === maxIndex) {
+                        Composite.remove(engine.world, [bodyA, bodyB]);
+                        score += 1000;
+                    }
+                    document.getElementById('score').innerText = score;
+                }
+            });
+        });
+
+        // 게임 오버 체크 로직 업데이트
+        Events.on(engine, 'afterUpdate', () => {
+            if (isGameOver || !isGameStarted) return;
+
+            const bodies = Composite.allBodies(engine.world);
+            let isViolating = false;
+            const now = Date.now();
+
+            for (let body of bodies) {
+                if (body.isStatic || body.label !== 'polygon') continue;
+
+                // 1. 방금 생성된 도형(낙하 중)은 무시 (2초 유예)
+                // 단, 이미 어딘가에 안착해서 속도가 거의 0이라면 2초 안 지났어도 체크 대상이 됨
+                const isSettled = body.speed < 0.2;
+                const isOldEnough = (now - body.createdAt > 2000);
+
+                if (isOldEnough || isSettled) {
+                    // 도형의 '가장 윗부분(min.y)'이 한계선(CONFIG.limitY)보다 작으면(위쪽이면) 걸친 것
+                    // Y좌표는 아래로 갈수록 커지므로, 작다는 것은 더 위에 있다는 뜻
+                    if (body.bounds.min.y < CONFIG.limitY) {
+                        isViolating = true;
+                        break;
+                    }
+                }
+            }
+
+            const lineEl = document.getElementById('visual-limit-line');
+            if (isViolating) {
+                lineEl.classList.add('warning-active');
+                if (!warningTimer) {
+                    // 2초간 경고 후 게임오버
+                    warningTimer = setTimeout(() => {
+                        gameOver();
+                    }, 2000);
+                }
+            } else {
+                lineEl.classList.remove('warning-active');
+                clearTimeout(warningTimer);
+                warningTimer = null;
+            }
+        });
+
+        const gameCanvas = render.canvas;
+        const handleMove = (e) => {
+            if (!isGameStarted || isGameOver || !canDrop) return;
+            const x = getEventX(e);
+            const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
+
+            if (!previewBody) {
+                // 미리보기는 spawnY 위치에 표시
+                previewBody = createPolygon(clampedX, CONFIG.spawnY, currentShapeIndex, true);
+                Composite.add(engine.world, previewBody);
+            } else {
+                Body.setPosition(previewBody, { x: clampedX, y: CONFIG.spawnY });
+            }
+        };
+
+        const handleEnd = (e) => {
+            if (!isGameStarted || isGameOver || !canDrop) return;
+            const x = getEventX(e);
+            const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
+
+            if (previewBody) {
+                Composite.remove(engine.world, previewBody);
+                previewBody = null;
+            }
+
+            // 실제 생성도 spawnY 위치에서
+            const dropBody = createPolygon(clampedX, CONFIG.spawnY, currentShapeIndex);
+            Composite.add(engine.world, dropBody);
+
+            canDrop = false;
+            setTimeout(() => {
+                if(!isGameOver) {
+                    canDrop = true;
+                    setNextShape();
+                }
+            }, 600);
+        };
+
+        gameCanvas.addEventListener('mousemove', handleMove);
+        gameCanvas.addEventListener('touchstart', handleMove);
+        gameCanvas.addEventListener('mousedown', handleEnd);
+        gameCanvas.addEventListener('touchend', handleEnd);
+    }
+
+    function getEventX(e) {
+        const rect = render.canvas.getBoundingClientRect();
+        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+        return (clientX - rect.left) * (CONFIG.width / rect.width);
+    }
+
+    function gameOver() {
+        if (isGameOver) return;
+        isGameOver = true;
+
+        if (score > bestScore) {
+            bestScore = score;
+            localStorage.setItem('polygon-suika-kids-best', bestScore);
+        }
+        document.getElementById('final-score-msg').innerText = `내 점수: ${score}`;
+        document.getElementById('gameover-screen').style.display = 'flex';
+        Runner.stop(runner);
+    }
+
+    document.getElementById('start-btn').onclick = () => {
+        document.getElementById('title-screen').style.display = 'none';
+        isGameStarted = true;
+        updateLimitLinePosition(); // 시작 시 위치 재계산
+        Runner.run(runner, engine);
+    };
+
+    initGame();
+</script>
+</body>
+</html>
