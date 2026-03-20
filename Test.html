@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheets 데이터 관리</title>
+    <style>
+        body { font-family: sans-serif; margin: 40px; line-height: 1.6; }
+        .container { max-width: 600px; margin: auto; }
+        .input-group { margin-bottom: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 8px; }
+        input { padding: 8px; margin-right: 10px; border: 1px solid #ccc; border-radius: 4px; }
+        button { padding: 8px 16px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 4px; }
+        button:hover { background-color: #45a049; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .loading { color: #666; font-style: italic; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📊 데이터 입력 및 조회</h2>
+
+    <div class="input-group">
+        <input type="text" id="userName" placeholder="이름 입력">
+        <input type="number" id="userScore" placeholder="점수 입력">
+        <button onclick="submitData()">저장하기</button>
+    </div>
+
+    <h3>저장된 목록</h3>
+    <button onclick="fetchData()" style="background-color: #2196F3;">새로고침</button>
+    <div id="status" class="loading"></div>
+
+    <table id="dataTable">
+        <thead>
+        <tr>
+            <th>이름</th>
+            <th>점수</th>
+        </tr>
+        </thead>
+        <tbody id="tableBody">
+        </tbody>
+    </table>
+</div>
+
+<script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAmYDdKmPBg_nSiANaHkn4w_rOm718JiwqgtUkDPIwZW7bggCEpQyuOf56v27m7UuXyg/exec";
+
+    // 1. 데이터 불러오기 (GET)
+    async function fetchData() {
+        const status = document.getElementById('status');
+        const tableBody = document.getElementById('tableBody');
+        status.innerText = "데이터를 불러오는 중...";
+        tableBody.innerHTML = "";
+
+        try {
+            const response = await fetch(SCRIPT_URL);
+            const data = await response.json();
+
+            data.forEach(row => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `<td>${row.name}</td><td>${row.score}</td>`;
+                tableBody.appendChild(tr);
+            });
+            status.innerText = "조회 완료";
+        } catch (error) {
+            console.error("Error:", error);
+            status.innerText = "데이터를 불러오는 데 실패했습니다.";
+        }
+    }
+
+    // 2. 데이터 저장하기 (POST)
+    async function submitData() {
+        const name = document.getElementById('userName').value;
+        const score = document.getElementById('userScore').value;
+
+        if (!name || !score) {
+            alert("이름과 점수를 모두 입력해주세요!");
+            return;
+        }
+
+        const status = document.getElementById('status');
+        status.innerText = "저장 중...";
+
+        try {
+            // Apps Script는 CORS 이슈로 인해 FormData 형식을 주로 사용합니다.
+            const formData = new FormData();
+            formData.append("name", name);
+            formData.append("score", score);
+
+            await fetch(SCRIPT_URL, {
+                method: "POST",
+                body: formData
+            });
+
+            alert("성공적으로 저장되었습니다!");
+            document.getElementById('userName').value = "";
+            document.getElementById('userScore').value = "";
+            fetchData(); // 저장 후 목록 새로고침
+        } catch (error) {
+            console.error("Error:", error);
+            alert("저장에 실패했습니다.");
+        }
+    }
+
+    // 페이지 로드 시 데이터 자동 조회
+    window.onload = fetchData;
+</script>
+
+</body>
+</html>
