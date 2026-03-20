@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>정다각형 진화 (초등용)</title>
+    <title>알파벳 진화 (초등용)</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -84,14 +84,20 @@
             color: #555;
         }
         .guide-shape {
-            width: 20px;
-            height: 20px;
+            width: 24px;
+            height: 24px;
             border: 2px solid #555;
             box-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            color: #5D4037;
         }
         .danger-line {
             position: absolute;
-            /* top은 JS에서 설정함 */
             width: 380px;
             max-width: 90%;
             height: 4px;
@@ -153,15 +159,15 @@
             <p id="score" class="text-2xl font-black">0</p>
         </div>
         <div class="info-box text-right">
-            <p class="text-sm font-bold opacity-70">다음 도형</p>
+            <p class="text-sm font-bold opacity-70">다음 알파벳</p>
             <div id="next-shape-display" class="mt-1 flex justify-end items-center h-8"></div>
         </div>
     </div>
 
     <div id="title-screen" class="overlay">
-        <h1 class="text-5xl text-[#2E7D32] mb-4 drop-shadow-sm" style="text-shadow: 2px 2px 0 #fff;">도형 합치기</h1>
+        <h1 class="text-5xl text-[#2E7D32] mb-4 drop-shadow-sm" style="text-shadow: 2px 2px 0 #fff;">알파벳 합치기</h1>
         <p class="text-xl text-[#558B2F] mb-10 bg-white px-4 py-2 rounded-full shadow-sm">
-            🔷 같은 모양끼리 쾅! 🔴
+            🅰️ 같은 알파벳끼리 쾅! 🅱️
         </p>
         <div class="bg-[#FFF9C4] p-6 rounded-3xl border-4 border-[#FFD54F] mb-10 w-64 shadow-md">
             <p class="text-sm font-bold text-[#8D6E63] mb-1">최고 기록 🏆</p>
@@ -189,18 +195,18 @@
     const CONFIG = {
         width: 400,
         height: 640,
-        limitY: 200, // 게임오버 선을 더 아래로 내림 (Y값이 클수록 아래)
-        spawnY: 50,  // 도형이 생성되어 떨어지는 위치 (선보다 훨씬 위)
+        limitY: 200,
+        spawnY: 50,
         shapes: [
-            { sides: 3, radius: 25, color: '#FF8A80', name: '삼각형' },
-            { sides: 4, radius: 36, color: '#FFD180', name: '사각형' },
-            { sides: 5, radius: 47, color: '#FFFF8D', name: '오각형' },
-            { sides: 6, radius: 58, color: '#CCFF90', name: '육각형' },
-            { sides: 7, radius: 69, color: '#A7FFEB', name: '칠각형' },
-            { sides: 8, radius: 80, color: '#80D8FF', name: '팔각형' },
-            { sides: 10, radius: 91, color: '#82B1FF', name: '십각형' },
-            { sides: 12, radius: 102, color: '#B388FF', name: '십이각형' },
-            { sides: 0, radius: 115, color: '#FF80AB', name: '왕수박(원)' }
+            { radius: 25, color: '#FF8A80', letter: 'A', name: '에이' },
+            { radius: 36, color: '#FFD180', letter: 'B', name: '비' },
+            { radius: 47, color: '#FFFF8D', letter: 'C', name: '씨' },
+            { radius: 58, color: '#CCFF90', letter: 'D', name: '디' },
+            { radius: 69, color: '#A7FFEB', letter: 'E', name: '이' },
+            { radius: 80, color: '#80D8FF', letter: 'F', name: '에프' },
+            { radius: 91, color: '#82B1FF', letter: 'G', name: '쥐' },
+            { radius: 102, color: '#B388FF', letter: 'H', name: '에이치' },
+            { radius: 115, color: '#FF80AB', letter: 'I', name: '아이(최대)' }
         ],
         spawnRange: [0, 1, 2]
     };
@@ -209,7 +215,7 @@
 
     let engine, render, runner;
     let score = 0;
-    let bestScore = localStorage.getItem('polygon-suika-kids-best') || 0;
+    let bestScore = localStorage.getItem('alphabet-suika-kids-best') || 0;
     let isGameOver = false;
     let isGameStarted = false;
     let currentShapeIndex = 0;
@@ -235,7 +241,6 @@
             }
         });
 
-        // 벽 생성
         const wallColor = '#8D6E63';
         const ground = Bodies.rectangle(CONFIG.width / 2, CONFIG.height + 30, CONFIG.width, 60, { isStatic: true, render: { fillStyle: wallColor } });
         const leftWall = Bodies.rectangle(-30, CONFIG.height / 2, 60, CONFIG.height * 2, { isStatic: true, render: { fillStyle: wallColor } });
@@ -243,25 +248,37 @@
 
         Composite.add(engine.world, [ground, leftWall, rightWall]);
 
+        // 알파벳 텍스트 렌더링 이벤트 추가
+        Events.on(render, 'afterRender', () => {
+            const context = render.context;
+            const bodies = Composite.allBodies(engine.world);
+
+            context.textAlign = 'center';
+            context.textBaseline = 'middle';
+
+            for (let body of bodies) {
+                if (body.label === 'alphabet' && body.gameData) {
+                    const conf = CONFIG.shapes[body.gameData.index];
+
+                    // 도형이 회전할 때 글자도 같이 회전하도록 캔버스 컨텍스트 조정
+                    context.translate(body.position.x, body.position.y);
+                    context.rotate(body.angle);
+
+                    // 글자 크기를 원의 반지름에 비례하게 설정
+                    context.font = `bold ${conf.radius}px 'Jua'`;
+                    context.fillStyle = "#5D4037";
+                    context.fillText(conf.letter, 0, 0);
+
+                    // 원래 상태로 복구
+                    context.rotate(-body.angle);
+                    context.translate(-body.position.x, -body.position.y);
+                }
+            }
+        });
+
         Render.run(render);
         runner = Runner.create();
 
-        // 시각적 한계선 위치 동기화
-        const canvasRect = render.canvas.getBoundingClientRect();
-        // 캔버스 내부에서의 비율 계산 (CSS position용)
-        // 실제 게임 내 좌표계와 화면 표시 좌표계 매칭
-        // 간단하게 top offset을 캔버스 크기 비율에 맞춤
-        const lineEl = document.getElementById('visual-limit-line');
-        // canvas가 중앙 정렬되어 있으므로, 캔버스 상단 기준 오프셋 계산 필요
-        // 하지만 여기선 심플하게 %로 근사치 혹은 JS로 직접 픽셀 지정
-        // CSS에서 position: absolute는 game-container 기준임.
-        // game-container 높이가 100vh이므로 캔버스 높이와 다를 수 있음.
-        // 따라서 캔버스의 상단 위치를 구해서 더해줘야 함.
-
-        // 더 쉬운 방법: 캔버스 렌더링 루프에서 선을 그리는 것이지만, 
-        // HTML 요소로 표시하려면 캔버스 위에 덮어씌워야 함.
-        // 여기서는 game-container가 flex center이므로 캔버스가 중앙에 옴.
-        // line의 top을 계산하기 위해 렌더링 직후 위치 조정
         updateLimitLinePosition();
         window.addEventListener('resize', updateLimitLinePosition);
 
@@ -274,11 +291,8 @@
         const lineEl = document.getElementById('visual-limit-line');
         const canvas = document.querySelector('canvas');
         if(canvas) {
-            // 캔버스 내에서의 Y좌표 비율
             const ratio = CONFIG.limitY / CONFIG.height;
-            // 캔버스 실제 표시 높이
             const displayHeight = canvas.clientHeight;
-            // 캔버스 상단 여백 (Flex container center 정렬 시)
             const offsetTop = canvas.offsetTop;
 
             lineEl.style.top = (offsetTop + displayHeight * ratio) + 'px';
@@ -292,20 +306,21 @@
             const item = document.createElement('div');
             item.className = 'guide-item';
             item.innerHTML = `
-                <div class="guide-shape" style="background:${s.color}; border-radius:${s.sides === 0 ? '50%' : '4px'}"></div>
+                <div class="guide-shape" style="background:${s.color}; border: 2px solid #5D4037;">${s.letter}</div>
                 <span style="font-family:'Jua'">${s.name}</span>
             `;
             guide.appendChild(item);
         });
     }
 
-    function createPolygon(x, y, index, isStatic = false) {
+    // 다각형에서 '원(Circle)' 생성으로 로직 변경
+    function createAlphabetBody(x, y, index, isStatic = false) {
         const conf = CONFIG.shapes[index];
         const options = {
             friction: 0.3,
             restitution: 0.2,
             isStatic: isStatic,
-            label: 'polygon',
+            label: 'alphabet',
             render: {
                 fillStyle: conf.color,
                 strokeStyle: '#5D4037',
@@ -313,10 +328,7 @@
             }
         };
 
-        const body = conf.sides === 0
-            ? Bodies.circle(x, y, conf.radius, options)
-            : Bodies.polygon(x, y, conf.sides, conf.radius, options);
-
+        const body = Bodies.circle(x, y, conf.radius, options);
         body.createdAt = Date.now();
         body.gameData = { index: index };
         return body;
@@ -328,7 +340,7 @@
 
         const nextConf = CONFIG.shapes[nextShapeIndex];
         const nextDisplay = document.getElementById('next-shape-display');
-        nextDisplay.innerHTML = `<div style="width:28px; height:28px; background:${nextConf.color}; border:2px solid #5D4037; border-radius:${nextConf.sides === 0 ? '50%' : '4px'}"></div>`;
+        nextDisplay.innerHTML = `<div style="width:32px; height:32px; background:${nextConf.color}; border:2px solid #5D4037; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:18px; color:#5D4037;">${nextConf.letter}</div>`;
     }
 
     function setupEvents() {
@@ -345,7 +357,7 @@
                         const nextIndex = currentIndex + 1;
                         const pos = Vector.div(Vector.add(bodyA.position, bodyB.position), 2);
                         Composite.remove(engine.world, [bodyA, bodyB]);
-                        const newBody = createPolygon(pos.x, pos.y, nextIndex);
+                        const newBody = createAlphabetBody(pos.x, pos.y, nextIndex);
                         Composite.add(engine.world, newBody);
                         score += (nextIndex + 1) * 10;
                     } else if (currentIndex === maxIndex) {
@@ -357,7 +369,6 @@
             });
         });
 
-        // 게임 오버 체크 로직 업데이트
         Events.on(engine, 'afterUpdate', () => {
             if (isGameOver || !isGameStarted) return;
 
@@ -366,16 +377,12 @@
             const now = Date.now();
 
             for (let body of bodies) {
-                if (body.isStatic || body.label !== 'polygon') continue;
+                if (body.isStatic || body.label !== 'alphabet') continue;
 
-                // 1. 방금 생성된 도형(낙하 중)은 무시 (2초 유예)
-                // 단, 이미 어딘가에 안착해서 속도가 거의 0이라면 2초 안 지났어도 체크 대상이 됨
                 const isSettled = body.speed < 0.2;
                 const isOldEnough = (now - body.createdAt > 2000);
 
                 if (isOldEnough || isSettled) {
-                    // 도형의 '가장 윗부분(min.y)'이 한계선(CONFIG.limitY)보다 작으면(위쪽이면) 걸친 것
-                    // Y좌표는 아래로 갈수록 커지므로, 작다는 것은 더 위에 있다는 뜻
                     if (body.bounds.min.y < CONFIG.limitY) {
                         isViolating = true;
                         break;
@@ -387,7 +394,6 @@
             if (isViolating) {
                 lineEl.classList.add('warning-active');
                 if (!warningTimer) {
-                    // 2초간 경고 후 게임오버
                     warningTimer = setTimeout(() => {
                         gameOver();
                     }, 2000);
@@ -406,8 +412,7 @@
             const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
 
             if (!previewBody) {
-                // 미리보기는 spawnY 위치에 표시
-                previewBody = createPolygon(clampedX, CONFIG.spawnY, currentShapeIndex, true);
+                previewBody = createAlphabetBody(clampedX, CONFIG.spawnY, currentShapeIndex, true);
                 Composite.add(engine.world, previewBody);
             } else {
                 Body.setPosition(previewBody, { x: clampedX, y: CONFIG.spawnY });
@@ -424,8 +429,7 @@
                 previewBody = null;
             }
 
-            // 실제 생성도 spawnY 위치에서
-            const dropBody = createPolygon(clampedX, CONFIG.spawnY, currentShapeIndex);
+            const dropBody = createAlphabetBody(clampedX, CONFIG.spawnY, currentShapeIndex);
             Composite.add(engine.world, dropBody);
 
             canDrop = false;
@@ -455,7 +459,7 @@
 
         if (score > bestScore) {
             bestScore = score;
-            localStorage.setItem('polygon-suika-kids-best', bestScore);
+            localStorage.setItem('alphabet-suika-kids-best', bestScore);
         }
         document.getElementById('final-score-msg').innerText = `내 점수: ${score}`;
         document.getElementById('gameover-screen').style.display = 'flex';
@@ -465,7 +469,7 @@
     document.getElementById('start-btn').onclick = () => {
         document.getElementById('title-screen').style.display = 'none';
         isGameStarted = true;
-        updateLimitLinePosition(); // 시작 시 위치 재계산
+        updateLimitLinePosition();
         Runner.run(runner, engine);
     };
 
