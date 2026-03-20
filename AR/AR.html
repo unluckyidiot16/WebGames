@@ -83,7 +83,7 @@
 <div id="game-container" class="relative w-full h-full max-w-md overflow-hidden bg-white shadow-2xl">
     <canvas id="gameCanvas"></canvas>
 
-    <!-- UI Layers -->
+    <!-- UI 레이어 -->
     <div id="ui-layer" class="ui-panel">
 
         <!-- 1. 타이틀 화면 -->
@@ -121,9 +121,9 @@
             <div class="flex flex-col items-end">
                 <div id="stage-info" class="text-blue-800 text-lg font-bold bg-white/80 px-3 py-1 rounded-lg border-2 border-blue-400">Stage 1</div>
                 <div id="target-display" class="mt-2 text-2xl bg-white px-4 py-2 rounded-xl border-4 border-blue-600 animate-bounce flex items-center gap-2">
-                    <span>Target:</span>
-                    <img id="target-img-ui" src="" class="w-8 h-8 object-contain hidden">
-                    <span id="target-text-ui">A</span>
+                    <span class="text-sm text-blue-500">Target:</span>
+                    <img id="target-img-ui" src="" class="w-10 h-10 object-contain hidden">
+                    <span id="target-text-ui" class="font-bold">A</span>
                 </div>
             </div>
         </div>
@@ -148,10 +148,6 @@
 </div>
 
 <script>
-    /**
-     * 알파벳 런 Pro - 자석 아이템 제거 버전
-     */
-
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const container = document.getElementById('game-container');
@@ -171,8 +167,8 @@
         player: {
             x: 0,
             y: 0,
-            w: 70,
-            h: 70,
+            w: 80, // 이미지를 위해 크기 약간 키움
+            h: 80,
             targetX: 0,
             img: new Image()
         },
@@ -192,7 +188,7 @@
         let mode = 'sequence';
 
         if (id >= 16) {
-            const words = ["CAT", "DOG", "SUN", "MAP", "APPLE", "BANANA", "PIG", "HAT"];
+            const words = ["CAT", "DOG", "SUN", "MAP", "APPLE", "BANANA", "PIG", "HAT", "EGG", "BOX"];
             const word = words[(id - 16) % words.length];
             targets = word.split("");
             mode = 'word';
@@ -202,7 +198,7 @@
 
         return {
             id, targets, mode,
-            spawnInterval: Math.max(1200 - (id * 35), 500),
+            spawnInterval: Math.max(1200 - (id * 35), 600),
             speed: 1.6 + (id * 0.12),
             rotate: 0.02 + (id * 0.005)
         };
@@ -254,18 +250,18 @@
         document.getElementById('screen-stages').classList.remove('hidden');
     }
 
-    // --- CHARACTER IMAGE LOGIC ---
+    // --- CHARACTER IMAGE LOGIC (사용자 요청 핵심) ---
     function updatePlayerSprite() {
         const currentTarget = state.targets[state.targetIndex];
         if (!currentTarget) return;
 
-        // 1. 현재 타겟 문자를 대문자로 변환 (파일명 매칭용)
+        // 1. 현재 타겟 문자를 대문자로 변환 (A.png ~ Z.png 매칭)
         const charName = currentTarget.toUpperCase();
 
-        // 2. 캐릭터 이미지 경로 설정 (PIC 폴더 안의 A.png ~ Z.png)
+        // 2. 캐릭터 이미지 경로 설정 (로컬 PIC 폴더)
         state.player.img.src = `./PIC/${charName}.png`;
 
-        // 3. 우측 상단 HUD 이미지 업데이트
+        // 3. 우측 상단 HUD 이미지 및 텍스트 업데이트
         const uiImg = document.getElementById('target-img-ui');
         const uiText = document.getElementById('target-text-ui');
 
@@ -273,10 +269,9 @@
         uiImg.classList.remove('hidden');
         uiText.innerText = currentTarget;
 
-        // 이미지 로드 실패 시 처리 (텍스트로 대체하기 위함)
+        // 이미지 로드 실패 시 HUD에서 이미지를 숨김 (텍스트는 유지)
         state.player.img.onerror = () => {
-            uiImg.classList.add('hidden'); // HUD 이미지 숨김
-            console.warn(`${charName}.png 파일을 /PIC/ 폴더에서 찾을 수 없습니다.`);
+            uiImg.classList.add('hidden');
         };
     }
 
@@ -286,23 +281,23 @@
             this.char = char;
             this.isTarget = isTarget;
             this.itemType = itemType;
-            this.w = 48;
-            this.h = 48;
+            this.w = 50;
+            this.h = 50;
             this.x = Math.random() * (canvas.width - this.w) + this.w / 2;
-            this.y = -50;
+            this.y = -60;
             this.rotation = 0;
-            this.rotationSpeed = (Math.random() - 0.5) * 0.08;
+            this.rotationSpeed = (Math.random() - 0.5) * 0.1;
             this.processed = false;
 
             const config = state.isInfinite ? getStageConfig(20) : getStageConfig(state.stage);
-            this.speed = config.speed + (Math.random() * 0.4);
+            this.speed = config.speed + (Math.random() * 0.5);
         }
 
         update() {
             if (this.processed) return;
 
             let currentSpeed = this.speed;
-            if (state.slowTimer > 0) currentSpeed *= 0.6;
+            if (state.slowTimer > 0) currentSpeed *= 0.55;
             this.y += currentSpeed;
             this.rotation += this.rotationSpeed;
 
@@ -317,13 +312,15 @@
             ctx.translate(this.x, this.y);
             ctx.rotate(this.rotation);
 
+            // 배경 타일
             ctx.fillStyle = this.itemType ? '#fffbeb' : 'white';
-            ctx.shadowBlur = 4;
-            ctx.shadowColor = 'rgba(0,0,0,0.1)';
+            ctx.shadowBlur = 6;
+            ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.beginPath();
-            ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 10);
+            ctx.roundRect(-this.w/2, -this.h/2, this.w, this.h, 12);
             ctx.fill();
 
+            // 테두리
             ctx.strokeStyle = this.itemType ? '#f59e0b' : '#3b82f6';
             ctx.lineWidth = 3;
             ctx.stroke();
@@ -331,11 +328,11 @@
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             if (this.itemType) {
-                const icons = { slow: '⏰', shield: '🛡️', heart: '💖' }; // 자석 제거
-                ctx.font = '28px Arial';
+                const icons = { slow: '⏰', shield: '🛡️', heart: '💖' };
+                ctx.font = '30px Arial';
                 ctx.fillText(icons[this.itemType], 0, 0);
             } else {
-                ctx.font = 'bold 28px Jua';
+                ctx.font = 'bold 30px Jua';
                 ctx.fillStyle = '#1e3a8a';
                 ctx.fillText(this.char, 0, 0);
             }
@@ -349,7 +346,7 @@
         canvas.width = rect.width;
         canvas.height = rect.height;
         state.groundY = canvas.height - state.floorHeight;
-        state.player.y = state.groundY - (state.player.h);
+        state.player.y = state.groundY - state.player.h;
     }
 
     function handleMove(clientX) {
@@ -365,6 +362,7 @@
             isRunning: true,
             isInfinite: infinite,
             stage: stageId,
+            score: 0,
             hearts: 3,
             combo: 0,
             targetIndex: 0,
@@ -395,45 +393,47 @@
         drawBackground();
 
         state.gameTime++;
-
         if (state.slowTimer > 0) state.slowTimer--;
         if (state.shieldTimer > 0) state.shieldTimer--;
 
+        // 플레이어 이동
         state.player.x += (state.player.targetX - state.player.x) * 0.25;
 
+        // 플레이어 캐릭터 렌더링
         ctx.save();
         if (state.shieldTimer > 0) {
             ctx.beginPath();
-            ctx.arc(state.player.x, state.player.y + state.player.h/2, 50, 0, Math.PI*2);
+            ctx.arc(state.player.x, state.player.y + state.player.h/2, 55, 0, Math.PI*2);
             ctx.fillStyle = 'rgba(59,130,246,0.15)';
             ctx.fill();
             ctx.strokeStyle = '#3b82f6';
+            ctx.lineWidth = 3;
             ctx.stroke();
         }
 
-        try {
-            if (state.player.img.complete && state.player.img.naturalWidth !== 0) {
-                ctx.drawImage(
-                    state.player.img,
-                    state.player.x - state.player.w/2,
-                    state.player.y,
-                    state.player.w,
-                    state.player.h
-                );
-            } else {
-                ctx.font = '40px Jua';
-                ctx.textAlign = 'center';
-                ctx.fillStyle = '#3b82f6';
-                ctx.fillText(state.targets[state.targetIndex] || '?', state.player.x, state.player.y + state.player.h/2);
-            }
-        } catch(e) {
-            ctx.fillText('🏃', state.player.x, state.player.y + state.player.h/2);
+        // 이미지 로드 여부에 따라 그리기
+        if (state.player.img.complete && state.player.img.naturalWidth !== 0) {
+            ctx.drawImage(
+                state.player.img,
+                state.player.x - state.player.w/2,
+                state.player.y,
+                state.player.w,
+                state.player.h
+            );
+        } else {
+            // 이미지 없을 때 폴백 텍스트
+            ctx.font = 'bold 50px Jua';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#3b82f6';
+            ctx.fillText(state.targets[state.targetIndex] || '?', state.player.x, state.player.y + state.player.h/2);
         }
         ctx.restore();
 
+        // 오브젝트 생성
         const config = state.isInfinite ? getStageConfig(20) : getStageConfig(state.stage);
         let interval = config.spawnInterval;
-        if (state.isInfinite) interval = Math.max(450, 950 - (state.gameTime / 12));
+        if (state.isInfinite) interval = Math.max(450, 950 - (state.gameTime / 15));
 
         if (Date.now() - state.lastSpawnTime > interval) {
             const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
@@ -441,12 +441,13 @@
             const char = isTarget ? state.targets[state.targetIndex] : alphabet[Math.floor(Math.random() * 26)];
 
             let item = null;
-            if (Math.random() < 0.06) item = ['slow', 'shield', 'heart'][Math.floor(Math.random() * 3)];
+            if (Math.random() < 0.07) item = ['slow', 'shield', 'heart'][Math.floor(Math.random() * 3)];
 
             state.objects.push(new Alphabet(char, isTarget && !item, item));
             state.lastSpawnTime = Date.now();
         }
 
+        // 오브젝트 업데이트 및 충돌
         for (let i = state.objects.length - 1; i >= 0; i--) {
             const obj = state.objects[i];
             obj.update();
@@ -454,29 +455,23 @@
 
             if (!obj.processed) {
                 const dist = Math.hypot(obj.x - state.player.x, obj.y - (state.player.y + state.player.h/2));
-                if (dist < 45) {
+                if (dist < 50) {
                     obj.processed = true;
                     handleCatch(obj);
                     state.objects.splice(i, 1);
                 }
-            } else if (obj.y > state.groundY + 20) {
+            } else if (obj.y > state.groundY + 30) {
                 state.objects.splice(i, 1);
             }
-        }
-
-        if (state.isInfinite) {
-            const sec = Math.floor(state.gameTime / 60);
-            if (sec > 90) state.currentMode = 'word';
-            else if (sec > 45) state.currentMode = 'case';
         }
 
         requestAnimationFrame(gameLoop);
     }
 
     function drawBackground() {
+        // 바닥
         ctx.fillStyle = '#4ade80';
         ctx.fillRect(0, state.groundY, canvas.width, state.floorHeight);
-
         ctx.strokeStyle = '#22c55e';
         ctx.lineWidth = 6;
         ctx.beginPath();
@@ -484,10 +479,11 @@
         ctx.lineTo(canvas.width, state.groundY);
         ctx.stroke();
 
+        // 바닥 패턴
         ctx.fillStyle = '#16a34a';
-        for(let i=0; i<canvas.width; i+=50) {
+        for(let i=0; i<canvas.width + 50; i+=50) {
             ctx.beginPath();
-            ctx.arc(i + (state.gameTime % 50), state.groundY + 15, 3, 0, Math.PI*2);
+            ctx.arc(i - (state.gameTime % 50), state.groundY + 15, 3, 0, Math.PI*2);
             ctx.fill();
         }
     }
@@ -495,12 +491,13 @@
     function handleCatch(obj) {
         if (obj.itemType) {
             state.score += 50;
-            if (obj.itemType === 'slow') state.slowTimer = 400;
-            if (obj.itemType === 'shield') state.shieldTimer = 400;
+            if (obj.itemType === 'slow') state.slowTimer = 450;
+            if (obj.itemType === 'shield') state.shieldTimer = 450;
             if (obj.itemType === 'heart') {
                 state.hearts = Math.min(3, state.hearts + 1);
                 updateHeartsUI();
             }
+            updateHUD();
             return;
         }
 
@@ -516,14 +513,14 @@
 
             if (state.targetIndex >= state.targets.length) {
                 if (state.isInfinite) {
-                    state.targetIndex = 0;
+                    state.targetIndex = 0; // 무한 반복
                     state.score += 1000;
                 } else {
                     finishStage();
                     return;
                 }
             }
-            updatePlayerSprite();
+            updatePlayerSprite(); // 이미지 갱신
             updateHUD();
         } else {
             takeDamage();
@@ -559,7 +556,7 @@
         for (let i = 0; i < 3; i++) {
             const s = document.createElement('span');
             s.innerText = i < state.hearts ? '❤️' : '🖤';
-            s.style.fontSize = '24px';
+            s.style.fontSize = '26px';
             box.appendChild(s);
         }
     }
@@ -597,7 +594,6 @@
 
         showTitle();
     };
-
 </script>
 </body>
 </html>
