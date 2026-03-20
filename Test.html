@@ -47,7 +47,8 @@
 <script>
     const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwAmYDdKmPBg_nSiANaHkn4w_rOm718JiwqgtUkDPIwZW7bggCEpQyuOf56v27m7UuXyg/exec";
 
-    // 1. 데이터 불러오기 (GET)
+
+    // 1. 데이터 불러오기 (GET) — redirect 추가
     async function fetchData() {
         const status = document.getElementById('status');
         const tableBody = document.getElementById('tableBody');
@@ -55,22 +56,24 @@
         tableBody.innerHTML = "";
 
         try {
-            const response = await fetch(SCRIPT_URL);
+            const response = await fetch(SCRIPT_URL, {
+                redirect: 'follow'   // ✅ 핵심 수정
+            });
             const data = await response.json();
 
             data.forEach(row => {
                 const tr = document.createElement('tr');
-                tr.innerHTML = `<td>${row.name}</td><td>${row.score}</td>`;
+                // ✅ 시트 헤더명과 일치시키기
+                tr.innerHTML = `<td>${row['이름']}</td><td>${row['점수']}</td>`;
                 tableBody.appendChild(tr);
             });
             status.innerText = "조회 완료";
         } catch (error) {
-            console.error("Error:", error);
-            status.innerText = "데이터를 불러오는 데 실패했습니다.";
+            status.innerText = "불러오기 실패: " + error.message;
         }
     }
 
-    // 2. 데이터 저장하기 (POST)
+    // 2. 데이터 저장하기 (POST) — no-cors 추가
     async function submitData() {
         const name = document.getElementById('userName').value;
         const score = document.getElementById('userScore').value;
@@ -83,28 +86,27 @@
         const status = document.getElementById('status');
         status.innerText = "저장 중...";
 
-        try {
-            // Apps Script는 CORS 이슈로 인해 FormData 형식을 주로 사용합니다.
-            const formData = new FormData();
-            formData.append("name", name);
-            formData.append("score", score);
+        const formData = new FormData();
+        formData.append("name", name);
+        formData.append("score", score);
 
+        try {
             await fetch(SCRIPT_URL, {
                 method: "POST",
+                mode: 'no-cors',    // ✅ 핵심 수정
                 body: formData
             });
 
-            alert("성공적으로 저장되었습니다!");
+            // no-cors는 응답을 못 읽으므로 성공으로 간주
+            alert("저장되었습니다! (시트에서 확인하세요)");
             document.getElementById('userName').value = "";
             document.getElementById('userScore').value = "";
-            fetchData(); // 저장 후 목록 새로고침
+            setTimeout(fetchData, 1500); // ✅ 약간 딜레이 후 새로고침
         } catch (error) {
-            console.error("Error:", error);
-            alert("저장에 실패했습니다.");
+            alert("저장 실패: " + error.message);
         }
     }
 
-    // 페이지 로드 시 데이터 자동 조회
     window.onload = fetchData;
 </script>
 
