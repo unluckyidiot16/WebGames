@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>초3 영단어 이미지 스크램블</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f9ff; touch-action: manipulation; }
+        .font-jua { font-family: 'Jua', sans-serif; }
+        .tile { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; border-radius: 12px; cursor: pointer; transition: all 0.2s; user-select: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .tile:active { transform: translateY(2px); box-shadow: none; }
+        .tile-placeholder { width: 55px; height: 55px; border: 3px dashed #cbd5e1; border-radius: 12px; }
+        .progress-bar { transition: width 0.1s linear; }
+        /* 이미지 스타일 */
+        #hint-image { width: 120px; height: 120px; object-fit: contain; border-radius: 20px; background: white; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    </style>
+</head>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center p-4">
+
+<div id="title-screen" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative flex flex-col items-center justify-center p-8 min-h-[500px]">
+    <div class="text-6xl mb-4 animate__animated animate__bounceIn">🍎</div>
+    <h1 class="text-4xl font-jua text-blue-600 mb-8 text-center leading-snug">초3 영단어<br>이미지 퀴즈</h1>
+    <div class="bg-blue-50 rounded-2xl p-6 w-full mb-8 text-center border-2 border-blue-100 shadow-inner">
+        <div>
+            <span class="text-sm text-gray-500 font-bold tracking-wider">🏆 최고 점수</span>
+            <div id="best-score-display" class="text-4xl font-jua text-orange-500 mt-1">0</div>
+        </div>
+    </div>
+    <button onclick="startGameFromTitle()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl shadow-lg animate__animated animate__pulse animate__infinite">
+        게임 시작!
+    </button>
+</div>
+
+<div id="game-container" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative hidden">
+    <div class="bg-blue-500 p-4 text-white flex justify-between items-center">
+        <div class="flex flex-col"><span class="text-xs opacity-80">SCORE</span><span id="score-display" class="text-2xl font-jua">0</span></div>
+        <div id="hearts-display" class="text-xl flex gap-1">❤️❤️❤️</div>
+    </div>
+
+    <div class="p-4 bg-blue-100 flex justify-between items-center">
+        <div id="stage-info" class="font-bold text-blue-700">Stage 1</div>
+        <div class="w-32 bg-white rounded-full h-4 overflow-hidden border border-blue-300">
+            <div id="timer-bar" class="progress-bar bg-red-400 h-full w-full"></div>
+        </div>
+    </div>
+
+    <div id="play-area" class="p-6 min-h-[450px] flex flex-col items-center justify-center gap-6">
+        <div id="image-hint-container" class="flex flex-col items-center gap-2">
+            <img id="hint-image" src="" alt="힌트 이미지" class="animate__animated animate__fadeIn">
+            <div id="meaning-hint" class="text-lg font-bold text-gray-400 opacity-0 transition-opacity">뜻 힌트</div>
+        </div>
+
+        <div id="answer-slots" class="flex gap-2 justify-center flex-wrap"></div>
+        <div id="letter-pool" class="flex gap-2 justify-center flex-wrap mt-2 p-4 bg-gray-50 rounded-2xl w-full min-h-[80px]"></div>
+
+        <div class="grid grid-cols-2 gap-2 w-full mt-2">
+            <button onclick="useHint('random')" class="p-2 bg-green-100 hover:bg-green-200 rounded-xl border border-green-200 text-xs font-bold text-green-700">랜덤 글자 (-4점)</button>
+            <button onclick="useHint('meaning')" class="p-2 bg-orange-100 hover:bg-orange-200 rounded-xl border border-orange-200 text-xs font-bold text-orange-700">뜻 보기 (-2점)</button>
+        </div>
+    </div>
+
+    <div class="p-6 pt-0">
+        <button id="check-btn" onclick="checkAnswer()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-2xl shadow-lg">정답 확인!</button>
+    </div>
+
+    <div id="modal-overlay" class="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-6 text-center hidden">
+        <div id="modal-content" class="bg-white rounded-3xl p-8 w-full">
+            <h2 id="modal-title" class="text-3xl font-jua mb-4 text-blue-600"></h2>
+            <p id="modal-body" class="mb-6 text-gray-600"></p>
+            <button id="modal-btn" class="w-full py-3 bg-blue-500 text-white rounded-xl font-bold text-lg"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // 기존 데이터 유지
+    const wordData = {
+        1: [{w: "cat", m: "고양이"}, {w: "dog", m: "개"}, {w: "pig", m: "돼지"}, {w: "box", m: "상자"}, {w: "sun", m: "태양"}, {w: "cup", m: "컵"}, {w: "bus", m: "버스"}],
+        2: [{w: "book", m: "책"}, {w: "desk", m: "책상"}, {w: "milk", m: "우유"}, {w: "fish", m: "물고기"}, {w: "tree", m: "나무"}, {w: "door", m: "문"}, {w: "hand", m: "손"}],
+        3: [{w: "apple", m: "사과"}, {w: "house", m: "집"}, {w: "water", m: "물"}, {w: "bread", m: "빵"}, {w: "pizza", m: "피자"}, {w: "robot", m: "로봇"}, {w: "grape", m: "포도"}]
+    };
+
+    let currentStage = 1, score = 0, hearts = 3, currentWord = null, userSelection = [], timer = null, timeLeft = 0, maxTime = 15, isChecking = false;
+
+    function startGameFromTitle() {
+        document.getElementById('title-screen').classList.add('hidden');
+        document.getElementById('game-container').classList.remove('hidden');
+        loadWord();
+    }
+
+    function loadWord() {
+        isChecking = false;
+        const pool = wordData[currentStage];
+        currentWord = pool[Math.floor(Math.random() * pool.length)];
+
+        // 이미지 힌트 업데이트 (첫 글자 대문자 + .png)
+        const firstLetter = currentWord.w[0].toUpperCase();
+        const imgEl = document.getElementById('hint-image');
+        imgEl.src = `./PIC/${firstLetter}.png`; // 로컬 폴더 경로 설정
+        imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/120?text=?'; }; // 이미지 없을 때 예외처리
+
+        timeLeft = (currentStage === 1) ? 12 : (currentStage === 2) ? 15 : 20;
+        userSelection = Array(currentWord.w.length).fill(null);
+        currentScramble = currentWord.w.split('').sort(() => Math.random() - 0.5);
+
+        renderGame();
+        startTimer();
+        document.getElementById('meaning-hint').innerText = currentWord.m;
+        document.getElementById('meaning-hint').classList.add('opacity-0');
+        document.getElementById('stage-info').innerText = `Stage ${currentStage}`;
+    }
+
+    function renderGame() {
+        const poolEl = document.getElementById('letter-pool');
+        poolEl.innerHTML = '';
+        currentScramble.forEach((char, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'tile bg-white text-blue-600 border-2 border-blue-200';
+            btn.innerText = char;
+            btn.onclick = () => {
+                const emptyIdx = userSelection.indexOf(null);
+                if (emptyIdx !== -1) {
+                    userSelection[emptyIdx] = char;
+                    btn.style.visibility = 'hidden';
+                    renderSlots();
+                }
+            };
+            poolEl.appendChild(btn);
+        });
+        renderSlots();
+    }
+
+    function renderSlots() {
+        const slotsEl = document.getElementById('answer-slots');
+        slotsEl.innerHTML = '';
+        userSelection.forEach((char, idx) => {
+            const slot = document.createElement('div');
+            if (char === null) slot.className = 'tile-placeholder';
+            else {
+                slot.className = 'tile bg-blue-500 text-white animate__animated animate__bounceIn';
+                slot.innerText = char;
+                slot.onclick = () => {
+                    userSelection = Array(currentWord.w.length).fill(null);
+                    document.querySelectorAll('#letter-pool .tile').forEach(t => t.style.visibility = 'visible');
+                    renderSlots();
+                };
+            }
+            slotsEl.appendChild(slot);
+        });
+    }
+
+    function checkAnswer() {
+        if (isChecking || userSelection.includes(null)) return;
+        if (userSelection.join('') === currentWord.w) {
+            handleCorrect();
+        } else {
+            handleWrong();
+        }
+    }
+
+    function handleCorrect() {
+        isChecking = true;
+        clearInterval(timer);
+        score += 10;
+        document.getElementById('score-display').innerText = score;
+        document.querySelectorAll('#answer-slots .tile').forEach(t => t.classList.add('bg-green-500'));
+        setTimeout(() => {
+            if (score >= currentStage * 50 && currentStage < 3) {
+                currentStage++;
+                showModal("Level Up!", `Stage ${currentStage}로 이동합니다.`, "계속하기", loadWord);
+            } else {
+                loadWord();
+            }
+        }, 1000);
+    }
+
+    function handleWrong() {
+        isChecking = true;
+        clearInterval(timer);
+        hearts--;
+        updateHearts();
+        document.querySelectorAll('#answer-slots .tile').forEach(t => t.classList.add('bg-red-500', 'animate__shakeX'));
+        setTimeout(() => {
+            if (hearts <= 0) showModal("Game Over", `최종 점수: ${score}`, "다시 시작", () => location.reload());
+            else loadWord();
+        }, 1000);
+    }
+
+    function updateHearts() {
+        document.getElementById('hearts-display').innerText = "❤️".repeat(hearts) + "🖤".repeat(3 - hearts);
+    }
+
+    function startTimer() {
+        clearInterval(timer);
+        const bar = document.getElementById('timer-bar');
+        const startTime = timeLeft;
+        timer = setInterval(() => {
+            timeLeft -= 0.1;
+            bar.style.width = (timeLeft / startTime * 100) + '%';
+            if (timeLeft <= 0) handleWrong();
+        }, 100);
+    }
+
+    function useHint(type) {
+        if (type === 'random' && score >= 4) {
+            score -= 4;
+            const idx = userSelection.indexOf(null);
+            if(idx !== -1) { userSelection[idx] = currentWord.w[idx]; renderSlots(); }
+        } else if (type === 'meaning' && score >= 2) {
+            score -= 2;
+            document.getElementById('meaning-hint').classList.remove('opacity-0');
+        }
+        document.getElementById('score-display').innerText = score;
+    }
+
+    function showModal(title, body, btnText, callback) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-body').innerHTML = body;
+        const btn = document.getElementById('modal-btn');
+        btn.innerText = btnText;
+        btn.onclick = () => { document.getElementById('modal-overlay').classList.add('hidden'); callback(); };
+        document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>

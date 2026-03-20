@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>알파벳 도둑잡기 Pro - 최종본</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
@@ -14,11 +14,14 @@
             user-select: none;
             overflow: hidden;
             touch-action: manipulation;
+            /* 모바일 브라우저 주소창 대응 */
+            height: 100vh;
+            height: 100dvh;
         }
 
         .screen {
             width: 100vw;
-            height: 100vh;
+            height: 100%;
             display: flex;
             flex-direction: column;
             position: absolute;
@@ -26,26 +29,35 @@
             background: #f8fafc;
         }
 
+        /* 카드 크기를 화면 너비에 맞춰 반응형으로 변경 */
         .card {
             transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             aspect-ratio: 2/3;
-            width: 72px;
+            width: 18vw;
+            max-width: 72px;
+            min-width: 55px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.6rem;
+            font-size: 1.4rem;
             font-weight: 900;
-            border-radius: 12px;
+            border-radius: 10px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-            border: 3px solid #fff;
+            border: 2px solid #fff;
             position: relative;
+            flex-shrink: 0;
+        }
+
+        @media (min-width: 640px) {
+            .card { font-size: 1.8rem; width: 72px; }
         }
 
         .card.selected {
-            transform: translateY(-15px);
+            transform: translateY(-12px);
             border-color: #6366f1;
             box-shadow: 0 10px 20px rgba(99, 102, 241, 0.4);
             background-color: #f5f3ff;
+            z-index: 10;
         }
 
         .card.ai-hidden {
@@ -72,21 +84,22 @@
             padding: 1rem 2rem;
             border-radius: 1.25rem;
             font-weight: 800;
-            box-shadow: 0 8px 0 #4338ca;
+            box-shadow: 0 6px 0 #4338ca;
             transition: all 0.1s;
         }
         .btn-primary:active {
-            transform: translateY(4px);
-            box-shadow: 0 4px 0 #4338ca;
+            transform: translateY(3px);
+            box-shadow: 0 3px 0 #4338ca;
         }
 
         .world-tab {
             flex: 1;
             text-align: center;
-            padding: 0.8rem;
+            padding: 0.6rem;
             font-weight: 800;
             border-radius: 0.8rem;
             color: #64748b;
+            font-size: 0.85rem;
         }
         .world-tab.active {
             background: white;
@@ -94,8 +107,14 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.05);
         }
 
+        /* 터치 가능 영역 확보를 위한 z-index 정리 */
         #feedback-layer {
-            z-index: 100;
+            z-index: 50;
+        }
+
+        /* 세이프 에어리어 대응 */
+        .pb-safe {
+            padding-bottom: env(safe-area-inset-bottom, 1rem);
         }
     </style>
 </head>
@@ -103,87 +122,89 @@
 
 <!-- 타이틀 -->
 <div id="screen-title" class="screen p-8 justify-between z-10">
-    <div class="mt-24 text-center">
-        <h1 class="text-6xl font-black text-slate-800 tracking-tighter">
+    <div class="mt-20 text-center">
+        <h1 class="text-5xl font-black text-slate-800 tracking-tighter">
             ALPHABET<br><span class="text-indigo-600">THIEF</span>
         </h1>
-        <p class="text-slate-500 mt-4 font-bold">도둑을 피해 알파벳 짝을 맞추자!</p>
+        <p class="text-slate-500 mt-4 font-bold text-sm">도둑을 피해 알파벳 짝을 맞추자!</p>
     </div>
-    <div class="flex flex-col gap-3 mb-16">
-        <button onclick="showMap()" class="btn-primary text-2xl py-6">모험 시작</button>
-        <div id="challenge-unlock-msg" class="text-center text-xs font-bold text-slate-400">모든 스테이지 클리어 시 도전 모드 오픈</div>
-        <button id="btn-challenge" onclick="startChallengeMode()" class="hidden bg-slate-900 text-white py-5 rounded-2xl font-black text-xl shadow-xl">도전 모드 (A~Z) 🃏</button>
+    <div class="flex flex-col gap-3 mb-12">
+        <button onclick="showMap()" class="btn-primary text-xl py-5">모험 시작</button>
+        <div id="challenge-unlock-msg" class="text-center text-[10px] font-bold text-slate-400">모든 스테이지 클리어 시 도전 모드 오픈</div>
+        <button id="btn-challenge" onclick="startChallengeMode()" class="hidden bg-slate-900 text-white py-5 rounded-2xl font-black text-xl shadow-xl">도전 모드 🃏</button>
         <button onclick="resetData()" class="text-[10px] text-slate-300 mt-4">데이터 초기화</button>
     </div>
 </div>
 
 <!-- 맵 -->
-<div id="screen-map" class="screen hidden p-6 overflow-y-auto scroll-hide">
-    <div class="flex items-center justify-between mb-8">
-        <h2 class="text-3xl font-black text-slate-800">월드 선택</h2>
-        <button onclick="showScreen('screen-title')" class="bg-slate-200 px-4 py-2 rounded-xl font-bold text-sm">홈으로</button>
+<div id="screen-map" class="screen hidden p-6 overflow-hidden">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-2xl font-black text-slate-800">월드 선택</h2>
+        <button onclick="showScreen('screen-title')" class="bg-slate-200 px-3 py-1.5 rounded-xl font-bold text-xs">홈으로</button>
     </div>
 
-    <div class="flex bg-slate-200 p-1.5 rounded-2xl mb-8">
-        <button onclick="switchWorld(1)" id="tab-1" class="world-tab active text-sm">W1: 대문자</button>
-        <button onclick="switchWorld(2)" id="tab-2" class="world-tab text-sm">W2: 대소문자</button>
-        <button onclick="switchWorld(3)" id="tab-3" class="world-tab text-sm">W3: 단어그림</button>
+    <div class="flex bg-slate-200 p-1 rounded-2xl mb-6">
+        <button onclick="switchWorld(1)" id="tab-1" class="world-tab active">W1:대문자</button>
+        <button onclick="switchWorld(2)" id="tab-2" class="world-tab">W2:대소</button>
+        <button onclick="switchWorld(3)" id="tab-3" class="world-tab">W3:그림</button>
     </div>
 
-    <div id="stage-list" class="flex flex-col gap-4"></div>
+    <div id="stage-list" class="flex-1 flex flex-col gap-3 overflow-y-auto scroll-hide pb-10"></div>
 </div>
 
 <!-- 게임 화면 -->
-<div id="screen-game" class="screen hidden bg-slate-100">
-    <!-- AI 구역 -->
-    <div class="bg-slate-800 p-4 pt-10 text-white shadow-lg">
-        <div class="flex items-center justify-between w-full mb-6 px-2">
+<div id="screen-game" class="screen hidden bg-slate-100 overflow-hidden">
+    <!-- AI 구역 (높이 고정) -->
+    <div class="bg-slate-800 p-3 pt-8 text-white shadow-lg flex-shrink-0">
+        <div class="flex items-center justify-between w-full mb-3 px-2">
             <div class="flex items-center gap-3">
-                <div id="ai-avatar" class="text-4xl bg-white/10 w-14 h-14 flex items-center justify-center rounded-full">🤖</div>
+                <div id="ai-avatar" class="text-3xl bg-white/10 w-11 h-11 flex items-center justify-center rounded-full">🤖</div>
                 <div>
-                    <div id="ai-name" class="font-black text-lg">보통 AI</div>
-                    <div id="difficulty-badge" class="text-[10px] bg-indigo-500 text-white px-2 py-0.5 rounded font-black uppercase tracking-widest">NORMAL</div>
+                    <div id="ai-name" class="font-black text-sm">보통 AI</div>
+                    <div id="difficulty-badge" class="text-[9px] bg-indigo-500 text-white px-1.5 py-0.5 rounded font-black uppercase tracking-widest">NORMAL</div>
                 </div>
             </div>
             <div class="text-right">
-                <div class="text-[10px] text-slate-400 font-bold mb-1">상대 손패</div>
-                <div id="ai-count" class="text-3xl font-black text-white">0</div>
+                <div class="text-[9px] text-slate-400 font-bold mb-0.5 uppercase">AI Hand</div>
+                <div id="ai-count" class="text-2xl font-black text-white">0</div>
             </div>
         </div>
-        <div id="ai-hand" class="flex flex-wrap justify-center gap-2 min-h-[110px] w-full max-w-md mx-auto"></div>
+        <!-- AI 카드 컨테이너: 스크롤 가능하게 변경 -->
+        <div id="ai-hand" class="flex flex-wrap justify-center gap-1.5 overflow-x-hidden overflow-y-auto max-h-[140px] scroll-hide pb-2"></div>
     </div>
 
-    <!-- 중앙 구역 -->
-    <div class="flex-1 flex flex-col items-center justify-center relative">
-        <div id="turn-indicator" class="text-center p-6 rounded-3xl bg-white/50 backdrop-blur-sm border border-white">
-            <div id="turn-text" class="text-3xl font-black text-slate-300 mb-1">준비...</div>
-            <div id="status-msg" class="text-sm text-slate-500 font-bold">잠시만 기다려주세요.</div>
+    <!-- 중앙 구역 (유동적 높이) -->
+    <div class="flex-1 flex flex-col items-center justify-center relative min-h-[80px]">
+        <div id="turn-indicator" class="text-center p-4 rounded-2xl bg-white/40 backdrop-blur-sm border border-white/50">
+            <div id="turn-text" class="text-xl font-black text-slate-400 mb-0.5">준비...</div>
+            <div id="status-msg" class="text-[11px] text-slate-500 font-bold">잠시만 기다려주세요.</div>
         </div>
         <div id="feedback-layer" class="absolute pointer-events-none w-full flex items-center justify-center"></div>
     </div>
 
-    <!-- 플레이어 구역 -->
-    <div class="bg-white p-5 pb-12 shadow-[0_-10px_30px_rgba(0,0,0,0.05)] rounded-t-[3rem]">
-        <div class="flex justify-between items-end mb-6 px-4">
+    <!-- 플레이어 구역 (높이 확보) -->
+    <div class="bg-white p-4 pb-safe shadow-[0_-10px_30px_rgba(0,0,0,0.05)] rounded-t-[2.5rem] flex-shrink-0">
+        <div class="flex justify-between items-end mb-4 px-2">
             <div>
-                <span class="text-[10px] font-black text-slate-400 tracking-widest block mb-1">MY CARDS</span>
-                <span id="player-count" class="text-4xl font-black text-indigo-600">0</span>
+                <span class="text-[9px] font-black text-slate-400 tracking-widest block mb-0.5 uppercase">My Cards</span>
+                <span id="player-count" class="text-3xl font-black text-indigo-600">0</span>
             </div>
-            <button id="btn-end-turn" onclick="nextPhase()" class="hidden bg-slate-900 text-white px-10 py-4 rounded-2xl font-black shadow-xl animate-bounce">턴 종료</button>
+            <button id="btn-end-turn" onclick="nextPhase()" class="hidden bg-slate-900 text-white px-8 py-3 rounded-xl font-black shadow-lg animate-bounce text-sm">턴 종료</button>
         </div>
-        <div id="player-hand" class="flex flex-wrap justify-center gap-3 max-h-[250px] overflow-y-auto scroll-hide py-2"></div>
+        <!-- 플레이어 카드 컨테이너 -->
+        <div id="player-hand" class="flex flex-wrap justify-center gap-1.5 overflow-y-auto scroll-hide max-h-[35vh] min-h-[120px] py-1"></div>
     </div>
 </div>
 
 <!-- 결과 -->
-<div id="screen-result" class="screen hidden bg-slate-900/95 z-50 flex items-center justify-center p-8 backdrop-blur-lg">
-    <div class="bg-white w-full max-w-sm rounded-[3rem] p-10 text-center flex flex-col items-center shadow-2xl">
-        <div id="result-emoji" class="text-9xl mb-8">🏆</div>
-        <h2 id="result-title" class="text-5xl font-black text-slate-800 mb-4">WINNER</h2>
-        <p id="result-desc" class="text-slate-500 font-medium mb-10 leading-relaxed">알파벳의 신이 나타났습니다!</p>
-        <div class="flex flex-col gap-4 w-full">
-            <button onclick="showMap()" class="bg-indigo-600 text-white py-5 rounded-2xl font-black text-xl shadow-lg shadow-indigo-200">다음 목적지로</button>
-            <button onclick="retryGame()" class="bg-slate-100 text-slate-500 py-4 rounded-2xl font-bold">다시 도전</button>
+<div id="screen-result" class="screen hidden bg-slate-900/95 z-[100] flex items-center justify-center p-8 backdrop-blur-lg">
+    <div class="bg-white w-full max-w-sm rounded-[2.5rem] p-10 text-center flex flex-col items-center shadow-2xl">
+        <div id="result-emoji" class="text-8xl mb-6">🏆</div>
+        <h2 id="result-title" class="text-4xl font-black text-slate-800 mb-3 uppercase tracking-tighter">Winner</h2>
+        <p id="result-desc" class="text-slate-500 font-medium mb-8 leading-relaxed text-sm">알파벳의 신이 나타났습니다!</p>
+        <div class="flex flex-col gap-3 w-full">
+            <button onclick="showMap()" class="bg-indigo-600 text-white py-4 rounded-2xl font-black text-lg shadow-lg">다음 목적지로</button>
+            <button onclick="retryGame()" class="bg-slate-100 text-slate-500 py-3 rounded-2xl font-bold text-sm">다시 도전</button>
         </div>
     </div>
 </div>
@@ -248,18 +269,18 @@
             const sNum = (w - 1) * 5 + i;
             const isLocked = sNum > state.unlocked;
             const btn = document.createElement('button');
-            btn.className = `flex items-center justify-between p-6 rounded-2xl border-b-[6px] transition-all ${isLocked ? 'bg-slate-100 text-slate-300 border-slate-200 pointer-events-none' : 'bg-white border-slate-200 text-slate-800 active:translate-y-1 active:border-b-0'}`;
+            btn.className = `flex items-center justify-between p-5 rounded-2xl border-b-[5px] transition-all ${isLocked ? 'bg-slate-100 text-slate-300 border-slate-200 pointer-events-none' : 'bg-white border-slate-200 text-slate-800 active:translate-y-1 active:border-b-0'}`;
 
             let subText = "같은 대문자";
             if(w === 2) subText = "대문자 & 소문자";
             if(w === 3) subText = "대문자 & 그림";
 
             btn.innerHTML = `
-                    <div class="flex items-center gap-5">
-                        <span class="text-3xl font-black opacity-10">${sNum}</span>
+                    <div class="flex items-center gap-4">
+                        <span class="text-2xl font-black opacity-10">${sNum}</span>
                         <div class="text-left">
-                            <div class="font-black text-xl">STAGE ${sNum}</div>
-                            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-tight">${subText}</div>
+                            <div class="font-black text-lg">STAGE ${sNum}</div>
+                            <div class="text-[10px] font-bold text-slate-400 uppercase tracking-tight">${subText}</div>
                         </div>
                     </div>
                     ${isLocked ? '🔒' : '➡️'}
@@ -293,7 +314,6 @@
             const alpCount = 4 + state.stage;
             const subset = ALPHABET.slice(0, Math.min(alpCount, 26));
 
-            // 스테이지 모드: 1명당 1장씩 강제 분배 (페어 분리)
             subset.forEach((item, idx) => {
                 const pairId = `p_${idx}`;
                 state.pHand.push(createCardObj(item, 1, pairId));
@@ -307,12 +327,10 @@
             state.pHand.sort(() => Math.random() - 0.5);
             state.aiHand.sort(() => Math.random() - 0.5);
         } else {
-            // 도전 모드: A~Z 중 랜덤 10쌍 + 조커 = 21장
             const randomAlps = [...ALPHABET].sort(() => Math.random() - 0.5).slice(0, 10);
             let pool = [];
             randomAlps.forEach((item, idx) => {
                 const pairId = `p_${idx}`;
-                // 도전모드는 월드3 규칙(그림) + 랜덤배분
                 pool.push(createCardObj(item, 1, pairId));
                 pool.push(createCardObj(item, 2, pairId));
             });
@@ -335,16 +353,11 @@
         let isImg = false;
         let char = item.c;
 
-        // World 1: 무조건 대문자 (Cat 등이 섞이지 않도록 명시)
         if (state.world === 1) {
             display = item.c;
-        }
-        // World 2: 타입 2만 소문자
-        else if (state.world === 2) {
+        } else if (state.world === 2) {
             display = (type === 2) ? item.c.toLowerCase() : item.c;
-        }
-        // World 3: 타입 2만 이미지(폴백:단어)
-        else if (state.world === 3 || state.mode === 'challenge') {
+        } else if (state.world === 3 || state.mode === 'challenge') {
             if (type === 2) {
                 display = item.w;
                 isImg = true;
@@ -365,18 +378,18 @@
 
         if (p === 'pick') {
             turnText.innerText = "나의 차례";
-            turnText.className = "text-3xl font-black text-indigo-600";
+            turnText.className = "text-2xl font-black text-indigo-600";
             statusMsg.innerText = "상대의 카드 1장을 뽑으세요.";
         } else if (p === 'match') {
             turnText.innerText = "짝 맞추기";
-            turnText.className = "text-3xl font-black text-indigo-500";
+            turnText.className = "text-2xl font-black text-indigo-500";
             statusMsg.innerText = "짝이 맞는 카드 2장을 골라주세요.";
             endBtn.classList.remove('hidden');
         } else if (p === 'ai') {
             turnText.innerText = "상대 차례";
-            turnText.className = "text-3xl font-black text-slate-400";
+            turnText.className = "text-2xl font-black text-slate-400";
             statusMsg.innerText = "AI가 생각 중입니다...";
-            setTimeout(aiTurn, 1200);
+            setTimeout(aiTurn, 1000);
         }
 
         document.getElementById('ai-name').innerText = state.difficulty.toUpperCase() + " AI";
@@ -392,7 +405,7 @@
         state.aiHand.forEach((c, idx) => {
             const div = document.createElement('div');
             div.className = `card ai-hidden`;
-            div.innerHTML = `<span class="opacity-10 text-3xl font-black">?</span>`;
+            div.innerHTML = `<span class="opacity-10 text-2xl font-black">?</span>`;
             div.onclick = () => { if(state.phase === 'pick' && !state.isProcessing) pickCard(idx); };
             aiArea.appendChild(div);
         });
@@ -403,9 +416,9 @@
 
             if (c.isImg) {
                 div.innerHTML = `
-                        <div class="flex flex-col items-center p-1">
-                            <img src="/PIC ${c.char}.png" class="w-12 h-12 object-contain mb-1" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                            <span class="text-[10px] leading-none uppercase font-black text-center" style="display:none">${c.display}</span>
+                        <div class="flex flex-col items-center p-0.5">
+                            <img src="/PIC ${c.char}.png" class="w-10 h-10 object-contain mb-0.5" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                            <span class="text-[9px] leading-none uppercase font-black text-center" style="display:none">${c.display}</span>
                         </div>
                     `;
             } else {
@@ -443,13 +456,13 @@
         if (state.selected.length === 2) {
             const [i1, i2] = state.selected;
             if (state.pHand[i1].pair === state.pHand[i2].pair) {
-                showFeedback(`Perfect Match! ✨`, "text-green-500");
+                showFeedback(`Correct! ✨`, "text-green-500");
                 const id1 = state.pHand[i1].id;
                 const id2 = state.pHand[i2].id;
                 state.pHand = state.pHand.filter(c => c.id !== id1 && c.id !== id2);
                 state.selected = [];
             } else {
-                showFeedback("No Match!", "text-rose-500");
+                showFeedback("Wrong Pair!", "text-rose-500");
                 state.selected = [];
             }
         }
@@ -463,31 +476,23 @@
 
     async function aiTurn() {
         if (state.pHand.length === 0) return;
-
         let targetIdx = 0;
         const jokerIdx = state.pHand.findIndex(c => c.isJoker);
+        const prob = state.difficulty === 'hard' ? 0.85 : (state.difficulty === 'challenge' ? 0.95 : 0);
 
-        if (state.difficulty === 'normal') {
-            targetIdx = Math.floor(Math.random() * state.pHand.length);
+        if (jokerIdx !== -1 && Math.random() < prob) {
+            let cands = state.pHand.map((_, i) => i).filter(i => i !== jokerIdx);
+            targetIdx = cands.length > 0 ? cands[Math.floor(Math.random() * cands.length)] : jokerIdx;
         } else {
-            // Hard/Challenge: 조커 회피 (85%~95%)
-            const prob = state.difficulty === 'hard' ? 0.85 : 0.95;
-            if (jokerIdx !== -1 && Math.random() < prob) {
-                let cands = state.pHand.map((_, i) => i).filter(i => i !== jokerIdx);
-                targetIdx = cands.length > 0 ? cands[Math.floor(Math.random() * cands.length)] : jokerIdx;
-            } else {
-                targetIdx = Math.floor(Math.random() * state.pHand.length);
-            }
+            targetIdx = Math.floor(Math.random() * state.pHand.length);
         }
 
         const card = state.pHand.splice(targetIdx, 1)[0];
         state.aiHand.push(card);
         renderGame();
-        showFeedback("상대가 카드를 가져갔어요.", "text-slate-600");
+        showFeedback("AI 차례", "text-slate-500");
+        await sleep(800);
 
-        await sleep(1000);
-
-        // AI 매칭 로직
         let found = true;
         while(found) {
             found = false;
@@ -496,14 +501,13 @@
                     if(!state.aiHand[i].isJoker && state.aiHand[i].pair === state.aiHand[j].pair) {
                         state.aiHand.splice(j,1);
                         state.aiHand.splice(i,1);
-                        showFeedback("상대가 짝을 맞췄습니다.", "text-indigo-400");
+                        showFeedback("AI Match!", "text-indigo-400");
                         found = true; break;
                     }
                 }
                 if(found) break;
             }
         }
-
         renderGame();
         if(!checkGameOver()) setPhase('pick');
     }
@@ -511,7 +515,6 @@
     function checkGameOver() {
         if (state.pHand.length === 0 || state.aiHand.length === 0) {
             let win = state.pHand.length === 0;
-
             if (win && state.mode === 'stage') {
                 const currentS = (state.world - 1) * 5 + state.stage;
                 if (currentS === state.unlocked) {
@@ -528,15 +531,8 @@
 
     function showResult(win) {
         const sc = document.getElementById('screen-result');
-        const title = document.getElementById('result-title');
-        const emoji = document.getElementById('result-emoji');
-        const desc = document.getElementById('result-desc');
-
-        emoji.innerText = win ? "🏆" : "🃏";
-        title.innerText = win ? "PERFECT!" : "DEFEAT";
-        title.className = `text-5xl font-black mb-4 ${win ? 'text-indigo-600' : 'text-slate-800'}`;
-        desc.innerText = win ? "모든 카드를 성공적으로 버렸습니다!" : "조커가 당신의 손에 남았습니다...";
-
+        document.getElementById('result-emoji').innerText = win ? "🏆" : "🃏";
+        document.getElementById('result-title').innerText = win ? "Perfect!" : "Defeat";
         sc.classList.remove('hidden');
     }
 
@@ -548,20 +544,19 @@
     function showFeedback(text, color) {
         const layer = document.getElementById('feedback-layer');
         const el = document.createElement('div');
-        el.className = `text-2xl font-black animate-bounce ${color} bg-white/90 px-6 py-3 rounded-3xl shadow-2xl border border-white`;
+        el.className = `text-lg font-black animate-bounce ${color} bg-white/90 px-5 py-2 rounded-2xl shadow-xl border border-white/50`;
         el.innerText = text;
         layer.innerHTML = '';
         layer.appendChild(el);
-        setTimeout(() => { if(layer.firstChild === el) layer.innerHTML = ''; }, 1800);
+        setTimeout(() => { if(layer.firstChild === el) layer.innerHTML = ''; }, 1500);
     }
 
     function resetData() {
-        if(confirm("모든 데이터를 초기화할까요?")) {
+        if(confirm("초기화하시겠습니까?")) {
             localStorage.removeItem('abc_v3_unlocked');
             location.reload();
         }
     }
-
     function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 </script>
 </body>
