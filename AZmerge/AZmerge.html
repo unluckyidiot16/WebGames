@@ -280,7 +280,6 @@
         updateLimitLinePosition();
         window.addEventListener('resize', updateLimitLinePosition);
 
-        // 초기 인덱스 세팅
         nextShapeIndex = CONFIG.spawnRange[Math.floor(Math.random() * CONFIG.spawnRange.length)];
         setNextShape();
 
@@ -320,7 +319,7 @@
             friction: 0.3,
             restitution: 0.2,
             isStatic: isStatic,
-            isSensor: isStatic, // 미리보기용 정적 객체는 충돌하지 않게 설정
+            isSensor: isStatic,
             label: 'alphabet',
             render: {
                 fillStyle: conf.color,
@@ -332,6 +331,8 @@
         const body = Bodies.circle(x, y, conf.radius, options);
         body.createdAt = Date.now();
         body.gameData = { index: index };
+        // 병합 중인지 확인하는 플래그 초기화
+        body.isMerging = false;
         return body;
     }
 
@@ -373,8 +374,16 @@
         Events.on(engine, 'collisionStart', (event) => {
             event.pairs.forEach((pair) => {
                 const { bodyA, bodyB } = pair;
+
+                // [버그 수정] 둘 중 하나라도 이미 병합 중이라면 로직 건너뛰기
+                if (bodyA.isMerging || bodyB.isMerging) return;
+
                 if (bodyA.gameData && bodyB.gameData &&
                     bodyA.gameData.index === bodyB.gameData.index) {
+
+                    // [버그 수정] 병합 시작 시 플래그를 true로 변경하여 중복 병합 방지
+                    bodyA.isMerging = true;
+                    bodyB.isMerging = true;
 
                     const currentIndex = bodyA.gameData.index;
                     const maxIndex = CONFIG.shapes.length - 1;
@@ -433,13 +442,11 @@
 
         const gameCanvas = render.canvas;
 
-        // 마우스 & 터치 조준 처리
         const handleAim = (e) => {
             if (!isGameStarted || isGameOver || !canDrop) return;
             updatePreview(getEventX(e));
         };
 
-        // 낙하 처리 로직
         const handleDrop = (e) => {
             if (!isGameStarted || isGameOver || !canDrop) return;
 
@@ -455,17 +462,15 @@
 
             canDrop = false;
 
-            // 0.6초 뒤에 다음 알파벳 세팅 및 미리보기 자동 생성
             setTimeout(() => {
                 if(!isGameOver) {
                     canDrop = true;
                     setNextShape();
-                    updatePreview(CONFIG.width / 2); // 정중앙에 다음 알파벳을 바로 띄워줌
+                    updatePreview(CONFIG.width / 2);
                 }
             }, 600);
         };
 
-        // 이벤트 리스너 (터치 이벤트 스크롤 방지 추가)
         gameCanvas.addEventListener('mousemove', handleAim);
         gameCanvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
@@ -502,7 +507,6 @@
         updateLimitLinePosition();
         Runner.run(runner, engine);
 
-        // 게임 시작 시 정중앙에 첫 알파벳 띄워주기
         updatePreview(CONFIG.width / 2);
     };
 
