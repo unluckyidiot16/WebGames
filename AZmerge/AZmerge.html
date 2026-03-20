@@ -218,8 +218,10 @@
     let bestScore = localStorage.getItem('alphabet-suika-kids-best') || 0;
     let isGameOver = false;
     let isGameStarted = false;
+
     let currentShapeIndex = 0;
     let nextShapeIndex = 0;
+
     let canDrop = true;
     let previewBody = null;
     let warningTimer = null;
@@ -248,7 +250,6 @@
 
         Composite.add(engine.world, [ground, leftWall, rightWall]);
 
-        // 알파벳 텍스트 렌더링 이벤트 추가
         Events.on(render, 'afterRender', () => {
             const context = render.context;
             const bodies = Composite.allBodies(engine.world);
@@ -260,16 +261,13 @@
                 if (body.label === 'alphabet' && body.gameData) {
                     const conf = CONFIG.shapes[body.gameData.index];
 
-                    // 도형이 회전할 때 글자도 같이 회전하도록 캔버스 컨텍스트 조정
                     context.translate(body.position.x, body.position.y);
                     context.rotate(body.angle);
 
-                    // 글자 크기를 원의 반지름에 비례하게 설정
                     context.font = `bold ${conf.radius}px 'Jua'`;
                     context.fillStyle = "#5D4037";
                     context.fillText(conf.letter, 0, 0);
 
-                    // 원래 상태로 복구
                     context.rotate(-body.angle);
                     context.translate(-body.position.x, -body.position.y);
                 }
@@ -282,9 +280,12 @@
         updateLimitLinePosition();
         window.addEventListener('resize', updateLimitLinePosition);
 
+        // 초기 인덱스 세팅
+        nextShapeIndex = CONFIG.spawnRange[Math.floor(Math.random() * CONFIG.spawnRange.length)];
+        setNextShape();
+
         setupEvents();
         createGuide();
-        setNextShape();
     }
 
     function updateLimitLinePosition() {
@@ -313,13 +314,13 @@
         });
     }
 
-    // 다각형에서 '원(Circle)' 생성으로 로직 변경
     function createAlphabetBody(x, y, index, isStatic = false) {
         const conf = CONFIG.shapes[index];
         const options = {
             friction: 0.3,
             restitution: 0.2,
             isStatic: isStatic,
+            isSensor: isStatic, // 미리보기용 정적 객체는 충돌하지 않게 설정
             label: 'alphabet',
             render: {
                 fillStyle: conf.color,
@@ -341,6 +342,31 @@
         const nextConf = CONFIG.shapes[nextShapeIndex];
         const nextDisplay = document.getElementById('next-shape-display');
         nextDisplay.innerHTML = `<div style="width:32px; height:32px; background:${nextConf.color}; border:2px solid #5D4037; border-radius:50%; display:flex; justify-content:center; align-items:center; font-weight:bold; font-size:18px; color:#5D4037;">${nextConf.letter}</div>`;
+    }
+
+    function updatePreview(x) {
+        if (!isGameStarted || isGameOver) return;
+        const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
+
+        if (!previewBody) {
+            previewBody = createAlphabetBody(clampedX, CONFIG.spawnY, currentShapeIndex, true);
+            Composite.add(engine.world, previewBody);
+        } else {
+            Body.setPosition(previewBody, { x: clampedX, y: CONFIG.spawnY });
+        }
+    }
+
+    function getEventX(e) {
+        const rect = render.canvas.getBoundingClientRect();
+        let clientX;
+        if (e.touches && e.touches.length > 0) {
+            clientX = e.touches[0].clientX;
+        } else if (e.changedTouches && e.changedTouches.length > 0) {
+            clientX = e.changedTouches[0].clientX;
+        } else {
+            clientX = e.clientX;
+        }
+        return (clientX - rect.left) * (CONFIG.width / rect.width);
     }
 
     function setupEvents() {
@@ -406,51 +432,55 @@
         });
 
         const gameCanvas = render.canvas;
-        const handleMove = (e) => {
-            if (!isGameStarted || isGameOver || !canDrop) return;
-            const x = getEventX(e);
-            const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
 
-            if (!previewBody) {
-                previewBody = createAlphabetBody(clampedX, CONFIG.spawnY, currentShapeIndex, true);
-                Composite.add(engine.world, previewBody);
-            } else {
-                Body.setPosition(previewBody, { x: clampedX, y: CONFIG.spawnY });
-            }
+        // 마우스 & 터치 조준 처리
+        const handleAim = (e) => {
+            if (!isGameStarted || isGameOver || !canDrop) return;
+            updatePreview(getEventX(e));
         };
 
-        const handleEnd = (e) => {
+        // 낙하 처리 로직
+        const handleDrop = (e) => {
             if (!isGameStarted || isGameOver || !canDrop) return;
-            const x = getEventX(e);
-            const clampedX = Math.max(40, Math.min(CONFIG.width - 40, x));
+
+            const dropX = previewBody ? previewBody.position.x : getEventX(e);
 
             if (previewBody) {
                 Composite.remove(engine.world, previewBody);
                 previewBody = null;
             }
 
-            const dropBody = createAlphabetBody(clampedX, CONFIG.spawnY, currentShapeIndex);
+            const dropBody = createAlphabetBody(dropX, CONFIG.spawnY, currentShapeIndex);
             Composite.add(engine.world, dropBody);
 
             canDrop = false;
+
+            // 0.6초 뒤에 다음 알파벳 세팅 및 미리보기 자동 생성
             setTimeout(() => {
                 if(!isGameOver) {
                     canDrop = true;
                     setNextShape();
+                    updatePreview(CONFIG.width / 2); // 정중앙에 다음 알파벳을 바로 띄워줌
                 }
             }, 600);
         };
 
-        gameCanvas.addEventListener('mousemove', handleMove);
-        gameCanvas.addEventListener('touchstart', handleMove);
-        gameCanvas.addEventListener('mousedown', handleEnd);
-        gameCanvas.addEventListener('touchend', handleEnd);
-    }
+        // 이벤트 리스너 (터치 이벤트 스크롤 방지 추가)
+        gameCanvas.addEventListener('mousemove', handleAim);
+        gameCanvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleAim(e);
+        }, { passive: false });
+        gameCanvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            handleAim(e);
+        }, { passive: false });
 
-    function getEventX(e) {
-        const rect = render.canvas.getBoundingClientRect();
-        const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-        return (clientX - rect.left) * (CONFIG.width / rect.width);
+        gameCanvas.addEventListener('mousedown', handleDrop);
+        gameCanvas.addEventListener('touchend', (e) => {
+            e.preventDefault();
+            handleDrop(e);
+        }, { passive: false });
     }
 
     function gameOver() {
@@ -471,6 +501,9 @@
         isGameStarted = true;
         updateLimitLinePosition();
         Runner.run(runner, engine);
+
+        // 게임 시작 시 정중앙에 첫 알파벳 띄워주기
+        updatePreview(CONFIG.width / 2);
     };
 
     initGame();
