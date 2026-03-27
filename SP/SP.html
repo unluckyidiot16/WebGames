@@ -14,19 +14,20 @@
         .tile:active { transform: translateY(2px); box-shadow: none; }
         .tile-placeholder { width: 55px; height: 55px; border: 3px dashed #cbd5e1; border-radius: 12px; }
         .progress-bar { transition: width 0.1s linear; }
-        /* 이미지 스타일 */
         #hint-image { width: 120px; height: 120px; object-fit: contain; border-radius: 20px; background: white; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
     </style>
 </head>
 <body class="bg-blue-50 min-h-screen flex items-center justify-center p-4">
 
+<!-- 타이틀 화면 -->
 <div id="title-screen" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative flex flex-col items-center justify-center p-8 min-h-[500px]">
     <div class="text-6xl mb-4 animate__animated animate__bounceIn">🍎</div>
     <h1 class="text-4xl font-jua text-blue-600 mb-8 text-center leading-snug">초3 영단어<br>이미지 퀴즈</h1>
     <div class="bg-blue-50 rounded-2xl p-6 w-full mb-8 text-center border-2 border-blue-100 shadow-inner">
         <div>
-            <span class="text-sm text-gray-500 font-bold tracking-wider">🏆 최고 점수</span>
-            <div id="best-score-display" class="text-4xl font-jua text-orange-500 mt-1">0</div>
+            <span class="text-sm text-gray-500 font-bold tracking-wider">🏆 게임 규칙</span>
+            <p class="text-sm text-gray-600 mt-2">단어 길이에 따라 점수가 올라가요!</p>
+            <p class="text-sm text-gray-600">5문제를 맞히면 다음 단계로 레벨업!</p>
         </div>
     </div>
     <button onclick="startGameFromTitle()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl shadow-lg animate__animated animate__pulse animate__infinite">
@@ -34,12 +35,15 @@
     </button>
 </div>
 
+<!-- 게임 화면 -->
 <div id="game-container" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative hidden">
+    <!-- 상단 상태바 -->
     <div class="bg-blue-500 p-4 text-white flex justify-between items-center">
         <div class="flex flex-col"><span class="text-xs opacity-80">SCORE</span><span id="score-display" class="text-2xl font-jua">0</span></div>
         <div id="hearts-display" class="text-xl flex gap-1">❤️❤️❤️</div>
     </div>
 
+    <!-- 스테이지 및 타이머 -->
     <div class="p-4 bg-blue-100 flex justify-between items-center">
         <div id="stage-info" class="font-bold text-blue-700">Stage 1</div>
         <div class="w-32 bg-white rounded-full h-4 overflow-hidden border border-blue-300">
@@ -47,72 +51,121 @@
         </div>
     </div>
 
+    <!-- 플레이 영역 -->
     <div id="play-area" class="p-6 min-h-[450px] flex flex-col items-center justify-center gap-6">
+        <!-- 이미지 및 뜻 힌트 -->
         <div id="image-hint-container" class="flex flex-col items-center gap-2">
             <img id="hint-image" src="" alt="힌트 이미지" class="animate__animated animate__fadeIn">
             <div id="meaning-hint" class="text-lg font-bold text-gray-400 opacity-0 transition-opacity">뜻 힌트</div>
         </div>
 
+        <!-- 빈칸 및 글자 타일 -->
         <div id="answer-slots" class="flex gap-2 justify-center flex-wrap"></div>
         <div id="letter-pool" class="flex gap-2 justify-center flex-wrap mt-2 p-4 bg-gray-50 rounded-2xl w-full min-h-[80px]"></div>
 
+        <!-- 힌트 버튼 -->
         <div class="grid grid-cols-2 gap-2 w-full mt-2">
-            <button onclick="useHint('random')" class="p-2 bg-green-100 hover:bg-green-200 rounded-xl border border-green-200 text-xs font-bold text-green-700">랜덤 글자 (-4점)</button>
-            <button onclick="useHint('meaning')" class="p-2 bg-orange-100 hover:bg-orange-200 rounded-xl border border-orange-200 text-xs font-bold text-orange-700">뜻 보기 (-2점)</button>
+            <button onclick="useHint('random')" class="p-2 bg-green-100 hover:bg-green-200 rounded-xl border border-green-200 text-sm font-bold text-green-700">랜덤 글자 (-5점)</button>
+            <button onclick="useHint('meaning')" class="p-2 bg-orange-100 hover:bg-orange-200 rounded-xl border border-orange-200 text-sm font-bold text-orange-700">뜻 보기 (-3점)</button>
         </div>
     </div>
 
+    <!-- 정답 확인 버튼 -->
     <div class="p-6 pt-0">
-        <button id="check-btn" onclick="checkAnswer()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-2xl shadow-lg">정답 확인!</button>
+        <button id="check-btn" onclick="checkAnswer()" class="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white text-xl font-bold rounded-2xl shadow-lg transition-colors">정답 확인!</button>
     </div>
 
+    <!-- 공통 모달창 -->
     <div id="modal-overlay" class="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-6 text-center hidden">
-        <div id="modal-content" class="bg-white rounded-3xl p-8 w-full">
+        <div id="modal-content" class="bg-white rounded-3xl p-8 w-full animate__animated animate__zoomIn">
             <h2 id="modal-title" class="text-3xl font-jua mb-4 text-blue-600"></h2>
-            <p id="modal-body" class="mb-6 text-gray-600"></p>
-            <button id="modal-btn" class="w-full py-3 bg-blue-500 text-white rounded-xl font-bold text-lg"></button>
+            <p id="modal-body" class="mb-6 text-gray-600 font-bold"></p>
+            <button id="modal-btn" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-lg transition-colors"></button>
         </div>
     </div>
 </div>
 
 <script>
-    // 기존 데이터 유지
+    // 스테이지별 단어 데이터 (글자 수 기준 분배)
     const wordData = {
-        1: [{w: "cat", m: "고양이"}, {w: "dog", m: "개"}, {w: "pig", m: "돼지"}, {w: "box", m: "상자"}, {w: "sun", m: "태양"}, {w: "cup", m: "컵"}, {w: "bus", m: "버스"}],
-        2: [{w: "book", m: "책"}, {w: "desk", m: "책상"}, {w: "milk", m: "우유"}, {w: "fish", m: "물고기"}, {w: "tree", m: "나무"}, {w: "door", m: "문"}, {w: "hand", m: "손"}],
-        3: [{w: "apple", m: "사과"}, {w: "house", m: "집"}, {w: "water", m: "물"}, {w: "bread", m: "빵"}, {w: "pizza", m: "피자"}, {w: "robot", m: "로봇"}, {w: "grape", m: "포도"}]
+        1: [ // 2~3글자 단어
+            {w: "up", m: "위로"}, {w: "cat", m: "고양이"}, {w: "dog", m: "개"},
+            {w: "egg", m: "달걀"}, {w: "hat", m: "모자"}, {w: "ice", m: "얼음"},
+            {w: "jam", m: "잼"}, {w: "pig", m: "돼지"}, {w: "sun", m: "태양"},
+            {w: "ten", m: "십 (10)"}, {w: "win", m: "이기다"}, {w: "six", m: "육 (6)"}
+        ],
+        2: [ // 4~5글자 단어
+            {w: "frog", m: "개구리"}, {w: "game", m: "게임"}, {w: "king", m: "왕"},
+            {w: "lion", m: "사자"}, {w: "nine", m: "구 (9)"}, {w: "ring", m: "반지"},
+            {w: "apple", m: "사과"}, {w: "queen", m: "여왕"}
+        ],
+        3: [ // 6글자 이상 단어
+            {w: "banana", m: "바나나"}, {w: "monkey", m: "원숭이"}, {w: "orange", m: "오렌지"},
+            {w: "violin", m: "바이올린"}, {w: "yellow", m: "노란색"}, {w: "zebra", m: "얼룩말"}
+        ]
     };
 
-    let currentStage = 1, score = 0, hearts = 3, currentWord = null, userSelection = [], timer = null, timeLeft = 0, maxTime = 15, isChecking = false;
+    let currentStage = 1;
+    let score = 0;
+    let hearts = 3;
+    let wordsSolved = 0; // 스테이지 내 맞춘 단어 수
+    let currentWord = null;
+    let userSelection = [];
+    let currentScramble = [];
+    let timer = null;
+    let timeLeft = 0;
+    let isChecking = false;
 
+    // 게임 시작
     function startGameFromTitle() {
         document.getElementById('title-screen').classList.add('hidden');
         document.getElementById('game-container').classList.remove('hidden');
+        score = 0;
+        hearts = 3;
+        currentStage = 1;
+        wordsSolved = 0;
+        document.getElementById('score-display').innerText = score;
+        updateHearts();
         loadWord();
     }
 
+    // 새 단어 불러오기
     function loadWord() {
         isChecking = false;
+
+        // 현재 스테이지의 단어 풀에서 랜덤 선택
         const pool = wordData[currentStage];
         currentWord = pool[Math.floor(Math.random() * pool.length)];
 
-        // 이미지 힌트 업데이트 (첫 글자 대문자 + .png)
-        const firstLetter = currentWord.w[0].toUpperCase();
+        // 이미지 경로 수정: 단어이름.png (예: apple.png)
         const imgEl = document.getElementById('hint-image');
-        imgEl.src = `./PIC/${firstLetter}.png`; // 로컬 폴더 경로 설정
-        imgEl.onerror = () => { imgEl.src = 'https://via.placeholder.com/120?text=?'; }; // 이미지 없을 때 예외처리
+        imgEl.src = `./PIC/${currentWord.w}.png`;
 
-        timeLeft = (currentStage === 1) ? 12 : (currentStage === 2) ? 15 : 20;
+        // 로컬 이미지가 없을 경우를 대비한 플레이스홀더 처리
+        imgEl.onerror = () => {
+            imgEl.src = `https://ui-avatars.com/api/?name=${currentWord.w[0]}&background=random&color=fff&size=120&font-size=0.6`;
+        };
+
+        // 타이머 시간 설정 (스테이지별로 증가)
+        timeLeft = (currentStage === 1) ? 15 : (currentStage === 2) ? 20 : 25;
+
+        // 타일 초기화
         userSelection = Array(currentWord.w.length).fill(null);
         currentScramble = currentWord.w.split('').sort(() => Math.random() - 0.5);
 
         renderGame();
         startTimer();
-        document.getElementById('meaning-hint').innerText = currentWord.m;
-        document.getElementById('meaning-hint').classList.add('opacity-0');
-        document.getElementById('stage-info').innerText = `Stage ${currentStage}`;
+
+        // 뜻 힌트 초기화
+        const meaningHintEl = document.getElementById('meaning-hint');
+        meaningHintEl.innerText = currentWord.m;
+        meaningHintEl.classList.add('opacity-0');
+
+        // 스테이지 정보 업데이트
+        document.getElementById('stage-info').innerText = `Stage ${currentStage} (${wordsSolved}/5)`;
     }
 
+    // 화면 렌더링
     function renderGame() {
         const poolEl = document.getElementById('letter-pool');
         poolEl.innerHTML = '';
@@ -125,6 +178,7 @@
                 if (emptyIdx !== -1) {
                     userSelection[emptyIdx] = char;
                     btn.style.visibility = 'hidden';
+                    btn.dataset.poolIdx = idx; // 복구를 위해 인덱스 저장
                     renderSlots();
                 }
             };
@@ -133,16 +187,20 @@
         renderSlots();
     }
 
+    // 정답 입력칸 렌더링
     function renderSlots() {
         const slotsEl = document.getElementById('answer-slots');
         slotsEl.innerHTML = '';
         userSelection.forEach((char, idx) => {
             const slot = document.createElement('div');
-            if (char === null) slot.className = 'tile-placeholder';
-            else {
+            if (char === null) {
+                slot.className = 'tile-placeholder';
+            } else {
                 slot.className = 'tile bg-blue-500 text-white animate__animated animate__bounceIn';
                 slot.innerText = char;
+                // 클릭 시 입력 취소
                 slot.onclick = () => {
+                    if (isChecking) return;
                     userSelection = Array(currentWord.w.length).fill(null);
                     document.querySelectorAll('#letter-pool .tile').forEach(t => t.style.visibility = 'visible');
                     renderSlots();
@@ -152,8 +210,10 @@
         });
     }
 
+    // 정답 확인
     function checkAnswer() {
         if (isChecking || userSelection.includes(null)) return;
+
         if (userSelection.join('') === currentWord.w) {
             handleCorrect();
         } else {
@@ -161,38 +221,65 @@
         }
     }
 
+    // 정답 처리
     function handleCorrect() {
         isChecking = true;
         clearInterval(timer);
-        score += 10;
+
+        // 스테이지별 점수 차등 지급
+        const earnedScore = (currentStage === 1) ? 10 : (currentStage === 2) ? 15 : 20;
+        score += earnedScore;
+        wordsSolved++;
+
         document.getElementById('score-display').innerText = score;
-        document.querySelectorAll('#answer-slots .tile').forEach(t => t.classList.add('bg-green-500'));
+        document.querySelectorAll('#answer-slots .tile').forEach(t => {
+            t.classList.remove('bg-blue-500');
+            t.classList.add('bg-green-500');
+        });
+
         setTimeout(() => {
-            if (score >= currentStage * 50 && currentStage < 3) {
+            // 5문제 맞추면 레벨업
+            if (wordsSolved >= 5 && currentStage < 3) {
                 currentStage++;
-                showModal("Level Up!", `Stage ${currentStage}로 이동합니다.`, "계속하기", loadWord);
+                wordsSolved = 0;
+                showModal("Level Up! 🎉", `축하합니다!<br>Stage ${currentStage}로 이동합니다.`, "계속하기", loadWord);
             } else {
                 loadWord();
             }
         }, 1000);
     }
 
+    // 오답 처리
     function handleWrong() {
         isChecking = true;
         clearInterval(timer);
         hearts--;
         updateHearts();
-        document.querySelectorAll('#answer-slots .tile').forEach(t => t.classList.add('bg-red-500', 'animate__shakeX'));
+
+        document.querySelectorAll('#answer-slots .tile').forEach(t => {
+            t.classList.remove('bg-blue-500');
+            t.classList.add('bg-red-500', 'animate__shakeX');
+        });
+
         setTimeout(() => {
-            if (hearts <= 0) showModal("Game Over", `최종 점수: ${score}`, "다시 시작", () => location.reload());
-            else loadWord();
-        }, 1000);
+            if (hearts <= 0) {
+                showModal("Game Over 💦", `최종 점수: ${score}점<br>다시 도전해보세요!`, "처음으로", () => {
+                    document.getElementById('modal-overlay').classList.add('hidden');
+                    document.getElementById('game-container').classList.add('hidden');
+                    document.getElementById('title-screen').classList.remove('hidden');
+                });
+            } else {
+                loadWord();
+            }
+        }, 1200);
     }
 
+    // 하트 UI 업데이트
     function updateHearts() {
         document.getElementById('hearts-display').innerText = "❤️".repeat(hearts) + "🖤".repeat(3 - hearts);
     }
 
+    // 타이머 시작
     function startTimer() {
         clearInterval(timer);
         const bar = document.getElementById('timer-bar');
@@ -200,28 +287,59 @@
         timer = setInterval(() => {
             timeLeft -= 0.1;
             bar.style.width = (timeLeft / startTime * 100) + '%';
-            if (timeLeft <= 0) handleWrong();
+
+            // 시간이 30% 이하로 남으면 빨간색으로 변경
+            if (timeLeft / startTime < 0.3) {
+                bar.classList.replace('bg-blue-400', 'bg-red-500');
+            } else {
+                bar.classList.replace('bg-red-500', 'bg-blue-400');
+            }
+
+            if (timeLeft <= 0) {
+                handleWrong();
+            }
         }, 100);
     }
 
+    // 힌트 사용
     function useHint(type) {
-        if (type === 'random' && score >= 4) {
-            score -= 4;
-            const idx = userSelection.indexOf(null);
-            if(idx !== -1) { userSelection[idx] = currentWord.w[idx]; renderSlots(); }
-        } else if (type === 'meaning' && score >= 2) {
-            score -= 2;
-            document.getElementById('meaning-hint').classList.remove('opacity-0');
+        if (type === 'random') {
+            if (score >= 5) {
+                score -= 5;
+                // 정답 배열 중 빈 곳에 맞는 글자 하나 넣어주기 (간단 버전)
+                const emptyIdx = userSelection.indexOf(null);
+                if (emptyIdx !== -1) {
+                    userSelection[emptyIdx] = currentWord.w[emptyIdx];
+                    renderSlots();
+                }
+            } else {
+                showModal("앗!", "점수가 부족해요!<br>(5점 필요)", "확인", () => {});
+                return;
+            }
+        } else if (type === 'meaning') {
+            if (score >= 3) {
+                score -= 3;
+                document.getElementById('meaning-hint').classList.remove('opacity-0');
+            } else {
+                showModal("앗!", "점수가 부족해요!<br>(3점 필요)", "확인", () => {});
+                return;
+            }
         }
         document.getElementById('score-display').innerText = score;
     }
 
+    // 커스텀 모달창 띄우기
     function showModal(title, body, btnText, callback) {
         document.getElementById('modal-title').innerText = title;
         document.getElementById('modal-body').innerHTML = body;
         const btn = document.getElementById('modal-btn');
         btn.innerText = btnText;
-        btn.onclick = () => { document.getElementById('modal-overlay').classList.add('hidden'); callback(); };
+
+        // 기존 이벤트 리스너 제거 및 새 리스너 등록
+        btn.onclick = () => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            if(callback) callback();
+        };
         document.getElementById('modal-overlay').classList.remove('hidden');
     }
 </script>
