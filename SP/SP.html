@@ -137,12 +137,17 @@
         const pool = wordData[currentStage];
         currentWord = pool[Math.floor(Math.random() * pool.length)];
 
-        // 이미지 경로 수정: 단어이름.png (예: apple.png)
+        // 이미지 로딩 로직 개선 (에러 핸들러 초기화 및 무한 루프 방지)
         const imgEl = document.getElementById('hint-image');
-        imgEl.src = `./PIC/${currentWord.w}.png`;
+        imgEl.onerror = null; // 이전 단어에서 발생한 에러 이벤트 초기화
+
+        // 이미지 경로 설정: 첫 글자 대문자.png (예: A.png, B.png)
+        const firstLetter = currentWord.w[0].toUpperCase();
+        imgEl.src = `./PIC/${firstLetter}.png`;
 
         // 로컬 이미지가 없을 경우를 대비한 플레이스홀더 처리
         imgEl.onerror = () => {
+            imgEl.onerror = null; // 플레이스홀더 대체 이미지도 없을 경우 무한 깜빡임 방지
             imgEl.src = `https://ui-avatars.com/api/?name=${currentWord.w[0]}&background=random&color=fff&size=120&font-size=0.6`;
         };
 
