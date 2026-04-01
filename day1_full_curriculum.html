@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>1일차 · 형태의 이유 — 영재학급 커리큘럼</title>
+<style>
+/* ── Base ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #ffffff;
+  --bg2: #f4f3ee;
+  --bg3: #eceae3;
+  --text: #1a1a1e;
+  --text2: #5a5958;
+  --text3: #8a8880;
+  --border: #dddcd5;
+  --border2: #c8c7c0;
+  --shadow: 0 1px 4px rgba(0,0,0,.07), 0 0 0 1px rgba(0,0,0,.05);
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #1c1c1a;
+    --bg2: #252523;
+    --bg3: #2e2e2b;
+    --text: #e2e0d8;
+    --text2: #9a9890;
+    --text3: #6a6866;
+    --border: #3a3a36;
+    --border2: #4a4a46;
+    --shadow: 0 1px 4px rgba(0,0,0,.3), 0 0 0 1px rgba(255,255,255,.04);
+  }
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", sans-serif;
+  font-size: 13px;
+  background: var(--bg2);
+  color: var(--text);
+  line-height: 1.5;
+  min-height: 100vh;
+}
+
+.page { max-width: 960px; margin: 0 auto; padding: 20px 16px 40px; }
+
+/* ── Nav ── */
+.nav {
+  display: flex; gap: 0;
+  border-radius: 10px; overflow: hidden;
+  border: 1px solid var(--border2);
+  margin-bottom: 20px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+.nb {
+  flex: 1; padding: 10px 4px;
+  border: none; background: transparent;
+  cursor: pointer; font-size: 11px; font-weight: 500;
+  color: var(--text2);
+  border-right: 1px solid var(--border);
+  transition: all .15s; text-align: center; line-height: 1.3;
+}
+.nb:last-child { border-right: none; }
+.nb.on { background: #1E2761; color: #fff; }
+.nb .sub { font-size: 9px; opacity: .8; display: block; margin-top: 1px; }
+.panel { display: none; }
+.panel.on { display: block; }
+
+/* ── Day header ── */
+.day-header {
+  border-radius: 12px; padding: 16px 18px;
+  margin-bottom: 18px; background: #1E2761;
+  box-shadow: var(--shadow);
+}
+.day-header h1 { font-size: 20px; font-weight: 600; color: #fff; margin-bottom: 4px; }
+.day-header .meta { font-size: 12px; color: #CADCFC; line-height: 1.6; }
+.day-header .q { font-size: 13px; color: #E8A838; margin-top: 6px; font-weight: 500; }
+
+/* ── Card system ── */
+.card {
+  background: var(--bg);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 11px 13px;
+  box-shadow: var(--shadow);
+}
+.card h4 {
+  font-size: 10px; font-weight: 600; color: var(--text2);
+  margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em;
+}
+.card li, .card p { font-size: 11px; color: var(--text); line-height: 1.7; }
+.card ul { padding-left: 14px; }
+
+.card-alt {
+  background: var(--bg2);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  padding: 11px 13px;
+}
+.card-alt h4 {
+  font-size: 10px; font-weight: 600; color: var(--text2);
+  margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em;
+}
+.card-alt li, .card-alt p { font-size: 11px; color: var(--text); line-height: 1.7; }
+.card-alt ul { padding-left: 14px; }
+
+/* ── Grid ── */
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+.three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+
+/* ── Period card ── */
+.period-card {
+  border-radius: 12px;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+.period-top {
+  padding: 13px 15px 11px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg2);
+}
+.period-num-row { display: flex; align-items: center; gap: 11px; margin-bottom: 10px; }
+.pnum {
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600; color: #fff; flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0,0,0,.2);
+}
+.pnum-info .ptime { font-size: 10px; color: var(--text3); }
+.pnum-info .ptitle { font-size: 15px; font-weight: 600; color: var(--text); }
+.pnum-info .pq { font-size: 11px; color: var(--text2); margin-top: 2px; line-height: 1.4; }
+
+/* ── Time bar ── */
+.tbar { display: flex; height: 30px; border-radius: 6px; overflow: hidden; border: 1px solid var(--border); }
+.tslot {
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-size: 9px; font-weight: 500; color: #fff; line-height: 1.2;
+}
+
+.period-body { padding: 13px 15px; }
+
+/* ── Section label ── */
+.section-label { display: flex; align-items: center; gap: 9px; margin: 14px 0 9px; }
+.sec-dot {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 10px; font-weight: 600; color: #fff; flex-shrink: 0;
+  box-shadow: 0 1px 4px rgba(0,0,0,.2);
+}
+.sec-title { font-size: 13px; font-weight: 500; color: var(--text); }
+.sec-time { font-size: 10px; color: var(--text3); margin-left: 4px; }
+
+/* ── Q script ── */
+.q-script {
+  background: var(--bg2);
+  border-radius: 8px; border: 1px solid var(--border);
+  padding: 10px 12px; margin-bottom: 10px;
+}
+.q-script h4 {
+  font-size: 10px; font-weight: 600; color: var(--text2);
+  margin-bottom: 8px; text-transform: uppercase; letter-spacing: .06em;
+}
+.q-row { display: flex; gap: 8px; margin-bottom: 7px; align-items: flex-start; }
+.qb {
+  padding: 2px 7px; border-radius: 5px;
+  font-size: 9px; font-weight: 600;
+  white-space: nowrap; flex-shrink: 0; margin-top: 2px;
+}
+.qt { font-size: 11px; color: var(--text); line-height: 1.55; }
+
+/* ── Tags / Badges ── */
+.tag { display: inline-block; padding: 2px 8px; border-radius: 7px; font-size: 10px; font-weight: 500; margin: 0 3px 4px 0; }
+.divider { height: 1px; background: var(--border); margin: 13px 0; }
+
+/* ── Callout notes ── */
+.note-amber {
+  background: #FDF3DC; border-radius: 8px;
+  padding: 10px 13px; border-left: 3px solid #E8A838; margin-bottom: 9px;
+}
+.note-amber h4 { font-size: 10px; font-weight: 600; color: #633806; margin-bottom: 4px; }
+.note-amber p { font-size: 11px; color: #854F0B; line-height: 1.65; }
+
+.note-red {
+  background: #FCEBEB; border-radius: 8px;
+  padding: 10px 13px; border-left: 3px solid #E24B4A; margin-bottom: 9px;
+}
+.note-red h4 { font-size: 10px; font-weight: 600; color: #A32D2D; margin-bottom: 4px; }
+.note-red p { font-size: 11px; color: #791F1F; line-height: 1.65; }
+
+.note-green {
+  background: #E1F5EE; border-radius: 8px;
+  padding: 10px 13px; border-left: 3px solid #1D9E75; margin-bottom: 9px;
+}
+.note-green h4 { font-size: 10px; font-weight: 600; color: #085041; margin-bottom: 4px; }
+.note-green p { font-size: 11px; color: #0F6E56; line-height: 1.65; }
+
+/* ── Connect arrow ── */
+.connect-arrow {
+  background: #1E2761; border-radius: 8px;
+  padding: 11px 15px; margin-top: 6px; text-align: center;
+}
+.connect-arrow p { font-size: 11px; color: #CADCFC; line-height: 1.7; }
+.connect-arrow strong { color: #E8A838; }
+
+/* ── Overview specific ── */
+.ov-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 16px; }
+.ov-card {
+  border-radius: 10px; padding: 11px 12px;
+  border: 1px solid var(--border2);
+  background: var(--bg);
+  box-shadow: var(--shadow);
+}
+.ov-card .num { font-size: 22px; font-weight: 600; margin-bottom: 2px; }
+.ov-card .lbl { font-size: 11px; color: var(--text2); }
+.ov-card .sub { font-size: 10px; color: var(--text3); margin-top: 2px; }
+
+.timeline-row {
+  display: grid; grid-template-columns: 86px 1fr 110px;
+  gap: 8px; align-items: center;
+}
+.tl-time { font-size: 10px; color: var(--text3); }
+.tl-label {
+  border-radius: 6px; padding: 7px 11px;
+  font-size: 11px; font-weight: 500;
+}
+.tl-tools { font-size: 10px; color: var(--text3); text-align: right; }
+.tl-break {
+  font-size: 10px; color: var(--text3);
+  text-align: center; padding: 3px 0;
+  grid-column: 1 / -1;
+}
+.tl-bridge {
+  border-radius: 6px; padding: 7px 11px;
+  font-size: 11px; font-weight: 500;
+  border: 2px dashed #E8A838;
+  background: #FDF3DC; color: #633806;
+}
+
+/* ── Bridge activity specific ── */
+.bridge-header {
+  border-radius: 10px; padding: 12px 15px; margin-bottom: 14px;
+  background: #FDF3DC; border: 2px solid #E8A838;
+}
+.bridge-header h2 { font-size: 15px; font-weight: 600; color: #412402; margin-bottom: 3px; }
+.bridge-header p { font-size: 12px; color: #633806; line-height: 1.55; }
+
+.poly-grid { display: grid; grid-template-columns: repeat(5,1fr); gap: 8px; margin: 10px 0; }
+.poly-card {
+  border-radius: 8px; padding: 9px 6px; text-align: center;
+  border: 1.5px solid; box-shadow: var(--shadow);
+}
+.poly-num { font-size: 20px; font-weight: 600; margin-bottom: 1px; }
+.poly-name { font-size: 9px; font-weight: 600; }
+.poly-angle { font-size: 9px; margin-top: 2px; }
+.poly-ok { font-size: 9px; font-weight: 600; margin-top: 4px; padding: 1px 5px; border-radius: 4px; display: inline-block; }
+
+/* ── Materials table ── */
+.mat-wrap {
+  border-radius: 10px; border: 1px solid var(--border2);
+  overflow: hidden; background: var(--bg);
+  box-shadow: var(--shadow); margin-bottom: 14px;
+}
+.mat-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+.mat-table th {
+  background: var(--bg3); padding: 8px 11px;
+  text-align: left; font-weight: 600; font-size: 10px;
+  color: var(--text2); border-bottom: 1px solid var(--border2);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.mat-table td {
+  padding: 8px 11px; border-bottom: 1px solid var(--border);
+  color: var(--text); vertical-align: middle;
+}
+.mat-table tr:last-child td { border-bottom: none; }
+.mat-table tr:nth-child(even) td { background: var(--bg2); }
+.tag-mw  { background: #E1F5EE; color: #085041; padding: 1px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; }
+.tag-make{ background: #FAEEDA; color: #633806; padding: 1px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; }
+.tag-paper{background: #E6F1FB; color: #0C447C; padding: 1px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; }
+.tag-new { background: #FCEBEB; color: #A32D2D; padding: 1px 7px; border-radius: 5px; font-size: 10px; font-weight: 500; }
+
+.priority-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.prio-badge { padding: 3px 9px; border-radius: 6px; font-size: 10px; font-weight: 600; white-space: nowrap; }
+</style>
+</head>
+<body>
+<div class="page">
+
+<div class="nav">
+  <button class="nb on"  onclick="go('ov')">개요<span class="sub">1일차 전체</span></button>
+  <button class="nb"     onclick="go('p1')">1교시<span class="sub">점→선→면</span></button>
+  <button class="nb"     onclick="go('bridge')">쉬는시간<span class="sub">테셀레이션</span></button>
+  <button class="nb"     onclick="go('p2')">2교시<span class="sub">정다면체</span></button>
+  <button class="nb"     onclick="go('p3')">3교시<span class="sub">XYZ 좌표</span></button>
+  <button class="nb"     onclick="go('p4')">4교시<span class="sub">자연+역설</span></button>
+  <button class="nb"     onclick="go('mat')">교구 목록</button>
+</div>
+
+<!-- ════════ OVERVIEW ════════ -->
+<div class="panel on" id="ov">
+  <div class="day-header">
+    <h1>1일차 · 형태의 이유</h1>
+    <div class="meta">초등 4·5학년 영재학급 · 4교시 연속 · 총 180분</div>
+    <div class="q">관통 질문: "자연은 왜 하필 이 모양을 선택했을까?"</div>
+  </div>
+
+  <div class="ov-grid">
+    <div class="ov-card"><div class="num" style="color:#185FA5">1교시</div><div class="lbl">점에서 면으로</div><div class="sub">09:00–09:45</div></div>
+    <div class="ov-card"><div class="num" style="color:#7F77DD">2교시</div><div class="lbl">정다면체의 비밀</div><div class="sub">09:55–10:40</div></div>
+    <div class="ov-card"><div class="num" style="color:#1D9E75">3교시</div><div class="lbl">공간을 숫자로</div><div class="sub">10:50–11:35</div></div>
+    <div class="ov-card"><div class="num" style="color:#E05C5C">4교시</div><div class="lbl">자연의 선택+역설</div><div class="sub">11:45–12:30</div></div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:14px">
+    <div class="card">
+      <h4>오늘의 개념 흐름</h4>
+      <ul>
+        <li>점(0D) → 선(1D) → 면(2D)</li>
+        <li>평면 테셀레이션 — 딱 3가지 정다각형만 가능 <span style="color:#E8A838;font-size:10px">★ 신설</span></li>
+        <li>정다각형 무한 → 정다면체 왜 5개?</li>
+        <li>꼭짓점을 (x,y,z)로 표현</li>
+        <li>자연도 정다면체를 선택함 (다이아몬드)</li>
+        <li>케플러의 아름다운 오류</li>
+        <li>아리스토텔레스 바퀴 역설 (미결)</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>학생이 하루 끝에 가져가는 것</h4>
+      <ul>
+        <li style="margin-bottom:5px"><strong>발견:</strong> 정다면체는 왜 5가지뿐인가</li>
+        <li style="margin-bottom:5px"><strong>연결:</strong> 자연도 같은 규칙을 쓴다</li>
+        <li style="margin-bottom:5px"><strong>균열:</strong> 틀린 직관도 탐구의 출발점</li>
+        <li><strong>미결:</strong> 원은 왜 이상한가 (2일차 열쇠)</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="card">
+    <h4>하루 흐름 한눈에</h4>
+    <div style="margin-top:10px;display:flex;flex-direction:column;gap:7px">
+      <div class="timeline-row">
+        <div class="tl-time">09:00–09:45</div>
+        <div class="tl-label" style="background:#E6F1FB;color:#0C447C">1교시 · 점에서 면으로 — 숫자 점 카드, 0D→4D 모형</div>
+        <div class="tl-tools">숫자점카드 · 0D4D</div>
+      </div>
+      <div class="timeline-row">
+        <div class="tl-time" style="color:#E8A838;font-weight:500">쉬는 시간</div>
+        <div class="tl-bridge">★ 평면 테셀레이션 탐구 — 어떤 다각형이 평면을 채울까?</div>
+        <div class="tl-tools" style="color:#854F0B">다각형 세트</div>
+      </div>
+      <div class="timeline-row">
+        <div class="tl-time">09:55–10:40</div>
+        <div class="tl-label" style="background:#EEEDFE;color:#3C3489">2교시 · 정다면체 — 왜 5가지뿐인가</div>
+        <div class="tl-tools">주사위세트 · 종이</div>
+      </div>
+      <div class="tl-break">— 쉬는 시간 10분 —</div>
+      <div class="timeline-row">
+        <div class="tl-time">10:50–11:35</div>
+        <div class="tl-label" style="background:#E1F5EE;color:#085041">3교시 · XYZ 좌표계 — 공간을 숫자로</div>
+        <div class="tl-tools">XYZ모형 · 기록지</div>
+      </div>
+      <div class="tl-break">— 쉬는 시간 10분 —</div>
+      <div class="timeline-row">
+        <div class="tl-time">11:45–12:30</div>
+        <div class="tl-label" style="background:#FCEBEB;color:#A32D2D">4교시 · 다이아몬드+케플러+아리스토텔레스</div>
+        <div class="tl-tools">다이아 · 바퀴역설</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ P1 ════════ -->
+<div class="panel" id="p1">
+  <div class="period-card">
+    <div class="period-top">
+      <div class="period-num-row">
+        <div class="pnum" style="background:#185FA5">1</div>
+        <div class="pnum-info">
+          <div class="ptime">09:00 – 09:45 · 45분</div>
+          <div class="ptitle">점에서 면으로</div>
+          <div class="pq">핵심 질문: "점은 크기가 있을까? 점이 움직이면 무엇이 생기나?"</div>
+        </div>
+      </div>
+      <div class="tbar">
+        <div class="tslot" style="width:11%;background:#185FA5">도입<span>5분</span></div>
+        <div class="tslot" style="width:35%;background:#378ADD">점 카드 탐색<span>16분</span></div>
+        <div class="tslot" style="width:32%;background:#85B7EB">0D→4D 연결<span>14분</span></div>
+        <div class="tslot" style="width:22%;background:#B5D4F4;color:#0C447C">정리·연결<span>10분</span></div>
+      </div>
+    </div>
+    <div class="period-body">
+      <div style="margin-bottom:9px">
+        <span class="tag" style="background:#E6F1FB;color:#0C447C">숫자 점 카드 (모둠별 1세트)</span>
+        <span class="tag" style="background:#E6F1FB;color:#0C447C">0D→4D 시각화 모형 (모둠별)</span>
+      </div>
+
+      <div class="section-label">
+        <div class="sec-dot" style="background:#378ADD">A</div>
+        <span class="sec-title">숫자 점 카드 탐색</span><span class="sec-time">5~21분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>카드 펼쳐 숫자 맞추기 — 점만 보고</li>
+            <li>0 카드: "점이 없으면 없는 건가?"</li>
+            <li>같은 수를 다른 배열로 만들기</li>
+            <li>점을 최대한 작게 그리기 — 어디서 사라지나?</li>
+          </ul>
+        </div>
+        <div class="q-script">
+          <h4>질문 스크립트</h4>
+          <div class="q-row"><span class="qb" style="background:#E6F1FB;color:#0C447C">열기</span><span class="qt">"이 카드에서 숫자를 가리면 몇인지 알 수 있어?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#E6F1FB;color:#0C447C">탐구</span><span class="qt">"점 3개를 다른 모양으로 놓아도 3이야? 왜?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">충돌</span><span class="qt">"점을 계속 작게 만들면 어디서 사라져?"</span></div>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <div class="sec-dot" style="background:#85B7EB">B</div>
+        <span class="sec-title">0D → 4D 연결</span><span class="sec-time">21~35분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>0D→4D 모형에서 맨 왼쪽(점) 찾기</li>
+            <li>점 2개를 손가락으로 연결 → "이게 1D"</li>
+            <li>선을 밀면 → 면(2D)</li>
+            <li>정삼각형·정사각형 점 배열 만들기</li>
+            <li>"정다각형이 무한히 많다면?"</li>
+          </ul>
+        </div>
+        <div class="q-script">
+          <h4>질문 스크립트</h4>
+          <div class="q-row"><span class="qb" style="background:#EAF3DE;color:#27500A">탐구</span><span class="qt">"선을 옆으로 밀면 무엇이 생길까?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#EAF3DE;color:#27500A">탐구</span><span class="qt">"정삼각형, 정사각형 다음은? 무한히 만들 수 있어?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">예고</span><span class="qt">"그럼 정다면체도 무한히 많아야 하지 않을까?"</span></div>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <h4>교사 노트</h4>
+        <p>마지막 질문 "정다면체도 무한히 많아야 하지 않을까?"를 학생 입에서 먼저 나오게 유도하세요. 교사가 먼저 말하면 쉬는 시간 활동과 2교시의 충돌이 약해집니다.</p>
+      </div>
+      <div class="connect-arrow"><p>1교시 끝 → 쉬는 시간: <strong>"정다면체가 무한히 많다"</strong>는 예측을 품고 다각형 세트로</p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ BRIDGE ════════ -->
+<div class="panel" id="bridge">
+  <div class="bridge-header">
+    <h2>★ 쉬는 시간 브릿지 활동 · 10분</h2>
+    <p>핵심 질문: "어떤 정다각형이 평면을 빈틈없이 채울 수 있을까?"<br>
+    교구: 다각형의 기하학 세트 (3~12각형) + A3 종이</p>
+  </div>
+
+  <!-- 다각형 분류표 -->
+  <div class="card" style="margin-bottom:12px">
+    <h4>학생이 직접 붙여서 발견하는 분류 (교사는 절대 먼저 알려주지 않음)</h4>
+    <div class="poly-grid">
+      <div class="poly-card" style="background:#E6FFED;border-color:#34A853">
+        <div class="poly-num" style="color:#1A5C2E">3</div>
+        <div class="poly-name" style="color:#1A5C2E">정삼각형</div>
+        <div class="poly-angle" style="color:#2D7A44">60° × 6 = 360°</div>
+        <span class="poly-ok" style="background:#C8F5D8;color:#1A5C2E">채울 수 있음</span>
+      </div>
+      <div class="poly-card" style="background:#E6FFED;border-color:#34A853">
+        <div class="poly-num" style="color:#1A5C2E">4</div>
+        <div class="poly-name" style="color:#1A5C2E">정사각형</div>
+        <div class="poly-angle" style="color:#2D7A44">90° × 4 = 360°</div>
+        <span class="poly-ok" style="background:#C8F5D8;color:#1A5C2E">채울 수 있음</span>
+      </div>
+      <div class="poly-card" style="background:#FFEBE8;border-color:#E24B4A">
+        <div class="poly-num" style="color:#A32D2D">5</div>
+        <div class="poly-name" style="color:#A32D2D">정오각형</div>
+        <div class="poly-angle" style="color:#791F1F">108° → 불가</div>
+        <span class="poly-ok" style="background:#FFCCC8;color:#A32D2D">빈틈 생김</span>
+      </div>
+      <div class="poly-card" style="background:#E6FFED;border-color:#34A853">
+        <div class="poly-num" style="color:#1A5C2E">6</div>
+        <div class="poly-name" style="color:#1A5C2E">정육각형</div>
+        <div class="poly-angle" style="color:#2D7A44">120° × 3 = 360°</div>
+        <span class="poly-ok" style="background:#C8F5D8;color:#1A5C2E">채울 수 있음</span>
+      </div>
+      <div class="poly-card" style="background:#FFEBE8;border-color:#E24B4A">
+        <div class="poly-num" style="color:#A32D2D">7+</div>
+        <div class="poly-name" style="color:#A32D2D">정칠각형~</div>
+        <div class="poly-angle" style="color:#791F1F">128.5°~ → 불가</div>
+        <span class="poly-ok" style="background:#FFCCC8;color:#A32D2D">겹치거나 빈틈</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="two-col" style="margin-bottom:12px">
+    <div class="card">
+      <h4>3단계 활동 흐름</h4>
+      <ul>
+        <li style="margin-bottom:6px"><strong>0~5분 · 자유 탐색:</strong> "이걸로 종이를 채워봐" — 설명 없이. 각 다각형을 같은 것끼리만 붙이기</li>
+        <li style="margin-bottom:6px"><strong>5~8분 · 충돌:</strong> 정오각형에서 빈틈이 생기는 순간 — "왜 오각형은 안 되지?"</li>
+        <li><strong>8~10분 · 연결:</strong> "2D에서 딱 3가지면… 3D에서는 몇 가지일까?" → 2교시로</li>
+      </ul>
+    </div>
+    <div class="q-script">
+      <h4>질문 스크립트</h4>
+      <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">충돌</span><span class="qt">"오각형을 붙였을 때 꼭짓점 주변에 뭔가 이상한 게 보여?"</span></div>
+      <div class="q-row"><span class="qb" style="background:#FAEEDA;color:#633806">탐구</span><span class="qt">"삼각형 6개가 딱 맞는 이유가 뭘까? 각도로 생각해봐."</span></div>
+      <div class="q-row"><span class="qb" style="background:#EAF3DE;color:#27500A">발견</span><span class="qt">"채울 수 있는 정다각형은 몇 가지야?"</span></div>
+      <div class="q-row"><span class="qb" style="background:#E1F5EE;color:#085041">전환</span><span class="qt">"2D에서 딱 3가지면… 3D에서는 몇 가지일까?"</span></div>
+    </div>
+  </div>
+
+  <div class="two-col">
+    <div class="card">
+      <h4>2D ↔ 3D 평행 구조 (교사 참고)</h4>
+      <ul>
+        <li>2D: 꼭짓점 합 = 360° → 딱 <strong>3가지</strong></li>
+        <li>3D: 꼭짓점 합 &lt; 360° → 딱 <strong>5가지</strong></li>
+        <li>같은 규칙이 차원을 달리하며 작동</li>
+        <li>→ 이게 2교시 핵심 발견의 준비</li>
+      </ul>
+    </div>
+    <div class="note-amber" style="margin-bottom:0">
+      <h4>왜 이 활동이 2교시를 바꾸는가</h4>
+      <p>쉬는 시간에 "3가지"를 손으로 발견했기 때문에, 2교시의 "왜 5개야?"는 설명이 아니라 예측과 검증이 됩니다. 수업의 결이 완전히 달라집니다.</p>
+    </div>
+  </div>
+
+  <div class="connect-arrow" style="margin-top:12px">
+    <p>쉬는 시간 → 2교시: <strong>"2D에서 딱 3가지였어. 3D 정다면체는 몇 가지일 것 같아?"</strong><br>
+    학생이 예측을 들고 2교시에 입장 → 주사위로 검증</p>
+  </div>
+</div>
+
+<!-- ════════ P2 ════════ -->
+<div class="panel" id="p2">
+  <div class="period-card">
+    <div class="period-top">
+      <div class="period-num-row">
+        <div class="pnum" style="background:#7F77DD">2</div>
+        <div class="pnum-info">
+          <div class="ptime">09:55 – 10:40 · 45분</div>
+          <div class="ptitle">정다면체의 비밀</div>
+          <div class="pq">핵심 질문: "면을 접으면 왜 딱 5가지 입체만 만들어질까?"</div>
+        </div>
+      </div>
+      <div class="tbar">
+        <div class="tslot" style="width:11%;background:#534AB7">도입<span>5분</span></div>
+        <div class="tslot" style="width:35%;background:#7F77DD">주사위 탐색<span>16분</span></div>
+        <div class="tslot" style="width:32%;background:#AFA9EC">종이 접기<span>14분</span></div>
+        <div class="tslot" style="width:22%;background:#CECBF6;color:#3C3489">정리<span>10분</span></div>
+      </div>
+    </div>
+    <div class="period-body">
+      <div style="margin-bottom:9px">
+        <span class="tag" style="background:#EEEDFE;color:#3C3489">다면체 주사위 세트 D4·D6·D8·D12·D20 (모둠별)</span>
+        <span class="tag" style="background:#EEEDFE;color:#3C3489">A4 종이·가위·테이프</span>
+      </div>
+
+      <div class="note-green" style="margin-bottom:10px">
+        <h4>쉬는 시간 활동 연결</h4>
+        <p>2교시 첫 질문: "아까 평면에서 딱 3가지 정다각형만 채울 수 있었잖아. 그럼 3D 정다면체는 몇 가지일 것 같아?" → 예측을 먼저 받은 후 주사위 꺼내기</p>
+      </div>
+
+      <div class="section-label">
+        <div class="sec-dot" style="background:#7F77DD">A</div>
+        <span class="sec-title">주사위 5종 탐색</span><span class="sec-time">5~21분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>주사위 5종 꺼내기 — 각 면 모양 확인</li>
+            <li>꼭짓점 하나에 몇 개 면이 모이는지 세기</li>
+            <li>D4: 삼각형 3개 / D6: 사각형 3개 / D8: 삼각형 4개</li>
+            <li>D12: 오각형 3개 / D20: 삼각형 5개</li>
+            <li>"D20 이후가 없는 이유는?"</li>
+          </ul>
+        </div>
+        <div class="card-alt">
+          <h4>꼭짓점 각도 합 (교사 참고)</h4>
+          <ul>
+            <li>정삼각형 60°: 3·4·5개 → D4·D8·D20</li>
+            <li>정사각형 90°: 3개만 → D6</li>
+            <li>정오각형 108°: 3개만 → D12</li>
+            <li>정육각형 120°: 3개=360° → 닫히지 않음</li>
+            <li>∴ 정다면체는 5가지가 전부</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <div class="sec-dot" style="background:#AFA9EC">B</div>
+        <span class="sec-title">종이 접기 실험 — 왜 6개면 안 되나</span><span class="sec-time">21~35분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>정육각형 종이 6개 오려내기</li>
+            <li>꼭짓점 한 곳에 6개 붙이기 시도</li>
+            <li>→ 평평해져서 입체가 안 됨!</li>
+            <li>삼각형 6개도 시도 → 마찬가지</li>
+            <li>"왜 평평해지면 입체가 안 되지?"</li>
+          </ul>
+        </div>
+        <div class="q-script">
+          <h4>질문 스크립트</h4>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">충돌</span><span class="qt">"정육각형 6개를 꼭짓점에 붙이면 어떻게 될까? 예측해봐."</span></div>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">발견</span><span class="qt">"왜 평평해지면 입체가 안 되는 거지?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">핵심</span><span class="qt">"360°가 되면 어떻게 되는 거야? 그 직전까지만 가능하다면?"</span></div>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <h4>교사 노트</h4>
+        <p>"정다면체는 5가지입니다"를 교사가 먼저 말하지 마세요. 종이 접기를 하다가 "아 그래서 5개밖에 없구나"를 학생이 먼저 말하는 게 이 교시의 목표입니다. 쉬는 시간에 "3가지"를 이미 발견했기 때문에 이 순간이 훨씬 강하게 연결됩니다.</p>
+      </div>
+      <div class="connect-arrow"><p>2교시 → 3교시 연결: <strong>"이 꼭짓점들의 위치를 어떻게 숫자로 표현할 수 있을까?"</strong></p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ P3 ════════ -->
+<div class="panel" id="p3">
+  <div class="period-card">
+    <div class="period-top">
+      <div class="period-num-row">
+        <div class="pnum" style="background:#1D9E75">3</div>
+        <div class="pnum-info">
+          <div class="ptime">10:50 – 11:35 · 45분</div>
+          <div class="ptitle">공간을 숫자로 — XYZ 좌표</div>
+          <div class="pq">핵심 질문: "주사위 꼭짓점 위치를 숫자 3개로 표현할 수 있을까?"</div>
+        </div>
+      </div>
+      <div class="tbar">
+        <div class="tslot" style="width:11%;background:#0F6E56">도입<span>5분</span></div>
+        <div class="tslot" style="width:44%;background:#1D9E75">좌표 읽기<span>20분</span></div>
+        <div class="tslot" style="width:33%;background:#5DCAA5">패턴 발견<span>15분</span></div>
+        <div class="tslot" style="width:12%;background:#9FE1CB;color:#085041">정리<span>5분</span></div>
+      </div>
+    </div>
+    <div class="period-body">
+      <div style="margin-bottom:9px">
+        <span class="tag" style="background:#E1F5EE;color:#085041">XYZ 3색 좌표계 모형 (모둠별)</span>
+        <span class="tag" style="background:#E1F5EE;color:#085041">D6 주사위</span>
+        <span class="tag" style="background:#E1F5EE;color:#085041">좌표 기록지 (개인)</span>
+      </div>
+
+      <div class="section-label">
+        <div class="sec-dot" style="background:#1D9E75">A</div>
+        <span class="sec-title">XYZ 모형 탐색 + 좌표 읽기</span><span class="sec-time">5~25분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>XYZ 모형 중앙에 D6 정육면체 놓기</li>
+            <li>X=빨강·Y=초록·Z=파랑 방향 확인</li>
+            <li>꼭짓점 하나 선택 → (x,y,z) 읽기 시도</li>
+            <li>꼭짓점 8개 전부 기록지에 적기</li>
+            <li>"모두 1 아니면 -1이다?" 패턴 발견</li>
+          </ul>
+        </div>
+        <div class="q-script">
+          <h4>질문 스크립트</h4>
+          <div class="q-row"><span class="qb" style="background:#E1F5EE;color:#085041">열기</span><span class="qt">"눈을 감고 이 꼭짓점 위치를 말로만 알려줄 수 있어?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#E1F5EE;color:#085041">탐구</span><span class="qt">"꼭짓점 8개 좌표를 다 쓰면 뭔가 규칙이 보여?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#E1F5EE;color:#085041">발견</span><span class="qt">"왜 모두 1이나 -1이지? 다른 숫자는 없어?"</span></div>
+        </div>
+      </div>
+
+      <div class="section-label">
+        <div class="sec-dot" style="background:#5DCAA5">B</div>
+        <span class="sec-title">패턴 확장 + 4D 예측</span><span class="sec-time">25~40분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>D4 꼭짓점도 좌표로 써보기</li>
+            <li>"정사면체는 (±1,±1,±1)이 아닌 이유?"</li>
+            <li>0D→4D 모형에서 4D(테서렉트) 찾기</li>
+            <li>"4D라면 숫자가 몇 개 필요할까?"</li>
+            <li>"원자 위치도 이렇게 표현할 수 있을까?"</li>
+          </ul>
+        </div>
+        <div class="q-script">
+          <h4>질문 스크립트</h4>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">확장</span><span class="qt">"4D 정육면체 꼭짓점은 숫자 몇 개로 표현해야 해?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">연결</span><span class="qt">"그럼 원자 위치도 이 방법으로 표현할 수 있을까?"</span></div>
+        </div>
+      </div>
+
+      <div class="note-amber">
+        <h4>교사 노트</h4>
+        <p>정육면체 꼭짓점이 (±1, ±1, ±1) 패턴임을 학생이 직접 발견하게 하세요. "모두 1 아니면 -1이다"는 관찰이 나오면 성공입니다.</p>
+      </div>
+      <div class="connect-arrow"><p>3교시 → 4교시 연결: <strong>"원자 위치도 좌표로 표현할 수 있다면, 다이아몬드 탄소 원자는 어디에 있을까?"</strong></p></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ P4 ════════ -->
+<div class="panel" id="p4">
+  <div class="period-card">
+    <div class="period-top">
+      <div class="period-num-row">
+        <div class="pnum" style="background:#E05C5C">4</div>
+        <div class="pnum-info">
+          <div class="ptime">11:45 – 12:30 · 45분</div>
+          <div class="ptitle">자연의 선택 + 케플러의 오류 + 아리스토텔레스의 바퀴</div>
+          <div class="pq">핵심 질문: "왜 자연은 정사면체를 선택했나? 그리고 원은 왜 이상한가?"</div>
+        </div>
+      </div>
+      <div class="tbar">
+        <div class="tslot" style="width:11%;background:#185FA5">도입<span>5분</span></div>
+        <div class="tslot" style="width:33%;background:#1D9E75">다이아몬드<span>15분</span></div>
+        <div class="tslot" style="width:15%;background:#7F77DD">케플러<span>7분</span></div>
+        <div class="tslot" style="width:22%;background:#378ADD">전체 정리<span>10분</span></div>
+        <div class="tslot" style="width:19%;background:#E05C5C">역설 예고<span>8분</span></div>
+      </div>
+    </div>
+    <div class="period-body">
+      <div style="margin-bottom:10px">
+        <span class="tag" style="background:#E1F5EE;color:#085041">다이아몬드 결정구조 모형 (전체 순환 2개)</span>
+        <span class="tag" style="background:#EEEDFE;color:#3C3489">플라톤 입체 지구 5종 (전시용)</span>
+        <span class="tag" style="background:#FCEBEB;color:#A32D2D">아리스토텔레스 바퀴 역설 모형 (전체 순환 2개)</span>
+        <span class="tag" style="background:#E1F5EE;color:#085041">D4 주사위</span>
+        <span class="tag" style="background:#E6F1FB;color:#0C447C">숫자 점 카드 (1교시 것 재활용)</span>
+      </div>
+
+      <!-- A -->
+      <div class="section-label">
+        <div class="sec-dot" style="background:#1D9E75">A</div>
+        <span class="sec-title">다이아몬드 — 자연의 첫 번째 선택</span><span class="sec-time">0~15분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>활동 순서</h4>
+          <ul>
+            <li>모형 2개 모둠 순환 시작</li>
+            <li>탄소 원자 1개 찾기 → 연결된 4개 확인</li>
+            <li>D4(정사면체)와 비교 — 같은 모양!</li>
+            <li>"왜 4개? 6개나 8개는 안 되나?"</li>
+            <li>흑연도 탄소 — 왜 다른가? (답 안 줌)</li>
+          </ul>
+        </div>
+        <div class="q-script">
+          <h4>질문 스크립트</h4>
+          <div class="q-row"><span class="qb" style="background:#E1F5EE;color:#085041">발견</span><span class="qt">"이 모형에서 가장 작은 반복 단위를 찾아봐."</span></div>
+          <div class="q-row"><span class="qb" style="background:#E1F5EE;color:#085041">비교</span><span class="qt">"탄소 4개가 만드는 모양이 우리 주사위 중 어떤 것과 같아?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#FAEEDA;color:#633806">열린질문</span><span class="qt">"흑연도 탄소야. 근데 흑연은 층층이 평평해. 왜 다를까?"</span></div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- B -->
+      <div class="section-label">
+        <div class="sec-dot" style="background:#7F77DD">B</div>
+        <span class="sec-title">케플러의 오류 — 틀린 직관도 탐구의 출발점</span><span class="sec-time">15~22분</span>
+      </div>
+      <div class="card-alt" style="margin-bottom:9px">
+        <h4>교사 설명 (최대 3분)</h4>
+        <p style="margin-bottom:5px">플라톤 입체 지구 5종을 앞에 전시하며: <em>"1596년 케플러가 이런 주장을 했어. '행성이 6개인 이유는 정다면체가 5가지라서다. 행성 궤도 사이에 정다면체가 딱 맞게 들어간다.'"</em></p>
+        <p style="color:#6a6866">→ 완전히 틀렸다. 하지만 이 방향으로 생각했다는 것 자체가 정다면체에 대한 깊은 탐구였다.</p>
+      </div>
+      <div class="two-col">
+        <div class="q-script">
+          <h4>질문 (2분)</h4>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">충돌</span><span class="qt">"케플러 논리의 틀린 부분이 어디야?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#EEEDFE;color:#3C3489">연결</span><span class="qt">"틀렸어도 이렇게 생각한 게 의미 있을까?"</span></div>
+        </div>
+        <div class="card-alt">
+          <h4>이 이야기를 넣는 이유</h4>
+          <ul>
+            <li>정다면체 5가지 이유 재확인</li>
+            <li>"틀린 직관도 탐구의 시작"</li>
+            <li>2일차 테마 "의심하라" 예고</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- C -->
+      <div class="section-label">
+        <div class="sec-dot" style="background:#378ADD">C</div>
+        <span class="sec-title">오늘의 여정 전체 연결</span><span class="sec-time">22~32분</span>
+      </div>
+      <div class="two-col">
+        <div class="card-alt">
+          <h4>숫자 점 카드를 다시 꺼낸다</h4>
+          <p style="margin-bottom:7px">아침에 처음 본 교구. 학생이 오늘 여정을 직접 말로 연결.</p>
+          <div class="q-row"><span class="qb" style="background:#E6F1FB;color:#0C447C">정리</span><span class="qt">"오늘 점에서 시작해서 어디까지 갔지? 순서대로 말해줄 수 있어?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#E6F1FB;color:#0C447C">심화</span><span class="qt">"오늘 배운 것 중 가장 이상했던 게 뭐야?"</span></div>
+        </div>
+        <div class="card-alt">
+          <h4>칠판에 함께 정리</h4>
+          <ul>
+            <li>점(0D) → 선(1D) → 면(2D)</li>
+            <li>평면 테셀레이션 → 딱 3가지</li>
+            <li>면 접기 → 정다면체 5종</li>
+            <li>좌표계 → 꼭짓점 (±1,±1,±1)</li>
+            <li>다이아몬드 → 자연의 정사면체</li>
+            <li>케플러 → 틀린 직관도 탐구</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- D -->
+      <div class="section-label">
+        <div class="sec-dot" style="background:#E05C5C">D</div>
+        <span class="sec-title">마지막 질문 — 아리스토텔레스의 바퀴 (답 없이 끝냄)</span><span class="sec-time">32~45분</span>
+      </div>
+      <div class="card-alt" style="margin-bottom:9px">
+        <h4>모형 제시 방법</h4>
+        <p style="margin-bottom:5px">모형을 꺼내 아무 설명 없이 한 번 굴려 보여준다. 그 다음 말한다:</p>
+        <p style="font-style:italic;color:#6a6866">"오늘 우리가 정다각형이 많아질수록 원에 가까워진다고 했잖아. 그럼 원은 면이 무한히 많은 정다각형이야. 근데 이 모형에서 뭔가 이상한 게 있어."</p>
+      </div>
+      <div class="two-col">
+        <div class="q-script">
+          <h4>질문 스크립트 (답 주지 않음)</h4>
+          <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">관찰</span><span class="qt">"큰 바퀴랑 작은 바퀴가 같은 축에 달려있어. 같이 굴러가면 어떻게 될 것 같아?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">충돌</span><span class="qt">"둘 다 같은 거리를 이동했어. 근데 둘레가 달라. 이게 어떻게 가능하지?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">심화</span><span class="qt">"작은 바퀴가 이동하는 동안 뭔가 건너뛰었을까, 아니면 미끄러졌을까?"</span></div>
+          <div class="q-row"><span class="qb" style="background:#FCEBEB;color:#A32D2D">마무리</span><span class="qt">"집에 가서 생각해봐. 다음 시간에 얘기하자."</span></div>
+        </div>
+        <div class="card-alt">
+          <h4>왜 답을 안 주는가</h4>
+          <p style="margin-bottom:6px">이 역설은 2,000년 동안 풀리지 않았어요. 갈릴레이도 틀린 답을 냈고, 진짜 해답은 미적분 이후에야 나왔어요.</p>
+          <p>"이상하다"는 감각을 품고 자는 것이 2일차의 시작입니다.</p>
+        </div>
+      </div>
+
+      <div class="connect-arrow" style="margin-top:12px">
+        <p>1일차 종료 시 학생이 가져가는 것<br>
+        <strong>"정다면체는 왜 5가지뿐이다"</strong> + <strong>"자연도 같은 규칙을 쓴다"</strong> + <strong>"틀린 직관도 탐구의 출발점"</strong><br>
+        + <strong>"원은 뭔가 이상하다"</strong> ← 이 미결 질문이 2일차를 여는 열쇠</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════ MATERIALS ════════ -->
+<div class="panel" id="mat">
+  <div class="mat-wrap">
+    <table class="mat-table">
+      <thead>
+        <tr>
+          <th>교구</th>
+          <th style="text-align:center">사용 교시</th>
+          <th style="text-align:center">배부 단위</th>
+          <th style="text-align:center">수량</th>
+          <th>출처</th>
+          <th>비고</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td><strong>숫자 점 카드</strong></td><td style="text-align:center">1·4교시</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">5세트</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">Tumki · 4.1h/세트</td></tr>
+        <tr><td><strong>0D→4D 시각화</strong></td><td style="text-align:center">1·2교시</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">2~5세트</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">Pirate_The_Captain · 7.2h/세트 · 2세트로 순환 가능</td></tr>
+        <tr><td><strong>다각형의 기하학</strong><br><span style="font-size:10px;color:#8a8880">3~12각형 세트</span> <span class="tag-new">신설</span></td><td style="text-align:center">쉬는 시간</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">5세트</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">Yobi · 1.2h/세트 · 출력 부담 낮음</td></tr>
+        <tr><td><strong>다면체 주사위 세트</strong><br><span style="font-size:10px;color:#8a8880">D4·D6·D8·D12·D20</span></td><td style="text-align:center">2·3교시</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">5세트</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">Tjoene · 모둠별 색상 다르게</td></tr>
+        <tr><td><strong>XYZ 좌표계 모형</strong></td><td style="text-align:center">3교시</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">5개</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">Elektrooon · 34min/개 · 3색 필라멘트 필요</td></tr>
+        <tr><td><strong>다이아몬드 결정구조</strong></td><td style="text-align:center">4교시</td><td style="text-align:center">전체 순환</td><td style="text-align:center;font-weight:600">2개</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">J-C · 6.5h/개</td></tr>
+        <tr><td><strong>플라톤 입체 지구 5종</strong></td><td style="text-align:center">4교시</td><td style="text-align:center">전체 전시</td><td style="text-align:center;font-weight:600">1세트</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">Andyroohoo · 14.1h · 케플러 설명용</td></tr>
+        <tr><td><strong>아리스토텔레스 바퀴</strong></td><td style="text-align:center">4교시</td><td style="text-align:center">전체 순환</td><td style="text-align:center;font-weight:600">2개</td><td><span class="tag-mw">MakerWorld</span></td><td style="font-size:10px;color:#5a5958">fatman · 1.2h/개 · 자석 7×2mm 4개 별도</td></tr>
+        <tr><td><strong>A3 흰 종이</strong></td><td style="text-align:center">쉬는 시간</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">모둠당 1장</td><td><span class="tag-paper">소모품</span></td><td style="font-size:10px;color:#5a5958">다각형 붙이기 배경판</td></tr>
+        <tr><td><strong>A4 종이·가위·테이프</strong></td><td style="text-align:center">2교시</td><td style="text-align:center">모둠</td><td style="text-align:center;font-weight:600">모둠당 1세트</td><td><span class="tag-paper">소모품</span></td><td style="font-size:10px;color:#5a5958">정육각형 접기용</td></tr>
+        <tr><td><strong>좌표 기록지</strong></td><td style="text-align:center">3교시</td><td style="text-align:center">개인</td><td style="text-align:center;font-weight:600">20장</td><td><span class="tag-make">직접 제작</span></td><td style="font-size:10px;color:#5a5958">꼭짓점 8개 기록 칸 포함</td></tr>
+        <tr><td><strong>수업 기록지</strong></td><td style="text-align:center">전교시</td><td style="text-align:center">개인</td><td style="text-align:center;font-weight:600">20장</td><td><span class="tag-make">직접 제작</span></td><td style="font-size:10px;color:#5a5958">발견·질문·이상했던 것 기록</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="card">
+    <h4>출력 우선순위 & 일정</h4>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">
+      <div class="priority-row">
+        <span class="prio-badge" style="background:#EAF3DE;color:#27500A">D-14 시작</span>
+        <span style="font-size:11px;color:#1a1a1e">숫자 점 카드 5세트 (21h) + 0D→4D 2~5세트 (14~36h)</span>
+      </div>
+      <div class="priority-row">
+        <span class="prio-badge" style="background:#E6F1FB;color:#0C447C">D-7 시작</span>
+        <span style="font-size:11px;color:#1a1a1e">주사위 5세트 + XYZ 5개 (3h) + 다각형 세트 5세트 (6h) + 바퀴 2개 (2.5h)</span>
+      </div>
+      <div class="priority-row">
+        <span class="prio-badge" style="background:#FAEEDA;color:#633806">D-3 시작</span>
+        <span style="font-size:11px;color:#1a1a1e">다이아몬드 2개 (13h) + 플라톤 지구 1세트 (14h, 선택)</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- .page -->
+<script>
+function go(id){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  const ids=['ov','p1','bridge','p2','p3','p4','mat'];
+  document.querySelectorAll('.nb').forEach((b,i)=>b.classList.toggle('on',ids[i]===id));
+}
+</script>
+</body>
+</html>
