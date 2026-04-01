@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>A to Z 영단어 스피드 게임</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f0f9ff; touch-action: manipulation; }
+        .font-jua { font-family: 'Jua', sans-serif; }
+        .tile { width: 55px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; font-weight: bold; border-radius: 12px; cursor: pointer; transition: all 0.2s; user-select: none; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        .tile:active { transform: translateY(2px); box-shadow: none; }
+        .tile-placeholder { width: 55px; height: 55px; border: 3px dashed #cbd5e1; border-radius: 12px; }
+        #hint-image { width: 140px; height: 140px; object-fit: contain; border-radius: 20px; background: white; padding: 10px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .tabular-nums { font-variant-numeric: tabular-nums; }
+    </style>
+</head>
+<body class="bg-blue-50 min-h-screen flex items-center justify-center p-4">
+
+<!-- 타이틀 화면 -->
+<div id="title-screen" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative flex flex-col items-center justify-center p-8 min-h-[500px]">
+    <div class="text-6xl mb-4 animate__animated animate__bounceIn">⚡</div>
+    <h1 class="text-4xl font-jua text-blue-600 mb-2 text-center leading-snug">A to Z<br>스피드 게임</h1>
+
+    <div id="best-record-display" class="text-xl font-bold text-red-500 mb-6 font-jua tracking-wide">
+        👑 최고 기록: 도전 전
+    </div>
+
+    <div class="bg-blue-50 rounded-2xl p-5 w-full mb-8 text-center border-2 border-blue-100 shadow-inner">
+        <div>
+            <span class="text-sm text-blue-500 font-bold tracking-wider">🏆 게임 규칙</span>
+            <p class="text-sm text-gray-700 mt-2 font-bold">A부터 Z까지 랜덤으로 등장해요!</p>
+            <p class="text-sm text-gray-600">가장 빠른 시간 안에 26문제를 클리어하세요.</p>
+            <p class="text-sm text-red-500 mt-2 font-bold">⚠️ 기회는 단 3번 (오답 시 하트 차감)</p>
+        </div>
+    </div>
+
+    <div class="flex gap-3 w-full">
+        <button onclick="startGame()" class="flex-[2] py-4 bg-blue-600 hover:bg-blue-700 text-white text-2xl font-bold rounded-2xl shadow-lg animate__animated animate__pulse animate__infinite">
+            START!
+        </button>
+        <button onclick="showRecords()" class="flex-[1] py-4 bg-gray-200 hover:bg-gray-300 text-gray-700 text-lg font-bold rounded-2xl shadow-md transition-colors">
+            기록
+        </button>
+    </div>
+</div>
+
+<!-- 게임 화면 -->
+<div id="game-container" class="max-w-md w-full bg-white rounded-3xl shadow-2xl overflow-hidden relative hidden">
+    <!-- 상단 상태바 -->
+    <div class="bg-blue-600 p-4 text-white flex justify-between items-center">
+        <div id="progress-info" class="text-lg font-bold bg-blue-800 px-4 py-1 rounded-full shadow-inner">1 / 26</div>
+        <div id="hearts-display" class="text-xl flex gap-1">❤️❤️❤️</div>
+    </div>
+
+    <!-- 스톱워치 -->
+    <div id="stopwatch-display" class="text-5xl font-jua tabular-nums text-center w-full bg-blue-50 text-blue-800 py-4 border-b-2 border-blue-100 shadow-sm">
+        00:00.00
+    </div>
+
+    <!-- 플레이 영역 -->
+    <div id="play-area" class="p-6 min-h-[420px] flex flex-col items-center justify-start gap-8 pt-8">
+        <!-- 이미지 -->
+        <div id="image-hint-container" class="flex flex-col items-center">
+            <img id="hint-image" src="" alt="힌트 이미지" class="animate__animated animate__zoomIn">
+        </div>
+
+        <!-- 빈칸 및 글자 타일 -->
+        <div class="w-full flex flex-col gap-6">
+            <div id="answer-slots" class="flex gap-2 justify-center flex-wrap"></div>
+            <div id="letter-pool" class="flex gap-2 justify-center flex-wrap p-4 bg-gray-50 rounded-2xl w-full min-h-[80px] border border-gray-100 shadow-inner"></div>
+        </div>
+    </div>
+
+    <!-- 공통 모달창 -->
+    <div id="modal-overlay" class="absolute inset-0 z-50 bg-black/70 flex items-center justify-center p-6 text-center hidden">
+        <div id="modal-content" class="bg-white rounded-3xl p-8 w-full animate__animated animate__zoomIn">
+            <h2 id="modal-title" class="text-3xl font-jua mb-4 text-blue-600"></h2>
+            <div id="modal-body" class="mb-6 text-gray-700 font-bold text-lg leading-relaxed"></div>
+            <button id="modal-btn" class="w-full py-3 bg-blue-500 hover:bg-blue-600 text-white rounded-xl font-bold text-lg transition-colors"></button>
+        </div>
+    </div>
+</div>
+
+<script>
+    // A to Z 단어 데이터
+    const aToZWords = [
+        { w: "apple" }, { w: "bear" }, { w: "cat" }, { w: "dog" },
+        { w: "egg" }, { w: "frog" }, { w: "game" }, { w: "hat" },
+        { w: "ice" }, { w: "jam" }, { w: "king" }, { w: "lion" },
+        { w: "monkey" }, { w: "nine" }, { w: "orange" }, { w: "pig" },
+        { w: "queen" }, { w: "ring" }, { w: "sun" }, { w: "ten" },
+        { w: "up" }, { w: "violin" }, { w: "win" }, { w: "xray" },
+        { w: "yellow" }, { w: "zebra" }
+    ];
+
+    let questions = [];
+    let currentIndex = 0;
+    let hearts = 3;
+    let currentWord = null;
+    let userSelection = [];
+    let currentScramble = [];
+
+    // 타이머 관련 변수
+    let startTime;
+    let timerInterval;
+    let isChecking = false;
+
+    // 페이지 로드 시 최고 기록 불러오기
+    window.onload = loadBestRecord;
+
+    // 게임 시작
+    function startGame() {
+        document.getElementById('title-screen').classList.add('hidden');
+        document.getElementById('game-container').classList.remove('hidden');
+
+        hearts = 3;
+        currentIndex = 0;
+        updateHearts();
+
+        // 문제 섞기
+        questions = [...aToZWords].sort(() => Math.random() - 0.5);
+
+        startStopwatch();
+        loadWord();
+    }
+
+    // 새 단어 불러오기
+    function loadWord() {
+        isChecking = false;
+        currentWord = questions[currentIndex];
+
+        // UI 업데이트
+        document.getElementById('progress-info').innerText = `${currentIndex + 1} / ${questions.length}`;
+
+        const imgEl = document.getElementById('hint-image');
+        imgEl.onerror = null;
+
+        // 이미지 경로 설정 (첫 글자)
+        const firstLetter = currentWord.w[0].toUpperCase();
+        imgEl.src = `./PIC/${firstLetter}.png`;
+
+        // 로컬 이미지가 없을 경우 플레이스홀더
+        imgEl.onerror = () => {
+            imgEl.onerror = null;
+            imgEl.src = `https://ui-avatars.com/api/?name=${firstLetter}&background=random&color=fff&size=140&font-size=0.6`;
+        };
+
+        // 타일 초기화
+        userSelection = Array(currentWord.w.length).fill(null);
+        currentScramble = currentWord.w.split('').sort(() => Math.random() - 0.5);
+
+        renderGame();
+    }
+
+    // 화면 렌더링
+    function renderGame() {
+        const poolEl = document.getElementById('letter-pool');
+        poolEl.innerHTML = '';
+        currentScramble.forEach((char, idx) => {
+            const btn = document.createElement('div');
+            btn.className = 'tile bg-white text-blue-600 border-2 border-blue-200 shadow-sm';
+            btn.innerText = char;
+            btn.onclick = () => {
+                if (isChecking) return;
+                const emptyIdx = userSelection.indexOf(null);
+                if (emptyIdx !== -1) {
+                    userSelection[emptyIdx] = char;
+                    btn.style.visibility = 'hidden';
+                    btn.dataset.poolIdx = idx; // 복구를 위해 인덱스 저장
+                    renderSlots();
+
+                    // 칸이 꽉 찼으면 자동 검사
+                    if (!userSelection.includes(null)) {
+                        checkAnswer();
+                    }
+                }
+            };
+            poolEl.appendChild(btn);
+        });
+        renderSlots();
+    }
+
+    // 정답 입력칸 렌더링
+    function renderSlots() {
+        const slotsEl = document.getElementById('answer-slots');
+        slotsEl.innerHTML = '';
+        userSelection.forEach((char, idx) => {
+            const slot = document.createElement('div');
+            if (char === null) {
+                slot.className = 'tile-placeholder';
+            } else {
+                slot.className = 'tile bg-blue-500 text-white animate__animated animate__bounceIn shadow-md';
+                slot.innerText = char;
+                // 클릭 시 입력 취소
+                slot.onclick = () => {
+                    if (isChecking) return;
+                    // 선택된 모든 글자를 취소하여 풀로 되돌림
+                    userSelection = Array(currentWord.w.length).fill(null);
+                    document.querySelectorAll('#letter-pool .tile').forEach(t => t.style.visibility = 'visible');
+                    renderSlots();
+                };
+            }
+            slotsEl.appendChild(slot);
+        });
+    }
+
+    // 정답 확인
+    function checkAnswer() {
+        if (isChecking || userSelection.includes(null)) return;
+
+        if (userSelection.join('') === currentWord.w) {
+            handleCorrect();
+        } else {
+            handleWrong();
+        }
+    }
+
+    // 정답 처리
+    function handleCorrect() {
+        isChecking = true;
+
+        document.querySelectorAll('#answer-slots .tile').forEach(t => {
+            t.classList.remove('bg-blue-500');
+            t.classList.add('bg-green-500', 'animate__animated', 'animate__pulse');
+        });
+
+        setTimeout(() => {
+            currentIndex++;
+            if (currentIndex >= questions.length) {
+                gameClear();
+            } else {
+                loadWord();
+            }
+        }, 300); // 0.3초 딜레이 후 빠르게 다음 문제로
+    }
+
+    // 오답 처리
+    function handleWrong() {
+        isChecking = true;
+        hearts--;
+        updateHearts();
+
+        document.querySelectorAll('#answer-slots .tile').forEach(t => {
+            t.classList.remove('bg-blue-500');
+            t.classList.add('bg-red-500', 'animate__animated', 'animate__shakeX');
+        });
+
+        setTimeout(() => {
+            if (hearts <= 0) {
+                gameOver();
+            } else {
+                // 입력 초기화 후 다시 풀기
+                userSelection = Array(currentWord.w.length).fill(null);
+                document.querySelectorAll('#letter-pool .tile').forEach(t => t.style.visibility = 'visible');
+                renderSlots();
+                isChecking = false;
+            }
+        }, 500);
+    }
+
+    // 게임 클리어
+    function gameClear() {
+        clearInterval(timerInterval);
+        const finalTime = Date.now() - startTime;
+        saveRecord(finalTime);
+
+        showModal(
+            "Mission Clear! 🎉",
+            `A to Z 마스터!<br><br><span class="text-3xl text-blue-600 font-jua">${formatTime(finalTime)}</span>`,
+            "처음으로",
+            resetToTitle
+        );
+    }
+
+    // 게임 오버
+    function gameOver() {
+        clearInterval(timerInterval);
+        showModal(
+            "Game Over 💦",
+            `목숨을 모두 잃었습니다.<br>다시 도전해보세요!`,
+            "처음으로",
+            resetToTitle
+        );
+    }
+
+    // 타이틀로 돌아가기
+    function resetToTitle() {
+        document.getElementById('modal-overlay').classList.add('hidden');
+        document.getElementById('game-container').classList.add('hidden');
+        document.getElementById('title-screen').classList.remove('hidden');
+        loadBestRecord();
+    }
+
+    // 하트 UI 업데이트
+    function updateHearts() {
+        document.getElementById('hearts-display').innerText = "❤️".repeat(hearts) + "🖤".repeat(3 - hearts);
+    }
+
+    // 스톱워치 시작
+    function startStopwatch() {
+        startTime = Date.now();
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            const elapsed = Date.now() - startTime;
+            document.getElementById('stopwatch-display').innerText = formatTime(elapsed);
+        }, 41); // 약 24fps 업데이트
+    }
+
+    // 시간 포맷 (mm:ss.ms)
+    function formatTime(ms) {
+        let totalSeconds = Math.floor(ms / 1000);
+        let minutes = Math.floor(totalSeconds / 60);
+        let seconds = totalSeconds % 60;
+        let milliseconds = Math.floor((ms % 1000) / 10);
+        return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}.${milliseconds.toString().padStart(2, '0')}`;
+    }
+
+    // 로컬 스토리지에 기록 저장
+    function saveRecord(timeMs) {
+        // 최고 기록 갱신
+        let best = localStorage.getItem('speedGameBest');
+        if (!best || timeMs < parseInt(best)) {
+            localStorage.setItem('speedGameBest', timeMs.toString());
+        }
+
+        // 최근 기록 5개 유지
+        let history = JSON.parse(localStorage.getItem('speedGameHistory') || '[]');
+        history.unshift({
+            date: new Date().toLocaleDateString() + ' ' + new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}),
+            time: timeMs
+        });
+        if (history.length > 5) history.pop();
+        localStorage.setItem('speedGameHistory', JSON.stringify(history));
+    }
+
+    // 최고 기록 화면에 표시
+    function loadBestRecord() {
+        let best = localStorage.getItem('speedGameBest');
+        let display = document.getElementById('best-record-display');
+        if (best) {
+            display.innerText = `👑 최고 기록: ${formatTime(parseInt(best))}`;
+        } else {
+            display.innerText = `👑 최고 기록: 도전 전`;
+        }
+    }
+
+    // 최근 기록 보기 모달
+    function showRecords() {
+        let history = JSON.parse(localStorage.getItem('speedGameHistory') || '[]');
+        let bodyHtml = '';
+
+        if (history.length === 0) {
+            bodyHtml = '<p class="text-gray-500 my-8">아직 클리어 기록이 없습니다.</p>';
+        } else {
+            bodyHtml = '<ul class="text-left space-y-3 mt-4">';
+            history.forEach((rec) => {
+                bodyHtml += `<li class="flex justify-between items-center border-b border-gray-100 pb-2">
+                    <span class="text-gray-500 text-sm">${rec.date}</span>
+                    <span class="font-jua text-blue-600 text-xl">${formatTime(rec.time)}</span>
+                </li>`;
+            });
+            bodyHtml += '</ul>';
+        }
+
+        showModal("⏱️ 최근 기록 (최대 5회)", bodyHtml, "닫기", () => {});
+    }
+
+    // 커스텀 모달창 띄우기
+    function showModal(title, bodyHtml, btnText, callback) {
+        document.getElementById('modal-title').innerText = title;
+        document.getElementById('modal-body').innerHTML = bodyHtml;
+        const btn = document.getElementById('modal-btn');
+        btn.innerText = btnText;
+
+        btn.onclick = () => {
+            document.getElementById('modal-overlay').classList.add('hidden');
+            if(callback) callback();
+        };
+        document.getElementById('modal-overlay').classList.remove('hidden');
+    }
+</script>
+</body>
+</html>
