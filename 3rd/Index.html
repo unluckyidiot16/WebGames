@@ -39,13 +39,13 @@
     <p class="text-xl text-green-800">원하는 게임을 골라서 재미있게 즐겨보세요!</p>
 </header>
 
-<!-- Game List Container (총 9개 게임을 위해 넓은 화면에서 4열 그리드 지원) -->
+<!-- Game List Container (총 12개 게임을 위해 넓은 화면에서 4열 그리드 지원) -->
 <main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="game-container">
     <!-- 게임 카드들이 JavaScript를 통해 여기에 생성됩니다. -->
 </main>
 
 <script>
-    // 게임 데이터 정의 (알파벳 스크램블 게임, 알파벳 도둑잡기 추가)
+    // 게임 데이터 정의
     const games = [
         { id: 1, title: 'ABC 팡', url: 'https://unluckyidiot16.github.io/WebGames/ABCP/ABCP.html', color: 'from-pink-400 to-rose-400', icon: 'gamepad-2' },
         { id: 2, title: 'AtoZ', url: 'https://unluckyidiot16.github.io/WebGames/AM/AM.html', color: 'from-orange-400 to-amber-400', icon: 'spell-check' },
@@ -57,10 +57,11 @@
         { id: 8, title: '알파벳 도둑잡기', url: 'https://unluckyidiot16.github.io/WebGames/AOM/AOM.html', color: 'from-fuchsia-400 to-pink-500', icon: 'search' },
         { id: 9, title: '알파벳 수박게임', url: 'https://unluckyidiot16.github.io/WebGames/AZmerge/AZmerge.html', color: 'from-red-400 to-rose-500', icon: 'apple' },
         { id: 10, title: '알파벳 런', url: 'https://unluckyidiot16.github.io/WebGames/AR/AR.html', color: 'from-amber-300 to-orange-500', icon: 'footprints' },
-        { id: 11, title: '이미지 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SP/SP.html', color: 'from-indigo-400 to-purple-600', icon: 'image' }
+        { id: 11, title: '이미지 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SP/SP.html', color: 'from-indigo-400 to-purple-600', icon: 'image' },
+        { id: 12, title: '스피드 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SPS/SPS.html', color: 'from-teal-400 to-emerald-500', icon: 'zap' }
     ];
 
-    // UI 렌더링 함수 (해금 로직 제거, 모두 바로 플레이 가능)
+    // UI 렌더링 함수
     function renderGames() {
         const container = document.getElementById('game-container');
         container.innerHTML = '';
