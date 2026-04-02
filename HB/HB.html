@@ -1,0 +1,691 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Hi, Bye</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Custom Styles -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Jua&display=swap');
+
+        * {
+            font-family: 'Jua', sans-serif;
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
+
+        body {
+            margin: 0;
+            overflow: hidden;
+            background-color: #f1f5f9; /* bg-slate-100 */
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-8px) rotate(-3deg); }
+            50% { transform: translateX(8px) rotate(3deg); }
+            75% { transform: translateX(-8px) rotate(-3deg); }
+        }
+        .animate-shake { animation: shake 0.3s ease-in-out; }
+
+        @keyframes popIn {
+            0% { transform: scale(0.8); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-pop { animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+
+        /* 유틸리티 클래스 */
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<!-- ==========================================
+     TITLE SCREEN
+========================================== -->
+<div id="title-screen" class="flex flex-col items-center justify-center w-full h-screen bg-slate-900 text-white">
+    <div class="mb-10 text-center animate-pop">
+        <h1 class="text-6xl md:text-8xl font-bold text-yellow-400 drop-shadow-lg mb-4">Hi, Bye</h1>
+        <p class="text-xl md:text-2xl text-slate-300">캐주얼 판별 웹게임</p>
+    </div>
+    <button id="btn-start" class="px-8 py-4 bg-blue-500 hover:bg-blue-400 text-white text-3xl rounded-2xl shadow-[0_6px_0_#1e3a8a] active:shadow-[0_0px_0_#1e3a8a] active:translate-y-[6px] transition-all">
+        게임 시작
+    </button>
+</div>
+
+<!-- ==========================================
+     PREPARE SCREEN
+========================================== -->
+<div id="prepare-screen" class="hidden flex flex-col items-center justify-center w-full h-screen bg-slate-100 text-slate-800 p-4">
+    <h2 id="prep-stage-text" class="text-4xl mb-2 text-blue-600 font-bold">Stage 1</h2>
+    <p class="text-xl mb-8 text-slate-500">오늘의 주인공들을 기억하세요!</p>
+
+    <div id="prep-chars-area" class="flex gap-6 md:gap-10 mb-6 w-full max-w-2xl justify-center flex-wrap">
+        <!-- Injected by JS -->
+    </div>
+    <div id="prep-fake-notice" class="hidden mb-6 text-center bg-orange-100 border-2 border-orange-300 rounded-2xl px-6 py-3">
+        <span class="text-xl font-bold text-orange-600">❓ 낯선 캐릭터가 나오면 → FINE!</span>
+    </div>
+
+    <div id="prep-countdown" class="text-7xl font-bold text-yellow-500 animate-pulse">
+        3
+    </div>
+</div>
+
+<!-- ==========================================
+     PLAYING SCREEN
+========================================== -->
+<div id="playing-screen" class="hidden flex flex-col items-center w-full h-screen overflow-hidden transition-colors duration-200">
+    <!-- 상단 UI -->
+    <div class="w-full max-w-lg flex justify-between items-center p-4 bg-white shadow-sm rounded-b-2xl z-10">
+        <div class="flex flex-col">
+            <span id="play-stage-text" class="text-lg text-slate-500">Stage 1</span>
+            <span id="play-score-text" class="text-2xl font-bold text-slate-800">0 점</span>
+        </div>
+
+        <div id="play-lives-container" class="flex gap-1 text-2xl">
+            <span class="text-red-500">♥</span>
+            <span class="text-red-500">♥</span>
+            <span class="text-red-500">♥</span>
+            <span class="text-red-500">♥</span>
+            <span class="text-red-500">♥</span>
+        </div>
+    </div>
+
+    <!-- 중앙 게임 영역 -->
+    <div class="flex-1 w-full max-w-lg flex flex-col items-center justify-center relative p-4">
+
+        <!-- 콤보 표시 -->
+        <div id="combo-display" class="hidden absolute top-10 text-4xl font-bold text-yellow-500 italic drop-shadow-md">
+            <span id="combo-text">3</span> COMBO!
+        </div>
+
+        <!-- 피드백 O/X -->
+        <div id="feedback-display" class="hidden absolute z-20 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+            <!-- Content injected via JS -->
+        </div>
+
+        <!-- 캐릭터 카드 -->
+        <div id="play-char-card" class="w-64 h-64 md:w-80 md:h-80 bg-white rounded-[3rem] shadow-xl p-8 relative flex items-center justify-center">
+            <div id="play-char-container" class="w-full h-full flex items-center justify-center relative">
+                <!-- Character Injection -->
+            </div>
+        </div>
+
+        <div id="play-progress-text" class="text-slate-400 mt-4 font-bold">
+            1 / 8
+        </div>
+    </div>
+
+    <!-- 하단 컨트롤 영역 -->
+    <div class="w-full max-w-lg bg-white p-6 rounded-t-3xl shadow-[0_-10px_30px_rgba(0,0,0,0.05)] z-10">
+
+        <!-- 시간 제한 바 -->
+        <div class="w-full h-4 bg-slate-200 rounded-full mb-6 overflow-hidden">
+            <div id="time-bar" class="h-full bg-blue-500 rounded-full" style="width: 100%;"></div>
+        </div>
+
+        <!-- 입력 버튼 -->
+        <div class="flex gap-3">
+            <button id="btn-hi" class="flex-1 py-8 bg-green-500 hover:bg-green-400 rounded-3xl text-4xl font-bold text-white shadow-[0_8px_0_#14532d] active:shadow-[0_0px_0_#14532d] active:translate-y-[8px] transition-all touch-manipulation">
+                HI
+            </button>
+            <button id="btn-fine" class="hidden flex-1 py-8 bg-yellow-400 hover:bg-yellow-300 rounded-3xl text-3xl font-bold text-white shadow-[0_8px_0_#b45309] active:shadow-[0_0px_0_#b45309] active:translate-y-[8px] transition-all touch-manipulation">
+                FINE
+            </button>
+            <button id="btn-bye" class="flex-1 py-8 bg-red-500 hover:bg-red-400 rounded-3xl text-4xl font-bold text-white shadow-[0_8px_0_#7f1d1d] active:shadow-[0_0px_0_#7f1d1d] active:translate-y-[8px] transition-all touch-manipulation">
+                BYE
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     STAGE CLEAR SCREEN
+========================================== -->
+<div id="clear-screen" class="hidden flex flex-col items-center justify-center w-full h-screen bg-green-50 text-slate-800 p-4">
+    <div class="text-center bg-white p-10 rounded-3xl shadow-2xl animate-pop border-4 border-green-200 w-full max-w-md">
+        <h2 id="clear-stage-text" class="text-5xl font-bold text-green-500 mb-6">Stage 1 클리어!</h2>
+        <div class="text-2xl mb-2 flex justify-between w-64 mx-auto"><span>현재 점수:</span> <span id="clear-score">0</span></div>
+        <div class="text-2xl mb-8 flex justify-between w-64 mx-auto"><span>최고 콤보:</span> <span id="clear-max-combo" class="text-yellow-500">0</span></div>
+
+        <button id="btn-next-stage" class="w-full px-8 py-4 bg-green-500 hover:bg-green-400 text-white text-3xl rounded-2xl shadow-[0_6px_0_#14532d] active:shadow-[0_0px_0_#14532d] active:translate-y-[6px] transition-all">
+            다음 스테이지
+        </button>
+    </div>
+</div>
+
+<!-- ==========================================
+     GAME OVER SCREEN
+========================================== -->
+<div id="gameover-screen" class="hidden flex flex-col items-center justify-center w-full h-screen bg-slate-900 text-white p-4">
+    <div class="text-center animate-pop w-full max-w-md">
+        <h2 class="text-6xl font-bold text-red-500 mb-4 drop-shadow-md">GAME OVER</h2>
+        <p id="over-stage-text" class="text-2xl text-slate-300 mb-8">Stage 1 에서 쓰러졌습니다...</p>
+
+        <div class="bg-slate-800 p-6 rounded-2xl mb-8 border border-slate-700 inline-block text-left min-w-[250px] w-full max-w-[300px]">
+            <div class="text-xl mb-2 flex justify-between"><span>최종 점수:</span> <span id="over-score" class="text-yellow-400 font-bold">0</span></div>
+            <div class="text-xl flex justify-between"><span>최고 콤보:</span> <span id="over-max-combo" class="text-blue-300">0</span></div>
+        </div>
+
+        <div class="flex gap-4 justify-center">
+            <button id="btn-title" class="flex-1 px-4 py-4 bg-slate-600 hover:bg-slate-500 rounded-xl text-xl transition-colors">
+                타이틀로
+            </button>
+            <button id="btn-retry" class="flex-1 px-4 py-4 bg-blue-500 hover:bg-blue-400 rounded-xl text-xl font-bold shadow-[0_4px_0_#1e3a8a] active:shadow-none active:translate-y-[4px] transition-all">
+                다시 도전
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- ==========================================
+     GAME LOGIC SCRIPT
+========================================== -->
+<script>
+    // --- 캐릭터 데이터 ---
+    const CHARACTERS = [
+        { id: 'angel',            src: './PIC/angel_1680414.png',            defaultEmoji: '👼' },
+        { id: 'cerberus',         src: './PIC/cerberus_1680407.png',         defaultEmoji: '🐺' },
+        { id: 'cowboy',           src: './PIC/cowboy_1680376.png',           defaultEmoji: '🤠' },
+        { id: 'cyclops',          src: './PIC/cyclops_1680394.png',          defaultEmoji: '👁️' },
+        { id: 'elf',              src: './PIC/elf_1680367.png',              defaultEmoji: '🧝' },
+        { id: 'fairy',            src: './PIC/fairy_1680378.png',            defaultEmoji: '🧚' },
+        { id: 'faun',             src: './PIC/faun_1680383.png',             defaultEmoji: '🐾' },
+        { id: 'geisha',           src: './PIC/geisha_1680389.png',           defaultEmoji: '🎎' },
+        { id: 'genie',            src: './PIC/genie_1680377.png',            defaultEmoji: '🧞' },
+        { id: 'gnome',            src: './PIC/gnome_1680375.png',            defaultEmoji: '🧙' },
+        { id: 'goblin',           src: './PIC/goblin_1680381.png',           defaultEmoji: '👺' },
+        { id: 'godzilla',         src: './PIC/godzilla_1680390.png',         defaultEmoji: '🦖' },
+        { id: 'grim-reaper',      src: './PIC/grim-reaper_1680404.png',      defaultEmoji: '💀' },
+        { id: 'haunted',          src: './PIC/haunted_1680393.png',          defaultEmoji: '🌳' },
+        { id: 'jackalope',        src: './PIC/jackalope_1680398.png',        defaultEmoji: '🐇' },
+        { id: 'king',             src: './PIC/king_1680380.png',             defaultEmoji: '👑' },
+        { id: 'knight',           src: './PIC/knight_1680373.png',           defaultEmoji: '⚔️' },
+        { id: 'krampus',          src: './PIC/krampus_1680388.png',          defaultEmoji: '🎄' },
+        { id: 'leprechaun',       src: './PIC/leprechaun_1680413.png',       defaultEmoji: '🍀' },
+        { id: 'loch-ness-monster',src: './PIC/loch-ness-monster_1680399.png',defaultEmoji: '🦕' },
+        { id: 'medusa',           src: './PIC/medusa_1680385.png',           defaultEmoji: '🐍' },
+        { id: 'oni',              src: './PIC/oni_1680382.png',              defaultEmoji: '👹' },
+        { id: 'princess-blue',    src: './PIC/princess_1680384.png',         defaultEmoji: '👸' },
+        { id: 'princess-pink',    src: './PIC/princess_1680403.png',         defaultEmoji: '🫅' },
+        { id: 'red-riding-hood',  src: './PIC/red-riding-hood_1680392.png',  defaultEmoji: '🧣' },
+        { id: 'robot',            src: './PIC/robot_1680369.png',            defaultEmoji: '🤖' },
+        { id: 'spartan',          src: './PIC/spartan_1680400.png',          defaultEmoji: '🛡️' },
+        { id: 'sphynx',           src: './PIC/sphynx_1680411.png',          defaultEmoji: '🦁' },
+        { id: 'superhero',        src: './PIC/superhero_1680371.png',        defaultEmoji: '🦸' },
+        { id: 'ufo',              src: './PIC/ufo_1680368.png',              defaultEmoji: '🛸' },
+        { id: 'vampire',          src: './PIC/vampire_1680387.png',          defaultEmoji: '🧛' },
+        { id: 'werewolf',         src: './PIC/werewolf_1680391.png',         defaultEmoji: '🐺' },
+        { id: 'zombie',           src: './PIC/zombie_1680409.png',           defaultEmoji: '🧟' }
+    ];
+
+    // --- 전역 상태 변수 ---
+    let state = {
+        currentScreen: 'title', // title, prepare, playing, clear, gameover
+        currentStage: 1,
+        score: 0,
+        lives: 5,
+        combo: 0,
+        maxCombo: 0,
+
+        stageData: null,
+        questions: [],
+        currentQIdx: 0,
+
+        timeLeftRatio: 100,
+        prepInterval: null,
+        animFrameId: null,
+        startTime: null
+    };
+
+    // --- 난이도별 스테이지 생성 (초등 3학년 기준) ---
+    function generateStageData(stageNum) {
+        let timeLimit, targetCount, hiCount, byeCount, fakeRatio;
+
+        if (stageNum <= 5) {
+            // 입문: Hi×1 / Bye×1, 페이크 없음
+            timeLimit   = 4.0 - (stageNum - 1) * 0.2;   // 4.0 → 3.2s
+            targetCount = 6   + (stageNum - 1) * 1;       // 6 → 10
+            hiCount = 1; byeCount = 1; fakeRatio = 0;
+        } else if (stageNum <= 8) {
+            // Hi 2종 도입, 반응속도 형성
+            timeLimit   = 3.0 - (stageNum - 6) * 0.12;   // 3.0 → 2.76s
+            targetCount = 10  + (stageNum - 6) * 1;       // 10 → 12
+            hiCount = 2; byeCount = 1; fakeRatio = 0;
+        } else if (stageNum <= 12) {
+            // Bye 2종 추가, 혼동 시작
+            timeLimit   = 2.6 - (stageNum - 9) * 0.1;    // 2.6 → 2.2s
+            targetCount = 12  + (stageNum - 9) * 1;       // 12 → 15
+            hiCount = 2; byeCount = 2; fakeRatio = 0;
+        } else if (stageNum <= 15) {
+            // Hi 3종 + 페이크 등장 (10~16%)
+            timeLimit   = 2.1 - (stageNum - 13) * 0.1;   // 2.1 → 1.9s
+            targetCount = 15  + (stageNum - 13) * 1;      // 15 → 17
+            hiCount = 3; byeCount = 2;
+            fakeRatio   = 0.10 + (stageNum - 13) * 0.03;
+        } else if (stageNum <= 18) {
+            // Bye 3종 + 페이크 증가 (15~19%)
+            timeLimit   = 1.8 - (stageNum - 16) * 0.1;   // 1.8 → 1.6s
+            targetCount = 17  + (stageNum - 16) * 1;      // 17 → 19
+            hiCount = 3; byeCount = 3;
+            fakeRatio   = 0.15 + (stageNum - 16) * 0.02;
+        } else {
+            // 최고 난이도 고정
+            timeLimit   = 1.5;
+            targetCount = 20  + (stageNum - 19) * 2;      // 20 → 22
+            hiCount = 3; byeCount = 3; fakeRatio = 0.20;
+        }
+
+        return {
+            stage: stageNum,
+            timeLimit: Math.max(1.5, timeLimit),
+            targetCount: Math.floor(targetCount),
+            hiCount, byeCount, fakeRatio
+        };
+    }
+
+    // --- 화면 전환 헬퍼 ---
+    function switchScreen(screenName) {
+        const screens = ['title', 'prepare', 'playing', 'clear', 'gameover'];
+        screens.forEach(s => {
+            document.getElementById(`${s}-screen`).classList.add('hidden');
+        });
+        document.getElementById(`${screenName}-screen`).classList.remove('hidden');
+        state.currentScreen = screenName;
+    }
+
+    // --- 애니메이션 재시작 헬퍼 ---
+    function triggerAnimation(element, animationClass) {
+        element.classList.remove(animationClass);
+        void element.offsetWidth; // Trigger reflow
+        element.classList.add(animationClass);
+    }
+
+    // --- 캐릭터 렌더링 헬퍼 (Fallback 포함) ---
+    function renderCharacter(container, charData, isSilhouette = false) {
+        container.innerHTML = '';
+
+        const img = document.createElement('img');
+        img.src = charData.src;
+        img.alt = charData.id;
+
+        // 실루엣 스타일 처리
+        let classes = "w-full h-full object-contain drop-shadow-md";
+        if (isSilhouette) classes += " brightness-0 opacity-80";
+        img.className = classes;
+        img.draggable = false;
+
+        // 이미지 로드 실패 시 이모지로 대체
+        img.onerror = () => {
+            const span = document.createElement('span');
+            span.className = `text-8xl drop-shadow-md ${isSilhouette ? 'brightness-0 opacity-80 text-black' : ''}`;
+            span.textContent = charData.defaultEmoji;
+            container.innerHTML = '';
+            container.appendChild(span);
+        };
+
+        container.appendChild(img);
+    }
+
+    // --- UI 업데이트 헬퍼 ---
+    function updatePlayingHUD() {
+        document.getElementById('play-stage-text').innerText = `Stage ${state.currentStage}`;
+        document.getElementById('play-score-text').innerText = `${state.score.toLocaleString()} 점`;
+
+        // 생명력 표시
+        const livesContainer = document.getElementById('play-lives-container');
+        livesContainer.innerHTML = '';
+        for(let i=0; i<5; i++) {
+            const heart = document.createElement('span');
+            heart.innerText = '♥';
+            heart.className = i < state.lives ? "text-red-500 text-2xl" : "text-slate-200 text-2xl";
+            livesContainer.appendChild(heart);
+        }
+
+        // 문제 번호 표시
+        document.getElementById('play-progress-text').innerText = `${state.currentQIdx + 1} / ${state.stageData.targetCount}`;
+
+        // 콤보 표시
+        const comboContainer = document.getElementById('combo-display');
+        if (state.combo >= 3) {
+            comboContainer.classList.remove('hidden');
+            document.getElementById('combo-text').innerText = state.combo;
+            triggerAnimation(comboContainer, 'animate-pop');
+        } else {
+            comboContainer.classList.add('hidden');
+        }
+    }
+
+    // --- 캐릭터 한국어 이름 ---
+    const CHAR_NAMES = {
+        'angel':'천사','cerberus':'케르베로스','cowboy':'카우보이',
+        'cyclops':'사이클롭스','elf':'엘프','fairy':'요정',
+        'faun':'파운','geisha':'게이샤','genie':'지니',
+        'gnome':'노움','goblin':'고블린','godzilla':'고질라',
+        'grim-reaper':'저승사자','haunted':'귀신나무','jackalope':'재컬로프',
+        'king':'왕','knight':'기사','krampus':'크람푸스',
+        'leprechaun':'레프러콘','loch-ness-monster':'네시','medusa':'메두사',
+        'oni':'오니','princess-blue':'공주(파랑)','princess-pink':'공주(분홍)',
+        'red-riding-hood':'빨간모자','robot':'로봇','spartan':'스파르타',
+        'sphynx':'스핑크스','superhero':'슈퍼히어로','ufo':'UFO',
+        'vampire':'뱀파이어','werewolf':'늑대인간','zombie':'좀비'
+    };
+
+    // --- 스테이지 초기화 ---
+    function initStage(stageNum) {
+        state.currentStage = stageNum;
+        const sd = generateStageData(stageNum);
+        state.stageData = sd;
+
+        // 필요 캐릭터 수 계산 후 셔플
+        const needFake = sd.fakeRatio > 0;
+        const minNeeded = sd.hiCount + sd.byeCount + (needFake ? 2 : 0);
+        const shuffled = [...CHARACTERS].sort(() => 0.5 - Math.random());
+
+        const hiChars   = shuffled.slice(0, sd.hiCount);
+        const byeChars  = shuffled.slice(sd.hiCount, sd.hiCount + sd.byeCount);
+        const fakePool  = shuffled.slice(sd.hiCount + sd.byeCount);
+
+        // 문제 배열 생성
+        const fakeCount = needFake ? Math.max(1, Math.floor(sd.targetCount * sd.fakeRatio)) : 0;
+        const realCount = sd.targetCount - fakeCount;
+        const hiCount   = Math.ceil(realCount / 2);
+        const byeCount  = realCount - hiCount;
+
+        let qArray = [];
+        for (let i = 0; i < hiCount; i++)
+            qArray.push({ char: hiChars[i % hiChars.length], answer: 'HI' });
+        for (let i = 0; i < byeCount; i++)
+            qArray.push({ char: byeChars[i % byeChars.length], answer: 'BYE' });
+        for (let i = 0; i < fakeCount; i++)
+            qArray.push({ char: fakePool[i % Math.max(1, fakePool.length)], answer: 'FINE' });
+
+        state.questions = qArray.sort(() => Math.random() - 0.5);
+        state.currentQIdx = 0;
+        state.combo = 0;
+
+        // FINE 버튼 표시/숨김
+        document.getElementById('btn-fine').classList.toggle('hidden', !needFake);
+
+        // Prepare 화면 구성
+        document.getElementById('prep-stage-text').innerText = `Stage ${state.currentStage}`;
+        const prepArea = document.getElementById('prep-chars-area');
+        prepArea.innerHTML = '';
+        prepArea.appendChild(buildPrepGroup(hiChars,  'HI',  'green'));
+        prepArea.appendChild(buildPrepGroup(byeChars, 'BYE', 'red'));
+
+        document.getElementById('prep-fake-notice').classList.toggle('hidden', !needFake);
+
+        switchScreen('prepare');
+        startPrepareCountdown();
+    }
+
+    // --- Prepare 카드 그룹 생성 ---
+    function buildPrepGroup(chars, label, color) {
+        const C = {
+            green: { text:'text-green-500', bg:'bg-green-100', nameBg:'bg-green-50', border:'border-green-200', nameText:'text-green-600' },
+            red:   { text:'text-red-500',   bg:'bg-red-100',   nameBg:'bg-red-50',   border:'border-red-200',   nameText:'text-red-500'   }
+        }[color];
+        const sz = chars.length === 1 ? 'w-32 h-32 md:w-40 md:h-40'
+            : chars.length === 2 ? 'w-24 h-24 md:w-32 md:h-32'
+                :                      'w-20 h-20 md:w-28 md:h-28';
+
+        const group = document.createElement('div');
+        group.className = 'flex flex-col items-center';
+
+        const lbl = document.createElement('span');
+        lbl.className = `text-xl font-bold ${C.text} mb-3 ${C.bg} px-4 py-1 rounded-full`;
+        lbl.innerText = `TODAY'S ${label}`;
+        group.appendChild(lbl);
+
+        const row = document.createElement('div');
+        row.className = 'flex gap-2 md:gap-3';
+        chars.forEach((char, idx) => {
+            const col = document.createElement('div');
+            col.className = 'flex flex-col items-center';
+
+            const box = document.createElement('div');
+            box.className = `${sz} bg-white rounded-2xl shadow-lg p-3 animate-pop flex items-center justify-center`;
+            box.style.animationDelay = `${idx * 0.1}s`;
+            renderCharacter(box, char, true);
+            col.appendChild(box);
+
+            const name = document.createElement('div');
+            name.className = `mt-2 text-sm font-bold ${C.nameText} ${C.nameBg} px-3 py-1 rounded-full border-2 ${C.border}`;
+            name.innerText = CHAR_NAMES[char.id] || char.id;
+            col.appendChild(name);
+
+            row.appendChild(col);
+        });
+        group.appendChild(row);
+        return group;
+    }
+
+    // --- 카운트다운 로직 (5초) ---
+    function startPrepareCountdown() {
+        let count = 5;
+        const countEl = document.getElementById('prep-countdown');
+        countEl.innerText = count;
+
+        if(state.prepInterval) clearInterval(state.prepInterval);
+
+        state.prepInterval = setInterval(() => {
+            count--;
+            if(count > 0) {
+                countEl.innerText = count;
+            } else if(count === 0) {
+                countEl.innerText = "시작!";
+            } else {
+                clearInterval(state.prepInterval);
+                startGameplay();
+            }
+        }, 1000);
+    }
+
+    // --- 게임 플레이 시작 ---
+    function startGameplay() {
+        switchScreen('playing');
+        updatePlayingHUD();
+        showCurrentQuestion();
+    }
+
+    function showCurrentQuestion() {
+        const currentQ = state.questions[state.currentQIdx];
+        const charContainer = document.getElementById('play-char-container');
+        const cardElement = document.getElementById('play-char-card');
+
+        renderCharacter(charContainer, currentQ.char, false);
+        triggerAnimation(cardElement, 'animate-pop');
+
+        updatePlayingHUD();
+
+        // 타이머 시작
+        state.timeLeftRatio = 100;
+        state.startTime = performance.now();
+        if(state.animFrameId) cancelAnimationFrame(state.animFrameId);
+        state.animFrameId = requestAnimationFrame(animateTimer);
+    }
+
+    // --- 타이머 루프 ---
+    function animateTimer(time) {
+        if(state.currentScreen !== 'playing') return;
+
+        if (!state.startTime) state.startTime = time;
+        const elapsedTime = (time - state.startTime) / 1000;
+        const remainingTime = state.stageData.timeLimit - elapsedTime;
+        state.timeLeftRatio = Math.max(0, (remainingTime / state.stageData.timeLimit) * 100);
+
+        // 프로그레스 바 UI 업데이트
+        const timeBar = document.getElementById('time-bar');
+        timeBar.style.width = `${state.timeLeftRatio}%`;
+
+        if (state.timeLeftRatio < 30) {
+            timeBar.className = "h-full rounded-full transition-all duration-75 ease-linear bg-red-500";
+        } else {
+            timeBar.className = "h-full rounded-full transition-all duration-75 ease-linear bg-blue-500";
+        }
+
+        if (remainingTime <= 0) {
+            const currentQ = state.questions[state.currentQIdx];
+            if (currentQ && currentQ.answer === 'FINE') {
+                handleCorrectAnswer(); // 페이크는 시간 초과 = 그냥 지나침 = 정답
+            } else {
+                handleWrongAnswer('TIME_OUT');
+            }
+        } else {
+            state.animFrameId = requestAnimationFrame(animateTimer);
+        }
+    }
+
+    // --- 피드백 연출 ---
+    function showFeedback(type) {
+        const fbDisplay = document.getElementById('feedback-display');
+        fbDisplay.classList.remove('hidden');
+        fbDisplay.innerHTML = '';
+
+        if (type === 'SUCCESS') {
+            fbDisplay.innerHTML = '<span class="text-9xl text-green-400 opacity-80 drop-shadow-lg animate-pop">O</span>';
+        } else if (type === 'FAIL') {
+            fbDisplay.innerHTML = '<span class="text-9xl text-red-500 opacity-80 drop-shadow-lg animate-pop">X</span>';
+        } else if (type === 'TIME_OUT') {
+            fbDisplay.innerHTML = '<span class="text-6xl text-red-500 font-bold whitespace-nowrap bg-white/80 px-4 py-2 rounded-xl border-4 border-red-500 shadow-xl opacity-90 rotate-[-10deg] animate-pop">TIME OUT!</span>';
+        }
+
+        setTimeout(() => {
+            fbDisplay.classList.add('hidden');
+        }, 300);
+    }
+
+    function triggerShake() {
+        const playingScreen = document.getElementById('playing-screen');
+        playingScreen.classList.add('bg-red-50');
+        triggerAnimation(playingScreen, 'animate-shake');
+        setTimeout(() => {
+            playingScreen.classList.remove('bg-red-50');
+        }, 300);
+    }
+
+    // --- 정답/오답 처리 ---
+    function handleCorrectAnswer() {
+        if(state.animFrameId) cancelAnimationFrame(state.animFrameId);
+
+        const timeBonusRatio = state.timeLeftRatio / 100;
+        const timeBonus = Math.floor(timeBonusRatio * 50);
+
+        let comboMultiplier = 1;
+        if (state.combo >= 15) comboMultiplier = 2.0;
+        else if (state.combo >= 10) comboMultiplier = 1.5;
+        else if (state.combo >= 5) comboMultiplier = 1.2;
+
+        const gainedScore = Math.floor((100 + timeBonus) * comboMultiplier);
+
+        state.score += gainedScore;
+        state.combo += 1;
+        if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+
+        showFeedback('SUCCESS');
+        nextQuestion();
+    }
+
+    function handleWrongAnswer(type = 'FAIL') {
+        if(state.animFrameId) cancelAnimationFrame(state.animFrameId);
+
+        state.lives -= 1;
+        state.combo = 0;
+        showFeedback(type);
+        triggerShake();
+        updatePlayingHUD();
+
+        if (state.lives <= 0) {
+            setTimeout(showGameOver, 300); // 딜레이 후 게임오버 처리
+        } else {
+            nextQuestion();
+        }
+    }
+
+    function nextQuestion() {
+        state.currentQIdx += 1;
+        if (state.currentQIdx >= state.questions.length) {
+            setTimeout(showStageClear, 300);
+        } else {
+            showCurrentQuestion();
+        }
+    }
+
+    // --- 플레이어 입력 ---
+    function onPlayerInput(input) {
+        if (state.currentScreen !== 'playing') return;
+        const currentQ = state.questions[state.currentQIdx];
+
+        if (currentQ.answer === input) {
+            handleCorrectAnswer();
+        } else {
+            handleWrongAnswer('FAIL');
+        }
+    }
+
+    // --- 결과 화면 ---
+    function showStageClear() {
+        document.getElementById('clear-stage-text').innerText = `Stage ${state.currentStage} 클리어!`;
+        document.getElementById('clear-score').innerText = state.score.toLocaleString();
+        document.getElementById('clear-max-combo').innerText = state.maxCombo;
+        switchScreen('clear');
+    }
+
+    function showGameOver() {
+        document.getElementById('over-stage-text').innerText = `Stage ${state.currentStage} 에서 쓰러졌습니다...`;
+        document.getElementById('over-score').innerText = state.score.toLocaleString();
+        document.getElementById('over-max-combo').innerText = state.maxCombo;
+        switchScreen('gameover');
+    }
+
+    // ==========================================
+    // EVENT LISTENERS BINDING
+    // ==========================================
+    document.getElementById('btn-start').addEventListener('click', () => {
+        state.score = 0;
+        state.lives = 5;
+        state.combo = 0;
+        state.maxCombo = 0;
+        initStage(1);
+    });
+
+    document.getElementById('btn-next-stage').addEventListener('click', () => {
+        initStage(state.currentStage + 1);
+    });
+
+    document.getElementById('btn-title').addEventListener('click', () => {
+        switchScreen('title');
+    });
+
+    document.getElementById('btn-retry').addEventListener('click', () => {
+        state.score = 0;
+        state.lives = 5;
+        state.combo = 0;
+        state.maxCombo = 0;
+        initStage(state.currentStage);
+    });
+
+    // 게임 입력 버튼
+    document.getElementById('btn-hi').addEventListener('click', () => onPlayerInput('HI'));
+    document.getElementById('btn-fine').addEventListener('click', () => onPlayerInput('FINE'));
+    document.getElementById('btn-bye').addEventListener('click', () => onPlayerInput('BYE'));
+
+    // 키보드 바인딩: ← HI / Space FINE / → BYE
+    document.addEventListener('keydown', (e) => {
+        if (state.currentScreen === 'playing') {
+            if (e.key === 'ArrowLeft')  onPlayerInput('HI');
+            else if (e.key === ' ')     onPlayerInput('FINE');
+            else if (e.key === 'ArrowRight') onPlayerInput('BYE');
+        }
+    });
+
+    // 초기 화면 표시
+    switchScreen('title');
+</script>
+</body>
+</html>
