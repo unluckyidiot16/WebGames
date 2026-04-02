@@ -149,6 +149,13 @@
 <div id="clear-screen" class="hidden flex flex-col items-center justify-center w-full h-screen bg-green-50 text-slate-800 p-4">
     <div class="text-center bg-white p-10 rounded-3xl shadow-2xl animate-pop border-4 border-green-200 w-full max-w-md">
         <h2 id="clear-stage-text" class="text-5xl font-bold text-green-500 mb-6">Stage 1 클리어!</h2>
+
+        <!-- 해금 알림 메시지 영역 추가 -->
+        <div id="unlock-message" class="hidden mb-6 bg-yellow-100 border-2 border-yellow-400 p-4 rounded-xl animate-bounce">
+            <span class="text-xl font-bold text-yellow-700">🎉 축하합니다! 1단원 복습 게임이 열렸어요! 🎉</span><br>
+            <span class="text-sm text-yellow-600">메인 화면으로 돌아가서 확인해보세요.</span>
+        </div>
+
         <div class="text-2xl mb-2 flex justify-between w-64 mx-auto"><span>현재 점수:</span> <span id="clear-score">0</span></div>
         <div class="text-2xl mb-8 flex justify-between w-64 mx-auto"><span>최고 콤보:</span> <span id="clear-max-combo" class="text-yellow-500">0</span></div>
 
@@ -633,6 +640,16 @@
         document.getElementById('clear-stage-text').innerText = `Stage ${state.currentStage} 클리어!`;
         document.getElementById('clear-score').innerText = state.score.toLocaleString();
         document.getElementById('clear-max-combo').innerText = state.maxCombo;
+
+        // --- 15 스테이지 해금 로직 및 알림 표시 ---
+        const unlockMsg = document.getElementById('unlock-message');
+        if (state.currentStage >= 15) {
+            localStorage.setItem('game_HB_cleared', 'true');
+            if(unlockMsg) unlockMsg.classList.remove('hidden');
+        } else {
+            if(unlockMsg) unlockMsg.classList.add('hidden');
+        }
+
         switchScreen('clear');
     }
 
