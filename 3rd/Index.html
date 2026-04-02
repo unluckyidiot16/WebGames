@@ -35,6 +35,14 @@
             opacity: 0.7;
             cursor: not-allowed;
         }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-down {
+            animation: fadeInDown 0.4s ease-out forwards;
+        }
     </style>
 </head>
 <body class="min-h-screen flex flex-col items-center py-10 px-4">
@@ -50,8 +58,8 @@
     <!-- 카테고리와 게임들이 JavaScript를 통해 여기에 생성됩니다. -->
 </main>
 
-<!-- 선생님 / 개발자용 테스트 메뉴 -->
-<div class="mt-20 p-6 bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-7xl">
+<!-- 선생님 / 개발자용 테스트 메뉴 (기본 숨김) -->
+<div id="admin-menu" class="hidden mt-20 p-6 bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-7xl animate-fade-in-down">
     <div class="flex items-center justify-between mb-4">
         <h2 class="text-2xl text-gray-700 flex items-center gap-2">
             <i data-lucide="settings" class="w-6 h-6"></i> 선생님 / 테스트 메뉴
@@ -69,6 +77,13 @@
         <code class="bg-white px-3 py-2 rounded text-red-600 font-mono text-sm border border-gray-200 block">localStorage.setItem('game_HB_cleared', 'true');</code>
     </div>
 </div>
+
+<!-- 하단 비밀번호 트리거 (눈에 띄지 않게 배치) -->
+<footer class="mt-16 pb-8 text-center w-full">
+    <button onclick="promptAdmin()" class="text-green-300 hover:text-green-500 transition opacity-50 hover:opacity-100 flex items-center justify-center mx-auto gap-1 text-sm font-sans">
+        <i data-lucide="lock" class="w-4 h-4"></i> 선생님 메뉴
+    </button>
+</footer>
 
 <script>
     // 2단원 게임 및 1단원 복습 게임 데이터 정의
@@ -181,6 +196,21 @@
         lucide.createIcons();
     }
 
+    // 선생님 비밀번호 트리거 함수
+    function promptAdmin() {
+        const pwd = prompt("선생님 메뉴 비밀번호를 입력하세요:");
+        if (pwd === "1234") {
+            const adminMenu = document.getElementById('admin-menu');
+            adminMenu.classList.remove('hidden');
+            // 부드럽게 스크롤하여 메뉴 보여주기
+            setTimeout(() => {
+                adminMenu.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        } else if (pwd !== null) {
+            alert("비밀번호가 틀렸습니다.");
+        }
+    }
+
     // 테스트용 함수: 2단원 클리어 시뮬레이션
     function simulateClearHB() {
         localStorage.setItem('game_HB_cleared', 'true');
@@ -193,6 +223,7 @@
         if(confirm('모든 진행 상황을 초기화하고 1단원을 다시 잠금 상태로 되돌릴까요?')) {
             localStorage.removeItem('game_HB_cleared');
             renderCategories(); // 화면 갱신
+            alert('초기화 되었습니다.');
         }
     }
 
