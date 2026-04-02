@@ -25,9 +25,15 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .game-card:hover {
+        .game-card:not(.locked):hover {
             transform: translateY(-5px) scale(1.02);
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .locked {
+            filter: grayscale(100%);
+            opacity: 0.7;
+            cursor: not-allowed;
         }
     </style>
 </head>
@@ -36,69 +42,165 @@
 <!-- Header -->
 <header class="text-center mb-12 animate-bounce">
     <h1 class="text-5xl md:text-6xl text-green-600 drop-shadow-md mb-2">🌟 3학년 영어 게임 🌟</h1>
-    <p class="text-xl text-green-800">원하는 게임을 골라서 재미있게 즐겨보세요!</p>
+    <p class="text-xl text-green-800">단원별 미션을 순서대로 클리어해보세요!</p>
 </header>
 
-<!-- Game List Container (총 12개 게임을 위해 넓은 화면에서 4열 그리드 지원) -->
-<main class="w-full max-w-7xl grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="game-container">
-    <!-- 게임 카드들이 JavaScript를 통해 여기에 생성됩니다. -->
+<!-- Category Container -->
+<main class="w-full max-w-7xl flex flex-col gap-12" id="main-container">
+    <!-- 카테고리와 게임들이 JavaScript를 통해 여기에 생성됩니다. -->
 </main>
 
+<!-- 선생님 / 개발자용 테스트 메뉴 -->
+<div class="mt-20 p-6 bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-7xl">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl text-gray-700 flex items-center gap-2">
+            <i data-lucide="settings" class="w-6 h-6"></i> 선생님 / 테스트 메뉴
+        </h2>
+    </div>
+    <div class="flex flex-wrap gap-3">
+        <button onclick="simulateClearHB()" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">2단원 (Hi, Bye, Fine) 클리어 테스트</button>
+        <button onclick="resetProgress()" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-400 transition ml-auto">진행 상황 초기화 (잠금 복구)</button>
+    </div>
+
+    <!-- 개발자 연동 가이드 -->
+    <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200 text-left">
+        <h3 class="text-xl text-blue-800 mb-2">💡 실제 게임 페이지 연동 방법 (필수)</h3>
+        <p class="text-gray-700 mb-2">1단원 복습 게임들이 정상적으로 해금되려면, <strong>2단원의 'Hi, Bye, Fine' 게임(.html)이 클리어 되었을 때</strong> 아래 자바스크립트 코드가 실행되도록 게임 코드를 수정해야 합니다.</p>
+        <code class="bg-white px-3 py-2 rounded text-red-600 font-mono text-sm border border-gray-200 block">localStorage.setItem('game_HB_cleared', 'true');</code>
+    </div>
+</div>
+
 <script>
-    // 게임 데이터 정의
-    const games = [
-        { id: 1, title: 'ABC 팡', url: 'https://unluckyidiot16.github.io/WebGames/ABCP/ABCP.html', color: 'from-pink-400 to-rose-400', icon: 'gamepad-2' },
-        { id: 2, title: 'AtoZ', url: 'https://unluckyidiot16.github.io/WebGames/AM/AM.html', color: 'from-orange-400 to-amber-400', icon: 'spell-check' },
-        { id: 3, title: '영어단어 스크램블', url: 'https://unluckyidiot16.github.io/WebGames/SC/SC.html', color: 'from-emerald-400 to-teal-400', icon: 'shuffle' },
-        { id: 4, title: '영단어 팡', url: 'https://unluckyidiot16.github.io/WebGames/PPE/PPE.html', color: 'from-blue-400 to-indigo-400', icon: 'bomb' },
-        { id: 5, title: '기억력 게임', url: 'https://unluckyidiot16.github.io/WebGames/AZM/AZM.html', color: 'from-purple-400 to-violet-400', icon: 'brain' },
-        { id: 6, title: '알파뱀', url: 'https://unluckyidiot16.github.io/WebGames/AS/AS.html', color: 'from-lime-400 to-green-500', icon: 'puzzle' },
-        { id: 7, title: '알파벳 스크램블 게임', url: 'https://unluckyidiot16.github.io/WebGames/ASR/ASR.html', color: 'from-cyan-400 to-blue-500', icon: 'keyboard' },
-        { id: 8, title: '알파벳 도둑잡기', url: 'https://unluckyidiot16.github.io/WebGames/AOM/AOM.html', color: 'from-fuchsia-400 to-pink-500', icon: 'search' },
-        { id: 9, title: '알파벳 수박게임', url: 'https://unluckyidiot16.github.io/WebGames/AZmerge/AZmerge.html', color: 'from-red-400 to-rose-500', icon: 'apple' },
-        { id: 10, title: '알파벳 런', url: 'https://unluckyidiot16.github.io/WebGames/AR/AR.html', color: 'from-amber-300 to-orange-500', icon: 'footprints' },
-        { id: 11, title: '이미지 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SP/SP.html', color: 'from-indigo-400 to-purple-600', icon: 'image' },
-        { id: 12, title: '스피드 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SPS/SPS.html', color: 'from-teal-400 to-emerald-500', icon: 'zap' }
+    // 2단원 게임 및 1단원 복습 게임 데이터 정의
+    const categories = [
+        {
+            id: 2,
+            title: "✌️ 2단원 게임",
+            subtitle: "이 게임을 먼저 클리어해야 1단원 복습이 열립니다!",
+            isLocked: false, // 2단원은 항상 열려있음
+            games: [
+                { id: '2-1', title: 'Hi, Bye, Fine', url: 'https://unluckyidiot16.github.io/WebGames/HB/HB.html', color: 'from-blue-500 to-indigo-600', icon: 'message-circle' }
+            ]
+        },
+        {
+            id: 1,
+            title: "☝️ 1단원 복습 게임",
+            subtitle: "2단원 미션을 완료하면 접속할 수 있어요!",
+            isLocked: () => localStorage.getItem('game_HB_cleared') !== 'true', // HB 게임 클리어 여부 확인
+            games: [
+                { id: '1-1', title: 'ABC 팡', url: 'https://unluckyidiot16.github.io/WebGames/ABCP/ABCP.html', color: 'from-pink-400 to-rose-400', icon: 'gamepad-2' },
+                { id: '1-2', title: 'AtoZ', url: 'https://unluckyidiot16.github.io/WebGames/AM/AM.html', color: 'from-orange-400 to-amber-400', icon: 'spell-check' },
+                { id: '1-3', title: '영어단어 스크램블', url: 'https://unluckyidiot16.github.io/WebGames/SC/SC.html', color: 'from-emerald-400 to-teal-400', icon: 'shuffle' },
+                { id: '1-4', title: '영단어 팡', url: 'https://unluckyidiot16.github.io/WebGames/PPE/PPE.html', color: 'from-blue-400 to-indigo-400', icon: 'bomb' },
+                { id: '1-5', title: '기억력 게임', url: 'https://unluckyidiot16.github.io/WebGames/AZM/AZM.html', color: 'from-purple-400 to-violet-400', icon: 'brain' },
+                { id: '1-6', title: '알파뱀', url: 'https://unluckyidiot16.github.io/WebGames/AS/AS.html', color: 'from-lime-400 to-green-500', icon: 'puzzle' },
+                { id: '1-7', title: '알파벳 스크램블 게임', url: 'https://unluckyidiot16.github.io/WebGames/ASR/ASR.html', color: 'from-cyan-400 to-blue-500', icon: 'keyboard' },
+                { id: '1-8', title: '알파벳 도둑잡기', url: 'https://unluckyidiot16.github.io/WebGames/AOM/AOM.html', color: 'from-fuchsia-400 to-pink-500', icon: 'search' },
+                { id: '1-9', title: '알파벳 수박게임', url: 'https://unluckyidiot16.github.io/WebGames/AZmerge/AZmerge.html', color: 'from-red-400 to-rose-500', icon: 'apple' },
+                { id: '1-10', title: '알파벳 런', url: 'https://unluckyidiot16.github.io/WebGames/AR/AR.html', color: 'from-amber-300 to-orange-500', icon: 'footprints' },
+                { id: '1-11', title: '이미지 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SP/SP.html', color: 'from-indigo-400 to-purple-600', icon: 'image' },
+                { id: '1-12', title: '스피드 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SPS/SPS.html', color: 'from-teal-400 to-emerald-500', icon: 'zap' }
+            ]
+        }
     ];
 
     // UI 렌더링 함수
-    function renderGames() {
-        const container = document.getElementById('game-container');
+    function renderCategories() {
+        const container = document.getElementById('main-container');
         container.innerHTML = '';
 
-        games.forEach((game) => {
-            const card = document.createElement('a');
+        categories.forEach((category) => {
+            // 현재 카테고리가 잠겨있는지 확인
+            const isCategoryLocked = typeof category.isLocked === 'function' ? category.isLocked() : category.isLocked;
 
-            card.href = game.url;
-            card.className = `game-card relative block p-6 rounded-3xl shadow-lg bg-gradient-to-br ${game.color} text-white overflow-hidden`;
+            // 섹션 컨테이너 생성
+            const section = document.createElement('section');
+            section.className = 'w-full';
 
-            card.innerHTML = `
+            // 카테고리 헤더
+            const header = document.createElement('div');
+            header.className = 'mb-6 border-b-4 border-green-300 pb-3 flex items-center justify-between';
+            header.innerHTML = `
+                <div>
+                    <h2 class="text-3xl font-bold text-green-700 flex items-center gap-3">
+                        ${category.title}
+                        ${isCategoryLocked ? '<span class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-full font-normal"><i data-lucide="lock" class="w-4 h-4 inline mb-1"></i> 잠김</span>' : '<span class="text-sm bg-green-100 text-green-600 px-3 py-1 rounded-full font-normal"><i data-lucide="unlock" class="w-4 h-4 inline mb-1"></i> 열림</span>'}
+                    </h2>
+                    <p class="text-green-600 mt-2 text-lg">${category.subtitle}</p>
+                </div>
+            `;
+            section.appendChild(header);
+
+            // 게임 그리드
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
+
+            category.games.forEach((game) => {
+                const card = document.createElement('a');
+
+                if (isCategoryLocked) {
+                    card.className = `game-card locked relative block p-6 rounded-3xl shadow-lg bg-gray-300 text-gray-500 overflow-hidden`;
+                    card.onclick = (e) => {
+                        e.preventDefault();
+                        alert(`2단원의 [Hi, Bye, Fine] 게임을 먼저 클리어해야 열 수 있어요!`);
+                    };
+                } else {
+                    card.href = game.url;
+                    card.className = `game-card relative block p-6 rounded-3xl shadow-lg bg-gradient-to-br ${game.color} text-white overflow-hidden`;
+                }
+
+                card.innerHTML = `
                     <div class="flex justify-between items-start mb-4 relative z-10">
-                        <span class="text-xl font-bold bg-white/30 px-3 py-1 rounded-full border border-white/50 shadow-sm text-white">
-                            Game ${game.id}
+                        <span class="text-lg font-bold bg-white/30 px-3 py-1 rounded-full border border-white/50 shadow-sm text-white">
+                            ${game.title === 'Hi, Bye, Fine' ? 'Mission' : `Game ${game.id.split('-')[1]}`}
                         </span>
+                        ${isCategoryLocked ? `<i data-lucide="lock" class="w-8 h-8 opacity-70"></i>` : ''}
                     </div>
                     
                     <div class="flex flex-col items-center justify-center py-4 relative z-10">
                         <div class="bg-white/20 p-4 rounded-full mb-3 shadow-inner">
-                            <i data-lucide="${game.icon}" class="w-12 h-12 text-white drop-shadow-md"></i>
+                            <i data-lucide="${isCategoryLocked ? 'lock' : game.icon}" class="w-12 h-12 text-white drop-shadow-md"></i>
                         </div>
-                        <h2 class="text-3xl font-bold text-center drop-shadow-md">${game.title}</h2>
+                        <h2 class="text-2xl font-bold text-center drop-shadow-md">${game.title}</h2>
                     </div>
 
+                    ${!isCategoryLocked ? `
                     <div class="absolute -bottom-4 -right-4 bg-white/20 w-32 h-32 rounded-full blur-2xl"></div>
                     <div class="absolute -top-4 -left-4 bg-white/20 w-24 h-24 rounded-full blur-xl"></div>
+                    ` : ''}
                 `;
 
-            container.appendChild(card);
+                grid.appendChild(card);
+            });
+
+            section.appendChild(grid);
+            container.appendChild(section);
         });
 
         // 아이콘 렌더링
         lucide.createIcons();
     }
 
+    // 테스트용 함수: 2단원 클리어 시뮬레이션
+    function simulateClearHB() {
+        localStorage.setItem('game_HB_cleared', 'true');
+        renderCategories(); // 화면 갱신
+        alert('2단원 게임이 클리어 처리되어 1단원 복습 게임들이 해금되었습니다!');
+    }
+
+    // 테스트용 함수: 진행 상황 초기화
+    function resetProgress() {
+        if(confirm('모든 진행 상황을 초기화하고 1단원을 다시 잠금 상태로 되돌릴까요?')) {
+            localStorage.removeItem('game_HB_cleared');
+            renderCategories(); // 화면 갱신
+        }
+    }
+
+    // 페이지 포커스 시 상태 업데이트 (다른 탭에서 게임 클리어 후 돌아왔을 때 자동 갱신)
+    window.addEventListener('focus', renderCategories);
+
     // 초기 렌더링
-    renderGames();
+    renderCategories();
 </script>
 </body>
 </html>
