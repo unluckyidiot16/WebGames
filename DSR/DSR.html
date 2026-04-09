@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dino Spelling Run - Enhanced</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f7f7f7;
+            font-family: 'Press+Start+2P', cursive;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            max-width: 95%;
+            image-rendering: pixelated;
+            border-radius: 8px;
+        }
+
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .word-display {
+            font-size: 24px;
+            color: #535353;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px #eee;
+        }
+
+        .letter-hint { color: #ccc; }
+        .letter-collected { color: #4caf50; }
+        .letter-current { color: #2196f3; text-decoration: underline; }
+
+        .stats-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            color: #535353;
+            font-size: 12px;
+        }
+
+        .hp-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 5px;
+        }
+
+        .heart {
+            width: 20px;
+            height: 20px;
+            fill: #ff4d4d;
+        }
+
+        .heart.empty {
+            fill: #ccc;
+        }
+
+        #overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+        }
+
+        .btn {
+            background: #535353;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+            font-family: 'Press+Start+2P', cursive;
+            font-size: 14px;
+            transition: transform 0.1s;
+        }
+
+        .btn:active { transform: scale(0.95); }
+        .btn:hover { background: #333; }
+
+        .mode-desc {
+            font-size: 10px;
+            color: #777;
+            margin-bottom: 20px;
+            max-width: 400px;
+            text-align: center;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <!-- UI Layer -->
+    <div id="ui-layer">
+        <div id="current-word" class="word-display"></div>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-container">
+        <div>HI <span id="high-score">00000</span></div>
+        <div style="font-size: 18px; margin-top: 5px;"><span id="score">00000</span></div>
+    </div>
+
+    <!-- HP Bar -->
+    <div id="hp-bar" class="hp-container"></div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Initial / Game Over Overlay -->
+    <div id="overlay">
+        <h1 id="overlay-title" style="font-size: 24px; color: #535353; margin-bottom: 30px;">DINO SPELLING</h1>
+
+        <div id="mode-selection">
+            <button class="btn" onclick="startGame('practice')">PRACTICE MODE</button>
+            <p class="mode-desc">No HP limit. Wrong letters don't hurt you.</p>
+            <button class="btn" onclick="startGame('challenge')">CHALLENGE MODE</button>
+            <p class="mode-desc">3 HP. Wrong letters reduce HP. Complete words to heal.</p>
+        </div>
+
+        <div id="game-over-ui" style="display: none; text-align: center;">
+            <p id="game-over-reason" style="color: #ff4d4d; margin-bottom: 20px; font-size: 14px;"></p>
+            <button class="btn" onclick="showModeSelection()">MAIN MENU</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreEl = document.getElementById('score');
+    const highScoreEl = document.getElementById('high-score');
+    const wordEl = document.getElementById('current-word');
+    const hpBarEl = document.getElementById('hp-bar');
+    const overlay = document.getElementById('overlay');
+    const overlayTitle = document.getElementById('overlay-title');
+    const modeSelection = document.getElementById('mode-selection');
+    const gameOverUi = document.getElementById('game-over-ui');
+    const gameOverReason = document.getElementById('game-over-reason');
+
+    // Constants
+    const CANVAS_WIDTH = 800;
+    const CANVAS_HEIGHT = 250;
+    const GROUND_Y = 200;
+    const GRAVITY = 0.6;
+    const JUMP_FORCE = -12;
+    const GAME_SPEED_START = 6;
+    const WORDS = ["GALAXY", "PIXEL", "DINO", "RUNNER", "JUNGLE", "ORANGE", "BREEZE", "CACTUS", "SUMMER", "WINTER"];
+
+    // Game State
+    let gameMode = 'practice'; // 'practice' or 'challenge'
+    let hp = 3;
+    let maxHp = 3;
+    let score = 0;
+    let highScore = 0;
+    let isRunning = false;
+    let gameSpeed = GAME_SPEED_START;
+    let frame = 0;
+    let currentWord = "";
+    let targetLetterIndex = 0;
+
+    // Objects
+    let dino = { x: 50, y: GROUND_Y - 47, width: 44, height: 47, vy: 0, isJumping: false };
+    let obstacles = [];
+    let letters = [];
+    let clouds = [];
+
+    function initCanvas() {
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+    }
+
+    // Input Handling
+    function handleAction() {
+        if (!isRunning) return;
+        if (!dino.isJumping) {
+            dino.vy = JUMP_FORCE;
+            dino.isJumping = true;
+        }
+    }
+
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') handleAction(); });
+    canvas.addEventListener('mousedown', handleAction);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(); });
+
+    // Mode Handling
+    function showModeSelection() {
+        overlay.style.display = 'flex';
+        modeSelection.style.display = 'block';
+        gameOverUi.style.display = 'none';
+        overlayTitle.innerText = "DINO SPELLING";
+    }
+
+    function startGame(mode) {
+        gameMode = mode;
+        hp = (mode === 'challenge') ? 3 : 999;
+        overlay.style.display = 'none';
+        resetGameState();
+        isRunning = true;
+        loop();
+    }
+
+    function resetGameState() {
+        score = 0;
+        frame = 0;
+        gameSpeed = GAME_SPEED_START;
+        obstacles = [];
+        letters = [];
+        clouds = [];
+        dino.y = GROUND_Y - dino.height;
+        dino.vy = 0;
+        setNewWord();
+        updateUI();
+    }
+
+    function setNewWord() {
+        currentWord = WORDS[Math.floor(Math.random() * WORDS.length)];
+        targetLetterIndex = 0;
+    }
+
+    function updateUI() {
+        // Word Display
+        let html = "";
+        for (let i = 0; i < currentWord.length; i++) {
+            if (i < targetLetterIndex) html += `<span class="letter-collected">${currentWord[i]}</span>`;
+            else if (i === targetLetterIndex) html += `<span class="letter-current">${currentWord[i]}</span>`;
+            else html += `<span class="letter-hint">${currentWord[i]}</span>`;
+        }
+        wordEl.innerHTML = html;
+
+        // Score
+        scoreEl.innerText = String(Math.floor(score)).padStart(5, '0');
+        highScoreEl.innerText = String(Math.floor(highScore)).padStart(5, '0');
+
+        // HP Hearts
+        hpBarEl.innerHTML = "";
+        if (gameMode === 'challenge') {
+            for (let i = 0; i < maxHp; i++) {
+                const isFull = i < hp;
+                hpBarEl.innerHTML += `
+                    <svg class="heart ${isFull ? '' : 'empty'}" viewBox="0 0 24 24">
+                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+                    </svg>`;
+            }
+        }
+    }
+
+    // Spawning Logic with Forced-Collision Avoidance
+    function spawnManager() {
+        frame++;
+
+        // Spawn Clouds
+        if (frame % 150 === 0) {
+            clouds.push({ x: CANVAS_WIDTH, y: 30 + Math.random() * 50, speed: 0.5 + Math.random() });
+        }
+
+        // Spawn Obstacles (Cactus)
+        let spawnedObstacle = false;
+        if (frame % 120 === 0 && Math.random() > 0.4) {
+            obstacles.push({ x: CANVAS_WIDTH, y: GROUND_Y - 40, width: 25, height: 40 });
+            spawnedObstacle = true;
+        }
+
+        // Spawn Letters
+        if (frame % 70 === 0) {
+            // [IMPROVEMENT] Logic to avoid placing wrong letters where player MUST jump
+            // If a cactus was just spawned, we ensure any letter near it is either the CORRECT one 
+            // or high enough/far enough away.
+            const lastObstacle = obstacles[obstacles.length - 1];
+            const isNearObstacle = lastObstacle && (CANVAS_WIDTH - lastObstacle.x < 100);
+
+            let char;
+            const isTarget = Math.random() > 0.5;
+
+            if (isNearObstacle) {
+                // If there's a cactus, either spawn the CORRECT letter (reward for the jump)
+                // or don't spawn a letter at all in this frame.
+                if (Math.random() > 0.5) char = currentWord[targetLetterIndex];
+                else return; // Skip spawning to avoid "trap"
+            } else {
+                char = isTarget ? currentWord[targetLetterIndex] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+            }
+
+            letters.push({
+                x: CANVAS_WIDTH,
+                y: GROUND_Y - 70 - Math.random() * 60,
+                char: char,
+                isTarget: char === currentWord[targetLetterIndex]
+            });
+        }
+    }
+
+    // Drawing
+    function drawDino(x, y) {
+        ctx.fillStyle = '#535353';
+        ctx.fillRect(x + 15, y, 20, 15); // head
+        ctx.fillRect(x + 30, y + 5, 10, 5); // snout
+        ctx.fillRect(x + 10, y + 15, 25, 20); // body
+        ctx.fillRect(x, y + 20, 10, 10); // tail
+        if (!dino.isJumping && Math.floor(frame / 6) % 2 === 0) ctx.fillRect(x + 12, y + 35, 6, 10);
+        else ctx.fillRect(x + 25, y + 35, 6, 10);
+        ctx.fillStyle = '#fff'; ctx.fillRect(x + 22, y + 3, 3, 3);
+    }
+
+    function drawCactus(x, y) {
+        ctx.fillStyle = '#535353';
+        ctx.fillRect(x + 8, y, 9, 40); // main
+        ctx.fillRect(x, y + 10, 8, 15); // left
+        ctx.fillRect(x + 17, y + 5, 8, 20); // right
+    }
+
+    function drawLetter(l) {
+        ctx.fillStyle = l.isTarget ? '#2196f3' : '#535353';
+        ctx.font = '20px "Press Start 2P"';
+        ctx.fillText(l.char, l.x, l.y);
+    }
+
+    function update() {
+        gameSpeed += 0.0005;
+        score += 0.15;
+
+        // Physics
+        dino.vy += GRAVITY;
+        dino.y += dino.vy;
+        if (dino.y > GROUND_Y - dino.height) {
+            dino.y = GROUND_Y - dino.height;
+            dino.vy = 0;
+            dino.isJumping = false;
+        }
+
+        // Move Objects
+        clouds.forEach((c, i) => { c.x -= c.speed; if (c.x < -100) clouds.splice(i, 1); });
+
+        obstacles.forEach((o, i) => {
+            o.x -= gameSpeed;
+            if (dino.x < o.x + o.width && dino.x + dino.width > o.x && dino.y < o.y + o.height && dino.y + dino.height > o.y) {
+                endGame("CRASHED INTO CACTUS!");
+            }
+            if (o.x < -100) obstacles.splice(i, 1);
+        });
+
+        letters.forEach((l, i) => {
+            l.x -= gameSpeed;
+            if (dino.x < l.x + 20 && dino.x + dino.width > l.x && dino.y < l.y + 30 && dino.y + dino.height > l.y) {
+                if (l.isTarget) {
+                    targetLetterIndex++;
+                    score += 50;
+                    if (targetLetterIndex >= currentWord.length) {
+                        score += 500;
+                        if (gameMode === 'challenge' && hp < maxHp) hp++;
+                        setNewWord();
+                    }
+                } else {
+                    if (gameMode === 'challenge') {
+                        hp--;
+                        if (hp <= 0) endGame("OUT OF HEARTS!");
+                    }
+                    score = Math.max(0, score - 30);
+                }
+                letters.splice(i, 1);
+                updateUI();
+            }
+            if (l.x < -100) letters.splice(i, 1);
+        });
+
+        spawnManager();
+        if (score > highScore) highScore = score;
+    }
+
+    function loop() {
+        if (!isRunning) return;
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Ground
+        ctx.strokeStyle = '#535353';
+        ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 5); ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 5); ctx.stroke();
+
+        clouds.forEach(c => {
+            ctx.fillStyle = '#eee';
+            ctx.fillRect(c.x, c.y, 40, 10); ctx.fillRect(c.x + 10, c.y - 5, 20, 5);
+        });
+
+        obstacles.forEach(o => drawCactus(o.x, o.y));
+        letters.forEach(l => drawLetter(l));
+        drawDino(dino.x, dino.y);
+
+        update();
+        requestAnimationFrame(loop);
+    }
+
+    function endGame(reason) {
+        isRunning = false;
+        overlay.style.display = 'flex';
+        modeSelection.style.display = 'none';
+        gameOverUi.style.display = 'block';
+        overlayTitle.innerText = "GAME OVER";
+        gameOverReason.innerText = reason;
+        updateUI();
+    }
+
+    initCanvas();
+    showModeSelection();
+    window.addEventListener('resize', initCanvas);
+</script>
+
+</body>
+</html>
