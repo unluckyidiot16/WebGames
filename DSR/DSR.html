@@ -182,7 +182,7 @@
     const WORDS = ["GALAXY", "PIXEL", "DINO", "RUNNER", "JUNGLE", "ORANGE", "BREEZE", "CACTUS", "SUMMER", "WINTER"];
 
     // Game State
-    let gameMode = 'practice'; // 'practice' or 'challenge'
+    let gameMode = 'practice';
     let hp = 3;
     let maxHp = 3;
     let score = 0;
@@ -279,58 +279,46 @@
         }
     }
 
-    // Spawning Logic with Forced-Collision Avoidance
     function spawnManager() {
         frame++;
 
-        // Spawn Clouds
         if (frame % 150 === 0) {
             clouds.push({ x: CANVAS_WIDTH, y: 30 + Math.random() * 50, speed: 0.5 + Math.random() });
         }
 
-        // Spawn Obstacles (Cactus)
-        let spawnedObstacle = false;
         if (frame % 120 === 0 && Math.random() > 0.4) {
             obstacles.push({ x: CANVAS_WIDTH, y: GROUND_Y - 40, width: 25, height: 40 });
-            spawnedObstacle = true;
         }
 
-        // Spawn Letters
         if (frame % 70 === 0) {
-            // [IMPROVEMENT] Logic to avoid placing wrong letters where player MUST jump
-            // If a cactus was just spawned, we ensure any letter near it is either the CORRECT one 
-            // or high enough/far enough away.
             const lastObstacle = obstacles[obstacles.length - 1];
             const isNearObstacle = lastObstacle && (CANVAS_WIDTH - lastObstacle.x < 100);
 
             let char;
-            const isTarget = Math.random() > 0.5;
-
             if (isNearObstacle) {
-                // If there's a cactus, either spawn the CORRECT letter (reward for the jump)
-                // or don't spawn a letter at all in this frame.
+                // 장애물 근처면 50% 확률로만 정답 알파벳을 스폰하거나 스킵
                 if (Math.random() > 0.5) char = currentWord[targetLetterIndex];
-                else return; // Skip spawning to avoid "trap"
+                else return;
             } else {
-                char = isTarget ? currentWord[targetLetterIndex] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+                // 평소엔 50% 확률로 정답, 50% 확률로 오답 스폰
+                char = (Math.random() > 0.5) ? currentWord[targetLetterIndex] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
             }
 
             letters.push({
                 x: CANVAS_WIDTH,
                 y: GROUND_Y - 70 - Math.random() * 60,
-                char: char,
-                isTarget: char === currentWord[targetLetterIndex]
+                char: char
+                // isTarget을 여기서 미리 정하지 않고 실시간으로 판단함
             });
         }
     }
 
-    // Drawing
     function drawDino(x, y) {
         ctx.fillStyle = '#535353';
-        ctx.fillRect(x + 15, y, 20, 15); // head
-        ctx.fillRect(x + 30, y + 5, 10, 5); // snout
-        ctx.fillRect(x + 10, y + 15, 25, 20); // body
-        ctx.fillRect(x, y + 20, 10, 10); // tail
+        ctx.fillRect(x + 15, y, 20, 15);
+        ctx.fillRect(x + 30, y + 5, 10, 5);
+        ctx.fillRect(x + 10, y + 15, 25, 20);
+        ctx.fillRect(x, y + 20, 10, 10);
         if (!dino.isJumping && Math.floor(frame / 6) % 2 === 0) ctx.fillRect(x + 12, y + 35, 6, 10);
         else ctx.fillRect(x + 25, y + 35, 6, 10);
         ctx.fillStyle = '#fff'; ctx.fillRect(x + 22, y + 3, 3, 3);
@@ -338,13 +326,15 @@
 
     function drawCactus(x, y) {
         ctx.fillStyle = '#535353';
-        ctx.fillRect(x + 8, y, 9, 40); // main
-        ctx.fillRect(x, y + 10, 8, 15); // left
-        ctx.fillRect(x + 17, y + 5, 8, 20); // right
+        ctx.fillRect(x + 8, y, 9, 40);
+        ctx.fillRect(x, y + 10, 8, 15);
+        ctx.fillRect(x + 17, y + 5, 8, 20);
     }
 
     function drawLetter(l) {
-        ctx.fillStyle = l.isTarget ? '#2196f3' : '#535353';
+        // [버그 수정] 그려지는 순간의 targetLetterIndex와 비교하여 색상 결정
+        const isCurrentTarget = (l.char === currentWord[targetLetterIndex]);
+        ctx.fillStyle = isCurrentTarget ? '#2196f3' : '#535353';
         ctx.font = '20px "Press Start 2P"';
         ctx.fillText(l.char, l.x, l.y);
     }
@@ -353,7 +343,6 @@
         gameSpeed += 0.0005;
         score += 0.15;
 
-        // Physics
         dino.vy += GRAVITY;
         dino.y += dino.vy;
         if (dino.y > GROUND_Y - dino.height) {
@@ -362,7 +351,6 @@
             dino.isJumping = false;
         }
 
-        // Move Objects
         clouds.forEach((c, i) => { c.x -= c.speed; if (c.x < -100) clouds.splice(i, 1); });
 
         obstacles.forEach((o, i) => {
@@ -373,10 +361,14 @@
             if (o.x < -100) obstacles.splice(i, 1);
         });
 
-        letters.forEach((l, i) => {
+        // [버그 수정] 역순 루프를 통해 안전하게 요소 제거 및 실시간 타겟 확인
+        for (let i = letters.length - 1; i >= 0; i--) {
+            let l = letters[i];
             l.x -= gameSpeed;
+
             if (dino.x < l.x + 20 && dino.x + dino.width > l.x && dino.y < l.y + 30 && dino.y + dino.height > l.y) {
-                if (l.isTarget) {
+                // 충돌 시점에 현재 타겟인지 확인
+                if (l.char === currentWord[targetLetterIndex]) {
                     targetLetterIndex++;
                     score += 50;
                     if (targetLetterIndex >= currentWord.length) {
@@ -392,10 +384,11 @@
                     score = Math.max(0, score - 30);
                 }
                 letters.splice(i, 1);
-                updateUI();
+                updateUI(); // 먹자마자 UI 즉시 갱신 (다음 철자 파란색으로 변경)
+            } else if (l.x < -100) {
+                letters.splice(i, 1);
             }
-            if (l.x < -100) letters.splice(i, 1);
-        });
+        }
 
         spawnManager();
         if (score > highScore) highScore = score;
@@ -405,7 +398,6 @@
         if (!isRunning) return;
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Ground
         ctx.strokeStyle = '#535353';
         ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 5); ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 5); ctx.stroke();
 
