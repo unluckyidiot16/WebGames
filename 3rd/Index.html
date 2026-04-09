@@ -3,658 +3,246 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>개념 마인드맵</title>
+    <title>3학년 영어 게임 🌟</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Jua (귀여운 느낌의 폰트) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Jua&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&display=swap');
-        *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-        :root{
-            --bg:#0f0f13;--bg2:#16161d;--bg3:#1e1e28;
-            --b:#2a2a38;--b2:#3a3a50;
-            --t:#e8e8f0;--t2:#9090a8;--t3:#5a5a72;
-            --math:#4f9cf9;--sci:#3ecf8e;
-            --elem:#f4a742;--mid:#a78bfa;--high:#f87171;
-            --pw:260px;--hh:50px;
+        body {
+            font-family: 'Jua', sans-serif;
+            background-color: #f0fdf4;
+            background-image: radial-gradient(#bbf7d0 2px, transparent 2px);
+            background-size: 30px 30px;
         }
-        body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--t);height:100vh;overflow:hidden;display:flex;flex-direction:column}
-        header{height:var(--hh);background:var(--bg2);border-bottom:1px solid var(--b);display:flex;align-items:center;padding:0 14px;gap:10px;flex-shrink:0}
-        .logo{font-size:13px;font-weight:700;white-space:nowrap}.logo em{color:var(--math);font-style:normal}
-        .srch{flex:1;max-width:280px;position:relative}
-        .srch input{width:100%;background:var(--bg3);border:1px solid var(--b);border-radius:8px;padding:5px 10px 5px 26px;font-size:12px;color:var(--t);font-family:inherit;outline:none;transition:border-color .15s}
-        .srch input:focus{border-color:var(--math)}.srch input::placeholder{color:var(--t3)}
-        .sic{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--t3);font-size:12px;pointer-events:none}
-        .hbadges{display:flex;gap:4px;margin-left:auto}
-        .hb{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid;cursor:pointer;background:transparent;font-family:inherit;transition:all .15s}
-        .hb.a{color:var(--t2);border-color:var(--b2)}.hb.a.on{background:var(--b2);color:var(--t)}
-        .hb.m{color:var(--math);border-color:var(--math)}.hb.m.on{background:var(--math);color:#fff}
-        .hb.s{color:var(--sci);border-color:var(--sci)}.hb.s.on{background:var(--sci);color:#000}
-        .layout{display:flex;flex:1;overflow:hidden}
-        .panel{width:var(--pw);background:var(--bg2);border-right:1px solid var(--b);display:flex;flex-direction:column;flex-shrink:0}
-        .ps{padding:11px;border-bottom:1px solid var(--b)}
-        .pt{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--t3);margin-bottom:7px}
-        .gbs{display:flex;flex-direction:column;gap:3px}
-        .gb{display:flex;align-items:center;gap:7px;padding:5px 8px;border-radius:6px;border:1px solid var(--b);background:transparent;cursor:pointer;font-size:11px;color:var(--t2);font-family:inherit;transition:all .15s;text-align:left}
-        .gb:hover,.gb.on{background:var(--bg3);color:var(--t);border-color:var(--b2)}
-        .gd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-        .leg{display:flex;flex-direction:column;gap:6px}
-        .li{display:flex;align-items:center;gap:8px;font-size:10px;color:var(--t2)}
-        .ll{flex-shrink:0}
-        .ni{flex:1;overflow-y:auto;padding:11px}
-        .ni::-webkit-scrollbar{width:3px}.ni::-webkit-scrollbar-thumb{background:var(--b2);border-radius:2px}
-        .em{color:var(--t3);font-size:11px;line-height:1.7;text-align:center;margin-top:20px}
-        .bq-btn{display:flex;align-items:center;gap:5px;padding:4px 9px;border-radius:6px;border:1px solid;font-size:10px;font-weight:600;cursor:pointer;font-family:inherit;transition:all .15s;background:transparent;color:var(--sci);border-color:var(--sci)}
-        .bq-btn:hover{background:var(--sci);color:#000}
-        .bq-btn.loading{opacity:.5;cursor:not-allowed}
-        .bq-box{margin-top:12px;border-radius:8px;overflow:hidden;border:1px solid var(--b2)}
-        .bq-header{background:#0d2e1f;padding:8px 11px;font-size:10px;font-weight:700;color:var(--sci);letter-spacing:.06em;text-transform:uppercase;display:flex;align-items:center;justify-content:space-between}
-        .bq-close{background:none;border:none;color:var(--t3);cursor:pointer;font-size:14px;line-height:1;padding:0}
-        .bq-close:hover{color:var(--t)}
-        .bq-section{padding:10px 11px;border-bottom:1px solid var(--b)}
-        .bq-section:last-child{border-bottom:none}
-        .bq-label{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin-bottom:5px}
-        .bq-text{font-size:11px;color:var(--t);line-height:1.7}
-        .bq-tag{display:inline-block;padding:1px 6px;border-radius:4px;font-size:9px;font-weight:600;margin-right:4px;margin-bottom:2px}
-        .bq-spinner{display:inline-block;width:10px;height:10px;border:2px solid #3ecf8e44;border-top-color:var(--sci);border-radius:50%;animation:spin .7s linear infinite}
-        @keyframes spin{to{transform:rotate(360deg)}}
-        .in{font-size:14px;font-weight:700;margin-bottom:5px}
-        .it{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:8px}
-        .itg{padding:2px 7px;border-radius:4px;font-size:10px;font-weight:500}
-        .cs h4{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--t3);margin:9px 0 5px}
-        .cr{display:flex;align-items:center;gap:6px;padding:4px 0;border-bottom:1px solid var(--b);cursor:pointer;transition:color .1s}
-        .cr:hover{color:var(--math)}.cr:last-child{border-bottom:none}
-        .cd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
-        .cn{font-size:11px;flex:1}.ct{font-size:9px;color:var(--t3)}
-        .cw{flex:1;position:relative;overflow:hidden}
-        canvas{position:absolute;inset:0;cursor:grab}.grabbing{cursor:grabbing!important}
-        .tt{position:absolute;background:var(--bg2);border:1px solid var(--b2);border-radius:8px;padding:6px 10px;font-size:11px;pointer-events:none;opacity:0;transition:opacity .12s;z-index:50;box-shadow:0 4px 16px rgba(0,0,0,.5);max-width:180px}
-        .tt.show{opacity:1}.ttn{font-weight:600;margin-bottom:2px}.ttm{font-size:10px;color:var(--t2)}
-        .sb{position:absolute;bottom:10px;right:10px;background:var(--bg2);border:1px solid var(--b);border-radius:7px;padding:5px 10px;font-size:10px;color:var(--t3);display:flex;gap:10px}
-        .sb b{color:var(--t2);font-weight:500}
-        .zb{position:absolute;bottom:10px;left:10px;display:flex;gap:3px}
-        .zbtn{width:28px;height:28px;background:var(--bg2);border:1px solid var(--b);border-radius:6px;color:var(--t2);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;font-family:inherit}
-        .zbtn:hover{background:var(--bg3);color:var(--t)}
-        .nav-link:hover{opacity:.75}
+
+        .game-card {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .game-card:not(.locked):hover {
+            transform: translateY(-5px) scale(1.02);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .locked {
+            filter: grayscale(100%);
+            opacity: 0.7;
+            cursor: not-allowed;
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in-down {
+            animation: fadeInDown 0.4s ease-out forwards;
+        }
     </style>
 </head>
-<body>
-<header>
-    <div class="logo">개념 마인드맵 <em>·</em> 수학·과학</div>
-    <div class="srch"><span class="sic">⌕</span><input type="text" id="SI" placeholder="개념 검색..."></div>
-    <div class="hbadges">
-        <button class="hb a on" id="ba">전체</button>
-        <button class="hb m" id="bm">수학</button>
-        <button class="hb s" id="bs">과학</button>
-    </div>
-    <div style="display:flex;gap:6px;margin-left:10px">
-        <a href="/gifted.html" style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid var(--mid);color:var(--mid);text-decoration:none;display:flex;align-items:center">문항 생성</a>
-        <a href="/chat.html" style="padding:3px 10px;border-radius:20px;font-size:10px;font-weight:600;border:1px solid var(--sci);color:var(--sci);text-decoration:none;display:flex;align-items:center">학생 채팅</a>
-    </div>
+<body class="min-h-screen flex flex-col items-center py-10 px-4">
+
+<!-- Header -->
+<header class="text-center mb-12 animate-bounce">
+    <h1 class="text-5xl md:text-6xl text-green-600 drop-shadow-md mb-2">🌟 3학년 영어 게임 🌟</h1>
+    <p class="text-xl text-green-800">단원별 미션을 순서대로 클리어해보세요!</p>
 </header>
-<div class="layout">
-    <div class="panel">
-        <div class="ps">
-            <div class="pt">학교급 필터</div>
-            <div class="gbs">
-                <button class="gb on" id="ga"><span class="gd" style="background:#fff3"></span>전체</button>
-                <button class="gb" id="ge"><span class="gd" style="background:var(--elem)"></span>초등 (1~6학년)</button>
-                <button class="gb" id="gm"><span class="gd" style="background:var(--mid)"></span>중학교 (1~3학년)</button>
-                <button class="gb" id="gh"><span class="gd" style="background:var(--high)"></span>고등학교</button>
-            </div>
-        </div>
-        <div class="ps">
-            <div class="pt">노드 유형</div>
-            <div class="leg">
-                <div class="li"><span class="ll" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--math)"></span>수학 개념</div>
-                <div class="li"><span class="ll" style="display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--sci)"></span>과학 개념</div>
-            </div>
-            <div class="pt" style="margin-top:10px">연결선 유형</div>
-            <div class="leg">
-                <div class="li"><span class="ll" style="display:inline-block;width:22px;height:2px;background:var(--math);opacity:.5"></span>위계 (선수→후속)</div>
-                <div class="li"><span class="ll" style="display:inline-block;width:22px;height:1px;border-top:2px dashed var(--sci)"></span>교과 간 연결</div>
-                <div class="li"><span class="ll" style="display:inline-block;width:22px;height:1px;border-top:2px dotted var(--elem)"></span>재등장 (심화)</div>
-            </div>
-        </div>
-        <div class="ni" id="NI"><div class="em">노드를 클릭하면<br>연결 정보가 표시됩니다</div></div>
+
+<!-- Category Container -->
+<main class="w-full max-w-7xl flex flex-col gap-12" id="main-container">
+    <!-- 카테고리와 게임들이 JavaScript를 통해 여기에 생성됩니다. -->
+</main>
+
+<!-- 선생님 / 개발자용 테스트 메뉴 (기본 숨김) -->
+<div id="admin-menu" class="hidden mt-20 p-6 bg-white rounded-2xl shadow-lg border border-gray-200 w-full max-w-7xl animate-fade-in-down">
+    <div class="flex items-center justify-between mb-4">
+        <h2 class="text-2xl text-gray-700 flex items-center gap-2">
+            <i data-lucide="settings" class="w-6 h-6"></i> 선생님 / 테스트 메뉴
+        </h2>
     </div>
-    <div class="cw">
-        <canvas id="cv"></canvas>
-        <div class="tt" id="TT"><div class="ttn" id="TTN"></div><div class="ttm" id="TTM"></div></div>
-        <div class="sb">노드 <b id="SN">0</b> · 연결 <b id="SL">0</b> · 표시 <b id="SV">0</b></div>
-        <div class="zb">
-            <button class="zbtn" id="ZI">+</button>
-            <button class="zbtn" id="ZO">−</button>
-            <button class="zbtn" id="ZR">⊙</button>
-        </div>
+    <div class="flex flex-wrap gap-3">
+        <button onclick="simulateClearHB()" class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition">2단원 (Hi, Bye, Fine) 클리어 테스트</button>
+        <button onclick="simulateClearHBR()" class="px-4 py-2 bg-purple-500 text-white rounded-lg shadow hover:bg-purple-600 transition">2단원 (Rhythm) 클리어 테스트</button>
+        <button onclick="resetProgress()" class="px-4 py-2 bg-red-500 text-white rounded-lg shadow hover:bg-red-400 transition ml-auto">진행 상황 초기화 (잠금 복구)</button>
+    </div>
+
+    <!-- 개발자 연동 가이드 -->
+    <div class="mt-4 p-4 bg-blue-50 rounded-xl border border-blue-200 text-left">
+        <h3 class="text-xl text-blue-800 mb-2">💡 실제 게임 페이지 연동 방법 (필수)</h3>
+        <p class="text-gray-700 mb-2">1단원 복습 게임들이 정상적으로 해금되려면, <strong>2단원의 게임들이 클리어 되었을 때</strong> 아래 자바스크립트 코드가 실행되도록 게임 코드를 수정해야 합니다.</p>
+        <code class="bg-white px-3 py-2 rounded text-red-600 font-mono text-sm border border-gray-200 block mb-2">localStorage.setItem('game_HB_cleared', 'true'); // Hi, Bye, Fine용</code>
+        <code class="bg-white px-3 py-2 rounded text-red-600 font-mono text-sm border border-gray-200 block">localStorage.setItem('game_HBR_cleared', 'true'); // Rhythm용</code>
     </div>
 </div>
+
+<!-- 하단 비밀번호 트리거 (눈에 띄지 않게 배치) -->
+<footer class="mt-16 pb-8 text-center w-full">
+    <button onclick="promptAdmin()" class="text-green-300 hover:text-green-500 transition opacity-50 hover:opacity-100 flex items-center justify-center mx-auto gap-1 text-sm font-sans">
+        <i data-lucide="lock" class="w-4 h-4"></i> 선생님 메뉴
+    </button>
+</footer>
+
 <script>
-    // ── DATA ────────────────────────────────────────────────────────
-    const SERVER = 'https://gifted-server-production.up.railway.app';
-    const ND=[
-        {id:'M01',n:'자연수',s:'math',g:'elem',a:'수와 연산',d:'1~2학년'},
-        {id:'M02',n:'덧셈·뺄셈',s:'math',g:'elem',a:'수와 연산',d:'1~2학년'},
-        {id:'M03',n:'곱셈·나눗셈',s:'math',g:'elem',a:'수와 연산',d:'2~4학년'},
-        {id:'M04',n:'분수',s:'math',g:'elem',a:'수와 연산',d:'3~5학년'},
-        {id:'M05',n:'소수',s:'math',g:'elem',a:'수와 연산',d:'4~5학년'},
-        {id:'M06',n:'약수·배수',s:'math',g:'elem',a:'수와 연산',d:'5학년'},
-        {id:'M20',n:'정수·유리수',s:'math',g:'middle',a:'수와 연산',d:'중1'},
-        {id:'M21',n:'무리수·실수',s:'math',g:'middle',a:'수와 연산',d:'중3'},
-        {id:'M22',n:'소인수분해',s:'math',g:'middle',a:'수와 연산',d:'중1'},
-        {id:'M40',n:'지수·로그',s:'math',g:'high',a:'수와 연산',d:'고1'},
-        {id:'M07',n:'점·선·면·각',s:'math',g:'elem',a:'도형과 측정',d:'3~4학년'},
-        {id:'M08',n:'평면도형',s:'math',g:'elem',a:'도형과 측정',d:'2~4학년'},
-        {id:'M09',n:'정다각형',s:'math',g:'elem',a:'도형과 측정',d:'4~5학년'},
-        {id:'M10',n:'테셀레이션',s:'math',g:'elem',a:'도형과 측정',d:'5학년'},
-        {id:'M11',n:'입체도형',s:'math',g:'elem',a:'도형과 측정',d:'1~6학년'},
-        {id:'M12',n:'넓이·둘레',s:'math',g:'elem',a:'도형과 측정',d:'3~5학년'},
-        {id:'M13',n:'부피·겉넓이',s:'math',g:'elem',a:'도형과 측정',d:'6학년'},
-        {id:'M28',n:'평면좌표',s:'math',g:'middle',a:'도형과 측정',d:'중2~3'},
-        {id:'M29',n:'피타고라스 정리',s:'math',g:'middle',a:'도형과 측정',d:'중3'},
-        {id:'M30',n:'닮음·합동',s:'math',g:'middle',a:'도형과 측정',d:'중2'},
-        {id:'M31',n:'원의 성질',s:'math',g:'middle',a:'도형과 측정',d:'중3'},
-        {id:'M32',n:'삼각비',s:'math',g:'middle',a:'도형과 측정',d:'중3'},
-        {id:'M35',n:'정다면체',s:'math',g:'middle',a:'도형과 측정',d:'중1'},
-        {id:'M47',n:'벡터·공간도형',s:'math',g:'high',a:'도형과 측정',d:'고2'},
-        {id:'M14',n:'비와 비율',s:'math',g:'elem',a:'규칙성과 비',d:'6학년'},
-        {id:'M15',n:'규칙과 대응',s:'math',g:'elem',a:'규칙성과 비',d:'4~6학년'},
-        {id:'M23',n:'일차방정식',s:'math',g:'middle',a:'규칙성과 비',d:'중1'},
-        {id:'M24',n:'연립방정식',s:'math',g:'middle',a:'규칙성과 비',d:'중2'},
-        {id:'M25',n:'이차방정식',s:'math',g:'middle',a:'규칙성과 비',d:'중3'},
-        {id:'M26',n:'일차함수',s:'math',g:'middle',a:'함수',d:'중2'},
-        {id:'M27',n:'이차함수',s:'math',g:'middle',a:'함수',d:'중3'},
-        {id:'M41',n:'다항함수',s:'math',g:'high',a:'함수',d:'고1'},
-        {id:'M42',n:'삼각함수',s:'math',g:'high',a:'함수',d:'고1'},
-        {id:'M44',n:'극한·연속',s:'math',g:'high',a:'함수',d:'고2'},
-        {id:'M45',n:'미분',s:'math',g:'high',a:'미적분',d:'고2'},
-        {id:'M46',n:'적분',s:'math',g:'high',a:'미적분',d:'고2'},
-        {id:'M43',n:'수열',s:'math',g:'high',a:'미적분',d:'고1'},
-        {id:'M48',n:'행렬',s:'math',g:'high',a:'미적분',d:'고2'},
-        {id:'M16',n:'경우의 수',s:'math',g:'elem',a:'확률과 통계',d:'6학년'},
-        {id:'M33',n:'확률',s:'math',g:'middle',a:'확률과 통계',d:'중2'},
-        {id:'M34',n:'통계(중등)',s:'math',g:'middle',a:'확률과 통계',d:'중1~3'},
-        {id:'M49',n:'확률분포',s:'math',g:'high',a:'확률과 통계',d:'고2'},
-        {id:'S01',n:'물질의 상태',s:'sci',g:'elem',a:'물질',d:'3학년'},
-        {id:'S02',n:'혼합물 분리',s:'sci',g:'elem',a:'물질',d:'4학년'},
-        {id:'S03',n:'산·염기',s:'sci',g:'elem',a:'물질',d:'6학년'},
-        {id:'S20',n:'물질의 구성',s:'sci',g:'middle',a:'물질',d:'중1'},
-        {id:'S21',n:'분자·원자',s:'sci',g:'middle',a:'물질',d:'중1'},
-        {id:'S22',n:'원소·주기율표',s:'sci',g:'middle',a:'물질',d:'중2'},
-        {id:'S23',n:'화학반응',s:'sci',g:'middle',a:'물질',d:'중2~3'},
-        {id:'S24',n:'결정구조',s:'sci',g:'middle',a:'물질',d:'중3'},
-        {id:'S40',n:'화학 결합',s:'sci',g:'high',a:'물질',d:'화학I'},
-        {id:'S41',n:'산화·환원',s:'sci',g:'high',a:'물질',d:'화학I'},
-        {id:'S42',n:'열역학',s:'sci',g:'high',a:'물질',d:'화학II'},
-        {id:'S04',n:'힘과 운동(초)',s:'sci',g:'elem',a:'운동과 에너지',d:'4~5학년'},
-        {id:'S05',n:'중력',s:'sci',g:'elem',a:'운동과 에너지',d:'3~5학년'},
-        {id:'S06',n:'빛과 그림자',s:'sci',g:'elem',a:'운동과 에너지',d:'4학년'},
-        {id:'S07',n:'소리',s:'sci',g:'elem',a:'운동과 에너지',d:'3학년'},
-        {id:'S25',n:'힘과 운동(중)',s:'sci',g:'middle',a:'운동과 에너지',d:'중1~3'},
-        {id:'S26',n:'에너지 전환',s:'sci',g:'middle',a:'운동과 에너지',d:'중2'},
-        {id:'S27',n:'전기·자기',s:'sci',g:'middle',a:'운동과 에너지',d:'중2~3'},
-        {id:'S28',n:'파동·빛',s:'sci',g:'middle',a:'운동과 에너지',d:'중1~3'},
-        {id:'S43',n:'뉴턴 역학',s:'sci',g:'high',a:'운동과 에너지',d:'물리I'},
-        {id:'S44',n:'전자기파',s:'sci',g:'high',a:'운동과 에너지',d:'물리I'},
-        {id:'S45',n:'핵과 양자',s:'sci',g:'high',a:'운동과 에너지',d:'물리II'},
-        {id:'S08',n:'날씨와 대기',s:'sci',g:'elem',a:'지구와 우주',d:'5학년'},
-        {id:'S09',n:'태양계',s:'sci',g:'elem',a:'지구와 우주',d:'4학년'},
-        {id:'S10',n:'지층과 암석',s:'sci',g:'elem',a:'지구와 우주',d:'3~4학년'},
-        {id:'S29',n:'지구의 역사',s:'sci',g:'middle',a:'지구와 우주',d:'중2'},
-        {id:'S30',n:'판구조론',s:'sci',g:'middle',a:'지구와 우주',d:'중2'},
-        {id:'S31',n:'우주와 천체',s:'sci',g:'middle',a:'지구와 우주',d:'중3'},
-        {id:'S46',n:'천체물리',s:'sci',g:'high',a:'지구와 우주',d:'지구과학I·II'},
-        {id:'S47',n:'대기·해양',s:'sci',g:'high',a:'지구와 우주',d:'지구과학I'},
-        {id:'S11',n:'생물의 구조',s:'sci',g:'elem',a:'생명',d:'4~5학년'},
-        {id:'S12',n:'식물의 구조·기능',s:'sci',g:'elem',a:'생명',d:'4~6학년'},
-        {id:'S13',n:'동물의 구조·기능',s:'sci',g:'elem',a:'생명',d:'5~6학년'},
-        {id:'S14',n:'생태계',s:'sci',g:'elem',a:'생명',d:'6학년'},
-        {id:'S32',n:'세포',s:'sci',g:'middle',a:'생명',d:'중2'},
-        {id:'S33',n:'유전·진화',s:'sci',g:'middle',a:'생명',d:'중3'},
-        {id:'S34',n:'자극과 반응',s:'sci',g:'middle',a:'생명',d:'중3'},
-        {id:'S48',n:'DNA·유전자',s:'sci',g:'high',a:'생명',d:'생명과학I'},
-        {id:'S49',n:'생태계 평형',s:'sci',g:'high',a:'생명',d:'생명과학II'},
+    // 2단원 게임 및 1단원 복습 게임 데이터 정의
+    const categories = [
+        {
+            id: 2,
+            title: "✌️ 2단원 게임",
+            subtitle: "이 게임을 먼저 클리어해야 1단원 복습이 열립니다!",
+            isLocked: false, // 2단원은 항상 열려있음
+            games: [
+                { id: '2-1', title: 'Hi, Bye, Fine', url: 'https://unluckyidiot16.github.io/WebGames/HB/HB.html', color: 'from-blue-500 to-indigo-600', icon: 'message-circle' },
+                { id: '2-2', title: 'Hi Fine Bye Rhythm', url: 'https://unluckyidiot16.github.io/WebGames/HBR/HBR.html', color: 'from-violet-500 to-fuchsia-600', icon: 'music' },
+                { id: '2-3', title: 'Dino Spelling Run', url: 'https://unluckyidiot16.github.io/WebGames/DSR/DSR.html', color: 'from-green-500 to-emerald-600', icon: 'bone' }
+            ]
+        },
+        {
+            id: 1,
+            title: "☝️ 1단원 복습 게임",
+            subtitle: "2단원 미션을 완료하면 접속할 수 있어요!",
+            isLocked: () => localStorage.getItem('game_HB_cleared') !== 'true' && localStorage.getItem('game_HBR_cleared') !== 'true', // 둘 중 하나라도 클리어하면 해금
+            games: [
+                { id: '1-1', title: 'ABC 팡', url: 'https://unluckyidiot16.github.io/WebGames/ABCP/ABCP.html', color: 'from-pink-400 to-rose-400', icon: 'gamepad-2' },
+                { id: '1-2', title: 'AtoZ', url: 'https://unluckyidiot16.github.io/WebGames/AM/AM.html', color: 'from-orange-400 to-amber-400', icon: 'spell-check' },
+                { id: '1-3', title: '영어단어 스크램블', url: 'https://unluckyidiot16.github.io/WebGames/SC/SC.html', color: 'from-emerald-400 to-teal-400', icon: 'shuffle' },
+                { id: '1-4', title: '영단어 팡', url: 'https://unluckyidiot16.github.io/WebGames/PPE/PPE.html', color: 'from-blue-400 to-indigo-400', icon: 'bomb' },
+                { id: '1-5', title: '기억력 게임', url: 'https://unluckyidiot16.github.io/WebGames/AZM/AZM.html', color: 'from-purple-400 to-violet-400', icon: 'brain' },
+                { id: '1-6', title: '알파뱀', url: 'https://unluckyidiot16.github.io/WebGames/AS/AS.html', color: 'from-lime-400 to-green-500', icon: 'puzzle' },
+                { id: '1-7', title: '알파벳 스크램블 게임', url: 'https://unluckyidiot16.github.io/WebGames/ASR/ASR.html', color: 'from-cyan-400 to-blue-500', icon: 'keyboard' },
+                { id: '1-8', title: '알파벳 도둑잡기', url: 'https://unluckyidiot16.github.io/WebGames/AOM/AOM.html', color: 'from-fuchsia-400 to-pink-500', icon: 'search' },
+                { id: '1-9', title: '알파벳 수박게임', url: 'https://unluckyidiot16.github.io/WebGames/AZmerge/AZmerge.html', color: 'from-red-400 to-rose-500', icon: 'apple' },
+                { id: '1-10', title: '알파벳 런', url: 'https://unluckyidiot16.github.io/WebGames/AR/AR.html', color: 'from-amber-300 to-orange-500', icon: 'footprints' },
+                { id: '1-11', title: '이미지 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SP/SP.html', color: 'from-indigo-400 to-purple-600', icon: 'image' },
+                { id: '1-12', title: '스피드 퀴즈', url: 'https://unluckyidiot16.github.io/WebGames/SPS/SPS.html', color: 'from-teal-400 to-emerald-500', icon: 'zap' }
+            ]
+        }
     ];
 
-    const LK=[
-        {s:'M01',t:'M02',tp:'hier'},{s:'M02',t:'M03',tp:'hier'},{s:'M03',t:'M04',tp:'hier'},
-        {s:'M04',t:'M05',tp:'hier'},{s:'M03',t:'M06',tp:'hier'},{s:'M01',t:'M20',tp:'reapp'},
-        {s:'M20',t:'M21',tp:'hier'},{s:'M06',t:'M22',tp:'hier'},{s:'M22',t:'M20',tp:'hier'},
-        {s:'M21',t:'M40',tp:'hier'},
-        {s:'M07',t:'M08',tp:'hier'},{s:'M08',t:'M09',tp:'hier'},{s:'M09',t:'M10',tp:'hier'},
-        {s:'M08',t:'M11',tp:'hier'},{s:'M11',t:'M35',tp:'reapp'},{s:'M09',t:'M35',tp:'hier'},
-        {s:'M12',t:'M13',tp:'hier'},{s:'M08',t:'M12',tp:'hier'},{s:'M11',t:'M13',tp:'hier'},
-        {s:'M28',t:'M29',tp:'hier'},{s:'M29',t:'M32',tp:'hier'},{s:'M30',t:'M31',tp:'hier'},
-        {s:'M35',t:'M47',tp:'reapp'},{s:'M29',t:'M47',tp:'hier'},
-        {s:'M15',t:'M23',tp:'hier'},{s:'M23',t:'M24',tp:'hier'},{s:'M24',t:'M25',tp:'hier'},
-        {s:'M14',t:'M15',tp:'hier'},
-        {s:'M15',t:'M26',tp:'hier'},{s:'M26',t:'M27',tp:'hier'},{s:'M23',t:'M26',tp:'hier'},
-        {s:'M25',t:'M27',tp:'hier'},{s:'M27',t:'M41',tp:'hier'},{s:'M26',t:'M41',tp:'reapp'},
-        {s:'M41',t:'M44',tp:'hier'},{s:'M32',t:'M42',tp:'hier'},
-        {s:'M44',t:'M45',tp:'hier'},{s:'M45',t:'M46',tp:'hier'},
-        {s:'M40',t:'M43',tp:'hier'},
-        {s:'M16',t:'M33',tp:'hier'},{s:'M33',t:'M49',tp:'hier'},{s:'M34',t:'M49',tp:'hier'},
-        {s:'S01',t:'S20',tp:'reapp'},{s:'S20',t:'S21',tp:'hier'},{s:'S21',t:'S22',tp:'hier'},
-        {s:'S22',t:'S40',tp:'hier'},{s:'S23',t:'S41',tp:'hier'},{s:'S24',t:'S40',tp:'hier'},
-        {s:'S02',t:'S23',tp:'hier'},{s:'S03',t:'S41',tp:'hier'},
-        {s:'S04',t:'S25',tp:'reapp'},{s:'S25',t:'S43',tp:'hier'},{s:'S05',t:'S43',tp:'reapp'},
-        {s:'S26',t:'S42',tp:'hier'},{s:'S27',t:'S44',tp:'hier'},
-        {s:'S06',t:'S28',tp:'reapp'},{s:'S28',t:'S44',tp:'hier'},{s:'S07',t:'S28',tp:'reapp'},
-        {s:'S44',t:'S45',tp:'hier'},
-        {s:'S09',t:'S31',tp:'reapp'},{s:'S31',t:'S46',tp:'hier'},{s:'S10',t:'S29',tp:'reapp'},
-        {s:'S29',t:'S30',tp:'hier'},{s:'S08',t:'S47',tp:'reapp'},
-        {s:'S11',t:'S32',tp:'hier'},{s:'S32',t:'S48',tp:'hier'},
-        {s:'S12',t:'S14',tp:'hier'},{s:'S13',t:'S14',tp:'hier'},{s:'S14',t:'S49',tp:'hier'},
-        {s:'S33',t:'S48',tp:'hier'},{s:'S34',t:'S48',tp:'lat'},
-        // cross-subject
-        {s:'M14',t:'S23',tp:'lat'},{s:'M12',t:'S04',tp:'lat'},{s:'M13',t:'S01',tp:'lat'},
-        {s:'M26',t:'S25',tp:'lat'},{s:'M27',t:'S25',tp:'lat'},{s:'M45',t:'S43',tp:'lat'},
-        {s:'M46',t:'S43',tp:'lat'},{s:'M42',t:'S44',tp:'lat'},{s:'M47',t:'S43',tp:'lat'},
-        {s:'M49',t:'S33',tp:'lat'},{s:'M43',t:'S46',tp:'lat'},{s:'M35',t:'S24',tp:'lat'},
-        {s:'M09',t:'S24',tp:'lat'},{s:'M10',t:'S24',tp:'lat'},{s:'M31',t:'S46',tp:'lat'},
-        {s:'M05',t:'S21',tp:'lat'},{s:'M40',t:'S46',tp:'lat'},{s:'M44',t:'S42',tp:'lat'},
-        {s:'M28',t:'S09',tp:'lat'},{s:'M34',t:'S14',tp:'lat'},
-    ];
+    // UI 렌더링 함수
+    function renderCategories() {
+        const container = document.getElementById('main-container');
+        container.innerHTML = '';
 
-    // ── MINDMAP TREE STRUCTURE ──────────────────────────────────────
-    // subject → areas (order = clockwise from top for each half)
-    const MATH_AREAS = ['수와 연산','도형과 측정','규칙성과 비','함수','미적분','확률과 통계'];
-    const SCI_AREAS  = ['물질','운동과 에너지','지구와 우주','생명'];
-    const GRADE_ORDER = {elem:0, middle:1, high:2};
+        categories.forEach((category) => {
+            // 현재 카테고리가 잠겨있는지 확인
+            const isCategoryLocked = typeof category.isLocked === 'function' ? category.isLocked() : category.isLocked;
 
-    // ── INDEX & ADJACENCY ───────────────────────────────────────────
-    const NM={};
-    ND.forEach(n=>NM[n.id]=n);
-    const ADJ={};
-    ND.forEach(n=>ADJ[n.id]=[]);
-    LK.forEach(l=>{
-        const src=NM[l.s],tgt=NM[l.t];
-        if(!src||!tgt)return;
-        l.src=src;l.tgt=tgt;
-        ADJ[src.id].push({node:tgt,tp:l.tp,dir:'out'});
-        ADJ[tgt.id].push({node:src,tp:l.tp,dir:'in'});
-    });
+            // 섹션 컨테이너 생성
+            const section = document.createElement('section');
+            section.className = 'w-full';
 
-    // ── COLORS ─────────────────────────────────────────────────────
-    const NC={math:{elem:'#4f9cf9',middle:'#2563eb',high:'#1d4ed8'},
-        sci:{elem:'#3ecf8e',middle:'#16a34a',high:'#15803d'}};
-    const SC={elem:'#f4a742',middle:'#a78bfa',high:'#f87171'};
-    const EC={hier:'#4f9cf9aa',lat:'#3ecf8eaa',reapp:'#f4a742aa'};
-    const AREA_COL={
-        '수와 연산':'#60a5fa','도형과 측정':'#818cf8','규칙성과 비':'#a78bfa',
-        '함수':'#c084fc','미적분':'#e879f9','확률과 통계':'#f472b6',
-        '물질':'#34d399','운동과 에너지':'#2dd4bf','지구와 우주':'#38bdf8','생명':'#86efac',
-    };
+            // 카테고리 헤더
+            const header = document.createElement('div');
+            header.className = 'mb-6 border-b-4 border-green-300 pb-3 flex items-center justify-between';
+            header.innerHTML = `
+                <div>
+                    <h2 class="text-3xl font-bold text-green-700 flex items-center gap-3">
+                        ${category.title}
+                        ${isCategoryLocked ? '<span class="text-sm bg-red-100 text-red-600 px-3 py-1 rounded-full font-normal"><i data-lucide="lock" class="w-4 h-4 inline mb-1"></i> 잠김</span>' : '<span class="text-sm bg-green-100 text-green-600 px-3 py-1 rounded-full font-normal"><i data-lucide="unlock" class="w-4 h-4 inline mb-1"></i> 열림</span>'}
+                    </h2>
+                    <p class="text-green-600 mt-2 text-lg">${category.subtitle}</p>
+                </div>
+            `;
+            section.appendChild(header);
 
-    // ── LAYOUT ─────────────────────────────────────────────────────
-    let PX=0,PY=0,SC2=1;
-    // Virtual nodes for subject & area centers
-    const VNODES=[]; // {id, x, y, label, col, type:'subject'|'area', sub}
+            // 게임 그리드
+            const grid = document.createElement('div');
+            grid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6';
 
-    function computeLayout(W,H){
-        VNODES.length=0;
-        const cx=W/2, cy=H/2;
+            category.games.forEach((game) => {
+                const card = document.createElement('a');
 
-        // Radii
-        const R0=0;           // center (implicit root)
-        const R1=80;          // subject nodes
-        const R2=200;         // area nodes
-        const R3e=310;        // elem concept ring
-        const R3m=390;        // middle concept ring
-        const R3h=470;        // high concept ring
-        const ringR={elem:R3e,middle:R3m,high:R3h};
-
-        // Math: left half  (angles 90°→270° = π/2→3π/2)
-        // Sci:  right half (angles -90°→90° = -π/2→π/2)
-        const subjectAngles={
-            math:{cx:cx-R1,cy,midAngle:Math.PI,startAngle:Math.PI/2,endAngle:3*Math.PI/2,areas:MATH_AREAS},
-            sci: {cx:cx+R1,cy,midAngle:0,    startAngle:-Math.PI/2,endAngle:Math.PI/2,  areas:SCI_AREAS},
-        };
-
-        Object.entries(subjectAngles).forEach(([sub,cfg])=>{
-            // subject virtual node
-            VNODES.push({id:'__'+sub,x:cfg.cx,y:cfg.cy,label:sub==='math'?'수학':'과학',
-                col:sub==='math'?'#4f9cf9':'#3ecf8e',type:'subject',sub});
-
-            const areas=cfg.areas;
-            const totalAng=cfg.endAngle-cfg.startAngle;
-            // weight by node count
-            const areaNodes={};
-            areas.forEach(a=>areaNodes[a]=ND.filter(n=>n.s===sub&&n.a===a));
-            const totalN=ND.filter(n=>n.s===sub).length;
-
-            let anglePtr=cfg.startAngle + totalAng*0.03;
-
-            areas.forEach(area=>{
-                const nodes=areaNodes[area];
-                if(!nodes||!nodes.length)return;
-                const areaFrac=nodes.length/totalN;
-                const areaSweep=totalAng*0.94*areaFrac;
-                const areaMid=anglePtr+areaSweep/2;
-
-                // area virtual node
-                const ax=cx+R2*Math.cos(areaMid);
-                const ay=cy+R2*Math.sin(areaMid);
-                VNODES.push({id:'__'+area,x:ax,y:ay,label:area,col:AREA_COL[area]||'#888',
-                    type:'area',sub,parentAngle:areaMid});
-
-                // concept nodes by grade
-                const byGrade={elem:[],middle:[],high:[]};
-                nodes.forEach(n=>byGrade[n.g].push(n));
-
-                Object.entries(byGrade).forEach(([gr,gNodes])=>{
-                    if(!gNodes.length)return;
-                    gNodes.sort((a,b)=>a.n.localeCompare(b.n));
-                    const r=ringR[gr];
-                    // each grade gets a sub-arc within the area sweep
-                    const gSweep=Math.min(areaSweep*0.88, gNodes.length*0.32);
-                    const gStart=areaMid-gSweep/2;
-                    gNodes.forEach((nd,i)=>{
-                        const frac=gNodes.length>1?i/(gNodes.length-1):0.5;
-                        const angle=gStart+frac*gSweep;
-                        nd.x=cx+r*Math.cos(angle);
-                        nd.y=cy+r*Math.sin(angle);
-                        nd._areaMid=areaMid;
-                        nd._r=r;
-                    });
-                });
-
-                anglePtr+=areaSweep;
-            });
-        });
-    }
-
-    // ── CANVAS ─────────────────────────────────────────────────────
-    const cv=document.getElementById('cv');
-    const ctx=cv.getContext('2d');
-
-    function resize(){
-        const w=cv.parentElement;
-        cv.width=w.clientWidth;
-        cv.height=w.clientHeight;
-    }
-
-    function vis(){
-        const v=new Set();
-        ND.forEach(n=>{
-            if(fsub!=='all'&&n.s!==fsub)return;
-            if(fgr!=='all'&&n.g!==fgr)return;
-            if(fstr&&!n.n.includes(fstr)&&!n.a.includes(fstr))return;
-            v.add(n.id);
-        });
-        return v;
-    }
-
-    function nr(n){return n.g==='high'?12:n.g==='middle'?10:8}
-
-    function toScreen(wx,wy){return{x:wx*SC2+PX,y:wy*SC2+PY}}
-
-    // ── DRAW ────────────────────────────────────────────────────────
-    let sel=null,fsub='all',fgr='all',fstr='';
-
-    function draw(){
-        ctx.clearRect(0,0,cv.width,cv.height);
-        const V=vis();
-        const selC=new Set();
-        if(sel){selC.add(sel);ADJ[sel].forEach(c=>selC.add(c.node.id));}
-
-        // -- tree branch lines (subject→area, area→concepts) --
-        VNODES.forEach(vn=>{
-            if(vn.type==='subject'){
-                // subject → root center line
-                const c=toScreen(cv.width/2/SC2,cv.height/2/SC2);
-                // actually draw subject→area lines below
-            }
-            if(vn.type==='area'){
-                // area → subject
-                const subVN=VNODES.find(v=>v.id==='__'+vn.sub);
-                if(subVN){
-                    const sp=toScreen(subVN.x,subVN.y),tp=toScreen(vn.x,vn.y);
-                    ctx.beginPath();ctx.moveTo(sp.x,sp.y);ctx.lineTo(tp.x,tp.y);
-                    ctx.strokeStyle=vn.col+'55';ctx.lineWidth=1.5;ctx.setLineDash([]);
-                    ctx.stroke();
+                if (isCategoryLocked) {
+                    card.className = `game-card locked relative block p-6 rounded-3xl shadow-lg bg-gray-300 text-gray-500 overflow-hidden`;
+                    card.onclick = (e) => {
+                        e.preventDefault();
+                        alert(`2단원의 게임을 먼저 클리어해야 열 수 있어요!`);
+                    };
+                } else {
+                    card.href = game.url;
+                    card.className = `game-card relative block p-6 rounded-3xl shadow-lg bg-gradient-to-br ${game.color} text-white overflow-hidden`;
                 }
-                // area → its concepts (tree lines)
-                ND.filter(n=>n.s===vn.sub&&n.a===vn.label.replace('__','')).forEach(n=>{
-                    if(!V.has(n.id))return;
-                    const sp=toScreen(vn.x,vn.y),tp=toScreen(n.x,n.y);
-                    ctx.beginPath();ctx.moveTo(sp.x,sp.y);ctx.lineTo(tp.x,tp.y);
-                    ctx.strokeStyle=vn.col+'33';ctx.lineWidth=1;ctx.setLineDash([3,3]);
-                    ctx.stroke();ctx.setLineDash([]);
-                });
-            }
-        });
 
-        // subject→area connection (subject vnode → area vnode)
-        // already done above
+                card.innerHTML = `
+                    <div class="flex justify-between items-start mb-4 relative z-10">
+                        <span class="text-lg font-bold bg-white/30 px-3 py-1 rounded-full border border-white/50 shadow-sm text-white">
+                            ${game.title.includes('Hi, Bye') || game.title.includes('Rhythm') ? 'Mission' : `Game ${game.id.split('-')[1]}`}
+                        </span>
+                        ${isCategoryLocked ? `<i data-lucide="lock" class="w-8 h-8 opacity-70"></i>` : ''}
+                    </div>
+                    
+                    <div class="flex flex-col items-center justify-center py-4 relative z-10">
+                        <div class="bg-white/20 p-4 rounded-full mb-3 shadow-inner">
+                            <i data-lucide="${isCategoryLocked ? 'lock' : game.icon}" class="w-12 h-12 text-white drop-shadow-md"></i>
+                        </div>
+                        <h2 class="text-2xl font-bold text-center drop-shadow-md">${game.title}</h2>
+                    </div>
 
-        // -- concept-to-concept edges --
-        LK.forEach(l=>{
-            if(!l.src||!l.tgt)return;
-            if(!V.has(l.src.id)||!V.has(l.tgt.id))return;
-            const dim=sel&&!selC.has(l.src.id)&&!selC.has(l.tgt.id);
-            const hi=sel&&(selC.has(l.src.id)||selC.has(l.tgt.id));
-            const sp=toScreen(l.src.x,l.src.y),tp=toScreen(l.tgt.x,l.tgt.y);
-            ctx.beginPath();
-            ctx.strokeStyle=EC[l.tp];
-            ctx.globalAlpha=dim?.04:hi?.95:.25;
-            ctx.lineWidth=(hi?2.5:1.5);
-            ctx.setLineDash(l.tp==='lat'?[5,4]:l.tp==='reapp'?[2,4]:[]);
-            ctx.moveTo(sp.x,sp.y);ctx.lineTo(tp.x,tp.y);
-            ctx.stroke();ctx.setLineDash([]);ctx.globalAlpha=1;
-        });
+                    ${!isCategoryLocked ? `
+                    <div class="absolute -bottom-4 -right-4 bg-white/20 w-32 h-32 rounded-full blur-2xl"></div>
+                    <div class="absolute -top-4 -left-4 bg-white/20 w-24 h-24 rounded-full blur-xl"></div>
+                    ` : ''}
+                `;
 
-        // -- virtual nodes (subject & area) --
-        VNODES.forEach(vn=>{
-            if(fsub!=='all'&&vn.sub!==fsub)return;
-            const sp=toScreen(vn.x,vn.y);
-            const r=(vn.type==='subject'?20:13)*SC2;
-            ctx.beginPath();ctx.arc(sp.x,sp.y,r,0,Math.PI*2);
-            ctx.fillStyle=vn.col+'22';ctx.fill();
-            ctx.strokeStyle=vn.col;ctx.lineWidth=2;ctx.stroke();
-            if(SC2>.3){
-                ctx.fillStyle=vn.col;
-                ctx.font=`${vn.type==='subject'?'bold ':''} ${Math.max(8,vn.type==='subject'?11:9)*SC2}px 'Noto Sans KR',sans-serif`;
-                ctx.textAlign='center';
-                const dy=vn.type==='subject'?r+13*SC2:r+10*SC2;
-                ctx.fillText(vn.label,sp.x,sp.y+dy);
-            }
-        });
-
-        // -- concept nodes --
-        ND.forEach(n=>{
-            if(!V.has(n.id))return;
-            const sp=toScreen(n.x,n.y);
-            const r=nr(n)*SC2;
-            const dim=sel&&!selC.has(n.id);
-            const hi=sel&&n.id===sel;
-            ctx.globalAlpha=dim?.1:1;
-            ctx.beginPath();ctx.arc(sp.x,sp.y,r,0,Math.PI*2);
-            ctx.fillStyle=NC[n.s][n.g];ctx.fill();
-            ctx.strokeStyle=hi?'#fff':SC[n.g];ctx.lineWidth=(hi?2.5:1.5);ctx.stroke();
-            if(SC2>.38){
-                ctx.fillStyle=dim?'#333':'#d0d0e0';
-                ctx.font=`${Math.max(7,9*SC2)}px 'Noto Sans KR',sans-serif`;
-                ctx.textAlign='center';
-                ctx.fillText(n.n,sp.x,sp.y+r+Math.max(7,10*SC2));
-            }
-            ctx.globalAlpha=1;
-        });
-
-        document.getElementById('SN').textContent=ND.length;
-        document.getElementById('SL').textContent=LK.length;
-        document.getElementById('SV').textContent=V.size;
-    }
-
-    // ── INTERACTION ─────────────────────────────────────────────────
-    let drag=null,panning=false,ps=null;
-
-    function hitTest(sx,sy){
-        const V=vis();
-        for(let i=ND.length-1;i>=0;i--){
-            const n=ND[i];if(!V.has(n.id))continue;
-            const sp=toScreen(n.x,n.y),r=nr(n)*SC2;
-            if((sx-sp.x)**2+(sy-sp.y)**2<=r*r)return n;
-        }return null;
-    }
-
-    function rc(){return cv.getBoundingClientRect()}
-
-    cv.addEventListener('mousedown',e=>{
-        const r=rc(),sx=e.clientX-r.left,sy=e.clientY-r.top;
-        const h=hitTest(sx,sy);
-        if(h){drag=h;cv.classList.add('grabbing')}
-        else{panning=true;ps={x:sx-PX,y:sy-PY};cv.classList.add('grabbing')}
-    });
-    cv.addEventListener('mousemove',e=>{
-        const r=rc(),sx=e.clientX-r.left,sy=e.clientY-r.top;
-        if(panning){PX=sx-ps.x;PY=sy-ps.y;draw();return}
-        const h=hitTest(sx,sy),tt=document.getElementById('TT');
-        if(h){
-            document.getElementById('TTN').textContent=h.n;
-            document.getElementById('TTM').textContent=(h.s==='math'?'수학':'과학')+' · '+h.a+' · '+h.d;
-            tt.style.left=(sx+14)+'px';tt.style.top=(sy-8)+'px';tt.classList.add('show');
-        }else tt.classList.remove('show');
-    });
-    cv.addEventListener('mouseup',()=>{drag=null;panning=false;cv.classList.remove('grabbing')});
-    cv.addEventListener('click',e=>{
-        const r=rc(),h=hitTest(e.clientX-r.left,e.clientY-r.top);
-        if(h){sel===h.id?(sel=null,renderEmpty()):(sel=h.id,renderInfo(h))}
-        else{sel=null;renderEmpty();}
-        draw();
-    });
-    cv.addEventListener('wheel',e=>{
-        e.preventDefault();
-        const r=rc(),sx=e.clientX-r.left,sy=e.clientY-r.top;
-        const f=e.deltaY<0?1.12:.89,ns=Math.max(.1,Math.min(4,SC2*f));
-        PX=sx-(sx-PX)*(ns/SC2);PY=sy-(sy-PY)*(ns/SC2);SC2=ns;draw();
-    },{passive:false});
-
-    // ── INFO PANEL ──────────────────────────────────────────────────
-    function renderEmpty(){document.getElementById('NI').innerHTML='<div class="em">노드를 클릭하면<br>연결 정보가 표시됩니다</div>'}
-    // ── BRIDGE QUESTION ──────────────────────────────────────────────
-    async function generateBridge(srcNode, tgtNode, btnEl) {
-        btnEl.classList.add('loading');
-        btnEl.innerHTML = '<span class="bq-spinner"></span> 생성 중...';
-
-        try {
-            const res = await fetch(`${SERVER}/api/bridge`, {
-                method: 'POST',
-                headers: {'Content-Type':'application/json'},
-                body: JSON.stringify({ srcNode, tgtNode }),
+                grid.appendChild(card);
             });
-            if(!res.ok) throw new Error(`서버 오류 ${res.status}`);
-            const bq = await res.json();
 
-            // Remove existing bridge box if any
-            const existing = document.getElementById('BQ');
-            if(existing) existing.remove();
+            section.appendChild(grid);
+            container.appendChild(section);
+        });
 
-            const box = document.createElement('div');
-            box.id = 'BQ';
-            box.className = 'bq-box';
-            box.innerHTML = `
-      <div class="bq-header">
-        <span>⟡ ${srcNode.n} → ${tgtNode.n}</span>
-        <button class="bq-close" id="BQClose">✕</button>
-      </div>
-      <div class="bq-section">
-        <div class="bq-label">브릿지 질문</div>
-        <div class="bq-text" style="color:var(--sci);font-weight:500">"${bq.question}"</div>
-      </div>
-      <div class="bq-section">
-        <div class="bq-label">교사 노트</div>
-        <div class="bq-text">${bq.why}</div>
-      </div>
-      <div class="bq-section">
-        <div class="bq-label">예상 학생 반응</div>
-        <div class="bq-text" style="color:var(--t2)">${bq.student_response}</div>
-      </div>
-      <div class="bq-section">
-        <div class="bq-label">후속 질문</div>
-        <div class="bq-text">"${bq.followup}"</div>
-      </div>
-      <div class="bq-section">
-        <div class="bq-label">선수 개념</div>
-        <div>${bq.prior.split(',').map(p=>`<span class="bq-tag" style="background:var(--b2);color:var(--t2)">${p.trim()}</span>`).join('')}</div>
-      </div>
-    `;
-            document.getElementById('NI').appendChild(box);
-            document.getElementById('BQClose').addEventListener('click', ()=>box.remove());
-            box.scrollIntoView({behavior:'smooth', block:'nearest'});
-        } catch(err) {
-            console.error(err);
-            btnEl.innerHTML = '⚠ 오류';
-        } finally {
-            btnEl.classList.remove('loading');
-            btnEl.innerHTML = '⟡ 브릿지 질문 생성';
+        // 아이콘 렌더링
+        lucide.createIcons();
+    }
+
+    // 선생님 비밀번호 트리거 함수
+    function promptAdmin() {
+        const pwd = prompt("선생님 메뉴 비밀번호를 입력하세요:");
+        if (pwd === "1234") {
+            const adminMenu = document.getElementById('admin-menu');
+            adminMenu.classList.remove('hidden');
+            // 부드럽게 스크롤하여 메뉴 보여주기
+            setTimeout(() => {
+                adminMenu.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }, 100);
+        } else if (pwd !== null) {
+            alert("비밀번호가 틀렸습니다.");
         }
     }
 
-    function renderInfo(n){
-        const sc=n.s==='math'?'var(--math)':'var(--sci)';
-        const sl=n.s==='math'?'수학':'과학';
-        const gc={elem:'var(--elem)',middle:'var(--mid)',high:'var(--high)'}[n.g];
-        const gl={elem:'초등',middle:'중학교',high:'고등'}[n.g];
-        const tl={hier:'위계',lat:'교과연결',reapp:'재등장'};
-        const gr={hier:[],lat:[],reapp:[]};
-        ADJ[n.id].forEach(c=>gr[c.tp].push(c));
-        let ch='';
-        for(const [tp,it] of Object.entries(gr)){
-            if(!it.length)continue;
-            ch+=`<div class="cs"><h4>${tl[tp]} (${it.length})</h4>`;
-            it.forEach(c=>{
-                const cc=c.node.s==='math'?'var(--math)':'var(--sci)';
-                // Bridge button only for cross-subject (lat) connections
-                const showBridge = tp==='lat';
-                ch+=`<div class="cr" data-j="${c.node.id}" style="flex-wrap:wrap;gap:4px">
-        <span class="cd" style="background:${cc}"></span>
-        <span class="cn" style="flex:1">${c.dir==='out'?'→':'←'} ${c.node.n}</span>
-        <span class="ct">${c.node.s==='math'?'수':'과'}</span>
-        ${showBridge?`<button class="bq-btn" data-src="${n.id}" data-tgt="${c.node.id}">⟡ 브릿지</button>`:''}
-      </div>`;
-            });
-            ch+='</div>';
-        }
-        document.getElementById('NI').innerHTML=`<div class="in">${n.n}</div><div class="it"><span class="itg" style="background:${sc}22;color:${sc}">${sl}</span><span class="itg" style="background:${gc}22;color:${gc}">${gl}</span><span class="itg" style="background:#fff1;color:var(--t2)">${n.d}</span></div><span class="itg" style="background:#fff1;color:var(--t3)">${n.a}</span>${ch}`;
+    // 테스트용 함수: 2단원 클리어 시뮬레이션
+    function simulateClearHB() {
+        localStorage.setItem('game_HB_cleared', 'true');
+        renderCategories(); // 화면 갱신
+        alert('2단원 게임이 클리어 처리되어 1단원 복습 게임들이 해금되었습니다!');
     }
-    document.getElementById('NI').addEventListener('click',e=>{
-        // Bridge button click
-        const bBtn = e.target.closest('.bq-btn');
-        if(bBtn && !bBtn.classList.contains('loading')){
-            const src=NM[bBtn.dataset.src], tgt=NM[bBtn.dataset.tgt];
-            if(src&&tgt) generateBridge(src,tgt,bBtn);
-            return;
+
+    function simulateClearHBR() {
+        localStorage.setItem('game_HBR_cleared', 'true');
+        renderCategories(); // 화면 갱신
+        alert('2단원 리듬 게임이 클리어 처리되어 1단원 복습 게임들이 해금되었습니다!');
+    }
+
+    // 테스트용 함수: 진행 상황 초기화
+    function resetProgress() {
+        if(confirm('모든 진행 상황을 초기화하고 1단원을 다시 잠금 상태로 되돌릴까요?')) {
+            localStorage.removeItem('game_HB_cleared');
+            localStorage.removeItem('game_HBR_cleared');
+            renderCategories(); // 화면 갱신
+            alert('초기화 되었습니다.');
         }
-        // Node jump click
-        const rw=e.target.closest('.cr');if(!rw)return;
-        const n=NM[rw.dataset.j];if(!n)return;
-        sel=n.id;renderInfo(n);
-        PX=cv.width/2-n.x*SC2;PY=cv.height/2-n.y*SC2;draw();
-    });
+    }
 
-    // ── FILTERS ─────────────────────────────────────────────────────
-    function setSub(s){fsub=s;['a','m','s'].forEach((x,i)=>document.getElementById('b'+x).classList.toggle('on',['all','math','sci'][i]===s));draw();}
-    function setGr(g){fgr=g;['a','e','m','h'].forEach((x,i)=>document.getElementById('g'+x).classList.toggle('on',['all','elem','middle','high'][i]===g));draw();}
-    document.getElementById('ba').addEventListener('click',()=>setSub('all'));
-    document.getElementById('bm').addEventListener('click',()=>setSub('math'));
-    document.getElementById('bs').addEventListener('click',()=>setSub('sci'));
-    document.getElementById('ga').addEventListener('click',()=>setGr('all'));
-    document.getElementById('ge').addEventListener('click',()=>setGr('elem'));
-    document.getElementById('gm').addEventListener('click',()=>setGr('middle'));
-    document.getElementById('gh').addEventListener('click',()=>setGr('high'));
-    document.getElementById('SI').addEventListener('input',e=>{fstr=e.target.value.trim();draw();});
-    document.getElementById('ZI').addEventListener('click',()=>{SC2=Math.min(4,SC2*1.3);draw();});
-    document.getElementById('ZO').addEventListener('click',()=>{SC2=Math.max(.1,SC2/1.3);draw();});
-    document.getElementById('ZR').addEventListener('click',()=>{
-        SC2=0.75;PX=cv.width*.125;PY=cv.height*.1;draw();
-    });
+    // 페이지 포커스 시 상태 업데이트 (다른 탭에서 게임 클리어 후 돌아왔을 때 자동 갱신)
+    window.addEventListener('focus', renderCategories);
 
-    // ── INIT ────────────────────────────────────────────────────────
-    window.addEventListener('load',()=>{
-        resize();
-        window.addEventListener('resize',()=>{resize();computeLayout(cv.width,cv.height);draw();});
-        computeLayout(cv.width,cv.height);
-        SC2=0.75; PX=cv.width*.125; PY=cv.height*.1;
-        draw();
-    });
+    // 초기 렌더링
+    renderCategories();
 </script>
 </body>
 </html>
