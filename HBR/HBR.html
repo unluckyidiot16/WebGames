@@ -224,6 +224,13 @@
     <div id="result-box" class="text-center bg-white p-8 md:p-10 rounded-3xl shadow-2xl animate-pop w-full max-w-sm border-4 border-slate-200">
 
         <h2 id="result-title" class="text-5xl font-bold mb-2">Stage Clear!</h2>
+
+        <!-- 해금 알림 메시지 영역 -->
+        <div id="unlock-message" class="hidden mb-6 mt-4 bg-yellow-100 border-2 border-yellow-400 p-4 rounded-xl animate-bounce">
+            <span class="text-xl font-bold text-yellow-700">🎉 축하합니다! 1단원 복습 게임이 열렸어요! 🎉</span><br>
+            <span class="text-sm text-yellow-600">메인 화면으로 돌아가서 확인해보세요.</span>
+        </div>
+
         <p id="result-desc" class="text-lg text-slate-500 mb-6 font-bold">참 잘했어요!</p>
 
         <!-- 별점 표시 영역 -->
@@ -255,7 +262,7 @@
 </div>
 
 <script>
-    // --- 캐릭터 데이터 (HB.html 에셋 재활용 + 이모지 폴백) ---
+    // --- 캐릭터 데이터 ---
     const CHARACTERS = [
         { id: 'angel', emoji: '👼' }, { id: 'cerberus', emoji: '🐺' }, { id: 'cowboy', emoji: '🤠' },
         { id: 'cyclops', emoji: '👁️' }, { id: 'elf', emoji: '🧝' }, { id: 'fairy', emoji: '🧚' },
@@ -296,7 +303,7 @@
         timeLeftRatio: 100
     };
 
-    // --- 사운드 효과 (Web Audio API 활용 - 틱, 팝 등 간단한 소리) ---
+    // --- 사운드 효과 ---
     const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     function playTone(freq, type, duration, vol=0.1) {
         if(audioCtx.state === 'suspended') audioCtx.resume();
@@ -378,35 +385,29 @@
     // --- 스테이지 난이도 데이터 생성 ---
     function getStageConfig(stage) {
         if (state.mode === 'challenge') {
-            // 무한 도전 모드: 스테이지 번호가 높을수록 계속 어려워짐
             let len = 4 + Math.floor(stage / 3);
             let spd = Math.max(300, 800 - (stage * 30));
             let tm = Math.max(3000, 5000 + (len * 500) - (stage * 100));
             return { length: Math.min(len, 15), words: ['HI', 'FINE', 'BYE'], speed: spd, timeLimit: tm };
         }
 
-        // A안 캠페인 기준 1~20 밸런싱
         let length = 2;
         let words = ['HI', 'BYE'];
-        let speed = 1000; // ms (말풍선 보여주는 속도)
-        let timeLimit = 5000; // ms (입력 제한 시간)
+        let speed = 1000;
+        let timeLimit = 5000;
 
         if (stage >= 2) words = ['HI', 'FINE', 'BYE'];
-
         if (stage >= 3) length = 3;
         if (stage >= 4) speed = 900;
-
         if (stage >= 6) { length = 4; speed = 850; timeLimit = 6000; }
         if (stage >= 8) speed = 750;
         if (stage >= 10) { length = 5; speed = 700; timeLimit = 7000; }
-
         if (stage >= 11) speed = 650;
         if (stage >= 13) { timeLimit = 6000; }
         if (stage >= 15) { length = 6; speed = 600; timeLimit = 7500; }
-
         if (stage >= 17) { speed = 500; timeLimit = 6500; }
         if (stage >= 19) { length = 7; speed = 450; timeLimit = 7000; }
-        if (stage === 20) { length = 7; speed = 400; timeLimit = 6000; } // 최종장
+        if (stage === 20) { length = 7; speed = 400; timeLimit = 6000; }
 
         return { length, words, speed, timeLimit };
     }
@@ -414,7 +415,6 @@
     function generatePattern(config) {
         let pattern = [];
         for(let i=0; i<config.length; i++) {
-            // 연속 같은 단어 3번 이상 방지 로직
             let word;
             do {
                 word = config.words[Math.floor(Math.random() * config.words.length)];
@@ -429,14 +429,12 @@
         document.getElementById('play-stage-text').innerText = state.mode === 'challenge' ? `SURVIVAL ${state.currentStage}` : `Stage ${state.currentStage}`;
         document.getElementById('play-score-text').innerText = state.score;
 
-        // Lives
         const livesCont = document.getElementById('play-lives-container');
         livesCont.innerHTML = '';
         for(let i=0; i<3; i++) {
             livesCont.innerHTML += `<span class="${i < state.lives ? 'text-red-500' : 'text-slate-200'}">♥</span>`;
         }
 
-        // Combo
         const comboEl = document.getElementById('combo-display');
         if (state.combo >= 2) {
             comboEl.classList.remove('hidden');
@@ -465,16 +463,13 @@
 
             dot.className = "w-4 h-4 md:w-5 md:h-5 rounded-full transition-colors duration-200 shadow-md";
             if (i < state.inputIndex) {
-                // 채워진 색상
                 const word = state.pattern[i];
                 if(word === 'HI') dot.classList.add('bg-green-500');
                 if(word === 'FINE') dot.classList.add('bg-yellow-400');
                 if(word === 'BYE') dot.classList.add('bg-red-500');
             } else if (i === state.inputIndex && state.phase === 'inputting') {
-                // 현재 입력해야 할 칸 깜빡임
                 dot.classList.add('bg-blue-400', 'animate-pulse');
             } else {
-                // 대기
                 dot.classList.add('bg-slate-200', 'shadow-inner');
             }
         }
@@ -490,18 +485,16 @@
     function startStage(stageNum) {
         state.currentStage = stageNum;
         if(state.mode === 'campaign') {
-            state.score = 0; // 캠페인은 스테이지마다 점수 초기화
+            state.score = 0;
             state.combo = 0;
             state.lives = 3;
         }
-        // 챌린지 모드는 점수/생명력 유지
 
         state.maxCombo = 0;
         state.isPlaying = true;
 
         switchScreen('playing');
 
-        // FINE 버튼 숨김/표시 처리 (1스테이지는 HI, BYE만)
         const config = getStageConfig(stageNum);
         document.getElementById('btn-fine').classList.toggle('hidden', !config.words.includes('FINE'));
 
@@ -523,10 +516,8 @@
         renderProgressDots();
         setStatusMsg("잘 보고 기억하세요!", "text-blue-600");
 
-        // 초기 딜레이
         await sleep(1000);
 
-        // --- 패턴 제시 (Presenting Phase) ---
         state.phase = 'presenting';
         const charContainer = document.getElementById('play-char-container');
         const bubble = document.getElementById('speech-bubble');
@@ -537,25 +528,19 @@
             const word = state.pattern[i];
             const char = getRandomChar();
 
-            // 캐릭터 표시 (이미지 대신 이모지 사용으로 안정성 확보)
             charContainer.innerHTML = `<span class="text-7xl md:text-8xl drop-shadow-md animate-pop">${char.emoji}</span>`;
 
-            // 말풍선 표시
             bubble.innerText = word;
             bubble.className = `speech-bubble animate-bubble bubble-${word.toLowerCase()}`;
             bubble.classList.remove('hidden');
 
-            // 사운드
             if(word==='HI') SFX.hi(); else if(word==='FINE') SFX.fine(); else SFX.bye();
 
-            // 보여주는 시간
             await sleep(config.speed * 0.7);
 
-            // 숨기기
             charContainer.innerHTML = '';
             bubble.classList.add('hidden');
 
-            // 간격
             await sleep(config.speed * 0.3);
         }
 
@@ -570,7 +555,6 @@
         setStatusMsg("순서대로 따라하세요!", "text-green-600");
         updateProgressDots();
 
-        // 타이머 시작
         state.timeLimit = timeLimit;
         state.startTime = performance.now();
         state.timeLeftRatio = 100;
@@ -603,24 +587,20 @@
         }
     }
 
-    // 버튼 클릭/키보드 입력 처리
     function handleInput(word) {
         if (state.phase !== 'inputting' || !state.isPlaying) return;
 
         const expected = state.pattern[state.inputIndex];
 
-        // 버튼 피드백 효과 임시 생성 (화면 중앙 캐릭터 영역에 작게 표시)
         const charCont = document.getElementById('play-char-container');
         charCont.innerHTML = `<span class="text-6xl font-bold ${word==='HI'?'text-green-500':word==='FINE'?'text-yellow-400':'text-red-500'} animate-pop">${word}</span>`;
 
         if (word === expected) {
-            // 정답
             SFX.pop();
             state.inputIndex++;
             state.combo++;
             if(state.combo > state.maxCombo) state.maxCombo = state.combo;
 
-            // 점수 계산 (빠를수록 높은 보너스)
             const timeBonus = Math.floor(state.timeLeftRatio / 2);
             state.score += 100 + (state.combo * 10) + timeBonus;
 
@@ -628,12 +608,10 @@
             updateProgressDots();
 
             if (state.inputIndex >= state.pattern.length) {
-                // 라운드/스테이지 성공
                 cancelAnimationFrame(state.animFrameId);
                 handleRoundClear();
             }
         } else {
-            // 오답
             handleMiss('MISS');
         }
     }
@@ -656,7 +634,7 @@
 
     function handleMiss(reason) {
         cancelAnimationFrame(state.animFrameId);
-        state.phase = 'ready'; // 입력 차단
+        state.phase = 'ready';
         document.getElementById('control-area').classList.add('disabled-btn');
 
         state.combo = 0;
@@ -667,7 +645,6 @@
         if (state.lives <= 0) {
             setTimeout(() => { showResultScreen(false); }, 1000);
         } else {
-            // 생명이 남았다면 잠시 후 현재 라운드 패턴 재제시
             setStatusMsg("다시 한 번!", "text-red-500");
             setTimeout(() => { playRound(); }, 1500);
         }
@@ -679,16 +656,15 @@
         showFeedback('CLEAR');
 
         if (state.mode === 'challenge') {
-            // 무한 모드는 바로 다음 라운드로
             state.currentStage++;
-            state.lives = Math.min(3, state.lives + 1); // 보너스 생명
+            state.lives = Math.min(3, state.lives + 1);
             setTimeout(() => { playRound(); }, 1500);
         } else {
-            // 캠페인 모드는 결과 화면 출력
             setTimeout(() => { showResultScreen(true); }, 1000);
         }
     }
 
+    // 결과 창 로직 및 10스테이지 해금 기능 적용
     function showResultScreen(isClear) {
         state.isPlaying = false;
         SFX.clear();
@@ -700,6 +676,7 @@
         const comboEl = document.getElementById('result-combo');
         const starsCont = document.getElementById('result-stars');
         const btnNext = document.getElementById('btn-next');
+        const unlockMsg = document.getElementById('unlock-message'); // 해금 알림 요소
 
         document.getElementById('result-screen').classList.remove('hidden');
         triggerAnim(resBox, 'animate-pop');
@@ -707,7 +684,6 @@
         scoreEl.innerText = state.score;
         comboEl.innerText = state.maxCombo;
 
-        // 별점 계산
         let earnedStars = 0;
         if (isClear) {
             if (state.lives === 3) earnedStars = 3;
@@ -726,23 +702,27 @@
             desc.innerText = state.lives === 3 ? "퍼펙트! 완벽해요!" : "잘했어요!";
             btnNext.classList.remove('hidden');
 
-            // 데이터 저장 (캠페인일 때만)
+            // --- 해금 로직 및 알림 표시 ---
+            if (state.mode === 'campaign' && state.currentStage >= 10) {
+                localStorage.setItem('game_HBR_cleared', 'true');
+                if (unlockMsg) unlockMsg.classList.remove('hidden');
+            } else {
+                if (unlockMsg) unlockMsg.classList.add('hidden');
+            }
+
             if (state.mode === 'campaign') {
                 if (state.currentStage === state.maxStage && state.maxStage < 20) {
                     state.maxStage++;
                 } else if (state.currentStage === 20 && state.maxStage === 20) {
-                    state.maxStage = 21; // 21은 도전모드 해금 의미
+                    state.maxStage = 21;
                     desc.innerText = "모든 캠페인 완료! 도전 모드가 열렸습니다!";
                 }
 
-                // 최고 별점 갱신
                 const prevStars = state.stars[state.currentStage] || 0;
                 if (earnedStars > prevStars) {
                     state.stars[state.currentStage] = earnedStars;
                 }
                 saveData();
-            } else {
-                // 도전 모드 클리어(라는 건 없음, 무한이므로 여기 올 일은 죽었을 때뿐)
             }
         } else {
             title.innerText = "Game Over";
@@ -750,9 +730,9 @@
             desc.innerText = state.mode === 'challenge' ? `Survive: Stage ${state.currentStage}` : "아쉽네요. 다시 도전해보세요!";
             btnNext.classList.add('hidden');
             earnedStars = 0;
+            if (unlockMsg) unlockMsg.classList.add('hidden'); // 게임오버 시 해금 알림 숨김
         }
 
-        // 챌린지 모드 죽었을 때
         if (state.mode === 'challenge') {
             title.innerText = "기록 달성!";
             title.className = "text-4xl font-bold mb-2 text-purple-500";
@@ -762,7 +742,6 @@
         }
     }
 
-    // --- 스테이지 선택 화면 렌더링 ---
     function renderStageSelect() {
         const grid = document.getElementById('stage-grid');
         grid.innerHTML = '';
@@ -792,7 +771,7 @@
             } else if (!isUnlocked) {
                 starCont.innerHTML = '<span>🔒</span>';
             } else {
-                starCont.innerHTML = '<span class="text-transparent">★</span>'; // spacing
+                starCont.innerHTML = '<span class="text-transparent">★</span>';
             }
             btn.appendChild(starCont);
 
