@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Dino Spelling Run - Enhanced</title>
+    <title>Dino Spelling Run - Heroes</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
@@ -12,7 +12,7 @@
             margin: 0;
             padding: 0;
             overflow: hidden;
-            background-color: #f7f7f7;
+            background-color: #f0f0f0;
             font-family: 'Press+Start+2P', cursive;
             user-select: none;
             touch-action: manipulation;
@@ -31,12 +31,13 @@
         canvas {
             display: block;
             background-color: #fff;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             max-width: 95%;
             image-rendering: pixelated;
-            border-radius: 8px;
+            border-radius: 12px;
         }
 
+        /* Top UI elements */
         #ui-layer {
             position: absolute;
             top: 20px;
@@ -52,10 +53,9 @@
             color: #535353;
             letter-spacing: 8px;
             margin-bottom: 10px;
-            text-shadow: 2px 2px #eee;
         }
 
-        .letter-hint { color: #ccc; }
+        .letter-hint { color: #ddd; }
         .letter-collected { color: #4caf50; }
         .letter-current { color: #2196f3; text-decoration: underline; }
 
@@ -65,7 +65,8 @@
             right: 20px;
             text-align: right;
             color: #535353;
-            font-size: 12px;
+            font-size: 10px;
+            pointer-events: none;
         }
 
         .hp-container {
@@ -74,87 +75,119 @@
             left: 20px;
             display: flex;
             gap: 5px;
+            pointer-events: none;
         }
 
-        .heart {
-            width: 20px;
-            height: 20px;
-            fill: #ff4d4d;
-        }
+        .heart { width: 22px; height: 22px; fill: #ff4d4d; }
+        .heart.empty { fill: #ccc; }
 
-        .heart.empty {
-            fill: #ccc;
-        }
-
+        /* Overlay & Menus */
         #overlay {
             position: absolute;
             inset: 0;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.98);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            z-index: 10;
+            z-index: 100;
+            padding: 20px;
         }
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .char-card {
+            border: 4px solid #eee;
+            padding: 12px;
+            text-align: center;
+            cursor: pointer;
+            width: 160px;
+            background: white;
+            transition: all 0.2s;
+        }
+
+        .char-card.selected { border-color: #2196f3; background: #e3f2fd; transform: translateY(-2px); }
+        .char-card.locked { opacity: 0.5; cursor: default; background: #fafafa; }
 
         .btn {
             background: #535353;
             color: white;
-            padding: 15px 30px;
+            padding: 14px 28px;
             border: none;
             cursor: pointer;
-            margin: 10px;
+            margin: 8px;
             font-family: 'Press+Start+2P', cursive;
-            font-size: 14px;
-            transition: transform 0.1s;
+            font-size: 12px;
+            border-radius: 4px;
         }
 
-        .btn:active { transform: scale(0.95); }
-        .btn:hover { background: #333; }
+        .btn:hover:not(:disabled) { background: #333; }
+        .btn:disabled { background: #bbb; cursor: not-allowed; }
 
-        .mode-desc {
-            font-size: 10px;
-            color: #777;
-            margin-bottom: 20px;
-            max-width: 400px;
+        #game-over-ui {
             text-align: center;
-            line-height: 1.6;
+            animation: fadeIn 0.5s;
         }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <!-- UI Layer -->
+    <!-- Active Game UI -->
     <div id="ui-layer">
         <div id="current-word" class="word-display"></div>
     </div>
 
-    <!-- Stats -->
     <div class="stats-container">
-        <div>HI <span id="high-score">00000</span></div>
-        <div style="font-size: 18px; margin-top: 5px;"><span id="score">00000</span></div>
+        <div>HI-SCORE: <span id="high-score-val">00000</span></div>
+        <div style="font-size: 16px; margin-top: 8px;"><span id="score-val">00000</span></div>
+        <div style="font-size: 10px; margin-top: 8px; color: #4caf50;">WORDS: <span id="word-count-val">0</span></div>
     </div>
 
-    <!-- HP Bar -->
     <div id="hp-bar" class="hp-container"></div>
 
     <canvas id="gameCanvas"></canvas>
 
-    <!-- Initial / Game Over Overlay -->
+    <!-- Overlay (Menu/Game Over) -->
     <div id="overlay">
-        <h1 id="overlay-title" style="font-size: 24px; color: #535353; margin-bottom: 30px;">DINO SPELLING</h1>
+        <div id="main-menu" style="text-align: center; width: 100%;">
+            <h1 style="font-size: 28px; color: #535353; margin-bottom: 10px;">DINO HEROES</h1>
+            <p style="font-size: 10px; color: #888; margin-bottom: 25px;">CHALLENGE MODE BEST: <span id="menu-hi-score">0</span></p>
 
-        <div id="mode-selection">
-            <button class="btn" onclick="startGame('practice')">PRACTICE MODE</button>
-            <p class="mode-desc">No HP limit. Wrong letters don't hurt you.</p>
-            <button class="btn" onclick="startGame('challenge')">CHALLENGE MODE</button>
-            <p class="mode-desc">3 HP. Wrong letters reduce HP. Complete words to heal.</p>
+            <div id="character-selection" class="char-grid mx-auto">
+                <!-- Characters injected here -->
+            </div>
+
+            <div class="flex flex-col sm:flex-row justify-center items-center">
+                <div class="m-2">
+                    <button class="btn" onclick="startGame('practice')">PRACTICE</button>
+                    <p style="font-size: 8px; color: #999; margin-top: 5px;">Easy / No Death</p>
+                </div>
+                <div class="m-2">
+                    <button class="btn" onclick="startGame('challenge')">CHALLENGE</button>
+                    <p style="font-size: 8px; color: #999; margin-top: 5px;">Hard / Unlock Heroes</p>
+                </div>
+            </div>
         </div>
 
-        <div id="game-over-ui" style="display: none; text-align: center;">
-            <p id="game-over-reason" style="color: #ff4d4d; margin-bottom: 20px; font-size: 14px;"></p>
-            <button class="btn" onclick="showModeSelection()">MAIN MENU</button>
+        <div id="game-over-ui" style="display: none;">
+            <h2 style="font-size: 32px; color: #ff4d4d; margin-bottom: 15px;">GAME OVER</h2>
+            <p id="game-over-reason" style="font-size: 12px; color: #535353; margin-bottom: 30px;"></p>
+
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <p style="font-size: 10px; color: #888;">FINAL SCORE</p>
+                <p id="final-score" style="font-size: 24px; color: #535353; margin: 10px 0;">00000</p>
+                <p style="font-size: 10px; color: #4caf50;">WORDS COMPLETED: <span id="final-words">0</span></p>
+            </div>
+
+            <button class="btn" onclick="showMainMenu()">BACK TO MENU</button>
         </div>
     </div>
 </div>
@@ -162,39 +195,49 @@
 <script>
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
-    const scoreEl = document.getElementById('score');
-    const highScoreEl = document.getElementById('high-score');
+    const scoreVal = document.getElementById('score-val');
+    const highScoreVal = document.getElementById('high-score-val');
+    const wordCountVal = document.getElementById('word-count-val');
     const wordEl = document.getElementById('current-word');
     const hpBarEl = document.getElementById('hp-bar');
     const overlay = document.getElementById('overlay');
-    const overlayTitle = document.getElementById('overlay-title');
-    const modeSelection = document.getElementById('mode-selection');
+    const mainMenu = document.getElementById('main-menu');
     const gameOverUi = document.getElementById('game-over-ui');
-    const gameOverReason = document.getElementById('game-over-reason');
+    const charSelectionEl = document.getElementById('character-selection');
 
-    // Constants
+    // Configuration
     const CANVAS_WIDTH = 800;
     const CANVAS_HEIGHT = 250;
     const GROUND_Y = 200;
     const GRAVITY = 0.6;
     const JUMP_FORCE = -12;
-    const GAME_SPEED_START = 6;
-    const WORDS = ["GALAXY", "PIXEL", "DINO", "RUNNER", "JUNGLE", "ORANGE", "BREEZE", "CACTUS", "SUMMER", "WINTER"];
+    const WORDS = ["GALAXY", "PIXEL", "DINO", "RUNNER", "JUNGLE", "ORANGE", "BREEZE", "CACTUS", "SUMMER", "WINTER", "ROCKET", "PLANET", "FOREST", "RIVER", "BEACH"];
 
-    // Game State
+    const CHARACTERS = [
+        { id: 'green', name: 'GREEN', color: '#535353', speedMult: 1.0, hp: 3, size: 1.0, unlockReq: 0 },
+        { id: 'red', name: 'RED REX', color: '#e53935', speedMult: 1.25, hp: 2, size: 0.8, unlockReq: 2 },
+        { id: 'blue', name: 'BLUE BRONTO', color: '#1e88e5', speedMult: 0.85, hp: 5, size: 1.3, unlockReq: 4 },
+        { id: 'gold', name: 'GOLDEN', color: '#fbc02d', speedMult: 1.5, hp: 1, size: 0.9, unlockReq: 6 }
+    ];
+
+    // Global Data
+    let challengeHighScore = 0;
+    let totalWordsCompleted = 0; // Cumulative across sessions for unlocks
+    let selectedCharIndex = 0;
+
+    // Game Logic State
     let gameMode = 'practice';
     let hp = 3;
-    let maxHp = 3;
     let score = 0;
-    let highScore = 0;
     let isRunning = false;
-    let gameSpeed = GAME_SPEED_START;
+    let gameSpeed = 6;
     let frame = 0;
     let currentWord = "";
     let targetLetterIndex = 0;
+    let currentRunWords = 0;
+    let animationId = null;
 
-    // Objects
-    let dino = { x: 50, y: GROUND_Y - 47, width: 44, height: 47, vy: 0, isJumping: false };
+    let dino = { x: 50, y: 0, width: 44, height: 47, vy: 0, isJumping: false };
     let obstacles = [];
     let letters = [];
     let clouds = [];
@@ -204,45 +247,69 @@
         canvas.height = CANVAS_HEIGHT;
     }
 
-    // Input Handling
-    function handleAction() {
-        if (!isRunning) return;
-        if (!dino.isJumping) {
-            dino.vy = JUMP_FORCE;
-            dino.isJumping = true;
-        }
+    function showMainMenu() {
+        if (animationId) cancelAnimationFrame(animationId);
+        isRunning = false;
+        overlay.style.display = 'flex';
+        mainMenu.style.display = 'block';
+        gameOverUi.style.display = 'none';
+        document.getElementById('menu-hi-score').innerText = Math.floor(challengeHighScore);
+        renderCharSelection();
     }
 
-    window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') handleAction(); });
-    canvas.addEventListener('mousedown', handleAction);
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(); });
+    function renderCharSelection() {
+        charSelectionEl.innerHTML = "";
+        CHARACTERS.forEach((char, index) => {
+            const isUnlocked = totalWordsCompleted >= char.unlockReq;
+            const isSelected = selectedCharIndex === index;
 
-    // Mode Handling
-    function showModeSelection() {
-        overlay.style.display = 'flex';
-        modeSelection.style.display = 'block';
-        gameOverUi.style.display = 'none';
-        overlayTitle.innerText = "DINO SPELLING";
+            const card = document.createElement('div');
+            card.className = `char-card ${isSelected ? 'selected' : ''} ${isUnlocked ? '' : 'locked'}`;
+            card.innerHTML = `
+                <div style="font-size: 8px; margin-bottom: 8px;">${char.name}</div>
+                <div style="background: ${char.color}; width: 24px; height: 24px; margin: 0 auto 8px; border-radius: 2px;"></div>
+                <div style="font-size: 6px; color: #777;">HP: ${char.hp} | SPD: x${char.speedMult}</div>
+                ${!isUnlocked ? `<div style="font-size: 6px; color: #ff9800; margin-top: 6px;">Need ${char.unlockReq} Words</div>` : ''}
+            `;
+
+            if (isUnlocked) {
+                card.onclick = () => {
+                    selectedCharIndex = index;
+                    renderCharSelection();
+                };
+            }
+            charSelectionEl.appendChild(card);
+        });
     }
 
     function startGame(mode) {
         gameMode = mode;
-        hp = (mode === 'challenge') ? 3 : 999;
+        const char = CHARACTERS[selectedCharIndex];
+        hp = (mode === 'challenge') ? char.hp : 999;
+
         overlay.style.display = 'none';
         resetGameState();
+
         isRunning = true;
         loop();
     }
 
     function resetGameState() {
+        const char = CHARACTERS[selectedCharIndex];
         score = 0;
         frame = 0;
-        gameSpeed = GAME_SPEED_START;
+        currentRunWords = 0;
+        gameSpeed = 6 * char.speedMult;
         obstacles = [];
         letters = [];
         clouds = [];
+
+        dino.width = 44 * char.size;
+        dino.height = 47 * char.size;
         dino.y = GROUND_Y - dino.height;
         dino.vy = 0;
+        dino.isJumping = false;
+
         setNewWord();
         updateUI();
     }
@@ -253,7 +320,7 @@
     }
 
     function updateUI() {
-        // Word Display
+        // Word Guide
         let html = "";
         for (let i = 0; i < currentWord.length; i++) {
             if (i < targetLetterIndex) html += `<span class="letter-collected">${currentWord[i]}</span>`;
@@ -262,87 +329,67 @@
         }
         wordEl.innerHTML = html;
 
-        // Score
-        scoreEl.innerText = String(Math.floor(score)).padStart(5, '0');
-        highScoreEl.innerText = String(Math.floor(highScore)).padStart(5, '0');
+        // Stats
+        scoreVal.innerText = String(Math.floor(score)).padStart(5, '0');
+        highScoreVal.innerText = String(Math.floor(challengeHighScore)).padStart(5, '0');
+        wordCountVal.innerText = currentRunWords;
 
-        // HP Hearts
+        // HP
         hpBarEl.innerHTML = "";
         if (gameMode === 'challenge') {
-            for (let i = 0; i < maxHp; i++) {
-                const isFull = i < hp;
-                hpBarEl.innerHTML += `
-                    <svg class="heart ${isFull ? '' : 'empty'}" viewBox="0 0 24 24">
-                        <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
-                    </svg>`;
+            const charHp = CHARACTERS[selectedCharIndex].hp;
+            for (let i = 0; i < charHp; i++) {
+                hpBarEl.innerHTML += `<svg class="heart ${i < hp ? '' : 'empty'}" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
             }
         }
     }
 
-    function spawnManager() {
-        frame++;
-
-        if (frame % 150 === 0) {
-            clouds.push({ x: CANVAS_WIDTH, y: 30 + Math.random() * 50, speed: 0.5 + Math.random() });
-        }
-
-        if (frame % 120 === 0 && Math.random() > 0.4) {
-            obstacles.push({ x: CANVAS_WIDTH, y: GROUND_Y - 40, width: 25, height: 40 });
-        }
-
-        if (frame % 70 === 0) {
-            const lastObstacle = obstacles[obstacles.length - 1];
-            const isNearObstacle = lastObstacle && (CANVAS_WIDTH - lastObstacle.x < 100);
-
-            let char;
-            if (isNearObstacle) {
-                // 장애물 근처면 50% 확률로만 정답 알파벳을 스폰하거나 스킵
-                if (Math.random() > 0.5) char = currentWord[targetLetterIndex];
-                else return;
-            } else {
-                // 평소엔 50% 확률로 정답, 50% 확률로 오답 스폰
-                char = (Math.random() > 0.5) ? currentWord[targetLetterIndex] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
-            }
-
-            letters.push({
-                x: CANVAS_WIDTH,
-                y: GROUND_Y - 70 - Math.random() * 60,
-                char: char
-                // isTarget을 여기서 미리 정하지 않고 실시간으로 판단함
-            });
+    function handleAction() {
+        if (!isRunning) return;
+        if (!dino.isJumping) {
+            dino.vy = JUMP_FORCE;
+            dino.isJumping = true;
         }
     }
+
+    // Controls
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') handleAction(); });
+    canvas.addEventListener('mousedown', handleAction);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(); });
 
     function drawDino(x, y) {
-        ctx.fillStyle = '#535353';
-        ctx.fillRect(x + 15, y, 20, 15);
-        ctx.fillRect(x + 30, y + 5, 10, 5);
-        ctx.fillRect(x + 10, y + 15, 25, 20);
-        ctx.fillRect(x, y + 20, 10, 10);
-        if (!dino.isJumping && Math.floor(frame / 6) % 2 === 0) ctx.fillRect(x + 12, y + 35, 6, 10);
-        else ctx.fillRect(x + 25, y + 35, 6, 10);
-        ctx.fillStyle = '#fff'; ctx.fillRect(x + 22, y + 3, 3, 3);
-    }
+        const char = CHARACTERS[selectedCharIndex];
+        const s = char.size;
+        ctx.fillStyle = char.color;
 
-    function drawCactus(x, y) {
-        ctx.fillStyle = '#535353';
-        ctx.fillRect(x + 8, y, 9, 40);
-        ctx.fillRect(x, y + 10, 8, 15);
-        ctx.fillRect(x + 17, y + 5, 8, 20);
-    }
+        // Head
+        ctx.fillRect(x + 15*s, y, 20*s, 15*s);
+        // Snout
+        ctx.fillRect(x + 30*s, y + 5*s, 10*s, 5*s);
+        // Body
+        ctx.fillRect(x + 10*s, y + 15*s, 25*s, 20*s);
+        // Tail
+        ctx.fillRect(x, y + 20*s, 10*s, 10*s);
 
-    function drawLetter(l) {
-        // [버그 수정] 그려지는 순간의 targetLetterIndex와 비교하여 색상 결정
-        const isCurrentTarget = (l.char === currentWord[targetLetterIndex]);
-        ctx.fillStyle = isCurrentTarget ? '#2196f3' : '#535353';
-        ctx.font = '20px "Press Start 2P"';
-        ctx.fillText(l.char, l.x, l.y);
+        // Animated Legs
+        if (!dino.isJumping && Math.floor(frame / 6) % 2 === 0) {
+            ctx.fillRect(x + 12*s, y + 35*s, 6*s, 10*s);
+        } else {
+            ctx.fillRect(x + 25*s, y + 35*s, 6*s, 10*s);
+        }
+
+        // Eye
+        ctx.fillStyle = '#fff'; ctx.fillRect(x + 22*s, y + 3*s, 3*s, 3*s);
     }
 
     function update() {
+        if (!isRunning) return;
+
+        const char = CHARACTERS[selectedCharIndex];
         gameSpeed += 0.0005;
         score += 0.15;
 
+        // Physics
         dino.vy += GRAVITY;
         dino.y += dino.vy;
         if (dino.y > GROUND_Y - dino.height) {
@@ -351,81 +398,150 @@
             dino.isJumping = false;
         }
 
+        // Move Background
         clouds.forEach((c, i) => { c.x -= c.speed; if (c.x < -100) clouds.splice(i, 1); });
 
+        // Move & Collide Obstacles
         obstacles.forEach((o, i) => {
             o.x -= gameSpeed;
             if (dino.x < o.x + o.width && dino.x + dino.width > o.x && dino.y < o.y + o.height && dino.y + dino.height > o.y) {
-                endGame("CRASHED INTO CACTUS!");
+                endGame("HIT A CACTUS!");
             }
             if (o.x < -100) obstacles.splice(i, 1);
         });
 
-        // [버그 수정] 역순 루프를 통해 안전하게 요소 제거 및 실시간 타겟 확인
+        // Move & Collide Letters (Reverse loop for safe splice)
         for (let i = letters.length - 1; i >= 0; i--) {
             let l = letters[i];
             l.x -= gameSpeed;
 
             if (dino.x < l.x + 20 && dino.x + dino.width > l.x && dino.y < l.y + 30 && dino.y + dino.height > l.y) {
-                // 충돌 시점에 현재 타겟인지 확인
                 if (l.char === currentWord[targetLetterIndex]) {
                     targetLetterIndex++;
-                    score += 50;
+                    score += 100;
                     if (targetLetterIndex >= currentWord.length) {
                         score += 500;
-                        if (gameMode === 'challenge' && hp < maxHp) hp++;
+                        currentRunWords++;
+                        if (gameMode === 'challenge') {
+                            totalWordsCompleted++; // For permanent unlocks
+                            if (hp < char.hp) hp++; // Heal
+                        }
                         setNewWord();
                     }
                 } else {
                     if (gameMode === 'challenge') {
                         hp--;
-                        if (hp <= 0) endGame("OUT OF HEARTS!");
+                        if (hp <= 0) {
+                            endGame("OUT OF HEARTS!");
+                            return; // Stop processing immediately
+                        }
                     }
-                    score = Math.max(0, score - 30);
+                    score = Math.max(0, score - 50);
                 }
                 letters.splice(i, 1);
-                updateUI(); // 먹자마자 UI 즉시 갱신 (다음 철자 파란색으로 변경)
-            } else if (l.x < -100) {
-                letters.splice(i, 1);
-            }
+                updateUI();
+            } else if (l.x < -100) letters.splice(i, 1);
         }
 
         spawnManager();
-        if (score > highScore) highScore = score;
+        if (gameMode === 'challenge' && score > challengeHighScore) {
+            challengeHighScore = score;
+        }
+        updateUI();
+    }
+
+    function spawnManager() {
+        frame++;
+
+        // Clouds
+        if (frame % 150 === 0) clouds.push({ x: CANVAS_WIDTH, y: 30 + Math.random() * 50, speed: 0.5 + Math.random() });
+
+        // Obstacles
+        if (frame % 120 === 0 && Math.random() > 0.4) {
+            obstacles.push({ x: CANVAS_WIDTH, y: GROUND_Y - 40, width: 25, height: 40 });
+        }
+
+        // Letters (with avoidance logic)
+        if (frame % 75 === 0) {
+            const lastObs = obstacles[obstacles.length - 1];
+            const isNearObs = lastObs && (CANVAS_WIDTH - lastObs.x < 180);
+
+            let char;
+            let yPos = GROUND_Y - 70 - Math.random() * 60;
+
+            if (isNearObs) {
+                // Obstacle nearby: spawn ONLY correct letter high up
+                if (Math.random() > 0.4) {
+                    char = currentWord[targetLetterIndex];
+                    yPos = GROUND_Y - 120; // High enough to jump for
+                } else return;
+            } else {
+                char = (Math.random() > 0.5) ? currentWord[targetLetterIndex] : "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[Math.floor(Math.random() * 26)];
+            }
+
+            letters.push({ x: CANVAS_WIDTH, y: yPos, char: char });
+        }
     }
 
     function loop() {
         if (!isRunning) return;
+
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Ground line
         ctx.strokeStyle = '#535353';
+        ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 5); ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 5); ctx.stroke();
 
+        // Draw Clouds
         clouds.forEach(c => {
-            ctx.fillStyle = '#eee';
+            ctx.fillStyle = '#f0f0f0';
             ctx.fillRect(c.x, c.y, 40, 10); ctx.fillRect(c.x + 10, c.y - 5, 20, 5);
         });
 
-        obstacles.forEach(o => drawCactus(o.x, o.y));
-        letters.forEach(l => drawLetter(l));
+        // Draw Obstacles
+        obstacles.forEach(o => {
+            ctx.fillStyle = '#535353';
+            ctx.fillRect(o.x + 8, o.y, 9, 40);
+            ctx.fillRect(o.x, o.y + 10, 8, 15);
+            ctx.fillRect(o.x + 17, o.y + 5, 8, 20);
+        });
+
+        // Draw Letters
+        letters.forEach(l => {
+            const isTarget = l.char === currentWord[targetLetterIndex];
+            ctx.fillStyle = isTarget ? '#2196f3' : '#535353';
+            ctx.font = '20px "Press Start 2P"';
+            ctx.fillText(l.char, l.x, l.y);
+        });
+
         drawDino(dino.x, dino.y);
 
         update();
-        requestAnimationFrame(loop);
+        animationId = requestAnimationFrame(loop);
     }
 
     function endGame(reason) {
         isRunning = false;
+        if (animationId) cancelAnimationFrame(animationId);
+
+        // UI Switch
         overlay.style.display = 'flex';
-        modeSelection.style.display = 'none';
+        mainMenu.style.display = 'none';
         gameOverUi.style.display = 'block';
-        overlayTitle.innerText = "GAME OVER";
-        gameOverReason.innerText = reason;
-        updateUI();
+
+        document.getElementById('game-over-reason').innerText = reason;
+        document.getElementById('final-score').innerText = String(Math.floor(score)).padStart(5, '0');
+        document.getElementById('final-words').innerText = currentRunWords;
+
+        if (gameMode === 'challenge' && score > challengeHighScore) {
+            challengeHighScore = score;
+        }
     }
 
+    // Init
     initCanvas();
-    showModeSelection();
+    showMainMenu();
     window.addEventListener('resize', initCanvas);
 </script>
 
