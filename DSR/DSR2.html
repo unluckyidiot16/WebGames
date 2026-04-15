@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Dino Spelling Run - Stage Heroes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap');
+
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            font-family: 'Press+Start+2P', cursive;
+            user-select: none;
+            touch-action: manipulation;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        canvas {
+            display: block;
+            background-color: #fff;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            max-width: 95%;
+            image-rendering: pixelated;
+            border-radius: 12px;
+        }
+
+        /* UI Elements */
+        #ui-layer {
+            position: absolute;
+            top: 20px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            pointer-events: none;
+        }
+
+        .word-display {
+            font-size: 24px;
+            color: #535353;
+            letter-spacing: 8px;
+            margin-bottom: 10px;
+            background: rgba(255,255,255,0.8);
+            padding: 10px 20px;
+            border-radius: 10px;
+        }
+
+        .letter-hint { color: #ddd; }
+        .letter-collected { color: #4caf50; }
+        .letter-current { color: #2196f3; text-decoration: underline; animation: blink 0.8s infinite; }
+
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+        .stats-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            text-align: right;
+            color: #535353;
+            font-size: 10px;
+            pointer-events: none;
+        }
+
+        .hp-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            gap: 5px;
+            pointer-events: none;
+        }
+
+        .heart { width: 22px; height: 22px; fill: #ff4d4d; }
+        .heart.empty { fill: #ccc; }
+
+        .stage-indicator {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        /* Overlays */
+        #overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(255, 255, 255, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 20px;
+            overflow-y: auto;
+        }
+
+        .menu-card {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .stage-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(45px, 1fr));
+            gap: 8px;
+            margin: 20px 0;
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 10px;
+            background: #f0f0f0;
+            border-radius: 10px;
+        }
+
+        .stage-btn {
+            width: 45px;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #fff;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 10px;
+            cursor: pointer;
+        }
+
+        .stage-btn.locked { opacity: 0.4; cursor: not-allowed; background: #eee; }
+        .stage-btn.cleared { background: #e8f5e9; border-color: #4caf50; color: #4caf50; }
+        .stage-btn.current { border-color: #2196f3; color: #2196f3; box-shadow: 0 0 10px rgba(33,150,243,0.3); }
+
+        .char-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .char-card {
+            border: 3px solid #eee;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            background: white;
+            border-radius: 12px;
+            transition: all 0.2s;
+        }
+
+        .char-card.selected { border-color: #2196f3; background: #f0f7ff; transform: scale(1.02); }
+        .char-card.locked { opacity: 0.4; filter: grayscale(1); cursor: default; }
+
+        .btn {
+            background: #333;
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            cursor: pointer;
+            font-family: 'Press+Start+2P', cursive;
+            font-size: 12px;
+            border-radius: 8px;
+            transition: background 0.2s;
+        }
+
+        .btn:hover:not(:disabled) { background: #000; }
+        .btn-green { background: #4caf50; }
+        .btn-blue { background: #2196f3; }
+
+        #toast {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-size: 10px;
+            display: none;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <div id="ui-layer">
+        <div id="current-word" class="word-display"></div>
+    </div>
+
+    <div class="stats-container">
+        <div>SCORE: <span id="score-val">00000</span></div>
+        <div style="font-size: 10px; margin-top: 5px; color: #2196f3;">BEST: <span id="high-score-val">00000</span></div>
+    </div>
+
+    <div id="hp-bar" class="hp-container"></div>
+    <div id="stage-text" class="stage-indicator">STAGE 1</div>
+
+    <canvas id="gameCanvas"></canvas>
+
+    <div id="toast"></div>
+
+    <!-- Overlay Manager -->
+    <div id="overlay">
+        <!-- Main Menu -->
+        <div id="main-menu" class="menu-card">
+            <h1 class="text-2xl mb-2 text-slate-700">DINO HEROES</h1>
+            <p class="text-[8px] text-gray-400 mb-6">COMPLETE STAGES TO UNLOCK HEROES</p>
+
+            <div class="mb-4 text-left">
+                <span class="text-[10px] text-slate-500">SELECT HERO:</span>
+                <div id="character-selection" class="char-grid mt-2"></div>
+            </div>
+
+            <div class="mb-4 text-left">
+                <span class="text-[10px] text-slate-500">SELECT STAGE:</span>
+                <div id="stage-grid" class="stage-grid"></div>
+            </div>
+
+            <div class="flex flex-col gap-2">
+                <button class="btn btn-blue w-full" onclick="startSelectedStage()">PLAY STAGE</button>
+                <button class="btn w-full" onclick="startInfinite()">INFINITE MODE</button>
+            </div>
+        </div>
+
+        <!-- Stage Clear / Game Over -->
+        <div id="status-ui" class="menu-card" style="display: none;">
+            <h2 id="status-title" class="text-2xl mb-4">STAGE CLEAR!</h2>
+            <p id="status-msg" class="text-[10px] text-gray-500 mb-6"></p>
+
+            <div id="unlock-msg" class="mb-6 p-4 bg-yellow-50 rounded-lg hidden">
+                <p class="text-[10px] text-yellow-700">🎉 NEW HERO UNLOCKED!</p>
+            </div>
+
+            <div class="flex flex-col gap-3">
+                <button id="next-btn" class="btn btn-green" onclick="goNextStage()">NEXT STAGE</button>
+                <button class="btn" onclick="showMainMenu()">BACK TO MENU</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const wordEl = document.getElementById('current-word');
+    const scoreVal = document.getElementById('score-val');
+    const highScoreVal = document.getElementById('high-score-val');
+    const stageText = document.getElementById('stage-text');
+    const hpBarEl = document.getElementById('hp-bar');
+    const overlay = document.getElementById('overlay');
+    const mainMenu = document.getElementById('main-menu');
+    const statusUi = document.getElementById('status-ui');
+    const charSelectionEl = document.getElementById('character-selection');
+    const stageGridEl = document.getElementById('stage-grid');
+    const toast = document.getElementById('toast');
+
+    // Constants
+    const CANVAS_WIDTH = 800;
+    const CANVAS_HEIGHT = 250;
+    const GROUND_Y = 200;
+    const GRAVITY = 0.6;
+    const JUMP_FORCE = -12;
+
+    // 26 Stages (3rd Grade English Words)
+    const STAGE_WORDS = [
+        "APPLE", "BANANA", "CANDY", "DREAM", "ELBOW", "FRUIT", "GRAPE", "HOUSE",
+        "ISLAND", "JUICE", "KNIFE", "LEMON", "MELON", "NIGHT", "OCEAN", "PIANO",
+        "QUEEN", "RADIO", "SNAKE", "TIGER", "UNCLE", "VOICE", "WATER", "X-RAY",
+        "YELLOW", "ZEBRA"
+    ];
+
+    const CHARACTERS = [
+        { id: 'green', name: 'GREEN', color: '#4caf50', speed: 1.0, jump: 1.0, hp: 3, unlockStage: 0 },
+        { id: 'red', name: 'RED REX', color: '#e53935', speed: 1.2, jump: 0.9, hp: 2, unlockStage: 5 },
+        { id: 'blue', name: 'BLUE BRONTO', color: '#1e88e5', speed: 0.8, jump: 1.0, hp: 5, unlockStage: 10 },
+        { id: 'gold', name: 'GOLDEN', color: '#fbc02d', speed: 1.4, jump: 1.1, hp: 1, unlockStage: 15 },
+        { id: 'purple', name: 'PURPLE', color: '#9c27b0', speed: 1.1, jump: 1.3, hp: 3, unlockStage: 20 },
+        { id: 'pink', name: 'PINKY', color: '#ff4081', speed: 1.0, jump: 1.0, hp: 4, unlockStage: 23 },
+        { id: 'black', name: 'BLACK', color: '#212121', speed: 1.6, jump: 1.2, hp: 2, unlockStage: 25 },
+        { id: 'white', name: 'LEGEND', color: '#cfd8dc', speed: 1.2, jump: 1.4, hp: 6, unlockStage: 26 }
+    ];
+
+    // Persisted State
+    let unlockedStage = 1;
+    let selectedStageIndex = 0;
+    let selectedCharIndex = 0;
+    let highScore = 0;
+
+    // Game Logic State
+    let isRunning = false;
+    let gameMode = 'stage'; // 'stage' or 'infinite'
+    let hp = 3;
+    let score = 0;
+    let gameSpeed = 6;
+    let frame = 0;
+    let currentWord = "";
+    let targetLetterIndex = 0;
+    let animationId = null;
+
+    let dino = { x: 50, y: 0, width: 44, height: 47, vy: 0, isJumping: false };
+    let obstacles = [];
+    let letters = [];
+    let clouds = [];
+
+    // Initialize
+    function init() {
+        canvas.width = CANVAS_WIDTH;
+        canvas.height = CANVAS_HEIGHT;
+        showMainMenu();
+    }
+
+    function showMainMenu() {
+        isRunning = false;
+        if (animationId) cancelAnimationFrame(animationId);
+
+        overlay.style.display = 'flex';
+        mainMenu.style.display = 'block';
+        statusUi.style.display = 'none';
+
+        renderCharSelection();
+        renderStageGrid();
+        highScoreVal.innerText = String(Math.floor(highScore)).padStart(5, '0');
+    }
+
+    function renderCharSelection() {
+        charSelectionEl.innerHTML = "";
+        CHARACTERS.forEach((char, index) => {
+            const isUnlocked = unlockedStage >= char.unlockStage;
+            const isSelected = selectedCharIndex === index;
+
+            const card = document.createElement('div');
+            card.className = `char-card ${isSelected ? 'selected' : ''} ${isUnlocked ? '' : 'locked'}`;
+            card.innerHTML = `
+                <div style="font-size: 7px; margin-bottom: 5px;">${char.name}</div>
+                <div style="background: ${char.color}; width: 20px; height: 20px; margin: 0 auto 5px; border-radius: 4px;"></div>
+                <div style="font-size: 5px; color: #888;">HP:${char.hp} SPD:${char.speed}</div>
+                ${!isUnlocked ? `<div style="font-size: 5px; color: #ff5722; margin-top: 4px;">Lv.${char.unlockStage} Clear</div>` : ''}
+            `;
+
+            if (isUnlocked) {
+                card.onclick = () => {
+                    selectedCharIndex = index;
+                    renderCharSelection();
+                };
+            }
+            charSelectionEl.appendChild(card);
+        });
+    }
+
+    function renderStageGrid() {
+        stageGridEl.innerHTML = "";
+        for (let i = 0; i < 26; i++) {
+            const isUnlocked = (i + 1) <= unlockedStage;
+            const isCurrent = i === selectedStageIndex;
+            const isCleared = (i + 1) < unlockedStage;
+
+            const btn = document.createElement('div');
+            btn.className = `stage-btn ${isUnlocked ? '' : 'locked'} ${isCleared ? 'cleared' : ''} ${isCurrent ? 'current' : ''}`;
+            btn.innerText = i + 1;
+
+            if (isUnlocked) {
+                btn.onclick = () => {
+                    selectedStageIndex = i;
+                    renderStageGrid();
+                };
+            }
+            stageGridEl.appendChild(btn);
+        }
+    }
+
+    function startSelectedStage() {
+        gameMode = 'stage';
+        startGame();
+    }
+
+    function startInfinite() {
+        gameMode = 'infinite';
+        startGame();
+    }
+
+    function startGame() {
+        const char = CHARACTERS[selectedCharIndex];
+        hp = char.hp;
+        score = 0;
+        frame = 0;
+        gameSpeed = 6 * char.speed;
+        obstacles = [];
+        letters = [];
+        clouds = [];
+        targetLetterIndex = 0;
+
+        dino.y = GROUND_Y - dino.height;
+        dino.vy = 0;
+        dino.isJumping = false;
+
+        if (gameMode === 'stage') {
+            currentWord = STAGE_WORDS[selectedStageIndex];
+            stageText.innerText = `STAGE ${selectedStageIndex + 1}: ${currentWord}`;
+        } else {
+            setRandomWord();
+            stageText.innerText = `INFINITE MODE`;
+        }
+
+        overlay.style.display = 'none';
+        isRunning = true;
+        updateUI();
+        loop();
+    }
+
+    function setRandomWord() {
+        currentWord = STAGE_WORDS[Math.floor(Math.random() * STAGE_WORDS.length)];
+        targetLetterIndex = 0;
+    }
+
+    function updateUI() {
+        // Word Display
+        let html = "";
+        for (let i = 0; i < currentWord.length; i++) {
+            if (i < targetLetterIndex) html += `<span class="letter-collected">${currentWord[i]}</span>`;
+            else if (i === targetLetterIndex) html += `<span class="letter-current">${currentWord[i]}</span>`;
+            else html += `<span class="letter-hint">${currentWord[i]}</span>`;
+        }
+        wordEl.innerHTML = html;
+
+        // Stats
+        scoreVal.innerText = String(Math.floor(score)).padStart(5, '0');
+
+        // HP
+        hpBarEl.innerHTML = "";
+        const maxHp = CHARACTERS[selectedCharIndex].hp;
+        for (let i = 0; i < maxHp; i++) {
+            hpBarEl.innerHTML += `<svg class="heart ${i < hp ? '' : 'empty'}" viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>`;
+        }
+    }
+
+    function handleAction() {
+        if (!isRunning) return;
+        if (!dino.isJumping) {
+            const char = CHARACTERS[selectedCharIndex];
+            dino.vy = JUMP_FORCE * char.jump;
+            dino.isJumping = true;
+        }
+    }
+
+    // Controls
+    window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') handleAction(); });
+    canvas.addEventListener('mousedown', handleAction);
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(); });
+
+    function drawDino(x, y) {
+        const char = CHARACTERS[selectedCharIndex];
+        ctx.fillStyle = char.color;
+
+        // Pixel-art style Dino
+        ctx.fillRect(x + 15, y, 20, 15); // Head
+        ctx.fillRect(x + 30, y + 5, 10, 5); // Snout
+        ctx.fillRect(x + 10, y + 15, 25, 20); // Body
+        ctx.fillRect(x, y + 20, 10, 10); // Tail
+
+        // Animated Legs
+        if (!dino.isJumping && Math.floor(frame / 6) % 2 === 0) {
+            ctx.fillRect(x + 12, y + 35, 6, 10);
+        } else {
+            ctx.fillRect(x + 25, y + 35, 6, 10);
+        }
+        // Eye
+        ctx.fillStyle = '#fff'; ctx.fillRect(x + 22, y + 3, 3, 3);
+    }
+
+    function update() {
+        if (!isRunning) return;
+
+        const char = CHARACTERS[selectedCharIndex];
+        gameSpeed += 0.0005;
+        score += 0.15;
+
+        // Physics
+        dino.vy += GRAVITY;
+        dino.y += dino.vy;
+        if (dino.y > GROUND_Y - dino.height) {
+            dino.y = GROUND_Y - dino.height;
+            dino.vy = 0;
+            dino.isJumping = false;
+        }
+
+        // Background
+        clouds.forEach((c, i) => { c.x -= c.speed; if (c.x < -100) clouds.splice(i, 1); });
+
+        // Obstacles
+        obstacles.forEach((o, i) => {
+            o.x -= gameSpeed;
+            if (dino.x < o.x + o.width && dino.x + dino.width > o.x && dino.y < o.y + o.height && dino.y + dino.height > o.y) {
+                takeDamage("OBSTACLE!");
+                obstacles.splice(i, 1);
+            }
+            if (o.x < -100) obstacles.splice(i, 1);
+        });
+
+        // Letters
+        for (let i = letters.length - 1; i >= 0; i--) {
+            let l = letters[i];
+            l.x -= gameSpeed;
+
+            if (dino.x < l.x + 20 && dino.x + dino.width > l.x && dino.y < l.y + 30 && dino.y + dino.height > l.y) {
+                if (l.char === currentWord[targetLetterIndex]) {
+                    targetLetterIndex++;
+                    score += 100;
+                    if (targetLetterIndex >= currentWord.length) {
+                        if (gameMode === 'stage') {
+                            clearStage();
+                            return;
+                        } else {
+                            score += 500;
+                            showToast("WORD COMPLETE! +500");
+                            setRandomWord();
+                        }
+                    }
+                } else {
+                    takeDamage("WRONG LETTER!");
+                    score = Math.max(0, score - 50);
+                }
+                letters.splice(i, 1);
+                updateUI();
+            } else if (l.x < -100) letters.splice(i, 1);
+        }
+
+        spawnManager();
+        if (score > highScore) highScore = score;
+        updateUI();
+    }
+
+    function spawnManager() {
+        frame++;
+        if (frame % 150 === 0) clouds.push({ x: CANVAS_WIDTH, y: 30 + Math.random() * 50, speed: 0.5 + Math.random() });
+
+        if (frame % 110 === 0 && Math.random() > 0.4) {
+            obstacles.push({ x: CANVAS_WIDTH, y: GROUND_Y - 35, width: 20, height: 35 });
+        }
+
+        if (frame % 70 === 0) {
+            const isTarget = Math.random() > 0.4;
+            let char = isTarget ? currentWord[targetLetterIndex] : String.fromCharCode(65 + Math.floor(Math.random() * 26));
+            let yPos = GROUND_Y - 60 - Math.random() * 70;
+            letters.push({ x: CANVAS_WIDTH, y: yPos, char: char });
+        }
+    }
+
+    function loop() {
+        if (!isRunning) return;
+
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Ground
+        ctx.strokeStyle = '#535353';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 5); ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 5); ctx.stroke();
+
+        clouds.forEach(c => {
+            ctx.fillStyle = '#f0f0f0';
+            ctx.fillRect(c.x, c.y, 40, 10); ctx.fillRect(c.x + 10, c.y - 5, 20, 5);
+        });
+
+        obstacles.forEach(o => {
+            ctx.fillStyle = '#ff7043';
+            ctx.fillRect(o.x + 5, o.y, 10, 35);
+            ctx.fillRect(o.x, o.y + 10, 5, 10);
+            ctx.fillRect(o.x + 15, o.y + 5, 5, 15);
+        });
+
+        letters.forEach(l => {
+            const isTarget = l.char === currentWord[targetLetterIndex];
+            ctx.fillStyle = isTarget ? '#2196f3' : '#9e9e9e';
+            ctx.font = '18px "Press Start 2P"';
+            ctx.fillText(l.char, l.x, l.y);
+        });
+
+        drawDino(dino.x, dino.y);
+
+        update();
+        animationId = requestAnimationFrame(loop);
+    }
+
+    function takeDamage(reason) {
+        hp--;
+        showToast(`HIT! ${reason}`);
+        if (hp <= 0) endGame("NO MORE HEARTS");
+        updateUI();
+    }
+
+    function clearStage() {
+        isRunning = false;
+        cancelAnimationFrame(animationId);
+
+        const currentLvl = selectedStageIndex + 1;
+        if (currentLvl === unlockedStage && unlockedStage < 26) {
+            unlockedStage++;
+        }
+
+        // Check for unlocks
+        const unlockedHero = CHARACTERS.find(c => c.unlockStage === currentLvl);
+        const unlockMsg = document.getElementById('unlock-msg');
+        if (unlockedHero) {
+            unlockMsg.classList.remove('hidden');
+            unlockMsg.innerHTML = `<p class="text-[10px] text-yellow-700">🎉 NEW HERO: ${unlockedHero.name} UNLOCKED!</p>`;
+        } else {
+            unlockMsg.classList.add('hidden');
+        }
+
+        statusUi.style.display = 'block';
+        overlay.style.display = 'flex';
+        mainMenu.style.display = 'none';
+
+        document.getElementById('status-title').innerText = "STAGE CLEAR!";
+        document.getElementById('status-title').style.color = "#4caf50";
+        document.getElementById('status-msg').innerText = `You finished spelling ${currentWord}!`;
+        document.getElementById('next-btn').style.display = currentLvl < 26 ? 'block' : 'none';
+    }
+
+    function endGame(reason) {
+        isRunning = false;
+        cancelAnimationFrame(animationId);
+
+        statusUi.style.display = 'block';
+        overlay.style.display = 'flex';
+        mainMenu.style.display = 'none';
+
+        document.getElementById('status-title').innerText = "GAME OVER";
+        document.getElementById('status-title').style.color = "#ff4d4d";
+        document.getElementById('status-msg').innerText = reason;
+        document.getElementById('next-btn').style.display = 'none';
+        document.getElementById('unlock-msg').classList.add('hidden');
+    }
+
+    function goNextStage() {
+        if (selectedStageIndex < 25) {
+            selectedStageIndex++;
+            startSelectedStage();
+        }
+    }
+
+    function showToast(msg) {
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // Init call
+    init();
+</script>
+
+</body>
+</html>
