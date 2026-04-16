@@ -237,6 +237,7 @@
             <div class="flex flex-col gap-2">
                 <button class="btn btn-blue w-full" onclick="startSelectedStage()">PLAY STAGE</button>
                 <button class="btn w-full" onclick="startInfinite()">INFINITE MODE</button>
+                <button class="text-[7px] text-gray-300 mt-2 underline" onclick="resetAllData()">RESET PROGRESS</button>
             </div>
         </div>
 
@@ -306,7 +307,7 @@
 
     // Game Logic State
     let isRunning = false;
-    let gameMode = 'stage'; // 'stage' or 'infinite'
+    let gameMode = 'stage';
     let hp = 3;
     let score = 0;
     let gameSpeed = 6;
@@ -320,10 +321,41 @@
     let letters = [];
     let clouds = [];
 
+    // --- Data Persistence Logic ---
+    function loadSavedData() {
+        const savedStage = localStorage.getItem('dino_unlocked_stage');
+        const savedHighScore = localStorage.getItem('dino_high_score');
+
+        if (savedStage) {
+            unlockedStage = parseInt(savedStage);
+            selectedStageIndex = Math.min(unlockedStage - 1, 25);
+        }
+        if (savedHighScore) {
+            highScore = parseFloat(savedHighScore);
+        }
+    }
+
+    function saveProgress() {
+        localStorage.setItem('dino_unlocked_stage', unlockedStage);
+        localStorage.setItem('dino_high_score', highScore);
+    }
+
+    function resetAllData() {
+        if(confirm("모든 진행 상황(스테이지, 기록)을 초기화하시겠습니까?")) {
+            localStorage.clear();
+            unlockedStage = 1;
+            selectedStageIndex = 0;
+            highScore = 0;
+            showMainMenu();
+            showToast("DATA RESET COMPLETE");
+        }
+    }
+
     // Initialize
     function init() {
         canvas.width = CANVAS_WIDTH;
         canvas.height = CANVAS_HEIGHT;
+        loadSavedData();
         showMainMenu();
     }
 
@@ -431,7 +463,6 @@
     }
 
     function updateUI() {
-        // Word Display
         let html = "";
         for (let i = 0; i < currentWord.length; i++) {
             if (i < targetLetterIndex) html += `<span class="letter-collected">${currentWord[i]}</span>`;
@@ -440,10 +471,8 @@
         }
         wordEl.innerHTML = html;
 
-        // Stats
         scoreVal.innerText = String(Math.floor(score)).padStart(5, '0');
 
-        // HP
         hpBarEl.innerHTML = "";
         const maxHp = CHARACTERS[selectedCharIndex].hp;
         for (let i = 0; i < maxHp; i++) {
@@ -460,7 +489,6 @@
         }
     }
 
-    // Controls
     window.addEventListener('keydown', (e) => { if (e.code === 'Space' || e.code === 'ArrowUp') handleAction(); });
     canvas.addEventListener('mousedown', handleAction);
     canvas.addEventListener('touchstart', (e) => { e.preventDefault(); handleAction(); });
@@ -469,19 +497,16 @@
         const char = CHARACTERS[selectedCharIndex];
         ctx.fillStyle = char.color;
 
-        // Pixel-art style Dino
         ctx.fillRect(x + 15, y, 20, 15); // Head
         ctx.fillRect(x + 30, y + 5, 10, 5); // Snout
         ctx.fillRect(x + 10, y + 15, 25, 20); // Body
         ctx.fillRect(x, y + 20, 10, 10); // Tail
 
-        // Animated Legs
         if (!dino.isJumping && Math.floor(frame / 6) % 2 === 0) {
             ctx.fillRect(x + 12, y + 35, 6, 10);
         } else {
             ctx.fillRect(x + 25, y + 35, 6, 10);
         }
-        // Eye
         ctx.fillStyle = '#fff'; ctx.fillRect(x + 22, y + 3, 3, 3);
     }
 
@@ -492,7 +517,6 @@
         gameSpeed += 0.0005;
         score += 0.15;
 
-        // Physics
         dino.vy += GRAVITY;
         dino.y += dino.vy;
         if (dino.y > GROUND_Y - dino.height) {
@@ -501,25 +525,44 @@
             dino.isJumping = false;
         }
 
-        // Background
         clouds.forEach((c, i) => { c.x -= c.speed; if (c.x < -100) clouds.splice(i, 1); });
 
-        // Obstacles
+        // Tighter Dino Hitbox for Collision
+        const dinoHitbox = {
+            x: dino.x + 10,
+            y: dino.y + 5,
+            w: dino.width - 15,
+            h: dino.height - 10
+        };
+
+        // Move & Collide Obstacles
         obstacles.forEach((o, i) => {
             o.x -= gameSpeed;
-            if (dino.x < o.x + o.width && dino.x + dino.width > o.x && dino.y < o.y + o.height && dino.y + dino.height > o.y) {
+            if (dinoHitbox.x < o.x + o.width && dinoHitbox.x + dinoHitbox.w > o.x &&
+                dinoHitbox.y < o.y + o.height && dinoHitbox.y + dinoHitbox.h > o.y) {
                 takeDamage("OBSTACLE!");
                 obstacles.splice(i, 1);
             }
             if (o.x < -100) obstacles.splice(i, 1);
         });
 
-        // Letters
+        // Move & Collide Letters (Refined Hitbox)
         for (let i = letters.length - 1; i >= 0; i--) {
             let l = letters[i];
             l.x -= gameSpeed;
 
-            if (dino.x < l.x + 20 && dino.x + dino.width > l.x && dino.y < l.y + 30 && dino.y + dino.height > l.y) {
+            // Alphabet visual area: roughly 18x18 square
+            // Text is drawn at l.x, l.y (baseline). So visual box is x to x+18, y-18 to y.
+            const letterHitbox = {
+                x: l.x,
+                y: l.y - 18,
+                w: 18,
+                h: 18
+            };
+
+            if (dinoHitbox.x < letterHitbox.x + letterHitbox.w && dinoHitbox.x + dinoHitbox.w > letterHitbox.x &&
+                dinoHitbox.y < letterHitbox.y + letterHitbox.h && dinoHitbox.y + dinoHitbox.h > letterHitbox.y) {
+
                 if (l.char === currentWord[targetLetterIndex]) {
                     targetLetterIndex++;
                     score += 100;
@@ -543,7 +586,10 @@
         }
 
         spawnManager();
-        if (score > highScore) highScore = score;
+        if (score > highScore) {
+            highScore = score;
+            saveProgress();
+        }
         updateUI();
     }
 
@@ -568,7 +614,6 @@
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-        // Ground
         ctx.strokeStyle = '#535353';
         ctx.lineWidth = 2;
         ctx.beginPath(); ctx.moveTo(0, GROUND_Y + 5); ctx.lineTo(CANVAS_WIDTH, GROUND_Y + 5); ctx.stroke();
@@ -612,9 +657,9 @@
         const currentLvl = selectedStageIndex + 1;
         if (currentLvl === unlockedStage && unlockedStage < 26) {
             unlockedStage++;
+            saveProgress();
         }
 
-        // Check for unlocks
         const unlockedHero = CHARACTERS.find(c => c.unlockStage === currentLvl);
         const unlockMsg = document.getElementById('unlock-msg');
         if (unlockedHero) {
@@ -637,6 +682,7 @@
     function endGame(reason) {
         isRunning = false;
         cancelAnimationFrame(animationId);
+        saveProgress();
 
         statusUi.style.display = 'block';
         overlay.style.display = 'flex';
@@ -662,7 +708,6 @@
         setTimeout(() => { toast.style.display = 'none'; }, 2000);
     }
 
-    // Init call
     init();
 </script>
 
