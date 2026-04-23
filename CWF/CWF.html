@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>고양이 영단어 낚시</title>
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --text-color: #ffffff;
+            --ui-bg: rgba(0, 0, 0, 0.85);
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            overflow: hidden;
+            font-family: 'Press Start 2P', monospace;
+            touch-action: none;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #000; /* 캔버스에서 배경색 처리 */
+        }
+
+        canvas {
+            display: block;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* UI 오버레이 스타일 */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: var(--ui-bg);
+            color: var(--text-color);
+            z-index: 10;
+        }
+
+        .hidden { display: none !important; }
+
+        h1 { font-size: 24px; text-align: center; line-height: 1.5; color: #ffd700; text-shadow: 2px 2px #b8860b; }
+        h2 { font-size: 16px; margin-bottom: 20px; }
+
+        .btn {
+            background-color: #ff9800;
+            color: #fff;
+            border: 4px solid #fff;
+            padding: 12px 16px;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 12px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.1s;
+        }
+        .btn:active { transform: scale(0.95); }
+        .btn:disabled { background-color: #555; color: #888; border-color: #888; cursor: not-allowed; }
+
+        .stats {
+            text-align: center;
+            margin-bottom: 20px;
+            font-size: 12px;
+            line-height: 1.8;
+            color: #87ceeb;
+        }
+
+        .gold-text { color: #ffd700; }
+
+        /* 맵 선택 UI */
+        #map-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 10px;
+            border: 2px solid #fff;
+        }
+        #map-info {
+            width: 140px;
+            text-align: center;
+        }
+        #map-name { font-size: 12px; color: #fff; margin: 0 0 5px 0; }
+        #map-desc { font-size: 9px; color: #aaa; margin: 0; }
+        .map-btn {
+            background: transparent;
+            border: none;
+            color: #ffd700;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 16px;
+            cursor: pointer;
+            padding: 10px;
+        }
+        .map-btn:active { transform: scale(0.8); }
+
+        /* 인게임 HUD */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            padding: 14px 12px;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            pointer-events: none;
+            z-index: 5;
+            font-size: 14px;
+            color: #fff;
+            text-shadow: 2px 2px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+            line-height: 1.9;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.45), rgba(0,0,0,0));
+        }
+
+        #word-display {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 20px;
+            letter-spacing: 5px;
+            color: #ffd700;
+            text-shadow: 2px 2px 0 #000;
+            pointer-events: none;
+            z-index: 5;
+            text-align: center;
+        }
+
+        #tuto-text {
+            position: absolute;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            color: rgba(255,255,255,0.85);
+            text-shadow: 2px 2px 0 #000;
+            pointer-events: none;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        /* 단어 도감 화면 */
+        #dex-screen { padding: 20px 10px; justify-content: flex-start; }
+        #dex-list {
+            width: 90%;
+            max-width: 500px;
+            max-height: 60vh;
+            overflow-y: auto;
+            padding: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid #555;
+            box-sizing: border-box;
+        }
+        .dex-stage-title {
+            color: #ffd700;
+            font-size: 12px;
+            margin: 10px 0 4px;
+            padding: 4px;
+            border-bottom: 1px solid #777;
+        }
+        .dex-stage-title:first-child { margin-top: 0; }
+        .dex-theme-title {
+            color: #87ceeb;
+            font-size: 10px;
+            margin: 8px 0 4px 8px;
+        }
+        .dex-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 3px 12px;
+            font-size: 10px;
+            line-height: 1.7;
+        }
+        .dex-word {
+            color: #fff;
+            font-family: 'Press Start 2P', monospace;
+            flex: 1.2;
+        }
+        .dex-ko {
+            color: #bbb;
+            font-family: 'Nanum Gothic', '맑은 고딕', sans-serif;
+            font-size: 12px;
+            flex: 1.5;
+            text-align: left;
+            padding-left: 10px;
+        }
+        .dex-count {
+            color: #ff9800;
+            font-family: 'Press Start 2P', monospace;
+            flex: 1;
+            text-align: right;
+        }
+        .dex-row.undiscovered .dex-word,
+        .dex-row.undiscovered .dex-ko {
+            color: #555;
+        }
+        .dex-row.mastered .dex-count {
+            color: #ff66aa;
+        }
+    </style>
+</head>
+<body>
+
+<div id="game-container">
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- 인게임 UI -->
+    <div id="hud" class="hidden">
+        <div>
+            남은 미끼: <span id="casts-left" style="color:#ff9800;">0</span><br>
+            이번 수익: <span id="session-gold" class="gold-text">0</span> G
+        </div>
+        <div style="text-align:right;">
+            목표: <span id="target-word-hud" style="color:#87ceeb;"></span><br>
+            완성: <span id="session-words">0</span>개
+        </div>
+    </div>
+    <div id="word-display" class="hidden"></div>
+    <div id="tuto-text" class="hidden">화면 터치: 찌 내리기<br>다시 터치: 찌 올리기</div>
+
+    <!-- 메인 메뉴 & 상점 화면 -->
+    <div id="menu-screen" class="screen">
+        <h1>CAT<br>WORD FISHING</h1>
+        <div class="stats">
+            <span class="gold-text">내 금화: <span id="menu-gold">0</span> G</span><br>
+            현재 낚시대 Lv.<span id="menu-rod-lv">1</span><br>
+            (한 번 출항 시 <span id="menu-max-casts">10</span>회 낚시 가능)
+        </div>
+        
+        <!-- 맵(스테이지) 선택 -->
+        <div id="map-selector">
+            <button class="map-btn" id="btn-prev-map">&lt;</button>
+            <div id="map-info">
+                <h3 id="map-name">얕은 바다</h3>
+                <p id="map-desc">알파벳 3개</p>
+            </div>
+            <button class="map-btn" id="btn-next-map">&gt;</button>
+        </div>
+
+        <button class="btn" id="btn-start" style="font-size: 14px; padding: 15px 25px;">출항하기</button>
+        
+        <div style="margin-top: 20px; border-top: 2px dashed #555; padding-top: 15px; text-align:center;">
+            <h2>낚시대 상점</h2>
+            <button class="btn" id="btn-upgrade">강화 (<span id="upgrade-cost">100</span> G)</button>
+            <div id="upgrade-msg" style="font-size:10px; margin-top:10px; color:#ff9800; min-height: 12px;"></div>
+        </div>
+
+        <button class="btn" id="btn-dex" style="margin-top: 18px; background-color: #6a5acd;">📖 단어 도감</button>
+    </div>
+
+    <!-- 단어 도감 화면 -->
+    <div id="dex-screen" class="screen hidden">
+        <h1 style="font-size: 18px;">📖 단어 도감</h1>
+        <div class="stats">
+            수집: <span id="dex-progress" class="gold-text">0 / 60</span>
+            <br><span style="color:#888; font-size:9px;">10회 완성 시 ★ MASTER</span>
+        </div>
+        <div id="dex-list"></div>
+        <button class="btn" id="btn-dex-back" style="margin-top: 12px;">돌아가기</button>
+    </div>
+
+    <!-- 결과 화면 -->
+    <div id="result-screen" class="screen hidden">
+        <h1 id="result-title">항해 종료!</h1>
+        <div class="stats" style="font-size: 14px;">
+            완성한 단어 수: <span id="result-words" style="color: #fff">0</span> 개<br>
+            <span style="color: #ccc; font-size:10px; margin-top:10px; display:block;">미끼를 모두 소진했습니다.</span>
+        </div>
+        <h2 class="gold-text" style="font-size: 18px;">총 획득 금화: <br><br>+<span id="result-reward">0</span> G</h2>
+        <button class="btn" id="btn-return-menu" style="margin-top:20px;">항구로 귀환</button>
+    </div>
+</div>
+
+<script>
+    /**
+     * 스테이지(맵) 설정
+     */
+    const stages = [
+        { 
+            name: "얕은 바다", 
+            desc: "알파벳 3개 (쉬움)", 
+            words: [
+                // 동물
+                {en: "CAT", ko: "고양이", theme: "동물"},
+                {en: "DOG", ko: "강아지", theme: "동물"},
+                {en: "PIG", ko: "돼지", theme: "동물"},
+                {en: "COW", ko: "소", theme: "동물"},
+                {en: "FOX", ko: "여우", theme: "동물"},
+                {en: "BEE", ko: "벌", theme: "동물"},
+                {en: "BUG", ko: "벌레", theme: "동물"},
+                {en: "BAT", ko: "박쥐", theme: "동물"},
+                // 탈것
+                {en: "CAR", ko: "자동차", theme: "탈것"},
+                {en: "BUS", ko: "버스", theme: "탈것"},
+                // 자연
+                {en: "SUN", ko: "태양", theme: "자연"},
+                {en: "SKY", ko: "하늘", theme: "자연"},
+                {en: "SEA", ko: "바다", theme: "자연"},
+                {en: "ICE", ko: "얼음", theme: "자연"},
+                // 사물
+                {en: "BOX", ko: "상자", theme: "사물"},
+                {en: "HAT", ko: "모자", theme: "사물"},
+                {en: "CUP", ko: "컵", theme: "사물"},
+                {en: "BAG", ko: "가방", theme: "사물"},
+                {en: "KEY", ko: "열쇠", theme: "사물"},
+                {en: "MAP", ko: "지도", theme: "사물"}
+            ], 
+            skyColor: "#639bff", 
+            seaTop: "#4fa4ff", 
+            seaBottom: "#1f4799",
+            bgDecorColor: "#2e8b57"
+        },
+        { 
+            name: "푸른 산호초", 
+            desc: "알파벳 4개 (보통)", 
+            words: [
+                // 동물
+                {en: "FISH", ko: "물고기", theme: "동물"},
+                {en: "BIRD", ko: "새", theme: "동물"},
+                {en: "BEAR", ko: "곰", theme: "동물"},
+                {en: "FROG", ko: "개구리", theme: "동물"},
+                {en: "LION", ko: "사자", theme: "동물"},
+                {en: "DUCK", ko: "오리", theme: "동물"},
+                {en: "WOLF", ko: "늑대", theme: "동물"},
+                {en: "GOAT", ko: "염소", theme: "동물"},
+                // 자연
+                {en: "TREE", ko: "나무", theme: "자연"},
+                {en: "FIRE", ko: "불", theme: "자연"},
+                {en: "STAR", ko: "별", theme: "자연"},
+                {en: "MOON", ko: "달", theme: "자연"},
+                {en: "RAIN", ko: "비", theme: "자연"},
+                {en: "SNOW", ko: "눈", theme: "자연"},
+                {en: "LEAF", ko: "나뭇잎", theme: "자연"},
+                {en: "SAND", ko: "모래", theme: "자연"},
+                // 사물
+                {en: "BOOK", ko: "책", theme: "사물"},
+                {en: "DESK", ko: "책상", theme: "사물"},
+                {en: "DOOR", ko: "문", theme: "사물"},
+                // 탈것
+                {en: "SHIP", ko: "배", theme: "탈것"}
+            ], 
+            skyColor: "#40e0d0", 
+            seaTop: "#00ced1", 
+            seaBottom: "#008080",
+            bgDecorColor: "#ff7f50"
+        },
+        { 
+            name: "깊은 심해", 
+            desc: "알파벳 5개 (어려움)", 
+            words: [
+                // 동물
+                {en: "TIGER", ko: "호랑이", theme: "동물"},
+                {en: "SHARK", ko: "상어", theme: "동물"},
+                {en: "SNAKE", ko: "뱀", theme: "동물"},
+                {en: "MOUSE", ko: "쥐", theme: "동물"},
+                {en: "HORSE", ko: "말", theme: "동물"},
+                {en: "SHEEP", ko: "양", theme: "동물"},
+                // 음식
+                {en: "APPLE", ko: "사과", theme: "음식"},
+                {en: "BREAD", ko: "빵", theme: "음식"},
+                {en: "HONEY", ko: "꿀", theme: "음식"},
+                {en: "CANDY", ko: "사탕", theme: "음식"},
+                // 자연
+                {en: "WATER", ko: "물", theme: "자연"},
+                {en: "CLOUD", ko: "구름", theme: "자연"},
+                {en: "RIVER", ko: "강", theme: "자연"},
+                {en: "EARTH", ko: "지구", theme: "자연"},
+                // 사물
+                {en: "HOUSE", ko: "집", theme: "사물"},
+                {en: "CHAIR", ko: "의자", theme: "사물"},
+                {en: "CLOCK", ko: "시계", theme: "사물"},
+                {en: "PLATE", ko: "접시", theme: "사물"},
+                // 탈것
+                {en: "TRAIN", ko: "기차", theme: "탈것"},
+                {en: "PLANE", ko: "비행기", theme: "탈것"}
+            ], 
+            skyColor: "#4682b4", 
+            seaTop: "#2f4f4f", 
+            seaBottom: "#191970",
+            bgDecorColor: "#800080"
+        }
+    ];
+
+    /**
+     * 게임 데이터 상태
+     */
+    const gameState = {
+        gold: 0,
+        rodLevel: 1,
+        maxCasts: 10,
+        currentCasts: 0,
+        
+        currentMapIdx: 0,
+        targetWord: "",
+        targetWordKo: "",
+        collectedLetters: [], 
+        
+        sessionGold: 0,
+        sessionWords: 0,
+        
+        // v1.3: 완성 횟수 기록 (도감용) {"CAT": 3, ...}
+        wordStats: {},
+        // v1.2: 필요한 글자 캐시 (매 프레임 계산 안 하도록)
+        neededCharsCache: [],
+        
+        screen: 'menu',
+        upgradeCosts: [0, 100, 250, 500, 1000, 2000, "MAX"],
+        castsPerLevel: [0, 10, 15, 20, 25, 30, 40]
+    };
+
+    // v1.3: 단어 셔플 큐 (한 바퀴 돌 동안 중복 없음)
+    let wordQueue = [];
+
+    /**
+     * 캔버스 및 렌더링 설정
+     */
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    
+    const LOGICAL_WIDTH = 240;
+    const LOGICAL_HEIGHT = 360;
+    canvas.width = LOGICAL_WIDTH;
+    canvas.height = LOGICAL_HEIGHT;
+
+    // DOM Elements
+    const screens = {
+        menu: document.getElementById('menu-screen'),
+        result: document.getElementById('result-screen'),
+        dex: document.getElementById('dex-screen'),
+        hud: document.getElementById('hud'),
+        wordDisplay: document.getElementById('word-display'),
+        tuto: document.getElementById('tuto-text')
+    };
+
+    /**
+     * localStorage 저장/로드 - 금화, 낚시대 레벨, 단어 완성 통계
+     */
+    const SAVE_KEY = 'CWF_save_v1';
+
+    function saveGame() {
+        try {
+            localStorage.setItem(SAVE_KEY, JSON.stringify({
+                gold: gameState.gold,
+                rodLevel: gameState.rodLevel,
+                wordStats: gameState.wordStats
+            }));
+        } catch (e) {
+            console.warn('Save failed:', e);
+        }
+    }
+
+    function loadGame() {
+        try {
+            const raw = localStorage.getItem(SAVE_KEY);
+            if (!raw) return;
+            const data = JSON.parse(raw);
+            if (typeof data.gold === 'number') gameState.gold = data.gold;
+            if (typeof data.rodLevel === 'number') {
+                gameState.rodLevel = Math.max(1, Math.min(
+                    data.rodLevel,
+                    gameState.castsPerLevel.length - 1
+                ));
+            }
+            if (data.wordStats && typeof data.wordStats === 'object') {
+                gameState.wordStats = data.wordStats;
+            }
+        } catch (e) {
+            console.warn('Load failed:', e);
+        }
+    }
+
+    /**
+     * 효과 엔티티 (플로팅 텍스트 등)
+     */
+    class FloatingText {
+        constructor(text, x, y, color, opts) {
+            opts = opts || {};
+            this.text = text;
+            this.x = x;
+            this.y = y;
+            this.color = color;
+            this.maxLife = opts.life || 2.0;
+            this.life = this.maxLife;
+            this.font = opts.font || '10px "Press Start 2P", monospace';
+            this.riseSpeed = opts.riseSpeed !== undefined ? opts.riseSpeed : 15;
+        }
+        update(dt) {
+            this.y -= this.riseSpeed * dt;
+            this.life -= dt;
+        }
+        draw(ctx) {
+            if (this.life <= 0) return;
+            const alpha = Math.max(0, this.life / this.maxLife);
+            ctx.globalAlpha = alpha;
+            ctx.fillStyle = this.color;
+            ctx.font = this.font;
+            ctx.textAlign = 'center';
+            // 테두리
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 3;
+            ctx.strokeText(this.text, this.x, this.y);
+            // 텍스트
+            ctx.fillText(this.text, this.x, this.y);
+            ctx.globalAlpha = 1.0;
+        }
+    }
+
+    /**
+     * 게임 내 엔티티 클래스들
+     */
+    class Hook {
+        constructor() {
+            this.x = LOGICAL_WIDTH / 2;
+            this.y = 50;
+            this.homeY = 50;
+            this.state = 'idle';
+            this.speed = 150;
+            this.caughtLetter = null;
+        }
+
+        update(dt) {
+            if (this.state === 'dropping') {
+                this.y += this.speed * dt;
+                if (this.y > LOGICAL_HEIGHT - 10) {
+                    this.state = 'reeling';
+                }
+            } else if (this.state === 'reeling') {
+                this.y -= (this.speed * 1.5) * dt;
+                if (this.caughtLetter) {
+                    this.caughtLetter.x = this.x - this.caughtLetter.size / 2;
+                    this.caughtLetter.y = this.y + 5;
+                }
+                
+                if (this.y <= this.homeY) {
+                    this.y = this.homeY;
+                    this.state = 'idle';
+                    if (this.caughtLetter) {
+                        checkLetter(this.caughtLetter.char);
+                        removeLetterFromWorld(this.caughtLetter);
+                        this.caughtLetter = null;
+                    }
+                    
+                    // 낚시바늘이 다 올라온 후 미끼가 0이면 게임 종료 판정
+                    if (gameState.currentCasts <= 0 && isGameActive()) {
+                        setTimeout(endGameSession, 800);
+                    }
+                }
+            }
+        }
+
+        draw(ctx) {
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(this.x, this.homeY);
+            ctx.lineTo(this.x, this.y);
+            ctx.stroke();
+
+            // J 모양 바늘
+            ctx.fillStyle = '#aaa';
+            ctx.fillRect(this.x - 1, this.y, 3, 4);
+            ctx.fillRect(this.x - 2, this.y + 3, 2, 1);
+            ctx.fillRect(this.x - 3, this.y + 1, 1, 2);
+        }
+    }
+
+    class LetterEntity {
+        constructor(layerY, speed, char, direction) {
+            this.size = 16;
+            this.y = layerY;
+            this.speed = speed;
+            this.char = char;
+            this.dir = direction;
+            this.x = this.dir === 1 ? -this.size : LOGICAL_WIDTH + this.size;
+            
+            const colors = ['#ffaaaa', '#aaffaa', '#aaaaff', '#ffffaa', '#ffaaff'];
+            this.bgColor = colors[Math.floor(Math.random() * colors.length)];
+            this.isCaught = false;
+        }
+
+        update(dt) {
+            if (this.isCaught) return;
+            
+            this.x += this.speed * this.dir * dt;
+
+            // 맵 밖으로 나가면 반대편에서 재등장
+            if (this.dir === 1 && this.x > LOGICAL_WIDTH + 20) {
+                this.x = -this.size;
+                this.updateCharIfNeeded();
+            } else if (this.dir === -1 && this.x < -20) {
+                this.x = LOGICAL_WIDTH + this.size;
+                this.updateCharIfNeeded();
+            }
+        }
+
+        // 화면 밖으로 나갔을 때 일정 확률로 필요한 단어로 변경
+        updateCharIfNeeded() {
+            if (Math.random() < 0.4) {
+                const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+                let needed = getNeededChars();
+                if (needed.length > 0) {
+                    this.char = needed[Math.floor(Math.random() * needed.length)];
+                } else {
+                    this.char = alphabet[Math.floor(Math.random() * alphabet.length)];
+                }
+            }
+        }
+
+        draw(ctx) {
+            ctx.fillStyle = this.bgColor;
+            ctx.fillRect(this.x, this.y, this.size, this.size);
+            
+            ctx.fillStyle = '#000';
+            ctx.font = '10px "Press Start 2P", monospace';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(this.char, this.x + this.size/2, this.y + this.size/2 + 1);
+            
+            // 목표 단어에 필요한 글자면 황금 테두리로 강조
+            const isNeeded = gameState.neededCharsCache.includes(this.char);
+            if (isNeeded) {
+                ctx.strokeStyle = '#ffd700';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(this.x - 1, this.y - 1, this.size + 2, this.size + 2);
+            } else {
+                ctx.strokeStyle = '#000';
+                ctx.lineWidth = 1;
+                ctx.strokeRect(this.x, this.y, this.size, this.size);
+            }
+        }
+    }
+
+    let hook = new Hook();
+    let letters = [];
+    let effects = [];
+    let lastTime = 0;
+    let animationId = null;
+    let tutoHideTimer = null;
+    
+    // v1.2: 파도 애니메이션용 시간 축적
+    let gameTime = 0;
+    // v1.2: 고양이 표정 - 상태에 따라 자동 변경, 이벤트 발생 시 override
+    let catExpressionOverride = null; // { type, until }
+
+    /**
+     * 알파벳 관리 로직
+     */
+    function spawnLetters() {
+        letters = [];
+        const numLayers = 5;
+        const layerHeight = (LOGICAL_HEIGHT - 100) / numLayers;
+        const startY = 100;
+
+        const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        let targetChars = gameState.targetWord.split('');
+
+        for (let i = 0; i < numLayers; i++) {
+            let y = startY + (i * layerHeight) + (Math.random() * 10);
+            let dir = i % 2 === 0 ? 1 : -1;
+            let speed = 20 + Math.random() * 30 + (i * 5); // 심해일수록 속도 변동
+            
+            let numLettersInLayer = 2 + Math.floor(Math.random() * 2);
+            
+            for(let j=0; j<numLettersInLayer; j++) {
+                let charToSpawn = '';
+                if (Math.random() < 0.4 && targetChars.length > 0) {
+                    let randIdx = Math.floor(Math.random() * targetChars.length);
+                    charToSpawn = targetChars[randIdx];
+                } else {
+                    charToSpawn = alphabet[Math.floor(Math.random() * alphabet.length)];
+                }
+
+                let entity = new LetterEntity(y, speed, charToSpawn, dir);
+                entity.x = Math.random() * LOGICAL_WIDTH; 
+                letters.push(entity);
+            }
+        }
+    }
+
+    function removeLetterFromWorld(letterObj) {
+        letters = letters.filter(l => l !== letterObj);
+        
+        setTimeout(() => {
+            if(gameState.screen !== 'playing') return;
+            const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            let targetChars = getNeededChars();
+            
+            let charToSpawn = alphabet[Math.floor(Math.random() * alphabet.length)];
+            if (Math.random() < 0.5 && targetChars.length > 0) {
+                charToSpawn = targetChars[Math.floor(Math.random() * targetChars.length)];
+            }
+
+            let dir = Math.random() < 0.5 ? 1 : -1;
+            let y = 100 + Math.random() * (LOGICAL_HEIGHT - 120);
+            let speed = 25 + Math.random() * 40;
+            letters.push(new LetterEntity(y, speed, charToSpawn, dir));
+        }, 800);
+    }
+
+    function getNeededChars() {
+        let needed = [];
+        let target = gameState.targetWord.split('');
+        for(let i=0; i<target.length; i++) {
+            if (gameState.collectedLetters[i] === null) {
+                needed.push(target[i]);
+            }
+        }
+        return needed;
+    }
+
+    function isGameActive() {
+        return gameState.screen === 'playing';
+    }
+
+    // v1.3: Fisher-Yates 셔플
+    function shuffleArray(arr) {
+        const a = [...arr];
+        for (let i = a.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [a[i], a[j]] = [a[j], a[i]];
+        }
+        return a;
+    }
+
+    // 새 단어 설정 (셔플 큐에서 하나씩 꺼냄 - 한 바퀴 동안 중복 없음)
+    function setRandomTargetWord() {
+        const pool = stages[gameState.currentMapIdx].words;
+        
+        if (wordQueue.length === 0) {
+            wordQueue = shuffleArray(pool);
+            // 방금 끝낸 단어가 새 큐 맨 앞이면 뒤로 보내서 연속 중복 방지
+            if (wordQueue.length > 1 && wordQueue[0].en === gameState.targetWord) {
+                [wordQueue[0], wordQueue[1]] = [wordQueue[1], wordQueue[0]];
+            }
+        }
+        
+        const next = wordQueue.shift();
+        gameState.targetWord = next.en;
+        gameState.targetWordKo = next.ko;
+        gameState.collectedLetters = new Array(gameState.targetWord.length).fill(null);
+        gameState.neededCharsCache = gameState.targetWord.split('');
+    }
+
+    function checkLetter(caughtChar) {
+        const targetArr = gameState.targetWord.split('');
+        let foundSpot = false;
+
+        for (let i = 0; i < targetArr.length; i++) {
+            if (gameState.collectedLetters[i] === null && targetArr[i] === caughtChar) {
+                gameState.collectedLetters[i] = caughtChar;
+                foundSpot = true;
+                break;
+            }
+        }
+
+        // 필요한 글자 캐시 업데이트 (하이라이트용)
+        gameState.neededCharsCache = getNeededChars();
+
+        updateHUD();
+
+        // 단어 완성 체크
+        if (!gameState.collectedLetters.includes(null)) {
+            handleWordComplete();
+        }
+    }
+
+    // v1.2: Web Speech API로 영어 발음 재생
+    function speakWord(word) {
+        try {
+            if (!window.speechSynthesis) return;
+            window.speechSynthesis.cancel(); // 이전 발음 중복 방지
+            const u = new SpeechSynthesisUtterance(word);
+            u.lang = 'en-US';
+            u.rate = 0.85;
+            u.pitch = 1.1;
+            window.speechSynthesis.speak(u);
+        } catch (e) {
+            console.warn('Speech synthesis failed:', e);
+        }
+    }
+
+    function handleWordComplete() {
+        const word = gameState.targetWord;
+        // 단어 완성 보상 처리
+        const reward = 50 + (word.length * 20);
+        gameState.sessionGold += reward;
+        gameState.sessionWords += 1;
+        gameState.gold += reward;
+
+        // v1.3: 완성 횟수 기록
+        const prevCount = gameState.wordStats[word] || 0;
+        gameState.wordStats[word] = prevCount + 1;
+        saveGame();
+
+        // v1.2: 영어 발음 재생
+        speakWord(word);
+
+        // 단어 뜻 + 보상 표시
+        effects.push(new FloatingText(
+            `${word} = ${gameState.targetWordKo}`,
+            LOGICAL_WIDTH/2, LOGICAL_HEIGHT/2 - 12,
+            '#ffd700',
+            { life: 3.5, riseSpeed: 8, font: 'bold 14px "Nanum Gothic", "맑은 고딕", sans-serif' }
+        ));
+        effects.push(new FloatingText(
+            `+${reward}G`,
+            LOGICAL_WIDTH/2, LOGICAL_HEIGHT/2 + 10,
+            '#ffd700',
+            { life: 3.0, riseSpeed: 8 }
+        ));
+
+        // v1.4: 미니 업적 팝업
+        if (prevCount === 0) {
+            effects.push(new FloatingText(
+                'NEW!',
+                LOGICAL_WIDTH/2, LOGICAL_HEIGHT/2 + 30,
+                '#00ffff',
+                { life: 3.0, riseSpeed: 10 }
+            ));
+        } else if (prevCount + 1 === 10) {
+            effects.push(new FloatingText(
+                '★ MASTER ★',
+                LOGICAL_WIDTH/2, LOGICAL_HEIGHT/2 + 30,
+                '#ff66aa',
+                { life: 3.5, riseSpeed: 10, font: 'bold 11px "Press Start 2P", monospace' }
+            ));
+        }
+
+        // 고양이 잠깐 행복 표정
+        catExpressionOverride = { type: 'happy', until: performance.now() + 1500 };
+        
+        // 화면 깜빡임 느낌 (단어 초기화 전)
+        screens.wordDisplay.style.color = '#fff';
+        
+        setTimeout(() => {
+            screens.wordDisplay.style.color = '#ffd700';
+            setRandomTargetWord();
+            spawnLetters(); 
+            updateHUD();
+        }, 500);
+    }
+
+    function checkCollisions() {
+        if (hook.state === 'idle' || hook.caughtLetter !== null) return;
+
+        // 히트박스 확대 (4x4 → 10x10, 중앙 정렬) - 3학년 접근성 개선
+        const hRect = { x: hook.x - 5, y: hook.y - 1, w: 10, h: 10 };
+
+        for (let i = 0; i < letters.length; i++) {
+            let l = letters[i];
+            if (l.isCaught) continue;
+
+            const lRect = { x: l.x, y: l.y, w: l.size, h: l.size };
+
+            if (hRect.x < lRect.x + lRect.w &&
+                hRect.x + hRect.w > lRect.x &&
+                hRect.y < lRect.y + lRect.h &&
+                hRect.h + hRect.y > lRect.y) {
+                
+                l.isCaught = true;
+                hook.caughtLetter = l;
+                hook.state = 'reeling';
+                break;
+            }
+        }
+    }
+
+    function handleInput() {
+        if (gameState.screen !== 'playing') return;
+        
+        screens.tuto.classList.add('hidden');
+        if (tutoHideTimer) { clearTimeout(tutoHideTimer); tutoHideTimer = null; }
+
+        if (hook.state === 'idle') {
+            if (gameState.currentCasts > 0) {
+                gameState.currentCasts--;
+                updateHUD();
+                hook.state = 'dropping';
+            }
+        } else if (hook.state === 'dropping') {
+            hook.state = 'reeling';
+        }
+    }
+
+    /**
+     * 렌더링
+     */
+    function drawBackground(ctx) {
+        const stage = stages[gameState.currentMapIdx];
+        const waterY = 70; // 수면 Y 좌표
+
+        // 하늘
+        ctx.fillStyle = stage.skyColor;
+        ctx.fillRect(0, 0, LOGICAL_WIDTH, waterY);
+
+        // 구름 (도트)
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(20, 20, 30, 10);
+        ctx.fillRect(25, 15, 20, 20);
+        ctx.fillRect(180, 30, 40, 15);
+        ctx.fillRect(190, 25, 20, 25);
+
+        // 바다 표면 (조금 더 두껍게)
+        ctx.fillStyle = stage.seaTop;
+        ctx.fillRect(0, waterY, LOGICAL_WIDTH, 12);
+
+        // 깊은 바다
+        ctx.fillStyle = stage.seaBottom;
+        ctx.fillRect(0, waterY + 12, LOGICAL_WIDTH, LOGICAL_HEIGHT - (waterY + 12));
+
+        // 수면 물결무늬 (흰 리플 점점이)
+        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+        ctx.fillRect(8, waterY + 3, 14, 1);
+        ctx.fillRect(40, waterY + 6, 10, 1);
+        ctx.fillRect(66, waterY + 2, 12, 1);
+        ctx.fillRect(168, waterY + 5, 16, 1);
+        ctx.fillRect(200, waterY + 8, 10, 1);
+        ctx.fillRect(220, waterY + 3, 12, 1);
+        
+        // 해저 배경 장식 (맵마다 색상 다름)
+        ctx.fillStyle = stage.bgDecorColor;
+        ctx.fillRect(10, LOGICAL_HEIGHT - 30, 5, 30);
+        ctx.fillRect(15, LOGICAL_HEIGHT - 20, 5, 20);
+        ctx.fillRect(210, LOGICAL_HEIGHT - 40, 4, 40);
+        ctx.fillRect(215, LOGICAL_HEIGHT - 15, 6, 15);
+    }
+
+    function drawCatAndBoat(ctx, t) {
+        const cx = LOGICAL_WIDTH / 2;
+        const waterY = 70;  // 수면
+        
+        // v1.2: 파도에 따른 흔들림 (시간 기반 sin)
+        const bob = Math.sin(t * 1.8) * 1.2;        // 수직 ±1.2px 흔들림
+        const sway = Math.sin(t * 1.2) * 1.0;       // 수평 ±1px 흔들림
+        
+        const deckY = 50 + bob;
+        const bottomY = waterY + bob;  // 배 바닥 = 수면 (파도에 따라 함께 흔들림)
+
+        // ==== 배 (바닥이 수면에 딱 닿게 - 잠기는 hull 없음) ====
+        ctx.fillStyle = '#b8704a';
+        ctx.beginPath();
+        ctx.moveTo(cx - 42 + sway, deckY);
+        ctx.lineTo(cx + 42 + sway, deckY);
+        ctx.lineTo(cx + 36 + sway, bottomY);
+        ctx.lineTo(cx - 36 + sway, bottomY);
+        ctx.closePath();
+        ctx.fill();
+
+        // 갑판 상단 테두리
+        ctx.fillStyle = '#5c3a21';
+        ctx.fillRect(cx - 42 + sway, deckY, 84, 2);
+
+        // 뱃전 창문
+        ctx.fillStyle = '#fce7b0';
+        ctx.fillRect(cx - 30 + sway, deckY + 8, 4, 3);
+        ctx.fillRect(cx - 20 + sway, deckY + 8, 4, 3);
+        ctx.fillRect(cx + 16 + sway, deckY + 8, 4, 3);
+        ctx.fillRect(cx + 26 + sway, deckY + 8, 4, 3);
+
+        // 배 하단 그림자(수중) - 살짝 어둡게
+        ctx.fillStyle = 'rgba(0,0,0,0.2)';
+        ctx.fillRect(cx - 34 + sway, bottomY, 68, 2);
+
+        // 물결 리플 (수면에서 배 주변으로 퍼지는 형태)
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        const ripplePhase = Math.sin(t * 2.5);
+        ctx.fillRect(cx - 54, waterY + 1, 10 + ripplePhase * 2, 1);
+        ctx.fillRect(cx + 44, waterY + 1, 10 - ripplePhase * 2, 1);
+        ctx.fillRect(cx - 52, waterY + 4, 7, 1);
+        ctx.fillRect(cx + 45, waterY + 4, 7, 1);
+        ctx.fillRect(cx - 56, waterY + 7, 5, 1);
+        ctx.fillRect(cx + 51, waterY + 7, 5, 1);
+
+        // ==== 낚시대 (배와 함께 흔들림) ====
+        ctx.strokeStyle = '#5c3a21';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(cx + 20 + sway, deckY);
+        ctx.lineTo(cx + 30 + sway, 18 + bob);
+        ctx.lineTo(cx + sway, deckY);
+        ctx.stroke();
+
+        // ==== 고양이 (표정 결정) ====
+        let expression = 'default';
+        // 훅 상태에 따라 집중 표정
+        if (hook.state === 'dropping' || hook.state === 'reeling') {
+            expression = 'concentrating';
+        }
+        // 단어 완성 시 행복 표정 override
+        if (catExpressionOverride && performance.now() < catExpressionOverride.until) {
+            expression = catExpressionOverride.type;
+        } else if (catExpressionOverride) {
+            catExpressionOverride = null;
+        }
+        
+        drawChibiCat(ctx, cx - 8 + sway, deckY, expression);
+    }
+
+    /**
+     * Chibi 데포르메 고양이 (큰 머리, 큰 눈, 표정 3종)
+     * @param {number} cx - 고양이의 가로 중심
+     * @param {number} feetY - 발이 닿는 지면 Y (갑판 상단)
+     * @param {string} expression - 'default' | 'concentrating' | 'happy'
+     */
+    function drawChibiCat(ctx, cx, feetY, expression) {
+        const W = 22, H = 24;
+        const x = cx - W / 2;
+        const y = feetY - H;
+
+        // ==== 꼬리 ====
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x - 2, y + 18, 2, 4);
+        ctx.fillRect(x - 4, y + 16, 2, 2);
+        ctx.fillRect(x - 3, y + 13, 2, 3);
+        ctx.fillRect(x - 1, y + 11, 2, 2);
+
+        // ==== 몸통 ====
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x + 6, y + 16, 10, 6);
+        ctx.fillRect(x + 5, y + 17, 12, 4);
+
+        // ==== 앞발 ====
+        ctx.fillRect(x + 7, y + 22, 3, 2);
+        ctx.fillRect(x + 12, y + 22, 3, 2);
+
+        // ==== 귀 ====
+        ctx.fillRect(x + 3, y, 4, 4);
+        ctx.fillRect(x + 4, y - 1, 2, 2);
+        ctx.fillRect(x + 15, y, 4, 4);
+        ctx.fillRect(x + 16, y - 1, 2, 2);
+
+        // ==== 머리 ====
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(x + 2, y + 3, 18, 12);
+        ctx.fillRect(x + 1, y + 5, 20, 8);
+        ctx.fillRect(x + 3, y + 2, 16, 14);
+
+        // ==== 귀 안쪽 (분홍) ====
+        ctx.fillStyle = '#ffb6c1';
+        ctx.fillRect(x + 4, y + 1, 2, 2);
+        ctx.fillRect(x + 16, y + 1, 2, 2);
+
+        // ==== 눈 - 표정별로 다르게 그리기 ====
+        if (expression === 'concentrating') {
+            // >.< 찡그린 표정 (집중/낚시 중)
+            ctx.fillStyle = '#000';
+            // 왼눈 > 모양
+            ctx.fillRect(x + 5, y + 8, 1, 1);
+            ctx.fillRect(x + 6, y + 9, 1, 1);
+            ctx.fillRect(x + 7, y + 10, 1, 1);
+            ctx.fillRect(x + 6, y + 11, 1, 1);
+            ctx.fillRect(x + 5, y + 12, 1, 1);
+            // 오른눈 < 모양
+            ctx.fillRect(x + 16, y + 8, 1, 1);
+            ctx.fillRect(x + 15, y + 9, 1, 1);
+            ctx.fillRect(x + 14, y + 10, 1, 1);
+            ctx.fillRect(x + 15, y + 11, 1, 1);
+            ctx.fillRect(x + 16, y + 12, 1, 1);
+        } else if (expression === 'happy') {
+            // ^ ^ 활짝 웃는 표정 (단어 완성)
+            ctx.fillStyle = '#000';
+            // 왼눈 ^ 모양
+            ctx.fillRect(x + 5, y + 10, 1, 1);
+            ctx.fillRect(x + 6, y + 9, 1, 1);
+            ctx.fillRect(x + 7, y + 10, 1, 1);
+            // 오른눈 ^ 모양
+            ctx.fillRect(x + 14, y + 10, 1, 1);
+            ctx.fillRect(x + 15, y + 9, 1, 1);
+            ctx.fillRect(x + 16, y + 10, 1, 1);
+            // 반짝이 포인트 (별)
+            ctx.fillStyle = '#ffd700';
+            ctx.fillRect(x + 1, y + 6, 1, 1);
+            ctx.fillRect(x + 20, y + 6, 1, 1);
+        } else {
+            // 기본 큰 눈 + 하이라이트
+            ctx.fillStyle = '#000';
+            ctx.fillRect(x + 5, y + 8, 3, 4);
+            ctx.fillRect(x + 14, y + 8, 3, 4);
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(x + 6, y + 8, 1, 2);
+            ctx.fillRect(x + 15, y + 8, 1, 2);
+        }
+
+        // ==== 볼터치 ====
+        ctx.fillStyle = '#ffaac4';
+        ctx.fillRect(x + 3, y + 11, 2, 1);
+        ctx.fillRect(x + 17, y + 11, 2, 1);
+
+        // ==== 코 ====
+        ctx.fillStyle = '#ff6b8a';
+        ctx.fillRect(x + 10, y + 12, 2, 1);
+
+        // ==== 입 (표정별 변화) ====
+        ctx.fillStyle = '#333';
+        if (expression === 'happy') {
+            // 활짝 웃는 입 (ᵕ)
+            ctx.fillRect(x + 9, y + 13, 1, 1);
+            ctx.fillRect(x + 10, y + 14, 2, 1);
+            ctx.fillRect(x + 12, y + 13, 1, 1);
+        } else {
+            // 기본 ω 입
+            ctx.fillRect(x + 9, y + 13, 1, 1);
+            ctx.fillRect(x + 12, y + 13, 1, 1);
+        }
+
+        // ==== 수염 ====
+        ctx.fillStyle = '#bbb';
+        ctx.fillRect(x - 2, y + 11, 3, 1);
+        ctx.fillRect(x - 2, y + 13, 3, 1);
+        ctx.fillRect(x + 19, y + 11, 3, 1);
+        ctx.fillRect(x + 19, y + 13, 3, 1);
+    }
+
+    function gameLoop(timestamp) {
+        if (!lastTime) lastTime = timestamp;
+        const dt = (timestamp - lastTime) / 1000;
+        lastTime = timestamp;
+        gameTime += dt;
+
+        if (gameState.screen === 'playing') {
+            hook.update(dt);
+            letters.forEach(l => l.update(dt));
+            effects.forEach(e => e.update(dt));
+            effects = effects.filter(e => e.life > 0);
+            checkCollisions();
+        }
+
+        ctx.clearRect(0, 0, LOGICAL_WIDTH, LOGICAL_HEIGHT);
+        drawBackground(ctx);
+        drawCatAndBoat(ctx, gameTime);
+        
+        // 게임 요소는 플레이 중에만 그림 (메뉴/도감 화면에선 숨김)
+        if (gameState.screen === 'playing') {
+            hook.draw(ctx);
+            letters.forEach(l => l.draw(ctx));
+            effects.forEach(e => e.draw(ctx));
+        }
+
+        animationId = requestAnimationFrame(gameLoop);
+    }
+
+    /**
+     * 화면 및 상태 전환
+     */
+    function showScreen(screenName) {
+        Object.values(screens).forEach(s => s.classList.add('hidden'));
+        
+        if (screenName === 'menu') {
+            screens.menu.classList.remove('hidden');
+            updateMenuUI();
+        } else if (screenName === 'playing') {
+            screens.hud.classList.remove('hidden');
+            screens.wordDisplay.classList.remove('hidden');
+            screens.tuto.classList.remove('hidden');
+        } else if (screenName === 'result') {
+            screens.result.classList.remove('hidden');
+        } else if (screenName === 'dex') {
+            screens.dex.classList.remove('hidden');
+            updateDexScreen();
+        }
+        gameState.screen = screenName;
+    }
+
+    // v1.4: 단어 도감 화면 업데이트
+    function updateDexScreen() {
+        const list = document.getElementById('dex-list');
+        list.innerHTML = '';
+        
+        let totalWords = 0;
+        let discoveredWords = 0;
+        
+        stages.forEach((stage, stageIdx) => {
+            totalWords += stage.words.length;
+            
+            // 스테이지 타이틀
+            const stageTitle = document.createElement('div');
+            stageTitle.className = 'dex-stage-title';
+            stageTitle.textContent = `${stageIdx + 1}. ${stage.name}`;
+            list.appendChild(stageTitle);
+            
+            // 테마별로 그룹화
+            const themes = {};
+            stage.words.forEach(w => {
+                if (!themes[w.theme]) themes[w.theme] = [];
+                themes[w.theme].push(w);
+            });
+            
+            // 테마 순서 (동물 → 자연 → 음식 → 사물 → 탈것)
+            const themeOrder = ['동물', '자연', '음식', '사물', '탈것'];
+            const orderedThemes = themeOrder.filter(t => themes[t]);
+            
+            orderedThemes.forEach(theme => {
+                const themeTitle = document.createElement('div');
+                themeTitle.className = 'dex-theme-title';
+                themeTitle.textContent = `▸ ${theme}`;
+                list.appendChild(themeTitle);
+                
+                themes[theme].forEach(w => {
+                    const count = gameState.wordStats[w.en] || 0;
+                    if (count > 0) discoveredWords++;
+                    
+                    const row = document.createElement('div');
+                    row.className = 'dex-row';
+                    if (count === 0) row.classList.add('undiscovered');
+                    if (count >= 10) row.classList.add('mastered');
+                    
+                    const wordSpan = document.createElement('span');
+                    wordSpan.className = 'dex-word';
+                    wordSpan.textContent = count === 0 ? '???' : w.en;
+                    
+                    const koSpan = document.createElement('span');
+                    koSpan.className = 'dex-ko';
+                    koSpan.textContent = count === 0 ? '???' : w.ko;
+                    
+                    const countSpan = document.createElement('span');
+                    countSpan.className = 'dex-count';
+                    if (count === 0) {
+                        countSpan.textContent = '-';
+                    } else if (count >= 10) {
+                        countSpan.textContent = `★${count}`;
+                    } else {
+                        countSpan.textContent = `×${count}`;
+                    }
+                    
+                    row.appendChild(wordSpan);
+                    row.appendChild(koSpan);
+                    row.appendChild(countSpan);
+                    list.appendChild(row);
+                });
+            });
+        });
+        
+        document.getElementById('dex-progress').textContent = `${discoveredWords} / ${totalWords}`;
+    }
+
+    function updateMenuUI() {
+        document.getElementById('menu-gold').textContent = gameState.gold;
+        document.getElementById('menu-rod-lv').textContent = gameState.rodLevel;
+        document.getElementById('menu-max-casts').textContent = gameState.castsPerLevel[gameState.rodLevel];
+        
+        // 맵 정보 업데이트
+        const stage = stages[gameState.currentMapIdx];
+        document.getElementById('map-name').textContent = stage.name;
+        document.getElementById('map-desc').textContent = stage.desc;
+
+        // 업그레이드 정보
+        const nextCost = gameState.upgradeCosts[gameState.rodLevel];
+        const btnUpgrade = document.getElementById('btn-upgrade');
+        const costSpan = document.getElementById('upgrade-cost');
+        
+        if (nextCost === "MAX") {
+            btnUpgrade.disabled = true;
+            btnUpgrade.textContent = "최고 레벨 달성";
+        } else {
+            costSpan.textContent = nextCost;
+            if (gameState.gold >= nextCost) {
+                btnUpgrade.disabled = false;
+            } else {
+                btnUpgrade.disabled = true;
+            }
+        }
+    }
+
+    function updateHUD() {
+        document.getElementById('casts-left').textContent = gameState.currentCasts;
+        document.getElementById('session-gold').textContent = gameState.sessionGold;
+        document.getElementById('session-words').textContent = gameState.sessionWords;
+        document.getElementById('target-word-hud').textContent = gameState.targetWord;
+        
+        let displayStr = "";
+        const targetArr = gameState.targetWord.split('');
+        for (let i = 0; i < targetArr.length; i++) {
+            if (gameState.collectedLetters[i] !== null) {
+                displayStr += gameState.collectedLetters[i] + " ";
+            } else {
+                displayStr += "_ ";
+            }
+        }
+        screens.wordDisplay.textContent = displayStr.trim();
+    }
+
+    function startGame() {
+        gameState.sessionGold = 0;
+        gameState.sessionWords = 0;
+        gameState.currentCasts = gameState.castsPerLevel[gameState.rodLevel];
+        
+        setRandomTargetWord();
+        
+        hook = new Hook();
+        effects = [];
+        spawnLetters();
+        
+        showScreen('playing');
+        updateHUD();
+
+        // 튜토리얼 5초 후 자동 페이드아웃 (첫 탭으로도 바로 사라짐)
+        if (tutoHideTimer) clearTimeout(tutoHideTimer);
+        tutoHideTimer = setTimeout(() => {
+            screens.tuto.classList.add('hidden');
+        }, 5000);
+    }
+
+    // 낚시 횟수를 모두 소진했을 때 최종 세션 종료
+    function endGameSession() {
+        if (gameState.screen !== 'playing') return;
+        
+        document.getElementById('result-words').textContent = gameState.sessionWords;
+        document.getElementById('result-reward').textContent = gameState.sessionGold;
+        
+        showScreen('result');
+    }
+
+    /**
+     * 이벤트 리스너
+     */
+    // 맵 선택 버튼 (맵 바꾸면 단어 큐 리셋)
+    document.getElementById('btn-prev-map').addEventListener('click', () => {
+        gameState.currentMapIdx = (gameState.currentMapIdx - 1 + stages.length) % stages.length;
+        wordQueue = [];
+        updateMenuUI();
+    });
+    
+    document.getElementById('btn-next-map').addEventListener('click', () => {
+        gameState.currentMapIdx = (gameState.currentMapIdx + 1) % stages.length;
+        wordQueue = [];
+        updateMenuUI();
+    });
+
+    document.getElementById('btn-start').addEventListener('click', startGame);
+    
+    document.getElementById('btn-return-menu').addEventListener('click', () => {
+        showScreen('menu');
+    });
+
+    // v1.4: 도감 버튼
+    document.getElementById('btn-dex').addEventListener('click', () => {
+        showScreen('dex');
+    });
+    document.getElementById('btn-dex-back').addEventListener('click', () => {
+        showScreen('menu');
+    });
+
+    document.getElementById('btn-upgrade').addEventListener('click', () => {
+        const cost = gameState.upgradeCosts[gameState.rodLevel];
+        if (cost !== "MAX" && gameState.gold >= cost) {
+            gameState.gold -= cost;
+            gameState.rodLevel++;
+            saveGame(); // 강화 후 저장
+            
+            const msg = document.getElementById('upgrade-msg');
+            msg.textContent = `Lv.${gameState.rodLevel}(으)로 강화 완료!`;
+            setTimeout(() => { msg.textContent = ""; }, 2000);
+            
+            updateMenuUI();
+        }
+    });
+
+    canvas.addEventListener('mousedown', handleInput);
+    canvas.addEventListener('touchstart', (e) => {
+        e.preventDefault(); 
+        handleInput();
+    }, {passive: false});
+
+    // 저장된 게임 상태 불러오기 (금화/낚시대 레벨)
+    loadGame();
+
+    showScreen('menu');
+    requestAnimationFrame(gameLoop);
+
+    document.fonts.ready.then(function () {
+        if(gameState.screen === 'menu') updateMenuUI();
+    });
+
+</script>
+</body>
+</html>

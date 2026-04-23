@@ -152,8 +152,10 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 20px 20px 40px;
     text-align: center;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
   }
   .overlay.hidden { display: none; }
 
@@ -263,15 +265,15 @@
   .char-select {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 8px;
-    margin-bottom: 20px;
+    gap: 6px;
+    margin-bottom: 16px;
     width: 100%;
-    max-width: 340px;
+    max-width: 360px;
   }
   .char-card {
     background: rgba(255,255,255,0.05);
-    border: 3px solid #334155;
-    padding: 8px 4px;
+    border: 2px solid #334155;
+    padding: 6px 3px;
     text-align: center;
     cursor: pointer;
     font-family: 'Press Start 2P', monospace;
@@ -427,45 +429,78 @@ const WORD_POOLS = {
 };
 
 // ============================================================
-// 캐릭터 정의
+// 캐릭터 정의 (6종)
 // ============================================================
 const CHARACTERS = [
   {
-    id: 'flame',
-    name: 'FLAME',
-    desc: '균형형',
-    unlockStage: 1,
-    hp: 3,
-    fireRateBonus: 0,
+    id: 'flame', name: 'FLAME', desc: '균형형',
+    unlockStage: 1, hp: 3, fireRateBonus: 0, maxOptions: 3, speedBonus: 0,
+    bulletShape: 'rect',
     colors: {
       body: '#ef4444', bodyDark: '#991b1b', belly: '#fca5a5',
-      wing: '#dc2626', horn: '#ffd700', bullet: '#ffd700', bulletStrong: '#ff8800'
+      wing: '#dc2626', horn: '#ffd700',
+      bullet: '#ffd700', bulletStrong: '#ff8800'
     }
   },
   {
-    id: 'ice',
-    name: 'ICE',
-    desc: 'HP +1',
-    unlockStage: 5,
-    hp: 4,
-    fireRateBonus: 0,
+    id: 'ice', name: 'ICE', desc: 'HP +1',
+    unlockStage: 5, hp: 4, fireRateBonus: -20, maxOptions: 3, speedBonus: 0,
+    bulletShape: 'ice',
     colors: {
       body: '#3b82f6', bodyDark: '#1e3a8a', belly: '#bfdbfe',
-      wing: '#2563eb', horn: '#e0f2fe', bullet: '#67e8f9', bulletStrong: '#22d3ee'
+      wing: '#2563eb', horn: '#e0f2fe',
+      bullet: '#67e8f9', bulletStrong: '#22d3ee'
     }
   },
   {
-    id: 'thunder',
-    name: 'THUNDER',
-    desc: '빠른 발사',
-    unlockStage: 10,
-    hp: 3,
-    fireRateBonus: 40, // ms 단축
+    id: 'thunder', name: 'THUNDER', desc: '빠른 발사',
+    unlockStage: 10, hp: 3, fireRateBonus: 40, maxOptions: 4, speedBonus: 0,
+    bulletShape: 'zigzag',
     colors: {
       body: '#a855f7', bodyDark: '#6b21a8', belly: '#e9d5ff',
-      wing: '#9333ea', horn: '#fef3c7', bullet: '#fde047', bulletStrong: '#facc15'
+      wing: '#9333ea', horn: '#fef3c7',
+      bullet: '#fde047', bulletStrong: '#facc15'
+    }
+  },
+  {
+    id: 'wind', name: 'WIND', desc: '빠른 이동',
+    unlockStage: 15, hp: 3, fireRateBonus: 20, maxOptions: 4, speedBonus: 2,
+    bulletShape: 'slash',
+    colors: {
+      body: '#10b981', bodyDark: '#065f46', belly: '#a7f3d0',
+      wing: '#059669', horn: '#f0fdf4',
+      bullet: '#6ee7b7', bulletStrong: '#10b981'
+    }
+  },
+  {
+    id: 'holy', name: 'HOLY', desc: 'HP +2',
+    unlockStage: 20, hp: 5, fireRateBonus: -30, maxOptions: 5, speedBonus: 0,
+    bulletShape: 'orb',
+    colors: {
+      body: '#fbbf24', bodyDark: '#b45309', belly: '#fef3c7',
+      wing: '#f59e0b', horn: '#fff',
+      bullet: '#fff', bulletStrong: '#fef3c7'
+    }
+  },
+  {
+    id: 'shadow', name: 'SHADOW', desc: '고위험 고화력',
+    unlockStage: 30, hp: 2, fireRateBonus: 60, maxOptions: 5, speedBonus: 0,
+    bulletShape: 'arrow',
+    colors: {
+      body: '#334155', bodyDark: '#0f172a', belly: '#64748b',
+      wing: '#1e293b', horn: '#dc2626',
+      bullet: '#c084fc', bulletStrong: '#ef4444'
     }
   }
+];
+
+// 판넬(옵션) 배치 오프셋 (플레이어 기준 상대좌표)
+const OPTION_OFFSETS = [
+  { x: -28, y: 8 },   // 좌측
+  { x:  28, y: 8 },   // 우측
+  { x: -48, y: 18 },  // 더 좌측 (뒤)
+  { x:  48, y: 18 },  // 더 우측 (뒤)
+  { x:   0, y: -20 }  // 머리 위
 ];
 
 // ============================================================
@@ -540,6 +575,9 @@ const state = {
   selectedChar: parseInt(localStorage.getItem('dragonFlight_v2_char') || '0'),
   kills: 0,
   hp: 3,
+
+  // 판넬(옵션)
+  options: [],
 
   // 단어 상태
   currentWord: null,
@@ -632,6 +670,7 @@ function startGame() {
   state.speedLines = [];
   state.boss = null;
   state.meteors = [];
+  state.options = [];
   state.lastMeteor = performance.now();
   state.score = 0;
   state.kills = 0;
@@ -783,8 +822,8 @@ function enemyShoot(enemy) {
     y: enemy.y + enemy.h/2,
     vx: 0,
     vy: 2.5 + state.stage * 0.1,
-    w: 5, h: 7,
-    color: enemy.type === 'tanky' ? '#ff0066' : '#a855f7'
+    w: 7, h: 10,  // 기존 5×7 → 7×10
+    color: enemy.type === 'tanky' ? '#dc2626' : '#ef4444'  // 모두 빨강 계열
   });
 }
 
@@ -844,11 +883,11 @@ function updateBoss() {
         state.enemyBullets.push({
           x: b.x, y: b.y + b.h/2,
           vx: i * 1.6, vy: 2.8,
-          w: 6, h: 9, color: '#ff0066'
+          w: 8, h: 12, color: '#ef4444'
         });
       }
     } else if (pattern === 1) {
-      // 플레이어 조준탄
+      // 플레이어 조준탄 (가장 위협적 - 큼 + 짙은 빨강)
       const dx = state.player.x - b.x;
       const dy = state.player.y - b.y;
       const dist = Math.max(1, Math.hypot(dx, dy));
@@ -856,7 +895,7 @@ function updateBoss() {
         x: b.x, y: b.y + b.h/2,
         vx: dx/dist * 2.8,
         vy: dy/dist * 2.8,
-        w: 7, h: 9, color: '#ffd700'
+        w: 10, h: 14, color: '#dc2626'
       });
     } else {
       // 5갈래 부채꼴
@@ -864,7 +903,7 @@ function updateBoss() {
         state.enemyBullets.push({
           x: b.x, y: b.y + b.h/2,
           vx: i * 1.0, vy: 2.4,
-          w: 5, h: 8, color: '#a855f7'
+          w: 7, h: 11, color: '#b91c1c'
         });
       }
     }
@@ -960,32 +999,41 @@ function shoot() {
   const py = state.player.y - 12;
   const lv = state.feverActive ? 10 : state.weaponLv;
   const C = char.colors;
+  const SH = char.bulletShape;
 
   if (state.feverActive) {
-    // 피버: 전방 7갈래 + 강화탄
+    // 피버: 전방 7갈래 + 강화탄 (모두 사각 + 금색으로 통일감)
     for (let i = -3; i <= 3; i++) {
-      state.bullets.push({ x: px + i*6, y: py, vx: i*1.2, vy: -9, color: '#ffd700', w: 4, h: 8 });
+      state.bullets.push({ x: px + i*6, y: py, vx: i*1.2, vy: -9, color: '#ffd700', w: 4, h: 8, shape: 'rect' });
     }
-    state.bullets.push({ x: px, y: py - 5, vx: 0, vy: -12, color: '#fff', w: 6, h: 12 });
+    state.bullets.push({ x: px, y: py - 5, vx: 0, vy: -12, color: '#fff', w: 6, h: 12, shape: 'rect' });
   } else if (lv === 1) {
-    state.bullets.push({ x: px, y: py, vx: 0, vy: -9, color: C.bullet, w: 3, h: 8 });
+    state.bullets.push({ x: px, y: py, vx: 0, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
   } else if (lv === 2) {
-    state.bullets.push({ x: px - 6, y: py, vx: 0, vy: -9, color: C.bullet, w: 3, h: 8 });
-    state.bullets.push({ x: px + 6, y: py, vx: 0, vy: -9, color: C.bullet, w: 3, h: 8 });
+    state.bullets.push({ x: px - 6, y: py, vx: 0, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
+    state.bullets.push({ x: px + 6, y: py, vx: 0, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
   } else if (lv === 3) {
-    state.bullets.push({ x: px, y: py, vx: 0, vy: -10, color: C.bulletStrong, w: 4, h: 9 });
-    state.bullets.push({ x: px - 8, y: py, vx: -0.8, vy: -9, color: C.bullet, w: 3, h: 8 });
-    state.bullets.push({ x: px + 8, y: py, vx: 0.8, vy: -9, color: C.bullet, w: 3, h: 8 });
+    state.bullets.push({ x: px, y: py, vx: 0, vy: -10, color: C.bulletStrong, w: 5, h: 10, shape: SH });
+    state.bullets.push({ x: px - 8, y: py, vx: -0.8, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
+    state.bullets.push({ x: px + 8, y: py, vx: 0.8, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
   } else if (lv === 4) {
-    state.bullets.push({ x: px - 10, y: py, vx: -0.8, vy: -9, color: C.bullet, w: 3, h: 8 });
-    state.bullets.push({ x: px - 4, y: py, vx: 0, vy: -10, color: C.bulletStrong, w: 4, h: 9 });
-    state.bullets.push({ x: px + 4, y: py, vx: 0, vy: -10, color: C.bulletStrong, w: 4, h: 9 });
-    state.bullets.push({ x: px + 10, y: py, vx: 0.8, vy: -9, color: C.bullet, w: 3, h: 8 });
+    state.bullets.push({ x: px - 10, y: py, vx: -0.8, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
+    state.bullets.push({ x: px - 4, y: py, vx: 0, vy: -10, color: C.bulletStrong, w: 5, h: 10, shape: SH });
+    state.bullets.push({ x: px + 4, y: py, vx: 0, vy: -10, color: C.bulletStrong, w: 5, h: 10, shape: SH });
+    state.bullets.push({ x: px + 10, y: py, vx: 0.8, vy: -9, color: C.bullet, w: 4, h: 9, shape: SH });
   } else { // Lv5+
     for (let i = -2; i <= 2; i++) {
-      state.bullets.push({ x: px + i*7, y: py, vx: i*1.0, vy: -10, color: i === 0 ? '#ff0066' : C.bulletStrong, w: 4, h: 9 });
+      state.bullets.push({ x: px + i*7, y: py, vx: i*1.0, vy: -10, color: i === 0 ? C.bulletStrong : C.bullet, w: 5, h: 10, shape: SH });
     }
-    if (lv >= 6) state.bullets.push({ x: px, y: py - 5, vx: 0, vy: -13, color: '#fff', w: 5, h: 11 });
+  }
+
+  // 판넬(옵션) 총알 - 각 옵션 위치에서 직선탄 발사
+  for (const opt of state.options) {
+    state.bullets.push({
+      x: opt.x, y: opt.y - 8,
+      vx: 0, vy: -9,
+      color: C.bullet, w: 3, h: 7, shape: SH
+    });
   }
 }
 
@@ -1120,7 +1168,8 @@ function loop() {
   if (!state.running) return;
 
   // 플레이어 이동
-  const speed = state.feverActive ? 9 : 6;
+  const char = CHARACTERS[state.selectedChar];
+  const speed = (state.feverActive ? 9 : 6) + (char.speedBonus || 0);
   if (pointerX !== null) {
     const dx = pointerX - state.player.x;
     if (Math.abs(dx) > 2) state.player.x += Math.sign(dx) * Math.min(Math.abs(dx), speed * 1.3);
@@ -1132,6 +1181,19 @@ function loop() {
   state.player.wingFrame = (state.player.wingFrame + 1) % 20;
   state.player.flameFrame = (state.player.flameFrame + 1) % 8;
   if (state.player.invuln > 0) state.player.invuln--;
+
+  // 판넬(옵션) 위치 업데이트 (lerp 추종)
+  for (let i = 0; i < state.options.length; i++) {
+    const opt = state.options[i];
+    const offset = OPTION_OFFSETS[i];
+    const targetX = state.player.x + offset.x;
+    const targetY = state.player.y + offset.y;
+    opt.x += (targetX - opt.x) * 0.18;
+    opt.y += (targetY - opt.y) * 0.18;
+    // 화면 경계 clamp
+    opt.x = Math.max(8, Math.min(W - 8, opt.x));
+    opt.flameFrame = (opt.flameFrame + 1) % 8;
+  }
 
   // 자동 발사
   shoot();
@@ -1415,7 +1477,21 @@ function collectLetter(L) {
   if (L.char === needed) {
     // 정답!
     state.letterIndex++;
-    state.weaponLv = Math.min(state.weaponLv + 1, 5);
+    const char = CHARACTERS[state.selectedChar];
+    if (state.weaponLv < 5) {
+      state.weaponLv++;
+    } else if (state.options.length < char.maxOptions) {
+      // Lv5 상태에서 정답 → 판넬 추가
+      const idx = state.options.length;
+      const offset = OPTION_OFFSETS[idx];
+      state.options.push({
+        x: state.player.x + offset.x,
+        y: state.player.y + offset.y,
+        flameFrame: 0
+      });
+      showCombo(state.player.x, state.player.y - 30, '★ PANEL +1 ★', '#fbbf24');
+      spawnParticles(state.player.x, state.player.y, '#fbbf24', 20);
+    }
     state.score += 100;
     spawnParticles(L.x, L.y, '#4ade80', 12);
     showCombo(L.x, L.y - 10, '+' + L.char, '#4ade80');
@@ -1431,7 +1507,7 @@ function collectLetter(L) {
     state.score += 5;
     spawnParticles(L.x, L.y, '#94a3b8', 5);
   } else {
-    // 오답 - 무기 약화
+    // 오답 - 무기 약화 (판넬은 유지)
     state.weaponLv = Math.max(1, state.weaponLv - 1);
     state.score = Math.max(0, state.score - 20);
     spawnParticles(L.x, L.y, '#ef4444', 10);
@@ -1519,23 +1595,25 @@ function render() {
     drawLetterTile(L);
   }
 
-  // 총알 (플레이어)
+  // 총알 (플레이어) - shape별 렌더
   for (const b of state.bullets) {
-    ctx.fillStyle = b.color;
-    ctx.fillRect(Math.floor(b.x - b.w/2), Math.floor(b.y - b.h/2), b.w, b.h);
-    // 빛나는 효과 (외곽)
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillRect(Math.floor(b.x - b.w/2 - 1), Math.floor(b.y - b.h/2), 1, b.h);
-    ctx.fillRect(Math.floor(b.x + b.w/2), Math.floor(b.y - b.h/2), 1, b.h);
+    drawPlayerBullet(b);
   }
 
-  // 적 탄환
+  // 적 탄환 (위험 강조: 어두운 외곽 + 흰 중앙 하이라이트)
   for (const b of state.enemyBullets) {
+    // 어두운 외곽 (후광)
+    ctx.fillStyle = '#450a0a';
+    ctx.fillRect(Math.floor(b.x - b.w/2 - 1), Math.floor(b.y - b.h/2 - 1), b.w + 2, b.h + 2);
+    // 메인 몸체 (빨강 캡슐)
     ctx.fillStyle = b.color;
     ctx.fillRect(Math.floor(b.x - b.w/2), Math.floor(b.y - b.h/2), b.w, b.h);
-    // 광휘 (위험 표시)
-    ctx.fillStyle = 'rgba(255,255,255,0.5)';
-    ctx.fillRect(Math.floor(b.x - 1), Math.floor(b.y - b.h/2), 2, 2);
+    // 흰 중앙 세로 라인
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.fillRect(Math.floor(b.x - 1), Math.floor(b.y - b.h/2 + 1), 2, Math.max(2, b.h - 2));
+    // 상단 번쩍 포인트
+    ctx.fillStyle = 'rgba(255,255,255,0.9)';
+    ctx.fillRect(Math.floor(b.x - 1), Math.floor(b.y - b.h/2 + 1), 2, 2);
   }
 
   // 적
@@ -1558,6 +1636,12 @@ function render() {
   // 플레이어
   drawDragon(state.player);
 
+  // 판넬(옵션) - 플레이어 뒤쪽에 그리면 시각적으로 전면에 가려지므로 먼저 그리는 게 좋지만
+  // 여기서는 플레이어가 더 잘 보이도록 뒤에 그린 후 판넬이 플레이어 위로 오게
+  for (const opt of state.options) {
+    drawOption(opt);
+  }
+
   // 파티클
   for (const p of state.particles) {
     const alpha = Math.max(0, p.life / p.maxLife);
@@ -1573,6 +1657,143 @@ function render() {
 function drawPx(x, y, w, h, color) {
   ctx.fillStyle = color;
   ctx.fillRect(Math.floor(x), Math.floor(y), w, h);
+}
+
+// ============================================================
+// 플레이어 총알 렌더 (캐릭터별 모양)
+// ============================================================
+function drawPlayerBullet(b) {
+  const cx = Math.floor(b.x);
+  const cy = Math.floor(b.y);
+  const shape = b.shape || 'rect';
+  const color = b.color;
+
+  switch (shape) {
+    case 'rect': {
+      // FLAME: 기본 직사각 + 양옆 반짝
+      drawPx(cx - b.w/2, cy - b.h/2, b.w, b.h, color);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.fillRect(Math.floor(cx - b.w/2 - 1), Math.floor(cy - b.h/2), 1, b.h);
+      ctx.fillRect(Math.floor(cx + b.w/2), Math.floor(cy - b.h/2), 1, b.h);
+      break;
+    }
+    case 'ice': {
+      // ICE: 마름모 얼음 결정
+      drawPx(cx - 1, cy - 5, 2, 1, color);        // 상단 꼭지
+      drawPx(cx - 2, cy - 4, 4, 1, color);
+      drawPx(cx - 3, cy - 3, 6, 1, color);
+      drawPx(cx - 3, cy - 2, 6, 2, color);        // 중앙 최대폭
+      drawPx(cx - 3, cy, 6, 1, color);
+      drawPx(cx - 2, cy + 1, 4, 1, color);
+      drawPx(cx - 1, cy + 2, 2, 2, color);        // 하단 꼭지
+      // 흰 하이라이트 (얼음 반짝)
+      drawPx(cx - 1, cy - 2, 1, 2, '#fff');
+      drawPx(cx, cy - 4, 1, 1, '#fff');
+      break;
+    }
+    case 'zigzag': {
+      // THUNDER: 번개 지그재그
+      drawPx(cx - 1, cy - 5, 3, 2, color);         // 상단
+      drawPx(cx, cy - 3, 3, 2, color);             // 오른쪽 이동
+      drawPx(cx - 2, cy - 1, 3, 2, color);         // 왼쪽 이동
+      drawPx(cx - 1, cy + 1, 3, 2, color);         // 오른쪽
+      drawPx(cx - 2, cy + 3, 3, 2, color);         // 하단
+      // 흰 코어
+      drawPx(cx, cy - 3, 1, 1, '#fff');
+      drawPx(cx - 1, cy, 1, 1, '#fff');
+      drawPx(cx, cy + 2, 1, 1, '#fff');
+      break;
+    }
+    case 'slash': {
+      // WIND: 얇고 긴 바람 칼 (대각 느낌)
+      drawPx(cx - 2, cy - 5, 2, 2, color);
+      drawPx(cx - 1, cy - 3, 2, 2, color);
+      drawPx(cx, cy - 1, 2, 2, color);
+      drawPx(cx + 1, cy + 1, 2, 2, color);
+      drawPx(cx + 2, cy + 3, 2, 2, color);
+      // 잔상
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillRect(cx - 2, cy - 5, 1, 1);
+      ctx.fillRect(cx, cy - 1, 1, 1);
+      ctx.fillRect(cx + 2, cy + 3, 1, 1);
+      break;
+    }
+    case 'orb': {
+      // HOLY: 빛 구슬 (원형) + 후광
+      // 외부 후광 (반투명)
+      ctx.globalAlpha = 0.4;
+      drawPx(cx - 4, cy - 2, 8, 4, color);
+      drawPx(cx - 2, cy - 4, 4, 8, color);
+      ctx.globalAlpha = 1;
+      // 몸체 (원형)
+      drawPx(cx - 1, cy - 3, 2, 1, color);
+      drawPx(cx - 2, cy - 2, 4, 1, color);
+      drawPx(cx - 3, cy - 1, 6, 2, color);
+      drawPx(cx - 2, cy + 1, 4, 1, color);
+      drawPx(cx - 1, cy + 2, 2, 1, color);
+      // 중앙 흰 하이라이트
+      drawPx(cx - 1, cy - 1, 2, 2, '#fff');
+      break;
+    }
+    case 'arrow': {
+      // SHADOW: 삼각 화살촉 (위로 뾰족)
+      drawPx(cx, cy - 5, 1, 1, color);             // 꼭지
+      drawPx(cx - 1, cy - 4, 3, 1, color);
+      drawPx(cx - 2, cy - 3, 5, 1, color);          // 날개 넓음
+      drawPx(cx - 2, cy - 2, 5, 2, color);
+      drawPx(cx - 1, cy, 3, 2, color);              // 몸체 좁아짐
+      drawPx(cx - 1, cy + 2, 3, 2, color);
+      drawPx(cx, cy + 4, 1, 1, color);              // 끝
+      // 중앙 라인 (어두운 코어)
+      drawPx(cx, cy - 2, 1, 4, '#000');
+      break;
+    }
+    default: {
+      drawPx(cx - b.w/2, cy - b.h/2, b.w, b.h, color);
+    }
+  }
+}
+
+// ============================================================
+// 판넬(옵션) 렌더
+// ============================================================
+function drawOption(opt) {
+  const cx = Math.floor(opt.x);
+  const cy = Math.floor(opt.y);
+  const char = CHARACTERS[state.selectedChar];
+  const C = char.colors;
+
+  // 미니 엔진 불꽃 (플레이어보다 작음)
+  const fIdx = Math.floor(opt.flameFrame / 3) % 3;
+  drawPx(cx - 1, cy + 6, 2, 2 + fIdx, '#ff0066');
+  drawPx(cx - 2, cy + 7, 4, 2, '#ff6600');
+
+  // 날개 (작음)
+  drawPx(cx - 6, cy - 1, 2, 4, C.wing);
+  drawPx(cx + 4, cy - 1, 2, 4, C.wing);
+
+  // 몸통 외곽
+  drawPx(cx - 4, cy - 4, 8, 1, C.bodyDark);   // 상
+  drawPx(cx - 4, cy + 5, 8, 1, C.bodyDark);   // 하
+  drawPx(cx - 5, cy - 3, 1, 8, C.bodyDark);   // 좌
+  drawPx(cx + 4, cy - 3, 1, 8, C.bodyDark);   // 우
+
+  // 몸통 내부
+  drawPx(cx - 4, cy - 3, 8, 8, C.body);
+  // 배 하이라이트
+  drawPx(cx - 2, cy, 4, 3, C.belly);
+
+  // 상단 (뾰족)
+  drawPx(cx - 2, cy - 6, 4, 2, C.body);
+  drawPx(cx - 2, cy - 7, 4, 1, C.bodyDark);
+
+  // 눈 (하나만)
+  drawPx(cx - 1, cy - 2, 2, 1, '#fff');
+  drawPx(cx, cy - 2, 1, 1, '#000');
+
+  // 뿔 (작게)
+  drawPx(cx - 3, cy - 6, 1, 2, C.horn);
+  drawPx(cx + 2, cy - 6, 1, 2, C.horn);
 }
 
 // 드래곤 (픽셀 아트) - 32x32 프레임, 날개 애니메이션
@@ -1701,57 +1922,155 @@ function drawMiniDragon(canvasEl, char) {
   mp(cx + 1, cy - 6, 1, 1, '#fff');
 }
 
-// 적 (픽셀 아트 - 적 유형별 다른 모양)
+// 적 (스페이스 인베이더 스타일 외계인 3종)
 function drawEnemy(e) {
   const cx = Math.floor(e.x);
   const cy = Math.floor(e.y);
+  const frameA = e.animFrame < 10; // 2프레임 애니메이션
 
   if (e.type === 'basic') {
-    // 박쥐 스타일
-    const wingUp = e.animFrame < 10;
-    // 날개
-    if (wingUp) {
-      drawPx(cx - 12, cy - 4, 4, 4, '#6b21a8');
-      drawPx(cx + 8, cy - 4, 4, 4, '#6b21a8');
-      drawPx(cx - 8, cy - 2, 4, 4, '#a855f7');
-      drawPx(cx + 4, cy - 2, 4, 4, '#a855f7');
+    // ===== 문어형 외계인 (보라) =====
+    // 안테나 2개 (머리 위)
+    drawPx(cx - 7, cy - 12, 2, 3, '#7e22ce');
+    drawPx(cx + 5, cy - 12, 2, 3, '#7e22ce');
+    drawPx(cx - 7, cy - 14, 2, 2, '#c084fc'); // 안테나 끝 빛남
+
+    drawPx(cx + 5, cy - 14, 2, 2, '#c084fc');
+
+    // 돔 머리 (둥근 외곽 시뮬레이션)
+    drawPx(cx - 6, cy - 10, 12, 2, '#6b21a8');
+    drawPx(cx - 8, cy - 8, 16, 2, '#7e22ce');
+    drawPx(cx - 9, cy - 6, 18, 6, '#a855f7'); // 메인 몸통
+
+    // 배 아래 어두운 테
+    drawPx(cx - 8, cy + 0, 16, 2, '#7e22ce');
+    drawPx(cx - 6, cy + 2, 12, 2, '#6b21a8');
+
+    // 눈 (큰 흰자 + 빨간 동공 = 위협적)
+    drawPx(cx - 5, cy - 5, 3, 3, '#fff');
+    drawPx(cx + 2, cy - 5, 3, 3, '#fff');
+    drawPx(cx - 4, cy - 4, 2, 2, '#ef4444');
+    drawPx(cx + 3, cy - 4, 2, 2, '#ef4444');
+
+    // 촉수 4개 (펄럭 애니메이션)
+    if (frameA) {
+      // 촉수 뻗음
+      drawPx(cx - 7, cy + 4, 2, 4, '#7e22ce');
+      drawPx(cx - 3, cy + 4, 2, 4, '#7e22ce');
+      drawPx(cx + 1, cy + 4, 2, 4, '#7e22ce');
+      drawPx(cx + 5, cy + 4, 2, 4, '#7e22ce');
+      drawPx(cx - 7, cy + 8, 2, 2, '#6b21a8');
+      drawPx(cx + 5, cy + 8, 2, 2, '#6b21a8');
     } else {
-      drawPx(cx - 12, cy + 2, 4, 4, '#6b21a8');
-      drawPx(cx + 8, cy + 2, 4, 4, '#6b21a8');
-      drawPx(cx - 8, cy + 0, 4, 4, '#a855f7');
-      drawPx(cx + 4, cy + 0, 4, 4, '#a855f7');
+      // 촉수 위로 당김
+      drawPx(cx - 7, cy + 4, 2, 3, '#7e22ce');
+      drawPx(cx - 3, cy + 4, 2, 3, '#7e22ce');
+      drawPx(cx + 1, cy + 4, 2, 3, '#7e22ce');
+      drawPx(cx + 5, cy + 4, 2, 3, '#7e22ce');
+      drawPx(cx - 5, cy + 7, 2, 3, '#6b21a8');
+      drawPx(cx + 3, cy + 7, 2, 3, '#6b21a8');
     }
-    // 몸통
-    drawPx(cx - 6, cy - 6, 12, 12, '#7e22ce');
-    drawPx(cx - 4, cy - 4, 8, 8, '#a855f7');
-    // 눈 (빨강)
-    drawPx(cx - 3, cy - 2, 2, 2, '#ef4444');
-    drawPx(cx + 1, cy - 2, 2, 2, '#ef4444');
-    // 입
-    drawPx(cx - 2, cy + 2, 4, 1, '#000');
+
   } else if (e.type === 'fast') {
-    // 빠른 적 - 화살 모양
-    drawPx(cx - 2, cy - 10, 4, 4, '#fbbf24');
-    drawPx(cx - 4, cy - 6, 8, 4, '#f59e0b');
-    drawPx(cx - 6, cy - 2, 12, 4, '#f59e0b');
-    drawPx(cx - 4, cy + 2, 8, 4, '#d97706');
-    drawPx(cx - 2, cy + 6, 4, 4, '#d97706');
-    // 눈
-    drawPx(cx - 2, cy - 4, 1, 1, '#000');
-    drawPx(cx + 1, cy - 4, 1, 1, '#000');
+    // ===== 게형 외계인 (빨강 - 확실한 적 느낌) =====
+    // 눈자루 (위로 돌출된 2개)
+    drawPx(cx - 5, cy - 10, 2, 4, '#991b1b');
+    drawPx(cx + 3, cy - 10, 2, 4, '#991b1b');
+    // 눈 (빨강 + 노랑 동공 = 악의적)
+    drawPx(cx - 6, cy - 12, 4, 3, '#ef4444');
+    drawPx(cx + 2, cy - 12, 4, 3, '#ef4444');
+    drawPx(cx - 5, cy - 11, 2, 1, '#fde047'); // 노랑 동공
+    drawPx(cx + 3, cy - 11, 2, 1, '#fde047');
+
+    // 몸통 (납작 타원 - 게처럼 옆으로 퍼짐)
+    drawPx(cx - 7, cy - 6, 14, 2, '#7f1d1d');   // 상단 테
+    drawPx(cx - 9, cy - 4, 18, 2, '#991b1b');
+    drawPx(cx - 10, cy - 2, 20, 4, '#dc2626'); // 메인
+    drawPx(cx - 9, cy + 2, 18, 2, '#991b1b');
+    drawPx(cx - 7, cy + 4, 14, 2, '#7f1d1d');  // 하단 테
+
+    // 몸통 무늬 (줄무늬)
+    drawPx(cx - 4, cy - 1, 2, 2, '#7f1d1d');
+    drawPx(cx + 2, cy - 1, 2, 2, '#7f1d1d');
+
+    // 집게팔 (양옆, 애니메이션)
+    if (frameA) {
+      // 팔 뻗음
+      drawPx(cx - 14, cy - 2, 4, 2, '#dc2626');
+      drawPx(cx + 10, cy - 2, 4, 2, '#dc2626');
+      drawPx(cx - 16, cy - 3, 2, 4, '#ef4444'); // 집게
+      drawPx(cx + 14, cy - 3, 2, 4, '#ef4444');
+      drawPx(cx - 16, cy - 4, 2, 2, '#7f1d1d');
+      drawPx(cx + 14, cy - 4, 2, 2, '#7f1d1d');
+    } else {
+      // 팔 당김
+      drawPx(cx - 12, cy - 2, 2, 2, '#dc2626');
+      drawPx(cx + 10, cy - 2, 2, 2, '#dc2626');
+      drawPx(cx - 13, cy - 3, 2, 4, '#ef4444');
+      drawPx(cx + 11, cy - 3, 2, 4, '#ef4444');
+    }
+
+    // 작은 다리 (아래 3쌍)
+    drawPx(cx - 6, cy + 6, 2, 2, '#7f1d1d');
+    drawPx(cx - 1, cy + 6, 2, 2, '#7f1d1d');
+    drawPx(cx + 4, cy + 6, 2, 2, '#7f1d1d');
+
   } else if (e.type === 'tanky') {
-    // 탱키 - 큰 돌덩이 외계인
-    drawPx(cx - 14, cy - 12, 28, 4, '#1e3a8a');
-    drawPx(cx - 16, cy - 8, 32, 4, '#1e40af');
-    drawPx(cx - 16, cy - 4, 32, 8, '#2563eb');
-    drawPx(cx - 14, cy + 4, 28, 4, '#2563eb');
-    drawPx(cx - 12, cy + 8, 24, 4, '#1e40af');
-    // 내부 밝은 부분
-    drawPx(cx - 10, cy - 6, 20, 8, '#3b82f6');
-    // 눈들 (3개)
-    drawPx(cx - 8, cy - 2, 2, 2, '#ef4444');
-    drawPx(cx - 1, cy - 2, 2, 2, '#ef4444');
-    drawPx(cx + 6, cy - 2, 2, 2, '#ef4444');
+    // ===== 대형 오징어형 외계인 (파랑) =====
+    // 돔 머리 (여러 층 - 둥근 느낌)
+    drawPx(cx - 8, cy - 14, 16, 2, '#1e3a8a');
+    drawPx(cx - 12, cy - 12, 24, 2, '#1e40af');
+    drawPx(cx - 14, cy - 10, 28, 4, '#2563eb');
+    drawPx(cx - 14, cy - 6, 28, 6, '#3b82f6'); // 메인 머리
+
+    // 머리 하이라이트 (상단 반사광)
+    drawPx(cx - 6, cy - 12, 4, 2, '#60a5fa');
+    drawPx(cx - 10, cy - 10, 4, 1, '#60a5fa');
+
+    // 눈 3개 (빨강 + 흰자)
+    drawPx(cx - 10, cy - 6, 4, 4, '#fff');
+    drawPx(cx - 2, cy - 6, 4, 4, '#fff');
+    drawPx(cx + 6, cy - 6, 4, 4, '#fff');
+    drawPx(cx - 9, cy - 5, 2, 2, '#ef4444');
+    drawPx(cx - 1, cy - 5, 2, 2, '#ef4444');
+    drawPx(cx + 7, cy - 5, 2, 2, '#ef4444');
+
+    // 몸통 아래 테 (어둡게)
+    drawPx(cx - 12, cy + 0, 24, 2, '#1e40af');
+    drawPx(cx - 10, cy + 2, 20, 2, '#1e3a8a');
+
+    // 이빨 (위협적)
+    drawPx(cx - 6, cy + 4, 2, 2, '#fff');
+    drawPx(cx - 2, cy + 4, 2, 2, '#fff');
+    drawPx(cx + 2, cy + 4, 2, 2, '#fff');
+    drawPx(cx + 6, cy + 4, 2, 2, '#fff');
+
+    // 6개 촉수 (애니메이션 - 좌/우 교차 펄럭)
+    if (frameA) {
+      // 왼쪽 촉수 3개 (길게)
+      drawPx(cx - 12, cy + 6, 2, 6, '#2563eb');
+      drawPx(cx - 7, cy + 6, 2, 4, '#2563eb');
+      drawPx(cx - 3, cy + 6, 2, 6, '#2563eb');
+      // 오른쪽 촉수 3개 (짧게)
+      drawPx(cx + 1, cy + 6, 2, 4, '#2563eb');
+      drawPx(cx + 5, cy + 6, 2, 6, '#2563eb');
+      drawPx(cx + 10, cy + 6, 2, 4, '#2563eb');
+      // 촉수 끝
+      drawPx(cx - 12, cy + 12, 2, 2, '#1e3a8a');
+      drawPx(cx - 3, cy + 12, 2, 2, '#1e3a8a');
+      drawPx(cx + 5, cy + 12, 2, 2, '#1e3a8a');
+    } else {
+      // 반대로 - 왼쪽 짧게, 오른쪽 길게
+      drawPx(cx - 12, cy + 6, 2, 4, '#2563eb');
+      drawPx(cx - 7, cy + 6, 2, 6, '#2563eb');
+      drawPx(cx - 3, cy + 6, 2, 4, '#2563eb');
+      drawPx(cx + 1, cy + 6, 2, 6, '#2563eb');
+      drawPx(cx + 5, cy + 6, 2, 4, '#2563eb');
+      drawPx(cx + 10, cy + 6, 2, 6, '#2563eb');
+      drawPx(cx - 7, cy + 12, 2, 2, '#1e3a8a');
+      drawPx(cx + 1, cy + 12, 2, 2, '#1e3a8a');
+      drawPx(cx + 10, cy + 12, 2, 2, '#1e3a8a');
+    }
   }
 }
 
