@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>워드 버블 - 영단어 퍼즐보블</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    touch-action: manipulation;
+    margin: 0;
+    min-height: 100vh;
+    user-select: none;
+    -webkit-user-select: none;
+  }
+  .font-jua { font-family: 'Jua', sans-serif; }
+
+  #game-container {
+    max-width: 420px;
+    margin: 0 auto;
+    background: white;
+    min-height: 100vh;
+    position: relative;
+    box-shadow: 0 0 40px rgba(0,0,0,0.15);
+    overflow: hidden;
+  }
+
+  canvas {
+    display: block;
+    background: linear-gradient(180deg, #e0f2fe 0%, #bae6fd 60%, #7dd3fc 100%);
+    cursor: crosshair;
+    width: 100%;
+    height: auto;
+  }
+
+  .header-bar {
+    background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+    color: white;
+    padding: 10px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  .word-target {
+    background: linear-gradient(180deg, #fff7ed 0%, #fed7aa 100%);
+    padding: 10px;
+    border-bottom: 4px solid #fdba74;
+  }
+
+  .slot {
+    width: 38px;
+    height: 46px;
+    background: white;
+    border: 3px solid #d1d5db;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.4rem;
+    font-weight: bold;
+    color: #475569;
+    font-family: 'Jua', sans-serif;
+    transition: all 0.3s;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .slot.filled {
+    background: linear-gradient(135deg, #34d399, #10b981);
+    color: white;
+    border-color: #047857;
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(16,185,129,0.4);
+  }
+
+  .slot.next-needed {
+    border-color: #f59e0b;
+    background: #fffbeb;
+    box-shadow: 0 0 0 3px rgba(245,158,11,0.2);
+  }
+
+  .overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15,23,42,0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    flex-direction: column;
+    padding: 24px;
+  }
+
+  .overlay-card {
+    background: white;
+    border-radius: 28px;
+    padding: 32px 28px;
+    max-width: 320px;
+    width: 100%;
+    text-align: center;
+    box-shadow: 0 25px 60px rgba(0,0,0,0.4);
+  }
+
+  .btn-primary {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.3rem;
+    padding: 14px 32px;
+    border-radius: 999px;
+    border: none;
+    box-shadow: 0 4px 0 #4338ca;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.1s;
+    width: 100%;
+  }
+  .btn-primary:active {
+    transform: translateY(2px);
+    box-shadow: 0 2px 0 #4338ca;
+  }
+  .btn-secondary {
+    background: linear-gradient(135deg, #f97316, #ea580c);
+    color: white;
+    font-family: 'Jua', sans-serif;
+    font-size: 1.1rem;
+    padding: 10px 24px;
+    border-radius: 999px;
+    border: none;
+    box-shadow: 0 3px 0 #c2410c;
+    cursor: pointer;
+    width: 100%;
+    margin-top: 10px;
+  }
+
+  .hint-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 8px;
+  }
+
+  .hint-emoji { font-size: 2.2rem; }
+  .hint-meaning { font-family: 'Jua', sans-serif; font-size: 1.3rem; color: #78350f; }
+
+  .slots-row {
+    display: flex;
+    gap: 6px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+
+  /* Mode selection cards */
+  .mode-card {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 16px;
+    border-radius: 18px;
+    border: none;
+    cursor: pointer;
+    text-align: left;
+    transition: transform 0.15s, box-shadow 0.15s;
+    font-family: inherit;
+    width: 100%;
+  }
+  .mode-card:active { transform: scale(0.97); }
+  .mode-stage {
+    background: linear-gradient(135deg, #6366f1, #8b5cf6);
+    color: white;
+    box-shadow: 0 4px 0 #4338ca;
+  }
+  .mode-stage:active { box-shadow: 0 2px 0 #4338ca; }
+  .mode-infinite {
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+    color: white;
+    box-shadow: 0 4px 0 #b45309;
+  }
+  .mode-infinite:active { box-shadow: 0 2px 0 #b45309; }
+  .mode-infinite.locked {
+    background: linear-gradient(135deg, #94a3b8, #64748b);
+    box-shadow: 0 4px 0 #475569;
+    cursor: not-allowed;
+    opacity: 0.85;
+  }
+  .mode-icon {
+    font-size: 2.4rem;
+    flex-shrink: 0;
+    width: 56px;
+    height: 56px;
+    background: rgba(255,255,255,0.2);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .mode-info { flex: 1; min-width: 0; }
+  .mode-title { font-family: 'Jua', sans-serif; font-size: 1.25rem; line-height: 1.2; }
+  .mode-desc { font-size: 0.7rem; opacity: 0.9; margin-top: 2px; line-height: 1.3; }
+  .mode-best {
+    font-size: 0.7rem;
+    margin-top: 6px;
+    background: rgba(0,0,0,0.2);
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-weight: bold;
+  }
+
+  /* Multiplier badge in HUD */
+  .multiplier-badge {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+    font-family: 'Jua', sans-serif;
+    padding: 2px 10px;
+    border-radius: 999px;
+    font-size: 1.2rem;
+    line-height: 1.2;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    transition: transform 0.2s;
+    display: inline-block;
+  }
+  .multiplier-badge.pulse { animation: multiPulse 0.4s; }
+  .multiplier-badge.high {
+    background: linear-gradient(135deg, #f43f5e, #db2777);
+    box-shadow: 0 2px 8px rgba(244, 63, 94, 0.6);
+  }
+  @keyframes multiPulse {
+    0% { transform: scale(1); }
+    40% { transform: scale(1.4); }
+    100% { transform: scale(1); }
+  }
+
+  /* Word completion toast (infinite mode) */
+  .word-toast {
+    position: absolute;
+    top: 130px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, #10b981, #059669);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 999px;
+    box-shadow: 0 8px 20px rgba(16,185,129,0.5);
+    z-index: 50;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    pointer-events: none;
+    animation: toastIn 0.4s, toastOut 0.4s 1s forwards;
+  }
+  .word-toast.hidden { display: none; }
+  .toast-emoji { font-size: 2rem; }
+  .toast-word { font-family: 'Jua', sans-serif; font-size: 1.2rem; line-height: 1.1; }
+  .toast-bonus { font-family: 'Jua', sans-serif; font-size: 0.9rem; opacity: 0.95; }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.7); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+  }
+  @keyframes toastOut {
+    to { opacity: 0; transform: translateX(-50%) translateY(-20px) scale(0.7); }
+  }
+
+  /* Unlock celebration */
+  .unlock-banner {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 14px;
+    margin-bottom: 14px;
+    font-family: 'Jua', sans-serif;
+    font-size: 0.95rem;
+    box-shadow: 0 4px 0 #b45309;
+    animation: unlockShake 0.6s;
+  }
+  @keyframes unlockShake {
+    0%, 100% { transform: rotate(0deg); }
+    20% { transform: rotate(-3deg) scale(1.05); }
+    40% { transform: rotate(3deg) scale(1.05); }
+    60% { transform: rotate(-2deg); }
+    80% { transform: rotate(2deg); }
+  }
+</style>
+</head>
+<body>
+
+<div id="game-container">
+  <!-- Header -->
+  <div class="header-bar">
+    <div>
+      <div class="text-[10px] opacity-80 font-bold tracking-widest">SCORE</div>
+      <div id="score-display" class="font-jua text-2xl leading-none">0</div>
+    </div>
+    <div id="hud-middle" class="text-center">
+      <div id="hud-middle-label" class="text-[10px] opacity-80 font-bold tracking-widest">STAGE</div>
+      <div id="stage-display" class="font-jua text-2xl leading-none">1</div>
+    </div>
+    <div class="text-right">
+      <div id="hud-right-label" class="text-[10px] opacity-80 font-bold tracking-widest">단어</div>
+      <div id="words-display" class="font-jua text-2xl leading-none">0/3</div>
+      <div id="multiplier-display" class="multiplier-badge mt-1" style="display:none;">×1</div>
+    </div>
+  </div>
+
+  <!-- Target word -->
+  <div class="word-target">
+    <div class="hint-row">
+      <div id="word-emoji" class="hint-emoji">🍎</div>
+      <div id="word-meaning" class="hint-meaning">사과</div>
+    </div>
+    <div id="word-slots" class="slots-row"></div>
+  </div>
+
+  <!-- Game canvas -->
+  <canvas id="game-canvas" width="400" height="560"></canvas>
+
+  <!-- Title screen -->
+  <div id="title-screen" class="overlay">
+    <div class="overlay-card animate__animated animate__bounceIn">
+      <div class="text-6xl mb-2">🫧</div>
+      <h1 class="font-jua text-4xl text-indigo-600 mb-1">워드 버블</h1>
+      <p class="text-xs text-gray-500 mb-4">같은 알파벳 3개로 단어 슬롯을 채워보자</p>
+
+      <!-- Mode selection cards -->
+      <div class="flex flex-col gap-3 mb-3">
+        <button class="mode-card mode-stage" onclick="startGame('stage')">
+          <div class="mode-icon">🎯</div>
+          <div class="mode-info">
+            <div class="mode-title">스테이지 모드</div>
+            <div class="mode-desc">3개 스테이지를 차례로 클리어!</div>
+            <div class="mode-best">🏆 BEST <span id="best-stage">0</span></div>
+          </div>
+        </button>
+
+        <button id="btn-infinite" class="mode-card mode-infinite locked" onclick="onInfiniteClick()">
+          <div class="mode-icon"><span id="infinite-icon">🔒</span></div>
+          <div class="mode-info">
+            <div class="mode-title">무한 모드</div>
+            <div id="infinite-desc" class="mode-desc">스테이지 모드를 모두 클리어하면 해금!</div>
+            <div class="mode-best" id="infinite-best-row" style="display:none;">🏆 BEST <span id="best-infinite">0</span></div>
+          </div>
+        </button>
+      </div>
+
+      <div class="text-[10px] text-gray-400 leading-tight">조준은 마우스/터치, 발사는 클릭/탭</div>
+    </div>
+  </div>
+
+  <!-- Word complete toast (infinite mode) -->
+  <div id="word-toast" class="word-toast hidden">
+    <div class="toast-emoji" id="toast-emoji">🎉</div>
+    <div>
+      <div class="toast-word" id="toast-word">APPLE</div>
+      <div class="toast-bonus" id="toast-bonus">+200</div>
+    </div>
+  </div>
+
+  <!-- Word clear screen -->
+  <div id="clear-screen" class="overlay" style="display:none;">
+    <div class="overlay-card animate__animated animate__zoomIn">
+      <div class="text-6xl mb-3">🎉</div>
+      <h2 class="font-jua text-3xl text-emerald-500 mb-2">정답!</h2>
+      <div id="clear-word" class="text-2xl font-jua text-gray-800 mb-1"></div>
+      <div id="clear-meaning" class="text-base text-gray-500 mb-5"></div>
+      <button class="btn-primary" onclick="nextWord()">다음 단어 →</button>
+    </div>
+  </div>
+
+  <!-- Stage clear screen -->
+  <div id="stage-clear-screen" class="overlay" style="display:none;">
+    <div class="overlay-card animate__animated animate__bounceIn">
+      <div class="text-6xl mb-3">⭐</div>
+      <h2 class="font-jua text-3xl text-purple-500 mb-2">스테이지 클리어!</h2>
+      <div id="stage-clear-text" class="text-base text-gray-600 mb-5"></div>
+      <button class="btn-primary" onclick="nextStage()">다음 스테이지 →</button>
+    </div>
+  </div>
+
+  <!-- Game over screen -->
+  <div id="gameover-screen" class="overlay" style="display:none;">
+    <div class="overlay-card animate__animated animate__shakeX">
+      <div class="text-6xl mb-3">😵</div>
+      <h2 class="font-jua text-3xl text-red-500 mb-2">앗, 꽉 찼어요!</h2>
+      <div class="bg-amber-100 rounded-2xl p-3 mb-5 border-2 border-amber-200">
+        <div class="text-[10px] text-amber-700 font-bold tracking-widest">최종 점수</div>
+        <div id="final-score" class="font-jua text-3xl text-amber-600 leading-tight">0</div>
+      </div>
+      <button class="btn-primary" onclick="resetToTitle()">다시 하기 🔄</button>
+    </div>
+  </div>
+
+  <!-- All clear screen -->
+  <div id="all-clear-screen" class="overlay" style="display:none;">
+    <div class="overlay-card animate__animated animate__tada">
+      <div class="text-6xl mb-3">🏆</div>
+      <h2 class="font-jua text-3xl text-amber-500 mb-2">올 클리어!</h2>
+      <div class="text-base text-gray-600 mb-3">모든 스테이지를 다 풀었어!</div>
+      <div id="unlock-banner" class="unlock-banner" style="display:none;">
+        🔓 무한 모드 해금!
+      </div>
+      <div class="bg-amber-100 rounded-2xl p-3 mb-5 border-2 border-amber-200">
+        <div class="text-[10px] text-amber-700 font-bold tracking-widest">최종 점수</div>
+        <div id="all-clear-score" class="font-jua text-3xl text-amber-600 leading-tight">0</div>
+      </div>
+      <button class="btn-primary" onclick="resetToTitle()">처음으로 🔄</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ==================== Word Data ====================
+const wordData = {
+  // Stage 1: 3-letter words
+  1: [
+    {w: "cat", m: "고양이", e: "🐱"},
+    {w: "dog", m: "개", e: "🐶"},
+    {w: "pig", m: "돼지", e: "🐷"},
+    {w: "cow", m: "소", e: "🐄"},
+    {w: "fox", m: "여우", e: "🦊"},
+    {w: "bee", m: "벌", e: "🐝"},
+    {w: "ant", m: "개미", e: "🐜"},
+    {w: "owl", m: "부엉이", e: "🦉"},
+    {w: "rat", m: "쥐", e: "🐀"},
+    {w: "sun", m: "해", e: "☀️"},
+    {w: "bus", m: "버스", e: "🚌"},
+    {w: "car", m: "자동차", e: "🚗"},
+    {w: "van", m: "밴", e: "🚐"},
+    {w: "cup", m: "컵", e: "☕"},
+    {w: "egg", m: "달걀", e: "🥚"},
+    {w: "pie", m: "파이", e: "🥧"},
+    {w: "jam", m: "잼", e: "🍯"},
+    {w: "tea", m: "차", e: "🍵"},
+    {w: "nut", m: "견과", e: "🥜"},
+    {w: "box", m: "상자", e: "📦"},
+    {w: "bag", m: "가방", e: "🎒"},
+    {w: "bed", m: "침대", e: "🛏️"},
+    {w: "hat", m: "모자", e: "🎩"},
+    {w: "key", m: "열쇠", e: "🔑"},
+    {w: "map", m: "지도", e: "🗺️"},
+    {w: "pen", m: "펜", e: "🖊️"},
+    {w: "toy", m: "장난감", e: "🧸"},
+    {w: "ice", m: "얼음", e: "🧊"},
+    {w: "ear", m: "귀", e: "👂"},
+    {w: "eye", m: "눈", e: "👁️"},
+    {w: "leg", m: "다리", e: "🦵"},
+    {w: "arm", m: "팔", e: "💪"},
+    {w: "zoo", m: "동물원", e: "🦓"}
+  ],
+  // Stage 2: 4-letter words
+  2: [
+    {w: "bear", m: "곰", e: "🐻"},
+    {w: "bird", m: "새", e: "🐦"},
+    {w: "duck", m: "오리", e: "🦆"},
+    {w: "fish", m: "물고기", e: "🐟"},
+    {w: "frog", m: "개구리", e: "🐸"},
+    {w: "lion", m: "사자", e: "🦁"},
+    {w: "wolf", m: "늑대", e: "🐺"},
+    {w: "crab", m: "게", e: "🦀"},
+    {w: "goat", m: "염소", e: "🐐"},
+    {w: "boat", m: "보트", e: "⛵"},
+    {w: "ship", m: "배", e: "🚢"},
+    {w: "bike", m: "자전거", e: "🚲"},
+    {w: "kite", m: "연", e: "🪁"},
+    {w: "ball", m: "공", e: "⚽"},
+    {w: "book", m: "책", e: "📚"},
+    {w: "desk", m: "책상", e: "🪑"},
+    {w: "door", m: "문", e: "🚪"},
+    {w: "ring", m: "반지", e: "💍"},
+    {w: "shoe", m: "신발", e: "👟"},
+    {w: "gift", m: "선물", e: "🎁"},
+    {w: "milk", m: "우유", e: "🥛"},
+    {w: "cake", m: "케이크", e: "🍰"},
+    {w: "corn", m: "옥수수", e: "🌽"},
+    {w: "pear", m: "배", e: "🍐"},
+    {w: "moon", m: "달", e: "🌙"},
+    {w: "star", m: "별", e: "⭐"},
+    {w: "rain", m: "비", e: "🌧️"},
+    {w: "snow", m: "눈", e: "❄️"},
+    {w: "fire", m: "불", e: "🔥"},
+    {w: "tree", m: "나무", e: "🌳"},
+    {w: "hand", m: "손", e: "✋"},
+    {w: "king", m: "왕", e: "👑"},
+    {w: "jump", m: "점프", e: "🤸"}
+  ],
+  // Stage 3: 5-letter words
+  3: [
+    {w: "apple", m: "사과", e: "🍎"},
+    {w: "grape", m: "포도", e: "🍇"},
+    {w: "lemon", m: "레몬", e: "🍋"},
+    {w: "mango", m: "망고", e: "🥭"},
+    {w: "peach", m: "복숭아", e: "🍑"},
+    {w: "melon", m: "멜론", e: "🍈"},
+    {w: "bread", m: "빵", e: "🍞"},
+    {w: "candy", m: "사탕", e: "🍬"},
+    {w: "pizza", m: "피자", e: "🍕"},
+    {w: "juice", m: "주스", e: "🧃"},
+    {w: "sugar", m: "설탕", e: "🧂"},
+    {w: "tiger", m: "호랑이", e: "🐯"},
+    {w: "horse", m: "말", e: "🐴"},
+    {w: "panda", m: "판다", e: "🐼"},
+    {w: "sheep", m: "양", e: "🐑"},
+    {w: "snake", m: "뱀", e: "🐍"},
+    {w: "mouse", m: "생쥐", e: "🐭"},
+    {w: "house", m: "집", e: "🏠"},
+    {w: "table", m: "식탁", e: "🪑"},
+    {w: "chair", m: "의자", e: "🪑"},
+    {w: "clock", m: "시계", e: "🕐"},
+    {w: "train", m: "기차", e: "🚂"},
+    {w: "plane", m: "비행기", e: "✈️"},
+    {w: "robot", m: "로봇", e: "🤖"},
+    {w: "piano", m: "피아노", e: "🎹"},
+    {w: "music", m: "음악", e: "🎵"},
+    {w: "cloud", m: "구름", e: "☁️"},
+    {w: "water", m: "물", e: "💧"},
+    {w: "earth", m: "지구", e: "🌍"},
+    {w: "ghost", m: "유령", e: "👻"},
+    {w: "queen", m: "여왕", e: "👸"},
+    {w: "happy", m: "행복한", e: "😊"},
+    {w: "smile", m: "미소", e: "😄"}
+  ]
+};
+
+// ==================== Constants ====================
+const RADIUS = 22;
+const BUBBLE_DIAM = RADIUS * 2;
+const COLS = 8;
+const HEX_H = RADIUS * Math.sqrt(3);
+const TOP_OFFSET = 16;
+const SHOOTER_Y = 510;
+const FLOOR_Y = 470;
+const PROJECTILE_SPEED = 14;
+const WORDS_PER_STAGE = 3;
+const MISSES_TO_DESCEND = 4;
+
+const LETTER_COLORS = {
+  A:'#ef4444', B:'#f97316', C:'#f59e0b', D:'#84cc16',
+  E:'#22c55e', F:'#10b981', G:'#14b8a6', H:'#06b6d4',
+  I:'#0ea5e9', J:'#3b82f6', K:'#6366f1', L:'#8b5cf6',
+  M:'#a855f7', N:'#d946ef', O:'#ec4899', P:'#f43f5e',
+  Q:'#dc2626', R:'#ea580c', S:'#d97706', T:'#65a30d',
+  U:'#16a34a', V:'#0d9488', W:'#0891b2', X:'#2563eb',
+  Y:'#7c3aed', Z:'#c026d3'
+};
+
+// ==================== State ====================
+let canvas, ctx;
+let grid = [];
+let parityOffset = 0; // flips when grid descends; controls hex offset row pattern
+let projectile = null;
+let currentLetter = null;
+let nextLetter = null;
+let aimAngle = -Math.PI / 2;
+
+let score = 0;
+let stage = 1;
+let wordsClearedInStage = 0;
+let missCount = 0;
+
+// Mode & infinite-mode-specific state
+let gameMode = 'stage'; // 'stage' or 'infinite'
+let multiplier = 1;
+let totalWordsCleared = 0;
+const MULTIPLIER_CAP = 10;
+
+let currentWord = null;
+let wordSlots = [];
+let recentWords = { 1: [], 2: [], 3: [] };
+let bestScoreStage = parseInt(localStorage.getItem('wordbubble-best-stage') || '0');
+let bestScoreInfinite = parseInt(localStorage.getItem('wordbubble-best-infinite') || '0');
+let infiniteUnlocked = localStorage.getItem('wordbubble-infinite-unlocked') === '1';
+
+let popping = [];
+let falling = [];
+let isRunning = false;
+let lastFrame = 0;
+
+// ==================== Hex Grid Helpers ====================
+function rowIsOffset(row) {
+  return ((row + parityOffset) % 2 + 2) % 2 === 1;
+}
+function maxColInRow(row) {
+  return rowIsOffset(row) ? COLS - 1 : COLS;
+}
+function hexPos(row, col) {
+  const xOffset = rowIsOffset(row) ? RADIUS : 0;
+  return {
+    x: col * BUBBLE_DIAM + RADIUS + xOffset,
+    y: TOP_OFFSET + row * HEX_H + RADIUS
+  };
+}
+function getNeighbors(row, col) {
+  if (rowIsOffset(row)) {
+    return [
+      [row, col-1], [row, col+1],
+      [row-1, col],   [row-1, col+1],
+      [row+1, col],   [row+1, col+1]
+    ];
+  } else {
+    return [
+      [row, col-1], [row, col+1],
+      [row-1, col-1], [row-1, col],
+      [row+1, col-1], [row+1, col]
+    ];
+  }
+}
+function isValidCell(row, col) {
+  return row >= 0 && col >= 0 && col < maxColInRow(row);
+}
+function gridAt(row, col) {
+  if (row < 0 || row >= grid.length) return null;
+  if (col < 0 || col >= COLS) return null;
+  return grid[row][col];
+}
+
+// ==================== Letter Generation ====================
+function pickGridLetter() {
+  // Mostly target word letters, some random
+  if (currentWord && Math.random() < 0.6) {
+    return currentWord.w[Math.floor(Math.random() * currentWord.w.length)].toUpperCase();
+  }
+  const pool = 'AEIOURTNSLMP';
+  return pool[Math.floor(Math.random() * pool.length)];
+}
+
+function pickShooterLetter() {
+  // Heavily bias toward unfilled letters in target word so the puzzle stays solvable
+  const unfilled = [];
+  if (currentWord) {
+    const target = currentWord.w.toUpperCase();
+    for (let i = 0; i < target.length; i++) {
+      if (wordSlots[i] === null) unfilled.push(target[i]);
+    }
+  }
+  if (unfilled.length > 0 && Math.random() < 0.7) {
+    return unfilled[Math.floor(Math.random() * unfilled.length)];
+  }
+  // Otherwise, sample from existing grid letters (for matching opportunities)
+  const gridLetters = [];
+  for (const row of grid) {
+    for (const cell of row) {
+      if (cell) gridLetters.push(cell.letter);
+    }
+  }
+  if (gridLetters.length > 0) {
+    return gridLetters[Math.floor(Math.random() * gridLetters.length)];
+  }
+  return 'AEIOURTNS'[Math.floor(Math.random() * 9)];
+}
+
+// ==================== Initialization ====================
+function initGrid() {
+  grid = [];
+  parityOffset = 0;
+  const startRows = 5;
+  for (let r = 0; r < startRows; r++) {
+    const row = new Array(COLS).fill(null);
+    const cells = maxColInRow(r);
+    for (let c = 0; c < cells; c++) {
+      row[c] = { letter: pickGridLetter() };
+    }
+    grid.push(row);
+  }
+}
+
+function loadWord(resetGrid = true) {
+  let pool, recent;
+  if (gameMode === 'infinite') {
+    // Combine all stages, weighted slightly toward shorter words
+    pool = [...wordData[1], ...wordData[1], ...wordData[2], ...wordData[2], ...wordData[3]];
+    recent = recentWords[0]; // shared list for infinite mode
+    if (!recent) { recentWords[0] = []; recent = recentWords[0]; }
+  } else {
+    pool = wordData[stage];
+    recent = recentWords[stage];
+  }
+  // Remember about 60% of pool — guarantees no repeats for many picks
+  const memorySize = Math.max(1, Math.floor(pool.length * 0.6));
+
+  let candidates = pool.filter(w => !recent.includes(w.w));
+  if (candidates.length === 0) candidates = pool; // safety fallback
+
+  currentWord = candidates[Math.floor(Math.random() * candidates.length)];
+
+  recent.push(currentWord.w);
+  while (recent.length > memorySize) recent.shift();
+
+  wordSlots = Array(currentWord.w.length).fill(null);
+
+  document.getElementById('word-emoji').textContent = currentWord.e;
+  document.getElementById('word-meaning').textContent = currentWord.m;
+  renderWordSlots();
+  if (resetGrid) initGrid();
+
+  currentLetter = pickShooterLetter();
+  nextLetter = pickShooterLetter();
+  missCount = 0;
+}
+
+function renderWordSlots() {
+  const container = document.getElementById('word-slots');
+  container.innerHTML = '';
+  let firstUnfilledFound = false;
+  wordSlots.forEach((letter) => {
+    const slot = document.createElement('div');
+    slot.className = 'slot';
+    if (letter) {
+      slot.classList.add('filled');
+      slot.textContent = letter;
+    } else if (!firstUnfilledFound) {
+      // Don't highlight "next needed" since order doesn't matter; leave plain
+      firstUnfilledFound = true;
+    }
+    container.appendChild(slot);
+  });
+}
+
+function updateUI() {
+  document.getElementById('score-display').textContent = score;
+  if (gameMode === 'infinite') {
+    document.getElementById('hud-middle-label').textContent = 'COMBO';
+    document.getElementById('stage-display').textContent = totalWordsCleared;
+    document.getElementById('hud-right-label').textContent = '점수배수';
+    document.getElementById('words-display').style.display = 'none';
+    document.getElementById('multiplier-display').style.display = 'inline-block';
+    const multiEl = document.getElementById('multiplier-display');
+    multiEl.textContent = '×' + multiplier;
+    multiEl.classList.toggle('high', multiplier >= 5);
+  } else {
+    document.getElementById('hud-middle-label').textContent = 'STAGE';
+    document.getElementById('stage-display').textContent = stage;
+    document.getElementById('hud-right-label').textContent = '단어';
+    document.getElementById('words-display').style.display = 'block';
+    document.getElementById('words-display').textContent = `${wordsClearedInStage}/${WORDS_PER_STAGE}`;
+    document.getElementById('multiplier-display').style.display = 'none';
+  }
+}
+
+function pulseMultiplier() {
+  const el = document.getElementById('multiplier-display');
+  el.classList.remove('pulse');
+  void el.offsetWidth; // force reflow to restart animation
+  el.classList.add('pulse');
+}
+
+// ==================== Drawing ====================
+function shadeColor(hex, percent) {
+  const num = parseInt(hex.slice(1), 16);
+  let r = (num >> 16) + percent;
+  let g = ((num >> 8) & 0xff) + percent;
+  let b = (num & 0xff) + percent;
+  r = Math.min(255, Math.max(0, r));
+  g = Math.min(255, Math.max(0, g));
+  b = Math.min(255, Math.max(0, b));
+  return '#' + ((r<<16)|(g<<8)|b).toString(16).padStart(6,'0');
+}
+
+function drawBubble(x, y, letter, scale=1, alpha=1) {
+  const color = LETTER_COLORS[letter] || '#6b7280';
+  ctx.save();
+  ctx.globalAlpha = alpha;
+  ctx.translate(x, y);
+  ctx.scale(scale, scale);
+
+  const grad = ctx.createRadialGradient(-RADIUS*0.35, -RADIUS*0.35, RADIUS*0.2, 0, 0, RADIUS);
+  grad.addColorStop(0, shadeColor(color, 40));
+  grad.addColorStop(0.6, color);
+  grad.addColorStop(1, shadeColor(color, -30));
+  ctx.fillStyle = grad;
+  ctx.beginPath();
+  ctx.arc(0, 0, RADIUS, 0, Math.PI*2);
+  ctx.fill();
+
+  ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+  ctx.lineWidth = 1.5;
+  ctx.stroke();
+
+  // Letter
+  ctx.fillStyle = 'white';
+  ctx.font = 'bold 22px Jua, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(letter, 0, 1);
+
+  // Highlight
+  ctx.beginPath();
+  ctx.arc(-RADIUS*0.35, -RADIUS*0.4, RADIUS*0.28, 0, Math.PI*2);
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.fill();
+
+  ctx.restore();
+}
+
+function drawAimLine(sx, sy, angle) {
+  ctx.save();
+  ctx.strokeStyle = 'rgba(99,102,241,0.45)';
+  ctx.lineWidth = 2.5;
+  ctx.setLineDash([5, 7]);
+
+  let x = sx, y = sy;
+  let vx = Math.cos(angle), vy = Math.sin(angle);
+  const stepLen = 6;
+  let bounces = 0;
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  for (let i = 0; i < 200 && bounces < 2; i++) {
+    x += vx * stepLen;
+    y += vy * stepLen;
+    if (x < RADIUS) { x = RADIUS; vx = -vx; bounces++; ctx.lineTo(x, y); }
+    if (x > canvas.width - RADIUS) { x = canvas.width - RADIUS; vx = -vx; bounces++; ctx.lineTo(x, y); }
+    if (y < TOP_OFFSET + RADIUS) break;
+    // Stop at any grid bubble
+    if (hitsAnyGridBubble(x, y)) break;
+    ctx.lineTo(x, y);
+  }
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.restore();
+}
+
+function hitsAnyGridBubble(x, y) {
+  const r2 = (BUBBLE_DIAM * 0.95) ** 2;
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (!grid[r][c]) continue;
+      const p = hexPos(r, c);
+      const dx = x - p.x, dy = y - p.y;
+      if (dx*dx + dy*dy < r2) return true;
+    }
+  }
+  return false;
+}
+
+function drawShooter() {
+  const sx = canvas.width / 2;
+  const sy = SHOOTER_Y;
+
+  // Cannon base
+  ctx.save();
+  ctx.fillStyle = '#334155';
+  ctx.beginPath();
+  ctx.arc(sx, sy + 5, 30, 0, Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle = '#475569';
+  ctx.beginPath();
+  ctx.arc(sx, sy, 28, 0, Math.PI*2);
+  ctx.fill();
+
+  // Barrel
+  ctx.translate(sx, sy);
+  ctx.rotate(aimAngle + Math.PI/2);
+  ctx.fillStyle = '#64748b';
+  ctx.fillRect(-10, -34, 20, 30);
+  ctx.fillStyle = '#475569';
+  ctx.fillRect(-12, -36, 24, 5);
+  ctx.restore();
+
+  // Letter in cannon
+  if (currentLetter && !projectile) {
+    drawBubble(sx, sy, currentLetter, 0.85);
+  }
+
+  // Next letter preview
+  ctx.save();
+  ctx.fillStyle = 'rgba(15,23,42,0.55)';
+  ctx.font = 'bold 10px Jua, sans-serif';
+  ctx.textAlign = 'left';
+  ctx.fillText('NEXT', 12, sy + 50);
+  ctx.restore();
+  if (nextLetter) {
+    drawBubble(28, sy + 35, nextLetter, 0.55);
+  }
+}
+
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // Floor warning line
+  ctx.save();
+  ctx.strokeStyle = 'rgba(220,38,38,0.55)';
+  ctx.lineWidth = 2;
+  ctx.setLineDash([8, 6]);
+  ctx.beginPath();
+  ctx.moveTo(0, FLOOR_Y);
+  ctx.lineTo(canvas.width, FLOOR_Y);
+  ctx.stroke();
+  ctx.setLineDash([]);
+  ctx.fillStyle = 'rgba(220,38,38,0.7)';
+  ctx.font = 'bold 9px Jua, sans-serif';
+  ctx.fillText('여기 넘으면 끝!', 8, FLOOR_Y - 4);
+  ctx.restore();
+
+  // Grid bubbles
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (grid[r][c]) {
+        const p = hexPos(r, c);
+        drawBubble(p.x, p.y, grid[r][c].letter);
+      }
+    }
+  }
+
+  // Falling bubbles
+  falling.forEach(f => drawBubble(f.x, f.y, f.letter));
+
+  // Popping animations
+  popping.forEach(p => {
+    const scale = 1 + p.t * 1.6;
+    const alpha = 1 - p.t;
+    drawBubble(p.x, p.y, p.letter, scale, alpha);
+  });
+
+  // Aim line
+  if (!projectile && isRunning) {
+    drawAimLine(canvas.width / 2, SHOOTER_Y, aimAngle);
+  }
+
+  drawShooter();
+
+  if (projectile) {
+    drawBubble(projectile.x, projectile.y, projectile.letter);
+  }
+}
+
+// ==================== Game Logic ====================
+function shoot() {
+  if (!isRunning || projectile || !currentLetter) return;
+  const sx = canvas.width / 2;
+  const sy = SHOOTER_Y;
+  projectile = {
+    x: sx,
+    y: sy,
+    vx: Math.cos(aimAngle) * PROJECTILE_SPEED,
+    vy: Math.sin(aimAngle) * PROJECTILE_SPEED,
+    letter: currentLetter
+  };
+  currentLetter = nextLetter;
+  nextLetter = pickShooterLetter();
+}
+
+function updateProjectile() {
+  if (!projectile) return;
+
+  // Substepping for accurate collision
+  const steps = 3;
+  for (let s = 0; s < steps; s++) {
+    projectile.x += projectile.vx / steps;
+    projectile.y += projectile.vy / steps;
+
+    if (projectile.x < RADIUS) {
+      projectile.x = RADIUS;
+      projectile.vx = -projectile.vx;
+    }
+    if (projectile.x > canvas.width - RADIUS) {
+      projectile.x = canvas.width - RADIUS;
+      projectile.vx = -projectile.vx;
+    }
+    if (projectile.y < TOP_OFFSET + RADIUS) {
+      projectile.y = TOP_OFFSET + RADIUS;
+      snapProjectileToGrid();
+      return;
+    }
+    // Grid collision
+    for (let r = 0; r < grid.length; r++) {
+      for (let c = 0; c < COLS; c++) {
+        if (!grid[r][c]) continue;
+        const p = hexPos(r, c);
+        const dx = projectile.x - p.x, dy = projectile.y - p.y;
+        if (dx*dx + dy*dy < BUBBLE_DIAM * BUBBLE_DIAM) {
+          snapProjectileToGrid();
+          return;
+        }
+      }
+    }
+    if (projectile.y > canvas.height + 50) {
+      projectile = null;
+      return;
+    }
+  }
+}
+
+function snapProjectileToGrid() {
+  if (!projectile) return;
+
+  // Find nearest valid empty cell (existing or new row at bottom)
+  let bestRow = -1, bestCol = -1, bestDist = Infinity;
+  const maxRowsToCheck = grid.length + 1;
+  for (let r = 0; r < maxRowsToCheck; r++) {
+    const cells = maxColInRow(r);
+    for (let c = 0; c < cells; c++) {
+      if (r < grid.length && grid[r][c]) continue;
+      const p = hexPos(r, c);
+      // Don't allow snapping below floor
+      if (p.y > FLOOR_Y + RADIUS) continue;
+      const dx = projectile.x - p.x, dy = projectile.y - p.y;
+      const dist = dx*dx + dy*dy;
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestRow = r;
+        bestCol = c;
+      }
+    }
+  }
+
+  const placedLetter = projectile.letter;
+  projectile = null;
+
+  if (bestRow === -1) {
+    // No valid placement — game over (shouldn't happen often)
+    triggerGameOver();
+    return;
+  }
+
+  while (grid.length <= bestRow) {
+    grid.push(new Array(COLS).fill(null));
+  }
+  grid[bestRow][bestCol] = { letter: placedLetter };
+
+  // Match check
+  const matches = findMatches(bestRow, bestCol);
+  if (matches.length >= 3) {
+    popMatches(matches, placedLetter);
+    missCount = 0;
+  } else {
+    missCount++;
+    if (missCount >= MISSES_TO_DESCEND) {
+      missCount = 0;
+      descendGrid();
+    }
+    checkFloor();
+  }
+}
+
+function findMatches(startRow, startCol) {
+  const cell = gridAt(startRow, startCol);
+  if (!cell) return [];
+  const target = cell.letter;
+  const visited = new Set();
+  const stack = [[startRow, startCol]];
+  const matches = [];
+
+  while (stack.length) {
+    const [r, c] = stack.pop();
+    const key = `${r},${c}`;
+    if (visited.has(key)) continue;
+    visited.add(key);
+    const cur = gridAt(r, c);
+    if (!cur || cur.letter !== target) continue;
+    matches.push([r, c]);
+    for (const [nr, nc] of getNeighbors(r, c)) {
+      if (!visited.has(`${nr},${nc}`) && isValidCell(nr, nc)) {
+        stack.push([nr, nc]);
+      }
+    }
+  }
+  return matches;
+}
+
+function popMatches(matches, letter) {
+  matches.forEach(([r, c]) => {
+    const p = hexPos(r, c);
+    popping.push({ x: p.x, y: p.y, letter, t: 0 });
+    grid[r][c] = null;
+  });
+  score += matches.length * 10 * multiplier;
+
+  // Fill word slots — each popped letter fills the leftmost matching unfilled slot
+  const target = currentWord.w.toUpperCase();
+  let lettersToFill = matches.length;
+  for (let i = 0; i < target.length && lettersToFill > 0; i++) {
+    if (wordSlots[i] === null && target[i] === letter) {
+      wordSlots[i] = letter;
+      lettersToFill--;
+      score += 50 * multiplier;
+    }
+  }
+  renderWordSlots();
+  updateUI();
+
+  // Drop disconnected after a brief delay
+  setTimeout(() => {
+    dropDisconnected();
+    if (wordSlots.every(s => s !== null)) {
+      onWordComplete();
+    } else {
+      checkFloor();
+    }
+  }, 120);
+}
+
+function dropDisconnected() {
+  if (grid.length === 0) return;
+  const connected = new Set();
+  const queue = [];
+  for (let c = 0; c < COLS; c++) {
+    if (grid[0][c]) {
+      queue.push([0, c]);
+      connected.add(`0,${c}`);
+    }
+  }
+  while (queue.length) {
+    const [r, c] = queue.shift();
+    for (const [nr, nc] of getNeighbors(r, c)) {
+      const key = `${nr},${nc}`;
+      if (!connected.has(key) && gridAt(nr, nc) && isValidCell(nr, nc)) {
+        connected.add(key);
+        queue.push([nr, nc]);
+      }
+    }
+  }
+
+  let dropped = 0;
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (grid[r][c] && !connected.has(`${r},${c}`)) {
+        const p = hexPos(r, c);
+        falling.push({ x: p.x, y: p.y, vy: 1 + Math.random() * 1.5, letter: grid[r][c].letter });
+        grid[r][c] = null;
+        dropped++;
+      }
+    }
+  }
+  if (dropped > 0) {
+    score += dropped * 15 * multiplier;
+    updateUI();
+  }
+}
+
+function descendGrid() {
+  // Reset combo multiplier in infinite mode when grid descends (= miss penalty)
+  if (gameMode === 'infinite' && multiplier > 1) {
+    multiplier = 1;
+    updateUI();
+    pulseMultiplier();
+  }
+  // Insert a new row at top; flip parity so existing rows visually descend correctly
+  const newRow = new Array(COLS).fill(null);
+  parityOffset = 1 - parityOffset;
+  // After flip, row 0 now uses new parity. Fill cells that exist under new parity.
+  const cells = maxColInRow(0);
+  for (let c = 0; c < cells; c++) {
+    newRow[c] = { letter: pickGridLetter() };
+  }
+  grid.unshift(newRow);
+}
+
+function checkFloor() {
+  // Game over if any grid bubble crosses floor
+  for (let r = 0; r < grid.length; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (grid[r][c]) {
+        const p = hexPos(r, c);
+        if (p.y + RADIUS > FLOOR_Y) {
+          triggerGameOver();
+          return;
+        }
+      }
+    }
+  }
+}
+
+function updateAnimations() {
+  // Popping decay
+  for (let i = popping.length - 1; i >= 0; i--) {
+    popping[i].t += 0.08;
+    if (popping[i].t >= 1) popping.splice(i, 1);
+  }
+  // Falling
+  for (let i = falling.length - 1; i >= 0; i--) {
+    falling[i].vy += 0.4;
+    falling[i].y += falling[i].vy;
+    if (falling[i].y > canvas.height + RADIUS * 2) falling.splice(i, 1);
+  }
+}
+
+// ==================== Screen Transitions ====================
+function onWordComplete() {
+  if (gameMode === 'infinite') {
+    // Infinite mode: bonus score + multiplier up + brief toast + auto-continue
+    totalWordsCleared++;
+    const baseBonus = 100 * currentWord.w.length; // 300/400/500 by word length
+    const earned = baseBonus * multiplier;
+    score += earned;
+
+    // Multiplier increment (capped)
+    if (multiplier < MULTIPLIER_CAP) {
+      multiplier++;
+      pulseMultiplier();
+    }
+    updateUI();
+
+    // Show celebration toast
+    showWordToast(currentWord, earned);
+
+    // Brief pause then load next word — keep grid intact, but add a top row to maintain pressure
+    isRunning = false;
+    setTimeout(() => {
+      // Add fresh row at top to compensate for cleared bubbles, keeps the grid alive
+      descendGridSilent(); // adds row without resetting multiplier
+      loadWord(false); // do not reset grid
+      isRunning = true;
+    }, 700);
+    return;
+  }
+
+  // Stage mode
+  isRunning = false;
+  score += 100;
+  wordsClearedInStage++;
+  updateUI();
+  document.getElementById('clear-word').textContent = currentWord.w.toUpperCase();
+  document.getElementById('clear-meaning').textContent = currentWord.m;
+  document.getElementById('clear-screen').style.display = 'flex';
+}
+
+// Adds a row at top without triggering multiplier reset (for word-completion top-up)
+function descendGridSilent() {
+  const newRow = new Array(COLS).fill(null);
+  parityOffset = 1 - parityOffset;
+  const cells = maxColInRow(0);
+  for (let c = 0; c < cells; c++) {
+    newRow[c] = { letter: pickGridLetter() };
+  }
+  grid.unshift(newRow);
+  // Safety: if this push us over the floor, end the game
+  checkFloor();
+}
+
+function showWordToast(word, bonus) {
+  const toast = document.getElementById('word-toast');
+  document.getElementById('toast-emoji').textContent = word.e;
+  document.getElementById('toast-word').textContent = word.w.toUpperCase() + ' · ' + word.m;
+  document.getElementById('toast-bonus').textContent = '+' + bonus + (multiplier > 1 ? ` (×${multiplier})` : '');
+  toast.classList.remove('hidden');
+  // Restart animation by reflowing
+  toast.style.animation = 'none';
+  void toast.offsetWidth;
+  toast.style.animation = '';
+  // Hide after animation
+  clearTimeout(showWordToast._t);
+  showWordToast._t = setTimeout(() => toast.classList.add('hidden'), 1500);
+}
+
+function nextWord() {
+  document.getElementById('clear-screen').style.display = 'none';
+
+  if (wordsClearedInStage >= WORDS_PER_STAGE) {
+    // Stage complete
+    if (stage >= 3) {
+      // All cleared — set unlock flag and show all-clear screen with banner
+      const wasNotUnlocked = !infiniteUnlocked;
+      infiniteUnlocked = true;
+      localStorage.setItem('wordbubble-infinite-unlocked', '1');
+      finalizeBest();
+      document.getElementById('all-clear-score').textContent = score;
+      document.getElementById('unlock-banner').style.display = wasNotUnlocked ? 'block' : 'none';
+      document.getElementById('all-clear-screen').style.display = 'flex';
+      return;
+    }
+    document.getElementById('stage-clear-text').textContent =
+      `Stage ${stage} 완료! 다음 단계는 ${currentWord.w.length < 4 ? '4글자' : '5글자'} 단어야.`;
+    document.getElementById('stage-clear-screen').style.display = 'flex';
+    return;
+  }
+
+  loadWord();
+  updateUI();
+  isRunning = true;
+}
+
+function nextStage() {
+  document.getElementById('stage-clear-screen').style.display = 'none';
+  stage++;
+  wordsClearedInStage = 0;
+  loadWord();
+  updateUI();
+  isRunning = true;
+}
+
+function triggerGameOver() {
+  isRunning = false;
+  finalizeBest();
+  document.getElementById('final-score').textContent = score;
+  document.getElementById('gameover-screen').style.display = 'flex';
+}
+
+function finalizeBest() {
+  if (gameMode === 'infinite') {
+    if (score > bestScoreInfinite) {
+      bestScoreInfinite = score;
+      localStorage.setItem('wordbubble-best-infinite', String(bestScoreInfinite));
+    }
+  } else {
+    if (score > bestScoreStage) {
+      bestScoreStage = score;
+      localStorage.setItem('wordbubble-best-stage', String(bestScoreStage));
+    }
+  }
+}
+
+function onInfiniteClick() {
+  if (!infiniteUnlocked) {
+    // Visual nudge: shake the locked card briefly
+    const btn = document.getElementById('btn-infinite');
+    btn.classList.remove('animate__animated', 'animate__headShake');
+    void btn.offsetWidth;
+    btn.classList.add('animate__animated', 'animate__headShake');
+    return;
+  }
+  startGame('infinite');
+}
+
+function startGame(mode) {
+  gameMode = mode;
+  document.getElementById('title-screen').style.display = 'none';
+  score = 0;
+  stage = 1;
+  wordsClearedInStage = 0;
+  multiplier = 1;
+  totalWordsCleared = 0;
+  recentWords = { 1: [], 2: [], 3: [], 0: [] };
+  loadWord(true);
+  updateUI();
+  isRunning = true;
+}
+
+function refreshTitleScreen() {
+  document.getElementById('best-stage').textContent = bestScoreStage;
+  const infBtn = document.getElementById('btn-infinite');
+  const infIcon = document.getElementById('infinite-icon');
+  const infDesc = document.getElementById('infinite-desc');
+  const infBestRow = document.getElementById('infinite-best-row');
+  if (infiniteUnlocked) {
+    infBtn.classList.remove('locked');
+    infIcon.textContent = '⚡';
+    infDesc.textContent = '끝없이 이어지는 콤보 챌린지!';
+    infBestRow.style.display = 'inline-block';
+    document.getElementById('best-infinite').textContent = bestScoreInfinite;
+  } else {
+    infBtn.classList.add('locked');
+    infIcon.textContent = '🔒';
+    infDesc.textContent = '스테이지 모드를 모두 클리어하면 해금!';
+    infBestRow.style.display = 'none';
+  }
+}
+
+function resetToTitle() {
+  document.getElementById('gameover-screen').style.display = 'none';
+  document.getElementById('all-clear-screen').style.display = 'none';
+  document.getElementById('word-toast').classList.add('hidden');
+  refreshTitleScreen();
+  document.getElementById('title-screen').style.display = 'flex';
+  score = 0;
+  stage = 1;
+  wordsClearedInStage = 0;
+  multiplier = 1;
+  totalWordsCleared = 0;
+  // Don't call updateUI here — title screen is showing, no HUD update needed
+}
+
+// ==================== Input ====================
+function getCanvasCoords(clientX, clientY) {
+  const rect = canvas.getBoundingClientRect();
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  return {
+    x: (clientX - rect.left) * scaleX,
+    y: (clientY - rect.top) * scaleY
+  };
+}
+
+function updateAim(clientX, clientY) {
+  const { x, y } = getCanvasCoords(clientX, clientY);
+  const sx = canvas.width / 2;
+  const sy = SHOOTER_Y;
+  let angle = Math.atan2(y - sy, x - sx);
+  // Limit aim to upper hemisphere
+  const minAngle = -Math.PI + 0.15; // ~-170°
+  const maxAngle = -0.15;            // ~-10° (so it can't shoot horizontally to the right)
+  if (angle > 0) {
+    // Below shooter — clamp to nearest valid bound
+    angle = (x < sx) ? minAngle : maxAngle;
+  } else {
+    angle = Math.max(minAngle, Math.min(maxAngle, angle));
+  }
+  aimAngle = angle;
+}
+
+function setupInput() {
+  canvas.addEventListener('mousemove', e => updateAim(e.clientX, e.clientY));
+  canvas.addEventListener('click', () => shoot());
+
+  canvas.addEventListener('touchstart', e => {
+    e.preventDefault();
+    if (e.touches[0]) updateAim(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+  canvas.addEventListener('touchmove', e => {
+    e.preventDefault();
+    if (e.touches[0]) updateAim(e.touches[0].clientX, e.touches[0].clientY);
+  }, { passive: false });
+  canvas.addEventListener('touchend', e => {
+    e.preventDefault();
+    shoot();
+  }, { passive: false });
+}
+
+// ==================== Main Loop ====================
+function loop(ts) {
+  if (isRunning) {
+    updateProjectile();
+  }
+  updateAnimations();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+window.addEventListener('load', () => {
+  canvas = document.getElementById('game-canvas');
+  ctx = canvas.getContext('2d');
+  refreshTitleScreen();
+  setupInput();
+  // Show empty grid for visual feedback on title screen
+  grid = [];
+  for (let r = 0; r < 4; r++) {
+    const row = new Array(COLS).fill(null);
+    const cells = maxColInRow(r);
+    for (let c = 0; c < cells; c++) {
+      const pool = 'AEIOURTNSLM';
+      row[c] = { letter: pool[Math.floor(Math.random() * pool.length)] };
+    }
+    grid.push(row);
+  }
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>
