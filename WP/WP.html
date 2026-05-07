@@ -1,0 +1,1462 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>워드퍼트 — 영어 단어 알까기 골프</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.19.0/matter.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Black+Han+Sans&family=Nanum+Gothic:wght@700;800&display=swap');
+
+* { box-sizing: border-box; }
+html, body {
+    margin: 0; padding: 0;
+    width: 100%; height: 100%;
+    overflow: hidden;
+    background: #2d3a2e;
+    font-family: 'Jua', 'Nanum Gothic', sans-serif;
+    color: #2d3a2e;
+    touch-action: none;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+#app {
+    position: relative;
+    width: 100vw; height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    background:
+        radial-gradient(circle at 20% 20%, #3d5a3f 0%, #2d3a2e 50%),
+        repeating-linear-gradient(45deg, transparent 0 8px, rgba(255,255,255,0.02) 8px 16px);
+}
+
+/* ───── 게임 보드 ───── */
+#stage {
+    position: relative;
+    background: #6ba368;
+    border: 14px solid #5d3a1f;
+    border-radius: 18px;
+    box-shadow:
+        inset 0 0 60px rgba(0,0,0,0.35),
+        0 20px 40px rgba(0,0,0,0.4),
+        0 0 0 4px #3d2412;
+    overflow: hidden;
+}
+#stage::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+        repeating-linear-gradient(0deg, rgba(255,255,255,0.03) 0 2px, transparent 2px 4px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,0.04) 0 2px, transparent 2px 5px);
+    pointer-events: none; z-index: 1;
+}
+#gameCanvas {
+    display: block;
+    position: relative; z-index: 2;
+}
+
+/* ───── HUD ───── */
+#hud {
+    position: absolute;
+    top: 12px; left: 12px; right: 12px;
+    display: flex; justify-content: space-between; align-items: flex-start;
+    pointer-events: none;
+    z-index: 50;
+}
+.hud-card {
+    background: rgba(255, 252, 240, 0.95);
+    border: 3px solid #5d3a1f;
+    border-radius: 14px;
+    padding: 8px 14px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    pointer-events: auto;
+}
+.hud-card .label {
+    font-size: 11px;
+    font-family: 'Nanum Gothic', sans-serif;
+    color: #8b6f47;
+    letter-spacing: 1px;
+    margin: 0;
+}
+.hud-card .value {
+    font-size: 22px;
+    font-family: 'Black Han Sans', sans-serif;
+    margin: 0; line-height: 1.1;
+    color: #2d3a2e;
+}
+.hud-card.flag .value::before { content: '⛳ '; font-size: 18px; }
+
+#btnMenu {
+    background: #fff8e1;
+    border: 3px solid #5d3a1f;
+    border-radius: 14px;
+    padding: 8px 14px;
+    font-family: 'Jua', sans-serif;
+    font-size: 14px;
+    color: #5d3a1f;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    cursor: pointer;
+    pointer-events: auto;
+}
+
+#hudStars {
+    background: rgba(255, 252, 240, 0.95);
+    border: 3px solid #5d3a1f;
+    border-radius: 14px;
+    padding: 6px 12px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    pointer-events: auto;
+    font-size: 18px;
+    line-height: 1;
+}
+#hudStars .star { transition: opacity 0.2s; }
+#hudStars .star.dim { opacity: 0.25; filter: grayscale(0.8); }
+
+/* ───── 단어바 ───── */
+#wordbar {
+    position: absolute;
+    bottom: 14px; left: 50%;
+    transform: translateX(-50%);
+    display: flex; gap: 8px;
+    background: rgba(255, 252, 240, 0.95);
+    border: 3px solid #5d3a1f;
+    border-radius: 16px;
+    padding: 10px 16px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.2);
+    z-index: 50;
+    pointer-events: none;
+    max-width: 92%;
+    overflow-x: auto;
+}
+.slot {
+    width: 32px; height: 40px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    font-family: 'Black Han Sans', sans-serif;
+    border: 2px dashed #c8b896;
+    color: #c8b896;
+    background: #fff;
+    transition: all 0.25s;
+    flex-shrink: 0;
+}
+.slot.current {
+    border: 2px solid #f59e0b;
+    color: #f59e0b;
+    background: #fff8e1;
+    animation: slotPulse 1.2s ease-in-out infinite;
+    box-shadow: 0 0 12px rgba(245, 158, 11, 0.5);
+}
+.slot.done {
+    border: 2px solid #16a34a;
+    color: #fff;
+    background: #16a34a;
+    border-style: solid;
+}
+@keyframes slotPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+/* ───── 오버레이 공통 ───── */
+.overlay {
+    position: absolute; inset: 0;
+    background: rgba(45, 58, 46, 0.92);
+    backdrop-filter: blur(8px);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 100;
+    padding: 20px;
+    text-align: center;
+    overflow-y: auto;
+}
+.overlay h1 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(40px, 9vw, 72px);
+    color: #ffe6a0;
+    margin: 0 0 8px;
+    letter-spacing: 2px;
+    text-shadow: 4px 4px 0 #5d3a1f, 8px 8px 0 rgba(0,0,0,0.3);
+    transform: rotate(-2deg);
+}
+.overlay h2 {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(30px, 6vw, 48px);
+    color: #ffe6a0;
+    margin: 0 0 14px;
+    text-shadow: 3px 3px 0 #5d3a1f;
+}
+.overlay p.subtitle {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(15px, 3vw, 20px);
+    color: #d4c896;
+    background: rgba(0,0,0,0.3);
+    padding: 8px 18px;
+    border-radius: 22px;
+    margin: 0 0 22px;
+}
+
+.btn {
+    font-family: 'Jua', sans-serif;
+    font-size: clamp(18px, 4vw, 24px);
+    background: #f59e0b;
+    color: #fff;
+    border: none;
+    padding: 14px 36px;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow: 0 6px 0 #b45309, 0 8px 20px rgba(0,0,0,0.3);
+    transition: all 0.1s;
+    margin: 6px;
+}
+.btn:active { transform: translateY(4px); box-shadow: 0 2px 0 #b45309, 0 4px 10px rgba(0,0,0,0.3); }
+.btn.secondary { background: #fff8e1; color: #5d3a1f; box-shadow: 0 6px 0 #c8b896, 0 8px 20px rgba(0,0,0,0.3); }
+.btn.secondary:active { box-shadow: 0 2px 0 #c8b896, 0 4px 10px rgba(0,0,0,0.3); }
+
+/* ───── 모드 선택 ───── */
+.mode-grid {
+    display: flex; gap: 16px; flex-wrap: wrap;
+    justify-content: center;
+    margin-bottom: 18px;
+}
+.mode-card {
+    width: 200px;
+    background: #fff8e1;
+    border: 4px solid #5d3a1f;
+    border-radius: 20px;
+    padding: 18px 16px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.3);
+    cursor: pointer;
+    transition: transform 0.15s;
+    text-align: center;
+}
+.mode-card:active { transform: translateY(4px); }
+.mode-card .icon { font-size: 56px; line-height: 1; display: block; margin-bottom: 6px; }
+.mode-card .title {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    color: #5d3a1f;
+    margin: 4px 0 6px;
+    letter-spacing: 1px;
+}
+.mode-card .desc {
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    color: #8b6f47;
+    line-height: 1.4;
+}
+.mode-card .badge {
+    display: inline-block;
+    margin-top: 8px;
+    background: #f59e0b;
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 11px;
+    padding: 3px 10px;
+    border-radius: 12px;
+}
+
+/* ───── 스테이지 그리드 ───── */
+#stageGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(96px, 110px));
+    gap: 12px;
+    background: rgba(255, 248, 225, 0.1);
+    border-radius: 20px;
+    padding: 14px;
+    margin: 0 0 18px;
+    max-height: 60vh;
+    overflow-y: auto;
+}
+.stage-card {
+    background: #fff8e1;
+    border: 3px solid #5d3a1f;
+    border-radius: 14px;
+    padding: 10px 6px;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.3);
+    cursor: pointer;
+    text-align: center;
+    transition: transform 0.1s;
+    position: relative;
+}
+.stage-card:active { transform: translateY(2px); }
+.stage-card.locked {
+    background: #4b5563;
+    border-color: #1f2937;
+    color: #9ca3af;
+    cursor: not-allowed;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.5);
+}
+.stage-card.locked:active { transform: none; }
+.stage-card .stage-num {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 14px;
+    color: #8b6f47;
+    margin: 0;
+}
+.stage-card.locked .stage-num { color: #9ca3af; }
+.stage-card .stage-word {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    color: #2d3a2e;
+    letter-spacing: 2px;
+    margin: 4px 0 6px;
+}
+.stage-card.locked .stage-word { color: #6b7280; }
+.stage-card .stage-stars {
+    font-size: 18px;
+    line-height: 1;
+}
+.stage-card .stage-stars .star.dim { opacity: 0.2; filter: grayscale(0.8); }
+.stage-card .stage-best {
+    font-family: 'Jua', sans-serif;
+    font-size: 11px;
+    color: #8b6f47;
+    margin-top: 4px;
+}
+.stage-card .lock-icon { font-size: 28px; margin: 4px 0; }
+.stage-card .trap-mark {
+    position: absolute;
+    top: 4px; right: 6px;
+    font-size: 11px;
+    color: #b91c1c;
+    background: #fff;
+    border-radius: 8px;
+    padding: 1px 4px;
+    border: 1px solid #b91c1c;
+}
+
+/* ───── 결과 스코어카드 ───── */
+.scorecard {
+    background: #fff8e1;
+    border: 4px solid #5d3a1f;
+    border-radius: 20px;
+    padding: 22px 28px;
+    box-shadow: 0 8px 0 rgba(0,0,0,0.3);
+    margin: 0 0 22px;
+    min-width: 280px;
+}
+.scorecard .word {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 36px;
+    color: #2d3a2e;
+    letter-spacing: 4px;
+    margin: 0 0 8px;
+}
+.scorecard .row {
+    display: flex; justify-content: space-between;
+    font-family: 'Jua', sans-serif;
+    font-size: 18px;
+    color: #5d3a1f;
+    padding: 4px 0;
+}
+.scorecard .grade {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 32px;
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 2px dashed #c8b896;
+}
+.grade.eagle { color: #d97706; }
+.grade.birdie { color: #16a34a; }
+.grade.par { color: #2563eb; }
+.grade.bogey { color: #6b7280; }
+.grade.double { color: #b91c1c; }
+
+.stars-display {
+    font-size: 56px;
+    margin: 14px 0;
+    line-height: 1;
+}
+.stars-display .star {
+    display: inline-block;
+    margin: 0 4px;
+    transform: scale(0);
+    animation: starPop 0.5s ease-out forwards;
+}
+.stars-display .star:nth-child(1) { animation-delay: 0.1s; }
+.stars-display .star:nth-child(2) { animation-delay: 0.4s; }
+.stars-display .star:nth-child(3) { animation-delay: 0.7s; }
+.stars-display .star.dim { opacity: 0.25; filter: grayscale(0.9); }
+@keyframes starPop {
+    0% { transform: scale(0) rotate(-180deg); }
+    70% { transform: scale(1.3) rotate(20deg); }
+    100% { transform: scale(1) rotate(0); }
+}
+
+.next-stars-hint {
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    color: #8b6f47;
+    background: rgba(255,255,255,0.5);
+    padding: 6px 12px;
+    border-radius: 10px;
+    margin: 6px 0 12px;
+}
+
+/* ───── 도전 모드 라운드 결과 ───── */
+.round-table {
+    background: #fff8e1;
+    border: 4px solid #5d3a1f;
+    border-radius: 20px;
+    padding: 18px;
+    margin: 0 0 22px;
+    max-height: 50vh;
+    overflow-y: auto;
+    min-width: 320px;
+}
+.round-table .row {
+    display: grid;
+    grid-template-columns: 32px 1fr 50px 50px 60px;
+    gap: 8px;
+    padding: 6px 4px;
+    font-family: 'Jua', sans-serif;
+    font-size: 15px;
+    color: #5d3a1f;
+    border-bottom: 1px dashed #d4c896;
+    align-items: center;
+}
+.round-table .row.header {
+    font-family: 'Black Han Sans', sans-serif;
+    color: #8b6f47;
+    font-size: 12px;
+    border-bottom: 2px solid #8b6f47;
+}
+.round-table .row .word-cell {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 18px;
+    letter-spacing: 2px;
+    color: #2d3a2e;
+}
+.round-table .row .diff-cell.minus { color: #16a34a; font-weight: 800; }
+.round-table .row .diff-cell.plus { color: #b91c1c; }
+.round-table .row .diff-cell.zero { color: #2563eb; }
+.round-table .total {
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    color: #d97706;
+    border-top: 3px solid #5d3a1f;
+    padding-top: 8px;
+    margin-top: 6px;
+    text-align: right;
+}
+.round-table .total .diff { font-size: 18px; margin-left: 12px; }
+.round-table .total .diff.minus { color: #16a34a; }
+.round-table .total .diff.plus { color: #b91c1c; }
+.round-table .total .diff.zero { color: #2563eb; }
+
+.best-banner {
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #fff;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: 22px;
+    padding: 10px 24px;
+    border-radius: 14px;
+    margin: 0 0 14px;
+    box-shadow: 0 6px 0 #b45309;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 0 rgba(0,0,0,0.2);
+}
+
+/* ───── 함정 배지 ───── */
+.trap-badge {
+    position: absolute;
+    top: 70px; right: 12px;
+    background: #b91c1c;
+    color: #fff;
+    font-family: 'Jua', sans-serif;
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    box-shadow: 0 3px 0 #7f1d1d;
+    z-index: 50;
+    animation: trapPulse 2s ease-in-out infinite;
+    pointer-events: none;
+}
+@keyframes trapPulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.06); }
+}
+
+/* ───── 토스트 ───── */
+#toast {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%) scale(0.5);
+    background: rgba(45, 58, 46, 0.95);
+    color: #ffe6a0;
+    font-family: 'Black Han Sans', sans-serif;
+    font-size: clamp(28px, 6vw, 48px);
+    padding: 16px 32px;
+    border-radius: 16px;
+    border: 3px solid #ffe6a0;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+    pointer-events: none;
+    opacity: 0;
+    transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+    z-index: 200;
+    text-shadow: 2px 2px 0 #5d3a1f;
+}
+#toast.show {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.howto {
+    color: #d4c896;
+    font-family: 'Jua', sans-serif;
+    font-size: 13px;
+    background: rgba(0,0,0,0.25);
+    padding: 8px 16px;
+    border-radius: 12px;
+    margin: 14px 0;
+    max-width: 380px;
+    line-height: 1.6;
+}
+.howto strong { color: #ffe6a0; }
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+</style>
+</head>
+<body>
+
+<div id="app">
+    <div id="stage">
+        <canvas id="gameCanvas"></canvas>
+
+        <div id="hud">
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+                <button id="btnMenu" type="button">≡ 메뉴</button>
+                <div class="hud-card flag">
+                    <p class="label" id="hudModeLabel">STAGE</p>
+                    <p class="value" id="holeLabel">1 / 9</p>
+                </div>
+            </div>
+            <div style="display:flex; gap:8px; align-items:flex-start;">
+                <div id="hudStars" style="display:none;">
+                    <span class="star">⭐</span><span class="star dim">⭐</span><span class="star dim">⭐</span>
+                </div>
+                <div class="hud-card">
+                    <p class="label">파 / 타수</p>
+                    <p class="value"><span id="strokeLabel">0</span> / <span id="parLabel">5</span></p>
+                </div>
+            </div>
+        </div>
+
+        <div id="trapBadge" class="trap-badge" style="display:none;">⚠ 함정 — 보라공 들어가면 +1타!</div>
+
+        <div id="wordbar"></div>
+
+        <!-- 메인 메뉴 -->
+        <div id="menuScreen" class="overlay">
+            <h1>WORD PUTT</h1>
+            <p class="subtitle">영어 단어 알까기 골프 ⛳</p>
+
+            <div class="mode-grid">
+                <div class="mode-card" id="cardStage">
+                    <span class="icon">🎯</span>
+                    <p class="title">스테이지 모드</p>
+                    <p class="desc">9개 스테이지 도전!<br>별을 모아보자 ⭐⭐⭐</p>
+                    <span class="badge" id="stageBadge">0 / 27 ⭐</span>
+                </div>
+                <div class="mode-card" id="cardChallenge">
+                    <span class="icon">🏆</span>
+                    <p class="title">도전 모드</p>
+                    <p class="desc">9홀 연속 라운드!<br>최소 타수에 도전</p>
+                    <span class="badge" id="challengeBadge">— 타</span>
+                </div>
+            </div>
+
+            <div class="howto">
+                <strong>조작</strong>: 흰 공을 끌어당겨 놓으면 발사!<br>
+                노란색으로 빛나는 글자를 순서대로 구멍에 넣으세요.
+            </div>
+        </div>
+
+        <!-- 스테이지 선택 -->
+        <div id="stageSelectScreen" class="overlay" style="display:none;">
+            <h2>🎯 스테이지 선택</h2>
+            <p class="subtitle">⭐ <span id="totalStars">0</span> / 27</p>
+            <div id="stageGrid"></div>
+            <button class="btn secondary" id="btnStageBack">← 메뉴</button>
+        </div>
+
+        <!-- 스테이지 결과 -->
+        <div id="stageResultScreen" class="overlay" style="display:none;">
+            <h2 id="stageResultTitle">스테이지 클리어!</h2>
+            <div class="scorecard">
+                <p class="word" id="stageResultWord">—</p>
+                <div class="row"><span>스테이지</span><span id="stageResultNum">1</span></div>
+                <div class="row"><span>파</span><span id="stageResultPar">8</span></div>
+                <div class="row"><span>타수</span><span id="stageResultStrokes">8</span></div>
+                <div class="stars-display" id="stageStars"></div>
+                <p class="next-stars-hint" id="stageNextHint" style="display:none;"></p>
+            </div>
+            <div class="btn-row">
+                <button class="btn secondary" id="btnStageRetry">↻ 다시</button>
+                <button class="btn" id="btnStageNext">다음 →</button>
+            </div>
+        </div>
+
+        <!-- 도전 모드 홀 결과 -->
+        <div id="holeScreen" class="overlay" style="display:none;">
+            <div class="scorecard">
+                <p class="word" id="holeWord">—</p>
+                <div class="row"><span>홀</span><span id="holeNum">1</span></div>
+                <div class="row"><span>파</span><span id="holePar">5</span></div>
+                <div class="row"><span>타수</span><span id="holeStrokes">5</span></div>
+                <p class="grade" id="holeGrade">PAR</p>
+            </div>
+            <button class="btn" id="btnNextHole">다음 홀 →</button>
+        </div>
+
+        <!-- 라운드 결과 -->
+        <div id="roundScreen" class="overlay" style="display:none;">
+            <h2>🏆 라운드 종료</h2>
+            <div id="bestBanner" class="best-banner" style="display:none;">⭐ NEW BEST! ⭐</div>
+            <div class="round-table" id="roundTable"></div>
+            <div class="btn-row">
+                <button class="btn" id="btnNewRound">다시 도전 ↻</button>
+                <button class="btn secondary" id="btnBackMenu">메뉴로</button>
+            </div>
+        </div>
+
+        <div id="toast"></div>
+    </div>
+</div>
+
+<script>
+'use strict';
+
+// ─────────────────────────────────────────────
+//  코스 데이터 — stagePar(3학년 기준 넉넉) + challengePar(타이트)
+//  별 기준: stagePar 이내=3⭐, +3 이내=2⭐, 그 이상=1⭐
+// ─────────────────────────────────────────────
+const COURSES = [
+    { id: 1, word: 'CAT',    stagePar: 8,  challengePar: 5,  distractors: ['B','M'],     trap: false },
+    { id: 2, word: 'SUN',    stagePar: 8,  challengePar: 5,  distractors: ['F','Z'],     trap: false },
+    { id: 3, word: 'BOX',    stagePar: 8,  challengePar: 5,  distractors: ['Q','J'],     trap: false },
+    { id: 4, word: 'BIRD',   stagePar: 11, challengePar: 7,  distractors: ['L','S'],     trap: false },
+    { id: 5, word: 'BOOK',   stagePar: 11, challengePar: 7,  distractors: ['T','M'],     trap: false },
+    { id: 6, word: 'TREE',   stagePar: 11, challengePar: 7,  distractors: ['G','N','D'], trap: false },
+    { id: 7, word: 'APPLE',  stagePar: 14, challengePar: 9,  distractors: ['B','D','C'], trap: true  },
+    { id: 8, word: 'HOUSE',  stagePar: 14, challengePar: 9,  distractors: ['T','M','R'], trap: true  },
+    { id: 9, word: 'FRIEND', stagePar: 17, challengePar: 11, distractors: ['B','S','M'], trap: true  },
+];
+const TOTAL_STARS = COURSES.length * 3;
+
+// 물리 상수
+const BOARD_BASE_W = 480;
+const BOARD_BASE_H = 720;
+const POCKET_RADIUS = 30;
+const LETTER_RADIUS = 24;
+const SHOOTER_RADIUS = 18;
+const MAX_DRAG_DIST = 180;
+const POWER_MULTIPLIER = 0.16;
+const STOP_THRESHOLD = 0.18;
+const STOP_FRAMES = 14;
+
+const COLORS = {
+    target: '#f59e0b', targetGlow: 'rgba(245, 158, 11, 0.55)',
+    letter: '#fff8e1', letterText: '#2d3a2e',
+    distractor: '#a78bfa', distractorTrap: '#dc2626',
+    shooter: '#ffffff', shooterAccent: '#ef4444',
+    aimLine: 'rgba(255, 255, 255, 0.85)',
+    aimLineWeak: 'rgba(255, 255, 255, 0.35)',
+};
+
+const { Engine, Render, Runner, Bodies, Body, Composite, Events } = Matter;
+
+// 세이브
+const SAVE_KEY = 'wordputt-v2';
+const defaultSave = () => ({ stages: {}, challenge: { bestTotal: null } });
+function loadSave() {
+    try {
+        const raw = localStorage.getItem(SAVE_KEY);
+        if (!raw) return defaultSave();
+        const data = JSON.parse(raw);
+        if (!data.stages) data.stages = {};
+        if (!data.challenge) data.challenge = { bestTotal: null };
+        return data;
+    } catch(e) { return defaultSave(); }
+}
+function persistSave() {
+    try { localStorage.setItem(SAVE_KEY, JSON.stringify(state.save)); } catch(e) {}
+}
+
+const state = {
+    canvas: null, ctx: null,
+    boardW: BOARD_BASE_W, boardH: BOARD_BASE_H,
+    scale: 1,
+    engine: null, runner: null,
+    walls: [], pockets: [],
+    shooter: null,
+    letterBodies: [],
+    mode: null,
+    currentCourseIdx: 0,
+    currentLetterIdx: 0,
+    strokes: 0,
+    holeResults: [],
+    phase: 'menu',
+    aim: null,
+    stopCounter: 0,
+    pocketingLock: false,
+    save: defaultSave(),
+};
+
+const $ = id => document.getElementById(id);
+
+function showToast(msg, ms = 1100) {
+    const el = $('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => el.classList.remove('show'), ms);
+}
+
+function shuffle(arr) {
+    for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+}
+
+function getCurrentPar() {
+    const c = COURSES[state.currentCourseIdx];
+    return state.mode === 'stage' ? c.stagePar : c.challengePar;
+}
+
+function getStarsForStage(strokes, stagePar) {
+    if (strokes <= stagePar) return 3;
+    if (strokes <= stagePar + 3) return 2;
+    return 1;
+}
+
+function totalStarsEarned() {
+    let total = 0;
+    for (const id in state.save.stages) total += (state.save.stages[id].bestStars || 0);
+    return total;
+}
+
+function isStageUnlocked(idx) {
+    if (idx === 0) return true;
+    const prev = state.save.stages[COURSES[idx - 1].id];
+    return !!(prev && prev.bestStars >= 1);
+}
+
+// 반응형
+function resizeStage() {
+    const stage = $('stage');
+    const canvas = state.canvas;
+    const ratio = BOARD_BASE_W / BOARD_BASE_H;
+    const margin = 40;
+    const maxW = window.innerWidth - margin;
+    const maxH = window.innerHeight - margin;
+    let w = maxW, h = w / ratio;
+    if (h > maxH) { h = maxH; w = h * ratio; }
+    stage.style.width = w + 'px';
+    stage.style.height = h + 'px';
+    canvas.style.width = (w - 28) + 'px';
+    canvas.style.height = (h - 28) + 'px';
+    canvas.width = BOARD_BASE_W;
+    canvas.height = BOARD_BASE_H;
+    state.scale = (w - 28) / BOARD_BASE_W;
+}
+
+// 엔진
+function buildEngine() {
+    if (state.engine) {
+        Runner.stop(state.runner);
+        Composite.clear(state.engine.world, false);
+        Engine.clear(state.engine);
+    }
+    state.engine = Engine.create({ gravity: { x: 0, y: 0 } });
+    state.runner = Runner.create();
+    Runner.run(state.runner, state.engine);
+
+    const W = BOARD_BASE_W, H = BOARD_BASE_H, t = 60;
+    const wallOpts = { isStatic: true, restitution: 0.85, friction: 0.02, label: 'wall' };
+    state.walls = [
+        Bodies.rectangle(W/2, -t/2, W, t, wallOpts),
+        Bodies.rectangle(W/2, H + t/2, W, t, wallOpts),
+        Bodies.rectangle(-t/2, H/2, t, H, wallOpts),
+        Bodies.rectangle(W + t/2, H/2, t, H, wallOpts),
+    ];
+    Composite.add(state.engine.world, state.walls);
+
+    const pPos = [
+        { x: POCKET_RADIUS - 4, y: POCKET_RADIUS - 4 },
+        { x: W - POCKET_RADIUS + 4, y: POCKET_RADIUS - 4 },
+        { x: POCKET_RADIUS - 4, y: H - POCKET_RADIUS + 4 },
+        { x: W - POCKET_RADIUS + 4, y: H - POCKET_RADIUS + 4 },
+    ];
+    state.pockets = pPos.map(p => ({ x: p.x, y: p.y, r: POCKET_RADIUS }));
+
+    Events.on(state.engine, 'beforeUpdate', () => {
+        const all = Composite.allBodies(state.engine.world);
+        for (const b of all) {
+            if (b.label === 'letter' || b.label === 'shooter') {
+                Body.setVelocity(b, { x: b.velocity.x * 0.985, y: b.velocity.y * 0.985 });
+                Body.setAngularVelocity(b, b.angularVelocity * 0.97);
+            }
+        }
+    });
+    Events.on(state.engine, 'afterUpdate', checkPockets);
+}
+
+function spawnLetterBody(x, y, meta) {
+    const body = Bodies.circle(x, y, LETTER_RADIUS, {
+        label: 'letter', restitution: 0.78, friction: 0.02, frictionAir: 0, density: 0.005,
+    });
+    body.gameMeta = { ...meta };
+    Composite.add(state.engine.world, body);
+    state.letterBodies.push(body);
+}
+
+function setupCourse(idx) {
+    const course = COURSES[idx];
+    state.currentCourseIdx = idx;
+    state.currentLetterIdx = 0;
+    state.strokes = 0;
+    state.phase = 'aim';
+    state.stopCounter = 0;
+    state.pocketingLock = false;
+
+    buildEngine();
+
+    state.shooter = Bodies.circle(BOARD_BASE_W/2, BOARD_BASE_H - 100, SHOOTER_RADIUS, {
+        label: 'shooter', restitution: 0.8, friction: 0.02, frictionAir: 0, density: 0.004,
+    });
+    Composite.add(state.engine.world, state.shooter);
+
+    const letters = course.word.split('');
+    const distractors = (course.distractors || []).slice();
+    const allChars = [
+        ...letters.map((c, i) => ({ char: c, isDistractor: false, wordIdx: i })),
+        ...distractors.map(c => ({ char: c, isDistractor: true, wordIdx: -1 })),
+    ];
+
+    const placed = [];
+    const minDist = LETTER_RADIUS * 2.4;
+    const margin = LETTER_RADIUS + 30;
+    const yTop = margin + 30;
+    const yBot = BOARD_BASE_H * 0.55;
+    const charsToPlace = shuffle(allChars.slice());
+    state.letterBodies = [];
+
+    for (const meta of charsToPlace) {
+        let placedOk = false;
+        for (let a = 0; a < 60; a++) {
+            const x = margin + Math.random() * (BOARD_BASE_W - margin * 2);
+            const y = yTop + Math.random() * (yBot - yTop);
+            let ok = true;
+            for (const p of placed) {
+                const dx = x - p.x, dy = y - p.y;
+                if (dx*dx + dy*dy < minDist * minDist) { ok = false; break; }
+            }
+            if (ok) { placed.push({ x, y }); spawnLetterBody(x, y, meta); placedOk = true; break; }
+        }
+        if (!placedOk) {
+            const j = placed.length, cols = 4;
+            const x = margin + (j % cols) * minDist;
+            const y = yTop + Math.floor(j / cols) * minDist;
+            placed.push({ x, y });
+            spawnLetterBody(x, y, meta);
+        }
+    }
+
+    $('hudModeLabel').textContent = state.mode === 'stage' ? 'STAGE' : 'HOLE';
+    $('holeLabel').textContent = `${course.id} / ${COURSES.length}`;
+    $('parLabel').textContent = getCurrentPar();
+    $('strokeLabel').textContent = '0';
+    $('trapBadge').style.display = course.trap ? 'block' : 'none';
+
+    if (state.mode === 'stage') {
+        $('hudStars').style.display = 'block';
+        updateHudStars();
+    } else {
+        $('hudStars').style.display = 'none';
+    }
+    renderWordbar();
+}
+
+function updateHudStars() {
+    const par = getCurrentPar();
+    const strokes = state.strokes;
+    let projected = 3;
+    if (strokes > par) projected = strokes <= par + 3 ? 2 : 1;
+    const stars = $('hudStars').children;
+    for (let i = 0; i < 3; i++) {
+        stars[i].classList.toggle('dim', i >= projected);
+    }
+}
+
+function renderWordbar() {
+    const bar = $('wordbar');
+    const word = COURSES[state.currentCourseIdx].word;
+    bar.innerHTML = '';
+    for (let i = 0; i < word.length; i++) {
+        const slot = document.createElement('div');
+        slot.className = 'slot';
+        if (i < state.currentLetterIdx) { slot.classList.add('done'); slot.textContent = word[i]; }
+        else if (i === state.currentLetterIdx) { slot.classList.add('current'); slot.textContent = word[i]; }
+        else { slot.textContent = word[i]; }
+        bar.appendChild(slot);
+    }
+}
+
+function checkPockets() {
+    if (state.phase !== 'shoot') return;
+    if (state.pocketingLock) return;
+
+    for (let i = state.letterBodies.length - 1; i >= 0; i--) {
+        const b = state.letterBodies[i];
+        for (const p of state.pockets) {
+            const dx = b.position.x - p.x, dy = b.position.y - p.y;
+            if (dx*dx + dy*dy < (p.r - LETTER_RADIUS * 0.3) ** 2) {
+                handleLetterPocketed(b, i);
+                break;
+            }
+        }
+    }
+
+    if (state.shooter) {
+        for (const p of state.pockets) {
+            const dx = state.shooter.position.x - p.x;
+            const dy = state.shooter.position.y - p.y;
+            if (dx*dx + dy*dy < (p.r - SHOOTER_RADIUS * 0.2) ** 2) {
+                penalizeShooter();
+                break;
+            }
+        }
+    }
+}
+
+function handleLetterPocketed(body, idx) {
+    const course = COURSES[state.currentCourseIdx];
+    const meta = body.gameMeta;
+    const targetChar = course.word[state.currentLetterIdx];
+
+    Composite.remove(state.engine.world, body);
+    state.letterBodies.splice(idx, 1);
+
+    if (meta.isDistractor) {
+        if (course.trap) {
+            state.strokes += 1;
+            $('strokeLabel').textContent = state.strokes;
+            if (state.mode === 'stage') updateHudStars();
+            showToast('함정 ! +1 타');
+            respawnLetter(meta);
+        } else {
+            showToast('방해 글자 정리 ✓', 700);
+        }
+        return;
+    }
+
+    if (meta.char === targetChar) {
+        state.currentLetterIdx += 1;
+        renderWordbar();
+        if (state.currentLetterIdx >= course.word.length) {
+            state.pocketingLock = true;
+            showToast(`${course.word} ✓`, 800);
+            setTimeout(finishCourse, 900);
+        } else {
+            showToast('GOOD!', 600);
+        }
+    } else {
+        state.strokes += 1;
+        $('strokeLabel').textContent = state.strokes;
+        if (state.mode === 'stage') updateHudStars();
+        showToast('순서 오류 +1 타');
+        respawnLetter(meta);
+    }
+}
+
+function respawnLetter(meta) {
+    const margin = LETTER_RADIUS + 30;
+    const yTop = margin + 20;
+    const yBot = BOARD_BASE_H * 0.4;
+    const minDist = LETTER_RADIUS * 2.4;
+    let pos = null;
+    for (let a = 0; a < 80; a++) {
+        const x = margin + Math.random() * (BOARD_BASE_W - margin * 2);
+        const y = yTop + Math.random() * (yBot - yTop);
+        let ok = true;
+        for (const lb of state.letterBodies) {
+            const dx = x - lb.position.x, dy = y - lb.position.y;
+            if (dx*dx + dy*dy < minDist * minDist) { ok = false; break; }
+        }
+        if (ok && state.shooter) {
+            const dx = x - state.shooter.position.x, dy = y - state.shooter.position.y;
+            if (dx*dx + dy*dy < minDist * minDist) ok = false;
+        }
+        if (ok) { pos = { x, y }; break; }
+    }
+    if (!pos) pos = { x: BOARD_BASE_W/2, y: 100 };
+    spawnLetterBody(pos.x, pos.y, meta);
+}
+
+function penalizeShooter() {
+    state.strokes += 1;
+    $('strokeLabel').textContent = state.strokes;
+    if (state.mode === 'stage') updateHudStars();
+    showToast('스크래치! +1 타');
+    Composite.remove(state.engine.world, state.shooter);
+    state.shooter = Bodies.circle(BOARD_BASE_W/2, BOARD_BASE_H - 100, SHOOTER_RADIUS, {
+        label: 'shooter', restitution: 0.8, friction: 0.02, frictionAir: 0, density: 0.004,
+    });
+    Composite.add(state.engine.world, state.shooter);
+}
+
+function checkAllStopped() {
+    if (state.phase !== 'shoot') return;
+    let moving = false;
+    if (state.shooter) {
+        const v = state.shooter.velocity;
+        if (Math.hypot(v.x, v.y) > STOP_THRESHOLD) moving = true;
+    }
+    for (const b of state.letterBodies) {
+        const v = b.velocity;
+        if (Math.hypot(v.x, v.y) > STOP_THRESHOLD) { moving = true; break; }
+    }
+    if (moving) state.stopCounter = 0;
+    else {
+        state.stopCounter++;
+        if (state.stopCounter >= STOP_FRAMES) {
+            if (!state.shooter || !state.shooter.position) {
+                state.shooter = Bodies.circle(BOARD_BASE_W/2, BOARD_BASE_H - 100, SHOOTER_RADIUS, {
+                    label: 'shooter', restitution: 0.8, friction: 0.02, frictionAir: 0, density: 0.004,
+                });
+                Composite.add(state.engine.world, state.shooter);
+            }
+            Body.setVelocity(state.shooter, { x: 0, y: 0 });
+            for (const b of state.letterBodies) Body.setVelocity(b, { x: 0, y: 0 });
+            state.phase = 'aim';
+        }
+    }
+}
+
+function getPointer(e) {
+    const rect = state.canvas.getBoundingClientRect();
+    const t = e.touches && e.touches.length ? e.touches[0] : e;
+    const cx = (t.clientX - rect.left) * (BOARD_BASE_W / rect.width);
+    const cy = (t.clientY - rect.top) * (BOARD_BASE_H / rect.height);
+    return { x: cx, y: cy };
+}
+
+function onPointerDown(e) {
+    if (state.phase !== 'aim' || !state.shooter) return;
+    const p = getPointer(e);
+    const dx = p.x - state.shooter.position.x;
+    const dy = p.y - state.shooter.position.y;
+    if (Math.hypot(dx, dy) > SHOOTER_RADIUS * 4) return;
+    state.aim = { startX: state.shooter.position.x, startY: state.shooter.position.y, x: p.x, y: p.y };
+    e.preventDefault();
+}
+
+function onPointerMove(e) {
+    if (!state.aim) return;
+    const p = getPointer(e);
+    state.aim.x = p.x; state.aim.y = p.y;
+    e.preventDefault();
+}
+
+function onPointerUp(e) {
+    if (!state.aim || !state.shooter) { state.aim = null; return; }
+    const dx = state.aim.startX - state.aim.x;
+    const dy = state.aim.startY - state.aim.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < 6) { state.aim = null; return; }
+    const clamped = Math.min(dist, MAX_DRAG_DIST);
+    const ux = dx / dist, uy = dy / dist;
+    const power = clamped * POWER_MULTIPLIER;
+    Body.setVelocity(state.shooter, { x: ux * power, y: uy * power });
+    state.aim = null;
+    state.strokes += 1;
+    $('strokeLabel').textContent = state.strokes;
+    if (state.mode === 'stage') updateHudStars();
+    state.phase = 'shoot';
+    state.stopCounter = 0;
+}
+
+function render() {
+    const ctx = state.ctx;
+    const W = BOARD_BASE_W, H = BOARD_BASE_H;
+    ctx.clearRect(0, 0, W, H);
+
+    for (const p of state.pockets) {
+        const grad = ctx.createRadialGradient(p.x, p.y, 4, p.x, p.y, p.r);
+        grad.addColorStop(0, '#000');
+        grad.addColorStop(0.7, '#111');
+        grad.addColorStop(1, 'rgba(0,0,0,0.0)');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = 'rgba(0,0,0,0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.r * 0.78, 0, Math.PI * 2);
+        ctx.stroke();
+    }
+
+    const course = COURSES[state.currentCourseIdx];
+    const targetChar = (course && state.currentLetterIdx < course.word.length)
+        ? course.word[state.currentLetterIdx] : null;
+
+    for (const b of state.letterBodies) {
+        const m = b.gameMeta;
+        const isTarget = !m.isDistractor && m.char === targetChar;
+        const isDistractor = m.isDistractor;
+
+        ctx.fillStyle = 'rgba(0,0,0,0.25)';
+        ctx.beginPath();
+        ctx.arc(b.position.x + 3, b.position.y + 4, LETTER_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isTarget) {
+            const g = ctx.createRadialGradient(b.position.x, b.position.y, LETTER_RADIUS,
+                                              b.position.x, b.position.y, LETTER_RADIUS + 18);
+            g.addColorStop(0, COLORS.targetGlow);
+            g.addColorStop(1, 'rgba(245, 158, 11, 0)');
+            ctx.fillStyle = g;
+            ctx.beginPath();
+            ctx.arc(b.position.x, b.position.y, LETTER_RADIUS + 18, 0, Math.PI * 2);
+            ctx.fill();
+        }
+
+        let fill = COLORS.letter, stroke = '#5d3a1f', textColor = COLORS.letterText;
+        if (isTarget) { fill = COLORS.target; stroke = '#b45309'; textColor = '#fff'; }
+        else if (isDistractor) {
+            fill = course.trap ? COLORS.distractorTrap : COLORS.distractor;
+            stroke = course.trap ? '#7f1d1d' : '#5b21b6';
+            textColor = '#fff';
+        }
+        ctx.fillStyle = fill;
+        ctx.strokeStyle = stroke;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(b.position.x, b.position.y, LETTER_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        ctx.fillStyle = 'rgba(255,255,255,0.35)';
+        ctx.beginPath();
+        ctx.arc(b.position.x - LETTER_RADIUS * 0.35, b.position.y - LETTER_RADIUS * 0.45,
+                LETTER_RADIUS * 0.32, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.save();
+        ctx.translate(b.position.x, b.position.y);
+        ctx.rotate(b.angle);
+        ctx.fillStyle = textColor;
+        ctx.font = `900 ${LETTER_RADIUS * 1.2}px 'Black Han Sans', sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(m.char, 0, 2);
+        ctx.restore();
+    }
+
+    if (state.shooter) {
+        const sx = state.shooter.position.x, sy = state.shooter.position.y;
+        ctx.fillStyle = 'rgba(0,0,0,0.3)';
+        ctx.beginPath();
+        ctx.arc(sx + 2, sy + 3, SHOOTER_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = COLORS.shooter;
+        ctx.strokeStyle = COLORS.shooterAccent;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(sx, sy, SHOOTER_RADIUS, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+        ctx.fillStyle = COLORS.shooterAccent;
+        ctx.beginPath();
+        ctx.arc(sx, sy, SHOOTER_RADIUS * 0.25, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.5)';
+        ctx.beginPath();
+        ctx.arc(sx - SHOOTER_RADIUS * 0.3, sy - SHOOTER_RADIUS * 0.4,
+                SHOOTER_RADIUS * 0.3, 0, Math.PI * 2);
+        ctx.fill();
+    }
+
+    if (state.aim && state.shooter) {
+        const sx = state.shooter.position.x, sy = state.shooter.position.y;
+        const dx = state.aim.startX - state.aim.x;
+        const dy = state.aim.startY - state.aim.y;
+        const dist = Math.hypot(dx, dy);
+        if (dist > 4) {
+            const clamped = Math.min(dist, MAX_DRAG_DIST);
+            const ux = dx / dist, uy = dy / dist;
+            ctx.strokeStyle = COLORS.aimLine;
+            ctx.lineWidth = 4;
+            ctx.setLineDash([12, 8]);
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(sx + ux * 220, sy + uy * 220);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.strokeStyle = COLORS.aimLineWeak;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(state.aim.x, state.aim.y);
+            ctx.stroke();
+            const powerRatio = clamped / MAX_DRAG_DIST;
+            const barX = sx - 30, barY = sy + SHOOTER_RADIUS + 14;
+            ctx.fillStyle = 'rgba(0,0,0,0.4)';
+            ctx.fillRect(barX, barY, 60, 6);
+            ctx.fillStyle = powerRatio > 0.85 ? '#ef4444' : (powerRatio > 0.5 ? '#f59e0b' : '#16a34a');
+            ctx.fillRect(barX, barY, 60 * powerRatio, 6);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1.5;
+            ctx.strokeRect(barX, barY, 60, 6);
+        }
+    }
+}
+
+function loop() {
+    checkAllStopped();
+    render();
+    requestAnimationFrame(loop);
+}
+
+// ─────────────────────────────────────────────
+//  코스 종료 → 모드 분기
+// ─────────────────────────────────────────────
+function finishCourse() {
+    if (state.mode === 'stage') finishStage();
+    else finishHole();
+}
+
+function finishStage() {
+    const course = COURSES[state.currentCourseIdx];
+    const stars = getStarsForStage(state.strokes, course.stagePar);
+
+    const prev = state.save.stages[course.id] || { bestStars: 0, bestStrokes: null };
+    const newBestStars = Math.max(prev.bestStars, stars);
+    const newBestStrokes = (prev.bestStrokes === null) ? state.strokes : Math.min(prev.bestStrokes, state.strokes);
+    state.save.stages[course.id] = { bestStars: newBestStars, bestStrokes: newBestStrokes };
+    persistSave();
+
+    state.phase = 'result';
+    $('stageResultWord').textContent = course.word;
+    $('stageResultNum').textContent = `${course.id} / ${COURSES.length}`;
+    $('stageResultPar').textContent = course.stagePar;
+    $('stageResultStrokes').textContent = state.strokes;
+
+    const sd = $('stageStars');
+    sd.innerHTML = '';
+    for (let i = 0; i < 3; i++) {
+        const s = document.createElement('span');
+        s.className = 'star' + (i < stars ? '' : ' dim');
+        s.textContent = '⭐';
+        sd.appendChild(s);
+    }
+
+    const hint = $('stageNextHint');
+    if (stars === 1) {
+        hint.textContent = `⭐⭐ 까지 ${state.strokes - (course.stagePar + 3)}타 줄여보세요!`;
+        hint.style.display = 'block';
+    } else if (stars === 2) {
+        hint.textContent = `⭐⭐⭐ 까지 ${state.strokes - course.stagePar}타 줄여보세요!`;
+        hint.style.display = 'block';
+    } else {
+        hint.style.display = 'none';
+    }
+
+    const isLast = state.currentCourseIdx >= COURSES.length - 1;
+    $('btnStageNext').textContent = isLast ? '🎯 스테이지 선택 →' : '다음 →';
+    $('stageResultTitle').textContent = isLast ? '🎉 모든 스테이지 클리어!' : '스테이지 클리어!';
+    $('stageResultScreen').style.display = 'flex';
+}
+
+function gradeOf(strokes, par) {
+    const diff = strokes - par;
+    if (diff <= -2) return { name: 'EAGLE', cls: 'eagle' };
+    if (diff === -1) return { name: 'BIRDIE', cls: 'birdie' };
+    if (diff === 0) return { name: 'PAR', cls: 'par' };
+    if (diff === 1) return { name: 'BOGEY', cls: 'bogey' };
+    return { name: 'DOUBLE+', cls: 'double' };
+}
+
+function finishHole() {
+    const course = COURSES[state.currentCourseIdx];
+    const grade = gradeOf(state.strokes, course.challengePar);
+    state.holeResults.push({
+        hole: course.id, word: course.word, par: course.challengePar,
+        strokes: state.strokes, diff: state.strokes - course.challengePar, grade: grade.name,
+    });
+    state.phase = 'result';
+
+    $('holeWord').textContent = course.word;
+    $('holeNum').textContent = `${course.id} / ${COURSES.length}`;
+    $('holePar').textContent = course.challengePar;
+    $('holeStrokes').textContent = state.strokes;
+    const diff = state.strokes - course.challengePar;
+    const gradeEl = $('holeGrade');
+    gradeEl.textContent = `${grade.name} (${diff >= 0 ? '+' : ''}${diff})`;
+    gradeEl.className = `grade ${grade.cls}`;
+
+    const isLast = state.currentCourseIdx >= COURSES.length - 1;
+    $('btnNextHole').textContent = isLast ? '🏁 라운드 종료 →' : '다음 홀 →';
+    $('holeScreen').style.display = 'flex';
+}
+
+function nextHole() {
+    $('holeScreen').style.display = 'none';
+    if (state.currentCourseIdx + 1 >= COURSES.length) finishRound();
+    else setupCourse(state.currentCourseIdx + 1);
+}
+
+function finishRound() {
+    const tbl = $('roundTable');
+    let totalStrokes = 0, totalDiff = 0;
+    let html = `<div class="row header"><span>홀</span><span>WORD</span><span>PAR</span><span>타수</span><span>등급</span></div>`;
+    for (const r of state.holeResults) {
+        totalStrokes += r.strokes;
+        totalDiff += r.diff;
+        const diffStr = r.diff >= 0 ? `+${r.diff}` : `${r.diff}`;
+        const diffCls = r.diff < 0 ? 'minus' : (r.diff > 0 ? 'plus' : 'zero');
+        html += `<div class="row">
+            <span>${r.hole}</span>
+            <span class="word-cell">${r.word}</span>
+            <span>${r.par}</span>
+            <span>${r.strokes}</span>
+            <span class="diff-cell ${diffCls}">${diffStr}</span>
+        </div>`;
+    }
+    const totalDiffStr = totalDiff >= 0 ? `+${totalDiff}` : `${totalDiff}`;
+    const totalDiffCls = totalDiff < 0 ? 'minus' : (totalDiff > 0 ? 'plus' : 'zero');
+    html += `<div class="total">${totalStrokes}타 <span class="diff ${totalDiffCls}">(${totalDiffStr})</span></div>`;
+    tbl.innerHTML = html;
+
+    state.phase = 'result';
+    const prevBest = state.save.challenge.bestTotal;
+    const isNewBest = (prevBest === null || totalStrokes < prevBest);
+    if (isNewBest) {
+        state.save.challenge.bestTotal = totalStrokes;
+        persistSave();
+    }
+    $('bestBanner').style.display = isNewBest ? 'block' : 'none';
+    $('roundScreen').style.display = 'flex';
+}
+
+function showStageSelect() {
+    hideAllOverlays();
+    state.phase = 'menu';
+    $('stageSelectScreen').style.display = 'flex';
+    $('totalStars').textContent = totalStarsEarned();
+    const grid = $('stageGrid');
+    grid.innerHTML = '';
+    COURSES.forEach((c, idx) => {
+        const card = document.createElement('div');
+        card.className = 'stage-card';
+        const unlocked = isStageUnlocked(idx);
+        const data = state.save.stages[c.id] || { bestStars: 0, bestStrokes: null };
+        if (!unlocked) {
+            card.classList.add('locked');
+            card.innerHTML = `
+                <p class="stage-num">STAGE ${c.id}</p>
+                <div class="lock-icon">🔒</div>
+                <div class="stage-best">이전 클리어</div>
+            `;
+        } else {
+            const stars = data.bestStars;
+            const starsHtml = [0,1,2].map(i =>
+                `<span class="star${i < stars ? '' : ' dim'}">⭐</span>`
+            ).join('');
+            const bestText = data.bestStrokes !== null ? `최소 ${data.bestStrokes}타` : 'NEW';
+            const trapMark = c.trap ? '<span class="trap-mark">함정</span>' : '';
+            card.innerHTML = `
+                ${trapMark}
+                <p class="stage-num">STAGE ${c.id}</p>
+                <p class="stage-word">${c.word}</p>
+                <div class="stage-stars">${starsHtml}</div>
+                <div class="stage-best">${bestText}</div>
+            `;
+            card.addEventListener('click', () => {
+                hideAllOverlays();
+                state.mode = 'stage';
+                setupCourse(idx);
+            });
+        }
+        grid.appendChild(card);
+    });
+}
+
+function hideAllOverlays() {
+    $('menuScreen').style.display = 'none';
+    $('stageSelectScreen').style.display = 'none';
+    $('stageResultScreen').style.display = 'none';
+    $('holeScreen').style.display = 'none';
+    $('roundScreen').style.display = 'none';
+}
+
+function goMenu() {
+    hideAllOverlays();
+    state.phase = 'menu';
+    state.mode = null;
+    state.holeResults = [];
+    state.save = loadSave();
+    $('stageBadge').textContent = `${totalStarsEarned()} / ${TOTAL_STARS} ⭐`;
+    $('challengeBadge').textContent = state.save.challenge.bestTotal !== null
+        ? `최소 ${state.save.challenge.bestTotal}타` : '— 타';
+    $('menuScreen').style.display = 'flex';
+}
+
+function startChallengeMode() {
+    hideAllOverlays();
+    state.mode = 'challenge';
+    state.holeResults = [];
+    setupCourse(0);
+}
+
+function init() {
+    state.canvas = $('gameCanvas');
+    state.ctx = state.canvas.getContext('2d');
+    state.save = loadSave();
+    resizeStage();
+    window.addEventListener('resize', resizeStage);
+
+    state.canvas.addEventListener('mousedown', onPointerDown);
+    window.addEventListener('mousemove', onPointerMove);
+    window.addEventListener('mouseup', onPointerUp);
+    state.canvas.addEventListener('touchstart', onPointerDown, { passive: false });
+    window.addEventListener('touchmove', onPointerMove, { passive: false });
+    window.addEventListener('touchend', onPointerUp, { passive: false });
+
+    $('cardStage').addEventListener('click', showStageSelect);
+    $('cardChallenge').addEventListener('click', startChallengeMode);
+    $('btnStageBack').addEventListener('click', goMenu);
+    $('btnMenu').addEventListener('click', () => {
+        if (confirm('메뉴로 돌아갈까요? (현재 진행은 저장되지 않습니다)')) goMenu();
+    });
+
+    $('btnStageNext').addEventListener('click', () => {
+        $('stageResultScreen').style.display = 'none';
+        if (state.currentCourseIdx + 1 >= COURSES.length) showStageSelect();
+        else setupCourse(state.currentCourseIdx + 1);
+    });
+    $('btnStageRetry').addEventListener('click', () => {
+        $('stageResultScreen').style.display = 'none';
+        setupCourse(state.currentCourseIdx);
+    });
+
+    $('btnNextHole').addEventListener('click', nextHole);
+    $('btnNewRound').addEventListener('click', startChallengeMode);
+    $('btnBackMenu').addEventListener('click', goMenu);
+
+    goMenu();
+    requestAnimationFrame(loop);
+}
+
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+} else {
+    init();
+}
+</script>
+</body>
+</html>
