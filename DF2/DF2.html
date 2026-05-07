@@ -414,7 +414,7 @@
         </div>
         <button class="btn" onclick="startGame()">PRESS START</button>
         <div class="controls-hint">
-            📱 화면을 위/아래로 끌어서 이동 | 🖥️ 마우스 / ↑ ↓
+            📱 화면을 끌어서 이동 (운석은 옆으로!) | 🖥️ 마우스 / 방향키
         </div>
     </div>
 
@@ -560,7 +560,7 @@
     const METEOR_MIN_INTERVAL = 12000;  // 운석 최소 간격 (ms)
     const METEOR_MAX_INTERVAL = 17000;  // 운석 최대 간격 (ms)
     const METEOR_WARNING_FRAMES = 120;  // 경고 지속 프레임 (2초 @ 60fps)
-    const BOSS_INTERVAL = 10;           // 보스 등장 주기 (스테이지)
+    const BOSS_INTERVAL = 20;           // 보스 등장 주기 (스테이지) - 2배로 늘림
 
     // ============================================================
     // 상수 & Canvas 설정
@@ -593,8 +593,9 @@
         ctx.imageSmoothingEnabled = false;
 
         if (state.player) {
-            state.player.x = 80; // 왼쪽 고정
-            state.player.y = Math.min(H - 20, state.player.y);
+            // 가로 이동 가능 영역 내로 clamp (왼쪽 ~ 화면 절반)
+            state.player.x = Math.max(30, Math.min(W * 0.5, state.player.x));
+            state.player.y = Math.max(20, Math.min(H - 20, state.player.y));
         }
     }
     window.addEventListener('resize', resize);
@@ -674,25 +675,30 @@
     // ============================================================
     // 입력
     // ============================================================
+    let pointerX = null;
     let pointerY = null;
     const keys = {};
 
-    function getY(e) {
+    function getPos(e) {
         const rect = canvas.getBoundingClientRect();
+        const cx = e.touches ? e.touches[0].clientX : e.clientX;
         const cy = e.touches ? e.touches[0].clientY : e.clientY;
         // 가상 좌표계로 변환 (SCALE로 나눔)
-        return (cy - rect.top) / SCALE;
+        return {
+            x: (cx - rect.left) / SCALE,
+            y: (cy - rect.top) / SCALE
+        };
     }
 
-    canvas.addEventListener('touchstart', e => { e.preventDefault(); pointerY = getY(e); }, { passive: false });
-    canvas.addEventListener('touchmove', e => { e.preventDefault(); pointerY = getY(e); }, { passive: false });
+    canvas.addEventListener('touchstart', e => { e.preventDefault(); const p = getPos(e); pointerX = p.x; pointerY = p.y; }, { passive: false });
+    canvas.addEventListener('touchmove', e => { e.preventDefault(); const p = getPos(e); pointerX = p.x; pointerY = p.y; }, { passive: false });
     canvas.addEventListener('touchend', e => { e.preventDefault(); }, { passive: false });
-    canvas.addEventListener('mousemove', e => { if (state.running) pointerY = getY(e); });
-    canvas.addEventListener('mouseleave', () => { pointerY = null; });
+    canvas.addEventListener('mousemove', e => { if (state.running) { const p = getPos(e); pointerX = p.x; pointerY = p.y; } });
+    canvas.addEventListener('mouseleave', () => { pointerX = null; pointerY = null; });
 
     window.addEventListener('keydown', e => {
         keys[e.key.toLowerCase()] = true;
-        if (['arrowup', 'arrowdown', 'w', 's'].includes(e.key.toLowerCase())) e.preventDefault();
+        if (['arrowup', 'arrowdown', 'arrowleft', 'arrowright', 'w', 's', 'a', 'd'].includes(e.key.toLowerCase())) e.preventDefault();
     });
     window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
@@ -1222,17 +1228,24 @@
     function loop() {
         if (!state.running) return;
 
-        // 플레이어 이동 (가로 모드: 상하)
+        // 플레이어 이동 (가로 모드: 상하 + 좌우 - 운석 회피용 가로 이동 가능)
+        // 가로 이동 범위는 화면 왼쪽 절반(30 ~ W*0.5)으로 제한 - 횡스크롤 슈팅 특성 유지
         const char = CHARACTERS[state.selectedChar];
         const speed = (state.feverActive ? 9 : 6) + (char.speedBonus || 0);
         if (pointerY !== null) {
             const dy = pointerY - state.player.y;
             if (Math.abs(dy) > 2) state.player.y += Math.sign(dy) * Math.min(Math.abs(dy), speed * 1.3);
         }
+        if (pointerX !== null) {
+            const dx = pointerX - state.player.x;
+            if (Math.abs(dx) > 2) state.player.x += Math.sign(dx) * Math.min(Math.abs(dx), speed * 1.3);
+        }
         if (keys['arrowup'] || keys['w']) state.player.y -= speed;
         if (keys['arrowdown'] || keys['s']) state.player.y += speed;
+        if (keys['arrowleft'] || keys['a']) state.player.x -= speed;
+        if (keys['arrowright'] || keys['d']) state.player.x += speed;
         state.player.y = Math.max(20, Math.min(H - 20, state.player.y));
-        state.player.x = 80;  // 가로 위치는 왼쪽 고정
+        state.player.x = Math.max(30, Math.min(W * 0.5, state.player.x));
         state.player.wingFrame = (state.player.wingFrame + 1) % 20;
         state.player.flameFrame = (state.player.flameFrame + 1) % 8;
         if (state.player.invuln > 0) state.player.invuln--;
@@ -1246,6 +1259,7 @@
             opt.x += (targetX - opt.x) * 0.18;
             opt.y += (targetY - opt.y) * 0.18;
             // 화면 경계 clamp
+            opt.x = Math.max(8, Math.min(W - 8, opt.x));
             opt.y = Math.max(8, Math.min(H - 8, opt.y));
             opt.flameFrame = (opt.flameFrame + 1) % 8;
         }
@@ -1382,7 +1396,7 @@
                         if (newStage > state.stage) {
                             state.stage = newStage;
                             showCombo(W/2, H/2, 'STAGE ' + state.stage, '#ffd700');
-                            // 10의 배수 스테이지마다 보스 등장
+                            // BOSS_INTERVAL의 배수 스테이지마다 보스 등장
                             if (state.stage % BOSS_INTERVAL === 0 && !state.boss) {
                                 spawnBoss();
                             }
