@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>알파뿌요 - 영단어 퍼즐</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Jua&family=Noto+Sans+KR:wght@400;700&display=swap');
+body {
+  font-family: 'Noto Sans KR', sans-serif;
+  background: linear-gradient(135deg, #fef3c7 0%, #fce7f3 50%, #dbeafe 100%);
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  min-height: 100vh;
+}
+.font-jua { font-family: 'Jua', sans-serif; }
+
+#game-canvas {
+  background: #fffbeb;
+  border: 4px solid #fbbf24;
+  border-radius: 14px;
+  box-shadow: 0 6px 20px rgba(0,0,0,0.12), inset 0 0 16px rgba(251, 191, 36, 0.06);
+  display: block;
+}
+.preview-canvas {
+  background: #fef3c7;
+  border: 2px solid #fcd34d;
+  border-radius: 8px;
+  display: block;
+}
+
+.ctrl-btn {
+  background: white;
+  border: 2px solid #fbbf24;
+  border-radius: 14px;
+  box-shadow: 0 3px 0 #d97706;
+  transition: all 0.05s;
+  font-family: 'Jua', sans-serif;
+  color: #d97706;
+}
+.ctrl-btn:active {
+  transform: translateY(2px);
+  box-shadow: 0 1px 0 #d97706;
+}
+
+.word-popup {
+  position: absolute;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.6rem;
+  color: #f59e0b;
+  text-shadow: 2px 2px 0 #fff, 3px 3px 0 rgba(0,0,0,0.15);
+  pointer-events: none;
+  animation: floatUp 1.4s ease-out forwards;
+  white-space: nowrap;
+  z-index: 10;
+}
+.word-popup.short {
+  font-size: 1.05rem;
+  color: #a855f7;
+}
+@keyframes floatUp {
+  0%   { transform: translate(-50%,-50%) scale(0.4); opacity: 0; }
+  20%  { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
+  60%  { transform: translate(-50%,calc(-50% - 30px)) scale(1.05); opacity: 1; }
+  100% { transform: translate(-50%,calc(-50% - 80px)) scale(0.9); opacity: 0; }
+}
+
+@keyframes chainPop {
+  0%   { transform: scale(0) rotate(-15deg); }
+  60%  { transform: scale(1.25) rotate(8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.chain-pop { animation: chainPop 0.5s ease-out; }
+</style>
+</head>
+<body class="flex items-center justify-center p-2">
+
+<!-- 타이틀 -->
+<div id="title-screen" class="max-w-md w-full bg-white rounded-3xl shadow-2xl p-6 text-center">
+  <div class="text-6xl mb-2 animate__animated animate__bounce animate__infinite" style="animation-duration:1.6s">🔤</div>
+  <h1 class="text-4xl font-jua text-amber-500 mb-1">알파 뿌요</h1>
+  <p class="text-gray-500 text-sm mb-5">떨어지는 글자로 영단어를 만들자!</p>
+
+  <div class="bg-amber-50 rounded-2xl p-4 mb-4 border-2 border-amber-200">
+    <div class="text-xs text-amber-700 font-bold tracking-wider">🏆 최고 점수</div>
+    <div id="best-score" class="text-4xl font-jua text-amber-500">0</div>
+  </div>
+
+  <div class="bg-blue-50 rounded-2xl p-4 mb-5 text-left text-sm text-gray-700 border-2 border-blue-100">
+    <div class="font-bold text-blue-600 mb-1 font-jua text-base">조작법</div>
+    <div>← → : 좌우 이동</div>
+    <div>↑ : 회전</div>
+    <div>↓ : 빨리 내리기</div>
+    <div>스페이스 : 한번에 떨어뜨리기</div>
+    <div class="mt-2 text-pink-600 font-bold">가로/세로 2글자 이상<br>영단어 만들면 터져요! 💥</div>
+    <div class="mt-1 text-xs text-purple-500">💡 GO, NO 같은 짧은 단어도<br>인정됩니다 (보너스 점수)</div>
+    <div class="mt-1 text-xs text-amber-600">✨ Q는 항상 U와 짝꿍이에요!<br>(QUIZ, QUEEN, QUIET...)</div>
+  </div>
+
+  <button onclick="startGame()" class="w-full py-4 bg-amber-500 hover:bg-amber-600 text-white text-2xl font-jua rounded-2xl shadow-lg active:scale-95 transition">
+    게임 시작!
+  </button>
+</div>
+
+<!-- 게임 화면 -->
+<div id="game-screen" class="hidden max-w-md w-full">
+  <div class="bg-white rounded-3xl shadow-2xl p-3">
+    <div class="flex justify-between items-center mb-2 px-1">
+      <div class="flex flex-col items-start">
+        <div class="text-[10px] text-gray-500 font-bold tracking-widest">SCORE</div>
+        <div id="score" class="text-2xl font-jua text-amber-500 leading-none">0</div>
+      </div>
+      <div class="flex flex-col items-center">
+        <div id="last-word" class="text-xs text-blue-500 font-jua min-h-[1rem]"></div>
+        <div id="chain-display" class="text-lg font-jua text-pink-500 min-h-[1.5rem] leading-none"></div>
+      </div>
+      <div class="flex flex-col items-end">
+        <div class="text-[10px] text-gray-500 font-bold tracking-widest">NEXT</div>
+        <canvas id="next-canvas" class="preview-canvas" width="44" height="88"></canvas>
+      </div>
+    </div>
+
+    <div class="relative flex justify-center">
+      <canvas id="game-canvas" width="320" height="520"></canvas>
+      <div id="popup-layer" class="absolute inset-0 pointer-events-none"></div>
+    </div>
+
+    <div class="grid grid-cols-5 gap-2 mt-3">
+      <button class="ctrl-btn py-3 text-2xl" onclick="action('left')">◀</button>
+      <button class="ctrl-btn py-3 text-2xl" onclick="action('rotate')">↻</button>
+      <button class="ctrl-btn py-3 text-2xl" onclick="action('right')">▶</button>
+      <button class="ctrl-btn py-3 text-2xl" onclick="action('soft')">▼</button>
+      <button class="ctrl-btn py-3 text-base font-jua" onclick="action('drop')">DROP</button>
+    </div>
+
+    <div class="text-center mt-3">
+      <button onclick="quitGame()" class="text-xs text-gray-400 underline">처음으로</button>
+    </div>
+  </div>
+</div>
+
+<!-- 게임 오버 -->
+<div id="gameover-modal" class="hidden fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-3xl p-6 max-w-sm w-full text-center animate__animated animate__zoomIn">
+    <div class="text-5xl mb-2">🎮</div>
+    <h2 class="text-3xl font-jua text-amber-500 mb-2">게임 오버!</h2>
+    <div class="bg-amber-50 rounded-2xl p-4 mb-3">
+      <div class="text-xs text-amber-700 font-bold tracking-wider">최종 점수</div>
+      <div id="final-score" class="text-4xl font-jua text-amber-500">0</div>
+      <div id="new-best" class="text-sm font-jua text-pink-500 hidden mt-1">🎉 신기록!</div>
+    </div>
+    <div id="found-words-list" class="bg-blue-50 rounded-2xl p-3 mb-4 max-h-40 overflow-y-auto text-sm text-left"></div>
+    <button onclick="startGame()" class="w-full py-3 bg-amber-500 hover:bg-amber-600 text-white text-xl font-jua rounded-2xl shadow mb-2 active:scale-95 transition">다시 하기</button>
+    <button onclick="quitGame()" class="w-full py-2 bg-gray-200 text-gray-600 rounded-2xl font-bold">메인으로</button>
+  </div>
+</div>
+
+<script>
+// ====== 3학년~초등 영단어 사전 ======
+const WORDS = new Set([
+  // 3글자
+  'ant','arm','art','ask','ate','bad','bag','bat','bay','bed','bee','beg','big','bit','bow','box','boy','bug','bus','but','buy',
+  'cab','can','cap','car','cat','cow','cry','cup','cut',
+  'dad','day','did','dig','dim','dip','dog','dot','dry','due',
+  'ear','eat','egg','elf','end','eye',
+  'fan','far','fat','few','fig','fit','fix','fly','fog','for','fox','fun','fur',
+  'gap','gas','get','god','got','gum','gun','gym',
+  'had','ham','has','hat','hen','her','him','hip','his','hit','hop','hot','how','hug',
+  'ice','ill','ink','its',
+  'jam','jar','jaw','jet','job','jog','joy',
+  'key','kid','kit',
+  'lab','lap','law','lay','led','leg','let','lid','lie','lip','log','lot','low',
+  'mad','man','map','may','men','met','mix','mom','mop','mud',
+  'nap','net','new','nor','not','now','nun','nut',
+  'oak','odd','off','oil','old','one','our','out','owl','own',
+  'pad','pan','pat','paw','pay','pea','pen','pet','pie','pig','pin','pit','pop','pot','put',
+  'ram','ran','rap','rat','raw','ray','red','rib','rid','rim','rip','rob','rod','rot','row','rub','rug','run',
+  'sad','sat','saw','say','sea','see','set','she','shy','sin','sip','sir','sit','six','ski','sky','sob','son','sow','spa','spy','sub','sum','sun',
+  'tab','tag','tan','tap','tar','tax','tea','ten','the','tie','tin','tip','toe','ton','too','top','toy','try','tub','two',
+  'use',
+  'van','vet','vow',
+  'wag','war','was','way','web','wed','wet','who','why','wig','win','wit','won',
+  'yam','yes','yet','you',
+  'zip','zoo',
+
+  // 4글자
+  'able','acid','aged','aids','aim','also','area','army','away',
+  'baby','back','bake','ball','band','bank','base','bath','bay','beak','bean','bear','beef','been','bell','belt','bend','best','bike','bill','bird','bite','blue','boat','body','bone','book','boom','boot','born','boss','both','bowl','bull','busy',
+  'cage','cake','call','calm','came','camp','card','care','case','cash','cast','cats','cave','cell','chat','chef','city','clap','club','coal','coat','code','cold','come','cone','cook','cool','copy','core','corn','cost','cute',
+  'damp','dare','dark','data','date','dawn','dead','deal','dear','debt','deep','deer','desk','dial','dice','died','digs','dish','dive','does','dogs','doll','done','door','down','drag','draw','drew','drop','drug','duck','dust',
+  'each','earn','ears','east','easy','eats','edge','eggs','else','even','ever','exit','eyes',
+  'face','fact','fail','fair','fall','fame','farm','fast','fate','fear','feed','feel','feet','fell','felt','file','fill','find','fine','fire','firm','fish','five','flag','flat','flew','flip','flow','fold','folk','food','foot','form','four','free','from','fuel','full','fund',
+  'gain','game','gate','gave','gear','gift','girl','give','glad','goal','goat','gold','gone','good','grew','gulf',
+  'hair','half','hall','hand','hang','hard','harm','hate','have','head','hear','heat','held','help','here','hero','hide','high','hill','hint','hire','hold','hole','holy','home','hope','host','hour','huge','hunt','hurt',
+  'idea','inch','info','into','iron','item',
+  'jail','jazz','join','joke','jump','just',
+  'keep','keys','kick','kids','kill','kind','king','kiss','kite','knee','knew','know',
+  'lack','lady','laid','lake','lamb','lamp','land','lane','last','late','lazy','lead','leaf','lean','left','legs','lend','lens','less','life','lift','like','line','link','lion','lips','list','live','load','loan','lock','logs','long','look','lord','lose','loss','lost','loud','love','luck',
+  'made','mail','main','make','male','many','maps','mark','mask','mass','math','meal','mean','meat','meet','melt','menu','mile','milk','mind','mine','miss','mode','mood','moon','more','most','move','much','must',
+  'nail','name','navy','near','neat','neck','need','nest','news','next','nice','nine','nope','nose','note',
+  'oak','okay','once','only','onto','open','oral','oven','over','owls','oxen',
+  'pace','page','paid','pain','pair','palm','park','part','pass','past','path','peak','pear','pens','pets','pick','pier','pies','pigs','pile','pill','pine','pink','plan','play','plot','plug','plus','poem','poet','poke','pole','pond','pool','poor','port','post','pour','pray','prey','pull','pure','push',
+  'quit','quiz',
+  'race','rack','rage','raid','rail','rain','rang','rank','rare','rate','read','real','rear','rely','rent','rest','rice','rich','ride','ring','rise','risk','road','roar','rock','role','roll','roof','room','root','rope','rose','rude','rule','rung','rush',
+  'safe','said','sail','sale','salt','same','sand','save','scar','seat','seed','seek','seem','seen','self','sell','send','ship','shoe','shop','shot','show','shut','sick','side','sigh','sign','silk','sing','sink','site','size','skin','slim','slip','slow','snap','snow','soap','soft','soil','sold','solo','some','song','soon','sore','sort','soul','soup','sour','sow','span','spin','spit','spot','star','stay','stop','suit','sung','sunk','sure','swam','swim',
+  'tail','take','tale','talk','tall','tame','tank','tape','task','team','tear','teen','tell','tend','tent','term','test','than','that','thaw','them','then','they','thin','this','tide','tied','ties','time','tiny','tips','tire','toad','toes','told','tomb','tone','tool','took','tops','tore','torn','toss','tour','town','toys','tray','tree','trip','true','tube','tuna','turn','twin','type',
+  'ugly','undo','unit','upon','used','user',
+  'vast','vary','vase','very','vest','veto','vibe','view','visa','void','vote','vows',
+  'wade','wage','wait','wake','walk','wall','want','warm','warn','wars','wash','wave','ways','weak','wear','week','well','went','were','west','what','when','whim','whip','wide','wife','wild','will','wind','wine','wing','wins','wipe','wire','wise','wish','with','wood','wool','word','wore','work','worm','worn','wove','wrap',
+  'yard','yarn','year','yell','yelp','yoga','your','yum',
+  'zero','zone','zoom','zoos',
+
+  // 5글자
+  'about','above','adopt','again','agent','agree','ahead','album','alert','alien','alike','alive','allow','alone','along','aloud','alpha','among','angel','anger','angle','angry','apple','april','aside','asked','audio','avoid','award','awake','aware','awful',
+  'baby','badge','badly','baker','beach','bears','below','bench','beret','berry','birds','birth','black','blame','blank','blast','blaze','bleed','blend','bless','blind','blink','blood','bloom','blown','board','boats','books','boots','boxes','brain','brand','brave','bread','break','brick','brief','bring','broad','broke','brown','brush','build','built','bunny','burst',
+  'cabin','candy','carry','catch','cause','cease','chain','chair','chalk','charm','chart','chase','cheap','cheat','check','cheek','cheer','chess','chest','chick','chief','child','chips','chose','civil','claim','clamp','class','clean','clear','clerk','click','climb','clock','close','cloth','cloud','clown','coach','coast','color','combo','comic','could','count','court','cover','crack','craft','crane','crash','crazy','cream','creek','crime','cross','crowd','crown','cruel','crush','curve','cycle',
+  'daddy','daily','dance','dated','dates','dawn','death','delay','depth','devil','diary','digit','dirty','dizzy','dough','dozen','draft','drank','dream','dress','dried','drier','drift','drink','drive','drove','drown','dwarf','dwell','dying',
+  'eager','eagle','early','earth','eaten','eight','elbow','elder','enemy','enjoy','enter','entry','equal','event','every','exact','exist','extra',
+  'fairy','faith','false','fancy','fault','feast','field','fifth','fifty','fight','final','firms','first','flame','flash','flesh','flies','flint','float','flock','flood','floor','flour','flute','focus','folks','force','forty','found','fresh','front','frost','fruit','funny',
+  'games','genre','ghost','given','gives','glass','globe','glory','glove','goals','going','goofy','goose','grace','grade','grand','grant','grape','graph','grass','grave','great','greet','grief','grill','grind','gripe','groan','gross','group','grown','guard','guess','guest','guide','gulps','gummy',
+  'habit','haiku','hairy','hands','handy','happy','harsh','haste','hatch','haunt','haven','heads','heads','heart','heavy','hello','helps','hence','henry','herbs','hippo','hobby','holds','holes','homes','honey','honor','horse','hotel','hours','house','human','humid','humor','hurry',
+  'icily','icing','ideal','ideas','idiot','image','imply','index','inner','input','irate','irony','issue','items',
+  'jeans','jelly','jewel','jiffy','joins','joint','joker','jolly','judge','juice','jumbo','jumps','jumpy',
+  'karma','kayak','kicks','kinds','kings','knack','knees','knelt','knife','knock','known','knows','koala',
+  'label','labor','lacks','laden','lakes','lamps','lance','lands','lapse','large','laser','later','laugh','layer','learn','lease','least','leave','legal','lemon','level','light','liked','liken','likes','limit','lined','lines','links','lions','lists','lived','liver','loafs','loans','lobby','local','lodge','logic','looks','loose','loved','lover','lowly','loyal','lucky','lunar','lunch','lying',
+  'macho','madam','magic','major','maker','males','mango','manor','march','marsh','mason','match','mates','maybe','mayor','meals','means','meant','medal','melon','melts','mercy','merge','merry','metal','meter','metro','midst','might','milky','minds','mines','minor','minus','mixed','mixer','model','moist','money','month','moods','moose','moral','motel','motor','mount','mouse','mouth','moves','movie','muddy','music',
+  'nails','naive','naked','nasal','nasty','navel','needy','nerve','never','newer','newly','niece','night','noble','noise','noisy','nomad','north','nosed','noses','noted','notes','nouns','novel','nudge','numbs','nurse',
+  'oasis','occur','ocean','offer','often','often','older','olive','omega','onion','onset','opens','opera','orbit','order','organ','other','ought','ounce','outer','owned','owner',
+  'pages','paint','pairs','panda','panel','paper','paris','parks','party','pasta','pause','peace','peach','pearl','pedal','peers','penny','perch','peril','phase','phone','photo','piano','picky','piece','piers','piety','pilot','pinch','pious','pitch','pivot','pixel','pizza','place','plain','plane','plans','plant','plate','plays','plumb','plump','plush','poems','poets','point','poles','ponds','pools','porch','pound','power','prawn','press','price','pride','prime','print','prior','prize','prone','proof','proud','prove','prune','pulse','punch','pupil','puppy','purse','pushy',
+  'queen','queer','query','quest','quick','quiet','quill','quilt','quirk','quite','quote',
+  'racer','radio','raft','raise','range','rapid','reach','react','ready','reads','realm','rebel','refer','reign','relax','reply','reset','rhino','rider','rides','ridge','right','rinse','river','roads','roast','robin','robot','rocks','rocky','rodeo','roger','roman','rooms','roost','rope','rough','round','route','royal','ruler','rules','runny','rural','rusty',
+  'sadly','safer','safes','sails','saint','salad','sales','salty','sandy','satin','sauce','savor','scale','scare','scarf','scene','scent','scope','score','scout','scrap','scrub','seals','seats','seeds','seeks','seems','sells','sense','seven','sewer','shade','shake','shall','shame','shape','share','shark','sharp','shave','sheep','sheet','shelf','shell','shift','shine','shiny','ships','shirt','shock','shoes','shook','shoot','shops','shore','short','shots','shout','shown','shows','sided','sides','sigh','sighs','sight','silly','since','sinks','sites','sixty','sized','sizes','skill','skirt','skull','slate','sleep','slept','slice','slide','slime','slope','small','smart','smell','smile','smoke','snack','snail','snake','snap','sneak','sniff','snore','snowy','soaps','sober','socks','solar','solid','solos','solve','songs','sorry','sorts','sound','south','space','spade','spare','spark','speak','speed','spell','spend','spent','spice','spicy','spike','spill','spine','spiny','split','spoil','spoke','spoon','sport','spots','spout','spray','spree','squad','stack','staff','stage','stair','stake','stale','stamp','stand','stare','stark','start','state','stays','steak','steam','steel','steep','steer','stems','steps','stern','stick','stiff','still','sting','stink','stock','stole','stone','stood','stool','stops','store','storm','story','stove','strap','straw','strip','stuck','study','stuff','style','sugar','sunny','super','swamp','swear','sweat','sweep','sweet','swift','swing','sword','swore','sworn','syrup',
+  'table','tacky','tales','tally','tamed','tango','tasks','tasty','teach','teams','tears','teens','teeth','tells','tense','tents','terms','tests','thank','thaws','theft','their','theme','there','these','thick','thief','thigh','thing','think','third','those','three','threw','throw','thumb','tidal','tides','tiger','tight','tiles','tinge','tiny','tired','title','toast','today','token','tooth','topic','torch','total','touch','tough','tower','towns','toxic','toys','track','trade','trail','train','traps','trash','treat','trend','trial','tribe','trick','tried','trips','truck','truly','trunk','trust','truth','tubes','tulip','tutor','twice','twins','twist','tying',
+  'ultra','uncle','under','undid','union','units','until','unzip','upper','upset','urban','urged','using','usual',
+  'vague','valid','value','vapor','vases','vault','venue','video','views','vinyl','viola','viper','viral','virus','visit','vital','vivid','vocal','voice','vowel',
+  'wagon','waist','wakes','walks','walls','wants','warms','warns','waste','watch','water','waved','waves','wears','weary','weeds','weeks','weigh','wells','wheat','wheel','where','which','while','whine','white','whole','whose','wider','width','wills','wiped','wires','witch','witty','women','woods','words','works','world','worms','worry','worse','worst','worth','would','wound','woven','wraps','wrist','write','wrong','wrote',
+  'yacht','yards','years','yeast','yells','young','youth','yummy',
+  'zebra','zeros','zones','zooms',
+
+  // 6글자 (보너스)
+  'animal','answer','around','autumn','banana','basket','beauty','before','behind','belong','better','bottle','bottom','bridge','bright','butter','candle','carpet','castle','center','change','cheese','circle','classic','clever','clouds','colors','corner','cousin','couple','danger','decide','desert','design','direct','doctor','dragon','during','during','either','energy','engine','expect','family','famous','farmer','father','figure','finger','flower','flying','forget','forest','format','friend','garden','gentle','golden','google','ground','growth','guitar','handle','happen','health','height','hidden','honest','hungry','indeed','inside','island','jacket','jungle','kettle','kindly','kitten','ladder','laptop','letter','lights','listen','little','lonely','lovely','lucky','mainly','manner','market','master','mighty','mirror','modern','moment','monkey','mother','mostly','muscle','myself','narrow','nature','needle','nibble','normal','number','object','office','online','orange','others','packet','parent','people','pepper','planet','please','pocket','poetic','police','potato','pretty','prince','public','rabbit','rather','really','recipe','remote','report','result','return','reward','riding','rocket','rotten','salmon','school','season','second','secret','select','senior','simple','singer','sister','sleeve','smelly','smooth','soccer','social','spider','spring','square','squash','stairs','starts','strong','sudden','suffer','summer','sunset','supper','sweets','tablet','talent','target','tennis','though','throat','throne','throng','throw','thrust','ticket','timber','tinker','tissue','toilet','tomato','tonight','toupee','toward','travel','trophy','tunnel','turkey','turtle','umpire','uncles','unique','unisex','unzips','update','useful','valley','velvet','victim','viking','vision','visits','volume','wallet','walnut','warmly','wealth','weight','wheels','widely','wisdom','wonder','wooded','wooden','wormed','wraps','wrench','yellow','yogurt','zigzag'
+]);
+
+// ====== 게임 상수 ======
+const COLS = 8;
+const ROWS = 13;
+const CELL = 40;
+const VOWELS = new Set(['A','E','I','O','U']);
+
+const LETTER_FREQ = {
+  // 모음 (자주 등장)
+  A:12, E:14, I:11, O:10, U:6,
+  // 자주 쓰이는 자음
+  T:9, S:8, N:7, R:7, L:6, D:5, H:5,
+  // 보통 자음
+  M:4, P:4, C:4, B:3, G:3, K:3, F:3, W:3, Y:3,
+  // 드문 자음 (Q는 항상 U와 함께 스폰됨)
+  V:2, J:1, X:1, Z:1, Q:1
+};
+const LETTER_POOL = [];
+for (const [l, n] of Object.entries(LETTER_FREQ)) {
+  for (let i = 0; i < n; i++) LETTER_POOL.push(l);
+}
+const VOWEL_LIST = ['A','E','I','O','U'];
+
+function randLetter() {
+  return LETTER_POOL[Math.floor(Math.random() * LETTER_POOL.length)];
+}
+const SCORES = {2:30, 3:100, 4:300, 5:600, 6:1000, 7:1500};
+
+// 2글자 단어 (3학년 수준 + 일상 어휘) - 페어 자체로는 절대 안 만들어지게 차단
+const SHORT_WORDS = new Set([
+  'am','an','as','at','be','by','do','go','he','hi','if','in','is','it',
+  'me','my','no','of','oh','on','or','ox','so','to','up','us','we','ax',
+  'ah','ha','ow','pi'
+]);
+
+function randPair() {
+  for (let attempt = 0; attempt < 30; attempt++) {
+    let a = randLetter(), b = randLetter();
+
+    // Q는 항상 U와 함께 스폰 (실제 영어처럼 QU 패턴 유도)
+    if (a === 'Q' && b === 'Q') b = 'U';
+    else if (a === 'Q' && b !== 'U') b = 'U';
+    else if (b === 'Q' && a !== 'U') a = 'U';
+
+    // 둘 다 자음이면 55% 확률로 하나를 모음으로
+    if (!VOWELS.has(a) && !VOWELS.has(b) && Math.random() < 0.55) {
+      if (Math.random() < 0.5) a = VOWEL_LIST[Math.floor(Math.random()*5)];
+      else b = VOWEL_LIST[Math.floor(Math.random()*5)];
+    }
+    // 페어 자체가 2글자 단어를 만드는 조합이면 재시도 (어느 방향이든)
+    const ab = (a + b).toLowerCase();
+    const ba = (b + a).toLowerCase();
+    if (!SHORT_WORDS.has(ab) && !SHORT_WORDS.has(ba)) {
+      return [a, b];
+    }
+  }
+  // 최후 안전장치 (QU는 단어 아니므로 안전)
+  return ['Q', 'U'];
+}
+
+function scoreFor(len) {
+  if (SCORES[len]) return SCORES[len];
+  return 1500 + (len - 7) * 800;
+}
+
+// ====== 게임 상태 ======
+let board, pair, nextPair, score, foundWords;
+let gameRunning = false, isLocking = false;
+let lastTick = 0, dropInterval = 800;
+
+const canvas = document.getElementById('game-canvas');
+const ctx = canvas.getContext('2d');
+const nextCanvas = document.getElementById('next-canvas');
+const nextCtx = nextCanvas.getContext('2d');
+const popupLayer = document.getElementById('popup-layer');
+
+function startGame() {
+  board = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+  score = 0;
+  foundWords = [];
+  gameRunning = true;
+  isLocking = false;
+  dropInterval = 800;
+  lastTick = performance.now();
+
+  nextPair = randPair();
+  spawnPair();
+
+  document.getElementById('title-screen').classList.add('hidden');
+  document.getElementById('gameover-modal').classList.add('hidden');
+  document.getElementById('game-screen').classList.remove('hidden');
+  document.getElementById('last-word').textContent = '';
+  document.getElementById('chain-display').textContent = '';
+  popupLayer.innerHTML = '';
+  updateUI();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+function quitGame() {
+  gameRunning = false;
+  document.getElementById('game-screen').classList.add('hidden');
+  document.getElementById('gameover-modal').classList.add('hidden');
+  document.getElementById('title-screen').classList.remove('hidden');
+  document.getElementById('best-score').textContent = localStorage.getItem('alphapuyo-best') || '0';
+}
+
+function spawnPair() {
+  const x = Math.floor(COLS / 2) - 1;
+  // 게임오버 체크
+  if (board[0][x] !== null || board[1][x] !== null) {
+    pair = null;
+    gameOver();
+    return;
+  }
+  pair = {
+    px: x, py: 1,
+    sx: x, sy: 0,
+    rotation: 0,         // 0=sub above, 1=right, 2=below, 3=left
+    pLetter: nextPair[0],
+    sLetter: nextPair[1]
+  };
+  nextPair = randPair();
+  lastTick = performance.now();
+}
+
+function getSubPos(rot, px, py) {
+  switch (rot) {
+    case 0: return [px, py - 1];
+    case 1: return [px + 1, py];
+    case 2: return [px, py + 1];
+    case 3: return [px - 1, py];
+  }
+}
+
+function isValidPos(px, py, rot) {
+  if (px < 0 || px >= COLS || py < 0 || py >= ROWS) return false;
+  if (board[py][px] !== null) return false;
+  const [sx, sy] = getSubPos(rot, px, py);
+  if (sx < 0 || sx >= COLS || sy >= ROWS) return false;
+  if (sy < 0) return false;
+  if (board[sy][sx] !== null) return false;
+  return true;
+}
+
+function tryMove(dx, dy) {
+  if (!pair || isLocking) return false;
+  const npx = pair.px + dx, npy = pair.py + dy;
+  if (isValidPos(npx, npy, pair.rotation)) {
+    pair.px = npx; pair.py = npy;
+    const [sx, sy] = getSubPos(pair.rotation, npx, npy);
+    pair.sx = sx; pair.sy = sy;
+    return true;
+  }
+  return false;
+}
+
+function tryRotate() {
+  if (!pair || isLocking) return false;
+  const newRot = (pair.rotation + 1) % 4;
+  const kicks = [[0,0], [-1,0], [1,0], [0,-1]];
+  for (const [dx, dy] of kicks) {
+    const nx = pair.px + dx, ny = pair.py + dy;
+    if (isValidPos(nx, ny, newRot)) {
+      pair.px = nx; pair.py = ny;
+      pair.rotation = newRot;
+      const [sx, sy] = getSubPos(newRot, nx, ny);
+      pair.sx = sx; pair.sy = sy;
+      return true;
+    }
+  }
+  return false;
+}
+
+function softDrop() {
+  if (!pair || isLocking) return;
+  if (tryMove(0, 1)) {
+    score += 1;
+    updateUI();
+  } else {
+    lockPair();
+  }
+}
+
+function hardDrop() {
+  if (!pair || isLocking) return;
+  while (tryMove(0, 1)) score += 2;
+  updateUI();
+  lockPair();
+}
+
+async function lockPair() {
+  if (!pair || isLocking) return;
+  isLocking = true;
+  // 보드에 배치
+  board[pair.py][pair.px] = pair.pLetter;
+  board[pair.sy][pair.sx] = pair.sLetter;
+  pair = null;
+  applyGravity();
+  draw();
+
+  let chainCount = 0;
+  while (true) {
+    await sleep(180);
+    const result = findWords();
+    if (result.cells.size === 0) break;
+    chainCount++;
+    await clearMatches(result, chainCount);
+    applyGravity();
+    draw();
+  }
+
+  if (chainCount > 0) {
+    setTimeout(() => {
+      document.getElementById('chain-display').textContent = '';
+    }, 800);
+  }
+
+  // 난이도 상승
+  dropInterval = Math.max(280, 800 - Math.floor(score / 1500) * 60);
+
+  isLocking = false;
+  spawnPair();
+  draw();
+}
+
+function applyGravity() {
+  for (let c = 0; c < COLS; c++) {
+    let writePos = ROWS - 1;
+    for (let r = ROWS - 1; r >= 0; r--) {
+      if (board[r][c] !== null) {
+        const letter = board[r][c];
+        board[r][c] = null;
+        board[writePos][c] = letter;
+        writePos--;
+      }
+    }
+  }
+}
+
+function findWords() {
+  const cells = new Set();
+  const wordsFound = [];
+
+  // 가로 스캔
+  for (let r = 0; r < ROWS; r++) {
+    let str = '', cellList = [];
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c] !== null) {
+        str += board[r][c];
+        cellList.push([r, c]);
+      } else {
+        scanLine(str, cellList, cells, wordsFound);
+        str = ''; cellList = [];
+      }
+    }
+    scanLine(str, cellList, cells, wordsFound);
+  }
+
+  // 세로 스캔
+  for (let c = 0; c < COLS; c++) {
+    let str = '', cellList = [];
+    for (let r = 0; r < ROWS; r++) {
+      if (board[r][c] !== null) {
+        str += board[r][c];
+        cellList.push([r, c]);
+      } else {
+        scanLine(str, cellList, cells, wordsFound);
+        str = ''; cellList = [];
+      }
+    }
+    scanLine(str, cellList, cells, wordsFound);
+  }
+
+  return { cells, words: wordsFound };
+}
+
+function scanLine(str, cellList, cellsSet, wordsFound) {
+  if (str.length < 2) return;
+  const lower = str.toLowerCase();
+  let s = 0;
+  while (s <= lower.length - 2) {
+    let matched = false;
+    // 길이 큰 것부터 시도
+    for (let e = lower.length; e >= s + 2; e--) {
+      const len = e - s;
+      const w = lower.slice(s, e);
+      const dict = (len === 2) ? SHORT_WORDS : WORDS;
+      if (dict.has(w)) {
+        for (let i = s; i < e; i++) cellsSet.add(cellList[i].join(','));
+        wordsFound.push(w);
+        s = e;
+        matched = true;
+        break;
+      }
+    }
+    if (!matched) s++;
+  }
+}
+
+async function clearMatches(result, chain) {
+  const { cells, words } = result;
+  
+  // 각 단어 점수 + 팝업
+  let gainedThisChain = 0;
+  for (const w of words) {
+    const base = scoreFor(w.length);
+    const gain = Math.floor(base * (1 + (chain - 1) * 0.5));
+    score += gain;
+    gainedThisChain += gain;
+    foundWords.push(w);
+  }
+
+  // 평균 셀 위치에 팝업
+  showWordPopups(words, cells, chain);
+
+  if (chain >= 2) {
+    const cd = document.getElementById('chain-display');
+    cd.textContent = `${chain} CHAIN!`;
+    cd.classList.remove('chain-pop');
+    void cd.offsetWidth;
+    cd.classList.add('chain-pop');
+  }
+
+  // 깜박임
+  for (let i = 0; i < 3; i++) {
+    drawWithFlash(cells, i % 2 === 0);
+    await sleep(80);
+  }
+
+  for (const cellKey of cells) {
+    const [r, c] = cellKey.split(',').map(Number);
+    board[r][c] = null;
+  }
+  updateUI();
+}
+
+function showWordPopups(words, cells, chain) {
+  // 단어별로 대표 위치 잡기
+  const cellsArr = [...cells].map(k => k.split(',').map(Number));
+  const rect = canvas.getBoundingClientRect();
+  const parentRect = popupLayer.getBoundingClientRect();
+  
+  words.forEach((word, i) => {
+    const div = document.createElement('div');
+    div.className = 'word-popup' + (word.length === 2 ? ' short' : '');
+    div.textContent = word.toUpperCase() + (chain > 1 ? ` ×${chain}` : '');
+    // 셀 영역 중심 + 약간 분산
+    const target = cellsArr.length > 0 ? cellsArr[Math.min(i * 2, cellsArr.length - 1)] : [6, 4];
+    const [r, c] = target;
+    const x = c * CELL + CELL/2;
+    const y = r * CELL + CELL/2;
+    div.style.left = x + 'px';
+    div.style.top = y + 'px';
+    popupLayer.appendChild(div);
+    setTimeout(() => div.remove(), 1400);
+  });
+  
+  // 최근 단어 표시
+  if (words.length > 0) {
+    document.getElementById('last-word').textContent = '✨ ' + words.map(w => w.toUpperCase()).join(' · ');
+    setTimeout(() => {
+      const el = document.getElementById('last-word');
+      if (el.textContent.startsWith('✨')) el.textContent = '';
+    }, 2200);
+  }
+}
+
+function gameOver() {
+  gameRunning = false;
+  const best = parseInt(localStorage.getItem('alphapuyo-best') || '0');
+  const isNewBest = score > best;
+  if (isNewBest) localStorage.setItem('alphapuyo-best', score);
+  document.getElementById('final-score').textContent = score.toLocaleString();
+  document.getElementById('new-best').classList.toggle('hidden', !isNewBest);
+  
+  const list = document.getElementById('found-words-list');
+  if (foundWords.length === 0) {
+    list.innerHTML = '<div class="text-gray-400 text-center py-2">완성한 단어가 없어요</div>';
+  } else {
+    const counts = {};
+    for (const w of foundWords) counts[w] = (counts[w]||0) + 1;
+    const sorted = Object.entries(counts).sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    list.innerHTML = 
+      '<div class="text-xs text-gray-500 font-bold mb-1">완성한 단어 (' + Object.keys(counts).length + '종 · ' + foundWords.length + '회)</div>' +
+      '<div class="font-jua text-blue-600 leading-relaxed">' +
+      sorted.map(([w, c]) => w.toUpperCase() + (c > 1 ? `×${c}` : '')).join(' · ') +
+      '</div>';
+  }
+  document.getElementById('gameover-modal').classList.remove('hidden');
+}
+
+function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+// ====== 렌더링 ======
+function draw() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // 배경 그리드 (살짝)
+  ctx.strokeStyle = 'rgba(251, 191, 36, 0.15)';
+  ctx.lineWidth = 1;
+  for (let r = 1; r < ROWS; r++) {
+    ctx.beginPath(); ctx.moveTo(0, r * CELL); ctx.lineTo(COLS * CELL, r * CELL); ctx.stroke();
+  }
+  for (let c = 1; c < COLS; c++) {
+    ctx.beginPath(); ctx.moveTo(c * CELL, 0); ctx.lineTo(c * CELL, ROWS * CELL); ctx.stroke();
+  }
+
+  // 보드 타일
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      if (board[r][c]) drawTile(c, r, board[r][c], false);
+    }
+  }
+
+  // 고스트 + 페어
+  if (pair && !isLocking) {
+    const ghost = computeGhost();
+    drawTile(ghost.px, ghost.py, pair.pLetter, true);
+    drawTile(ghost.sx, ghost.sy, pair.sLetter, true);
+    drawTile(pair.px, pair.py, pair.pLetter, false, true);
+    drawTile(pair.sx, pair.sy, pair.sLetter, false, true);
+  }
+  drawNext();
+}
+
+function computeGhost() {
+  let py = pair.py, sx = pair.sx, sy = pair.sy, px = pair.px;
+  while (true) {
+    const newPy = py + 1;
+    const [newSx, newSy] = getSubPos(pair.rotation, px, newPy);
+    if (newPy >= ROWS || newSy >= ROWS) break;
+    if (board[newPy][px] !== null) break;
+    if (newSy >= 0 && board[newSy][newSx] !== null) break;
+    py = newPy; sx = newSx; sy = newSy;
+  }
+  return { px, py, sx, sy };
+}
+
+function drawTile(c, r, letter, ghost, active) {
+  const x = c * CELL, y = r * CELL;
+  const isVowel = VOWELS.has(letter);
+
+  if (ghost) {
+    ctx.save();
+    ctx.globalAlpha = 0.22;
+    ctx.fillStyle = isVowel ? '#fb923c' : '#60a5fa';
+    roundRect(ctx, x + 3, y + 3, CELL - 6, CELL - 6, 6);
+    ctx.fill();
+    ctx.restore();
+    return;
+  }
+
+  // 그라데이션 배경
+  const grad = ctx.createLinearGradient(x, y, x, y + CELL);
+  if (isVowel) {
+    grad.addColorStop(0, '#fed7aa');
+    grad.addColorStop(1, '#fb923c');
+  } else {
+    grad.addColorStop(0, '#bfdbfe');
+    grad.addColorStop(1, '#3b82f6');
+  }
+  ctx.fillStyle = grad;
+  roundRect(ctx, x + 2, y + 2, CELL - 4, CELL - 4, 7);
+  ctx.fill();
+
+  // 테두리
+  ctx.strokeStyle = isVowel ? '#c2410c' : '#1d4ed8';
+  ctx.lineWidth = active ? 3 : 1.5;
+  ctx.stroke();
+
+  // 하이라이트
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  roundRect(ctx, x + 5, y + 5, CELL - 10, (CELL - 10) * 0.4, 5);
+  ctx.fill();
+  ctx.restore();
+
+  // 글자 (그림자 + 본체)
+  ctx.font = 'bold 24px Jua, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(0,0,0,0.25)';
+  ctx.fillText(letter, x + CELL/2 + 1, y + CELL/2 + 2);
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(letter, x + CELL/2, y + CELL/2 + 1);
+}
+
+function drawWithFlash(cells, on) {
+  draw();
+  if (on) {
+    for (const k of cells) {
+      const [r, c] = k.split(',').map(Number);
+      ctx.save();
+      ctx.globalAlpha = 0.85;
+      ctx.fillStyle = '#fffbeb';
+      roundRect(ctx, c * CELL + 2, r * CELL + 2, CELL - 4, CELL - 4, 7);
+      ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+
+function drawNext() {
+  nextCtx.clearRect(0, 0, nextCanvas.width, nextCanvas.height);
+  // sub 위, pivot 아래 (스폰 모양)
+  drawTinyTile(2, 2, nextPair[1]);
+  drawTinyTile(2, 46, nextPair[0]);
+}
+function drawTinyTile(x, y, letter) {
+  const sz = 40;
+  const isVowel = VOWELS.has(letter);
+  const grad = nextCtx.createLinearGradient(x, y, x, y + sz);
+  if (isVowel) { grad.addColorStop(0, '#fed7aa'); grad.addColorStop(1, '#fb923c'); }
+  else { grad.addColorStop(0, '#bfdbfe'); grad.addColorStop(1, '#3b82f6'); }
+  nextCtx.fillStyle = grad;
+  roundRect(nextCtx, x, y, sz, sz, 6);
+  nextCtx.fill();
+  nextCtx.strokeStyle = isVowel ? '#c2410c' : '#1d4ed8';
+  nextCtx.lineWidth = 1.5;
+  nextCtx.stroke();
+  nextCtx.font = 'bold 22px Jua, sans-serif';
+  nextCtx.textAlign = 'center';
+  nextCtx.textBaseline = 'middle';
+  nextCtx.fillStyle = 'rgba(0,0,0,0.25)';
+  nextCtx.fillText(letter, x + sz/2 + 1, y + sz/2 + 2);
+  nextCtx.fillStyle = '#fff';
+  nextCtx.fillText(letter, x + sz/2, y + sz/2 + 1);
+}
+
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y);
+  c.arcTo(x + w, y, x + w, y + h, r);
+  c.arcTo(x + w, y + h, x, y + h, r);
+  c.arcTo(x, y + h, x, y, r);
+  c.arcTo(x, y, x + w, y, r);
+  c.closePath();
+}
+
+function updateUI() {
+  document.getElementById('score').textContent = score.toLocaleString();
+}
+
+// ====== 입력 ======
+document.addEventListener('keydown', e => {
+  if (!gameRunning) return;
+  switch (e.key) {
+    case 'ArrowLeft':  if (tryMove(-1, 0)) draw(); e.preventDefault(); break;
+    case 'ArrowRight': if (tryMove(1, 0)) draw(); e.preventDefault(); break;
+    case 'ArrowUp':    if (tryRotate()) draw(); e.preventDefault(); break;
+    case 'ArrowDown':  softDrop(); draw(); e.preventDefault(); break;
+    case ' ':          hardDrop(); draw(); e.preventDefault(); break;
+  }
+});
+
+function action(a) {
+  if (!gameRunning) return;
+  switch (a) {
+    case 'left': tryMove(-1, 0); break;
+    case 'right': tryMove(1, 0); break;
+    case 'rotate': tryRotate(); break;
+    case 'soft': softDrop(); break;
+    case 'drop': hardDrop(); break;
+  }
+  draw();
+}
+
+// ====== 메인 루프 ======
+function gameLoop(t) {
+  if (!gameRunning) return;
+  if (pair && !isLocking) {
+    const dt = t - lastTick;
+    if (dt > dropInterval) {
+      if (!tryMove(0, 1)) {
+        lockPair();
+      }
+      lastTick = t;
+    }
+  }
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+// 초기 표시
+document.getElementById('best-score').textContent = localStorage.getItem('alphapuyo-best') || '0';
+</script>
+</body>
+</html>
