@@ -1,0 +1,1380 @@
+{
+  "type": "quizpack",
+  "version": "v1",
+  "pack": {
+    "title": "구구단 2~9 곱셈 퀴즈",
+    "subject": "MATH",
+    "grade": "2",
+    "description": "2학년 수준의 2~9단 곱셈 연습 퀴즈입니다."
+  },
+  "questions": [
+    {
+      "id": "Gugu2_9-001",
+      "index": 0,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 1 = ?",
+      "options": [
+        "2",
+        "1",
+        "3",
+        "4"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-002",
+      "index": 1,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 2 = ?",
+      "options": [
+        "5",
+        "4",
+        "3",
+        "2"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-003",
+      "index": 2,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 3 = ?",
+      "options": [
+        "7",
+        "5",
+        "6",
+        "4"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-004",
+      "index": 3,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 4 = ?",
+      "options": [
+        "9",
+        "7",
+        "8",
+        "6"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-005",
+      "index": 4,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 5 = ?",
+      "options": [
+        "9",
+        "11",
+        "10",
+        "8"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-006",
+      "index": 5,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 6 = ?",
+      "options": [
+        "11",
+        "13",
+        "12",
+        "10"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-007",
+      "index": 6,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 7 = ?",
+      "options": [
+        "15",
+        "14",
+        "12",
+        "13"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-008",
+      "index": 7,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 8 = ?",
+      "options": [
+        "18",
+        "17",
+        "15",
+        "16"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-009",
+      "index": 8,
+      "prompt": "다음 계산의 값을 구하세요.\n\n2 × 9 = ?",
+      "options": [
+        "19",
+        "18",
+        "17",
+        "16"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-010",
+      "index": 9,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 1 = ?",
+      "options": [
+        "4",
+        "5",
+        "3",
+        "2"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-011",
+      "index": 10,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 2 = ?",
+      "options": [
+        "4",
+        "6",
+        "7",
+        "5"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-012",
+      "index": 11,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 3 = ?",
+      "options": [
+        "7",
+        "8",
+        "9",
+        "10"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-013",
+      "index": 12,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 4 = ?",
+      "options": [
+        "13",
+        "12",
+        "10",
+        "11"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-014",
+      "index": 13,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 5 = ?",
+      "options": [
+        "14",
+        "13",
+        "15",
+        "16"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-015",
+      "index": 14,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 6 = ?",
+      "options": [
+        "18",
+        "17",
+        "19",
+        "16"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-016",
+      "index": 15,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 7 = ?",
+      "options": [
+        "21",
+        "23",
+        "20",
+        "22"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-017",
+      "index": 16,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 8 = ?",
+      "options": [
+        "25",
+        "26",
+        "24",
+        "23"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-018",
+      "index": 17,
+      "prompt": "다음 계산의 값을 구하세요.\n\n3 × 9 = ?",
+      "options": [
+        "29",
+        "28",
+        "27",
+        "26"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-019",
+      "index": 18,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 1 = ?",
+      "options": [
+        "5",
+        "6",
+        "3",
+        "4"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-020",
+      "index": 19,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 2 = ?",
+      "options": [
+        "9",
+        "7",
+        "8",
+        "6"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-021",
+      "index": 20,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 3 = ?",
+      "options": [
+        "13",
+        "10",
+        "12",
+        "11"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-022",
+      "index": 21,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 4 = ?",
+      "options": [
+        "18",
+        "16",
+        "17",
+        "15"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-023",
+      "index": 22,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 5 = ?",
+      "options": [
+        "19",
+        "18",
+        "20",
+        "21"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-024",
+      "index": 23,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 6 = ?",
+      "options": [
+        "25",
+        "26",
+        "24",
+        "23"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-025",
+      "index": 24,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 7 = ?",
+      "options": [
+        "29",
+        "30",
+        "31",
+        "28"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-026",
+      "index": 25,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 8 = ?",
+      "options": [
+        "33",
+        "34",
+        "31",
+        "32"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-027",
+      "index": 26,
+      "prompt": "다음 계산의 값을 구하세요.\n\n4 × 9 = ?",
+      "options": [
+        "36",
+        "35",
+        "34",
+        "37"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-028",
+      "index": 27,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 1 = ?",
+      "options": [
+        "7",
+        "6",
+        "4",
+        "5"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-029",
+      "index": 28,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 2 = ?",
+      "options": [
+        "11",
+        "9",
+        "10",
+        "8"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-030",
+      "index": 29,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 3 = ?",
+      "options": [
+        "16",
+        "15",
+        "13",
+        "14"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-031",
+      "index": 30,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 4 = ?",
+      "options": [
+        "18",
+        "21",
+        "22",
+        "20"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-032",
+      "index": 31,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 5 = ?",
+      "options": [
+        "25",
+        "26",
+        "24",
+        "23"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-033",
+      "index": 32,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 6 = ?",
+      "options": [
+        "29",
+        "30",
+        "31",
+        "28"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-034",
+      "index": 33,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 7 = ?",
+      "options": [
+        "34",
+        "33",
+        "35",
+        "32"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-035",
+      "index": 34,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 8 = ?",
+      "options": [
+        "40",
+        "39",
+        "38",
+        "41"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-036",
+      "index": 35,
+      "prompt": "다음 계산의 값을 구하세요.\n\n5 × 9 = ?",
+      "options": [
+        "43",
+        "44",
+        "45",
+        "42"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-037",
+      "index": 36,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 1 = ?",
+      "options": [
+        "7",
+        "8",
+        "6",
+        "5"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-038",
+      "index": 37,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 2 = ?",
+      "options": [
+        "11",
+        "12",
+        "13",
+        "10"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-039",
+      "index": 38,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 3 = ?",
+      "options": [
+        "18",
+        "16",
+        "17",
+        "15"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-040",
+      "index": 39,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 4 = ?",
+      "options": [
+        "21",
+        "22",
+        "24",
+        "23"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-041",
+      "index": 40,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 5 = ?",
+      "options": [
+        "31",
+        "32",
+        "30",
+        "29"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-042",
+      "index": 41,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 6 = ?",
+      "options": [
+        "35",
+        "36",
+        "34",
+        "37"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-043",
+      "index": 42,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 7 = ?",
+      "options": [
+        "43",
+        "42",
+        "41",
+        "44"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-044",
+      "index": 43,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 8 = ?",
+      "options": [
+        "47",
+        "49",
+        "50",
+        "48"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-045",
+      "index": 44,
+      "prompt": "다음 계산의 값을 구하세요.\n\n6 × 9 = ?",
+      "options": [
+        "54",
+        "52",
+        "53",
+        "55"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-046",
+      "index": 45,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 1 = ?",
+      "options": [
+        "7",
+        "8",
+        "6",
+        "5"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-047",
+      "index": 46,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 2 = ?",
+      "options": [
+        "15",
+        "13",
+        "14",
+        "12"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-048",
+      "index": 47,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 3 = ?",
+      "options": [
+        "22",
+        "20",
+        "21",
+        "23"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-049",
+      "index": 48,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 4 = ?",
+      "options": [
+        "29",
+        "28",
+        "30",
+        "27"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-050",
+      "index": 49,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 5 = ?",
+      "options": [
+        "33",
+        "34",
+        "36",
+        "35"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-051",
+      "index": 50,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 6 = ?",
+      "options": [
+        "41",
+        "43",
+        "44",
+        "42"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-052",
+      "index": 51,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 7 = ?",
+      "options": [
+        "47",
+        "50",
+        "48",
+        "49"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-053",
+      "index": 52,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 8 = ?",
+      "options": [
+        "57",
+        "55",
+        "54",
+        "56"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-054",
+      "index": 53,
+      "prompt": "다음 계산의 값을 구하세요.\n\n7 × 9 = ?",
+      "options": [
+        "63",
+        "62",
+        "61",
+        "64"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-055",
+      "index": 54,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 1 = ?",
+      "options": [
+        "7",
+        "9",
+        "8",
+        "6"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-056",
+      "index": 55,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 2 = ?",
+      "options": [
+        "17",
+        "15",
+        "16",
+        "18"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-057",
+      "index": 56,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 3 = ?",
+      "options": [
+        "25",
+        "24",
+        "26",
+        "23"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-058",
+      "index": 57,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 4 = ?",
+      "options": [
+        "31",
+        "32",
+        "34",
+        "33"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-059",
+      "index": 58,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 5 = ?",
+      "options": [
+        "41",
+        "39",
+        "40",
+        "42"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-060",
+      "index": 59,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 6 = ?",
+      "options": [
+        "47",
+        "49",
+        "48",
+        "46"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-061",
+      "index": 60,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 7 = ?",
+      "options": [
+        "55",
+        "56",
+        "58",
+        "57"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-062",
+      "index": 61,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 8 = ?",
+      "options": [
+        "63",
+        "64",
+        "62",
+        "65"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-063",
+      "index": 62,
+      "prompt": "다음 계산의 값을 구하세요.\n\n8 × 9 = ?",
+      "options": [
+        "73",
+        "71",
+        "70",
+        "72"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-064",
+      "index": 63,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 1 = ?",
+      "options": [
+        "9",
+        "11",
+        "10",
+        "8"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-065",
+      "index": 64,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 2 = ?",
+      "options": [
+        "18",
+        "19",
+        "17",
+        "16"
+      ],
+      "answerIndex": 0,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-066",
+      "index": 65,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 3 = ?",
+      "options": [
+        "28",
+        "27",
+        "29",
+        "26"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-067",
+      "index": 66,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 4 = ?",
+      "options": [
+        "37",
+        "35",
+        "36",
+        "38"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-068",
+      "index": 67,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 5 = ?",
+      "options": [
+        "44",
+        "46",
+        "45",
+        "43"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-069",
+      "index": 68,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 6 = ?",
+      "options": [
+        "55",
+        "53",
+        "52",
+        "54"
+      ],
+      "answerIndex": 3,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-070",
+      "index": 69,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 7 = ?",
+      "options": [
+        "64",
+        "63",
+        "62",
+        "65"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-071",
+      "index": 70,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 8 = ?",
+      "options": [
+        "71",
+        "70",
+        "72",
+        "69"
+      ],
+      "answerIndex": 2,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    },
+    {
+      "id": "Gugu2_9-072",
+      "index": 71,
+      "prompt": "다음 계산의 값을 구하세요.\n\n9 × 9 = ?",
+      "options": [
+        "79",
+        "81",
+        "82",
+        "80"
+      ],
+      "answerIndex": 1,
+      "difficulty": 1,
+      "tags": [
+        "gugudan",
+        "2-9단",
+        "곱셈",
+        "2학년"
+      ]
+    }
+  ]
+}
