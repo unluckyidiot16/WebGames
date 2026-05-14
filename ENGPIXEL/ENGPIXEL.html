@@ -1,1131 +1,1968 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <meta charset="UTF-8"/>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-    <title>픽셀 컬러링 & 규칙 퍼즐 V5</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { font-family: ui-sans-serif, system-ui; touch-action: manipulation; -webkit-user-select:none; user-select:none; oversizer-behavior: contain; }
-        .view { display: none; width: 100%; min-height: 100vh; }
-        .view.active { display: flex; }
-        canvas { display:block; image-rendering: pixelated; cursor: pointer; background:#fff; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>포켓 단어팡! - 단어로 포켓몬을 모아라</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DotGothic16&family=Jua&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pk-red: #EF4444;
+  --pk-red-dark: #B91C1C;
+  --pk-navy: #1E3A8A;
+  --pk-navy-dark: #1E293B;
+  --pk-yellow: #FCD34D;
+  --pk-yellow-dark: #D97706;
+  --pk-mint: #6EE7B7;
+  --pk-pink: #F472B6;
+  --pk-cream: #FFF8E7;
+  --pk-cream-2: #FEF3C7;
+  --pk-paper: #FFFBEB;
+  --ink: #1F2937;
+  --ink-soft: #4B5563;
+  --pk-c: #9CA3AF;
+  --pk-r: #60A5FA;
+  --pk-sr: #FBBF24;
+  --pk-l: #EC4899;
+}
+* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+html, body { margin: 0; padding: 0; }
+body {
+  font-family: 'Jua', 'Noto Sans KR', sans-serif;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 20% 10%, #FECACA 0%, transparent 38%),
+    radial-gradient(circle at 80% 20%, #FDE68A 0%, transparent 40%),
+    radial-gradient(circle at 50% 90%, #BFDBFE 0%, transparent 45%),
+    linear-gradient(135deg, #FFF8E7 0%, #FEF3C7 100%);
+  background-attachment: fixed;
+  min-height: 100vh;
+  touch-action: manipulation;
+  user-select: none;
+  -webkit-user-select: none;
+}
+body::before {
+  content:"";
+  position: fixed; inset: 0;
+  background-image:
+    linear-gradient(rgba(31,41,55,0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(31,41,55,0.04) 1px, transparent 1px);
+  background-size: 20px 20px;
+  pointer-events: none;
+  z-index: 0;
+}
 
-        /* 카드 스타일 - 색칠 완료 시 테두리 강조 */
-        .card { border:2px solid #e5e7eb; border-radius:10px; overflow:hidden; background:#fff; cursor:pointer; transition:.2s; position: relative; }
-        .card:active { transform: scale(0.95); }
+.font-retro { font-family: 'Press Start 2P', monospace; }
+.font-dot { font-family: 'DotGothic16', monospace; }
+.font-jua { font-family: 'Jua', sans-serif; }
 
-        .card.colored { border-width: 4px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
-        .card.colored.rarity-C { border-color:#9ca3af; }
-        .card.colored.rarity-R { border-color:#60a5fa; }
-        .card.colored.rarity-SR { border-color:#fbbf24; }
-        .card.colored.rarity-H { border-color:#ec4899; }
+/* Chunky card with hard shadow - signature aesthetic */
+.pk-card {
+  background: white;
+  border: 3px solid var(--pk-navy-dark);
+  border-radius: 18px;
+  box-shadow: 6px 6px 0 var(--pk-navy-dark);
+  position: relative;
+}
+.pk-card-yellow { background: var(--pk-paper); }
+.pk-card-cream { background: var(--pk-cream); }
 
-        .card img { width:100%; aspect-ratio:1/1; object-fit:contain; background:#f9fafb; image-rendering: pixelated; }
-        .locked { filter:grayscale(1) opacity(.6); }
-        .locked::after{ content:"🔒"; position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:24px; background:rgba(0,0,0,0.1); }
+/* Chunky button */
+.pk-btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  background: var(--pk-red);
+  color: white;
+  border: 3px solid var(--pk-navy-dark);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--pk-navy-dark);
+  font-family: 'Jua', sans-serif;
+  font-size: 1.1rem;
+  padding: 12px 20px;
+  transition: transform 0.06s, box-shadow 0.06s;
+  cursor: pointer;
+  position: relative;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.2);
+}
+.pk-btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--pk-navy-dark); }
+.pk-btn.alt { background: var(--pk-navy); }
+.pk-btn.yellow { background: var(--pk-yellow); color: var(--pk-navy-dark); text-shadow: none; }
+.pk-btn.mint { background: var(--pk-mint); color: var(--pk-navy-dark); text-shadow: none; }
+.pk-btn.ghost { background: white; color: var(--pk-navy-dark); text-shadow: none; }
+.pk-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-        /* 모달 공통 */
-        .modal { display:none; position:fixed; inset:0; z-index:2000; background:rgba(0,0,0,.6); justify-content:center; align-items:center; }
-        .modal-content { background:#fff; width:90%; max-width:480px; padding:24px; border-radius:16px; box-shadow:0 20px 25px -5px rgba(0,0,0,0.1); text-align:center; animation: popUp 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
-        @keyframes popUp { from {transform: scale(0.8); opacity: 0;} to {transform: scale(1); opacity: 1;} }
+/* Views */
+.view { display: none; width: 100%; min-height: 100vh; position: relative; z-index: 1; }
+.view.active { display: flex; }
 
-        .shake { animation:shake .3s; }
-        @keyframes shake { 0%,100%{transform:translate(0,0)} 25%{transform:translate(-5px,0)} 75%{transform:translate(5px,0)} }
+/* Pokeball spinner / decorative */
+.pokeball {
+  width: 64px; height: 64px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, var(--pk-red) 0%, var(--pk-red) 49%, var(--pk-navy-dark) 49%, var(--pk-navy-dark) 51%, white 51%, white 100%);
+  border: 4px solid var(--pk-navy-dark);
+  position: relative;
+  box-shadow: 4px 4px 0 var(--pk-navy-dark);
+}
+.pokeball::after {
+  content: ""; position: absolute; left: 50%; top: 50%;
+  transform: translate(-50%, -50%);
+  width: 18px; height: 18px; border-radius: 50%;
+  background: white; border: 4px solid var(--pk-navy-dark);
+  box-sizing: border-box;
+}
 
-        /* 규칙 퍼즐 스타일 */
-        .puzzle-box { background: #f3f4f6; border: 2px solid #e5e7eb; border-radius: 8px; cursor: pointer; transition: 0.2s; position: relative; overflow: hidden; }
-        .puzzle-box:hover { border-color: #0ea5e9; }
-        .puzzle-box.selected { border-color: #3b82f6; box-shadow: 0 0 0 2px #3b82f6; }
-        .question-mark { display:flex; align-items:center; justify-content:center; font-size:32px; font-weight:bold; color:#9ca3af; background:#f9fafb; border:2px dashed #d1d5db; border-radius:8px; }
+/* Word game canvas */
+#game-canvas {
+  background: var(--pk-paper);
+  border: 4px solid var(--pk-navy-dark);
+  border-radius: 14px;
+  box-shadow: inset 0 0 20px rgba(30,58,138,0.08);
+  display: block;
+  touch-action: none;
+}
 
-        /* 색칠 게임 UI */
-        .composite { display:flex; justify-content:center; overflow:hidden; border:3px solid #374151; border-radius:14px; background: #eee; position: relative; }
-        .grid-2x2 { display:inline-grid; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; gap:1px; background:#ccc; width: 100%; aspect-ratio: 1/1; }
-        .grid-2x2 > div { width: 100%; height: 100%; overflow: hidden; position: relative; background: #fff; }
-        .grid-2x2 canvas { width: 100% !important; height: 100% !important; }
+/* Word popups */
+.word-popup {
+  position: absolute;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.7rem;
+  color: var(--pk-yellow-dark);
+  text-shadow: 2px 2px 0 #fff, 3px 3px 0 rgba(0,0,0,0.18);
+  pointer-events: none;
+  animation: floatUp 1.4s ease-out forwards;
+  white-space: nowrap;
+  z-index: 10;
+}
+.word-popup.short { font-size: 1.1rem; color: #a855f7; }
+.word-popup.combo { color: #ec4899; }
+.word-popup.big { font-size: 2rem; color: var(--pk-red); }
+@keyframes floatUp {
+  0% { transform: translate(-50%,-50%) scale(0.4); opacity: 0; }
+  20% { transform: translate(-50%,-50%) scale(1.3); opacity: 1; }
+  60% { transform: translate(-50%,calc(-50% - 32px)) scale(1.05); opacity: 1; }
+  100% { transform: translate(-50%,calc(-50% - 84px)) scale(0.9); opacity: 0; }
+}
 
-        /* 팔레트 */
-        #paletteContainer, #zoomPalette {
-            display:flex; gap:8px; overflow-x:auto; padding:8px 4px; width:100%; scrollbar-width:none;
-        }
-        .palette-button {
-            flex: 0 0 42px; height:42px; border-radius:8px; border:2px solid #ddd;
-            font-weight:bold; color:#fff; text-shadow:0 0 2px #000;
-            display:flex; align-items:center; justify-content:center;
-            transition: transform 0.1s, border-color 0.1s;
-        }
-        .palette-button.selected { transform:scale(1.15); border-color:#3b82f6; box-shadow:0 4px 6px rgba(0,0,0,0.2); z-index: 10; }
+@keyframes chainPop {
+  0% { transform: scale(0) rotate(-15deg); }
+  60% { transform: scale(1.3) rotate(8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.chain-pop { animation: chainPop 0.5s ease-out; }
 
-        /* 줌 오버레이 */
-        #zoomOverlay { position:fixed; inset:0; background:rgba(0,0,0,0.9); display:none; align-items:center; justify-content:center; z-index:1500; flex-direction: column; }
-        #zoomCard { background:#fff; padding:10px; border-radius:12px; display:flex; flex-direction:column; gap:10px; align-items:center; width: 95vw; max-height: 90vh; }
-        #zoomCanvasWrapper { overflow: auto; max-width: 100%; max-height: 60vh; border: 1px solid #ccc; display: flex; justify-content: center; background: #eee; }
-        #zoomCanvas { display: block; }
+.letter-chip {
+  display: inline-block;
+  min-width: 1.4rem;
+  text-align: center;
+  background: linear-gradient(180deg, var(--pk-yellow), var(--pk-yellow-dark));
+  border-radius: 6px;
+  padding: 2px 6px;
+  margin: 0 2px;
+  color: white;
+  font-family: 'Jua', sans-serif;
+  font-size: 1.05rem;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.25);
+  border: 2px solid var(--pk-navy-dark);
+}
+.letter-chip.valid { background: linear-gradient(180deg, #BBF7D0, #16A34A); }
+.letter-chip.invalid { background: linear-gradient(180deg, #FECACA, #DC2626); }
+.timer-bar { transition: width 0.25s linear; }
 
-        /* 가챠 결과 */
-        .rarity-tag { position:absolute; top:4px; left:4px; font-size:10px; font-weight:800; color:#fff; padding:2px 6px; border-radius:4px; text-shadow:0 1px 2px rgba(0,0,0,.3); z-index: 10; }
-        .rarity-C .rarity-tag { background:#9ca3af; }
-        .rarity-R .rarity-tag { background:#60a5fa; }
-        .rarity-SR .rarity-tag { background:#f59e0b; }
-        .rarity-H .rarity-tag { background:#ec4899; }
-    </style>
+@keyframes flashWarn {
+  0%, 100% { background: var(--pk-paper); }
+  50% { background: var(--pk-cream-2); }
+}
+.warn-flash { animation: flashWarn 0.4s ease-in-out 3; }
+
+/* Modals */
+.modal { display: none; position: fixed; inset: 0; z-index: 2000; background: rgba(31,41,55,0.6); justify-content: center; align-items: center; padding: 16px; }
+.modal.show { display: flex; }
+.modal-content {
+  background: white;
+  width: 100%; max-width: 480px;
+  padding: 24px;
+  border: 4px solid var(--pk-navy-dark);
+  border-radius: 20px;
+  box-shadow: 8px 8px 0 var(--pk-navy-dark);
+  animation: popIn 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  text-align: center;
+}
+@keyframes popIn {
+  from { transform: scale(0.7) translateY(-30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+/* Pokedex grid */
+.dex-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(78px, 1fr)); gap: 10px; }
+.dex-card {
+  position: relative;
+  aspect-ratio: 1 / 1.15;
+  background: var(--pk-cream);
+  border: 3px solid var(--pk-navy-dark);
+  border-radius: 12px;
+  box-shadow: 3px 3px 0 var(--pk-navy-dark);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform 0.08s;
+  display: flex; flex-direction: column;
+}
+.dex-card:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--pk-navy-dark); }
+.dex-card img { width: 100%; flex: 1; object-fit: contain; image-rendering: pixelated; background: white; }
+.dex-card .dex-label {
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  text-align: center;
+  padding: 3px 0;
+  background: var(--pk-navy-dark);
+  color: white;
+  letter-spacing: 0.5px;
+}
+.dex-card.locked img { filter: brightness(0) opacity(0.35); }
+.dex-card.locked::after {
+  content: "?";
+  position: absolute; top: 38%; left: 0; right: 0;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 28px; color: var(--pk-navy-dark);
+  text-align: center;
+  pointer-events: none;
+}
+.dex-card.colored { box-shadow: 3px 3px 0 var(--pk-navy-dark), 0 0 0 2px var(--pk-yellow) inset; }
+.dex-card.colored.rarity-C { border-color: var(--pk-c); }
+.dex-card.colored.rarity-R { border-color: var(--pk-r); }
+.dex-card.colored.rarity-SR { border-color: var(--pk-sr); }
+.dex-card.colored.rarity-L { border-color: var(--pk-l); }
+.dex-card .rarity-dot {
+  position: absolute; top: 4px; right: 4px;
+  width: 14px; height: 14px; border-radius: 50%;
+  border: 2px solid var(--pk-navy-dark);
+  z-index: 5;
+}
+.dex-card .rarity-dot.C { background: var(--pk-c); }
+.dex-card .rarity-dot.R { background: var(--pk-r); }
+.dex-card .rarity-dot.SR { background: var(--pk-sr); }
+.dex-card .rarity-dot.L { background: var(--pk-l); }
+
+/* Coloring game */
+.composite {
+  display: flex; justify-content: center;
+  overflow: hidden;
+  border: 4px solid var(--pk-navy-dark);
+  border-radius: 14px;
+  background: var(--pk-cream);
+  position: relative;
+  box-shadow: 4px 4px 0 var(--pk-navy-dark);
+}
+.grid-2x2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: 2px;
+  background: var(--pk-navy-dark);
+  width: 100%;
+  aspect-ratio: 1/1;
+}
+.grid-2x2 > div { width: 100%; height: 100%; overflow: hidden; position: relative; background: white; cursor: pointer; }
+.grid-2x2 canvas { width: 100% !important; height: 100% !important; image-rendering: pixelated; }
+canvas { display: block; }
+
+#paletteContainer, #zoomPalette {
+  display: flex; gap: 8px; overflow-x: auto; padding: 8px 4px;
+  width: 100%; scrollbar-width: none;
+}
+#paletteContainer::-webkit-scrollbar, #zoomPalette::-webkit-scrollbar { display: none; }
+.palette-button {
+  flex: 0 0 46px; height: 46px;
+  border-radius: 10px;
+  border: 3px solid var(--pk-navy-dark);
+  box-shadow: 2px 2px 0 var(--pk-navy-dark);
+  font-family: 'Press Start 2P', monospace;
+  font-size: 11px;
+  color: white;
+  text-shadow: 1px 1px 0 rgba(0,0,0,0.6);
+  display: flex; align-items: center; justify-content: center;
+  transition: transform 0.08s;
+  cursor: pointer;
+}
+.palette-button.selected { transform: scale(1.18) translate(-2px, -2px); box-shadow: 4px 4px 0 var(--pk-navy-dark); z-index: 10; }
+.palette-button.done { opacity: 0.35; }
+
+/* Zoom overlay */
+#zoomOverlay { position: fixed; inset: 0; background: rgba(31,41,55,0.92); display: none; align-items: center; justify-content: center; z-index: 1500; flex-direction: column; padding: 12px; }
+#zoomCard { background: var(--pk-cream); padding: 12px; border: 4px solid var(--pk-navy-dark); border-radius: 14px; box-shadow: 6px 6px 0 var(--pk-navy-dark); display: flex; flex-direction: column; gap: 10px; align-items: center; width: 95vw; max-width: 600px; max-height: 92vh; }
+#zoomCanvasWrapper { overflow: auto; max-width: 100%; max-height: 60vh; border: 3px solid var(--pk-navy-dark); background: var(--pk-paper); border-radius: 8px; }
+#zoomCanvas { display: block; }
+
+/* Gacha modal */
+.gacha-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  max-height: 56vh;
+  overflow-y: auto;
+  padding: 6px;
+}
+.gacha-tile {
+  position: relative;
+  aspect-ratio: 1/1;
+  background: white;
+  border: 3px solid var(--pk-navy-dark);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 2px 2px 0 var(--pk-navy-dark);
+  animation: popIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.gacha-tile.rarity-C { background: linear-gradient(135deg, #F3F4F6, #E5E7EB); }
+.gacha-tile.rarity-R { background: linear-gradient(135deg, #DBEAFE, #93C5FD); }
+.gacha-tile.rarity-SR { background: linear-gradient(135deg, #FEF3C7, #FCD34D); animation: popIn 0.4s, sparkle 1.8s infinite; }
+.gacha-tile.rarity-L { background: linear-gradient(135deg, #FCE7F3, #F472B6); animation: popIn 0.4s, sparkle 1.4s infinite; }
+@keyframes sparkle {
+  0%, 100% { box-shadow: 2px 2px 0 var(--pk-navy-dark), 0 0 0 0 rgba(252, 211, 77, 0); }
+  50% { box-shadow: 2px 2px 0 var(--pk-navy-dark), 0 0 20px 4px rgba(252, 211, 77, 0.7); }
+}
+.gacha-tile img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+.gacha-tile .gtag {
+  position: absolute; top: 2px; left: 2px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: white;
+  background: var(--pk-navy-dark);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+.gacha-tile.rarity-C .gtag { background: var(--pk-c); }
+.gacha-tile.rarity-R .gtag { background: var(--pk-r); color: white; }
+.gacha-tile.rarity-SR .gtag { background: var(--pk-sr); color: var(--pk-navy-dark); }
+.gacha-tile.rarity-L .gtag { background: var(--pk-l); color: white; }
+.gacha-tile .newtag {
+  position: absolute; bottom: 2px; right: 2px;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: white;
+  background: var(--pk-red);
+  padding: 2px 4px;
+  border-radius: 4px;
+}
+
+.shake { animation: shake 0.32s; }
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-6px, 0); }
+  75% { transform: translate(6px, 0); }
+}
+
+/* Bouncing title decoration */
+@keyframes bobble { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.bobble { animation: bobble 1.8s ease-in-out infinite; }
+
+/* Top bar HUD */
+.hud {
+  display: flex; align-items: center; justify-content: space-between;
+  background: white;
+  border: 3px solid var(--pk-navy-dark);
+  border-radius: 14px;
+  box-shadow: 4px 4px 0 var(--pk-navy-dark);
+  padding: 10px 14px;
+  gap: 10px;
+}
+.hud-stat {
+  display: flex; flex-direction: column; align-items: flex-start;
+  font-family: 'Press Start 2P', monospace;
+  font-size: 8px;
+  color: var(--ink-soft);
+  letter-spacing: 0.5px;
+}
+.hud-stat .val { font-family: 'Jua', sans-serif; font-size: 1.5rem; color: var(--pk-navy-dark); margin-top: 2px; line-height: 1; }
+.hud-stat .val.red { color: var(--pk-red); }
+.hud-stat .val.yellow { color: var(--pk-yellow-dark); }
+</style>
 </head>
-<body class="bg-gray-100 min-h-screen text-gray-800">
+<body class="p-0">
 
 <!-- ================= 1. 타이틀 화면 ================= -->
-<div id="titleScreen" class="view active flex-col items-center justify-center p-6 bg-gradient-to-br from-indigo-50 to-blue-100">
-    <div class="text-center mb-10">
-        <h1 class="text-5xl md:text-7xl font-extrabold text-indigo-600 mb-4 drop-shadow-sm tracking-tight">PIXEL<br>PUZZLE</h1>
-        <p class="text-gray-600 text-lg">규칙을 찾고, 도감을 채우고, 색칠하세요!</p>
+<div id="titleScreen" class="view active flex-col items-center justify-center p-6">
+  <div class="pk-card pk-card-cream p-8 max-w-md w-full text-center">
+    <div class="flex justify-center mb-3"><div class="pokeball bobble"></div></div>
+    <h1 class="font-retro text-2xl md:text-3xl text-[var(--pk-red)] leading-tight mb-2" style="text-shadow: 3px 3px 0 var(--pk-navy-dark);">
+      포켓 단어팡!
+    </h1>
+    <p class="text-sm text-[var(--pk-navy-dark)] mb-5 font-jua">단어를 만들고, 포켓몬을 모으자!</p>
+
+    <div class="bg-white border-2 border-[var(--pk-navy-dark)] rounded-xl p-3 mb-5 text-left text-sm">
+      <div class="font-retro text-[10px] text-[var(--pk-red)] mb-2">놀이 방법</div>
+      <div class="font-jua text-[var(--ink)] leading-relaxed">
+        <div>① 글자를 <b>이어서 드래그</b>해 영단어를 만들어요</div>
+        <div>② 단어로 받은 포인트로 <b>포켓몬을 뽑아요</b></div>
+        <div>③ 도감의 포켓몬을 <b>색칠</b>해서 완성!</div>
+      </div>
     </div>
-    <button id="startButton" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-4 px-12 rounded-full text-xl shadow-xl transition transform hover:scale-105">
-        게임 시작
+
+    <div class="hud mb-4">
+      <div class="hud-stat">
+        <div>BEST</div>
+        <div class="val yellow" id="titleBest">0</div>
+      </div>
+      <div class="hud-stat" style="align-items:center;">
+        <div>POKEDEX</div>
+        <div class="val red" id="titleDex">0 / 415</div>
+      </div>
+      <div class="hud-stat" style="align-items:flex-end;">
+        <div>POINTS</div>
+        <div class="val" id="titlePoints">0</div>
+      </div>
+    </div>
+
+    <button onclick="showView('lobbyScreen')" class="pk-btn w-full text-xl py-3">
+      시작하기 ▶
     </button>
+  </div>
 </div>
 
 <!-- ================= 2. 로비 화면 ================= -->
-<div id="lobbyScreen" class="view flex-col items-center p-6 bg-gray-50">
-    <header class="w-full max-w-lg flex justify-between items-center mb-8 bg-white p-4 rounded-xl shadow-sm">
-        <div class="flex flex-col">
-            <span class="text-xs text-gray-500 font-bold">MY POINT</span>
-            <span class="text-2xl font-black text-indigo-600" id="lobbyPoints">0 P</span>
-        </div>
-        <div class="flex flex-col text-right">
-            <span class="text-xs text-gray-500 font-bold">CHALLENGE TICKET</span>
-            <span class="text-xl font-bold text-rose-500" id="lobbyCoupons">0</span>
-        </div>
-    </header>
+<div id="lobbyScreen" class="view flex-col items-center p-4">
+  <div class="w-full max-w-md">
 
-    <div class="grid grid-cols-1 gap-5 w-full max-w-lg">
-        <!-- 1. 도감 & 색칠 -->
-        <button id="goBookBtn" class="flex items-center p-6 bg-white rounded-2xl shadow-md border border-gray-100 hover:border-gray-300 transition group">
-            <div class="w-14 h-14 bg-blue-50 rounded-full flex items-center justify-center text-3xl mr-5 group-hover:scale-110 transition">🎨</div>
-            <div class="text-left">
-                <h2 class="text-xl font-bold text-gray-800">도감 & 색칠하기</h2>
-                <p class="text-xs text-gray-400 mt-1">수집한 픽셀을 색칠하여 완성하세요</p>
-            </div>
+    <!-- HUD -->
+    <div class="hud mb-4">
+      <div class="hud-stat">
+        <div>POINTS</div>
+        <div class="val" id="lobbyPoints">0</div>
+      </div>
+      <div class="hud-stat" style="align-items:center;">
+        <div>POKEDEX</div>
+        <div class="val red" id="lobbyDex">0 / 415</div>
+      </div>
+      <div class="hud-stat" style="align-items:flex-end;">
+        <div>COLORED</div>
+        <div class="val yellow" id="lobbyColored">0</div>
+      </div>
+    </div>
+
+    <!-- Play card -->
+    <div class="pk-card p-5 mb-4">
+      <div class="flex items-center gap-4 mb-3">
+        <div class="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--pk-red)] border-2 border-[var(--pk-navy-dark)] text-3xl shrink-0" style="box-shadow: 3px 3px 0 var(--pk-navy-dark);">💥</div>
+        <div class="flex-1">
+          <h2 class="font-retro text-sm text-[var(--pk-red)] mb-1">WORD PANG</h2>
+          <p class="text-xs text-[var(--ink-soft)] font-jua">90초 안에 단어를 찾아 포인트를 얻어요</p>
+        </div>
+      </div>
+      <button onclick="startWordGame()" class="pk-btn w-full text-lg">
+        단어팡 시작!
+      </button>
+    </div>
+
+    <!-- Gacha card -->
+    <div class="pk-card pk-card-yellow p-5 mb-4">
+      <div class="flex items-center gap-4 mb-3">
+        <div class="w-14 h-14 flex items-center justify-center rounded-xl bg-[var(--pk-yellow)] border-2 border-[var(--pk-navy-dark)] text-3xl shrink-0" style="box-shadow: 3px 3px 0 var(--pk-navy-dark);">🎁</div>
+        <div class="flex-1">
+          <h2 class="font-retro text-sm text-[var(--pk-yellow-dark)] mb-1">GACHA</h2>
+          <p class="text-xs text-[var(--ink-soft)] font-jua">포인트로 포켓몬을 뽑아요</p>
+        </div>
+      </div>
+      <div class="grid grid-cols-2 gap-2">
+        <button onclick="doGacha(1)" class="pk-btn yellow text-sm py-2">
+          1회 뽑기<br><span class="text-xs opacity-80">100 P</span>
         </button>
-
-        <!-- 2. 규칙 퍼즐 (일반) -->
-        <button id="goPuzzleBtn" class="flex items-center p-6 bg-white rounded-2xl shadow-md border border-emerald-50 hover:border-emerald-300 transition group">
-            <div class="w-14 h-14 bg-emerald-50 rounded-full flex items-center justify-center text-3xl mr-5 group-hover:scale-110 transition">🧩</div>
-            <div class="text-left">
-                <h2 class="text-xl font-bold text-emerald-700">규칙 퍼즐 (일반)</h2>
-                <p class="text-xs text-gray-400 mt-1">포인트를 모으세요! (10회 성공시 티켓 지급)</p>
-            </div>
+        <button onclick="doGacha(10)" class="pk-btn text-sm py-2">
+          10회 뽑기<br><span class="text-xs opacity-80">1,000 P</span>
         </button>
+      </div>
+    </div>
 
-        <!-- 3. 도전 퍼즐 (쿠폰) -->
-        <button id="goChallengeBtn" class="flex items-center p-6 bg-white rounded-2xl shadow-md border-2 border-rose-100 hover:border-rose-400 transition group relative overflow-hidden">
-            <div class="absolute top-0 right-0 bg-rose-500 text-white text-[10px] px-2 py-1 font-bold">티켓 1장 소모</div>
-            <div class="w-14 h-14 bg-rose-50 rounded-full flex items-center justify-center text-3xl mr-5 group-hover:scale-110 transition">🏆</div>
-            <div class="text-left">
-                <h2 class="text-xl font-bold text-rose-600">도전 퍼즐 (어려움)</h2>
-                <p class="text-xs text-gray-400 mt-1">10회 성공 시 <span class="font-bold text-rose-500">스페셜 가챠</span> 지급!</p>
-            </div>
+    <!-- Pokedex card -->
+    <div class="pk-card p-5 mb-4" style="background: linear-gradient(135deg, #FEE2E2, #FECACA);">
+      <div class="flex items-center gap-4 mb-3">
+        <div class="w-14 h-14 flex items-center justify-center rounded-xl bg-white border-2 border-[var(--pk-navy-dark)] text-3xl shrink-0" style="box-shadow: 3px 3px 0 var(--pk-navy-dark);">📕</div>
+        <div class="flex-1">
+          <h2 class="font-retro text-sm text-[var(--pk-navy-dark)] mb-1">POKEDEX</h2>
+          <p class="text-xs text-[var(--ink-soft)] font-jua">모은 포켓몬을 색칠해요</p>
+        </div>
+      </div>
+      <button onclick="showView('dexScreen')" class="pk-btn alt w-full text-lg">
+        도감 열기
+      </button>
+    </div>
+
+    <!-- Back to title -->
+    <button onclick="showView('titleScreen')" class="pk-btn ghost w-full text-sm py-2">
+      ← 메인으로
+    </button>
+  </div>
+</div>
+
+<!-- ================= 3. 단어 게임 화면 ================= -->
+<div id="wordScreen" class="view flex-col items-center p-3">
+  <div class="w-full max-w-md">
+    <div class="pk-card p-3">
+      <div class="flex justify-between items-stretch mb-2 px-1 gap-2">
+        <div class="flex flex-col items-start">
+          <div class="font-retro text-[8px] text-[var(--ink-soft)] tracking-widest">SCORE</div>
+          <div id="wScore" class="font-jua text-2xl text-[var(--pk-red)] leading-none">0</div>
+        </div>
+        <div class="flex flex-col items-center flex-1">
+          <div id="wChain" class="font-jua text-base text-[var(--pk-l)] min-h-[1.2rem] leading-none"></div>
+          <div class="w-full h-3 bg-[var(--pk-cream-2)] rounded-full overflow-hidden mt-1 border-2 border-[var(--pk-navy-dark)]">
+            <div id="wTimerBar" class="timer-bar h-full" style="width:100%; background: linear-gradient(to right, var(--pk-yellow), var(--pk-red));"></div>
+          </div>
+          <div id="wTimerText" class="font-retro text-[8px] text-[var(--ink-soft)] leading-none mt-1">90.0초</div>
+        </div>
+        <div class="flex flex-col items-end">
+          <div class="font-retro text-[8px] text-[var(--ink-soft)] tracking-widest">BEST</div>
+          <div id="wBest" class="font-jua text-2xl text-[var(--pk-navy)] leading-none">0</div>
+        </div>
+      </div>
+
+      <div id="wSelDisplay" class="text-center min-h-[2rem] mb-1"></div>
+
+      <div class="flex justify-center">
+        <div class="relative inline-block">
+          <canvas id="game-canvas"></canvas>
+          <div id="popupLayer" class="absolute inset-0 pointer-events-none"></div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-2 mt-3">
+        <button id="shuffleBtn" class="pk-btn yellow text-sm py-2" onclick="manualShuffle()">
+          🔀 섞기 (-300)
         </button>
-
-        <!-- 4. 뽑기 존 -->
-        <div class="bg-white rounded-2xl shadow-md border border-indigo-50 p-4">
-            <div class="flex items-center mb-3">
-                <div class="w-10 h-10 bg-indigo-50 rounded-full flex items-center justify-center text-xl mr-3">🎁</div>
-                <h2 class="text-lg font-bold text-indigo-700">픽셀 뽑기</h2>
-            </div>
-            <div class="flex gap-2">
-                <button id="gacha1Btn" class="flex-1 bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-bold py-3 rounded-xl transition">
-                    1회 뽑기<br><span class="text-xs font-normal">100 P</span>
-                </button>
-                <button id="gacha10Btn" class="flex-1 bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 rounded-xl transition shadow-lg">
-                    10회 뽑기<br><span class="text-xs font-normal opacity-80">1,000 P</span>
-                </button>
-            </div>
-        </div>
+        <button class="pk-btn ghost text-sm py-2" onclick="quitWordGame()">로비로</button>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- ================= 3. 도감(Book) 화면 ================= -->
-<div id="bookScreen" class="view flex-col items-center p-4 bg-gray-50">
-    <div class="w-full max-w-6xl flex flex-col gap-4 h-full">
-        <!-- 상단 네비게이션 -->
-        <div class="flex flex-wrap items-center justify-between gap-3 bg-white p-4 rounded-xl shadow-sm border border-gray-100">
-            <button id="backToLobbyFromBook" class="text-gray-500 font-bold px-3 py-1 hover:bg-gray-100 rounded-lg">← 로비</button>
-            <div class="flex gap-4 text-sm font-semibold">
-                <span>포인트: <b class="text-indigo-600" id="bookPoints">0</b></span>
-                <span>수집률: <b class="text-gray-700" id="collectionRate">0%</b></span>
-            </div>
-            <button id="quickGachaBtn" class="bg-indigo-600 text-white text-xs px-4 py-2 rounded-lg font-bold shadow hover:bg-indigo-700 transition">10회 뽑기</button>
-        </div>
-
-        <!-- 도감 그리드 -->
-        <div id="bookGrid" class="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 lg:grid-cols-8 gap-3 overflow-y-auto pb-10 content-start flex-1 p-1">
-            <!-- JS로 카드 생성됨 -->
-        </div>
+<!-- ================= 4. 게임 오버 모달 (단어팡) ================= -->
+<div id="gameoverModal" class="modal">
+  <div class="modal-content">
+    <div class="text-5xl mb-2">⏰</div>
+    <h2 class="font-retro text-xl text-[var(--pk-red)] mb-3" style="text-shadow: 2px 2px 0 var(--pk-navy-dark);">TIME UP!</h2>
+    <div class="bg-[var(--pk-cream-2)] border-2 border-[var(--pk-navy-dark)] rounded-xl p-3 mb-3">
+      <div class="font-retro text-[8px] text-[var(--ink-soft)]">FINAL SCORE</div>
+      <div id="finalScore" class="font-jua text-4xl text-[var(--pk-red)]">0</div>
+      <div id="finalGain" class="text-sm text-[var(--pk-yellow-dark)] font-jua mt-1">+ 0 P 획득!</div>
+      <div id="newBest" class="text-sm font-jua text-[var(--pk-l)] hidden mt-1">🎉 신기록!</div>
     </div>
+    <div id="foundWordsList" class="bg-[var(--pk-paper)] border-2 border-[var(--pk-navy-dark)] rounded-xl p-3 mb-4 max-h-40 overflow-y-auto text-sm text-left"></div>
+    <div class="grid grid-cols-2 gap-2">
+      <button onclick="startWordGame()" class="pk-btn">다시 하기</button>
+      <button onclick="quitWordGame()" class="pk-btn ghost">로비로</button>
+    </div>
+  </div>
 </div>
 
-<!-- ================= 4. 색칠 게임 화면 ================= -->
-<div id="gameScreen" class="view flex-col items-center p-4 bg-gray-100">
-    <div class="w-full max-w-3xl bg-white rounded-xl shadow-lg p-4 flex flex-col gap-4">
-        <div class="flex justify-between items-center border-b pb-2">
-            <button id="exitGameBtn" class="text-gray-500 font-bold hover:text-gray-800">← 나가기</button>
-            <h2 class="text-lg font-bold" id="gameTitle">No.1</h2>
-            <div class="text-xs bg-gray-100 px-3 py-1 rounded-full font-mono" id="gameProgress">0%</div>
-        </div>
-
-        <div id="loadingSpinner" class="hidden text-center py-10 text-gray-500">
-            <p class="mb-2">이미지 분석 중...</p>
-            <p class="text-xs text-blue-500 mt-1">※ 폴더명 'png' 확인</p>
-        </div>
-
-        <div class="composite aspect-square w-full max-w-[500px] mx-auto relative shadow-inner">
-            <div id="quadGrid" class="grid-2x2"></div>
-        </div>
-
-        <div>
-            <p class="text-xs text-gray-400 mb-2 text-center">▼ 색상을 선택하고 영역을 클릭하세요 (확대 가능)</p>
-            <div id="paletteContainer"></div>
-        </div>
+<!-- ================= 5. 도감 화면 ================= -->
+<div id="dexScreen" class="view flex-col items-center p-4">
+  <div class="w-full max-w-2xl">
+    <div class="hud mb-4">
+      <button onclick="showView('lobbyScreen')" class="pk-btn ghost text-sm px-3 py-2">← 로비</button>
+      <div class="hud-stat" style="align-items:center;">
+        <div>POKEDEX</div>
+        <div class="val red" id="dexCount">0 / 415</div>
+      </div>
+      <div class="hud-stat" style="align-items:flex-end;">
+        <div>POINTS</div>
+        <div class="val" id="dexPoints">0</div>
+      </div>
     </div>
+
+    <!-- 등급 필터 -->
+    <div class="pk-card pk-card-cream p-3 mb-3">
+      <div class="flex gap-2 flex-wrap justify-center text-xs font-jua">
+        <button class="dex-filter pk-btn ghost px-3 py-1" data-filter="ALL">전체</button>
+        <button class="dex-filter pk-btn ghost px-3 py-1" data-filter="OWNED">획득</button>
+        <button class="dex-filter pk-btn ghost px-3 py-1" data-filter="COLORED">완성</button>
+        <button class="dex-filter pk-btn ghost px-3 py-1" data-filter="L">★전설</button>
+      </div>
+    </div>
+
+    <!-- 도감 그리드 -->
+    <div id="dexGrid" class="dex-grid pb-10"></div>
+  </div>
 </div>
 
-<!-- ================= 5. 퍼즐 게임 모달 ================= -->
-<div id="puzzleModal" class="view flex-col items-center justify-center bg-gray-900/95 fixed inset-0 z-50">
-    <div class="w-full max-w-2xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
-        <!-- 헤더 -->
-        <div class="bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-white flex justify-between items-center" id="puzzleHeader">
-            <div>
-                <h2 class="text-xl font-bold" id="puzzleTitle">규칙 찾기</h2>
-                <p class="text-xs opacity-90" id="puzzleSubText">규칙을 찾아보세요</p>
-            </div>
-            <div class="text-right">
-                <div class="text-2xl font-black tracking-tighter" id="puzzleCombo">0 Combo</div>
-                <div class="text-[10px] opacity-80" id="puzzleMaxCombo">MAX: 0</div>
-            </div>
-        </div>
+<!-- ================= 6. 색칠 화면 ================= -->
+<div id="colorScreen" class="view flex-col items-center p-4">
+  <div class="w-full max-w-2xl">
+    <div class="pk-card p-4">
+      <div class="flex justify-between items-center pb-2 border-b-2 border-dashed border-[var(--pk-navy-dark)] mb-3">
+        <button onclick="exitColoring()" class="pk-btn ghost text-sm px-3 py-1">← 도감</button>
+        <h2 class="font-jua text-lg text-[var(--pk-navy-dark)]" id="colorTitle">No.1</h2>
+        <div class="font-retro text-[10px] bg-[var(--pk-navy-dark)] text-white px-3 py-1 rounded-full" id="colorProgress">0%</div>
+      </div>
 
-        <!-- 문제 영역 -->
-        <div class="p-6 bg-gray-50 flex flex-col items-center gap-8 flex-1 overflow-y-auto">
-            <!-- 타이머 바 -->
-            <div class="w-full bg-gray-200 h-2 rounded-full overflow-hidden">
-                <div id="puzzleTimerBar" class="bg-emerald-400 h-full w-full"></div>
-            </div>
+      <div id="colorLoading" class="hidden text-center py-10 text-[var(--ink-soft)] font-jua">
+        <div class="pokeball mx-auto mb-3" style="animation: spin 1.2s linear infinite;"></div>
+        <p>이미지 분석 중...</p>
+      </div>
 
-            <!-- 문제 시퀀스 -->
-            <div class="flex items-center gap-2 md:gap-4 w-full justify-center overflow-x-auto py-2">
-                <div class="flex gap-2 shrink-0" id="questionContainer"></div>
-                <div class="text-gray-300 text-2xl font-bold animate-pulse">▶</div>
-                <div class="question-mark w-16 h-16 md:w-20 md:h-20 bg-white shadow-inner text-4xl text-gray-300 shrink-0">?</div>
-            </div>
+      <div class="composite aspect-square w-full max-w-[500px] mx-auto">
+        <div id="quadGrid" class="grid-2x2"></div>
+      </div>
 
-            <!-- 정답 선택지 -->
-            <div class="w-full">
-                <div class="grid grid-cols-4 gap-3" id="answerContainer"></div>
-            </div>
-        </div>
-
-        <!-- 푸터 -->
-        <div class="p-4 border-t flex justify-between items-center bg-white">
-            <button id="exitPuzzleBtn" class="text-gray-400 hover:text-red-500 font-bold px-4 text-sm">그만하기</button>
-            <span class="text-xs text-gray-400" id="puzzleInfoText"></span>
-        </div>
+      <p class="text-xs text-[var(--ink-soft)] mt-3 mb-1 text-center font-jua">▼ 색을 고르고, 4분할 칸을 눌러 확대하세요</p>
+      <div id="paletteContainer"></div>
     </div>
+  </div>
 </div>
 
-<!-- ================= 6. 줌 오버레이 ================= -->
+<!-- ================= 7. 확대 오버레이 ================= -->
 <div id="zoomOverlay">
-    <div id="zoomCard">
-        <div class="flex justify-between w-full mb-1">
-            <span class="font-bold text-gray-700">확대 모드</span>
-            <button id="zoomCloseBtn" class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-1 px-3 rounded text-sm">닫기</button>
-        </div>
-        <div id="zoomCanvasWrapper">
-            <canvas id="zoomCanvas"></canvas>
-        </div>
-        <div class="w-full mt-2">
-            <div id="zoomPalette"></div>
-        </div>
+  <div id="zoomCard">
+    <div class="flex justify-between w-full">
+      <span class="font-jua font-bold text-[var(--pk-navy-dark)]">🔍 확대 모드</span>
+      <button id="zoomCloseBtn" class="pk-btn ghost text-sm px-3 py-1">닫기 ✕</button>
     </div>
+    <div id="zoomCanvasWrapper">
+      <canvas id="zoomCanvas"></canvas>
+    </div>
+    <div class="w-full">
+      <div id="zoomPalette"></div>
+    </div>
+  </div>
 </div>
 
-<!-- ================= 7. 가챠 결과 모달 ================= -->
+<!-- ================= 8. 가챠 결과 모달 ================= -->
 <div id="gachaModal" class="modal">
-    <div class="modal-content max-w-2xl w-full">
-        <h2 class="text-2xl font-bold mb-4 text-indigo-600" id="gachaTitle">획득 결과</h2>
-        <div id="gachaGrid" class="grid grid-cols-5 gap-2 mb-4 max-h-[50vh] overflow-y-auto p-2"></div>
-        <p id="gachaSummary" class="text-sm text-gray-500 mb-4 bg-gray-100 p-2 rounded"></p>
-        <button id="gachaCloseBtn" class="bg-indigo-600 text-white font-bold py-3 px-8 rounded-xl w-full hover:bg-indigo-700 shadow-lg">확인</button>
+  <div class="modal-content" style="max-width: 540px;">
+    <h2 class="font-retro text-base text-[var(--pk-red)] mb-3" id="gachaTitle" style="text-shadow: 2px 2px 0 var(--pk-navy-dark);">획득 결과!</h2>
+    <div id="gachaGrid" class="gacha-grid mb-3"></div>
+    <p id="gachaSummary" class="text-sm text-[var(--ink-soft)] mb-4 bg-[var(--pk-cream-2)] border-2 border-[var(--pk-navy-dark)] rounded-xl p-2 font-jua"></p>
+    <div class="grid grid-cols-2 gap-2">
+      <button id="gachaCloseBtn" class="pk-btn ghost">닫기</button>
+      <button id="gachaAgainBtn" class="pk-btn">10연 한 번 더!</button>
     </div>
+  </div>
 </div>
 
-<!-- ================= 8. 메시지 모달 ================= -->
+<!-- ================= 9. 일반 메시지 모달 ================= -->
 <div id="msgModal" class="modal">
-    <div class="modal-content">
-        <h3 id="msgTitle" class="text-xl font-bold mb-2">알림</h3>
-        <p id="msgBody" class="text-gray-600 mb-6 whitespace-pre-wrap leading-relaxed"></p>
-        <button id="msgOkBtn" class="bg-gray-800 text-white font-bold py-2 px-6 rounded-lg hover:bg-gray-700">확인</button>
-    </div>
+  <div class="modal-content">
+    <h3 id="msgTitle" class="font-jua text-xl text-[var(--pk-navy-dark)] mb-2"></h3>
+    <p id="msgBody" class="font-jua text-[var(--ink-soft)] mb-5 whitespace-pre-wrap leading-relaxed"></p>
+    <button id="msgOkBtn" class="pk-btn w-full">확인</button>
+  </div>
 </div>
 
+<style>@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }</style>
 <script>
-    /**
-     * ========================================================
-     * 1. 설정 및 전역 상태
-     * ========================================================
-     */
-    const CONFIG = {
-        // ⚠️ 이미지 폴더 이름 소문자 'png' 고정
-        basePath: './png/',
-        hiddenPath: 'https://unluckyidiot16.github.io/WebGames/Pixel/Hidden/',
-        maxNormal: 300,
-        maxHidden: 40,
+/* ============================================================
+ * 포켓 단어팡! - 통합 게임 스크립트
+ * ============================================================
+ * - 단어 게임: WOP 메커니즘 + 전체 영단어 사전 그대로 사용
+ * - 가챠: 1-415번 포켓몬, C/R/SR/L 등급
+ * - 색칠: 4분할 + 줌 (Guess 방식)
+ * ============================================================ */
 
-        // 게임 밸런스
-        gachaCost: 100,
-        puzzleReward: 30,
-        puzzleComboBonus: 10,
-        puzzleTime: 20,
-        challengeGoal: 10
-    };
+/* ====== 영단어 사전 (WOP에서 그대로 가져옴) ====== */
+const WORDS = new Set([
+// 3글자
+  'ant','arm','art','ask','ate','bad','bag','bat','bay','bed','bee','beg','big','bit','bow','box','boy','bug','bus','but','buy',
+  'cab','can','cap','car','cat','cow','cry','cup','cut',
+  'dad','day','did','dig','dim','dip','dog','dot','dry','due',
+  'ear','eat','egg','elf','end','eye',
+  'fan','far','fat','few','fig','fit','fix','fly','fog','for','fox','fun','fur',
+  'gap','gas','get','god','got','gum','gun','gym',
+  'had','ham','has','hat','hen','her','him','hip','his','hit','hop','hot','how','hug',
+  'ice','ill','ink','its',
+  'jam','jar','jaw','jet','job','jog','joy',
+  'key','kid','kit',
+  'lab','lap','law','lay','led','leg','let','lid','lie','lip','log','lot','low',
+  'mad','man','map','may','men','met','mix','mom','mop','mud',
+  'nap','net','new','nor','not','now','nun','nut',
+  'oak','odd','off','oil','old','one','our','out','owl','own',
+  'pad','pan','pat','paw','pay','pea','pen','pet','pie','pig','pin','pit','pop','pot','put',
+  'ram','ran','rap','rat','raw','ray','red','rib','rid','rim','rip','rob','rod','rot','row','rub','rug','run',
+  'sad','sat','saw','say','sea','see','set','she','shy','sin','sip','sir','sit','six','ski','sky','sob','son','sow','spa','spy','sub','sum','sun',
+  'tab','tag','tan','tap','tar','tax','tea','ten','the','tie','tin','tip','toe','ton','too','top','toy','try','tub','two',
+  'use',
+  'van','vet','vow',
+  'wag','war','was','way','web','wed','wet','who','why','wig','win','wit','won',
+  'yam','yes','yet','you',
+  'zip','zoo',
 
-    const State = {
-        points: 0, coupons: 0, owned: new Set(), hiddenOwned: new Set(), colored: new Set(),
-        normalList: [], hiddenList: [],
-        puzzle: {
-            mode: 'NORMAL', score: 0, combo: 0, maxCombo: 0,
-            timer: null, isPlaying: false, currentAnswerIdx: -1, timeLeft: 0, wrongCount: 0
+  // 4글자
+  'able','acid','aged','aids','also','area','army','away',
+  'baby','back','bake','ball','band','bank','base','bath','beak','bean','bear','beef','been','bell','belt','bend','best','bike','bill','bird','bite','blue','boat','body','bone','book','boom','boot','born','boss','both','bowl','bull','busy',
+  'cage','cake','call','calm','came','camp','card','care','case','cash','cast','cats','cave','cell','chat','chef','city','clap','club','coal','coat','code','cold','come','cone','cook','cool','copy','core','corn','cost','cute',
+  'damp','dare','dark','data','date','dawn','dead','deal','dear','debt','deep','deer','desk','dial','dice','died','digs','dish','dive','does','dogs','doll','done','door','down','drag','draw','drew','drop','drug','duck','dust',
+  'each','earn','ears','east','easy','eats','edge','eggs','else','even','ever','exit','eyes',
+  'face','fact','fail','fair','fall','fame','farm','fast','fate','fear','feed','feel','feet','fell','felt','file','fill','find','fine','fire','firm','fish','five','flag','flat','flew','flip','flow','fold','folk','food','foot','form','four','free','from','fuel','full','fund',
+  'gain','game','gate','gave','gear','gift','girl','give','glad','goal','goat','gold','gone','good','grew','gulf',
+  'hair','half','hall','hand','hang','hard','harm','hate','have','head','hear','heat','held','help','here','hero','hide','high','hill','hint','hire','hold','hole','holy','home','hope','host','hour','huge','hunt','hurt',
+  'idea','inch','info','into','iron','item',
+  'jail','jazz','join','joke','jump','just',
+  'keep','keys','kick','kids','kill','kind','king','kiss','kite','knee','knew','know',
+  'lack','lady','laid','lake','lamb','lamp','land','lane','last','late','lazy','lead','leaf','lean','left','legs','lend','lens','less','life','lift','like','line','link','lion','lips','list','live','load','loan','lock','logs','long','look','lord','lose','loss','lost','loud','love','luck',
+  'made','mail','main','make','male','many','maps','mark','mask','mass','math','meal','mean','meat','meet','melt','menu','mile','milk','mind','mine','miss','mode','mood','moon','more','most','move','much','must',
+  'nail','name','navy','near','neat','neck','need','nest','news','next','nice','nine','nope','nose','note',
+  'okay','once','only','onto','open','oral','oven','over','owls','oxen',
+  'pace','page','paid','pain','pair','palm','park','part','pass','past','path','peak','pear','pens','pets','pick','pier','pies','pigs','pile','pill','pine','pink','plan','play','plot','plug','plus','poem','poet','poke','pole','pond','pool','poor','port','post','pour','pray','prey','pull','pure','push',
+  'quit','quiz',
+  'race','rack','rage','raid','rail','rain','rang','rank','rare','rate','read','real','rear','rely','rent','rest','rice','rich','ride','ring','rise','risk','road','roar','rock','role','roll','roof','room','root','rope','rose','rude','rule','rung','rush',
+  'safe','said','sail','sale','salt','same','sand','save','scar','seat','seed','seek','seem','seen','self','sell','send','ship','shoe','shop','shot','show','shut','sick','side','sigh','sign','silk','sing','sink','site','size','skin','slim','slip','slow','snap','snow','soap','soft','soil','sold','solo','some','song','soon','sore','sort','soul','soup','sour','span','spin','spit','spot','star','stay','stop','suit','sung','sunk','sure','swam','swim',
+  'tail','take','tale','talk','tall','tame','tank','tape','task','team','tear','teen','tell','tend','tent','term','test','than','that','thaw','them','then','they','thin','this','tide','tied','ties','time','tiny','tips','tire','toad','toes','told','tomb','tone','tool','took','tops','tore','torn','toss','tour','town','toys','tray','tree','trip','true','tube','tuna','turn','twin','type',
+  'ugly','undo','unit','upon','used','user',
+  'vast','vary','vase','very','vest','veto','vibe','view','visa','void','vote','vows',
+  'wade','wage','wait','wake','walk','wall','want','warm','warn','wars','wash','wave','ways','weak','wear','week','well','went','were','west','what','when','whim','whip','wide','wife','wild','will','wind','wine','wing','wins','wipe','wire','wise','wish','with','wood','wool','word','wore','work','worm','worn','wove','wrap',
+  'yard','yarn','year','yell','yelp','yoga','your',
+  'zero','zone','zoom','zoos',
+
+  // 5글자
+  'about','above','adopt','again','agent','agree','ahead','album','alert','alien','alike','alive','allow','alone','along','aloud','alpha','among','angel','anger','angle','angry','apple','april','aside','asked','audio','avoid','award','awake','aware','awful',
+  'badge','badly','baker','beach','bears','below','bench','beret','berry','birds','birth','black','blame','blank','blast','blaze','bleed','blend','bless','blind','blink','blood','bloom','blown','board','boats','books','boots','boxes','brain','brand','brave','bread','break','brick','brief','bring','broad','broke','brown','brush','build','built','bunny','burst',
+  'cabin','candy','carry','catch','cause','cease','chain','chair','chalk','charm','chart','chase','cheap','cheat','check','cheek','cheer','chess','chest','chick','chief','child','chips','chose','civil','claim','clamp','class','clean','clear','clerk','click','climb','clock','close','cloth','cloud','clown','coach','coast','color','combo','comic','could','count','court','cover','crack','craft','crane','crash','crazy','cream','creek','crime','cross','crowd','crown','cruel','crush','curve','cycle',
+  'daddy','daily','dance','dated','dates','death','delay','depth','devil','diary','digit','dirty','dizzy','dough','dozen','draft','drank','dream','dress','dried','drier','drift','drink','drive','drove','drown','dwarf','dwell','dying',
+  'eager','eagle','early','earth','eaten','eight','elbow','elder','enemy','enjoy','enter','entry','equal','event','every','exact','exist','extra',
+  'fairy','faith','false','fancy','fault','feast','field','fifth','fifty','fight','final','firms','first','flame','flash','flesh','flies','flint','float','flock','flood','floor','flour','flute','focus','folks','force','forty','found','fresh','front','frost','fruit','funny',
+  'games','genre','ghost','given','gives','glass','globe','glory','glove','goals','going','goofy','goose','grace','grade','grand','grant','grape','graph','grass','grave','great','greet','grief','grill','grind','gripe','groan','gross','group','grown','guard','guess','guest','guide','gulps','gummy',
+  'habit','haiku','hairy','hands','handy','happy','harsh','haste','hatch','haunt','haven','heads','heart','heavy','hello','helps','hence','henry','herbs','hippo','hobby','holds','holes','homes','honey','honor','horse','hotel','hours','house','human','humid','humor','hurry',
+  'icily','icing','ideal','ideas','idiot','image','imply','index','inner','input','irate','irony','issue','items',
+  'jeans','jelly','jewel','jiffy','joins','joint','joker','jolly','judge','juice','jumbo','jumps','jumpy',
+  'karma','kayak','kicks','kinds','kings','knack','knees','knelt','knife','knock','known','knows','koala',
+  'label','labor','lacks','laden','lakes','lamps','lance','lands','lapse','large','laser','later','laugh','layer','learn','lease','least','leave','legal','lemon','level','light','liked','liken','likes','limit','lined','lines','links','lions','lists','lived','liver','loafs','loans','lobby','local','lodge','logic','looks','loose','loved','lover','lowly','loyal','lucky','lunar','lunch','lying',
+  'macho','madam','magic','major','maker','males','mango','manor','march','marsh','mason','match','mates','maybe','mayor','meals','means','meant','medal','melon','melts','mercy','merge','merry','metal','meter','metro','midst','might','milky','minds','mines','minor','minus','mixed','mixer','model','moist','money','month','moods','moose','moral','motel','motor','mount','mouse','mouth','moves','movie','muddy','music',
+  'nails','naive','naked','nasal','nasty','navel','needy','nerve','never','newer','newly','niece','night','noble','noise','noisy','nomad','north','nosed','noses','noted','notes','nouns','novel','nudge','numbs','nurse',
+  'oasis','occur','ocean','offer','often','older','olive','omega','onion','onset','opens','opera','orbit','order','organ','other','ought','ounce','outer','owned','owner',
+  'pages','paint','pairs','panda','panel','paper','paris','parks','party','pasta','pause','peace','peach','pearl','pedal','peers','penny','perch','peril','phase','phone','photo','piano','picky','piece','piers','piety','pilot','pinch','pious','pitch','pivot','pixel','pizza','place','plain','plane','plans','plant','plate','plays','plumb','plump','plush','poems','poets','point','poles','ponds','pools','porch','pound','power','prawn','press','price','pride','prime','print','prior','prize','prone','proof','proud','prove','prune','pulse','punch','pupil','puppy','purse','pushy',
+  'queen','queer','query','quest','quick','quiet','quill','quilt','quirk','quite','quote',
+  'racer','radio','raise','range','rapid','reach','react','ready','reads','realm','rebel','refer','reign','relax','reply','reset','rhino','rider','rides','ridge','right','rinse','river','roads','roast','robin','robot','rocks','rocky','rodeo','roger','roman','rooms','roost','rough','round','route','royal','ruler','rules','runny','rural','rusty',
+  'sadly','safer','safes','sails','saint','salad','sales','salty','sandy','satin','sauce','savor','scale','scare','scarf','scene','scent','scope','score','scout','scrap','scrub','seals','seats','seeds','seeks','seems','sells','sense','seven','sewer','shade','shake','shall','shame','shape','share','shark','sharp','shave','sheep','sheet','shelf','shell','shift','shine','shiny','ships','shirt','shock','shoes','shook','shoot','shops','shore','short','shots','shout','shown','shows','sided','sides','sighs','sight','silly','since','sinks','sites','sixty','sized','sizes','skill','skirt','skull','slate','sleep','slept','slice','slide','slime','slope','small','smart','smell','smile','smoke','snack','snail','snake','sneak','sniff','snore','snowy','soaps','sober','socks','solar','solid','solos','solve','songs','sorry','sorts','sound','south','space','spade','spare','spark','speak','speed','spell','spend','spent','spice','spicy','spike','spill','spine','spiny','split','spoil','spoke','spoon','sport','spots','spout','spray','spree','squad','stack','staff','stage','stair','stake','stale','stamp','stand','stare','stark','start','state','stays','steak','steam','steel','steep','steer','stems','steps','stern','stick','stiff','still','sting','stink','stock','stole','stone','stood','stool','stops','store','storm','story','stove','strap','straw','strip','stuck','study','stuff','style','sugar','sunny','super','swamp','swear','sweat','sweep','sweet','swift','swing','sword','swore','sworn','syrup',
+  'table','tacky','tales','tally','tamed','tango','tasks','tasty','teach','teams','tears','teens','teeth','tells','tense','tents','terms','tests','thank','thaws','theft','their','theme','there','these','thick','thief','thigh','thing','think','third','those','three','threw','throw','thumb','tidal','tides','tiger','tight','tiles','tinge','tired','title','toast','today','token','tooth','topic','torch','total','touch','tough','tower','towns','toxic','track','trade','trail','train','traps','trash','treat','trend','trial','tribe','trick','tried','trips','truck','truly','trunk','trust','truth','tubes','tulip','tutor','twice','twins','twist','tying',
+  'ultra','uncle','under','undid','union','units','until','unzip','upper','upset','urban','urged','using','usual',
+  'vague','valid','value','vapor','vases','vault','venue','video','views','vinyl','viola','viper','viral','virus','visit','vital','vivid','vocal','voice','vowel',
+  'wagon','waist','wakes','walks','walls','wants','warms','warns','waste','watch','water','waved','waves','wears','weary','weeds','weeks','weigh','wells','wheat','wheel','where','which','while','whine','white','whole','whose','wider','width','wills','wiped','wires','witch','witty','women','woods','words','works','world','worms','worry','worse','worst','worth','would','wound','woven','wraps','wrist','write','wrong','wrote',
+  'yacht','yards','years','yeast','yells','young','youth','yummy',
+  'zebra','zeros','zones','zooms',
+
+  // 6글자
+  'animal','answer','around','autumn','banana','basket','beauty','before','behind','belong','better','bottle','bottom','bridge','bright','butter','candle','carpet','castle','center','change','cheese','circle','clever','clouds','colors','corner','cousin','couple','danger','decide','desert','design','direct','doctor','dragon','during','either','energy','engine','expect','family','famous','farmer','father','figure','finger','flower','flying','forget','forest','format','friend','garden','gentle','golden','google','ground','growth','guitar','handle','happen','health','height','hidden','honest','hungry','indeed','inside','island','jacket','jungle','kettle','kindly','kitten','ladder','laptop','letter','lights','listen','little','lonely','lovely','mainly','manner','market','master','mighty','mirror','modern','moment','monkey','mother','mostly','muscle','myself','narrow','nature','needle','nibble','normal','number','object','office','online','orange','others','packet','parent','people','pepper','planet','please','pocket','poetic','police','potato','pretty','prince','public','rabbit','rather','really','recipe','remote','report','result','return','reward','riding','rocket','rotten','salmon','school','season','second','secret','select','senior','simple','singer','sister','sleeve','smelly','smooth','soccer','social','spider','spring','square','squash','stairs','starts','strong','sudden','suffer','summer','sunset','supper','sweets','tablet','talent','target','tennis','though','throat','throne','throng','thrust','ticket','timber','tinker','tissue','toilet','tomato','toupee','toward','travel','trophy','tunnel','turkey','turtle','umpire','uncles','unique','unisex','unzips','update','useful','valley','velvet','victim','viking','vision','visits','volume','wallet','walnut','warmly','wealth','weight','wheels','widely','wisdom','wonder','wooded','wooden','wormed','wrench','yellow','yogurt','zigzag'
+]);
+
+const SHORT_WORDS = new Set([
+'am','an','as','at','be','by','do','go','he','hi','if','in','is','it',
+  'me','my','no','of','oh','on','or','ox','so','to','up','us','we','ax',
+  'ah','ha','ow','pi'
+]);
+
+/* 키즈 부적합 단어 (보드에 배치하지 않음, 단 사용자가 만들면 인정) */
+const KIDS_EXCLUDE = new Set([
+'gun','war','sin','rob','rude','jail','rape','kill','died','dies','rot','tomb','dead','damp','rusty','dirty','muddy','nasty','ugly','sob','sad','cry','hate','harsh','death','devil','witch','ghost','demon'
+]);
+const KIDS_WORDS = [...WORDS].filter(w => w.length >= 3 && w.length <= 5 && !KIDS_EXCLUDE.has(w));
+
+/* ====== 게임 상수 ====== */
+const COLS = 5, ROWS = 5;
+let CELL = 60;
+const VOWELS = new Set(['A','E','I','O','U']);
+const MAX_WORD_LEN = 7;
+const GAME_TIME = 90;
+const SHUFFLE_COST = 300;
+const MAX_POKE = 415;
+const GACHA_COST = 100;
+
+/* 전설 포켓몬 ID (1-415 범위 안에서) */
+const LEGENDARY_IDS = new Set([
+  144,145,146,150,151,
+  243,244,245,249,250,251,
+  377,378,379,380,381,382,383,384,385,386
+]);
+
+/* 색칠 완료 시 보너스 */
+const COLOR_REWARD = { C: 200, R: 400, SR: 800, L: 1500 };
+
+/* 중복 환급 */
+const REFUND = { C: 30, R: 80, SR: 200, L: 500 };
+
+/* 점수표 (WOP과 동일) */
+function scoreFor(len) {
+  const TBL = {2:50, 3:120, 4:280, 5:500, 6:850, 7:1300};
+  return TBL[len] ?? (1300 + (len - 7) * 500);
+}
+
+/* ====== 등급 계산 ====== */
+function getRarity(id) {
+  if (LEGENDARY_IDS.has(id)) return 'L';
+  if (id > 350) return 'SR';
+  if (id > 200) return 'R';
+  return 'C';
+}
+
+/* ====== 저장소 키 ====== */
+const LS = {
+  points: 'pkwp_points',
+  best:   'pkwp_best',
+  owned:  'pkwp_owned',
+  colored:'pkwp_colored',
+  progress: 'pkwp_prog_'   // + stageId
+};
+
+/* ====== 전역 상태 ====== */
+const State = {
+  points: 0,
+  best: 0,
+  owned: new Set(),
+  colored: new Set()
+};
+
+/* 단어 게임 런타임 */
+let board, score, foundWords, timeLeft, gameRunning, isProcessing;
+let timerId = null, lastTickTime = 0;
+let selStart = null, selPath = [], isDragging = false;
+let gainedThisGame = 0;
+
+/* ====== 저장 / 로드 ====== */
+function loadState() {
+  try { State.points = parseInt(localStorage.getItem(LS.points) || '0', 10); } catch (e) { State.points = 0; }
+  try { State.best = parseInt(localStorage.getItem(LS.best) || '0', 10); } catch (e) { State.best = 0; }
+  try { State.owned = new Set(JSON.parse(localStorage.getItem(LS.owned) || '[]').map(Number)); } catch (e) { State.owned = new Set(); }
+  try { State.colored = new Set(JSON.parse(localStorage.getItem(LS.colored) || '[]').map(Number)); } catch (e) { State.colored = new Set(); }
+}
+function saveState() {
+  localStorage.setItem(LS.points, String(State.points));
+  localStorage.setItem(LS.best, String(State.best));
+  localStorage.setItem(LS.owned, JSON.stringify([...State.owned]));
+  localStorage.setItem(LS.colored, JSON.stringify([...State.colored]));
+  updateAllHUD();
+}
+
+/* ====== 화면 전환 / HUD ====== */
+function showView(id) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  if (id === 'dexScreen') renderDex();
+  updateAllHUD();
+}
+function updateAllHUD() {
+  const total = MAX_POKE;
+  const ownCount = State.owned.size;
+  const colCount = State.colored.size;
+  const dexText = `${ownCount} / ${total}`;
+  const set = (eid, v) => { const el = document.getElementById(eid); if (el) el.textContent = v; };
+  set('titlePoints', State.points.toLocaleString());
+  set('titleBest', State.best.toLocaleString());
+  set('titleDex', dexText);
+  set('lobbyPoints', State.points.toLocaleString());
+  set('lobbyDex', dexText);
+  set('lobbyColored', colCount);
+  set('dexCount', dexText);
+  set('dexPoints', State.points.toLocaleString());
+}
+
+/* ====== 메시지 모달 ====== */
+function showMsg(title, body, onOk) {
+  document.getElementById('msgTitle').textContent = title;
+  document.getElementById('msgBody').textContent = body;
+  const m = document.getElementById('msgModal');
+  m.classList.add('show');
+  const btn = document.getElementById('msgOkBtn');
+  btn.onclick = () => { m.classList.remove('show'); if (onOk) onOk(); };
+}
+
+/* ====== 포켓몬 DB / 스프라이트 ====== */
+let pokeDbMap = new Map();
+let pokeDbLoading = null;
+async function ensurePokeDb() {
+  if (pokeDbLoading) return pokeDbLoading;
+  pokeDbLoading = (async () => {
+    try {
+      const res = await fetch('./poke_db.json', { cache: 'force-cache' });
+      if (!res.ok) throw new Error('no poke_db');
+      const json = await res.json();
+      const arr = Array.isArray(json) ? json : (json.pokemon || json.items || []);
+      for (const it of arr) if (it && typeof it.id === 'number') pokeDbMap.set(it.id, it);
+    } catch (e) { /* fallback to URL-only */ }
+    return pokeDbMap;
+  })();
+  return pokeDbLoading;
+}
+const SPRITE_PIXEL = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+function getSpriteUrl(id) {
+  const e = pokeDbMap.get(id);
+  if (e && e.sprite_pixel) return e.sprite_pixel;
+  return SPRITE_PIXEL(id);
+}
+function getPokeName(id) {
+  const e = pokeDbMap.get(id);
+  if (e && e.name_ko) return e.name_ko;
+  if (e && e.name_en) return e.name_en;
+  return `#${id}`;
+}
+
+/* ============================================================
+ * 단어 게임 (WOP 메커니즘 그대로 - 그래픽만 새 톤)
+ * ============================================================ */
+const canvas = () => document.getElementById('game-canvas');
+let ctx = null;
+const popupLayer = () => document.getElementById('popupLayer');
+
+function setupCanvas() {
+  const c = canvas();
+  ctx = c.getContext('2d');
+  const dpr = window.devicePixelRatio || 1;
+  const available = Math.min(window.innerWidth - 60, 420);
+  CELL = Math.floor(available / COLS);
+  if (CELL < 50) CELL = 50;
+  if (CELL > 80) CELL = 80;
+  const cssSize = CELL * COLS;
+  c.style.width = cssSize + 'px';
+  c.style.height = cssSize + 'px';
+  c.width = cssSize * dpr;
+  c.height = cssSize * dpr;
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const pl = popupLayer();
+  pl.style.width = cssSize + 'px';
+  pl.style.height = cssSize + 'px';
+}
+
+let letterQueue = [];
+function pickWordsTotaling(n) {
+  const out = []; let total = 0; let fails = 0;
+  while (total < n && fails < 30) {
+    const rem = n - total;
+    const cand = KIDS_WORDS.filter(w => w.length <= rem && w.length >= Math.min(3, rem));
+    if (cand.length === 0) { fails++; break; }
+    const w = cand[Math.floor(Math.random() * cand.length)];
+    out.push(w); total += w.length;
+  }
+  return out;
+}
+function refillQueue() {
+  const words = pickWordsTotaling(25);
+  const letters = [];
+  for (const w of words) for (const ch of w.toUpperCase()) letters.push(ch);
+  for (let i = letters.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [letters[i], letters[j]] = [letters[j], letters[i]];
+  }
+  letterQueue.push(...letters);
+}
+function nextLetter() {
+  if (letterQueue.length === 0) refillQueue();
+  return letterQueue.shift();
+}
+
+const DIRS = [[0,1],[1,0],[1,1],[1,-1]];
+
+function makeBoard() {
+  letterQueue = [];
+  board = Array.from({length: ROWS}, () => Array(COLS).fill(null));
+  placeWordsOnBoard(ROWS * COLS);
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      if (board[r][c] === null) board[r][c] = nextLetter();
+}
+function placeWordsOnBoard(targetFilled) {
+  let filled = 0, fails = 0;
+  while (filled < targetFilled && fails < 40) {
+    const remaining = targetFilled - filled;
+    const max = Math.min(remaining, 5);
+    const min = filled === 0 ? 4 : 3;
+    const cand = KIDS_WORDS.filter(w => w.length >= min && w.length <= max);
+    if (cand.length === 0) break;
+    const word = cand[Math.floor(Math.random() * cand.length)];
+    const placements = [];
+    for (const [dr, dc] of DIRS) {
+      for (let r = 0; r < ROWS; r++) {
+        for (let c = 0; c < COLS; c++) {
+          const endR = r + dr * (word.length - 1);
+          const endC = c + dc * (word.length - 1);
+          if (endR < 0 || endR >= ROWS || endC < 0 || endC >= COLS) continue;
+          let newCells = 0, valid = true;
+          for (let k = 0; k < word.length; k++) {
+            const ch = board[r + dr * k][c + dc * k];
+            const wch = word[k].toUpperCase();
+            if (ch === null) newCells++;
+            else if (ch !== wch) { valid = false; break; }
+          }
+          if (!valid || newCells === 0) continue;
+          if (filled + newCells > targetFilled) continue;
+          placements.push({ dr, dc, r, c, newCells, total: word.length });
         }
-    };
-
-    const LS_KEY = {
-        points: 'px_points', owned: 'px_owned', hidden: 'px_hidden',
-        colored: 'px_colored', coupons: 'px_coupons', progress: 'px_prog_'
-    };
-
-    /**
-     * ========================================================
-     * 2. 초기화 및 데이터 로드
-     * ========================================================
-     */
-    function initGame() {
-        loadSaveData();
-        generateImageLists();
-        bindEvents();
-        updateUI();
+      }
     }
-
-    function loadSaveData() {
-        State.points = parseInt(localStorage.getItem(LS_KEY.points) || '0');
-        State.coupons = parseInt(localStorage.getItem(LS_KEY.coupons) || '0');
-        try { State.owned = new Set(JSON.parse(localStorage.getItem(LS_KEY.owned) || '[]')); } catch(e){ State.owned = new Set(); }
-        try { State.hiddenOwned = new Set(JSON.parse(localStorage.getItem(LS_KEY.hidden) || '[]')); } catch(e){ State.hiddenOwned = new Set(); }
-        try { State.colored = new Set(JSON.parse(localStorage.getItem(LS_KEY.colored) || '[]')); } catch(e){ State.colored = new Set(); }
+    if (placements.length === 0) { fails++; continue; }
+    fails = 0;
+    const withOverlap = placements.filter(p => p.newCells < p.total);
+    const pool = (withOverlap.length > 0 && filled > 0) ? withOverlap : placements;
+    const ch = pool[Math.floor(Math.random() * pool.length)];
+    for (let k = 0; k < word.length; k++) {
+      board[ch.r + ch.dr * k][ch.c + ch.dc * k] = word[k].toUpperCase();
     }
+    filled += ch.newCells;
+  }
+  return filled;
+}
 
-    function saveData() {
-        localStorage.setItem(LS_KEY.points, State.points);
-        localStorage.setItem(LS_KEY.coupons, State.coupons);
-        localStorage.setItem(LS_KEY.owned, JSON.stringify([...State.owned]));
-        localStorage.setItem(LS_KEY.hidden, JSON.stringify([...State.hiddenOwned]));
-        localStorage.setItem(LS_KEY.colored, JSON.stringify([...State.colored]));
-        updateUI();
+/* Trie for prefix-based dictionary check */
+const TRIE = (function buildTrie() {
+  const root = {};
+  function insert(w) {
+    let node = root;
+    for (const ch of w) {
+      if (!node[ch]) node[ch] = {};
+      node = node[ch];
     }
+    if (!node.$) node.$ = w;
+  }
+  for (const w of WORDS) {
+    insert(w);
+    const rev = w.split('').reverse().join('');
+    if (rev !== w) insert(rev);
+  }
+  for (const w of SHORT_WORDS) {
+    insert(w);
+    const rev = w.split('').reverse().join('');
+    if (rev !== w) insert(rev);
+  }
+  return root;
+})();
 
-    function generateImageLists() {
-        for(let i=1; i<=CONFIG.maxNormal; i++) State.normalList.push({ id: i, url: `${CONFIG.basePath}${i}.png`, type: 'N' });
-        for(let i=1; i<=CONFIG.maxHidden; i++) State.hiddenList.push({ id: i, url: `${CONFIG.hiddenPath}${i}.png`, type: 'H' });
+function findAllPossibleMatches() {
+  const matches = [];
+  const seen = new Set();
+  const visited = Array.from({length: ROWS}, () => new Array(COLS).fill(false));
+  const path = [];
+  function dfs(r, c, node) {
+    if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return;
+    if (visited[r][c]) return;
+    const ch = board[r][c].toLowerCase();
+    const next = node[ch];
+    if (!next) return;
+    visited[r][c] = true;
+    path.push([r, c]);
+    if (next.$) {
+      const sortedKey = path.slice().sort((a,b) => a[0]-b[0] || a[1]-b[1]).map(p => p.join(',')).join('|');
+      const key = next.$ + ':' + sortedKey;
+      if (!seen.has(key)) { seen.add(key); matches.push({ word: next.$, cells: path.slice() }); }
     }
-
-    function getRarity(id) {
-        if (id > 200) return 'SR';
-        if (id > 100) return 'R';
-        return 'C';
-    }
-
-    /**
-     * ========================================================
-     * 3. UI
-     * ========================================================
-     */
-    function showView(id) {
-        document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-        document.getElementById(id).classList.add('active');
-        if(id === 'bookScreen') renderBook();
-        if(id === 'lobbyScreen') updateUI();
-    }
-
-    function updateUI() {
-        ['lobbyPoints', 'bookPoints'].forEach(id => {
-            const el = document.getElementById(id);
-            if(el) el.textContent = `${State.points.toLocaleString()} P`;
-        });
-        const coupEl = document.getElementById('lobbyCoupons');
-        if(coupEl) coupEl.textContent = State.coupons;
-        const colEl = document.getElementById('collectionRate');
-        if(colEl) {
-            const total = State.normalList.length;
-            const have = State.owned.size;
-            const pct = Math.floor((have/total)*100);
-            colEl.textContent = `${pct}%`;
+    if (path.length < MAX_WORD_LEN) {
+      for (let dr = -1; dr <= 1; dr++)
+        for (let dc = -1; dc <= 1; dc++) {
+          if (dr === 0 && dc === 0) continue;
+          dfs(r + dr, c + dc, next);
         }
     }
+    visited[r][c] = false;
+    path.pop();
+  }
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) dfs(r, c, TRIE);
+  return matches;
+}
+function ensureMatches(min = 1) {
+  let m = findAllPossibleMatches();
+  let tries = 0;
+  while (m.length < min && tries < 25) {
+    shuffleBoardLetters();
+    m = findAllPossibleMatches();
+    tries++;
+  }
+  if (m.length < min) {
+    for (let i = 0; i < 8 && m.length < min; i++) { seedWord(); m = findAllPossibleMatches(); }
+  }
+  return m;
+}
+function shuffleBoardLetters() {
+  const flat = [];
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) flat.push(board[r][c]);
+  for (let i = flat.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [flat[i], flat[j]] = [flat[j], flat[i]];
+  }
+  let k = 0;
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) board[r][c] = flat[k++];
+}
+function seedWord() {
+  const word = KIDS_WORDS[Math.floor(Math.random() * KIDS_WORDS.length)].toUpperCase();
+  for (let t = 0; t < 100; t++) {
+    const dir = DIRS[Math.floor(Math.random() * DIRS.length)];
+    const r = Math.floor(Math.random() * ROWS);
+    const c = Math.floor(Math.random() * COLS);
+    const endR = r + dir[0] * (word.length - 1);
+    const endC = c + dir[1] * (word.length - 1);
+    if (endR < 0 || endR >= ROWS || endC < 0 || endC >= COLS) continue;
+    for (let k = 0; k < word.length; k++) board[r + dir[0]*k][c + dir[1]*k] = word[k];
+    return true;
+  }
+  return false;
+}
 
-    function showMessage(title, msg, callback) {
-        document.getElementById('msgTitle').textContent = title;
-        document.getElementById('msgBody').textContent = msg;
-        const modal = document.getElementById('msgModal');
-        modal.style.display = 'flex';
-        const btn = document.getElementById('msgOkBtn');
-        btn.onclick = () => {
-            modal.style.display = 'none';
-            if(callback) callback();
-        };
+/* ====== 게임 시작 / 종료 ====== */
+function startWordGame() {
+  showView('wordScreen');
+  setupCanvas();
+  makeBoard();
+  ensureMatches(1);
+  score = 0;
+  gainedThisGame = 0;
+  foundWords = [];
+  timeLeft = GAME_TIME;
+  gameRunning = true;
+  isProcessing = false;
+  selStart = null; selPath = []; isDragging = false;
+  document.getElementById('gameoverModal').classList.remove('show');
+  document.getElementById('wBest').textContent = State.best.toLocaleString();
+  document.getElementById('wChain').textContent = '';
+  popupLayer().innerHTML = '';
+  updateScoreUI();
+  drawBoard();
+  startTimer();
+}
+function quitWordGame() {
+  gameRunning = false;
+  stopTimer();
+  document.getElementById('gameoverModal').classList.remove('show');
+  showView('lobbyScreen');
+}
+function startTimer() {
+  lastTickTime = performance.now();
+  if (timerId) cancelAnimationFrame(timerId);
+  const tick = (now) => {
+    if (!gameRunning) return;
+    const dt = (now - lastTickTime) / 1000;
+    lastTickTime = now;
+    timeLeft -= dt;
+    if (timeLeft <= 0) { timeLeft = 0; updateTimerUI(); gameOver(); return; }
+    updateTimerUI();
+    timerId = requestAnimationFrame(tick);
+  };
+  timerId = requestAnimationFrame(tick);
+}
+function stopTimer() { if (timerId) cancelAnimationFrame(timerId); timerId = null; }
+function updateTimerUI() {
+  const pct = Math.max(0, (timeLeft / GAME_TIME) * 100);
+  document.getElementById('wTimerBar').style.width = pct + '%';
+  document.getElementById('wTimerText').textContent = timeLeft.toFixed(1) + '초';
+}
+function updateScoreUI() {
+  document.getElementById('wScore').textContent = score.toLocaleString();
+}
+function gameOver() {
+  gameRunning = false;
+  stopTimer();
+  /* Add earned points to global state */
+  State.points += gainedThisGame;
+  const isNewBest = score > State.best;
+  if (isNewBest) State.best = score;
+  saveState();
+  document.getElementById('finalScore').textContent = score.toLocaleString();
+  document.getElementById('finalGain').textContent = `+ ${gainedThisGame.toLocaleString()} P 획득!`;
+  document.getElementById('newBest').classList.toggle('hidden', !isNewBest);
+  const list = document.getElementById('foundWordsList');
+  if (foundWords.length === 0) {
+    list.innerHTML = '<div class="text-[var(--ink-soft)] text-center py-2 font-jua">완성한 단어가 없어요</div>';
+  } else {
+    const counts = {};
+    for (const w of foundWords) counts[w] = (counts[w] || 0) + 1;
+    const sorted = Object.entries(counts).sort((a,b) => b[1]-a[1] || a[0].localeCompare(b[0]));
+    list.innerHTML =
+      `<div class="font-retro text-[8px] text-[var(--ink-soft)] mb-1">완성 단어 ${Object.keys(counts).length}종 / ${foundWords.length}회</div>` +
+      '<div class="font-jua text-[var(--pk-navy)] leading-relaxed">' +
+      sorted.map(([w,c]) => w.toUpperCase() + (c > 1 ? `×${c}` : '')).join(' · ') +
+      '</div>';
+  }
+  document.getElementById('gameoverModal').classList.add('show');
+}
+
+/* ====== 입력 (드래그 경로) ====== */
+function getEventPos(e) {
+  const rect = canvas().getBoundingClientRect();
+  let x, y;
+  if (e.touches && e.touches.length) { x = e.touches[0].clientX - rect.left; y = e.touches[0].clientY - rect.top; }
+  else { x = e.clientX - rect.left; y = e.clientY - rect.top; }
+  return { x, y };
+}
+function pixelToCell(x, y) {
+  const c = Math.floor(x / CELL), r = Math.floor(y / CELL);
+  if (r < 0 || r >= ROWS || c < 0 || c >= COLS) return null;
+  return { r, c };
+}
+function tryExtendPath(cell) {
+  if (selPath.length === 0) { selPath.push(cell); return; }
+  const last = selPath[selPath.length - 1];
+  if (cell.r === last.r && cell.c === last.c) return;
+  if (selPath.length >= 2) {
+    const prev = selPath[selPath.length - 2];
+    if (cell.r === prev.r && cell.c === prev.c) { selPath.pop(); return; }
+  }
+  for (const p of selPath) if (p.r === cell.r && p.c === cell.c) return;
+  if (selPath.length >= MAX_WORD_LEN) return;
+  const dr = cell.r - last.r, dc = cell.c - last.c;
+  const adr = Math.abs(dr), adc = Math.abs(dc);
+  if (adr <= 1 && adc <= 1) { selPath.push(cell); return; }
+  if (adr <= 2 && adc <= 2 && selPath.length + 2 <= MAX_WORD_LEN) {
+    const midR = last.r + Math.sign(dr);
+    const midC = last.c + Math.sign(dc);
+    if (midR >= 0 && midR < ROWS && midC >= 0 && midC < COLS) {
+      const usedMid = selPath.some(p => p.r === midR && p.c === midC);
+      if (!usedMid) { selPath.push({ r: midR, c: midC }); selPath.push(cell); return; }
     }
+  }
+}
+function onPointerDown(e) {
+  e.preventDefault();
+  if (!gameRunning || isProcessing) return;
+  const { x, y } = getEventPos(e);
+  const cell = pixelToCell(x, y);
+  if (!cell) return;
+  selStart = cell; selPath = [cell]; isDragging = true;
+  updateSelDisplay(); drawBoard();
+}
+function onPointerMove(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+  const { x, y } = getEventPos(e);
+  const cell = pixelToCell(x, y);
+  if (!cell) return;
+  tryExtendPath(cell);
+  updateSelDisplay(); drawBoard();
+}
+function onPointerUp(e) {
+  if (!isDragging) return;
+  e.preventDefault();
+  isDragging = false;
+  if (selPath.length >= 2) submitSelection();
+  else { selStart = null; selPath = []; updateSelDisplay(); drawBoard(); }
+}
+function readPathLetters(path) { return path.map(p => board[p.r][p.c]).join(''); }
+function updateSelDisplay() {
+  const el = document.getElementById('wSelDisplay');
+  if (selPath.length === 0) {
+    el.innerHTML = '<span class="text-xs text-[var(--ink-soft)] font-jua">알파벳을 드래그해 단어를 만들어요</span>';
+    return;
+  }
+  const letters = readPathLetters(selPath);
+  const lower = letters.toLowerCase();
+  const rev = lower.split('').reverse().join('');
+  const dict = lower.length === 2 ? SHORT_WORDS : WORDS;
+  const isValid = lower.length >= 2 && (dict.has(lower) || dict.has(rev));
+  const cls = isValid ? 'letter-chip valid' : 'letter-chip';
+  el.innerHTML = letters.split('').map(l => `<span class="${cls}">${l}</span>`).join('');
+}
+function submitSelection() {
+  const letters = readPathLetters(selPath);
+  const lower = letters.toLowerCase();
+  const rev = lower.split('').reverse().join('');
+  const dict = lower.length === 2 ? SHORT_WORDS : WORDS;
+  let word = null;
+  if (dict.has(lower)) word = lower;
+  else if (dict.has(rev)) word = rev;
+  if (word) processMatch(word, selPath.slice());
+  else {
+    flashInvalidPath(selPath.slice());
+    selStart = null; selPath = [];
+    updateSelDisplay(); drawBoard();
+  }
+}
+async function processMatch(word, path) {
+  isProcessing = true;
+  selStart = null; selPath = [];
+  const gain = scoreFor(word.length);
+  score += gain;
+  gainedThisGame += gain;
+  foundWords.push(word);
+  showWordPopup(word, path, 1, gain);
+  showLastWord(word);
+  updateScoreUI();
+  await flashCells(path, true);
+  for (const p of path) board[p.r][p.c] = null;
+  drawBoard();
+  await sleep(80);
+  await applyGravity();
+  ensureMatches(1);
+  drawBoard();
+  isProcessing = false;
+  updateSelDisplay();
+}
+async function flashInvalidPath(path) {
+  for (let i = 0; i < 2; i++) {
+    drawWithHighlight(path, '#FECACA', '#DC2626');
+    await sleep(90);
+    drawBoard();
+    await sleep(70);
+  }
+}
+async function flashCells(cells, isMatch) {
+  for (let i = 0; i < 3; i++) {
+    const color = isMatch ? '#BBF7D0' : '#FEF3C7';
+    const stroke = isMatch ? '#16A34A' : '#D97706';
+    drawWithHighlight(cells, color, stroke);
+    await sleep(70);
+    if (i < 2) { drawBoard(); await sleep(50); }
+  }
+}
 
-    /**
-     * ========================================================
-     * 4. 규칙 퍼즐 게임 엔진 (방어 로직 강화 & 사이즈 최적화 V2)
-     * ========================================================
-     */
-    const PuzzleSystem = {
-        Rules: ['PATTERN', 'SIZE', 'COLOR', 'FLIP'],
-        AdvancedPatterns: ['ABC', 'AAB', 'ABB'],
+/* ====== 중력 (애니메이션) ====== */
+async function applyGravity() {
+  for (let c = 0; c < COLS; c++) {
+    let write = ROWS - 1;
+    for (let r = ROWS - 1; r >= 0; r--) {
+      if (board[r][c] !== null) { board[write--][c] = board[r][c]; }
+    }
+    while (write >= 0) board[write--][c] = null;
+  }
+  for (let c = 0; c < COLS; c++) {
+    for (let r = 0; r < ROWS; r++) {
+      if (board[r][c] === null) board[r][c] = nextLetter();
+    }
+  }
+  drawBoard();
+}
 
-        start(mode) {
-            if (mode === 'CHALLENGE') {
-                if (State.coupons < 1) {
-                    showMessage("쿠폰 부족", "도전 쿠폰이 필요합니다.");
-                    return;
-                }
-                State.coupons--;
-                saveData();
-            }
-            State.puzzle.mode = mode;
-            State.puzzle.score = 0;
-            State.puzzle.combo = 0;
-            State.puzzle.maxCombo = 0;
-            State.puzzle.wrongCount = 0;
-            State.puzzle.isPlaying = true;
+/* ====== 드로잉 ====== */
+function drawBoard() {
+  if (!ctx) return;
+  ctx.clearRect(0, 0, CELL * COLS, CELL * ROWS);
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const letter = board[r][c];
+      drawTileAt(c * CELL, r * CELL, letter, false, isCellInPath(r, c));
+    }
+  }
+  if (selPath.length >= 1) {
+    drawSelectionRibbon(selPath);
+    drawSelectionDots(selPath);
+  }
+}
+function isCellInPath(r, c) { for (const p of selPath) if (p.r === r && p.c === c) return true; return false; }
+function drawWithHighlight(cells, fillStyle, strokeStyle) {
+  drawBoard();
+  ctx.save();
+  ctx.globalAlpha = 0.55;
+  ctx.fillStyle = fillStyle;
+  ctx.strokeStyle = strokeStyle;
+  ctx.lineWidth = 2.5;
+  for (const p of cells) {
+    roundRect(ctx, p.c * CELL + 2, p.r * CELL + 2, CELL - 4, CELL - 4, 7);
+    ctx.fill(); ctx.stroke();
+  }
+  ctx.globalAlpha = 1;
+  ctx.font = `bold ${Math.floor(CELL * 0.55)}px Jua, sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  for (const p of cells) {
+    const letter = board[p.r] && board[p.r][p.c]; if (!letter) continue;
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillText(letter, p.c * CELL + CELL/2 + 1, p.r * CELL + CELL/2 + 2);
+    ctx.fillStyle = '#fff';
+    ctx.fillText(letter, p.c * CELL + CELL/2, p.r * CELL + CELL/2 + 1);
+  }
+  ctx.restore();
+}
+function drawSelectionRibbon(path) {
+  if (path.length < 2) return;
+  const letters = readPathLetters(path).toLowerCase();
+  const rev = letters.split('').reverse().join('');
+  const dict = letters.length === 2 ? SHORT_WORDS : WORDS;
+  const isValid = dict.has(letters) || dict.has(rev);
+  ctx.save();
+  ctx.strokeStyle = isValid ? 'rgba(34, 197, 94, 0.55)' : 'rgba(252, 211, 77, 0.55)';
+  ctx.lineWidth = CELL * 0.7;
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.beginPath();
+  ctx.moveTo(path[0].c * CELL + CELL/2, path[0].r * CELL + CELL/2);
+  for (let i = 1; i < path.length; i++) ctx.lineTo(path[i].c * CELL + CELL/2, path[i].r * CELL + CELL/2);
+  ctx.stroke();
+  ctx.restore();
+}
+function drawSelectionDots(path) {
+  ctx.save();
+  const last = path[path.length - 1];
+  ctx.fillStyle = 'rgba(255,255,255,0.85)';
+  ctx.beginPath();
+  ctx.arc(last.c * CELL + CELL/2, last.r * CELL + CELL/2, CELL * 0.12, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
+function drawTileAt(x, y, letter, ghost, active) {
+  if (!letter) return;
+  const isVowel = VOWELS.has(letter);
+  const grad = ctx.createLinearGradient(x, y, x, y + CELL);
+  if (active) {
+    grad.addColorStop(0, '#FEF08A'); grad.addColorStop(1, '#FACC15');
+  } else if (isVowel) {
+    grad.addColorStop(0, '#FECACA'); grad.addColorStop(1, '#EF4444');  /* vowels: pokeball red */
+  } else {
+    grad.addColorStop(0, '#BFDBFE'); grad.addColorStop(1, '#1E3A8A');  /* consonants: pokeball navy */
+  }
+  ctx.fillStyle = grad;
+  roundRect(ctx, x + 2, y + 2, CELL - 4, CELL - 4, 7);
+  ctx.fill();
+  ctx.strokeStyle = active ? '#92400E' : '#1E293B';
+  ctx.lineWidth = active ? 2.5 : 2;
+  ctx.stroke();
+  /* highlight */
+  ctx.save();
+  ctx.fillStyle = 'rgba(255,255,255,0.4)';
+  roundRect(ctx, x + 5, y + 5, CELL - 10, (CELL - 10) * 0.4, 5);
+  ctx.fill();
+  ctx.restore();
+  /* letter */
+  ctx.font = `bold ${Math.floor(CELL * 0.55)}px Jua, sans-serif`;
+  ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(0,0,0,0.28)';
+  ctx.fillText(letter, x + CELL/2 + 1, y + CELL/2 + 2);
+  ctx.fillStyle = active ? '#7C2D12' : '#FFFFFF';
+  ctx.fillText(letter, x + CELL/2, y + CELL/2 + 1);
+}
+function roundRect(c, x, y, w, h, r) {
+  c.beginPath();
+  c.moveTo(x + r, y); c.lineTo(x + w - r, y);
+  c.arcTo(x + w, y, x + w, y + r, r);
+  c.lineTo(x + w, y + h - r);
+  c.arcTo(x + w, y + h, x + w - r, y + h, r);
+  c.lineTo(x + r, y + h);
+  c.arcTo(x, y + h, x, y + h - r, r);
+  c.lineTo(x, y + r);
+  c.arcTo(x, y, x + r, y, r);
+  c.closePath();
+}
 
-            const header = document.getElementById('puzzleHeader');
-            const title = document.getElementById('puzzleTitle');
-            const info = document.getElementById('puzzleInfoText');
+/* ====== 팝업 ====== */
+function showWordPopup(word, path, chain, gain) {
+  const div = document.createElement('div');
+  let cls = 'word-popup';
+  if (word.length === 2) cls += ' short';
+  if (chain > 1) cls += ' combo';
+  if (word.length >= 5) cls += ' big';
+  div.className = cls;
+  div.innerHTML = word.toUpperCase() + (chain > 1 ? ` <span style="color:#EC4899">×${chain}</span>` : '')
+    + `<div style="font-size:0.7em;color:#10B981;text-shadow:1px 1px 0 #fff">+${gain} P</div>`;
+  let sumR = 0, sumC = 0;
+  for (const p of path) { sumR += p.r; sumC += p.c; }
+  const cr = sumR / path.length, cc = sumC / path.length;
+  div.style.left = (cc * CELL + CELL/2) + 'px';
+  div.style.top = (cr * CELL + CELL/2) + 'px';
+  popupLayer().appendChild(div);
+  setTimeout(() => div.remove(), 1400);
+}
+function showLastWord(word) {
+  const cd = document.getElementById('wChain');
+  cd.textContent = `✨ ${word.toUpperCase()}`;
+  cd.classList.remove('chain-pop');
+  void cd.offsetWidth;
+  cd.classList.add('chain-pop');
+  clearTimeout(cd._fadeTimer);
+  cd._fadeTimer = setTimeout(() => { cd.textContent = ''; }, 1800);
+}
 
-            if (mode === 'CHALLENGE') {
-                header.className = "bg-gradient-to-r from-rose-500 to-pink-500 p-4 text-white flex justify-between items-center";
-                title.textContent = "🏆 도전 퍼즐";
-                info.textContent = "10문제 성공 시 스페셜 가챠!";
+/* ====== 수동 셔플 ====== */
+function manualShuffle() {
+  if (!gameRunning || isProcessing) return;
+  if (score < SHUFFLE_COST) {
+    const btn = document.getElementById('shuffleBtn');
+    btn.classList.add('warn-flash');
+    setTimeout(() => btn.classList.remove('warn-flash'), 1200);
+    return;
+  }
+  score -= SHUFFLE_COST;
+  gainedThisGame = Math.max(0, gainedThisGame - SHUFFLE_COST);
+  updateScoreUI();
+  shuffleBoardLetters();
+  ensureMatches(1);
+  drawBoard();
+}
+
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+
+/* ============================================================
+ * 가챠 시스템
+ * ============================================================ */
+function rollRarity() {
+  const r = Math.random();
+  if (r < 0.01) return 'L';
+  if (r < 0.08) return 'SR';
+  if (r < 0.30) return 'R';
+  return 'C';
+}
+function pickFromRarity(rarity) {
+  const ids = [];
+  if (rarity === 'L') {
+    for (const id of LEGENDARY_IDS) if (id <= MAX_POKE) ids.push(id);
+  } else if (rarity === 'SR') {
+    for (let i = 351; i <= MAX_POKE; i++) if (!LEGENDARY_IDS.has(i)) ids.push(i);
+  } else if (rarity === 'R') {
+    for (let i = 201; i <= 350; i++) if (!LEGENDARY_IDS.has(i)) ids.push(i);
+  } else {
+    for (let i = 1; i <= 200; i++) if (!LEGENDARY_IDS.has(i)) ids.push(i);
+  }
+  if (ids.length === 0) return 1;
+  return ids[Math.floor(Math.random() * ids.length)];
+}
+
+let lastGachaCount = 10;
+function doGacha(count) {
+  const cost = count * GACHA_COST;
+  if (State.points < cost) {
+    showMsg('포인트가 부족해요', `${cost.toLocaleString()} P가 필요해요.\n현재: ${State.points.toLocaleString()} P\n\n단어팡으로 포인트를 얻어보세요!`);
+    return;
+  }
+  State.points -= cost;
+  lastGachaCount = count;
+  const results = [];
+  let refund = 0;
+  for (let i = 0; i < count; i++) {
+    const rarity = rollRarity();
+    const id = pickFromRarity(rarity);
+    const actualRarity = getRarity(id);
+    let isNew = false;
+    if (State.owned.has(id)) refund += (REFUND[actualRarity] || 30);
+    else { State.owned.add(id); isNew = true; }
+    results.push({ id, rarity: actualRarity, isNew });
+  }
+  State.points += refund;
+  saveState();
+  renderGachaResult(results, refund);
+}
+function renderGachaResult(results, refund) {
+  document.getElementById('gachaTitle').textContent = results.length === 1 ? '뽑기 결과!' : `${results.length}연 뽑기 결과!`;
+  const grid = document.getElementById('gachaGrid');
+  grid.innerHTML = '';
+  /* sort: L > SR > R > C, then new first */
+  const order = { L: 0, SR: 1, R: 2, C: 3 };
+  const sorted = [...results].sort((a,b) => order[a.rarity] - order[b.rarity] || (b.isNew - a.isNew));
+  sorted.forEach((r, i) => {
+    const div = document.createElement('div');
+    div.className = `gacha-tile rarity-${r.rarity}`;
+    div.style.animationDelay = `${Math.min(i * 0.06, 0.6)}s`;
+    div.innerHTML = `
+      <div class="gtag">${r.rarity}</div>
+      <img src="${getSpriteUrl(r.id)}" loading="lazy" alt="${getPokeName(r.id)}" onerror="this.src='${SPRITE_PIXEL(r.id)}';">
+      ${r.isNew ? '<div class="newtag">NEW</div>' : ''}
+    `;
+    grid.appendChild(div);
+  });
+  const newCount = results.filter(x => x.isNew).length;
+  const summary = newCount > 0
+    ? `새 포켓몬 ${newCount}마리 획득!${refund > 0 ? ` (중복 환급 ${refund.toLocaleString()} P)` : ''}`
+    : `모두 도감에 있어요. 환급 ${refund.toLocaleString()} P`;
+  document.getElementById('gachaSummary').textContent = summary;
+  /* show again button only if affordable */
+  const againBtn = document.getElementById('gachaAgainBtn');
+  const againCost = lastGachaCount * GACHA_COST;
+  if (State.points >= againCost) {
+    againBtn.disabled = false;
+    againBtn.textContent = lastGachaCount === 1 ? '한 번 더!' : `${lastGachaCount}연 한 번 더!`;
+  } else {
+    againBtn.disabled = true;
+    againBtn.textContent = '포인트 부족';
+  }
+  document.getElementById('gachaModal').classList.add('show');
+}
+
+/* ============================================================
+ * 도감 (포켓덱스)
+ * ============================================================ */
+let dexFilter = 'ALL';
+function renderDex() {
+  const grid = document.getElementById('dexGrid');
+  grid.innerHTML = '';
+  for (let id = 1; id <= MAX_POKE; id++) {
+    const isOwned = State.owned.has(id);
+    const isColored = State.colored.has(id);
+    const rarity = getRarity(id);
+    /* filter */
+    if (dexFilter === 'OWNED' && !isOwned) continue;
+    if (dexFilter === 'COLORED' && !isColored) continue;
+    if (dexFilter === 'L' && rarity !== 'L') continue;
+    const card = document.createElement('div');
+    card.className = `dex-card ${isOwned ? '' : 'locked'} ${isColored ? 'colored rarity-' + rarity : ''}`;
+    const img = document.createElement('img');
+    img.src = getSpriteUrl(id);
+    img.loading = 'lazy';
+    img.alt = isOwned ? getPokeName(id) : `#${id}`;
+    img.onerror = function() { this.src = SPRITE_PIXEL(id); };
+    const dot = document.createElement('div');
+    dot.className = `rarity-dot ${rarity}`;
+    const label = document.createElement('div');
+    label.className = 'dex-label';
+    label.textContent = `#${String(id).padStart(3, '0')}`;
+    card.appendChild(dot);
+    card.appendChild(img);
+    card.appendChild(label);
+    if (isOwned) card.onclick = () => startColoring(id);
+    else card.onclick = () => showMsg('아직 안 모았어요', `이 포켓몬은 가챠에서 모을 수 있어요.\n\n💡 단어팡으로 포인트를 모으고\n🎁 가챠로 뽑아보세요!`);
+    grid.appendChild(card);
+  }
+}
+function setDexFilter(f) {
+  dexFilter = f;
+  document.querySelectorAll('.dex-filter').forEach(b => {
+    if (b.dataset.filter === f) {
+      b.classList.remove('ghost'); b.style.background = 'var(--pk-red)'; b.style.color = 'white';
+    } else {
+      b.classList.add('ghost'); b.style.background = ''; b.style.color = '';
+    }
+  });
+  renderDex();
+}
+
+/* ============================================================
+ * 색칠 게임 (Guess 방식)
+ * ============================================================ */
+const COLOR_SCALE = 15;
+const ColorSession = {
+  imgWidth: 0, imgHeight: 0,
+  paletteMap: [null], numberGrid: [], completedGrid: [],
+  totalCells: 0, completedCells: 0, selectedColorIdx: 0,
+  colorCounts: {},  /* idx -> remaining count */
+  quadrants: [], stageId: 0, zoomQuad: null,
+  pokeId: 0
+};
+
+function initQuadGrid() {
+  const grid = document.getElementById('quadGrid');
+  grid.innerHTML = '';
+  ColorSession.quadrants = [];
+  for (let i = 0; i < 4; i++) {
+    const wrap = document.createElement('div');
+    const c = document.createElement('canvas');
+    wrap.appendChild(c);
+    grid.appendChild(wrap);
+    const cctx = c.getContext('2d');
+    cctx.imageSmoothingEnabled = false;
+    const q = { id: i, canvas: c, ctx: cctx, x: 0, y: 0, w: 0, h: 0 };
+    c.onclick = () => openZoom(q);
+    ColorSession.quadrants.push(q);
+  }
+}
+
+async function startColoring(id) {
+  ColorSession.pokeId = id;
+  ColorSession.stageId = id;
+  showView('colorScreen');
+  document.getElementById('colorTitle').textContent = `#${String(id).padStart(3,'0')} ${getPokeName(id)}`;
+  document.getElementById('colorLoading').style.display = 'block';
+  document.getElementById('quadGrid').style.opacity = '0';
+  initQuadGrid();
+  try {
+    const url = getSpriteUrl(id);
+    await processColorImage(url, id);
+    restoreColorProgress(id);
+    updateColorProgressUI();
+    renderAllQuads();
+    renderPalette();
+    document.getElementById('colorLoading').style.display = 'none';
+    document.getElementById('quadGrid').style.opacity = '1';
+  } catch (e) {
+    console.error(e);
+    /* fallback to PokeAPI direct URL */
+    try {
+      await processColorImage(SPRITE_PIXEL(id), id);
+      restoreColorProgress(id);
+      updateColorProgressUI();
+      renderAllQuads();
+      renderPalette();
+      document.getElementById('colorLoading').style.display = 'none';
+      document.getElementById('quadGrid').style.opacity = '1';
+    } catch (e2) {
+      showMsg('이미지 오류', '포켓몬 이미지를 불러올 수 없어요.\n인터넷 연결을 확인해 주세요.');
+      showView('dexScreen');
+    }
+  }
+}
+function exitColoring() {
+  showView('dexScreen');
+}
+function processColorImage(url) {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.crossOrigin = 'Anonymous';
+    img.src = url;
+    img.onload = () => {
+      const w = img.width, h = img.height;
+      ColorSession.imgWidth = w; ColorSession.imgHeight = h;
+      const cvs = document.createElement('canvas');
+      cvs.width = w; cvs.height = h;
+      const cctx = cvs.getContext('2d');
+      cctx.drawImage(img, 0, 0);
+      try {
+        const data = cctx.getImageData(0, 0, w, h).data;
+        ColorSession.numberGrid = []; ColorSession.completedGrid = [];
+        ColorSession.paletteMap = [null];
+        ColorSession.colorCounts = {};
+        let paletteDict = {}, colorCount = 1;
+        ColorSession.totalCells = 0; ColorSession.completedCells = 0;
+        for (let y = 0; y < h; y++) {
+          ColorSession.numberGrid[y] = []; ColorSession.completedGrid[y] = [];
+          for (let x = 0; x < w; x++) {
+            const i = (y * w + x) * 4;
+            const a = data[i + 3];
+            if (a < 128) {
+              ColorSession.numberGrid[y][x] = 0;
+              ColorSession.completedGrid[y][x] = true;
             } else {
-                header.className = "bg-gradient-to-r from-emerald-500 to-teal-500 p-4 text-white flex justify-between items-center";
-                title.textContent = "규칙 퍼즐";
-                info.textContent = "10콤보 시 심화 모드 발동!";
+              /* quantize lightly to reduce palette */
+              const rr = data[i], gg = data[i+1], bb = data[i+2];
+              const rgba = `rgba(${rr},${gg},${bb},${(a/255).toFixed(2)})`;
+              if (!paletteDict[rgba]) { paletteDict[rgba] = colorCount; ColorSession.paletteMap[colorCount] = rgba; colorCount++; }
+              const idx = paletteDict[rgba];
+              ColorSession.numberGrid[y][x] = idx;
+              ColorSession.completedGrid[y][x] = false;
+              ColorSession.colorCounts[idx] = (ColorSession.colorCounts[idx] || 0) + 1;
+              ColorSession.totalCells++;
             }
-            showView('puzzleModal');
-            this.nextLevel();
-        },
-
-        stop() {
-            State.puzzle.isPlaying = false;
-            clearInterval(State.puzzle.timer);
-            showView('lobbyScreen');
-            let msg = `최종 콤보: ${State.puzzle.maxCombo}\n획득 포인트: ${State.puzzle.score} P`;
-            if (State.puzzle.mode === 'NORMAL' && State.puzzle.maxCombo >= 10) {
-                State.coupons++;
-                msg += `\n🎁 10콤보 달성! 도전 티켓 1장 획득!`;
-            }
-            if(State.puzzle.score > 0) {
-                State.points += State.puzzle.score;
-                saveData();
-                showMessage('게임 종료', msg);
-            }
-        },
-
-        nextLevel() {
-            if(!State.puzzle.isPlaying) return;
-
-            // 이미지 부족 방어
-            const allImages = [...State.normalList, ...State.hiddenList];
-            if (allImages.length < 5) {
-                this.handleWrong('이미지가 부족합니다. (최소 5개 필요)');
-                return;
-            }
-
-            let puzzleData;
-            if (State.puzzle.mode === 'CHALLENGE') {
-                puzzleData = this.generateAdvancedPuzzle(true);
-            } else {
-                if (State.puzzle.combo >= 10) {
-                    puzzleData = this.generateAdvancedPuzzle(false);
-                } else {
-                    puzzleData = this.generateNormalPuzzle();
-                }
-            }
-
-            if (!puzzleData) {
-                this.handleWrong('문제 생성 오류 (재시도 해주세요)');
-                return;
-            }
-            this.renderUI(puzzleData);
-            this.startTimer();
-        },
-
-        startTimer() {
-            clearInterval(State.puzzle.timer);
-            State.puzzle.timeLeft = CONFIG.puzzleTime;
-            const bar = document.getElementById('puzzleTimerBar');
-            bar.style.transition = 'none';
-            bar.style.width = '100%';
-            void bar.offsetWidth;
-            bar.style.transition = `width ${CONFIG.puzzleTime}s linear`;
-            bar.style.width = '0%';
-            State.puzzle.timer = setInterval(() => {
-                State.puzzle.timeLeft -= 1;
-                if(State.puzzle.timeLeft < 0) {
-                    clearInterval(State.puzzle.timer);
-                    this.handleWrong('시간 초과!');
-                }
-            }, 1000);
-        },
-
-        // --- 문제 생성: 일반 모드 ---
-        generateNormalPuzzle() {
-            const allImages = [...State.normalList, ...State.hiddenList];
-            const rule = this.Rules[Math.floor(Math.random() * this.Rules.length)];
-            const baseImg = allImages[Math.floor(Math.random() * allImages.length)];
-
-            let sequence = [];
-            let answer = {};
-            // 기본 속성 초기화 (중요)
-            const def = { r:0, fx:1, scale:1, gray:false };
-
-            switch(rule) {
-                case 'PATTERN':
-                    let otherImg = baseImg;
-                    for(let k=0; k<50; k++) {
-                        otherImg = allImages[Math.floor(Math.random() * allImages.length)];
-                        if(otherImg.url !== baseImg.url) break;
-                    }
-                    sequence.push({ ...def, src: baseImg.url });
-                    sequence.push({ ...def, src: otherImg.url });
-                    sequence.push({ ...def, src: baseImg.url });
-                    answer = { ...def, src: otherImg.url, isCorrect: true };
-                    break;
-
-                case 'SIZE':
-                    sequence.push({ ...def, src: baseImg.url, scale: 1.0 });
-                    sequence.push({ ...def, src: baseImg.url, scale: 0.5 });
-                    sequence.push({ ...def, src: baseImg.url, scale: 1.0 });
-                    answer = { ...def, src: baseImg.url, scale: 0.5, isCorrect: true };
-                    break;
-
-                case 'COLOR':
-                    sequence.push({ ...def, src: baseImg.url, gray: false });
-                    sequence.push({ ...def, src: baseImg.url, gray: true });
-                    sequence.push({ ...def, src: baseImg.url, gray: false });
-                    answer = { ...def, src: baseImg.url, gray: true, isCorrect: true };
-                    break;
-
-                case 'FLIP':
-                    sequence.push({ ...def, src: baseImg.url, fx: 1 });
-                    sequence.push({ ...def, src: baseImg.url, fx: -1 });
-                    sequence.push({ ...def, src: baseImg.url, fx: 1 });
-                    answer = { ...def, src: baseImg.url, fx: -1, isCorrect: true };
-                    break;
-            }
-
-            // [방어 로직] 정답과 오답 생성 시 rule 전달
-            return { sequence, choices: this.makeChoices(answer, allImages, rule), rule, isAdvanced: false };
-        },
-
-        // --- 문제 생성: 심화 모드 ---
-        generateAdvancedPuzzle(isChallenge) {
-            const allImages = [...State.normalList, ...State.hiddenList];
-            let selectedImgs = [];
-            let safeLoop = 0;
-            while(selectedImgs.length < 3 && safeLoop < 100) {
-                safeLoop++;
-                const pick = allImages[Math.floor(Math.random() * allImages.length)];
-                if(!selectedImgs.some(x => x.url === pick.url)) selectedImgs.push(pick);
-            }
-            if(selectedImgs.length < 3) selectedImgs = [allImages[0], allImages[1]||allImages[0], allImages[2]||allImages[0]];
-            const [imgA, imgB, imgC] = selectedImgs;
-
-            const patternType = this.AdvancedPatterns[Math.floor(Math.random() * this.AdvancedPatterns.length)];
-            let fullSeq = [];
-            const def = { r:0, fx:1, scale:1, gray:false };
-
-            for(let i=0; i<6; i++) {
-                let currentImgUrl;
-                if (patternType === 'ABC') currentImgUrl = (i%3===0)?imgA.url : (i%3===1)?imgB.url : imgC.url;
-                else if (patternType === 'AAB') currentImgUrl = (i%3===2)?imgB.url : imgA.url;
-                else if (patternType === 'ABB') currentImgUrl = (i%3===0)?imgA.url : imgB.url;
-                fullSeq.push({ ...def, src: currentImgUrl });
-            }
-
-            const hideIndex = 3 + Math.floor(Math.random() * 3);
-            const answerItem = fullSeq[hideIndex];
-            const answer = { ...answerItem, isCorrect: true };
-            fullSeq[hideIndex].isHidden = true;
-
-            return { sequence: fullSeq, choices: this.makeChoices(answer, allImages, 'ADVANCED'), rule: isChallenge?'CHALLENGE':'ADVANCED', patternType, isAdvanced: true };
-        },
-
-        // --- [핵심] 개선된 보기(Choices) 생성 방어 로직 ---
-        makeChoices(answer, pool, rule) {
-            // 1. 고유성 검사를 위한 Set (Key: src + gray + scale + fx)
-            const seen = new Set();
-            const getSig = (item) => `${item.src}|${item.gray}|${item.scale}|${item.fx}`;
-
-            let choices = [answer];
-            seen.add(getSig(answer));
-
-            const def = { r:0, fx:1, scale:1, gray:false, src: answer.src };
-
-            // "함정 카드(Trap)" 생성 여부: SIZE/COLOR 문제에서만 1개 허용
-            // 예: 정답이 '흑백 피카츄'라면, 오답에 '컬러 피카츄' 하나는 넣어서 헷갈리게 함
-            // 나머지 2개 오답은 무조건 '다른 포켓몬'으로 채움 (중복 방지)
-            let trapUsed = false;
-
-            let safety = 0;
-            while(choices.length < 4 && safety < 100) {
-                safety++;
-                let distractor = { ...def, isCorrect: false };
-                let rndImg = pool[Math.floor(Math.random() * pool.length)];
-
-                // 규칙별 오답 생성 전략
-                if (rule === 'FLIP' || rule === 'PATTERN' || rule === 'ADVANCED') {
-                    // 이 규칙들은 오답이 무조건 '다른 그림'이어야 깔끔함
-                    if (rndImg.url === answer.src) continue;
-                    distractor.src = rndImg.url;
-                }
-                else if (rule === 'SIZE' || rule === 'COLOR') {
-                    // 크기/색깔 문제는 '같은 그림의 다른 상태'를 하나쯤 넣을 수 있음
-                    if (!trapUsed && rndImg.url === answer.src) {
-                        // 함정 생성 시도 (같은 그림)
-                        distractor.src = rndImg.url;
-                        if(rule === 'SIZE') distractor.scale = (answer.scale === 1.0) ? 0.5 : 1.0;
-                        if(rule === 'COLOR') distractor.gray = !answer.gray;
-                        trapUsed = true;
-                    } else {
-                        // 함정을 이미 썼거나 그림이 다르면 -> 그냥 다른 그림 오답
-                        if (rndImg.url === answer.src) continue; // 이미 같은 그림은 썼으므로 패스
-                        distractor.src = rndImg.url;
-                        // 헷갈리게 하기 위해 속성 랜덤 부여
-                        if(rule === 'SIZE') distractor.scale = Math.random()>0.5 ? 1.0 : 0.5;
-                        if(rule === 'COLOR') distractor.gray = Math.random()>0.5;
-                    }
-                }
-
-                // [최종 방어] 이미 목록에 있는 보기와 똑같은지 서명(Signature)으로 확인
-                // 정답이나 기존 오답과 100% 일치하면 절대 넣지 않음
-                const sig = getSig(distractor);
-                if (seen.has(sig)) continue;
-
-                seen.add(sig);
-                choices.push(distractor);
-            }
-
-            // 만약 이미지가 너무 부족해서 루프가 터지면, 강제로 다른 이미지 채워넣기
-            while(choices.length < 4) {
-                const dump = { ...def, src: pool[choices.length % pool.length].url, isCorrect: false };
-                if(!seen.has(getSig(dump))) { seen.add(getSig(dump)); choices.push(dump); }
-                else choices.push({...dump, scale:0.1}); // 최후의 수단
-            }
-
-            return choices.sort(() => Math.random() - 0.5);
-        },
-
-        // --- UI 렌더링 (사이즈 조정 복구) ---
-        async renderUI(data) {
-            document.getElementById('puzzleCombo').textContent = `${State.puzzle.combo} Combo`;
-            document.getElementById('puzzleMaxCombo').textContent = `MAX: ${State.puzzle.maxCombo}`;
-
-            let subText = "";
-            if (data.isAdvanced) {
-                subText = `⚡ 심화: [${data.patternType || "패턴"}] 빈칸 찾기`;
-            } else {
-                subText = `규칙: ${this.getRuleName(data.rule)}`;
-            }
-            if(State.puzzle.mode === 'CHALLENGE') subText = `도전 진행 중 (${State.puzzle.combo}/${CONFIG.challengeGoal})`;
-            document.getElementById('puzzleSubText').textContent = subText;
-
-            const qContainer = document.getElementById('questionContainer');
-            const aContainer = document.getElementById('answerContainer');
-            qContainer.innerHTML = '';
-            aContainer.innerHTML = '';
-
-            // [복구됨] 모바일 화면 넘어가지 않게 사이즈 동적 조절
-            // 심화모드(6개)는 42px, 일반모드(3개)는 64px
-            const boxSize = data.isAdvanced ? 42 : 64;
-
-            for(let item of data.sequence) {
-                const cvs = this.createCanvas(boxSize);
-                cvs.className = "border-2 border-gray-300 rounded bg-white shadow-sm shrink-0";
-                qContainer.appendChild(cvs);
-                if (item.isHidden) this.drawQuestionMark(cvs);
-                else await this.drawImageOnCanvas(cvs, item);
-            }
-
-            // 보기(정답) 버튼 크기는 64px로 고정
-            data.choices.forEach((item, idx) => {
-                const wrapper = document.createElement('div');
-                wrapper.className = 'puzzle-box flex items-center justify-center aspect-square';
-                const cvs = this.createCanvas(64);
-                wrapper.appendChild(cvs);
-                wrapper.onclick = () => this.checkAnswer(item, wrapper);
-                aContainer.appendChild(wrapper);
-                this.drawImageOnCanvas(cvs, item);
-            });
-        },
-
-        // [복구됨] 픽셀 단위(px)로 크기 고정하여 스크롤 생성 방지
-        createCanvas(size) {
-            const c = document.createElement('canvas');
-            c.width = size; c.height = size;
-            c.style.width = `${size}px`;
-            c.style.height = `${size}px`;
-            return c;
-        },
-
-        drawQuestionMark(canvas) {
-            const ctx = canvas.getContext('2d');
-            ctx.fillStyle = '#f3f4f6';
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-            const fontSize = Math.floor(canvas.width * 0.6);
-            ctx.font = `bold ${fontSize}px sans-serif`;
-            ctx.fillStyle = '#9ca3af';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText('?', canvas.width/2, canvas.height/2);
-            ctx.strokeStyle = '#d1d5db';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(0,0,canvas.width,canvas.height);
-        },
-
-        drawImageOnCanvas(canvas, item) {
-            return new Promise(resolve => {
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0,0,canvas.width, canvas.height);
-                ctx.imageSmoothingEnabled = false;
-                const img = new Image();
-                img.src = item.src;
-                img.onload = () => {
-                    const w = canvas.width;
-                    const h = canvas.height;
-                    ctx.save();
-                    ctx.translate(w/2, h/2);
-                    const deg = (item.r || 0) % 360;
-                    ctx.rotate(deg * Math.PI / 180);
-                    const s = item.scale || 1.0;
-                    ctx.scale((item.fx || 1) * s, s);
-
-                    // [중요] 흑백 필터 적용
-                    if(item.gray) ctx.filter = 'grayscale(100%)';
-
-                    ctx.drawImage(img, -w/2, -h/2, w, h);
-                    ctx.restore();
-                    resolve();
-                };
-                img.onerror = resolve;
-            });
-        },
-
-        checkAnswer(item, el) {
-            if(!State.puzzle.isPlaying) return;
-            clearInterval(State.puzzle.timer);
-
-            if(item.isCorrect) {
-                el.classList.add('selected');
-                el.style.backgroundColor = '#d1fae5';
-                State.puzzle.combo++;
-                if(State.puzzle.combo > State.puzzle.maxCombo) State.puzzle.maxCombo = State.puzzle.combo;
-                State.puzzle.score += (CONFIG.puzzleReward + (State.puzzle.combo * CONFIG.puzzleComboBonus));
-                if (State.puzzle.mode === 'CHALLENGE' && State.puzzle.combo >= CONFIG.challengeGoal) {
-                    setTimeout(() => this.winChallenge(), 500);
-                } else {
-                    setTimeout(() => this.nextLevel(), 400);
-                }
-            } else {
-                el.classList.add('shake');
-                el.style.backgroundColor = '#fee2e2';
-                State.puzzle.wrongCount++;
-                setTimeout(() => this.handleWrong(State.puzzle.mode==='CHALLENGE'?'도전 실패!':'틀렸습니다!'), 400);
-            }
-        },
-
-        winChallenge() {
-            State.puzzle.isPlaying = false;
-            showView('lobbyScreen');
-            showMessage("도전 성공!", "성공했습니다!\n보상으로 스페셜 가챠가 진행됩니다.", () => doSpecialGacha());
-        },
-
-        handleWrong(msg) {
-            showMessage('게임 오버', `${msg}\n최종 콤보: ${State.puzzle.maxCombo}`);
-            this.stop();
-        },
-
-        getRuleName(code) {
-            const names = { 'PATTERN':'규칙 찾기', 'FLIP':'거울 모드', 'SIZE':'크기 변화', 'COLOR':'색깔 변화', 'ADVANCED':'심화 패턴', 'CHALLENGE':'도전' };
-            return names[code] || '규칙 찾기';
+          }
         }
+        const halfW = Math.floor(w / 2), halfH = Math.floor(h / 2);
+        const geoms = [
+          { x: 0, y: 0, w: halfW, h: halfH },
+          { x: halfW, y: 0, w: w - halfW, h: halfH },
+          { x: 0, y: halfH, w: halfW, h: h - halfH },
+          { x: halfW, y: halfH, w: w - halfW, h: h - halfH }
+        ];
+        geoms.forEach((g, idx) => {
+          const q = ColorSession.quadrants[idx];
+          q.x = g.x; q.y = g.y; q.w = g.w; q.h = g.h;
+          q.canvas.width = g.w * COLOR_SCALE;
+          q.canvas.height = g.h * COLOR_SCALE;
+        });
+        resolve();
+      } catch (err) { reject(err); }
     };
+    img.onerror = () => reject(new Error('load fail'));
+  });
+}
 
-    /**
-     * ========================================================
-     * 5. 도감 및 가챠 시스템
-     * ========================================================
-     */
-    function renderBook() {
-        const grid = document.getElementById('bookGrid');
-        grid.innerHTML = '';
-        State.normalList.forEach(item => {
-            const isOwned = State.owned.has(item.id);
-            const isColored = State.colored.has(item.id);
-            grid.appendChild(createCard(item, isOwned, isColored, getRarity(item.id)));
-        });
-        State.hiddenList.forEach(item => {
-            if(State.hiddenOwned.has(item.id)) {
-                const isColored = State.colored.has(-item.id);
-                grid.appendChild(createCard(item, true, isColored, 'H'));
-            }
-        });
-    }
-
-    function createCard(item, isOwned, isColored, rarity) {
-        const div = document.createElement('div');
-        div.className = `card ${isColored ? 'colored rarity-'+rarity : ''}`;
-        const img = document.createElement('img');
-        img.src = item.url;
-        if(!isOwned) img.className = 'locked';
-        const label = document.createElement('div');
-        label.className = 'absolute bottom-0 w-full bg-white/90 text-center text-[10px] py-1 font-bold text-gray-600 truncate';
-        label.textContent = item.type==='H' ? `H-${item.id}` : `No.${item.id}`;
-        div.appendChild(img);
-        div.appendChild(label);
-        if(isOwned) div.onclick = () => startGame(item);
-        return div;
-    }
-
-    function doGacha(count) {
-        const cost = count * CONFIG.gachaCost;
-        if(State.points < cost) {
-            showMessage('포인트 부족', `${cost}P가 필요합니다.`);
-            return;
+function renderAllQuads() { ColorSession.quadrants.forEach(q => drawQuad(q)); }
+function drawQuad(q) {
+  const scale = COLOR_SCALE;
+  const ctx2 = q.ctx;
+  ctx2.clearRect(0, 0, q.canvas.width, q.canvas.height);
+  for (let y = 0; y < q.h; y++) {
+    for (let x = 0; x < q.w; x++) {
+      const gy = q.y + y, gx = q.x + x;
+      const idx = ColorSession.numberGrid[gy][gx];
+      if (idx === 0) continue;
+      if (ColorSession.completedGrid[gy][gx]) {
+        ctx2.fillStyle = ColorSession.paletteMap[idx];
+        ctx2.fillRect(x * scale, y * scale, scale, scale);
+      } else {
+        ctx2.fillStyle = '#FFFFFF';
+        ctx2.fillRect(x * scale, y * scale, scale, scale);
+        ctx2.strokeStyle = '#E5E7EB';
+        ctx2.lineWidth = 1;
+        ctx2.strokeRect(x * scale, y * scale, scale, scale);
+        if (scale > 8) {
+          ctx2.fillStyle = '#6B7280';
+          ctx2.font = 'bold 9px sans-serif';
+          ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+          ctx2.fillText(idx, x * scale + scale/2, y * scale + scale/2 + 1);
         }
-        State.points -= cost;
-        runGacha(count, false);
+      }
     }
+  }
+}
+function getRemaining(idx) {
+  let r = 0;
+  for (let y = 0; y < ColorSession.imgHeight; y++) {
+    for (let x = 0; x < ColorSession.imgWidth; x++) {
+      if (ColorSession.numberGrid[y][x] === idx && !ColorSession.completedGrid[y][x]) r++;
+    }
+  }
+  return r;
+}
+function renderPalette() {
+  const con = document.getElementById('paletteContainer');
+  con.innerHTML = '';
+  for (let i = 1; i < ColorSession.paletteMap.length; i++) {
+    const btn = document.createElement('button');
+    btn.className = 'palette-button';
+    btn.style.backgroundColor = ColorSession.paletteMap[i];
+    btn.textContent = i;
+    btn.dataset.idx = i;
+    const remaining = getRemaining(i);
+    if (remaining === 0) btn.classList.add('done');
+    btn.onclick = () => selectPaletteColor(i);
+    con.appendChild(btn);
+  }
+}
+function selectPaletteColor(idx) {
+  ColorSession.selectedColorIdx = idx;
+  [document.getElementById('paletteContainer'), document.getElementById('zoomPalette')].forEach(con => {
+    if (!con) return;
+    Array.from(con.children).forEach(b => {
+      if (parseInt(b.dataset.idx, 10) === idx) b.classList.add('selected');
+      else b.classList.remove('selected');
+    });
+  });
+}
+function refreshPaletteDone() {
+  const pal = document.getElementById('paletteContainer');
+  if (!pal) return;
+  Array.from(pal.children).forEach(b => {
+    const idx = parseInt(b.dataset.idx, 10);
+    const rem = getRemaining(idx);
+    if (rem === 0) b.classList.add('done'); else b.classList.remove('done');
+  });
+  const zpal = document.getElementById('zoomPalette');
+  if (zpal) {
+    Array.from(zpal.children).forEach(b => {
+      const idx = parseInt(b.dataset.idx, 10);
+      const rem = getRemaining(idx);
+      if (rem === 0) b.classList.add('done'); else b.classList.remove('done');
+    });
+  }
+}
 
-    function doSpecialGacha() {
-        const results = [];
-        const rand = Math.random();
-        let rarity = rand < 0.5 ? 'SR' : 'H';
-        let pool = [];
-        if(rarity === 'H') pool = State.hiddenList;
-        else pool = State.normalList.filter(x => x.id > 200);
-        if(pool.length === 0) pool = State.normalList;
-        const pick = pool[Math.floor(Math.random()*pool.length)];
-        let isNew = false;
-        let refund = 0;
-        if(rarity === 'H') {
-            if(State.hiddenOwned.has(pick.id)) refund = 300;
-            else { State.hiddenOwned.add(pick.id); isNew = true; }
-        } else {
-            if(State.owned.has(pick.id)) refund = 100;
-            else { State.owned.add(pick.id); isNew = true; }
-        }
-        if(refund > 0) State.points += refund;
-        saveData();
-        const grid = document.getElementById('gachaGrid');
-        grid.innerHTML = '';
-        document.getElementById('gachaTitle').textContent = "✨ 스페셜 가챠 결과 ✨";
-        const d = document.createElement('div');
-        d.className = `card rarity-${rarity} relative animate-pulse border-4 border-yellow-400`;
-        d.innerHTML = `<div class="rarity-tag" style="background:#f59e0b">SPECIAL</div><img src="${pick.url}" class="bg-gray-100">${isNew?'<span class="absolute bottom-0 right-0 bg-red-500 text-white text-[9px] px-1">NEW</span>':''}`;
-        grid.appendChild(d);
-        document.getElementById('gachaSummary').textContent = refund > 0 ? `중복 보상: ${refund}P` : `새로운 ${rarity} 등급 획득!`;
-        document.getElementById('gachaModal').style.display = 'flex';
+function openZoom(q) {
+  ColorSession.zoomQuad = q;
+  document.getElementById('zoomOverlay').style.display = 'flex';
+  const zCvs = document.getElementById('zoomCanvas');
+  const zScale = COLOR_SCALE * 2;
+  zCvs.width = q.w * zScale; zCvs.height = q.h * zScale;
+  drawZoomCanvas(zCvs, q, zScale);
+  const zp = document.getElementById('zoomPalette');
+  zp.innerHTML = document.getElementById('paletteContainer').innerHTML;
+  Array.from(zp.children).forEach(b => {
+    const idx = parseInt(b.dataset.idx, 10);
+    b.onclick = () => selectPaletteColor(idx);
+  });
+  if (ColorSession.selectedColorIdx) selectPaletteColor(ColorSession.selectedColorIdx);
+  zCvs.onclick = (e) => handleZoomClick(e, q, zScale);
+}
+function drawZoomCanvas(cvs, q, scale) {
+  const ctx2 = cvs.getContext('2d');
+  ctx2.imageSmoothingEnabled = false;
+  ctx2.clearRect(0, 0, cvs.width, cvs.height);
+  for (let y = 0; y < q.h; y++) {
+    for (let x = 0; x < q.w; x++) {
+      const gy = q.y + y, gx = q.x + x;
+      const idx = ColorSession.numberGrid[gy][gx];
+      if (idx === 0) continue;
+      if (ColorSession.completedGrid[gy][gx]) {
+        ctx2.fillStyle = ColorSession.paletteMap[idx];
+        ctx2.fillRect(x * scale, y * scale, scale, scale);
+      } else {
+        ctx2.fillStyle = '#FFFFFF';
+        ctx2.fillRect(x * scale, y * scale, scale, scale);
+        ctx2.strokeStyle = '#D1D5DB';
+        ctx2.strokeRect(x * scale, y * scale, scale, scale);
+        ctx2.fillStyle = '#374151';
+        ctx2.font = 'bold 16px sans-serif';
+        ctx2.textAlign = 'center'; ctx2.textBaseline = 'middle';
+        ctx2.fillText(idx, x * scale + scale/2, y * scale + scale/2 + 1);
+      }
     }
+  }
+}
+function handleZoomClick(e, q, scale) {
+  if (!ColorSession.selectedColorIdx) return;
+  const rect = e.target.getBoundingClientRect();
+  const x = Math.floor(((e.clientX - rect.left) * (e.target.width / rect.width)) / scale);
+  const y = Math.floor(((e.clientY - rect.top) * (e.target.height / rect.height)) / scale);
+  const gx = q.x + x, gy = q.y + y;
+  if (gx >= 0 && gx < ColorSession.imgWidth && gy >= 0 && gy < ColorSession.imgHeight) {
+    if (ColorSession.completedGrid[gy][gx]) return;
+    if (ColorSession.numberGrid[gy][gx] === ColorSession.selectedColorIdx) {
+      ColorSession.completedGrid[gy][gx] = true;
+      ColorSession.completedCells++;
+      drawZoomCanvas(e.target, q, scale);
+      drawQuad(q);
+      saveColorProgress();
+      updateColorProgressUI();
+      refreshPaletteDone();
+      checkColorCompletion();
+    } else if (ColorSession.numberGrid[gy][gx] !== 0) {
+      e.target.classList.add('shake');
+      setTimeout(() => e.target.classList.remove('shake'), 300);
+    }
+  }
+}
+function saveColorProgress() {
+  if (!ColorSession.completedGrid.length) return;
+  const bits = [];
+  for (let y = 0; y < ColorSession.imgHeight; y++)
+    for (let x = 0; x < ColorSession.imgWidth; x++)
+      bits.push(ColorSession.completedGrid[y][x] ? 1 : 0);
+  localStorage.setItem(LS.progress + ColorSession.stageId, JSON.stringify({ w: ColorSession.imgWidth, h: ColorSession.imgHeight, b: bits }));
+}
+function restoreColorProgress(stageId) {
+  try {
+    const raw = localStorage.getItem(LS.progress + stageId);
+    if (!raw) return;
+    const p = JSON.parse(raw);
+    if (p.w !== ColorSession.imgWidth || p.h !== ColorSession.imgHeight) return;
+    ColorSession.completedCells = 0;
+    for (let y = 0; y < ColorSession.imgHeight; y++) {
+      for (let x = 0; x < ColorSession.imgWidth; x++) {
+        const b = !!p.b[y * ColorSession.imgWidth + x];
+        ColorSession.completedGrid[y][x] = b || (ColorSession.numberGrid[y][x] === 0);
+        if (b && ColorSession.numberGrid[y][x] !== 0) ColorSession.completedCells++;
+      }
+    }
+  } catch (e) { /* ignore */ }
+}
+function updateColorProgressUI() {
+  const pct = ColorSession.totalCells > 0 ? Math.floor((ColorSession.completedCells / ColorSession.totalCells) * 100) : 0;
+  document.getElementById('colorProgress').textContent = pct + '%';
+}
+function checkColorCompletion() {
+  if (ColorSession.completedCells >= ColorSession.totalCells) {
+    if (!State.colored.has(ColorSession.pokeId)) {
+      State.colored.add(ColorSession.pokeId);
+      const rarity = getRarity(ColorSession.pokeId);
+      const reward = COLOR_REWARD[rarity] || 200;
+      State.points += reward;
+      saveState();
+      const name = getPokeName(ColorSession.pokeId);
+      const rarityName = { C: '일반', R: '레어', SR: '슈퍼레어', L: '★전설★' }[rarity];
+      showMsg('🎉 색칠 완성!', `${name} (${rarityName}) 색칠을 완성했어요!\n\n+ ${reward.toLocaleString()} P 획득!`, () => {
+        showView('dexScreen');
+      });
+    }
+  }
+}
 
-    function runGacha(count, isSpecial) {
-        const results = [];
-        let refund = 0;
-        for(let i=0; i<count; i++) {
-            const rand = Math.random();
-            let rarity = 'C';
-            if(rand < 0.05) rarity = 'SR';
-            else if(rand < 0.25) rarity = 'R';
-            let pool = [];
-            if(rarity === 'C') pool = State.normalList.filter(x => x.id <= 100);
-            else if(rarity === 'R') pool = State.normalList.filter(x => x.id > 100 && x.id <= 200);
-            else pool = State.normalList.filter(x => x.id > 200);
-            if(!pool.length) pool = State.normalList;
-            const pick = pool[Math.floor(Math.random()*pool.length)];
-            let isNew = false;
-            if(State.owned.has(pick.id)) refund += 50;
-            else { State.owned.add(pick.id); isNew = true; }
-            results.push({...pick, isNew, rarity});
-        }
-        if(refund > 0) State.points += refund;
-        saveData();
-        const grid = document.getElementById('gachaGrid');
-        grid.innerHTML = '';
-        document.getElementById('gachaTitle').textContent = "획득 결과";
-        results.forEach(r => {
-            const d = document.createElement('div');
-            d.className = `card rarity-${r.rarity} relative animate-pulse border-2`;
-            d.innerHTML = `<div class="rarity-tag">${r.rarity}</div><img src="${r.url}" class="bg-gray-100">${r.isNew?'<span class="absolute bottom-0 right-0 bg-red-500 text-white text-[9px] px-1">NEW</span>':''}`;
-            grid.appendChild(d);
-        });
-        document.getElementById('gachaSummary').textContent = `환급: ${refund}P`;
-        document.getElementById('gachaModal').style.display = 'flex';
-    }
+/* ============================================================
+ * 이벤트 바인딩 & 초기화
+ * ============================================================ */
+function bindEvents() {
+  /* 단어 게임 캔버스 */
+  const cv = canvas();
+  cv.addEventListener('mousedown', onPointerDown);
+  cv.addEventListener('mousemove', onPointerMove);
+  window.addEventListener('mouseup', onPointerUp);
+  cv.addEventListener('touchstart', onPointerDown, { passive: false });
+  cv.addEventListener('touchmove', onPointerMove, { passive: false });
+  cv.addEventListener('touchend', onPointerUp, { passive: false });
+  cv.addEventListener('touchcancel', onPointerUp, { passive: false });
+  window.addEventListener('resize', () => {
+    if (gameRunning) { setupCanvas(); drawBoard(); }
+  });
 
-    /**
-     * ========================================================
-     * 6. 색칠 게임 (로직 유지)
-     * ========================================================
-     */
-    const GAME_CONST = { CELL_SCALE: 15 };
-    let GameSession = {
-        imgWidth: 0, imgHeight: 0,
-        paletteMap: [null], numberGrid: [], completedGrid: [],
-        totalCells: 0, completedCells: 0, selectedColorIdx: 0,
-        quadrants: [], stageId: 0, zoomQuad: null
-    };
+  /* 모달 닫기 */
+  document.getElementById('gachaCloseBtn').onclick = () => document.getElementById('gachaModal').classList.remove('show');
+  document.getElementById('gachaAgainBtn').onclick = () => {
+    document.getElementById('gachaModal').classList.remove('show');
+    doGacha(lastGachaCount);
+  };
+  document.getElementById('zoomCloseBtn').onclick = () => document.getElementById('zoomOverlay').style.display = 'none';
 
-    function initQuadGrid() {
-        const grid = document.getElementById('quadGrid');
-        grid.innerHTML = '';
-        GameSession.quadrants = [];
-        for(let i=0; i<4; i++) {
-            const wrap = document.createElement('div');
-            const c = document.createElement('canvas');
-            wrap.appendChild(c);
-            grid.appendChild(wrap);
-            const ctx = c.getContext('2d');
-            ctx.imageSmoothingEnabled = false;
-            const q = { id:i, canvas:c, ctx:ctx, x:0, y:0, w:0, h:0 };
-            c.onclick = () => openZoom(q);
-            GameSession.quadrants.push(q);
-        }
-    }
+  /* 도감 필터 */
+  document.querySelectorAll('.dex-filter').forEach(b => {
+    b.onclick = () => setDexFilter(b.dataset.filter);
+  });
 
-    async function startGame(item) {
-        const stageId = (item.type === 'H') ? -item.id : item.id;
-        GameSession.stageId = stageId;
-        showView('gameScreen');
-        document.getElementById('gameTitle').textContent = item.type === 'H' ? `Hidden ${item.id}` : `No.${item.id}`;
-        document.getElementById('loadingSpinner').style.display = 'block';
-        document.getElementById('quadGrid').style.opacity = '0';
-        initQuadGrid();
-        try {
-            await processImage(item.url);
-            restoreProgress(stageId);
-            updateGameProgressUI();
-            renderAllQuads();
-            renderPalette();
-            document.getElementById('loadingSpinner').style.display = 'none';
-            document.getElementById('quadGrid').style.opacity = '1';
-        } catch(e) {
-            console.error(e);
-            if (e.name === 'SecurityError' || e.message.includes('tainted')) {
-                showMessage("실행 환경 오류", "로컬 파일 보안 문제. 웹 서버에서 실행해주세요.");
-            } else {
-                showMessage("오류", "이미지 처리 중 문제가 발생했습니다.");
-            }
-            showView('bookScreen');
-        }
-    }
+  /* Escape: 줌 닫기 */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') document.getElementById('zoomOverlay').style.display = 'none';
+  });
+}
 
-    function processImage(url) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'Anonymous';
-            img.src = url;
-            img.onload = () => {
-                const w = img.width; const h = img.height;
-                GameSession.imgWidth = w; GameSession.imgHeight = h;
-                const cvs = document.createElement('canvas');
-                cvs.width = w; cvs.height = h;
-                const ctx = cvs.getContext('2d');
-                ctx.drawImage(img, 0, 0);
-                try {
-                    const data = ctx.getImageData(0,0,w,h).data;
-                    GameSession.numberGrid = []; GameSession.completedGrid = [];
-                    GameSession.paletteMap = [null];
-                    let paletteDict = {}; let colorCount = 1;
-                    GameSession.totalCells = 0; GameSession.completedCells = 0;
-                    for(let y=0; y<h; y++) {
-                        GameSession.numberGrid[y] = []; GameSession.completedGrid[y] = [];
-                        for(let x=0; x<w; x++) {
-                            const i = (y*w + x)*4; const a = data[i+3];
-                            if(a < 128) {
-                                GameSession.numberGrid[y][x] = 0; GameSession.completedGrid[y][x] = true;
-                            } else {
-                                const rgba = `rgba(${data[i]},${data[i+1]},${data[i+2]},${(a/255).toFixed(2)})`;
-                                if(!paletteDict[rgba]) { paletteDict[rgba] = colorCount; GameSession.paletteMap[colorCount] = rgba; colorCount++; }
-                                GameSession.numberGrid[y][x] = paletteDict[rgba]; GameSession.completedGrid[y][x] = false;
-                                GameSession.totalCells++;
-                            }
-                        }
-                    }
-                    const halfW = Math.floor(w/2); const halfH = Math.floor(h/2);
-                    const geoms = [{x:0, y:0, w:halfW, h:halfH},{x:halfW, y:0, w:w-halfW, h:halfH},{x:0, y:halfH, w:halfW, h:h-halfH},{x:halfW, y:halfH, w:w-halfW, h:h-halfH}];
-                    geoms.forEach((g, idx) => {
-                        const q = GameSession.quadrants[idx];
-                        q.x = g.x; q.y = g.y; q.w = g.w; q.h = g.h;
-                        q.canvas.width = g.w * GAME_CONST.CELL_SCALE;
-                        q.canvas.height = g.h * GAME_CONST.CELL_SCALE;
-                    });
-                    resolve();
-                } catch (err) { reject(err); }
-            };
-            img.onerror = () => reject(new Error("로드 실패"));
-        });
-    }
-
-    function renderAllQuads() { GameSession.quadrants.forEach(q => drawQuad(q)); }
-    function drawQuad(q) {
-        const scale = GAME_CONST.CELL_SCALE;
-        const ctx = q.ctx;
-        ctx.clearRect(0, 0, q.canvas.width, q.canvas.height);
-        for(let y=0; y<q.h; y++) {
-            for(let x=0; x<q.w; x++) {
-                const gy = q.y + y; const gx = q.x + x;
-                const idx = GameSession.numberGrid[gy][gx];
-                if(idx === 0) continue;
-                if(GameSession.completedGrid[gy][gx]) {
-                    ctx.fillStyle = GameSession.paletteMap[idx]; ctx.fillRect(x*scale, y*scale, scale, scale);
-                } else {
-                    ctx.fillStyle = '#fff'; ctx.fillRect(x*scale, y*scale, scale, scale);
-                    ctx.strokeStyle = '#e5e7eb'; ctx.lineWidth = 1; ctx.strokeRect(x*scale, y*scale, scale, scale);
-                    if(scale > 8) { ctx.fillStyle = '#9ca3af'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(idx, x*scale+scale/2, y*scale+scale/2+1); }
-                }
-            }
-        }
-    }
-    function renderPalette() {
-        const con = document.getElementById('paletteContainer');
-        con.innerHTML = '';
-        for(let i=1; i<GameSession.paletteMap.length; i++) {
-            const btn = document.createElement('button');
-            btn.className = 'palette-button';
-            btn.style.backgroundColor = GameSession.paletteMap[i];
-            btn.textContent = i;
-            btn.onclick = () => selectPaletteColor(i);
-            con.appendChild(btn);
-        }
-    }
-    function selectPaletteColor(idx) {
-        GameSession.selectedColorIdx = idx;
-        [document.getElementById('paletteContainer'), document.getElementById('zoomPalette')].forEach(con => {
-            if(!con) return;
-            Array.from(con.children).forEach(b => {
-                if(parseInt(b.textContent) === idx) b.classList.add('selected'); else b.classList.remove('selected');
-            });
-        });
-    }
-    function openZoom(q) {
-        GameSession.zoomQuad = q;
-        document.getElementById('zoomOverlay').style.display = 'flex';
-        const zCvs = document.getElementById('zoomCanvas');
-        const zScale = GAME_CONST.CELL_SCALE * 2;
-        zCvs.width = q.w * zScale; zCvs.height = q.h * zScale;
-        drawZoomCanvas(zCvs, q, zScale);
-        const zp = document.getElementById('zoomPalette');
-        zp.innerHTML = document.getElementById('paletteContainer').innerHTML;
-        Array.from(zp.children).forEach((btn, i) => btn.onclick = () => selectPaletteColor(i+1));
-        if(GameSession.selectedColorIdx) selectPaletteColor(GameSession.selectedColorIdx);
-        zCvs.onclick = (e) => handleZoomClick(e, q, zScale);
-    }
-    function drawZoomCanvas(cvs, q, scale) {
-        const ctx = cvs.getContext('2d');
-        ctx.imageSmoothingEnabled = false;
-        ctx.clearRect(0,0,cvs.width,cvs.height);
-        for(let y=0; y<q.h; y++) {
-            for(let x=0; x<q.w; x++) {
-                const gy = q.y + y; const gx = q.x + x;
-                const idx = GameSession.numberGrid[gy][gx];
-                if(idx === 0) continue;
-                if(GameSession.completedGrid[gy][gx]) {
-                    ctx.fillStyle = GameSession.paletteMap[idx]; ctx.fillRect(x*scale, y*scale, scale, scale);
-                } else {
-                    ctx.fillStyle = '#fff'; ctx.fillRect(x*scale, y*scale, scale, scale);
-                    ctx.strokeStyle = '#d1d5db'; ctx.strokeRect(x*scale, y*scale, scale, scale);
-                    ctx.fillStyle = '#6b7280'; ctx.font = 'bold 16px sans-serif'; ctx.textAlign='center'; ctx.textBaseline='middle'; ctx.fillText(idx, x*scale+scale/2, y*scale+scale/2+1);
-                }
-            }
-        }
-    }
-    function handleZoomClick(e, q, scale) {
-        if(!GameSession.selectedColorIdx) return;
-        const rect = e.target.getBoundingClientRect();
-        const x = Math.floor(((e.clientX - rect.left) * (e.target.width/rect.width)) / scale);
-        const y = Math.floor(((e.clientY - rect.top) * (e.target.height/rect.height)) / scale);
-        const gx = q.x + x; const gy = q.y + y;
-        if(gx >= 0 && gx < GameSession.imgWidth && gy >= 0 && gy < GameSession.imgHeight) {
-            if(GameSession.completedGrid[gy][gx]) return;
-            if(GameSession.numberGrid[gy][gx] === GameSession.selectedColorIdx) {
-                GameSession.completedGrid[gy][gx] = true; GameSession.completedCells++;
-                drawZoomCanvas(e.target, q, scale); drawQuad(q);
-                saveProgress(); updateGameProgressUI(); checkCompletion();
-            } else if (GameSession.numberGrid[gy][gx] !== 0) {
-                e.target.classList.add('shake'); setTimeout(()=>e.target.classList.remove('shake'),300);
-            }
-        }
-    }
-    function saveProgress() { localStorage.setItem(LS_KEY.progress + GameSession.stageId, JSON.stringify(GameSession.completedGrid)); }
-    function restoreProgress(stageId) {
-        const saved = localStorage.getItem(LS_KEY.progress + stageId);
-        if(saved) {
-            try { const grid = JSON.parse(saved);
-                if(grid.length===GameSession.imgHeight && grid[0].length===GameSession.imgWidth) {
-                    GameSession.completedGrid = grid;
-                    let done=0; for(let y=0;y<GameSession.imgHeight;y++) for(let x=0;x<GameSession.imgWidth;x++) if(GameSession.numberGrid[y][x]!==0 && GameSession.completedGrid[y][x]) done++;
-                    GameSession.completedCells=done;
-                }
-            } catch(e){}
-        }
-    }
-    function updateGameProgressUI() {
-        const pct = Math.floor((GameSession.completedCells / GameSession.totalCells) * 100) || 0;
-        document.getElementById('gameProgress').textContent = `${pct}%`;
-    }
-    function checkCompletion() {
-        if(GameSession.completedCells >= GameSession.totalCells) {
-            if(!State.colored.has(GameSession.stageId)) {
-                State.colored.add(GameSession.stageId);
-                State.points += 500; State.coupons += 1; saveData();
-                showMessage("축하합니다!", "작품을 완성했습니다!\n500P와 도전 티켓 1장을 획득했습니다.");
-            }
-        }
-    }
-
-    /**
-     * ========================================================
-     * 7. 이벤트 바인딩
-     * ========================================================
-     */
-    function bindEvents() {
-        document.getElementById('startButton').onclick = () => showView('lobbyScreen');
-        document.getElementById('goBookBtn').onclick = () => showView('bookScreen');
-
-        document.getElementById('goPuzzleBtn').onclick = () => PuzzleSystem.start('NORMAL');
-        document.getElementById('goChallengeBtn').onclick = () => PuzzleSystem.start('CHALLENGE');
-
-        document.getElementById('gacha1Btn').onclick = () => doGacha(1);
-        document.getElementById('gacha10Btn').onclick = () => doGacha(10);
-        document.getElementById('backToLobbyFromBook').onclick = () => showView('lobbyScreen');
-        document.getElementById('quickGachaBtn').onclick = () => doGacha(10);
-        document.getElementById('exitGameBtn').onclick = () => { showView('bookScreen'); renderBook(); };
-        document.getElementById('gachaCloseBtn').onclick = () => document.getElementById('gachaModal').style.display = 'none';
-        document.getElementById('msgOkBtn').onclick = () => document.getElementById('msgModal').style.display = 'none';
-        document.getElementById('zoomCloseBtn').onclick = () => document.getElementById('zoomOverlay').style.display = 'none';
-        document.getElementById('exitPuzzleBtn').onclick = () => PuzzleSystem.stop();
-    }
-
-    window.onload = initGame;
+async function init() {
+  loadState();
+  await ensurePokeDb();   /* try to load poke_db.json, falls back silently */
+  bindEvents();
+  setDexFilter('ALL');
+  updateAllHUD();
+}
+window.addEventListener('load', init);
 </script>
 </body>
 </html>
