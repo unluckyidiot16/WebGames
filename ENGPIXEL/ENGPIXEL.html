@@ -880,10 +880,10 @@ async function ensurePokeDb() {
   })();
   return pokeDbLoading;
 }
-const SPRITE_PIXEL = (id) => `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/${id}.png`;
+/* Guess.html과 동일하게 로컬 './png/{id}.png' 폴더 사용 (소문자 png 고정) */
+const SPRITE_PIXEL = (id) => `./png/${id}.png`;
 function getSpriteUrl(id) {
-  const e = pokeDbMap.get(id);
-  if (e && e.sprite_pixel) return e.sprite_pixel;
+  /* 로컬 png 폴더를 최우선으로 사용 — poke_db.json의 원격 URL은 무시 */
   return SPRITE_PIXEL(id);
 }
 function getPokeName(id) {
@@ -1532,7 +1532,7 @@ function renderGachaResult(results, refund) {
     div.style.animationDelay = `${Math.min(i * 0.06, 0.6)}s`;
     div.innerHTML = `
       <div class="gtag">${r.rarity}</div>
-      <img src="${getSpriteUrl(r.id)}" loading="lazy" alt="${getPokeName(r.id)}" onerror="this.src='${SPRITE_PIXEL(r.id)}';">
+      <img src="${getSpriteUrl(r.id)}" loading="lazy" alt="${getPokeName(r.id)}" onerror="this.onerror=null;this.style.opacity='0.3';this.alt='no img';">
       ${r.isNew ? '<div class="newtag">NEW</div>' : ''}
     `;
     grid.appendChild(div);
@@ -1576,7 +1576,7 @@ function renderDex() {
     img.src = getSpriteUrl(id);
     img.loading = 'lazy';
     img.alt = isOwned ? getPokeName(id) : `#${id}`;
-    img.onerror = function() { this.src = SPRITE_PIXEL(id); };
+    img.onerror = function() { this.onerror = null; this.style.opacity = '0.3'; };
     const dot = document.createElement('div');
     dot.className = `rarity-dot ${rarity}`;
     const label = document.createElement('div');
@@ -1651,19 +1651,8 @@ async function startColoring(id) {
     document.getElementById('quadGrid').style.opacity = '1';
   } catch (e) {
     console.error(e);
-    /* fallback to PokeAPI direct URL */
-    try {
-      await processColorImage(SPRITE_PIXEL(id), id);
-      restoreColorProgress(id);
-      updateColorProgressUI();
-      renderAllQuads();
-      renderPalette();
-      document.getElementById('colorLoading').style.display = 'none';
-      document.getElementById('quadGrid').style.opacity = '1';
-    } catch (e2) {
-      showMsg('이미지 오류', '포켓몬 이미지를 불러올 수 없어요.\n인터넷 연결을 확인해 주세요.');
-      showView('dexScreen');
-    }
+    showMsg('이미지 오류', `포켓몬 이미지를 불러올 수 없어요.\n./png/${id}.png 파일이 있는지 확인해 주세요.`);
+    showView('dexScreen');
   }
 }
 function exitColoring() {
