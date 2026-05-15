@@ -98,7 +98,7 @@
 
   /* Stage indicator */
   #stage-panel {
-    position: fixed; bottom: 18px; left: 50%;
+    position: fixed; bottom: 38px; left: 50%;
     transform: translateX(-50%);
     background: rgba(20,20,30,0.7);
     border: 1px solid #555;
@@ -108,6 +108,7 @@
     color: #aaa;
     z-index: 10;
     text-shadow: 1px 1px 0 #000;
+    pointer-events: none;
   }
   #stage-panel .lvl { color: #ffd84a; font-weight: bold; }
   #stage-panel .info { color: #fff; opacity: 0.7; margin-left: 8px; }
@@ -218,6 +219,150 @@
     line-height: 1; margin-bottom: 24px;
     text-shadow: 3px 3px 0 #000;
   }
+
+  /* ============ Touch Controls ============ */
+  /* Hide cursor in touch mode (laptops have cursor over touchscreen) */
+  body.touch-mode { cursor: none; }
+  body.touch-mode #crosshair { z-index: 10; }
+
+  /* Aim drag area - covers entire screen below HUD, captures pointer for camera aim */
+  #aim-area {
+    position: fixed;
+    inset: 0;
+    z-index: 4;
+    pointer-events: none;
+    touch-action: none;
+  }
+  body.touch-mode #aim-area {
+    pointer-events: auto;
+  }
+
+  /* Joystick base */
+  #joystick-base {
+    position: fixed;
+    bottom: 30px; left: 30px;
+    width: 140px; height: 140px;
+    border-radius: 50%;
+    background: rgba(20, 25, 40, 0.45);
+    border: 3px solid rgba(255, 255, 255, 0.5);
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.5), inset 0 0 20px rgba(0,0,0,0.3);
+    z-index: 8;
+    pointer-events: none;
+    touch-action: none;
+    display: none;
+  }
+  body.touch-mode #joystick-base {
+    display: block;
+    pointer-events: auto;
+  }
+  #joystick-stick {
+    position: absolute;
+    left: 50%; top: 50%;
+    width: 60px; height: 60px;
+    margin-left: -30px; margin-top: -30px;
+    border-radius: 50%;
+    background: rgba(255, 216, 74, 0.85);
+    border: 3px solid #fff;
+    box-shadow: 0 4px 0 rgba(0,0,0,0.4);
+    pointer-events: none;
+    transition: transform 0.06s ease-out;
+  }
+  #joystick-stick.dragging {
+    transition: none;
+    background: rgba(255, 216, 74, 1);
+  }
+  #joystick-base::after {
+    content: 'MOVE';
+    position: absolute;
+    top: -22px; left: 50%;
+    transform: translateX(-50%);
+    color: #fff;
+    font-size: 10px;
+    letter-spacing: 3px;
+    opacity: 0.7;
+    text-shadow: 1px 1px 0 #000;
+    pointer-events: none;
+  }
+
+  /* Fire button */
+  #fire-button {
+    position: fixed;
+    bottom: 50px; right: 50px;
+    width: 110px; height: 110px;
+    background: rgba(255, 60, 60, 0.55);
+    border: 4px solid #fff;
+    box-shadow: 0 6px 0 rgba(0,0,0,0.4), inset 0 0 20px rgba(255,255,255,0.2);
+    z-index: 8;
+    display: none;
+    align-items: center; justify-content: center;
+    font-weight: bold;
+    color: #fff;
+    font-size: 22px;
+    letter-spacing: 2px;
+    text-shadow: 2px 2px 0 #000;
+    user-select: none;
+    pointer-events: none;
+    touch-action: none;
+    border-radius: 50%;
+  }
+  body.touch-mode #fire-button {
+    display: flex;
+    pointer-events: auto;
+  }
+  #fire-button.pressed {
+    background: rgba(255, 30, 30, 0.95);
+    transform: translateY(3px);
+    box-shadow: 0 3px 0 rgba(0,0,0,0.4);
+  }
+
+  /* Pause button (touch mode only) */
+  #pause-btn {
+    position: fixed;
+    top: 18px; left: 50%;
+    transform: translateX(-50%) translateY(110px);
+    width: 38px; height: 38px;
+    background: rgba(20, 25, 40, 0.7);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    color: #fff;
+    font-size: 16px;
+    z-index: 8;
+    display: none;
+    align-items: center; justify-content: center;
+    user-select: none;
+    touch-action: none;
+    pointer-events: none;
+  }
+  body.touch-mode #pause-btn {
+    display: flex;
+    pointer-events: auto;
+  }
+  #pause-btn::before {
+    content: '⏸';
+  }
+
+  /* Mode toggle button - always available */
+  #mode-toggle {
+    position: fixed;
+    bottom: 12px; left: 50%;
+    transform: translateX(-50%);
+    background: rgba(20, 25, 40, 0.85);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    color: #fff;
+    font-family: 'Courier New', monospace;
+    font-size: 10px;
+    letter-spacing: 2px;
+    padding: 6px 14px;
+    z-index: 110;
+    cursor: pointer;
+    user-select: none;
+    touch-action: manipulation;
+    text-shadow: 1px 1px 0 #000;
+    opacity: 0.75;
+    transition: opacity 0.2s;
+  }
+  #mode-toggle:hover { opacity: 1; }
+  #mode-toggle .mode-icon { color: #ffd84a; margin-right: 4px; }
+
 </style>
 </head>
 <body>
@@ -249,6 +394,19 @@
   STAGE <span class="lvl" id="stage-lvl">1</span><span class="info" id="stage-info">정적 표적</span>
 </div>
 
+<!-- Touch controls -->
+<div id="aim-area"></div>
+<div id="joystick-base">
+  <div id="joystick-stick"></div>
+</div>
+<div id="fire-button">FIRE</div>
+<div id="pause-btn"></div>
+
+<!-- Mode toggle (always visible at bottom) -->
+<div id="mode-toggle">
+  <span class="mode-icon" id="mode-icon">🖱</span><span id="mode-label">MOUSE MODE · CLICK TO SWITCH</span>
+</div>
+
 <div id="feedback"></div>
 <div id="word-complete">COMPLETE!</div>
 <div id="stage-up"></div>
@@ -259,8 +417,8 @@
   <div class="start">▶ CLICK TO START</div>
   <div class="controls">
     상단에 표시된 단어를 <b>순서대로</b> 맞히세요<br>
-    <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> 이동 &nbsp;·&nbsp;
-    MOUSE 조준 &nbsp;·&nbsp; LEFT CLICK 발사<br>
+    <b>마우스:</b> <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> 이동 · 마우스 조준 · 좌클릭 발사<br>
+    <b>터치:</b> 좌측 조이스틱 이동 · 우측 드래그 조준 · <span style="color:#ff8080">FIRE</span> 버튼 발사<br>
     단어를 완성할 때마다 표적이 움직이기 시작합니다!
   </div>
 </div>
@@ -665,6 +823,43 @@ const game = {
   state: 'menu',
 };
 
+// ---------- Input Mode (mouse <-> touch) ----------
+let inputMode = 'mouse';  // 'mouse' or 'touch'
+
+const touchInput = {
+  joystick: { active: false, pointerId: null, baseX: 0, baseY: 0, dx: 0, dy: 0 },
+  aim:      { active: false, pointerId: null, lastX: 0, lastY: 0 },
+  fireHeld: false,
+};
+
+function enterTouchMode() {
+  if (inputMode === 'touch') return;
+  inputMode = 'touch';
+  document.body.classList.add('touch-mode');
+  document.getElementById('mode-icon').textContent = '👆';
+  document.getElementById('mode-label').textContent = 'TOUCH MODE · TAP TO SWITCH';
+  if (document.pointerLockElement) document.exitPointerLock();
+  // Clear any keyboard state that might be stuck
+  Object.keys(keys).forEach(k => keys[k] = false);
+}
+
+function enterMouseMode() {
+  if (inputMode === 'mouse') return;
+  inputMode = 'mouse';
+  document.body.classList.remove('touch-mode');
+  document.getElementById('mode-icon').textContent = '🖱';
+  document.getElementById('mode-label').textContent = 'MOUSE MODE · CLICK TO SWITCH';
+  // Reset touch input state
+  touchInput.joystick.active = false;
+  touchInput.joystick.dx = touchInput.joystick.dy = 0;
+  touchInput.aim.active = false;
+  touchInput.fireHeld = false;
+  // Try to re-acquire pointer lock if game is running
+  if (game.state === 'playing') {
+    document.body.requestPointerLock();
+  }
+}
+
 function randomLetter() {
   return String.fromCharCode(65 + Math.floor(Math.random() * 26));
 }
@@ -842,19 +1037,47 @@ addEventListener('keyup', e => keys[e.code] = false);
 const overlay = document.getElementById('overlay');
 const gameoverScreen = document.getElementById('gameover');
 
-overlay.addEventListener('click', () => {
+// Start overlay - detect input mode from first interaction
+overlay.addEventListener('pointerdown', (e) => {
+  // Detect mode from pointerType
+  if (e.pointerType === 'touch') {
+    enterTouchMode();
+  } else if (e.pointerType === 'mouse' || e.pointerType === 'pen') {
+    enterMouseMode();
+  }
+  
+  if (game.state === 'paused') {
+    game.state = 'playing';
+    overlay.style.display = 'none';
+    if (inputMode === 'mouse') document.body.requestPointerLock();
+    return;
+  }
+  
   if (game.state !== 'playing') startGame();
-  document.body.requestPointerLock();
+  
+  if (inputMode === 'mouse') {
+    document.body.requestPointerLock();
+  } else {
+    overlay.style.display = 'none';
+  }
 });
-gameoverScreen.addEventListener('click', () => {
+
+gameoverScreen.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch') enterTouchMode();
+  else enterMouseMode();
+  
   gameoverScreen.style.display = 'none';
   startGame();
-  document.body.requestPointerLock();
+  
+  if (inputMode === 'mouse') {
+    document.body.requestPointerLock();
+  }
 });
 
 document.addEventListener('pointerlockchange', () => {
   locked = document.pointerLockElement === document.body;
-  if (game.state === 'playing' && !locked) {
+  // Only auto-pause when in mouse mode
+  if (game.state === 'playing' && !locked && inputMode === 'mouse') {
     overlay.style.display = 'flex';
     overlay.querySelector('h1').textContent = 'PAUSED';
     overlay.querySelector('.sub').textContent = '일시 정지';
@@ -864,7 +1087,7 @@ document.addEventListener('pointerlockchange', () => {
 });
 
 addEventListener('mousemove', e => {
-  if (!locked) return;
+  if (inputMode !== 'mouse' || !locked) return;
   player.yaw -= e.movementX * 0.0023;
   player.pitch -= e.movementY * 0.0023;
   const lim = Math.PI / 2 - 0.01;
@@ -872,14 +1095,175 @@ addEventListener('mousemove', e => {
 });
 
 addEventListener('mousedown', e => {
+  if (inputMode !== 'mouse') return;
   if (locked && e.button === 0 && game.state === 'playing') shoot();
 });
+
+// ---------- Touch Controls Setup ----------
+function isGameActive() {
+  if (game.state !== 'playing') return false;
+  if (inputMode === 'mouse') return locked;
+  return true; // touch mode: always active during play
+}
+
+(function setupTouchControls() {
+  const joyBase = document.getElementById('joystick-base');
+  const joyStick = document.getElementById('joystick-stick');
+  const aimArea = document.getElementById('aim-area');
+  const fireBtn = document.getElementById('fire-button');
+  const pauseBtn = document.getElementById('pause-btn');
+  const modeToggle = document.getElementById('mode-toggle');
+  
+  const JOY_MAX_R = 50;
+  
+  // Joystick
+  joyBase.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    if (e.pointerType === 'mouse') enterTouchMode(); // allow testing with mouse
+    if (e.pointerType === 'touch') enterTouchMode();
+    
+    joyBase.setPointerCapture(e.pointerId);
+    touchInput.joystick.active = true;
+    touchInput.joystick.pointerId = e.pointerId;
+    const rect = joyBase.getBoundingClientRect();
+    touchInput.joystick.baseX = rect.left + rect.width / 2;
+    touchInput.joystick.baseY = rect.top + rect.height / 2;
+    joyStick.classList.add('dragging');
+    updateJoystick(e.clientX, e.clientY);
+  });
+  joyBase.addEventListener('pointermove', e => {
+    if (e.pointerId !== touchInput.joystick.pointerId) return;
+    updateJoystick(e.clientX, e.clientY);
+  });
+  const endJoystick = (e) => {
+    if (e.pointerId !== touchInput.joystick.pointerId) return;
+    touchInput.joystick.active = false;
+    touchInput.joystick.pointerId = null;
+    touchInput.joystick.dx = 0;
+    touchInput.joystick.dy = 0;
+    joyStick.style.transform = '';
+    joyStick.classList.remove('dragging');
+  };
+  joyBase.addEventListener('pointerup', endJoystick);
+  joyBase.addEventListener('pointercancel', endJoystick);
+  
+  function updateJoystick(x, y) {
+    const dx = x - touchInput.joystick.baseX;
+    const dy = y - touchInput.joystick.baseY;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    const clamped = Math.min(dist, JOY_MAX_R);
+    const angle = Math.atan2(dy, dx);
+    const cdx = Math.cos(angle) * clamped;
+    const cdy = Math.sin(angle) * clamped;
+    touchInput.joystick.dx = cdx / JOY_MAX_R;
+    touchInput.joystick.dy = cdy / JOY_MAX_R;
+    joyStick.style.transform = `translate(${cdx}px, ${cdy}px)`;
+  }
+  
+  // Aim drag area
+  aimArea.addEventListener('pointerdown', e => {
+    if (e.pointerType === 'mouse' && inputMode !== 'touch') return;
+    e.preventDefault();
+    aimArea.setPointerCapture(e.pointerId);
+    touchInput.aim.active = true;
+    touchInput.aim.pointerId = e.pointerId;
+    touchInput.aim.lastX = e.clientX;
+    touchInput.aim.lastY = e.clientY;
+  });
+  aimArea.addEventListener('pointermove', e => {
+    if (e.pointerId !== touchInput.aim.pointerId) return;
+    const dx = e.clientX - touchInput.aim.lastX;
+    const dy = e.clientY - touchInput.aim.lastY;
+    touchInput.aim.lastX = e.clientX;
+    touchInput.aim.lastY = e.clientY;
+    
+    player.yaw -= dx * 0.005;
+    player.pitch -= dy * 0.005;
+    const lim = Math.PI / 2 - 0.01;
+    player.pitch = Math.max(-lim, Math.min(lim, player.pitch));
+  });
+  const endAim = (e) => {
+    if (e.pointerId !== touchInput.aim.pointerId) return;
+    touchInput.aim.active = false;
+    touchInput.aim.pointerId = null;
+  };
+  aimArea.addEventListener('pointerup', endAim);
+  aimArea.addEventListener('pointercancel', endAim);
+  
+  // Tap-on-aim-area-without-drag = fire (alternative to fire button)
+  let aimDownX = 0, aimDownY = 0, aimDownTime = 0;
+  aimArea.addEventListener('pointerdown', e => {
+    aimDownX = e.clientX;
+    aimDownY = e.clientY;
+    aimDownTime = performance.now();
+  });
+  aimArea.addEventListener('pointerup', e => {
+    const dist = Math.hypot(e.clientX - aimDownX, e.clientY - aimDownY);
+    const elapsed = performance.now() - aimDownTime;
+    if (dist < 8 && elapsed < 250 && isGameActive()) {
+      shoot();
+    }
+  });
+  
+  // Fire button
+  fireBtn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    fireBtn.setPointerCapture(e.pointerId);
+    fireBtn.classList.add('pressed');
+    touchInput.fireHeld = true;
+    if (isGameActive()) shoot();
+  });
+  const endFire = (e) => {
+    fireBtn.classList.remove('pressed');
+    touchInput.fireHeld = false;
+  };
+  fireBtn.addEventListener('pointerup', endFire);
+  fireBtn.addEventListener('pointercancel', endFire);
+  fireBtn.addEventListener('pointerleave', endFire);
+  
+  // Pause button (touch mode)
+  pauseBtn.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (game.state === 'playing') {
+      game.state = 'paused';
+      overlay.style.display = 'flex';
+      overlay.querySelector('h1').textContent = 'PAUSED';
+      overlay.querySelector('.sub').textContent = '일시 정지';
+      overlay.querySelector('.start').textContent = '▶ TAP TO RESUME';
+    }
+  });
+  
+  // Mode toggle button
+  modeToggle.addEventListener('pointerdown', e => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (inputMode === 'touch') {
+      enterMouseMode();
+    } else {
+      enterTouchMode();
+    }
+    // Auto-resume if paused (overlay visible)
+    if (overlay.style.display === 'flex' && (game.state === 'paused' || game.state === 'playing')) {
+      game.state = 'playing';
+      overlay.style.display = 'none';
+    }
+  });
+})();
+
+// Resume from paused state
+function resumeFromPause() {
+  if (game.state === 'paused') {
+    game.state = 'playing';
+  }
+}
 
 // ---------- Shoot ----------
 const raycaster = new THREE.Raycaster();
 
 function shoot() {
-  if (!canShoot) return;
+  if (!canShoot || game.state !== 'playing') return;
   canShoot = false;
   setTimeout(() => canShoot = true, 110);
   game.shots++;
@@ -983,7 +1367,7 @@ function onWrongShot(target) {
 // ---------- Movement ----------
 let bobTime = 0;
 function update(dt) {
-  if (!locked || game.state !== 'playing') return;
+  if (!isGameActive()) return;
   
   camera.quaternion.setFromEuler(new THREE.Euler(player.pitch, player.yaw, 0, 'YXZ'));
   
@@ -991,12 +1375,25 @@ function update(dt) {
   const right = new THREE.Vector3(Math.cos(player.yaw), 0, -Math.sin(player.yaw));
   
   const moveSpeed = 4.5;
+  
+  // Combine keyboard + joystick input into (inputX, inputY) where Y- is forward
+  let inputX = 0, inputY = 0;
+  if (touchInput.joystick.active) {
+    inputX += touchInput.joystick.dx;
+    inputY += touchInput.joystick.dy;
+  }
+  if (keys['KeyW']) inputY -= 1;
+  if (keys['KeyS']) inputY += 1;
+  if (keys['KeyA']) inputX -= 1;
+  if (keys['KeyD']) inputX += 1;
+  
+  let mag = Math.sqrt(inputX*inputX + inputY*inputY);
+  if (mag > 1) { inputX /= mag; inputY /= mag; mag = 1; }
+  
   const accel = new THREE.Vector3();
-  if (keys['KeyW']) accel.add(fwd);
-  if (keys['KeyS']) accel.sub(fwd);
-  if (keys['KeyD']) accel.add(right);
-  if (keys['KeyA']) accel.sub(right);
-  if (accel.lengthSq() > 0) accel.normalize().multiplyScalar(moveSpeed);
+  accel.addScaledVector(right, inputX);
+  accel.addScaledVector(fwd, -inputY);
+  if (mag > 0.01) accel.multiplyScalar(moveSpeed);
   
   player.vel.x = accel.x;
   player.vel.z = accel.z;
@@ -1031,6 +1428,11 @@ function update(dt) {
     bobTime *= 0.9;
     camera.position.copy(player.pos);
     gun.position.y += (-0.22 - gun.position.y) * 0.2;
+  }
+  
+  // Auto-fire when fire button held in touch mode
+  if (touchInput.fireHeld && canShoot) {
+    shoot();
   }
 }
 
@@ -1091,7 +1493,7 @@ function animate() {
   const dt = Math.min(clock.getDelta(), 0.05);
   const t = performance.now();
   
-  if (game.state === 'playing' && locked) {
+  if (isGameActive()) {
     game.timeLeft -= dt;
     if (game.timeLeft <= 0) {
       game.timeLeft = 0;
