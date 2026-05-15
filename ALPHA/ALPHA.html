@@ -549,6 +549,161 @@
   }
   .depart-btn:active { transform: translateY(1px); }
 
+  /* ===== Title screen ===== */
+  .title-screen {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 20px;
+    background:
+      radial-gradient(ellipse at center, rgba(212, 166, 71, 0.08) 0%, transparent 60%),
+      var(--bg);
+    padding: 40px 24px;
+    overflow-y: auto;
+  }
+  .title-logo {
+    font-family: var(--font-display);
+    font-size: clamp(48px, 9vw, 96px);
+    font-weight: 800;
+    letter-spacing: 0.16em;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(212, 166, 71, 0.4);
+    margin-bottom: -6px;
+    line-height: 1;
+  }
+  .title-tagline {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    letter-spacing: 0.25em;
+    color: var(--text-mute);
+    margin-bottom: 12px;
+  }
+  .title-sub {
+    font-family: var(--font-display);
+    font-size: clamp(16px, 2.4vw, 22px);
+    color: var(--text);
+    text-align: center;
+    max-width: 520px;
+    line-height: 1.5;
+    margin-bottom: 28px;
+  }
+  .title-modes {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+    max-width: 720px;
+  }
+  .mode-card {
+    background: var(--panel);
+    border: 2px solid var(--line);
+    padding: 24px 28px;
+    min-width: 240px;
+    max-width: 280px;
+    cursor: pointer;
+    transition: all 0.18s;
+    text-align: left;
+    font-family: inherit;
+    color: inherit;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  body:not(.input-touch) .mode-card:hover {
+    transform: translateY(-2px);
+    border-color: var(--mode-color, var(--accent));
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+  .mode-card.selected {
+    border-color: var(--mode-color, var(--accent));
+    background: rgba(212, 166, 71, 0.06);
+    box-shadow: 0 0 0 1px var(--mode-color, var(--accent)) inset;
+  }
+  .mode-card-icon {
+    font-size: 30px;
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+  .mode-card-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: bold;
+    color: var(--mode-color, var(--text));
+    letter-spacing: 0.05em;
+  }
+  .mode-card-desc {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-mute);
+    line-height: 1.6;
+    margin-top: 6px;
+  }
+  .mode-card-pros {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text);
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--line);
+  }
+  .mode-card-pros .pro { color: var(--success); }
+  .mode-card-pros .con { color: #d47a47; }
+  .title-start {
+    margin-top: 28px;
+    background: var(--accent);
+    color: var(--bg);
+    border: none;
+    padding: 16px 48px;
+    font-family: var(--font-display);
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.15em;
+    cursor: pointer;
+    transition: all .15s;
+  }
+  .title-start:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+    background: var(--line);
+    color: var(--text-mute);
+  }
+  body:not(.input-touch) .title-start:not(:disabled):hover {
+    background: var(--accent-2);
+    box-shadow: 0 0 20px rgba(212, 166, 71, 0.4);
+  }
+  .title-hint {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-mute);
+    margin-top: 16px;
+    letter-spacing: 0.1em;
+  }
+  /* 헤더 난이도 배지 */
+  .difficulty-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(15, 19, 26, 0.6);
+    border: 1px solid var(--diff-color, var(--line));
+    padding: 6px 10px;
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--diff-color, var(--text));
+    letter-spacing: 0.12em;
+    cursor: pointer;
+    transition: all 0.12s;
+  }
+  body:not(.input-touch) .difficulty-badge:hover {
+    background: rgba(15, 19, 26, 0.9);
+  }
+  .difficulty-badge .diff-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--diff-color, var(--accent));
+  }
+
   /* ===== Mission screen ===== */
   .mission {
     position: absolute;
@@ -1297,6 +1452,15 @@ function loadState() {
       if (!Array.isArray(s.freeSubmitted)) s.freeSubmitted = [];
       if (typeof s.chapter !== 'number') s.chapter = 1;
       if (typeof s.maxChapter !== 'number') s.maxChapter = s.chapter || 1;
+      // 난이도 마이그레이션 — 기존 사용자는 'hard'로 간주 (기존 규칙 유지)
+      // 단 difficulty가 null이면 타이틀로 보내서 선택하게 함
+      if (s.difficulty !== 'easy' && s.difficulty !== 'hard') {
+        // 기존 세이브 (난이도 필드 없음) → 타이틀에서 선택받기
+        s.difficulty = null;
+        s.scene = 'title';
+      }
+      // 미션 도중에 새로고침된 경우 베이스로 복귀 (안전)
+      if (s.scene === 'mission') s.scene = 'base';
       // 퀘스트 마이그레이션 - 현재 챕터에서 불가능한 미완료 퀘스트를 교체
       // (구버전 PICK_QUESTS fallback이 불가능한 단어를 박아둔 경우 복구)
       if (Array.isArray(s.quests)) {
@@ -1325,7 +1489,8 @@ function loadState() {
 
 function freshState() {
   return {
-    scene: 'base',                  // 'base' | 'mission'
+    scene: 'title',                 // 'title' | 'base' | 'mission'
+    difficulty: null,               // 'easy' | 'hard' — 타이틀에서 선택
     language: 'ko',
     baseInventory: EMPTY_INV(),     // 베이스 금고
     missionInventory: EMPTY_INV(),  // 미션 중 가방
@@ -1360,6 +1525,14 @@ function reducer(s, a) {
   switch (a.type) {
     case 'SET_LANG':
       return { ...s, language: a.lang };
+    case 'SET_DIFFICULTY':
+      return { ...s, difficulty: a.difficulty };
+    case 'START_GAME':
+      // 타이틀에서 모드 선택 후 게임 시작 (베이스로 이동)
+      return { ...s, scene: 'base', difficulty: a.difficulty || s.difficulty || 'easy' };
+    case 'GO_TO_TITLE':
+      // 베이스 → 타이틀 (난이도 재선택용)
+      return { ...s, scene: 'title' };
     case 'DEPART':
       return { ...s, scene: 'mission', missionSeed: Date.now(), missionInventory: EMPTY_INV(), missionCoins: 0 };
     case 'COLLECT_LETTER': {
@@ -1417,7 +1590,7 @@ function reducer(s, a) {
     case 'ABANDON_MISSION': {
       // reason: 'manual' (메뉴 포기) | 'death' (사망)
       if (a.reason === 'death') {
-        // 사망: 글자 50% 보존 + 장착 장비 손실 (tier 1 제외)
+        // 사망: 글자 50% 보존 + (하드 모드일 때만) 장착 장비 손실 (tier 1 제외)
         const preserved = EMPTY_INV();
         let kept = 0, lost = 0;
         for (const l in s.missionInventory) {
@@ -1430,22 +1603,27 @@ function reducer(s, a) {
         const merged = { ...s.baseInventory };
         for (const l in preserved) merged[l] = (merged[l] || 0) + preserved[l];
 
-        // 장착 장비 손실 처리 - tier 1은 잃지 않음
+        // 장착 장비 손실 — 이지 모드는 스킵, 하드 모드만 tier > 1 손실
+        const isEasy = s.difficulty === 'easy';
         const newOwned = { ...s.ownedGear };
         const newEquipped = { ...s.equipped };
         const lostGear = [];
-        for (const slot of ['weapon', 'bag', 'boots']) {
-          const equippedId = s.equipped[slot];
-          const equippedItem = GEAR_BY_ID[equippedId];
-          if (equippedItem && equippedItem.tier > 1) {
-            // 보유 목록에서 제거
-            newOwned[slot] = s.ownedGear[slot].filter(id => id !== equippedId);
-            // 기본 장비로 fallback
-            newEquipped[slot] = DEFAULT_GEAR[slot];
-            lostGear.push(equippedItem.name);
+        if (!isEasy) {
+          for (const slot of ['weapon', 'bag', 'boots']) {
+            const equippedId = s.equipped[slot];
+            const equippedItem = GEAR_BY_ID[equippedId];
+            if (equippedItem && equippedItem.tier > 1) {
+              // 보유 목록에서 제거
+              newOwned[slot] = s.ownedGear[slot].filter(id => id !== equippedId);
+              // 기본 장비로 fallback
+              newEquipped[slot] = DEFAULT_GEAR[slot];
+              lostGear.push(equippedItem.name);
+            }
           }
         }
-        const lossNote = lostGear.length ? ` | 장비 손실: ${lostGear.join(', ')}` : '';
+        const lossNote = lostGear.length
+          ? ` | 장비 손실: ${lostGear.join(', ')}`
+          : (isEasy ? ' (장비 유지)' : '');
         // 미션 코인 50% 보존 (글자와 동일 정책)
         const earnedKept = Math.floor((s.missionCoins || 0) * 0.5);
         const coinNote = earnedKept > 0 ? ` · +${earnedKept} ◈` : '';
@@ -3249,6 +3427,13 @@ function BaseScreen({ state, dispatch }) {
           <small>// 본부</small>
         </div>
         <div class="base-header-right">
+          <div class="difficulty-badge"
+               style=${`--diff-color: ${state.difficulty === 'easy' ? '#5fa85f' : '#d44a47'}`}
+               title="클릭하여 모드 변경"
+               onClick=${() => dispatch({ type: 'GO_TO_TITLE' })}>
+            <span class="diff-dot"></span>
+            <span>${state.difficulty === 'easy' ? '쉬운 모드' : '어려운 모드'}</span>
+          </div>
           <div class="coin-display">
             <span class="coin-icon">◈</span>
             <span class="coin-amount">${state.coins || 0}</span>
@@ -3752,6 +3937,62 @@ function MissionScreen({ state, dispatch }) {
   `;
 }
 
+function TitleScreen({ state, dispatch }) {
+  // 로컬 선택 상태 — 확정 전까지 state.difficulty에 반영 안 함
+  const [picked, setPicked] = useState(state.difficulty || null);
+  const start = () => {
+    if (!picked) return;
+    dispatch({ type: 'START_GAME', difficulty: picked });
+  };
+  return html`
+    <div class="title-screen">
+      <div class="title-logo">ALPHACOV</div>
+      <div class="title-tagline">// 알파벳 추출 슈터</div>
+      <div class="title-sub">
+        위험한 던전에 들어가 알파벳을 모으고,<br/>
+        무사히 돌아와서 영어 단어를 만들어 보자!
+      </div>
+
+      <div class="title-modes">
+        <button class="mode-card ${picked === 'easy' ? 'selected' : ''}"
+                style="--mode-color: #5fa85f;"
+                onClick=${() => setPicked('easy')}>
+          <div class="mode-card-icon">🛡️</div>
+          <div class="mode-card-title">쉬운 모드</div>
+          <div class="mode-card-desc">
+            처음 해보거나 차근차근 즐기고 싶을 때
+          </div>
+          <div class="mode-card-pros">
+            <div class="pro">✓ 사망해도 장비를 잃지 않아요</div>
+            <div class="pro">✓ 글자는 절반만 잃어요</div>
+          </div>
+        </button>
+
+        <button class="mode-card ${picked === 'hard' ? 'selected' : ''}"
+                style="--mode-color: #d44a47;"
+                onClick=${() => setPicked('hard')}>
+          <div class="mode-card-icon">⚔️</div>
+          <div class="mode-card-title">어려운 모드</div>
+          <div class="mode-card-desc">
+            진짜 추출 슈터를 경험하고 싶을 때
+          </div>
+          <div class="mode-card-pros">
+            <div class="con">✗ 사망 시 장착한 장비를 잃어요</div>
+            <div class="con">✗ 글자도 절반 잃어요</div>
+          </div>
+        </button>
+      </div>
+
+      <button class="title-start" disabled=${!picked} onClick=${start}>
+        ${picked === 'easy' ? '쉬운 모드로 시작 ▶'
+          : picked === 'hard' ? '어려운 모드로 시작 ▶'
+          : '모드를 선택해 주세요'}
+      </button>
+      <div class="title-hint">언제든지 본부에서 모드를 바꿀 수 있어요</div>
+    </div>
+  `;
+}
+
 function App() {
   const [state, dispatch] = useReducer(reducer, undefined, () => loadState() || freshState());
   const { mode: inputMode } = useInputMode();
@@ -3782,9 +4023,11 @@ function App() {
 
   return html`
     <div>
-      ${state.scene === 'base'
-        ? html`<${BaseScreen} state=${state} dispatch=${dispatch}/>`
-        : html`<${MissionScreen} state=${state} dispatch=${dispatch}/>`}
+      ${state.scene === 'title'
+        ? html`<${TitleScreen} state=${state} dispatch=${dispatch}/>`
+        : state.scene === 'base'
+          ? html`<${BaseScreen} state=${state} dispatch=${dispatch}/>`
+          : html`<${MissionScreen} state=${state} dispatch=${dispatch}/>`}
       ${state.extractedToast ? html`<div class="toast">${state.extractedToast}</div>` : ''}
     </div>
   `;
