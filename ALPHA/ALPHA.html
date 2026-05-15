@@ -1133,24 +1133,27 @@ const EMPTY_INV = () => {
   return o;
 };
 
+// 슬롯/스탯 한글 라벨 (UI 표시용; 내부 키는 그대로 weapon/bag/boots 유지)
+const SLOT_LABEL_KO = { weapon: '무기', bag: '가방', boots: '신발' };
+
 // === 장비 카탈로그 (id 기반) ===
 // 각 슬롯의 첫 항목 (tier 1)은 기본 장비 — 무료, 사망해도 잃지 않음
 const GEAR_CATALOG = {
   weapon: [
-    { id: 'pistol_1', name: 'Pistol Mk.I',  tier: 1, damage: 10, fireRate: 0.30, magazine: 12, cost: 0 },
-    { id: 'pistol_2', name: 'Pistol Mk.II', tier: 2, damage: 15, fireRate: 0.26, magazine: 14, cost: 80 },
-    { id: 'smg_1',    name: 'SMG',          tier: 2, damage: 7,  fireRate: 0.10, magazine: 25, cost: 200 },
-    { id: 'rifle_1',  name: 'Tactical Rifle',tier: 3, damage: 25, fireRate: 0.45, magazine: 8,  cost: 250 },
+    { id: 'pistol_1', name: '권총 1호',  tier: 1, damage: 10, fireRate: 0.30, magazine: 12, cost: 0 },
+    { id: 'pistol_2', name: '권총 2호',  tier: 2, damage: 15, fireRate: 0.26, magazine: 14, cost: 80 },
+    { id: 'smg_1',    name: '기관단총',  tier: 2, damage: 7,  fireRate: 0.10, magazine: 25, cost: 200 },
+    { id: 'rifle_1',  name: '전술 소총', tier: 3, damage: 25, fireRate: 0.45, magazine: 8,  cost: 250 },
   ],
   bag: [
-    { id: 'light',  name: 'Light Pack',  tier: 1, capacity: 10, cost: 0 },
-    { id: 'medium', name: 'Medium Pack', tier: 2, capacity: 20, cost: 60 },
-    { id: 'heavy',  name: 'Heavy Pack',  tier: 3, capacity: 30, cost: 150 },
+    { id: 'light',  name: '작은 가방', tier: 1, capacity: 10, cost: 0 },
+    { id: 'medium', name: '중간 가방', tier: 2, capacity: 20, cost: 60 },
+    { id: 'heavy',  name: '큰 가방',   tier: 3, capacity: 30, cost: 150 },
   ],
   boots: [
-    { id: 'worn',    name: 'Worn Sneakers', tier: 1, speedMul: 1.0,  cost: 0 },
-    { id: 'running', name: 'Running Shoes', tier: 2, speedMul: 1.25, cost: 100 },
-    { id: 'combat',  name: 'Combat Boots',  tier: 3, speedMul: 1.5,  cost: 250 },
+    { id: 'worn',    name: '낡은 운동화', tier: 1, speedMul: 1.0,  cost: 0 },
+    { id: 'running', name: '달리기화',    tier: 2, speedMul: 1.25, cost: 100 },
+    { id: 'combat',  name: '전투화',      tier: 3, speedMul: 1.5,  cost: 250 },
   ],
 };
 
@@ -1455,11 +1458,11 @@ function reducer(s, a) {
           missionCoins: 0,
           ownedGear: newOwned,
           equipped: newEquipped,
-          extractedToast: (kept > 0 ? `사망: ${kept}글자 회수 / ${lost} 손실` : `사망: 글자 손실`) + coinNote + lossNote,
+          extractedToast: (kept > 0 ? `사망: ${kept}글자 회수 / ${lost}글자 손실` : `사망: 글자를 모두 잃었어요`) + coinNote + lossNote,
         };
       }
       // manual abandon: 글자와 미션 코인 모두 잃음, 장비 유지
-      return { ...s, scene: 'base', missionInventory: EMPTY_INV(), missionCoins: 0, extractedToast: '미션 포기 - 글자 손실' };
+      return { ...s, scene: 'base', missionInventory: EMPTY_INV(), missionCoins: 0, extractedToast: '임무 포기 - 주운 글자를 모두 잃었어요' };
     }
     case 'CLEAR_TOAST':
       return { ...s, extractedToast: null };
@@ -1503,8 +1506,8 @@ function reducer(s, a) {
         coins: s.coins + reward + chapterBonus,
         extractedToast: allDone
           ? (chapterAdvanced
-              ? `챕터 클리어! 다음 챕터 "${chapterName}" 잠금 해제 +${reward + chapterBonus} 코인`
-              : `최종 챕터 완료! +${reward + chapterBonus} 코인`)
+              ? `${s.chapter}단계 완료! 다음 단계 "${chapterName}" 열림 +${reward + chapterBonus} 코인`
+              : `마지막 단계 완료! +${reward + chapterBonus} 코인`)
           : `"${w.word}" 제출! +${reward} 코인`,
       };
     }
@@ -3243,7 +3246,7 @@ function BaseScreen({ state, dispatch }) {
       <div class="base-header">
         <div class="base-title">
           ALPHACOV
-          <small>// BASE OF OPERATIONS</small>
+          <small>// 본부</small>
         </div>
         <div class="base-header-right">
           <div class="coin-display">
@@ -3260,7 +3263,7 @@ function BaseScreen({ state, dispatch }) {
       <!-- Quests -->
       <div class="panel">
         <div class="panel-head">
-          <span>QUESTS · CH.${state.chapter || 1} <span style="color: ${getChapterConfig(state.chapter || 1).color}; font-size: 11px;">${getChapterConfig(state.chapter || 1).name}</span></span>
+          <span>임무 · ${state.chapter || 1}단계 <span style="color: ${getChapterConfig(state.chapter || 1).color}; font-size: 11px;">${getChapterConfig(state.chapter || 1).name}</span></span>
           <span class="count">${state.quests.filter(q => q.completed).length}/${state.quests.length}</span>
         </div>
         <div class="quest-list">
@@ -3279,8 +3282,8 @@ function BaseScreen({ state, dispatch }) {
                     `)}
                   </span>
                   ${q.completed
-                    ? html`<span class="completed-tag">// COMPLETED</span>`
-                    : html`<button class="submit-btn" disabled=${!canSubmit} onClick=${() => dispatch({ type: 'SUBMIT_QUEST', questId: q.id })}>SUBMIT</button>`}
+                    ? html`<span class="completed-tag">// 완료</span>`
+                    : html`<button class="submit-btn" disabled=${!canSubmit} onClick=${() => dispatch({ type: 'SUBMIT_QUEST', questId: q.id })}>제출</button>`}
                 </div>
               </div>
             `;
@@ -3290,7 +3293,7 @@ function BaseScreen({ state, dispatch }) {
         <!-- 자유 제출 -->
         <div class="free-submit">
           <div class="free-submit-head">
-            FREE SUBMIT <span class="free-submit-rate">${state.language === 'en' ? 'reward: length × 4 coins' : '보상: 글자 수 × 4 코인'}</span>
+            단어 만들기 <span class="free-submit-rate">${state.language === 'en' ? 'reward: length × 4 coins' : '보상: 글자 수 × 4 코인'}</span>
           </div>
           <form class="free-submit-form" onSubmit=${(e) => {
             e.preventDefault();
@@ -3310,7 +3313,7 @@ function BaseScreen({ state, dispatch }) {
               autocomplete="off"
               spellcheck="false"
             />
-            <button class="free-submit-btn" type="submit">SUBMIT</button>
+            <button class="free-submit-btn" type="submit">제출</button>
           </form>
           ${state.freeSubmitted && state.freeSubmitted.length > 0 ? html`
             <div class="free-submit-history">
@@ -3327,8 +3330,8 @@ function BaseScreen({ state, dispatch }) {
       <!-- Inventory -->
       <div class="panel inventory-panel">
         <div class="panel-head">
-          <span>INVENTORY</span>
-          <span class="count">${totalLetters} LETTERS</span>
+          <span>글자 보관함</span>
+          <span class="count">${totalLetters} 글자</span>
         </div>
         <div class="inv-grid">
           ${Array.from({ length: 26 }, (_, i) => {
@@ -3347,8 +3350,8 @@ function BaseScreen({ state, dispatch }) {
       <!-- Item Inventory - 소유 장비 (클릭으로 장착) -->
       <div class="panel items-panel">
         <div class="panel-head">
-          <span>ITEMS</span>
-          <span class="count">${Object.values(state.ownedGear).reduce((a, b) => a + b.length, 0)} OWNED</span>
+          <span>아이템</span>
+          <span class="count">${Object.values(state.ownedGear).reduce((a, b) => a + b.length, 0)} 보유</span>
         </div>
         <div class="item-inv">
           ${['weapon', 'bag', 'boots'].flatMap(slot =>
@@ -3357,20 +3360,20 @@ function BaseScreen({ state, dispatch }) {
             const slot = item.slot;
             const equipped = state.equipped[slot] === item.id;
             const statLine = slot === 'weapon'
-              ? `DMG ${item.damage} · MAG ${item.magazine}`
+              ? `공격 ${item.damage} · 탄창 ${item.magazine}`
               : slot === 'bag'
-                ? `CAP ${item.capacity}`
-                : `SPD ${item.speedMul.toFixed(2)}x`;
+                ? `용량 ${item.capacity}`
+                : `속도 ${item.speedMul.toFixed(2)}x`;
             return html`
               <div class="item-card ${equipped ? 'equipped' : ''}"
                    onClick=${() => !equipped && dispatch({ type: 'EQUIP_GEAR', gearId: item.id })}>
                 <div class="item-card-head">
-                  <span class="item-card-slot">${slot.toUpperCase()}</span>
+                  <span class="item-card-slot">${SLOT_LABEL_KO[slot] || slot}</span>
                   <span class="item-card-tier">T${item.tier}</span>
                 </div>
                 <div class="item-card-name">${item.name}</div>
                 <div class="item-card-stats">${statLine}</div>
-                ${equipped ? html`<div class="item-card-badge">장착중</div>` : html`<div class="item-card-hint">클릭 장착</div>`}
+                ${equipped ? html`<div class="item-card-badge">장착중</div>` : html`<div class="item-card-hint">눌러서 장착</div>`}
               </div>
             `;
           })}
@@ -3383,20 +3386,20 @@ function BaseScreen({ state, dispatch }) {
       <!-- Equipment - 현재 장착 슬롯 -->
       <div class="panel equipment-panel">
         <div class="panel-head">
-          <span>EQUIPPED</span>
-          <span class="count">3 SLOTS</span>
+          <span>장착</span>
+          <span class="count">3 칸</span>
         </div>
         <div class="equip-slots">
           ${['weapon', 'bag', 'boots'].map(slot => {
             const equipped = GEAR_BY_ID[state.equipped[slot]];
             const statLine = slot === 'weapon'
-              ? `DMG ${equipped.damage} · ${(1/equipped.fireRate).toFixed(1)}/s · MAG ${equipped.magazine}`
+              ? `공격 ${equipped.damage} · ${(1/equipped.fireRate).toFixed(1)}/초 · 탄창 ${equipped.magazine}`
               : slot === 'bag'
-                ? `CAP ${equipped.capacity}`
-                : `SPD ${equipped.speedMul.toFixed(2)}x`;
+                ? `용량 ${equipped.capacity}`
+                : `속도 ${equipped.speedMul.toFixed(2)}x`;
             return html`
               <div class="equip-slot">
-                <div class="equip-slot-label">${slot.toUpperCase()}</div>
+                <div class="equip-slot-label">${SLOT_LABEL_KO[slot] || slot}</div>
                 <div class="equip-slot-body">
                   <span class="equip-slot-name">${equipped.name}</span>
                   <span class="equip-slot-tier">T${equipped.tier}</span>
@@ -3411,23 +3414,23 @@ function BaseScreen({ state, dispatch }) {
       <!-- Shop (구매 가능한 장비) -->
       <div class="panel shop-panel">
         <div class="panel-head">
-          <span>SHOP</span>
+          <span>상점</span>
           <span class="count">◈ ${state.coins || 0}</span>
         </div>
         <div class="shop-list">
           ${['weapon', 'bag', 'boots'].flatMap(slot =>
             GEAR_CATALOG[slot].filter(item => item.cost > 0 && !state.ownedGear[slot].includes(item.id)).map(item => {
               const statLine = slot === 'weapon'
-                ? `DMG ${item.damage} · RATE ${(1/item.fireRate).toFixed(1)}/s · MAG ${item.magazine}`
+                ? `공격 ${item.damage} · ${(1/item.fireRate).toFixed(1)}/초 · 탄창 ${item.magazine}`
                 : slot === 'bag'
-                  ? `CAP ${item.capacity}`
-                  : `SPD ${item.speedMul.toFixed(2)}x`;
+                  ? `용량 ${item.capacity}`
+                  : `속도 ${item.speedMul.toFixed(2)}x`;
               const affordable = (state.coins || 0) >= item.cost;
               return html`
                 <div class="shop-item ${affordable ? '' : 'locked'}">
                   <div style="flex: 1;">
                     <div class="shop-name">${item.name} <span class="shop-tier">T${item.tier}</span></div>
-                    <div class="shop-stats">${slot.toUpperCase()} · ${statLine}</div>
+                    <div class="shop-stats">${SLOT_LABEL_KO[slot] || slot} · ${statLine}</div>
                   </div>
                   <button class="shop-buy" disabled=${!affordable} onClick=${() => dispatch({ type: 'BUY_GEAR', gearId: item.id })}>
                     ◈ ${item.cost}
@@ -3446,10 +3449,10 @@ function BaseScreen({ state, dispatch }) {
       <div class="base-footer">
         <div class="footer-left">
           <div class="status-line">
-            STATUS: <span class="ok">READY</span> · COMPLETED ${state.completedCount} QUESTS · ${Object.values(state.baseInventory).reduce((a, b) => a + b, 0)} LETTERS
+            상태: <span class="ok">준비됨</span> · 완료한 임무 ${state.completedCount} · ${Object.values(state.baseInventory).reduce((a, b) => a + b, 0)} 글자
           </div>
           <div class="chapter-select">
-            <span class="chapter-select-label">SELECT CHAPTER:</span>
+            <span class="chapter-select-label">단계 선택:</span>
             ${CHAPTER_CONFIG.map((c, i) => {
               const ch = i + 1;
               const unlocked = ch <= (state.maxChapter || 1);
@@ -3463,7 +3466,7 @@ function BaseScreen({ state, dispatch }) {
                         style=${`--ch-color: ${c.color}; ${active ? `border-color: ${c.color}; color: ${c.color};` : ''}`}
                         onClick=${() => unlocked && dispatch({ type: 'SELECT_CHAPTER', chapter: ch })}>
                   <div class="chapter-btn-head">
-                    ${unlocked ? '' : '🔒 '}CH.${ch} ${c.name}
+                    ${unlocked ? '' : '🔒 '}${ch}단계 ${c.name}
                   </div>
                   <div class="chapter-btn-letters">
                     ${prevLetters.split('').map(l => html`<span class="ch-letter-prev">${l}</span>`)}
@@ -3475,7 +3478,7 @@ function BaseScreen({ state, dispatch }) {
           </div>
         </div>
         <button class="depart-btn" onClick=${() => dispatch({ type: 'DEPART' })}>
-          DEPART ▶
+          출발 ▶
         </button>
       </div>
     </div>
@@ -3634,7 +3637,7 @@ function MissionScreen({ state, dispatch }) {
         <!-- 상단: 좌측 QUESTS, 가운데 챕터 표시, 우측 EXTRACT 상태 -->
         <div class="hud-top">
           <div class="hud-quest">
-            <div class="hud-quest-label">QUESTS</div>
+            <div class="hud-quest-label">임무</div>
             <div class="hud-quest-text">
               ${state.quests.filter(q => !q.completed).slice(0, 1).map(q => {
                 const w = WORD_BY_ID[q.id];
@@ -3643,14 +3646,14 @@ function MissionScreen({ state, dispatch }) {
             </div>
           </div>
           <div class="hud-chapter" style=${`--ch-color: ${getChapterConfig(state.chapter || 1).color}`}>
-            <div class="hud-chapter-label">CHAPTER ${state.chapter}/${MAX_CHAPTER}</div>
+            <div class="hud-chapter-label">${state.chapter}단계 / ${MAX_CHAPTER}</div>
             <div class="hud-chapter-name">${getChapterConfig(state.chapter || 1).name}</div>
             ${(() => {
               const ch = state.chapter || 1;
               const letters = getChapterConfig(ch).letters || '';
               const prev = ch > 1 ? (CHAPTER_CONFIG[ch - 2]?.letters || '') : '';
               return html`
-                <div class="hud-chapter-letters-label">DROP POOL</div>
+                <div class="hud-chapter-letters-label">떨어지는 글자</div>
                 <div class="hud-chapter-letters">
                   ${letters.split('').map(l => html`
                     <span class=${prev.includes(l) ? 'ch-l-prev' : 'ch-l-new'}>${l}</span>
@@ -3659,7 +3662,7 @@ function MissionScreen({ state, dispatch }) {
               `;
             })()}
           </div>
-          ${canExtract ? html`<div class="hud-extract"><span style="color: var(--success);">▲ EXTRACT READY</span></div>` : ''}
+          ${canExtract ? html`<div class="hud-extract"><span style="color: var(--success);">▲ 탈출 가능</span></div>` : ''}
         </div>
 
         <!-- 우상: 미니맵 -->
@@ -3669,31 +3672,31 @@ function MissionScreen({ state, dispatch }) {
 
         <!-- 하단 중앙: 큰 HP 바 -->
         <div class="hud-hp-center">
-          <div class="hud-hp-label">HP</div>
+          <div class="hud-hp-label">체력</div>
           <div class="hud-hp-bar">
             <div class="hud-hp-fill" style="width: ${(hpState.hp / hpState.max) * 100}%; background: ${hpState.hp > 50 ? '#5fa85f' : hpState.hp > 25 ? '#d4a647' : '#d44a47'}"></div>
           </div>
           <div class="hud-hp-text">${hpState.hp} / ${hpState.max}</div>
         </div>
 
-        <!-- 하단 좌측: BAG 카운터 + BOUNTY + PACK 알파벳 -->
+        <!-- 하단 좌측: 가방 카운터 + 코인 + 주운 글자 -->
         <div class="hud-bottom-left">
           <div class="hud-bag">
-            BAG <b>${bagTotal}</b><span style="color: var(--text-mute);"> / ${GEAR_BY_ID[state.equipped.bag].capacity}</span>
+            가방 <b>${bagTotal}</b><span style="color: var(--text-mute);"> / ${GEAR_BY_ID[state.equipped.bag].capacity}</span>
           </div>
           ${(state.missionCoins || 0) > 0 ? html`
             <div class="hud-bounty ${bountyFlash ? 'flash' : ''}">
               <span class="bounty-icon">◈</span>
-              <span>BOUNTY <b>${state.missionCoins}</b></span>
+              <span>코인 <b>${state.missionCoins}</b></span>
             </div>
           ` : ''}
           <div class="hud-inv">
-            <div class="hud-inv-label">PACK</div>
+            <div class="hud-inv-label">주운 글자</div>
             <div class="hud-inv-letters">
               ${Object.entries(state.missionInventory).filter(([l, n]) => n > 0).map(([l, n]) => html`
                 <div class="hud-letter"><b>${l}</b>×${n}</div>
               `)}
-              ${bagTotal === 0 ? html`<div style="color: var(--text-mute); font-family: var(--font-mono); font-size: 11px;">EMPTY</div>` : ''}
+              ${bagTotal === 0 ? html`<div style="color: var(--text-mute); font-family: var(--font-mono); font-size: 11px;">비어있음</div>` : ''}
             </div>
           </div>
         </div>
@@ -3706,7 +3709,7 @@ function MissionScreen({ state, dispatch }) {
               : html`<span class="ammo-num" style="color: ${ammoState.ammo === 0 ? '#d44a47' : 'var(--accent)'};">${ammoState.ammo}</span><span style="color: var(--text-mute); font-size: 16px;"> / ${ammoState.max}</span><span style="color: var(--text-mute); font-size: 10px; margin-left: 6px;">[R]</span>`}
           </div>
           <div class="hud-actions">
-            <button class="hud-btn" onClick=${() => setPaused(true)}>≡ MENU</button>
+            <button class="hud-btn" onClick=${() => setPaused(true)}>≡ 메뉴</button>
           </div>
         </div>
 
@@ -3716,7 +3719,7 @@ function MissionScreen({ state, dispatch }) {
             <div class="extract-progress-bar">
               <div class="extract-progress-fill" style="width: ${(extractProgress.progress / extractProgress.duration) * 100}%"></div>
             </div>
-            <div class="extract-hint">STAY IN ZONE</div>
+            <div class="extract-hint">이 자리에 가만히 있어!</div>
           </div>
         ` : ''}
 
@@ -3729,18 +3732,18 @@ function MissionScreen({ state, dispatch }) {
 
         ${isDead ? html`
           <div class="death-overlay">
-            <div class="death-title">DEAD</div>
-            <div class="death-sub">베이스로 복귀 중...</div>
+            <div class="death-title">사망</div>
+            <div class="death-sub">본부로 돌아가는 중...</div>
           </div>
         ` : ''}
 
         ${paused ? html`
           <div class="pause-overlay">
-            <div class="pause-title">PAUSED</div>
-            <button class="pause-btn" onClick=${() => setPaused(false)}>RESUME</button>
-            <button class="pause-btn danger" onClick=${abandon}>ABANDON MISSION</button>
+            <div class="pause-title">잠시 멈춤</div>
+            <button class="pause-btn" onClick=${() => setPaused(false)}>계속하기</button>
+            <button class="pause-btn danger" onClick=${abandon}>임무 포기</button>
             <div style="font-family: var(--font-mono); font-size: 11px; color: var(--text-mute); margin-top: 12px;">
-              포기 시 가져온 글자를 모두 잃습니다 (캐주얼 모드)
+              포기하면 주운 글자를 모두 잃어요
             </div>
           </div>
         ` : ''}
