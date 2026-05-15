@@ -117,7 +117,7 @@
   .coin-display .coin-icon { font-size: 16px; }
   .coin-display .coin-amount { font-weight: bold; letter-spacing: 0.05em; }
   .lang-switch button:not(.active) { cursor: pointer; }
-  .lang-switch button:not(.active):hover { color: var(--text); }
+  body:not(.input-touch) .lang-switch button:not(.active):hover { color: var(--text); }
 
   .panel {
     background: var(--panel);
@@ -196,7 +196,7 @@
     letter-spacing: 0.1em;
     cursor: pointer;
   }
-  .free-submit-btn:hover { background: #e0b558; }
+  body:not(.input-touch) .free-submit-btn:hover { background: #e0b558; }
   .free-submit-history {
     display: flex;
     flex-wrap: wrap;
@@ -246,7 +246,7 @@
     color: var(--accent);
     background: rgba(212, 166, 71, 0.08);
   }
-  .quest .submit-btn:hover { background: rgba(212, 166, 71, 0.2); }
+  body:not(.input-touch) .quest .submit-btn:hover { background: rgba(212, 166, 71, 0.2); }
   .quest .submit-btn:disabled { opacity: 0.3; border-color: var(--line-2); color: var(--text-mute); cursor: not-allowed; background: none;}
   .quest .needed {
     display: inline-flex; gap: 2px; font-family: var(--font-mono); font-size: 11px;
@@ -347,7 +347,7 @@
     font-size: 10px;
     cursor: pointer;
   }
-  .gear-pick:hover { border-color: var(--accent); color: var(--text); }
+  body:not(.input-touch) .gear-pick:hover { border-color: var(--accent); color: var(--text); }
   .gear-pick.equipped { border-color: var(--accent); background: rgba(212, 166, 71, 0.15); color: var(--accent); }
   /* EQUIPPED 슬롯 (간단 표시) */
   .equip-slots { display: flex; flex-direction: column; gap: 4px; }
@@ -390,7 +390,7 @@
     transition: all 0.15s;
     position: relative;
   }
-  .item-card:hover:not(.equipped) {
+  body:not(.input-touch) .item-card:hover:not(.equipped) {
     border-color: var(--accent);
     background: rgba(212, 166, 71, 0.08);
   }
@@ -463,7 +463,7 @@
     text-align: left;
     min-width: 160px;
   }
-  .chapter-btn:hover:not(.locked):not(.active) {
+  body:not(.input-touch) .chapter-btn:hover:not(.locked):not(.active) {
     border-color: var(--accent);
     color: var(--text);
   }
@@ -518,7 +518,7 @@
     font-weight: bold;
     cursor: pointer;
   }
-  .shop-buy:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
+  body:not(.input-touch) .shop-buy:hover:not(:disabled) { background: var(--accent); color: var(--bg); }
   .shop-buy:disabled { opacity: 0.4; cursor: not-allowed; }
   .shop-hint { font-family: var(--font-mono); font-size: 10px; color: var(--text-mute); padding: 8px; text-align: center; opacity: 0.7; }
 
@@ -543,7 +543,7 @@
     border: 2px solid var(--accent);
     transition: all .12s;
   }
-  .depart-btn:hover {
+  body:not(.input-touch) .depart-btn:hover {
     background: var(--accent-2);
     box-shadow: 0 0 20px rgba(212, 166, 71, 0.4);
   }
@@ -554,6 +554,9 @@
     position: absolute;
     inset: 0;
     overflow: hidden;
+    /* cursor는 inputMode에 따라 동적으로 결정 — .mission.mode-mouse 일 때만 숨김 */
+  }
+  .mission.mode-mouse {
     cursor: none;
   }
   .mission canvas {
@@ -3188,12 +3191,42 @@ function Joystick({ side = 'left', onMove }) {
   `;
 }
 
-function useIsTouch() {
-  const [t, setT] = useState(false);
+// 입력 모드 감지: 하이브리드 노트북(터치 + 마우스/터치패드)에서 마지막 사용한 입력 추적
+// - hasTouch: 디바이스가 터치 지원하는지 (정적)
+// - mode: 마지막으로 사용한 입력 ('touch' | 'mouse')
+//   터치 시 → 'touch' (조이스틱 표시, cursor 보임)
+//   마우스/터치패드 이동 시 → 'mouse' (aim cursor 표시, cursor:none)
+function useInputMode() {
+  const hasTouch = (typeof window !== 'undefined') &&
+    ('ontouchstart' in window || (navigator.maxTouchPoints || 0) > 0);
+  // 초기값: 터치 가능 디바이스면 'touch'로 추정, 그 외엔 'mouse'
+  const [mode, setMode] = useState(hasTouch ? 'touch' : 'mouse');
   useEffect(() => {
-    setT('ontouchstart' in window || navigator.maxTouchPoints > 0);
-  }, []);
-  return t;
+    // 마지막 모드를 ref처럼 기록해서 동일 모드 중복 setState 회피
+    let last = hasTouch ? 'touch' : 'mouse';
+    const onPointer = (e) => {
+      // pointerType: 'mouse' | 'pen' | 'touch'
+      const nm = (e.pointerType === 'mouse' || e.pointerType === 'pen') ? 'mouse' : 'touch';
+      if (nm !== last) {
+        last = nm;
+        setMode(nm);
+      }
+    };
+    // pointerdown/pointermove 모두 추적
+    window.addEventListener('pointerdown', onPointer, { passive: true });
+    window.addEventListener('pointermove', onPointer, { passive: true });
+    return () => {
+      window.removeEventListener('pointerdown', onPointer);
+      window.removeEventListener('pointermove', onPointer);
+    };
+  }, [hasTouch]);
+  return { hasTouch, mode };
+}
+
+// 기존 호환 — isTouch 단일 boolean이 필요한 경우
+function useIsTouch() {
+  const { mode } = useInputMode();
+  return mode === 'touch';
 }
 
 /* =========================================================================
@@ -3454,7 +3487,8 @@ function MissionScreen({ state, dispatch }) {
   const worldRef = useRef(null);
   const moveRef = useRef({ x: 0, z: 0 });
   const keys = useKeyboard();
-  const isTouch = useIsTouch();
+  const { hasTouch, mode: inputMode } = useInputMode();
+  const isTouch = inputMode === 'touch';
   const minimapRef = useRef(null);
   const aimRef = useRef(null);
   const [ammoState, setAmmoState] = useState({ ammo: 12, max: 12, reloading: false });
@@ -3587,10 +3621,10 @@ function MissionScreen({ state, dispatch }) {
   );
 
   return html`
-    <div class="mission">
+    <div class="mission mode-${inputMode}">
       <canvas ref=${canvasRef}></canvas>
 
-      ${!isTouch ? html`
+      ${inputMode === 'mouse' ? html`
         <div class="aim-cursor ${ammoState.reloading ? 'reloading' : ''} ${ammoState.ammo === 0 ? 'empty' : ''}" ref=${aimRef}>
           <i class="t"></i><i class="b"></i><i class="l"></i><i class="r"></i>
         </div>
@@ -3686,7 +3720,7 @@ function MissionScreen({ state, dispatch }) {
           </div>
         ` : ''}
 
-        ${isTouch ? html`
+        ${hasTouch && inputMode === 'touch' ? html`
           <${Joystick} side="left" onMove=${onJoystick}/>
           <${Joystick} side="right" onMove=${onAimJoystick}/>
         ` : ''}
@@ -3717,6 +3751,7 @@ function MissionScreen({ state, dispatch }) {
 
 function App() {
   const [state, dispatch] = useReducer(reducer, undefined, () => loadState() || freshState());
+  const { mode: inputMode } = useInputMode();
 
   // 자동 저장
   useEffect(() => {
@@ -3729,6 +3764,18 @@ function App() {
     const id = setTimeout(() => dispatch({ type: 'CLEAR_TOAST' }), 1800);
     return () => clearTimeout(id);
   }, [state.extractedToast]);
+
+  // 입력 모드를 body class로 노출 — CSS :hover sticky 방지용
+  useEffect(() => {
+    const cls = document.body.classList;
+    if (inputMode === 'touch') {
+      cls.add('input-touch');
+      cls.remove('input-mouse');
+    } else {
+      cls.add('input-mouse');
+      cls.remove('input-touch');
+    }
+  }, [inputMode]);
 
   return html`
     <div>
