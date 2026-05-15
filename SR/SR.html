@@ -272,7 +272,7 @@
     background: rgba(255, 216, 74, 1);
   }
   #joystick-base::after {
-    content: 'MOVE';
+    content: 'AIM';
     position: absolute;
     top: -22px; left: 50%;
     transform: translateX(-50%);
@@ -417,8 +417,8 @@
   <div class="start">▶ CLICK TO START</div>
   <div class="controls">
     상단에 표시된 단어를 <b>순서대로</b> 맞히세요<br>
-    <b>마우스:</b> <span class="kbd">W</span><span class="kbd">A</span><span class="kbd">S</span><span class="kbd">D</span> 이동 · 마우스 조준 · 좌클릭 발사<br>
-    <b>터치:</b> 좌측 조이스틱 이동 · 우측 드래그 조준 · <span style="color:#ff8080">FIRE</span> 버튼 발사<br>
+    <b>마우스:</b> 마우스 조준 · 좌클릭 발사<br>
+    <b>터치:</b> 좌측 조이스틱으로 <b style="color:#ffd84a">에임 조준</b> · <span style="color:#ff8080">FIRE</span> 버튼 또는 화면 탭으로 발사<br>
     단어를 완성할 때마다 표적이 움직이기 시작합니다!
   </div>
 </div>
@@ -1160,49 +1160,27 @@ function isGameActive() {
     joyStick.style.transform = `translate(${cdx}px, ${cdy}px)`;
   }
   
-  // Aim drag area
+  // Aim area: tap to fire (drag-to-aim removed; joystick handles aim now)
+  let aimDownX = 0, aimDownY = 0, aimDownTime = 0, aimDownId = -1;
   aimArea.addEventListener('pointerdown', e => {
-    if (e.pointerType === 'mouse' && inputMode !== 'touch') return;
     e.preventDefault();
     aimArea.setPointerCapture(e.pointerId);
-    touchInput.aim.active = true;
-    touchInput.aim.pointerId = e.pointerId;
-    touchInput.aim.lastX = e.clientX;
-    touchInput.aim.lastY = e.clientY;
-  });
-  aimArea.addEventListener('pointermove', e => {
-    if (e.pointerId !== touchInput.aim.pointerId) return;
-    const dx = e.clientX - touchInput.aim.lastX;
-    const dy = e.clientY - touchInput.aim.lastY;
-    touchInput.aim.lastX = e.clientX;
-    touchInput.aim.lastY = e.clientY;
-    
-    player.yaw -= dx * 0.005;
-    player.pitch -= dy * 0.005;
-    const lim = Math.PI / 2 - 0.01;
-    player.pitch = Math.max(-lim, Math.min(lim, player.pitch));
-  });
-  const endAim = (e) => {
-    if (e.pointerId !== touchInput.aim.pointerId) return;
-    touchInput.aim.active = false;
-    touchInput.aim.pointerId = null;
-  };
-  aimArea.addEventListener('pointerup', endAim);
-  aimArea.addEventListener('pointercancel', endAim);
-  
-  // Tap-on-aim-area-without-drag = fire (alternative to fire button)
-  let aimDownX = 0, aimDownY = 0, aimDownTime = 0;
-  aimArea.addEventListener('pointerdown', e => {
     aimDownX = e.clientX;
     aimDownY = e.clientY;
     aimDownTime = performance.now();
+    aimDownId = e.pointerId;
   });
   aimArea.addEventListener('pointerup', e => {
+    if (e.pointerId !== aimDownId) return;
+    aimDownId = -1;
     const dist = Math.hypot(e.clientX - aimDownX, e.clientY - aimDownY);
     const elapsed = performance.now() - aimDownTime;
-    if (dist < 8 && elapsed < 250 && isGameActive()) {
+    if (dist < 10 && elapsed < 300 && isGameActive()) {
       shoot();
     }
+  });
+  aimArea.addEventListener('pointercancel', e => {
+    if (e.pointerId === aimDownId) aimDownId = -1;
   });
   
   // Fire button
@@ -1369,6 +1347,20 @@ let bobTime = 0;
 function update(dt) {
   if (!isGameActive()) return;
   
+  // Joystick = aim only (rate-based per frame, like a controller right-stick)
+  if (touchInput.joystick.active) {
+    const AIM_YAW_SPEED = 2.6;    // rad/sec at full deflection
+    const AIM_PITCH_SPEED = 2.0;
+    // Apply small dead-zone so the camera doesn't drift on a centered stick
+    const deadzone = 0.08;
+    const jdx = Math.abs(touchInput.joystick.dx) < deadzone ? 0 : touchInput.joystick.dx;
+    const jdy = Math.abs(touchInput.joystick.dy) < deadzone ? 0 : touchInput.joystick.dy;
+    player.yaw   -= jdx * AIM_YAW_SPEED   * dt;
+    player.pitch -= jdy * AIM_PITCH_SPEED * dt;
+    const lim = Math.PI / 2 - 0.01;
+    player.pitch = Math.max(-lim, Math.min(lim, player.pitch));
+  }
+  
   camera.quaternion.setFromEuler(new THREE.Euler(player.pitch, player.yaw, 0, 'YXZ'));
   
   const fwd = new THREE.Vector3(-Math.sin(player.yaw), 0, -Math.cos(player.yaw));
@@ -1376,12 +1368,8 @@ function update(dt) {
   
   const moveSpeed = 4.5;
   
-  // Combine keyboard + joystick input into (inputX, inputY) where Y- is forward
+  // Movement: keyboard only (joystick no longer contributes)
   let inputX = 0, inputY = 0;
-  if (touchInput.joystick.active) {
-    inputX += touchInput.joystick.dx;
-    inputY += touchInput.joystick.dy;
-  }
   if (keys['KeyW']) inputY -= 1;
   if (keys['KeyS']) inputY += 1;
   if (keys['KeyA']) inputX -= 1;

@@ -2789,13 +2789,30 @@ class World {
     this.renderer.render(this.scene, this.camera);
     // 미니맵은 매 ~3프레임마다 (성능)
     this._minimapFrame = (this._minimapFrame || 0) + 1;
-    if (this._minimapCtx && this._minimapFrame % 3 === 0) this._drawMinimap();
+    if (this._isMinimapValid() && this._minimapFrame % 3 === 0) this._drawMinimap();
     this._raf = requestAnimationFrame(this._tick);
   }
 
   setMinimapCanvas(canvas) {
+    if (!canvas) {
+      // 언마운트 시 호출 — 그리기를 중단하기만 함 (다시 등록될 때까지)
+      this._minimapCanvas = null;
+      this._minimapCtx = null;
+      return;
+    }
+    // 같은 canvas가 다시 들어오면 무시 (idempotent)
+    if (canvas === this._minimapCanvas && this._minimapCtx) return;
     this._minimapCanvas = canvas;
     this._minimapCtx = canvas.getContext('2d');
+    // 등록 즉시 1프레임 그려서 빈 검은 화면 시간을 최소화
+    if (this.mazeGrid) {
+      try { this._drawMinimap(); } catch (e) {}
+    }
+  }
+
+  // _drawMinimap에서 canvas가 분리됐는지 안전 가드
+  _isMinimapValid() {
+    return !!(this._minimapCtx && this._minimapCanvas && this._minimapCanvas.isConnected);
   }
 
   _drawMinimap() {
@@ -3677,7 +3694,14 @@ function MissionScreen({ state, dispatch }) {
   const keys = useKeyboard();
   const { hasTouch, mode: inputMode } = useInputMode();
   const isTouch = inputMode === 'touch';
-  const minimapRef = useRef(null);
+  // 미니맵 callback ref — Preact가 canvas를 (재)mount할 때마다 호출됨
+  // 입력 모드 전환 시 Preact가 형제 매칭을 재배치하면서 canvas가
+  // 재생성될 수 있는데, 그 경우에도 World에 새 canvas를 즉시 등록.
+  const minimapCanvasNode = useRef(null);
+  const setMinimapRef = (node) => {
+    minimapCanvasNode.current = node;
+    if (worldRef.current) worldRef.current.setMinimapCanvas(node);
+  };
   const aimRef = useRef(null);
   const [ammoState, setAmmoState] = useState({ ammo: 12, max: 12, reloading: false });
   const [hpState, setHpState] = useState({ hp: 100, max: 100 });
@@ -3739,7 +3763,7 @@ function MissionScreen({ state, dispatch }) {
     }, gear);
     worldRef.current = w;
     w.buildMap(state.missionSeed, getChapterConfig(state.chapter || 1));
-    if (minimapRef.current) w.setMinimapCanvas(minimapRef.current);
+    if (minimapCanvasNode.current) w.setMinimapCanvas(minimapCanvasNode.current);
     w.start();
     return () => {
       w.stop();
@@ -3852,7 +3876,7 @@ function MissionScreen({ state, dispatch }) {
 
         <!-- 우상: 미니맵 -->
         <div class="hud-minimap">
-          <canvas ref=${minimapRef} width="180" height="180"></canvas>
+          <canvas ref=${setMinimapRef} width="180" height="180"></canvas>
         </div>
 
         <!-- 하단 중앙: 큰 HP 바 -->
