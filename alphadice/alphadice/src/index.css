@@ -1,0 +1,238 @@
+:root {
+  --color-bg-deep: #1a1410;
+  --color-bg-warm: #2b1f17;
+  --color-stone: #d4c4a0;
+  --color-stone-shadow: #8a7a5e;
+  --color-parchment: #f5ebd3;
+  --color-parchment-shadow: #c4b797;
+  --color-blood: #c9302c;
+  --color-blood-dark: #8b1f1c;
+  --color-blood-bright: #ff3838;
+  --color-gold: #e8b923;
+  --color-gold-dark: #a07d0a;
+  --color-knight: #2d6a4f;
+  --color-knight-light: #52b788;
+  --color-mage: #5a3a8c;
+  --color-mage-light: #9d7ad6;
+  --color-rogue: #3a2a4a;
+  --color-rogue-light: #a677d4;
+  --color-bone: #f0e6d2;
+  --color-bone-shadow: #b8a785;
+  --color-ink: #1a1410;
+
+  --font-arcade: "Press Start 2P", monospace;
+  --font-display: "Jua", "DotGothic16", sans-serif;
+  --font-pixel: "DotGothic16", "Jua", monospace;
+
+  --shadow-pixel-sm: 2px 2px 0 rgba(0, 0, 0, 0.6);
+  --shadow-pixel: 4px 4px 0 rgba(0, 0, 0, 0.5);
+  --shadow-pixel-lg: 6px 6px 0 rgba(0, 0, 0, 0.4);
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+}
+
+body {
+  font-family: var(--font-display);
+  color: var(--color-ink);
+  background: var(--color-bg-deep);
+  overscroll-behavior: none;
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  cursor: pointer;
+  background: none;
+  color: inherit;
+  font-size: inherit;
+}
+
+#root {
+  position: relative;
+}
+
+/* ====== Shared utility classes ====== */
+
+.screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.no-select {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.canvas-container {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #87b4d3 0%, #c9b89b 60%, #b09778 100%);
+}
+
+/* ====== HUD overlays ====== */
+
+.hud-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 16px;
+}
+
+.hud-layer > * {
+  pointer-events: auto;
+}
+
+/* ====== Pixel-style panel ====== */
+
+.panel {
+  background: var(--color-parchment);
+  border: 4px solid var(--color-ink);
+  box-shadow: var(--shadow-pixel);
+  padding: 12px;
+  position: relative;
+}
+
+.panel::before {
+  content: "";
+  position: absolute;
+  inset: 2px;
+  border: 1px solid var(--color-parchment-shadow);
+  pointer-events: none;
+}
+
+/* ====== Pixel buttons ====== */
+
+.btn-pixel {
+  background: var(--color-blood);
+  color: white;
+  border: 3px solid var(--color-ink);
+  box-shadow: var(--shadow-pixel-sm);
+  padding: 10px 16px;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: bold;
+  transition: transform 80ms ease, box-shadow 80ms ease;
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.3);
+}
+
+.btn-pixel:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.6);
+}
+
+.btn-pixel:active:not(:disabled) {
+  transform: translate(2px, 2px);
+  box-shadow: 0 0 0 rgba(0, 0, 0, 0);
+}
+
+.btn-pixel:disabled {
+  background: #888;
+  color: #ddd;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.btn-pixel.gold {
+  background: var(--color-gold);
+  color: var(--color-ink);
+  text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+.btn-pixel.stone {
+  background: var(--color-stone);
+  color: var(--color-ink);
+  text-shadow: none;
+}
+
+/* ====== Animations ====== */
+
+@keyframes float-up {
+  0% {
+    transform: translate(-50%, 0);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-50%, -80px);
+    opacity: 0;
+  }
+}
+
+@keyframes shake-x {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@keyframes bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+@keyframes flash-red {
+  0%, 100% { background-color: var(--color-parchment); }
+  50% { background-color: #ff7070; }
+}
+
+@keyframes pop {
+  0% { transform: scale(0.5); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+/* Dice roll — combined rotate + bounce + brief blur to sell physicality.
+   Used by unlocked, unused dice when the player rerolls. Duration is
+   ~450ms so the player can still scan letters quickly. */
+@keyframes dice-roll {
+  0%   { transform: translateY(0) rotate(0deg) scale(1);     filter: blur(0); }
+  20%  { transform: translateY(-12px) rotate(180deg) scale(0.85); filter: blur(1px); }
+  50%  { transform: translateY(-6px) rotate(540deg) scale(0.95); filter: blur(0.5px); }
+  75%  { transform: translateY(-2px) rotate(680deg) scale(1.05); filter: blur(0); }
+  100% { transform: translateY(0) rotate(720deg) scale(1);   filter: blur(0); }
+}
+
+/* Locked-dice subtle shake — signals "this one isn't rerolling" while
+   neighbors are airborne. ~280ms, less intrusive than dice-roll. */
+@keyframes dice-jiggle {
+  0%, 100% { transform: translateX(0); }
+  25%      { transform: translateX(-2px); }
+  75%      { transform: translateX(2px); }
+}
+
+/* Cast pop — fired when a die transitions from "free" to "used" because
+   a skill consumed it. Brief scale-burst + golden glow that settles into
+   the greyed-out spent state. ~360ms so it lands during the dash-out
+   frame of the attack sequence. */
+@keyframes dice-pop {
+  0%   { transform: scale(1);     box-shadow: 0 0 0 rgba(252,230,173,0); }
+  35%  { transform: scale(1.35);  box-shadow: 0 0 16px rgba(252,230,173,0.95); }
+  65%  { transform: scale(1.1);   box-shadow: 0 0 8px rgba(252,230,173,0.5); }
+  100% { transform: scale(1);     box-shadow: 0 0 0 rgba(252,230,173,0); }
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
