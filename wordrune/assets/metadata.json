@@ -1,0 +1,392 @@
+{
+  "hero_knight_idle": {
+    "src": "assets/hero/knight_idle.png",
+    "frameW": 32,
+    "frameH": 40,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "hero_knight_walk": {
+    "src": "assets/hero/knight_walk.png",
+    "frameW": 32,
+    "frameH": 40,
+    "frames": 10,
+    "fps": 12,
+    "loop": true
+  },
+  "hero_knight_attack": {
+    "src": "assets/hero/knight_attack.png",
+    "frameW": 36,
+    "frameH": 40,
+    "frames": 6,
+    "fps": 14,
+    "loop": false
+  },
+  "hero_mage_idle": {
+    "src": "assets/hero/mage_idle.png",
+    "frameW": 22,
+    "frameH": 36,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "hero_mage_walk": {
+    "src": "assets/hero/mage_walk.png",
+    "frameW": 22,
+    "frameH": 36,
+    "frames": 5,
+    "fps": 10,
+    "loop": true
+  },
+  "hero_mage_attack": {
+    "src": "assets/hero/mage_attack.png",
+    "frameW": 26,
+    "frameH": 36,
+    "frames": 12,
+    "fps": 16,
+    "loop": false
+  },
+  "hero_archer_idle": {
+    "src": "assets/hero/archer_idle.png",
+    "frameW": 28,
+    "frameH": 34,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "hero_archer_walk": {
+    "src": "assets/hero/archer_walk.png",
+    "frameW": 28,
+    "frameH": 34,
+    "frames": 10,
+    "fps": 12,
+    "loop": true
+  },
+  "hero_archer_attack": {
+    "src": "assets/hero/archer_attack.png",
+    "frameW": 30,
+    "frameH": 34,
+    "frames": 10,
+    "fps": 14,
+    "loop": false
+  },
+  "fx_arrow": {
+    "src": "assets/fx/arrow.png",
+    "frameW": 24,
+    "frameH": 32,
+    "frames": 6,
+    "fps": 12,
+    "loop": true
+  },
+  "hero_rogue_idle": {
+    "src": "assets/hero/rogue_idle.png",
+    "frameW": 30,
+    "frameH": 34,
+    "frames": 6,
+    "fps": 8,
+    "loop": true
+  },
+  "hero_rogue_walk": {
+    "src": "assets/hero/rogue_walk.png",
+    "frameW": 30,
+    "frameH": 34,
+    "frames": 10,
+    "fps": 12,
+    "loop": true
+  },
+  "hero_rogue_attack": {
+    "src": "assets/hero/rogue_attack.png",
+    "frameW": 74,
+    "frameH": 34,
+    "frames": 7,
+    "fps": 14,
+    "loop": false
+  },
+  "fx_fireball": {
+    "src": "assets/fx/fireball.png",
+    "frameW": 24,
+    "frameH": 32,
+    "frames": 20,
+    "fps": 14,
+    "loop": true
+  },
+  "enemies_rat_idle": {
+    "src": "assets/enemies/rat_idle.png",
+    "frameW": 28,
+    "frameH": 22,
+    "frames": 12,
+    "fps": 10,
+    "loop": true
+  },
+  "enemies_rat_attack": {
+    "src": "assets/enemies/rat_attack.png",
+    "frameW": 30,
+    "frameH": 22,
+    "frames": 6,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_rat_dying": {
+    "src": "assets/enemies/rat_dying.png",
+    "frameW": 28,
+    "frameH": 22,
+    "frames": 10,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_golem_idle": {
+    "src": "assets/enemies/golem_idle.png",
+    "frameW": 32,
+    "frameH": 36,
+    "frames": 6,
+    "fps": 6,
+    "loop": true
+  },
+  "enemies_golem_attack": {
+    "src": "assets/enemies/golem_attack.png",
+    "frameW": 38,
+    "frameH": 36,
+    "frames": 10,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_golem_dying": {
+    "src": "assets/enemies/golem_dying.png",
+    "frameW": 40,
+    "frameH": 36,
+    "frames": 20,
+    "fps": 10,
+    "loop": false
+  },
+  "enemies_beholder_idle": {
+    "src": "assets/enemies/beholder_idle.png",
+    "frameW": 28,
+    "frameH": 38,
+    "frames": 18,
+    "fps": 12,
+    "loop": true
+  },
+  "enemies_beholder_attack": {
+    "src": "assets/enemies/beholder_attack.png",
+    "frameW": 28,
+    "frameH": 38,
+    "frames": 9,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_beholder_dying": {
+    "src": "assets/enemies/beholder_dying.png",
+    "frameW": 24,
+    "frameH": 38,
+    "frames": 18,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_stinger_idle": {
+    "src": "assets/enemies/stinger_idle.png",
+    "frameW": 32,
+    "frameH": 40,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_stinger_attack": {
+    "src": "assets/enemies/stinger_attack.png",
+    "frameW": 34,
+    "frameH": 40,
+    "frames": 10,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_stinger_dying": {
+    "src": "assets/enemies/stinger_dying.png",
+    "frameW": 44,
+    "frameH": 40,
+    "frames": 16,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_skeleton_idle": {
+    "src": "assets/enemies/skeleton_idle.png",
+    "frameW": 32,
+    "frameH": 34,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_skeleton_attack": {
+    "src": "assets/enemies/skeleton_attack.png",
+    "frameW": 68,
+    "frameH": 34,
+    "frames": 7,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_skeleton_dying": {
+    "src": "assets/enemies/skeleton_dying.png",
+    "frameW": 32,
+    "frameH": 34,
+    "frames": 14,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_slime_idle": {
+    "src": "assets/enemies/slime_idle.png",
+    "frameW": 30,
+    "frameH": 32,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_slime_attack": {
+    "src": "assets/enemies/slime_attack.png",
+    "frameW": 32,
+    "frameH": 32,
+    "frames": 7,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_slime_dying": {
+    "src": "assets/enemies/slime_dying.png",
+    "frameW": 32,
+    "frameH": 32,
+    "frames": 14,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_mummy_idle": {
+    "src": "assets/enemies/mummy_idle.png",
+    "frameW": 32,
+    "frameH": 66,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_mummy_attack": {
+    "src": "assets/enemies/mummy_attack.png",
+    "frameW": 40,
+    "frameH": 66,
+    "frames": 6,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_mummy_dying": {
+    "src": "assets/enemies/mummy_dying.png",
+    "frameW": 40,
+    "frameH": 66,
+    "frames": 11,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_kina_idle": {
+    "src": "assets/enemies/kina_idle.png",
+    "frameW": 32,
+    "frameH": 38,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_kina_attack": {
+    "src": "assets/enemies/kina_attack.png",
+    "frameW": 38,
+    "frameH": 38,
+    "frames": 8,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_kina_dying": {
+    "src": "assets/enemies/kina_dying.png",
+    "frameW": 44,
+    "frameH": 38,
+    "frames": 12,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_summoner_idle": {
+    "src": "assets/enemies/summoner_idle.png",
+    "frameW": 34,
+    "frameH": 34,
+    "frames": 12,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_summoner_attack": {
+    "src": "assets/enemies/summoner_attack.png",
+    "frameW": 36,
+    "frameH": 34,
+    "frames": 9,
+    "fps": 14,
+    "loop": false
+  },
+  "enemies_summoner_dying": {
+    "src": "assets/enemies/summoner_dying.png",
+    "frameW": 34,
+    "frameH": 34,
+    "frames": 12,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_dragon_idle": {
+    "src": "assets/enemies/dragon_idle.png",
+    "frameW": 62,
+    "frameH": 72,
+    "frames": 14,
+    "fps": 8,
+    "loop": true
+  },
+  "enemies_dragon_attack": {
+    "src": "assets/enemies/dragon_attack.png",
+    "frameW": 92,
+    "frameH": 72,
+    "frames": 13,
+    "fps": 12,
+    "loop": false
+  },
+  "enemies_dragon_dying": {
+    "src": "assets/enemies/dragon_dying.png",
+    "frameW": 76,
+    "frameH": 72,
+    "frames": 16,
+    "fps": 10,
+    "loop": false
+  },
+  "decor_chest_open": {
+    "src": "assets/decor/chest_open.png",
+    "frameW": 16,
+    "frameH": 19,
+    "frames": 6,
+    "fps": 14,
+    "loop": false
+  },
+  "decor_torch_yellow": {
+    "src": "assets/decor/torch_yellow.png",
+    "frameW": 8,
+    "frameH": 18,
+    "frames": 6,
+    "fps": 8,
+    "loop": true
+  },
+  "decor_torch_blue": {
+    "src": "assets/decor/torch_blue.png",
+    "frameW": 8,
+    "frameH": 20,
+    "frames": 6,
+    "fps": 8,
+    "loop": true
+  },
+  "tiles_dungeon": {
+    "src": "assets/tiles/dungeon.png",
+    "sheet": [
+      320,
+      416
+    ]
+  },
+  "icons_icons": {
+    "src": "assets/icons/icons.png",
+    "sheet": [
+      256,
+      96
+    ]
+  }
+}

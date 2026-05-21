@@ -1,0 +1,3005 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>워드룬 — 알파벳 IDLE</title>
+<!-- Pixel art: Matheus Tanuri / Marth (MiniRogue Dungeon, itch.io) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Jua&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    background: #0a0a0e; color: #eee;
+    font-family: 'Jua', sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden; height: 100%;
+  }
+  body { display: flex; align-items: center; justify-content: center; }
+
+  #game {
+    width: 100%; max-width: 480px; height: 100vh; max-height: 900px;
+    background: linear-gradient(180deg, #1a1620 0%, #0a0a0e 100%);
+    display: flex; flex-direction: column;
+    box-shadow: 0 0 40px rgba(255,100,50,0.1);
+    position: relative;
+  }
+
+  /* HUD */
+  #hud {
+    padding: 10px 14px; background: rgba(0,0,0,0.4);
+    border-bottom: 1px solid #2a2030;
+    display: flex; justify-content: space-between; align-items: center;
+    font-size: 12px;
+  }
+  .hud-stage {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 11px; color: #ffaa44; cursor: pointer;
+  }
+  .hud-stats { display: flex; gap: 8px; font-size: 13px; }
+  .stat-pill {
+    padding: 3px 8px; border-radius: 10px;
+    background: rgba(255,255,255,0.06);
+  }
+  .stat-pill .label { color: #888; margin-right: 4px; font-size: 10px; }
+  .stat-pill .val { font-weight: bold; font-size: 12px; }
+  .stat-pill.atk .val { color: #ff6a4a; }
+  .stat-pill.def .val { color: #6aaeff; }
+  .stat-pill.hp  .val { color: #6aff8a; }
+
+  /* 픽셀 아이콘 (icons atlas) */
+  .pixicon {
+    display: inline-block; width: 14px; height: 14px;
+    background-image: url('assets/icons/icons.png');
+    background-repeat: no-repeat;
+    background-size: 112px 42px; /* 1/2.28 scale of 256x96 */
+    vertical-align: middle;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+    margin-right: 3px;
+  }
+  /* atlas 8x3 grid, cell 32x32 → 14x14 scale */
+  .pixicon.hp   { background-position: -28px 0px; }    /* row0 col2 heart */
+  .pixicon.atk  { background-position: -84px 0px; }    /* row0 col6 sword */
+  .pixicon.def  { background-position: -84px -14px; }  /* row1 col6 shield */
+  .pixicon.book { background-position: 0px 0px; }      /* row0 col0 */
+  .pixicon.gold { background-position: -42px 0px; }    /* row0 col3 */
+
+  /* Combat */
+  #combatWrap {
+    position: relative; flex: 0 0 200px;
+    background: linear-gradient(180deg, #2a1a2e 0%, #4a2a3e 60%, #2a1a1e 100%);
+    border-bottom: 2px solid #4a2030; overflow: hidden;
+  }
+  #combatCanvas { display: block; width: 100%; height: 100%; image-rendering: pixelated; }
+
+  .dmg-pop {
+    position: absolute; font-family: 'Press Start 2P', monospace;
+    font-size: 11px; pointer-events: none;
+    text-shadow: 1px 1px 0 #000;
+    animation: dmgFloat 0.8s ease-out forwards;
+  }
+  .dmg-pop.player { color: #ffe066; }
+  .dmg-pop.enemy  { color: #ff6a6a; }
+  .dmg-pop.spell  { color: #ff44ff; font-size: 13px; font-weight: bold; }
+  .dmg-pop.crit   { color: #ffaa00; font-size: 15px; font-weight: bold; }
+  @keyframes dmgFloat {
+    0% { transform: translateY(0) scale(0.8); opacity: 0; }
+    20% { transform: translateY(-10px) scale(1.2); opacity: 1; }
+    100% { transform: translateY(-40px) scale(1); opacity: 0; }
+  }
+
+  .spell-cast {
+    position: absolute; font-family: 'Press Start 2P', monospace;
+    font-size: 12px; pointer-events: none;
+    text-shadow: 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    animation: spellCast 0.6s ease-out forwards;
+    font-weight: bold;
+  }
+  @keyframes spellCast {
+    0% { transform: translateY(0) scale(0.5); opacity: 0; }
+    30% { transform: translateY(-5px) scale(1.4); opacity: 1; }
+    100% { transform: translateY(-30px) scale(1); opacity: 0; }
+  }
+
+  .loot-pop {
+    position: absolute; padding: 4px 8px; border-radius: 4px;
+    font-size: 11px; background: rgba(0,0,0,0.7);
+    border: 1px solid; pointer-events: none;
+    animation: lootFloat 1.2s ease-out forwards;
+    white-space: nowrap;
+  }
+  @keyframes lootFloat {
+    0% { transform: translateY(0); opacity: 0; }
+    20% { transform: translateY(-8px); opacity: 1; }
+    100% { transform: translateY(-40px); opacity: 0; }
+  }
+
+  /* Tabs */
+  #tabs {
+    display: flex; background: rgba(0,0,0,0.5);
+    border-bottom: 1px solid #2a2030;
+  }
+  .tab {
+    flex: 1; padding: 10px; text-align: center;
+    cursor: pointer; font-size: 13px; color: #777;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s; user-select: none; position: relative;
+  }
+  .tab.active { color: #ffaa44; border-bottom-color: #ffaa44; background: rgba(255,170,68,0.05); }
+  .tab .badge {
+    display: inline-block; background: #ff5a3a; color: #fff;
+    font-size: 10px; padding: 1px 5px; border-radius: 8px;
+    margin-left: 4px; vertical-align: middle;
+  }
+
+  #tabContent {
+    flex: 1; overflow-y: auto; padding: 12px;
+    background: rgba(0,0,0,0.2);
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Alphabet grid */
+  .alpha-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+  .alpha-cell {
+    aspect-ratio: 1; background: rgba(255,255,255,0.04);
+    border: 1px solid #2a2030; border-radius: 4px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-family: 'Press Start 2P', monospace; position: relative;
+    user-select: none; -webkit-user-select: none;
+  }
+  .alpha-cell.has { background: rgba(255,170,68,0.1); border-color: #ffaa44; cursor: grab; }
+  .alpha-cell.has:active { transform: scale(0.95); cursor: grabbing; }
+  .alpha-cell.dragging { opacity: 0.4; }
+  .alpha-cell .letter { font-size: 12px; color: #ddd; }
+  .alpha-cell.has .letter { color: #ffd28a; }
+  .alpha-cell .count {
+    position: absolute; bottom: 1px; right: 3px;
+    font-size: 9px; color: #888;
+  }
+  .alpha-cell.has .count { color: #ffaa44; }
+  .alpha-cell .equip-hint {
+    position: absolute; top: 1px; left: 3px;
+    font-size: 8px; color: #88aaff;
+    font-family: 'Jua';
+  }
+  .alpha-cell .disassemble-btn {
+    position: absolute; top: -4px; right: -4px;
+    width: 16px; height: 16px;
+    background: #4a2a1a; border: 1px solid #6a3a2a;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 8px; cursor: pointer;
+    opacity: 0; transition: opacity 0.15s;
+    z-index: 2;
+  }
+  .alpha-cell:hover .disassemble-btn,
+  .alpha-cell.has .disassemble-btn { opacity: 0.8; }
+  .alpha-cell .disassemble-btn:hover { opacity: 1; transform: scale(1.1); }
+
+  /* 합성 슬롯 */
+  .compose-box {
+    margin: 14px 0;
+    padding: 12px;
+    background: linear-gradient(180deg, rgba(255,170,68,0.06), rgba(255,170,68,0.02));
+    border: 1px solid #4a3020;
+    border-radius: 6px;
+  }
+  .compose-box .title {
+    font-family: 'Jua'; font-size: 13px; color: #ffaa44;
+    margin-bottom: 10px; text-align: center;
+  }
+  .compose-slots {
+    display: flex; gap: 5px; justify-content: center;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+  .word-slot {
+    width: 44px; height: 44px;
+    flex: 0 0 44px;
+    border: 2px dashed #4a3020;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px; color: #ffd28a;
+    background: rgba(0,0,0,0.3);
+    user-select: none; -webkit-user-select: none;
+    transition: all 0.15s;
+    box-sizing: border-box;
+  }
+  .word-slot.filled {
+    background: rgba(255,170,68,0.15);
+    border: 2px solid #ffaa44;
+    cursor: pointer;
+  }
+  .word-slot.filled:active { transform: scale(0.9); }
+  .word-slot.drag-over {
+    background: rgba(100,255,150,0.2);
+    border: 2px solid #6aff8a;
+    transform: scale(1.05);
+  }
+  .compose-actions {
+    display: flex; gap: 6px; justify-content: center;
+  }
+  .compose-actions button {
+    padding: 7px 14px;
+    border-radius: 4px; cursor: pointer;
+    font-family: 'Jua'; font-size: 12px;
+    border: none;
+  }
+  .compose-actions .btn-compose {
+    background: linear-gradient(180deg, #2a8a4a, #155a25);
+    color: #fff;
+    border-bottom: 2px solid #052a05;
+    font-weight: bold;
+  }
+  .compose-actions .btn-compose:disabled {
+    background: #2a2a2a; color: #555; cursor: not-allowed;
+  }
+  .compose-actions .btn-clear {
+    background: rgba(255,255,255,0.08);
+    color: #aaa;
+    border: 1px solid #3a2a30;
+  }
+
+  /* 직업 카드 */
+  .class-card-mini {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    background: linear-gradient(180deg, rgba(170,140,68,0.10), rgba(170,140,68,0.02));
+    border: 1px solid #4a3020;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-bottom: 14px;
+    user-select: none;
+    transition: all 0.15s;
+  }
+  .class-card-mini:active { transform: scale(0.98); }
+  .class-card-mini:hover { border-color: #ffaa44; }
+  .class-card-mini .icon { font-size: 22px; }
+  .class-card-mini .info { flex: 1; }
+  .class-card-mini .cname { font-family: 'Jua'; font-size: 13px; color: #ffd28a; }
+  .class-card-mini .passive { font-size: 10px; color: #aaa; margin-top: 2px; }
+  .class-card-mini .change-hint { font-size: 10px; color: #666; }
+
+  /* 직업 선택 모달 그리드 */
+  .class-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+    margin-bottom: 12px;
+  }
+  .class-card {
+    padding: 12px 8px;
+    background: rgba(255,255,255,0.04);
+    border: 2px solid #2a2030;
+    border-radius: 6px;
+    cursor: pointer;
+    text-align: center;
+    user-select: none;
+    position: relative;
+    transition: all 0.15s;
+  }
+  .class-card:hover { border-color: #ffaa44; transform: translateY(-2px); }
+  .class-card.current {
+    background: rgba(255,170,68,0.12);
+    border-color: #ffaa44;
+    box-shadow: 0 0 8px rgba(255,170,68,0.3);
+  }
+  .class-card.locked {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+  .class-card.locked:hover { border-color: #2a2030; transform: none; }
+  .class-card .ce { font-size: 28px; margin-bottom: 4px; }
+  .class-card .cn { font-family: 'Jua'; font-size: 14px; color: #ffd28a; margin-bottom: 2px; }
+  .class-card .cd { font-size: 10px; color: #888; margin-bottom: 6px; line-height: 1.3; min-height: 26px; }
+  .class-card .cs {
+    font-size: 10px; color: #aaa;
+    display: flex; gap: 5px; justify-content: center;
+    flex-wrap: wrap;
+  }
+  .class-card .cs .stat { padding: 1px 4px; background: rgba(0,0,0,0.4); border-radius: 3px; }
+  .class-card .lock-overlay {
+    position: absolute; top: 4px; right: 6px;
+    font-size: 11px; color: #aa6a6a;
+  }
+  .class-card .unlock-bar {
+    margin-top: 6px;
+    height: 3px; background: rgba(0,0,0,0.5);
+    border-radius: 2px; overflow: hidden;
+  }
+  .class-card .unlock-fill {
+    height: 100%; background: linear-gradient(90deg, #ffaa44, #ff6a44);
+    transition: width 0.3s;
+  }
+  .class-card .unlock-text {
+    font-size: 9px; color: #aa6a6a; margin-top: 3px;
+  }
+  .class-card .passive-text {
+    font-size: 10px; color: #aaff88; margin-top: 4px;
+    min-height: 14px;
+  }
+  .class-card.current .current-badge {
+    position: absolute; top: -8px; left: 50%;
+    transform: translateX(-50%);
+    padding: 2px 8px;
+    background: #ffaa44; color: #1a0a0a;
+    border-radius: 8px; font-size: 9px; font-weight: bold;
+    font-family: 'Press Start 2P', monospace;
+  }
+
+  /* Equipment list */
+  .eq-list { display: flex; flex-direction: column; gap: 6px; }
+  .eq-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 10px; background: rgba(255,255,255,0.04);
+    border-left: 3px solid; border-radius: 4px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .eq-item:active { background: rgba(255,255,255,0.1); }
+  .eq-icon {
+    width: 32px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; background: rgba(0,0,0,0.4); border-radius: 4px;
+  }
+  .eq-info { flex: 1; min-width: 0; }
+  .eq-name { font-size: 13px; }
+  .eq-meta { font-size: 11px; color: #888; margin-top: 2px; display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+  .eq-letters { display: flex; gap: 2px; }
+  .eq-letter {
+    display: inline-block;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 9px; padding: 2px 4px;
+    background: rgba(255,170,68,0.15);
+    color: #ffd28a; border-radius: 2px;
+  }
+  .eq-stat { color: #6aff8a; }
+  .eq-stat.atk { color: #ff8a6a; }
+  .eq-stat.def { color: #6aaeff; }
+  .eq-sockets { display: flex; gap: 2px; }
+  .socket-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: rgba(0,0,0,0.6); border: 1px solid #555;
+  }
+  .socket-dot.filled { background: #ffaa44; border-color: #ffaa44; }
+
+  /* Slots */
+  .slot-row {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; margin-bottom: 12px;
+  }
+  .slot {
+    background: rgba(255,255,255,0.04);
+    border: 2px dashed #2a2030; border-radius: 6px;
+    padding: 8px; min-height: 80px;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    text-align: center; cursor: pointer;
+    transition: all 0.15s;
+  }
+  .slot.filled { border-style: solid; }
+  .slot:active { transform: scale(0.97); }
+  .slot-icon { font-size: 22px; opacity: 0.5; }
+  .slot.filled .slot-icon { opacity: 1; }
+  .slot-label { font-size: 11px; color: #777; margin-top: 4px; }
+  .slot-name { font-size: 11px; margin-top: 2px; }
+  .slot-letters {
+    display: flex; gap: 2px; margin-top: 4px;
+    flex-wrap: wrap; justify-content: center;
+  }
+  .slot-words { font-size: 9px; color: #ffaa44; margin-top: 2px; }
+
+  /* Word card */
+  .word-list { display: flex; flex-direction: column; gap: 6px; }
+  .word-card {
+    padding: 8px 10px; background: rgba(255,255,255,0.04);
+    border-left: 3px solid #ffaa44; border-radius: 4px;
+    cursor: pointer; transition: background 0.15s;
+  }
+  .word-card.locked { opacity: 0.5; border-left-color: #444; }
+  .word-card.available { border-left-color: #6aff8a; }
+  .word-card:active { background: rgba(255,255,255,0.1); }
+  .word-text {
+    font-family: 'Press Start 2P', monospace; font-size: 13px;
+  }
+  .word-elem-badge {
+    display: inline-block; font-size: 10px;
+    padding: 2px 6px; border-radius: 8px;
+    color: #fff; margin-left: 6px;
+    font-family: 'Jua', sans-serif;
+  }
+  .word-stats {
+    display: flex; gap: 8px; font-size: 11px;
+    color: #aaa; margin-top: 4px; flex-wrap: wrap;
+  }
+  .word-stats .label { color: #666; }
+  .word-stats .special { color: #ff44ff; font-weight: bold; }
+  .word-need {
+    display: flex; gap: 2px; margin-top: 4px;
+    flex-wrap: wrap; font-size: 10px;
+  }
+  .word-need .ltr {
+    font-family: 'Press Start 2P', monospace;
+    padding: 2px 4px; border-radius: 2px;
+    background: rgba(0,255,100,0.15); color: #6aff8a;
+  }
+  .word-need .ltr.missing {
+    background: rgba(255,80,80,0.15); color: #ff8a8a;
+  }
+  .word-instances {
+    display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;
+  }
+  .word-instance {
+    display: inline-block; padding: 2px 6px; border-radius: 4px;
+    background: rgba(255,170,68,0.2); color: #ffd28a;
+    font-size: 11px; font-family: 'Press Start 2P', monospace;
+    border: 1px solid #ffaa44;
+  }
+  .word-instance.socketed {
+    background: rgba(100,255,170,0.2);
+    color: #6affaa; border-color: #6affaa;
+  }
+
+  /* Buttons */
+  .btn {
+    padding: 8px 14px; border: none;
+    background: linear-gradient(180deg, #5a3525, #3a2515);
+    color: #ffd28a; font-family: 'Jua', sans-serif;
+    font-size: 13px; border-radius: 4px;
+    cursor: pointer; border-bottom: 2px solid #1a0a05;
+  }
+  .btn:active { transform: translateY(1px); border-bottom-width: 1px; }
+  .btn.primary {
+    background: linear-gradient(180deg, #8a4525, #5a2515);
+    color: #fff;
+  }
+  .btn.success {
+    background: linear-gradient(180deg, #258a45, #155a25);
+    color: #fff;
+  }
+  .btn.danger { background: linear-gradient(180deg, #6a2525, #3a1515); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; filter: grayscale(0.5); }
+  .btn-small { padding: 4px 10px; font-size: 11px; }
+
+  /* Modal */
+  .modal-bg {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none; align-items: center; justify-content: center;
+    z-index: 100; padding: 20px;
+  }
+  .modal-bg.show { display: flex; }
+  .modal {
+    background: #1a1418; border: 1px solid #4a3020;
+    border-radius: 8px; padding: 16px; width: 100%;
+    max-height: 80%; overflow-y: auto;
+  }
+  .modal h3 {
+    font-size: 14px; color: #ffaa44;
+    margin-bottom: 12px; text-align: center;
+  }
+  .modal-actions { display: flex; gap: 8px; margin-top: 12px; }
+  .modal-actions .btn { flex: 1; }
+
+  .section-h {
+    font-size: 13px; color: #ffaa44;
+    margin-bottom: 8px; margin-top: 4px; font-weight: bold;
+  }
+  .section-h .sub {
+    color: #777; font-weight: normal; font-size: 11px; float: right;
+  }
+  .section-h:not(:first-child) { margin-top: 16px; }
+  .empty-msg {
+    text-align: center; padding: 24px;
+    color: #555; font-size: 13px;
+  }
+
+  /* Toast */
+  #toastWrap {
+    position: absolute; top: 60px; left: 0; right: 0;
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; pointer-events: none; z-index: 50;
+  }
+  .toast {
+    background: rgba(0,0,0,0.85);
+    padding: 6px 12px; border-radius: 4px;
+    font-size: 12px; border-left: 3px solid #ffaa44;
+    animation: toastSlide 2.5s ease-out forwards;
+    max-width: 90%;
+  }
+  @keyframes toastSlide {
+    0% { transform: translateY(-20px); opacity: 0; }
+    10%, 80% { transform: translateY(0); opacity: 1; }
+    100% { transform: translateY(-10px); opacity: 0; }
+  }
+
+  .reset-btn {
+    width: 100%; margin-top: 16px;
+    background: rgba(100,30,30,0.3);
+    border: 1px solid #6a2525;
+    color: #aa6a6a; padding: 6px; border-radius: 4px;
+    cursor: pointer; font-size: 11px; font-family: 'Jua';
+  }
+
+  /* 필터 칩 */
+  .filter-row {
+    display: flex; gap: 4px; margin-bottom: 10px;
+    flex-wrap: wrap; align-items: center;
+  }
+  .filter-chip {
+    padding: 4px 10px; border-radius: 12px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #2a2030;
+    color: #aaa; font-size: 11px; cursor: pointer;
+    user-select: none;
+    transition: all 0.15s;
+  }
+  .filter-chip:active { transform: scale(0.95); }
+  .filter-chip.active {
+    background: rgba(255,170,68,0.15);
+    border-color: #ffaa44; color: #ffd28a;
+  }
+  .filter-chip .count {
+    margin-left: 4px; opacity: 0.6; font-size: 10px;
+  }
+  .bulk-btn {
+    margin-left: auto;
+    padding: 4px 10px; border-radius: 4px;
+    background: linear-gradient(180deg, #6a2525, #3a1515);
+    color: #ffaa6a; border: none;
+    font-family: 'Jua'; font-size: 11px;
+    cursor: pointer;
+    border-bottom: 2px solid #1a0a05;
+  }
+  .bulk-btn:active { transform: translateY(1px); border-bottom-width: 1px; }
+  .bulk-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+
+  /* 자동 분해 토글 */
+  .auto-row {
+    display: flex; gap: 6px; margin-bottom: 10px;
+    flex-wrap: wrap; align-items: center;
+    font-size: 11px;
+  }
+  .auto-row .label { color: #888; font-size: 11px; }
+  .toggle-pill {
+    display: inline-flex; align-items: center; gap: 4px;
+    padding: 3px 8px; border-radius: 10px;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid #2a2030;
+    color: #888; font-size: 11px;
+    cursor: pointer; user-select: none;
+    transition: all 0.15s;
+  }
+  .toggle-pill:active { transform: scale(0.95); }
+  .toggle-pill.on {
+    background: rgba(100,255,150,0.12);
+    border-color: #6aff8a;
+    color: #6affaa;
+  }
+  .toggle-pill .check { font-family: 'Press Start 2P', monospace; font-size: 9px; }
+
+  /* 합성 입력 UI */
+  .compose-row {
+    display: flex; gap: 6px; margin-bottom: 14px;
+    padding: 10px; border-radius: 6px;
+    background: linear-gradient(180deg, rgba(255,170,68,0.05), rgba(255,170,68,0.02));
+    border: 1px solid #4a3020;
+  }
+  .compose-row input {
+    flex: 1; padding: 8px 12px;
+    background: rgba(0,0,0,0.4);
+    border: 1px solid #4a3020;
+    border-radius: 4px;
+    color: #ffd28a;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    min-width: 0;
+  }
+  .compose-row input:focus {
+    outline: none;
+    border-color: #ffaa44;
+    background: rgba(255,170,68,0.08);
+    box-shadow: 0 0 6px rgba(255,170,68,0.3);
+  }
+  .compose-row input::placeholder { color: #5a4030; font-size: 10px; letter-spacing: 1px; }
+  .compose-row button {
+    padding: 8px 14px;
+    background: linear-gradient(180deg, #2a8a4a, #155a25);
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-family: 'Jua';
+    font-size: 13px;
+    font-weight: bold;
+    border-bottom: 2px solid #052a05;
+    white-space: nowrap;
+  }
+  .compose-row button:active { transform: translateY(1px); border-bottom-width: 1px; }
+
+  /* 미발견 단어 카드 */
+  .word-card.undiscovered {
+    opacity: 0.65; cursor: default;
+  }
+  .word-card.undiscovered .word-text-hidden {
+    font-family: 'Press Start 2P', monospace;
+    letter-spacing: 4px; color: #6a5040;
+    font-size: 14px;
+  }
+  .word-card.undiscovered .hint-meaning {
+    color: #aaa; font-size: 13px;
+    font-family: 'Jua';
+  }
+  .word-card.undiscovered .hint-length {
+    color: #666; font-size: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div id="game">
+  <div id="hud">
+    <div class="hud-stage" onclick="showStageMenu()">STAGE <span id="stageNum">1</span></div>
+    <div class="hud-stats">
+      <span class="stat-pill atk"><span class="pixicon atk"></span><span class="val" id="statAtk">5</span></span>
+      <span class="stat-pill def"><span class="pixicon def"></span><span class="val" id="statDef">0</span></span>
+      <span class="stat-pill hp"><span class="pixicon hp"></span><span class="val" id="statHp">100/100</span></span>
+    </div>
+  </div>
+
+  <div id="combatWrap">
+    <canvas id="combatCanvas"></canvas>
+    <div id="toastWrap"></div>
+  </div>
+
+  <div id="tabs">
+    <div class="tab active" data-tab="equip">장비</div>
+    <div class="tab" data-tab="inv">인벤토리</div>
+    <div class="tab" data-tab="word">단어<span id="wordBadge" class="badge" style="display:none">!</span></div>
+  </div>
+
+  <div id="tabContent"></div>
+
+  <div class="modal-bg" id="modal">
+    <div class="modal" id="modalContent"></div>
+  </div>
+</div>
+
+<script>
+// ============== WordCore 인라인 ==============
+(function (global) {
+  'use strict';
+  const ELEMENTS = {
+    fire:  { id: 'fire',  name: '불',   color: '#ff4444' },
+    water: { id: 'water', name: '물',   color: '#4488ff' },
+    earth: { id: 'earth', name: '땅',   color: '#aa7744' },
+    wind:  { id: 'wind',  name: '바람', color: '#88ddaa' },
+    light: { id: 'light', name: '빛',   color: '#ffdd44' },
+    dark:  { id: 'dark',  name: '암',   color: '#884488' },
+  };
+  const SEASON_1 = {
+    id: 'season_1', name: '시즌 1: 원소의 시작',
+    elements: ['fire', 'water', 'earth', 'wind', 'light', 'dark'],
+    anchorDict: {
+      FIRE: 'fire', BURN: 'fire', FLAME: 'fire', HOT: 'fire',
+      ICE: 'water', COLD: 'water', SNOW: 'water', RAIN: 'water', DIVE: 'water',
+      ROCK: 'earth', STONE: 'earth', SAND: 'earth',
+      WIND: 'wind', AIR: 'wind', STORM: 'wind', QUICK: 'wind',
+      SUN: 'light', LIGHT: 'light', STAR: 'light', DAY: 'light',
+      DARK: 'dark', NIGHT: 'dark', SHADOW: 'dark',
+    },
+    nonAnchorWords: ['APPLE','BOOK','FROG','HOUSE','KING','LEVEL','POOL','QUEEN','TREE','ZERO',
+                     'QUIZ','BOX','FIX','SKY','JOY','ZIP','MOVE'],
+    letterToElement: {
+      A:'fire',B:'fire',C:'fire',D:'fire',E:'fire',
+      F:'water',G:'water',H:'water',I:'water',
+      J:'earth',K:'earth',L:'earth',M:'earth',
+      N:'wind',O:'wind',P:'wind',Q:'wind',
+      R:'light',S:'light',T:'light',U:'light',
+      V:'dark',W:'dark',X:'dark',Y:'dark',Z:'dark',
+    },
+  };
+  SEASON_1.wordPool = [...Object.keys(SEASON_1.anchorDict), ...SEASON_1.nonAnchorWords];
+
+  // 한국어 뜻 (학습용 힌트)
+  SEASON_1.wordHints = {
+    FIRE: '불', BURN: '불태우다', FLAME: '불꽃', HOT: '뜨거운',
+    ICE: '얼음', COLD: '차가운', SNOW: '눈', RAIN: '비', DIVE: '잠수',
+    ROCK: '바위', STONE: '돌', SAND: '모래',
+    WIND: '바람', AIR: '공기', STORM: '폭풍', QUICK: '빠른',
+    SUN: '해', LIGHT: '빛', STAR: '별', DAY: '낮',
+    DARK: '어둠', NIGHT: '밤', SHADOW: '그림자',
+    APPLE: '사과', BOOK: '책', FROG: '개구리', HOUSE: '집',
+    KING: '왕', LEVEL: '단계', POOL: '웅덩이', QUEEN: '여왕',
+    TREE: '나무', ZERO: '영(0)',
+    QUIZ: '퀴즈', BOX: '상자', FIX: '고치다', SKY: '하늘',
+    JOY: '기쁨', ZIP: '잠그다', MOVE: '움직이다',
+  };
+
+  const VOWELS = new Set('AEIOU');
+  const RARE = new Set('XZQJ');
+  const countVowels = w => [...w].filter(c => VOWELS.has(c)).length;
+  function countConsonantClusters(w) {
+    let count = 0, run = 0;
+    for (const c of w) {
+      if (!VOWELS.has(c)) run++;
+      else { if (run >= 2) count++; run = 0; }
+    }
+    if (run >= 2) count++;
+    return count;
+  }
+  function countDoubleLetters(w) {
+    let c = 0;
+    for (let i = 1; i < w.length; i++) if (w[i] === w[i-1]) c++;
+    return c;
+  }
+  const countRareLetters = w => [...w].filter(c => RARE.has(c)).length;
+  const isPalindrome = w => w === [...w].reverse().join('');
+  const letterSum = w => [...w].reduce((s, c) => s + (c.charCodeAt(0) - 64), 0);
+  const allUniqueLetters = w => new Set(w).size === w.length;
+
+  function deriveMechanic(text) {
+    const w = text.toUpperCase();
+    const len = w.length;
+    const vowels = countVowels(w);
+    const clusters = countConsonantClusters(w);
+    const doubles = countDoubleLetters(w);
+    const rares = countRareLetters(w);
+    const palin = isPalindrome(w);
+    const unique = allUniqueLetters(w);
+    const lsum = letterSum(w);
+    let special = null;
+    if (palin) special = 'reflect';
+    else if (clusters >= 2) special = 'armor_pierce';
+    else if (unique && len >= 5) special = 'pierce';
+    else if (doubles >= 1) special = 'chain';
+    return {
+      baseDamage: 5 + len * 5,
+      targets: vowels >= 3 ? 3 : (vowels >= 2 ? 2 : 1),
+      radius: vowels >= 2 ? Math.min(2, vowels - 1) : 0,
+      castTime: Math.max(0.3, 1.0 - clusters * 0.15),
+      hits: 1 + doubles,
+      critChance: Math.min(1, rares * 0.20),
+      special,
+      cooldown: 4 + len * 1.2 + (lsum % 5) * 0.4,
+    };
+  }
+  function resolveElement(text, season) {
+    const w = text.toUpperCase();
+    if (season.anchorDict[w]) return season.anchorDict[w];
+    return season.letterToElement[w[0]] || 'fire';
+  }
+  function createWord(text, season) {
+    const w = text.toUpperCase();
+    return {
+      id: 'w_' + Math.random().toString(36).slice(2,8),
+      text: w,
+      element: resolveElement(w, season),
+      mechanic: deriveMechanic(w),
+      enhanceLevel: 0,
+      isAnchor: !!season.anchorDict[w],
+    };
+  }
+  const round = (n, d) => { const f = Math.pow(10, d); return Math.round(n*f)/f; };
+  function effectiveStats(word) {
+    const m = word.mechanic;
+    const lv = word.enhanceLevel;
+    const dmgMul = 1 + lv * 0.10;
+    const cdMul  = 1 - lv * 0.05;
+    return {
+      damage: round(m.baseDamage * dmgMul, 1),
+      cooldown: round(Math.max(2.0, m.cooldown * cdMul), 2),
+      castTime: m.castTime,
+      targets: m.targets,
+      radius: m.radius,
+      hits: m.hits,
+      critChance: m.critChance,
+      special: m.special,
+      enhanceLevel: lv,
+    };
+  }
+  function resolveDamage(stats, defenderDefense = 0, rng = Math.random) {
+    const def = stats.special === 'armor_pierce' ? 0 : defenderDefense;
+    const perHit = Math.max(1, stats.damage - def);
+    const didCrit = rng() < stats.critChance;
+    const critMul = didCrit ? 1.5 : 1.0;
+    const oneTargetDmg = perHit * stats.hits * critMul;
+    return { perHit, hits: stats.hits, didCrit,
+      totalPerTarget: round(oneTargetDmg, 1),
+      totalAllTargets: round(oneTargetDmg * stats.targets, 1) };
+  }
+  function emptyInventory() {
+    const inv = {};
+    for (let i = 0; i < 26; i++) inv[String.fromCharCode(65+i)] = 0;
+    return inv;
+  }
+  function canCompose(inv, word) {
+    const need = {};
+    for (const c of word.toUpperCase()) need[c] = (need[c]||0)+1;
+    for (const c of Object.keys(need)) if ((inv[c]||0) < need[c]) return false;
+    return true;
+  }
+  function consume(inv, word) {
+    const r = { ...inv };
+    for (const c of word.toUpperCase()) {
+      r[c]--;
+      if (r[c] < 0) throw new Error('letter underflow');
+    }
+    return r;
+  }
+  function missingLetters(inv, word) {
+    const need = {};
+    for (const c of word.toUpperCase()) need[c] = (need[c]||0)+1;
+    const miss = {};
+    for (const c of Object.keys(need)) {
+      const have = inv[c]||0;
+      if (have < need[c]) miss[c] = need[c] - have;
+    }
+    return miss;
+  }
+  function compose(inv, text, season) {
+    const w = text.toUpperCase();
+    if (!season.wordPool.includes(w)) return { ok: false, reason: 'not_in_pool' };
+    if (!canCompose(inv, w)) return { ok: false, reason: 'insufficient_letters' };
+    return { ok: true, inv: consume(inv, w), word: createWord(w, season) };
+  }
+  const EQUIPMENT_TYPES = {
+    weapon:    { sockets: 2, statType: 'attack',  baseStat: 5, icon: '⚔️' },
+    armor:     { sockets: 1, statType: 'defense', baseStat: 2, icon: '🛡️' },
+    accessory: { sockets: 1, statType: 'hp',      baseStat: 20, icon: '💍' },
+  };
+  const EQUIPMENT_TIERS = {
+    common: { letterCount: 1, statMul: 1.0, weight: 60, name: '일반', color: '#bbb' },
+    magic:  { letterCount: 2, statMul: 1.8, weight: 25, name: '매직', color: '#5af' },
+    rare:   { letterCount: 3, statMul: 3.0, weight: 12, name: '레어', color: '#fc3' },
+    unique: { letterCount: 4, statMul: 5.0, weight: 3,  name: '유니크', color: '#f73' },
+  };
+  const EQUIPMENT_NAMES = {
+    weapon: {
+      common: ['나무 막대', '녹슨 단검', '낡은 활', '돌도끼'],
+      magic:  ['강철 검', '예리한 단검', '연마된 활', '전투 도끼'],
+      rare:   ['미스릴 검', '서리 단검', '바람의 활', '룬 도끼'],
+      unique: ['용살자', '암살자의 단검', '천공의 활', '심판의 도끼'],
+    },
+    armor: {
+      common: ['헝겊 옷', '가죽 조끼', '나무 방패'],
+      magic:  ['철 갑옷', '강화 가죽', '강철 방패'],
+      rare:   ['미스릴 갑옷', '용비늘 망토', '신성한 방패'],
+      unique: ['불멸의 갑옷', '그림자 망토', '심연의 방패'],
+    },
+    accessory: {
+      common: ['구리 반지', '낡은 목걸이', '나무 부적'],
+      magic:  ['은 반지', '룬 목걸이', '마법 부적'],
+      rare:   ['금 반지', '용송곳니 목걸이', '서리 부적'],
+      unique: ['영원의 반지', '진리의 목걸이', '왕의 부적'],
+    },
+  };
+  const _demandCache = new Map();
+  function getLetterDemand(season) {
+    if (_demandCache.has(season.id)) return _demandCache.get(season.id);
+    const d = {};
+    for (let i = 0; i < 26; i++) d[String.fromCharCode(65+i)] = 0;
+    for (const w of season.wordPool) for (const c of w) d[c]++;
+    _demandCache.set(season.id, d);
+    return d;
+  }
+  function pickWeightedLetter(season, rng = Math.random) {
+    const d = getLetterDemand(season);
+    const total = Object.values(d).reduce((a,b)=>a+b, 0);
+    if (total === 0) return 'A';
+    let r = rng() * total;
+    for (const c of Object.keys(d)) { r -= d[c]; if (r < 0) return c; }
+    return 'A';
+  }
+  function pickTier(stageLevel = 1, rng = Math.random) {
+    const boost = Math.min(stageLevel / 50, 1.0);
+    const adj = {
+      common: EQUIPMENT_TIERS.common.weight * (1 - boost * 0.5),
+      magic:  EQUIPMENT_TIERS.magic.weight  * (1 + boost * 0.3),
+      rare:   EQUIPMENT_TIERS.rare.weight   * (1 + boost * 1.0),
+      unique: EQUIPMENT_TIERS.unique.weight * (1 + boost * 2.0),
+    };
+    const total = Object.values(adj).reduce((a,b)=>a+b, 0);
+    let r = rng() * total;
+    for (const t of Object.keys(adj)) { r -= adj[t]; if (r < 0) return t; }
+    return 'common';
+  }
+  function rollEquipmentDrop(season, opts = {}) {
+    const rng = opts.rng || Math.random;
+    const stageLevel = opts.stageLevel || 1;
+    const tier = opts.tier || pickTier(stageLevel, rng);
+    const types = Object.keys(EQUIPMENT_TYPES);
+    const type = opts.type || types[Math.floor(rng() * types.length)];
+    const tspec = EQUIPMENT_TIERS[tier];
+    const ttspec = EQUIPMENT_TYPES[type];
+    const namePool = EQUIPMENT_NAMES[type][tier];
+    const name = namePool[Math.floor(rng() * namePool.length)];
+    const letters = [];
+    for (let i = 0; i < tspec.letterCount; i++) letters.push(pickWeightedLetter(season, rng));
+    return {
+      id: 'eq_' + Math.random().toString(36).slice(2,8),
+      type, tier, name, letters,
+      statType: ttspec.statType,
+      statValue: Math.round(ttspec.baseStat * tspec.statMul),
+      sockets: ttspec.sockets,
+      socketedWordIds: [],
+    };
+  }
+  function disassembleEquipment(equip) {
+    return { letters: equip.letters.slice(), extractedWordIds: equip.socketedWordIds.slice() };
+  }
+  global.WordCore = {
+    ELEMENTS, SEASON_1, EQUIPMENT_TYPES, EQUIPMENT_TIERS, EQUIPMENT_NAMES,
+    deriveMechanic, resolveElement, createWord, effectiveStats, resolveDamage,
+    emptyInventory, canCompose, consume, missingLetters, compose,
+    getLetterDemand, pickWeightedLetter, pickTier, rollEquipmentDrop,
+    disassembleEquipment,
+  };
+})(window);
+
+// ============== 게임 상태 + 저장/로드 ==============
+const W = window.WordCore;
+const STORAGE_KEY = 'wordrune_save_v1';
+
+// ============== Sprite System ==============
+const SPRITES = {
+  // Heroes
+  knight_idle:   { src: 'assets/hero/knight_idle.png',    frameW: 32, frameH: 40, frames: 12, fps: 8,  loop: true },
+  knight_walk:   { src: 'assets/hero/knight_walk.png',    frameW: 32, frameH: 40, frames: 10, fps: 12, loop: true },
+  knight_attack: { src: 'assets/hero/knight_attack.png',  frameW: 36, frameH: 40, frames: 6,  fps: 14, loop: false },
+  mage_idle:     { src: 'assets/hero/mage_idle.png',      frameW: 22, frameH: 36, frames: 12, fps: 8,  loop: true },
+  mage_walk:     { src: 'assets/hero/mage_walk.png',      frameW: 22, frameH: 36, frames: 5,  fps: 10, loop: true },
+  mage_attack:   { src: 'assets/hero/mage_attack.png',    frameW: 26, frameH: 36, frames: 12, fps: 16, loop: false },
+  archer_idle:   { src: 'assets/hero/archer_idle.png',    frameW: 28, frameH: 34, frames: 12, fps: 8,  loop: true },
+  archer_walk:   { src: 'assets/hero/archer_walk.png',    frameW: 28, frameH: 34, frames: 10, fps: 12, loop: true },
+  archer_attack: { src: 'assets/hero/archer_attack.png',  frameW: 30, frameH: 34, frames: 10, fps: 14, loop: false },
+  rogue_idle:    { src: 'assets/hero/rogue_idle.png',     frameW: 30, frameH: 34, frames: 6,  fps: 8,  loop: true },
+  rogue_walk:    { src: 'assets/hero/rogue_walk.png',     frameW: 30, frameH: 34, frames: 10, fps: 12, loop: true },
+  rogue_attack:  { src: 'assets/hero/rogue_attack.png',   frameW: 74, frameH: 34, frames: 7,  fps: 14, loop: false },
+  // FX
+  fireball:      { src: 'assets/fx/fireball.png',         frameW: 24, frameH: 32, frames: 20, fps: 14, loop: true },
+  arrow:         { src: 'assets/fx/arrow.png',            frameW: 24, frameH: 32, frames: 6,  fps: 12, loop: true },
+  // Enemies — 10종 × 3 애니
+  rat_idle:      { src: 'assets/enemies/rat_idle.png',    frameW: 28, frameH: 22, frames: 12, fps: 10, loop: true },
+  rat_attack:    { src: 'assets/enemies/rat_attack.png',  frameW: 30, frameH: 22, frames: 6,  fps: 14, loop: false },
+  rat_dying:     { src: 'assets/enemies/rat_dying.png',   frameW: 28, frameH: 22, frames: 10, fps: 12, loop: false },
+  golem_idle:    { src: 'assets/enemies/golem_idle.png',  frameW: 32, frameH: 36, frames: 6,  fps: 6,  loop: true },
+  golem_attack:  { src: 'assets/enemies/golem_attack.png',frameW: 38, frameH: 36, frames: 10, fps: 12, loop: false },
+  golem_dying:   { src: 'assets/enemies/golem_dying.png', frameW: 40, frameH: 36, frames: 20, fps: 10, loop: false },
+  beholder_idle: { src: 'assets/enemies/beholder_idle.png',  frameW: 28, frameH: 38, frames: 18, fps: 12, loop: true },
+  beholder_attack:{ src: 'assets/enemies/beholder_attack.png',frameW: 28, frameH: 38, frames: 9, fps: 14, loop: false },
+  beholder_dying:{ src: 'assets/enemies/beholder_dying.png', frameW: 24, frameH: 38, frames: 18, fps: 12, loop: false },
+  stinger_idle:  { src: 'assets/enemies/stinger_idle.png',   frameW: 32, frameH: 40, frames: 12, fps: 8,  loop: true },
+  stinger_attack:{ src: 'assets/enemies/stinger_attack.png', frameW: 34, frameH: 40, frames: 10, fps: 14, loop: false },
+  stinger_dying: { src: 'assets/enemies/stinger_dying.png',  frameW: 44, frameH: 40, frames: 16, fps: 12, loop: false },
+  skeleton_idle: { src: 'assets/enemies/skeleton_idle.png',  frameW: 32, frameH: 34, frames: 12, fps: 8,  loop: true },
+  skeleton_attack:{src: 'assets/enemies/skeleton_attack.png',frameW: 68, frameH: 34, frames: 7,  fps: 14, loop: false },
+  skeleton_dying:{ src: 'assets/enemies/skeleton_dying.png', frameW: 32, frameH: 34, frames: 14, fps: 12, loop: false },
+  slime_idle:    { src: 'assets/enemies/slime_idle.png',     frameW: 30, frameH: 32, frames: 12, fps: 8,  loop: true },
+  slime_attack:  { src: 'assets/enemies/slime_attack.png',   frameW: 32, frameH: 32, frames: 7,  fps: 14, loop: false },
+  slime_dying:   { src: 'assets/enemies/slime_dying.png',    frameW: 32, frameH: 32, frames: 14, fps: 12, loop: false },
+  mummy_idle:    { src: 'assets/enemies/mummy_idle.png',     frameW: 32, frameH: 66, frames: 12, fps: 8,  loop: true },
+  mummy_attack:  { src: 'assets/enemies/mummy_attack.png',   frameW: 40, frameH: 66, frames: 6,  fps: 14, loop: false },
+  mummy_dying:   { src: 'assets/enemies/mummy_dying.png',    frameW: 40, frameH: 66, frames: 11, fps: 12, loop: false },
+  kina_idle:     { src: 'assets/enemies/kina_idle.png',      frameW: 32, frameH: 38, frames: 12, fps: 8,  loop: true },
+  kina_attack:   { src: 'assets/enemies/kina_attack.png',    frameW: 38, frameH: 38, frames: 8,  fps: 14, loop: false },
+  kina_dying:    { src: 'assets/enemies/kina_dying.png',     frameW: 44, frameH: 38, frames: 12, fps: 12, loop: false },
+  summoner_idle: { src: 'assets/enemies/summoner_idle.png',  frameW: 34, frameH: 34, frames: 12, fps: 8,  loop: true },
+  summoner_attack:{src: 'assets/enemies/summoner_attack.png',frameW: 36, frameH: 34, frames: 9,  fps: 14, loop: false },
+  summoner_dying:{ src: 'assets/enemies/summoner_dying.png', frameW: 34, frameH: 34, frames: 12, fps: 12, loop: false },
+  dragon_idle:   { src: 'assets/enemies/dragon_idle.png',    frameW: 62, frameH: 72, frames: 14, fps: 8,  loop: true },
+  dragon_attack: { src: 'assets/enemies/dragon_attack.png',  frameW: 92, frameH: 72, frames: 13, fps: 12, loop: false },
+  dragon_dying:  { src: 'assets/enemies/dragon_dying.png',   frameW: 76, frameH: 72, frames: 16, fps: 10, loop: false },
+  // Decor
+  chest_open:    { src: 'assets/decor/chest_open.png',       frameW: 16, frameH: 19, frames: 6,  fps: 14, loop: false },
+  torch_yellow:  { src: 'assets/decor/torch_yellow.png',     frameW: 8,  frameH: 18, frames: 6,  fps: 8,  loop: true },
+  torch_blue:    { src: 'assets/decor/torch_blue.png',       frameW: 8,  frameH: 20, frames: 6,  fps: 8,  loop: true },
+};
+
+// Atlas (단일 이미지, 영역 슬라이스)
+const ATLAS = {
+  tiles_dungeon: { src: 'assets/tiles/dungeon.png', w: 320, h: 416 },
+  icons:         { src: 'assets/icons/icons.png',   w: 256, h: 96, cols: 8, rows: 3, cellW: 32, cellH: 32 },
+};
+
+// 직업 정의 (확장 가능)
+const HERO_CLASSES = {
+  knight: {
+    name: '기사', emoji: '⚔️',
+    desc: '검과 갑옷의 근접 전사',
+    passive: '균형잡힌 능력치',
+    sprites: { idle: 'knight_idle', walk: 'knight_walk', attack: 'knight_attack' },
+    baseAtk: 5, baseDef: 0, baseHp: 100,
+    attackSpeedMul: 1.0, spellDmgMul: 1.0, critBonus: 0,
+    spriteOffsetY: 0,
+    unlock: null, // 기본 사용 가능
+  },
+  mage: {
+    name: '마법사', emoji: '🔮',
+    desc: '단어 마법의 달인',
+    passive: '단어 시전 위력 +30%',
+    sprites: { idle: 'mage_idle', walk: 'mage_walk', attack: 'mage_attack' },
+    baseAtk: 3, baseDef: 0, baseHp: 80,
+    attackSpeedMul: 0.9, spellDmgMul: 1.3, critBonus: 0,
+    spriteOffsetY: 0,
+    unlock: { type: 'discoveredWords', value: 5, label: '단어 5개 발견' },
+  },
+  rogue: {
+    name: '도적', emoji: '🗡️',
+    desc: '빠른 단검의 암살자',
+    passive: '공격속도 +40%, 방어 -1',
+    sprites: { idle: 'rogue_idle', walk: 'rogue_walk', attack: 'rogue_attack' },
+    baseAtk: 6, baseDef: -1, baseHp: 80,
+    attackSpeedMul: 1.4, spellDmgMul: 1.0, critBonus: 0.05,
+    spriteOffsetY: 0,
+    unlock: { type: 'totalKills', value: 30, label: '적 30회 처치' },
+  },
+  archer: {
+    name: '궁수', emoji: '🏹',
+    desc: '원거리 사수',
+    passive: '크리율 +10%, 공격속도 +10%',
+    sprites: { idle: 'archer_idle', walk: 'archer_walk', attack: 'archer_attack' },
+    baseAtk: 4, baseDef: 0, baseHp: 90,
+    attackSpeedMul: 1.1, spellDmgMul: 1.0, critBonus: 0.10,
+    spriteOffsetY: 0,
+    unlock: { type: 'bossKills', value: 3, label: '보스 3회 처치' },
+  },
+};
+
+function isClassUnlocked(key) {
+  const cls = HERO_CLASSES[key];
+  if (!cls || !cls.unlock) return true;
+  const u = cls.unlock;
+  if (u.type === 'discoveredWords') return (state.discoveredWords || []).length >= u.value;
+  if (u.type === 'totalKills') return state.totalKills >= u.value;
+  if (u.type === 'bossKills') return (state.bossKills || 0) >= u.value;
+  if (u.type === 'stage') return state.stage >= u.value;
+  return false;
+}
+
+function getUnlockProgress(key) {
+  const cls = HERO_CLASSES[key];
+  if (!cls || !cls.unlock) return { current: 1, needed: 1, ratio: 1 };
+  const u = cls.unlock;
+  let current = 0;
+  if (u.type === 'discoveredWords') current = (state.discoveredWords || []).length;
+  else if (u.type === 'totalKills') current = state.totalKills;
+  else if (u.type === 'bossKills') current = state.bossKills || 0;
+  else if (u.type === 'stage') current = state.stage;
+  return { current, needed: u.value, ratio: Math.min(1, current / u.value), label: u.label };
+}
+
+class Sprite {
+  constructor(meta) {
+    this.meta = meta;
+    this.image = new Image();
+    this.loaded = false;
+    this.errored = false;
+    this.image.onload = () => { this.loaded = true; };
+    this.image.onerror = () => { this.errored = true; console.warn('sprite load failed:', meta.src); };
+    this.image.src = meta.src;
+    this.frameIdx = 0;
+    this.elapsed = 0;
+    this.onComplete = null;
+  }
+  reset() { this.frameIdx = 0; this.elapsed = 0; }
+  update(dt) {
+    if (!this.loaded) return;
+    if (this.meta.fps <= 0) return;
+    this.elapsed += dt;
+    const frameDur = 1000 / this.meta.fps;
+    while (this.elapsed >= frameDur) {
+      this.elapsed -= frameDur;
+      this.frameIdx++;
+      if (this.meta.loop) {
+        this.frameIdx %= this.meta.frames;
+      } else {
+        if (this.frameIdx >= this.meta.frames) {
+          this.frameIdx = this.meta.frames - 1;
+          if (this.onComplete) { const cb = this.onComplete; this.onComplete = null; cb(); }
+          break;
+        }
+      }
+    }
+  }
+  draw(ctx, x, y, scale = 1, flipX = false) {
+    if (!this.loaded) return false;
+    const sx = this.frameIdx * this.meta.frameW;
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.translate(x, y);
+    if (flipX) ctx.scale(-1, 1);
+    const dw = this.meta.frameW * scale;
+    const dh = this.meta.frameH * scale;
+    // 앵커: 발 중앙 (그림자 위치)
+    ctx.drawImage(this.image,
+      sx, 0, this.meta.frameW, this.meta.frameH,
+      -dw/2, -dh + 4, dw, dh);
+    ctx.restore();
+    return true;
+  }
+  isDone() { return !this.meta.loop && this.frameIdx >= this.meta.frames - 1; }
+}
+
+// 등록된 SPRITES 모두 인스턴스화
+const sprites = {};
+for (const [key, meta] of Object.entries(SPRITES)) {
+  sprites[key] = new Sprite(meta);
+}
+
+// 모든 스프라이트 로드 완료 대기 (Promise, 타임아웃 5초)
+function waitSpritesReady() {
+  return new Promise(resolve => {
+    const start = performance.now();
+    const check = () => {
+      const total = Object.keys(sprites).length;
+      const ready = Object.values(sprites).filter(s => s.loaded || s.errored).length;
+      if (ready >= total || performance.now() - start > 5000) {
+        const failed = Object.entries(sprites).filter(([k,s]) => s.errored).map(([k]) => k);
+        if (failed.length) console.warn('sprites failed:', failed);
+        resolve();
+      } else {
+        requestAnimationFrame(check);
+      }
+    };
+    check();
+  });
+}
+
+
+
+function defaultState() {
+  return {
+    stage: 1, enemyCountThisStage: 0, enemiesPerStage: 5,
+    player: { x: 80, y: 145, heroClass: 'knight',
+              baseAtk: 5, baseDef: 0, baseHp: 100,
+              hp: 100, maxHp: 100, attackCooldown: 0, attackInterval: 1000,
+              alive: true, respawnTimer: 0,
+              animState: 'idle', attackAnimTimer: 0,
+              hitFlashTimer: 0 },
+    enemy: null,
+    letterInv: W.emptyInventory(),
+    equipInv: [],
+    equipped: { weapon: null, armor: null, accessory: null },
+    wordInv: [],
+    discoveredWords: [],
+    composeSlots: [],
+    socketTimers: {},
+    totalKills: 0, totalDrops: 0, bossKills: 0, bestStage: 1,
+    seenWordTab: false, activeTab: 'equip',
+    equipFilter: 'all',
+    autoDisCommon: false, autoDisMagic: false,
+    autoDisCount: 0,
+  };
+}
+let state = defaultState();
+
+let saveTimer = null;
+function scheduleSave() {
+  if (saveTimer) clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    try {
+      const data = JSON.parse(JSON.stringify(state));
+      data.enemy = null;
+      data.player.attackCooldown = 0;
+      data.player.respawnTimer = 0;
+      data.player.alive = true;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    } catch(e) { console.warn('save failed', e); }
+    saveTimer = null;
+  }, 300);
+}
+function loadSave() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return false;
+    const data = JSON.parse(raw);
+    const def = defaultState();
+    for (const k of Object.keys(def)) if (k in data) state[k] = data[k];
+    if (!state.socketTimers) state.socketTimers = {};
+    if (!state.wordInv) state.wordInv = [];
+    if (!state.discoveredWords) state.discoveredWords = [];
+    if (!state.composeSlots) state.composeSlots = [];
+    if (state.bossKills === undefined) state.bossKills = 0;
+    state.player = { ...def.player, ...state.player };
+    if (!state.player.heroClass || !HERO_CLASSES[state.player.heroClass]) {
+      state.player.heroClass = 'knight';
+    }
+    // 마이그레이션: 같은 단어 중복 인스턴스 → 1개로 합치기 (최고 강화 레벨 유지)
+    if (state.wordInv.length > 0) {
+      const byText = {};
+      for (const w of state.wordInv) {
+        if (!byText[w.text] || w.enhanceLevel > byText[w.text].enhanceLevel) byText[w.text] = w;
+      }
+      const merged = Object.values(byText);
+      if (merged.length !== state.wordInv.length) {
+        console.log('word migration:', state.wordInv.length, '→', merged.length);
+        // 사라진 인스턴스가 소켓에 있으면 해당 소켓도 정리
+        const validIds = new Set(merged.map(w => w.id));
+        for (const slot in state.equipped) {
+          const eq = state.equipped[slot];
+          if (eq && eq.socketedWordIds) {
+            eq.socketedWordIds = eq.socketedWordIds.map(id => validIds.has(id) ? id : null);
+          }
+        }
+        state.wordInv = merged;
+      }
+    }
+    return true;
+  } catch(e) { console.warn('load failed', e); return false; }
+}
+function resetSave() {
+  localStorage.removeItem(STORAGE_KEY);
+  state = defaultState();
+  location.reload();
+}
+
+// ============== 적 ==============
+const ENEMY_TYPES = [
+  { name: '쥐',     hpMul: 0.7, atkMul: 1.0, sprites: ['rat_idle','rat_attack','rat_dying'], minStage: 1 },
+  { name: '슬라임', hpMul: 1.0, atkMul: 1.0, sprites: ['slime_idle','slime_attack','slime_dying'], minStage: 1 },
+  { name: '독침',   hpMul: 0.9, atkMul: 1.3, sprites: ['stinger_idle','stinger_attack','stinger_dying'], minStage: 2 },
+  { name: '눈깔',   hpMul: 0.8, atkMul: 1.2, sprites: ['beholder_idle','beholder_attack','beholder_dying'], minStage: 3 },
+  { name: '해골',   hpMul: 1.3, atkMul: 0.9, sprites: ['skeleton_idle','skeleton_attack','skeleton_dying'], minStage: 4 },
+  { name: '골렘',   hpMul: 1.8, atkMul: 0.8, sprites: ['golem_idle','golem_attack','golem_dying'], minStage: 5 },
+  { name: '미라',   hpMul: 1.4, atkMul: 1.1, sprites: ['mummy_idle','mummy_attack','mummy_dying'], minStage: 7 },
+  { name: '키나',   hpMul: 1.0, atkMul: 1.4, sprites: ['kina_idle','kina_attack','kina_dying'], minStage: 8 },
+  { name: '소환사', hpMul: 1.2, atkMul: 1.3, sprites: ['summoner_idle','summoner_attack','summoner_dying'], minStage: 10 },
+];
+const BOSS_TYPE = {
+  name: '드래곤', hpMul: 5.0, atkMul: 2.0,
+  sprites: ['dragon_idle','dragon_attack','dragon_dying'], isBoss: true,
+};
+
+function spawnEnemy() {
+  // 매 5번째 스테이지의 마지막 적 = 보스
+  const isBossFight = state.stage % 5 === 0 && state.enemyCountThisStage === state.enemiesPerStage - 1;
+  const t = isBossFight ? BOSS_TYPE : (() => {
+    const candidates = ENEMY_TYPES.filter(e => e.minStage <= state.stage);
+    return candidates[Math.floor(Math.random() * candidates.length)];
+  })();
+  const stage = state.stage;
+  const baseHp  = (15 + stage * 5) * t.hpMul;
+  const baseAtk = (2  + stage * 1.0) * t.atkMul;
+  const defense = Math.max(0, Math.floor((stage - 5) * 0.4));
+  state.enemy = { ...t, x: 360, y: 145,
+    maxHp: Math.round(baseHp), hp: Math.round(baseHp),
+    atk: Math.max(1, Math.round(baseAtk)), def: defense,
+    attackCooldown: 700, attackInterval: 1400,
+    alive: true, animState: 'idle', dyingTimer: 0,
+    hitFlashTimer: 0, color: '#888' };
+  if (isBossFight) toast(`⚠️ <b style="color:#ff4444">보스 출현!</b>`);
+}
+
+// ============== Canvas ==============
+const HIT_FLASH_DURATION = 220; // ms
+
+// 피격 효과 계산: timer가 양수면 active
+// dir: 1 = 우측으로 밀림, -1 = 좌측으로 밀림 (방어자 시점)
+function getHitFlashFx(timer, dir) {
+  if (timer <= 0) return null;
+  const t = Math.min(1, timer / HIT_FLASH_DURATION); // 1 → 0
+  return {
+    xOffset: t * 6 * dir,
+    scaleBoost: t * 0.18,
+    glowStrength: 10 + t * 12,
+    glowColor: '#ff3030',
+  };
+}
+
+const canvas = document.getElementById('combatCanvas');
+const ctx = canvas.getContext('2d');
+function resizeCanvas() {
+  const r = canvas.getBoundingClientRect();
+  canvas.width = r.width; canvas.height = r.height;
+}
+window.addEventListener('resize', resizeCanvas);
+
+let bgScroll = 0;
+const projectiles = [];
+
+// 타일 atlas 로드
+const tileImage = new Image();
+let tileLoaded = false;
+tileImage.onload = () => { tileLoaded = true; };
+tileImage.src = ATLAS.tiles_dungeon.src;
+
+function drawBackground() {
+  const w = canvas.width, h = canvas.height;
+
+  // 던전 분위기 그라데이션 (배경)
+  ctx.fillStyle = '#1a1a2e';
+  ctx.fillRect(0, 0, w, h - 32);
+
+  if (tileLoaded) {
+    // 바닥 타일 — Tile Dungeon 시트의 적당한 바닥 영역에서 슬라이스
+    // (시트 분석: x=0,y=64,w=64,h=64 영역에 바닥 패턴 있음)
+    const tileSize = 32;
+    const floorY = h - 32;
+    const offset = (bgScroll * 0.3) % tileSize;
+    for (let x = -offset; x < w + tileSize; x += tileSize) {
+      // 타일 시트의 바닥 영역 (대략): (32, 96, 32, 32)
+      ctx.drawImage(tileImage, 32, 96, 32, 32, x, floorY, tileSize, tileSize);
+    }
+    // 벽 패턴 (상단 천장)
+    for (let x = -offset; x < w + tileSize; x += tileSize) {
+      ctx.drawImage(tileImage, 96, 256, 32, 32, x, 0, tileSize, 24);
+    }
+  } else {
+    // 폴백
+    ctx.fillStyle = '#1a0a14';
+    ctx.fillRect(0, h - 12, w, 12);
+  }
+
+  // 토치 (배경 분위기) — 천장에 매달림
+  const torch = sprites.torch_yellow;
+  if (torch && torch.loaded) {
+    for (let i = 0; i < 3; i++) {
+      const x = ((i * 180) - (bgScroll * 0.5) % 180);
+      torch.draw(ctx, x + 60, 42, 2.5, false);
+    }
+  }
+}
+function drawPlayer() {
+  const p = state.player;
+  // 그림자 (피격 효과와 무관하게 원위치)
+  if (p.alive) {
+    ctx.fillStyle = 'rgba(0,0,0,0.4)';
+    ctx.beginPath(); ctx.ellipse(p.x, p.y + 4, 14, 4, 0, 0, Math.PI*2); ctx.fill();
+  }
+  if (!p.alive) {
+    ctx.save(); ctx.translate(p.x, p.y - 8);
+    ctx.strokeStyle = '#ff6a6a'; ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.moveTo(-10, -10); ctx.lineTo(10, 10);
+    ctx.moveTo(10, -10); ctx.lineTo(-10, 10);
+    ctx.stroke(); ctx.restore(); return;
+  }
+  const cls = HERO_CLASSES[state.player.heroClass] || HERO_CLASSES.knight;
+  const spriteKey = cls.sprites[p.animState === 'attack' ? 'attack' : 'idle'];
+  const spr = sprites[spriteKey];
+  // 피격 효과 (플레이어는 좌측으로 밀림)
+  const fx = getHitFlashFx(p.hitFlashTimer, -1);
+  if (spr) {
+    ctx.save();
+    if (fx) {
+      ctx.shadowColor = fx.glowColor;
+      ctx.shadowBlur = fx.glowStrength;
+    }
+    const scale = 2.0 + (fx ? fx.scaleBoost : 0);
+    const xPos = p.x + (fx ? fx.xOffset : 0);
+    const drawn = spr.draw(ctx, xPos, p.y + (cls.spriteOffsetY||0), scale, false);
+    ctx.restore();
+    if (!drawn) {
+      ctx.fillStyle = '#5a8acc';
+      ctx.fillRect(p.x - 10, p.y - 20, 20, 22);
+    }
+  }
+}
+
+function drawEnemy() {
+  const e = state.enemy; if (!e) return;
+  if (e.alive || e.dyingTimer > 0) {
+    ctx.fillStyle = 'rgba(0,0,0,' + (e.alive ? 0.4 : 0.4 * e.dyingTimer/600) + ')';
+    ctx.beginPath(); ctx.ellipse(e.x, e.y + 4, e.isBoss ? 22 : 14, e.isBoss ? 6 : 4, 0, 0, Math.PI*2); ctx.fill();
+  }
+  if (!e.alive && e.dyingTimer <= 0) return;
+
+  let spriteKey;
+  if (!e.alive) spriteKey = e.sprites[2];
+  else if (e.animState === 'attack') spriteKey = e.sprites[1];
+  else spriteKey = e.sprites[0];
+  const spr = sprites[spriteKey];
+
+  if (spr) {
+    ctx.save();
+    if (!e.alive) {
+      const fadeStart = 0.3;
+      const ratio = e.dyingTimer / 600;
+      ctx.globalAlpha = ratio > fadeStart ? 1 : ratio / fadeStart;
+    }
+    // 적은 우측으로 밀림 (오른쪽 적이라 +방향)
+    const fx = e.alive ? getHitFlashFx(e.hitFlashTimer, 1) : null;
+    if (fx) {
+      ctx.shadowColor = fx.glowColor;
+      ctx.shadowBlur = fx.glowStrength;
+    }
+    const baseScale = e.isBoss ? 1.6 : 2.0;
+    const scale = baseScale + (fx ? fx.scaleBoost * baseScale / 2 : 0);
+    const xPos = e.x + (fx ? fx.xOffset : 0);
+    spr.draw(ctx, xPos, e.y, scale, false);
+    ctx.restore();
+  } else {
+    ctx.fillStyle = e.color || '#888';
+    ctx.fillRect(e.x - 12, e.y - 20, 24, 24);
+  }
+
+  if (!e.alive) return;
+  const barW = e.isBoss ? 80 : 36, barH = e.isBoss ? 6 : 4;
+  const yOff = e.isBoss ? -56 : -38;
+  const ratio = Math.max(0, e.hp / e.maxHp);
+  ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW/2 - 1, e.y + yOff, barW + 2, barH + 2);
+  ctx.fillStyle = '#3a1a1a'; ctx.fillRect(e.x - barW/2, e.y + yOff + 1, barW, barH);
+  ctx.fillStyle = e.isBoss ? '#ff2020' : '#ff5050';
+  ctx.fillRect(e.x - barW/2, e.y + yOff + 1, barW * ratio, barH);
+  ctx.fillStyle = e.isBoss ? '#ffaa44' : '#ddd';
+  ctx.font = (e.isBoss ? 'bold 12px' : '10px') + ' Jua';
+  ctx.textAlign = 'center';
+  const label = (e.isBoss ? '💀 ' : '') + e.name + (e.def > 0 ? ' [방' + e.def + ']' : '');
+  ctx.fillText(label, e.x, e.y + yOff - 4);
+}
+function drawProjectiles() {
+  const fb = sprites.fireball;
+  if (fb && fb.loaded) fb.update(16);
+  for (const p of projectiles) {
+    const elemColor = W.ELEMENTS[p.element]?.color || '#ffaa44';
+    if (fb && fb.loaded) {
+      ctx.save();
+      ctx.shadowColor = elemColor; ctx.shadowBlur = 12;
+      fb.draw(ctx, p.x, p.y, 1.2, false);
+      ctx.restore();
+    } else {
+      ctx.save();
+      ctx.fillStyle = elemColor; ctx.shadowColor = elemColor; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(p.x, p.y, 5, 0, Math.PI*2); ctx.fill();
+      ctx.globalAlpha = 0.4;
+      ctx.beginPath(); ctx.arc(p.x - p.vx*0.05, p.y, 3, 0, Math.PI*2); ctx.fill();
+      ctx.restore();
+    }
+  }
+}
+// 드롭 연출 큐
+const drops = []; // { x, y, sprite, equip, popped, life }
+
+function spawnDropChest(x, y, equip, autoDisassembled = false) {
+  const spr = new Sprite(SPRITES.chest_open);
+  spr.reset();
+  drops.push({ x, y, sprite: spr, equip, autoDisassembled, popped: false, life: 1400 });
+}
+
+function updateDrops(dt) {
+  for (let i = drops.length - 1; i >= 0; i--) {
+    const d = drops[i];
+    d.sprite.update(dt);
+    d.life -= dt;
+    if (!d.popped && d.sprite.isDone()) {
+      d.popped = true;
+      if (d.autoDisassembled) popAutoDis(d.x, d.y, d.equip);
+      else popLoot(d.x, d.y, d.equip);
+    }
+    if (d.life <= 0) drops.splice(i, 1);
+  }
+}
+
+function drawDrops() {
+  for (const d of drops) {
+    d.sprite.draw(ctx, d.x, d.y, 2.0, false);
+  }
+}
+
+let lastRenderTime = performance.now();
+function render() {
+  const now = performance.now();
+  const dt = now - lastRenderTime;
+  lastRenderTime = now;
+  // 활성 hero sprite 업데이트
+  const p = state.player;
+  const cls = HERO_CLASSES[p.heroClass] || HERO_CLASSES.knight;
+  const heroSpriteKey = cls.sprites[p.animState === 'attack' ? 'attack' : 'idle'];
+  if (sprites[heroSpriteKey]) sprites[heroSpriteKey].update(dt);
+  // 적 sprite 업데이트
+  const e = state.enemy;
+  if (e && e.sprites) {
+    let key;
+    if (!e.alive) key = e.sprites[2];
+    else if (e.animState === 'attack') key = e.sprites[1];
+    else key = e.sprites[0];
+    if (sprites[key]) sprites[key].update(dt);
+  }
+  // 토치 (배경 장식)
+  if (sprites.torch_yellow) sprites.torch_yellow.update(dt);
+  updateDrops(dt);
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawBackground(); drawProjectiles(); drawEnemy(); drawPlayer(); drawDrops();
+}
+
+// ============== 팝업 ==============
+const combatWrap = document.getElementById('combatWrap');
+function popDamage(x, y, dmg, kind='enemy', crit=false) {
+  const d = document.createElement('div');
+  d.className = 'dmg-pop ' + kind + (crit ? ' crit' : '');
+  d.textContent = (crit ? '!' : '') + dmg;
+  d.style.left = x + 'px'; d.style.top = y + 'px';
+  combatWrap.appendChild(d);
+  setTimeout(() => d.remove(), 800);
+}
+function popSpellCast(x, y, text, color) {
+  const d = document.createElement('div');
+  d.className = 'spell-cast';
+  d.style.color = color || '#ff44ff';
+  d.style.left = x + 'px'; d.style.top = y + 'px';
+  d.textContent = text;
+  combatWrap.appendChild(d);
+  setTimeout(() => d.remove(), 600);
+}
+function popLoot(x, y, equip) {
+  const tier = W.EQUIPMENT_TIERS[equip.tier];
+  const d = document.createElement('div');
+  d.className = 'loot-pop';
+  d.style.left = (x - 50) + 'px'; d.style.top = (y - 10) + 'px';
+  d.style.borderColor = tier.color; d.style.color = tier.color;
+  d.innerHTML = `+ <b>${equip.name}</b> <span style="opacity:0.7">[${equip.letters.join('')}]</span>`;
+  combatWrap.appendChild(d);
+  setTimeout(() => d.remove(), 1200);
+}
+function popAutoDis(x, y, equip) {
+  const tier = W.EQUIPMENT_TIERS[equip.tier];
+  const d = document.createElement('div');
+  d.className = 'loot-pop';
+  d.style.left = (x - 50) + 'px'; d.style.top = (y - 10) + 'px';
+  d.style.borderColor = '#888'; d.style.color = '#aaa';
+  d.innerHTML = `🔨 <span style="color:${tier.color}">${equip.name}</span> → <b style="color:#ffd28a">${equip.letters.join(',')}</b>`;
+  combatWrap.appendChild(d);
+  setTimeout(() => d.remove(), 1200);
+}
+function toast(msg) {
+  const t = document.createElement('div');
+  t.className = 'toast'; t.innerHTML = msg;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(() => t.remove(), 2500);
+}
+
+// ============== 스탯/캐스팅 ==============
+function playerStats() {
+  const p = state.player;
+  const cls = HERO_CLASSES[p.heroClass] || HERO_CLASSES.knight;
+  let atk = cls.baseAtk, def = cls.baseDef, hp = cls.baseHp;
+  for (const slot of ['weapon','armor','accessory']) {
+    const e = state.equipped[slot]; if (!e) continue;
+    if (e.statType === 'attack')  atk += e.statValue;
+    if (e.statType === 'defense') def += e.statValue;
+    if (e.statType === 'hp')      hp  += e.statValue;
+  }
+  return { atk, def, hp, attackSpeedMul: cls.attackSpeedMul || 1.0, spellDmgMul: cls.spellDmgMul || 1.0, critBonus: cls.critBonus || 0 };
+}
+function getEquippedSocketedWordIds() {
+  const ids = [];
+  for (const slot of ['weapon','armor','accessory']) {
+    const eq = state.equipped[slot]; if (!eq) continue;
+    for (const wid of eq.socketedWordIds) if (wid) ids.push(wid);
+  }
+  return ids;
+}
+function getWordById(id) { return state.wordInv.find(w => w.id === id); }
+function refreshHud() {
+  const s = playerStats();
+  if (state.player.maxHp !== s.hp) {
+    const ratio = state.player.hp / state.player.maxHp;
+    state.player.maxHp = s.hp;
+    state.player.hp = Math.round(s.hp * ratio);
+  }
+  document.getElementById('stageNum').textContent = state.stage;
+  document.getElementById('statAtk').textContent = s.atk;
+  document.getElementById('statDef').textContent = s.def;
+  document.getElementById('statHp').textContent  = state.player.hp + '/' + state.player.maxHp;
+}
+
+// ============== 게임 루프 ==============
+let lastTime = performance.now();
+
+function castSpell(word) {
+  const p = state.player; const e = state.enemy;
+  const stats = W.effectiveStats(word);
+  if (!e || !e.alive) return;
+  projectiles.push({
+    x: p.x + 10, y: p.y - 5, vx: 320, vy: 0,
+    element: word.element, stats, life: 1000,
+  });
+  popSpellCast(p.x, p.y - 30,
+    word.text + (word.enhanceLevel > 0 ? '+' + word.enhanceLevel : ''),
+    W.ELEMENTS[word.element].color);
+}
+function updateProjectiles(dt) {
+  for (let i = projectiles.length - 1; i >= 0; i--) {
+    const proj = projectiles[i];
+    proj.x += proj.vx * dt / 1000;
+    proj.life -= dt;
+    const e = state.enemy;
+    if (e && e.alive && Math.abs(proj.x - e.x) < 15) {
+      const ps = playerStats();
+      // 직업 보너스: 크리율 추가
+      const boostedStats = { ...proj.stats, critChance: (proj.stats.critChance || 0) + (ps.critBonus || 0) };
+      const dmgInfo = W.resolveDamage(boostedStats, e.def);
+      // 직업 보너스: 마법 데미지 배율
+      const finalDmg = Math.round(dmgInfo.totalPerTarget * (ps.spellDmgMul || 1.0));
+      e.hp -= finalDmg;
+      e.hitFlashTimer = HIT_FLASH_DURATION;
+      popDamage(e.x, e.y - 10, finalDmg, 'spell', dmgInfo.didCrit);
+      if (e.hp <= 0) {
+        e.hp = 0; e.alive = false; e.dyingTimer = 600;
+        const dyingKey = e.sprites && e.sprites[2];
+        if (dyingKey && sprites[dyingKey]) sprites[dyingKey].reset();
+        state.totalKills++; state.enemyCountThisStage++;
+        onEnemyKilled(e);
+      }
+      projectiles.splice(i, 1); continue;
+    }
+    if (proj.life <= 0 || proj.x > canvas.width + 30) projectiles.splice(i, 1);
+  }
+}
+function tick(dt) {
+  const p = state.player;
+  bgScroll += dt * 0.05;
+  // 피격 타이머 감소
+  if (p.hitFlashTimer > 0) p.hitFlashTimer -= dt;
+  if (state.enemy && state.enemy.hitFlashTimer > 0) state.enemy.hitFlashTimer -= dt;
+  if (!p.alive) {
+    p.respawnTimer -= dt;
+    if (p.respawnTimer <= 0) {
+      p.alive = true; p.hp = p.maxHp;
+      state.enemyCountThisStage = 0; state.enemy = null;
+      toast('부활!'); refreshHud();
+    }
+    updateProjectiles(dt); render(); return;
+  }
+  if (!state.enemy || (!state.enemy.alive && state.enemy.dyingTimer <= 0)) {
+    if (state.enemy && state.enemyCountThisStage >= state.enemiesPerStage) {
+      state.stage++; state.enemyCountThisStage = 0;
+      if (state.stage > state.bestStage) {
+        state.bestStage = state.stage;
+        scheduleLeaderboardSync();
+      }
+      toast(`🏁 스테이지 ${state.stage} 진입!`);
+      refreshHud(); scheduleSave();
+    }
+    spawnEnemy();
+  }
+  const e = state.enemy;
+  if (e && e.alive) {
+    const dist = Math.abs(p.x - e.x);
+    if (dist <= 320) {
+      const socketedIds = getEquippedSocketedWordIds();
+      for (const wid of socketedIds) {
+        if (state.socketTimers[wid] === undefined) state.socketTimers[wid] = 0;
+        state.socketTimers[wid] -= dt;
+        if (state.socketTimers[wid] <= 0) {
+          const word = getWordById(wid);
+          if (word) {
+            const stats = W.effectiveStats(word);
+            castSpell(word);
+            state.socketTimers[wid] = stats.cooldown * 1000;
+          }
+        }
+      }
+    }
+  }
+  if (!e.alive) { e.dyingTimer -= dt; updateProjectiles(dt); render(); return; }
+  const dist = Math.abs(p.x - e.x);
+  const attackRange = 60;
+  if (dist > attackRange) {
+    e.x -= 120 * dt / 1000;
+    updateProjectiles(dt); render(); return;
+  }
+  const ps = playerStats();
+  p.attackCooldown -= dt; e.attackCooldown -= dt;
+  if (p.attackCooldown <= 0) {
+    p.attackCooldown = p.attackInterval / (ps.attackSpeedMul || 1.0);
+    const dmg = Math.max(1, ps.atk - e.def);
+    e.hp -= dmg;
+    e.hitFlashTimer = HIT_FLASH_DURATION;
+    popDamage(e.x, e.y - 10, dmg, 'enemy', false);
+    // 캐릭터 attack 애니
+    p.animState = 'attack';
+    const cls = HERO_CLASSES[p.heroClass] || HERO_CLASSES.knight;
+    const atkKey = cls.sprites.attack;
+    if (sprites[atkKey]) {
+      sprites[atkKey].reset();
+      sprites[atkKey].onComplete = () => { p.animState = 'idle'; };
+    }
+    if (e.hp <= 0) {
+      e.hp = 0; e.alive = false; e.dyingTimer = 600;
+      // dying 애니 재시작
+      const dyingKey = e.sprites[2];
+      if (sprites[dyingKey]) sprites[dyingKey].reset();
+      state.totalKills++; state.enemyCountThisStage++;
+      onEnemyKilled(e);
+    }
+  }
+  if (e.alive && e.attackCooldown <= 0) {
+    e.attackCooldown = e.attackInterval;
+    // 적 attack 애니 트리거
+    e.animState = 'attack';
+    const eAtkKey = e.sprites[1];
+    if (sprites[eAtkKey]) {
+      sprites[eAtkKey].reset();
+      sprites[eAtkKey].onComplete = () => { if (e.alive) e.animState = 'idle'; };
+    }
+    const dmg = Math.max(1, e.atk - ps.def);
+    p.hp -= dmg;
+    p.hitFlashTimer = HIT_FLASH_DURATION;
+    popDamage(p.x, p.y - 10, dmg, 'player', false);
+    if (p.hp <= 0) {
+      p.hp = 0; p.alive = false; p.respawnTimer = 2500;
+      toast('💀 패배... 2.5초 후 부활');
+      scheduleSave();
+    }
+  }
+  updateProjectiles(dt); render();
+}
+function shouldAutoDisassemble(eq) {
+  if (eq.tier === 'common' && state.autoDisCommon) return true;
+  if (eq.tier === 'magic' && state.autoDisMagic) return true;
+  return false;
+}
+
+function onEnemyKilled(e) {
+  const opts = { stageLevel: state.stage };
+  if (e.isBoss) opts.tier = 'unique';
+  const eq = W.rollEquipmentDrop(W.SEASON_1, opts);
+  state.totalDrops++;
+  if (e.isBoss) state.bossKills = (state.bossKills || 0) + 1;
+  scheduleLeaderboardSync();
+  // 보스는 항상 인벤에. 일반/매직은 토글 따라 자동 분해
+  if (!e.isBoss && shouldAutoDisassemble(eq)) {
+    const dis = W.disassembleEquipment(eq);
+    for (const c of dis.letters) state.letterInv[c] = (state.letterInv[c]||0) + 1;
+    state.autoDisCount++;
+    spawnDropChest(e.x, e.y, eq, true); // autoDisassembled
+  } else {
+    state.equipInv.push(eq);
+    spawnDropChest(e.x, e.y, eq, false);
+    if (e.isBoss) {
+      toast(`👑 보스 처치! <b style="color:#ffaa44">유니크 ${eq.name}</b> 드롭`);
+    }
+  }
+  renderActiveTab();
+  scheduleSave();
+}
+function loop(now) {
+  const dt = Math.min(100, now - lastTime);
+  lastTime = now;
+  tick(dt);
+  requestAnimationFrame(loop);
+}
+
+// ============== UI ==============
+const tabContent = document.getElementById('tabContent');
+const SPECIAL_LABELS = {
+  reflect: '반사', armor_pierce: '방어 무시',
+  pierce: '관통', chain: '연쇄',
+};
+
+function renderEquipTab() {
+  const slotInfo = {
+    weapon:    { label: '무기',   icon: '⚔️' },
+    armor:     { label: '방어구', icon: '🛡️' },
+    accessory: { label: '장신구', icon: '💍' },
+  };
+  // 직업 카드 (장착 슬롯 위)
+  const cls = HERO_CLASSES[state.player.heroClass] || HERO_CLASSES.knight;
+  let html = `<div class="class-card-mini" onclick="openClassSelector()">
+    <div class="icon">${cls.emoji}</div>
+    <div class="info">
+      <div class="cname">${cls.name}</div>
+      <div class="passive">${cls.passive}</div>
+    </div>
+    <div class="change-hint">변경 ›</div>
+  </div>`;
+  html += '<div class="section-h">장착 슬롯 <span class="sub">탭하여 변경</span></div>';
+  html += '<div class="slot-row">';
+  for (const [slot, info] of Object.entries(slotInfo)) {
+    const eq = state.equipped[slot];
+    if (eq) {
+      const tier = W.EQUIPMENT_TIERS[eq.tier];
+      const wordCount = eq.socketedWordIds.filter(x => x).length;
+      const socketStr = wordCount > 0 ? `💎 ${wordCount}/${eq.sockets}` : `${eq.sockets}소켓`;
+      html += `<div class="slot filled" style="border-color:${tier.color}" onclick="openSlotModal('${slot}')">
+        <div class="slot-icon">${info.icon}</div>
+        <div class="slot-name" style="color:${tier.color}">${eq.name}</div>
+        <div class="slot-letters">${eq.letters.map(c => `<span class="eq-letter">${c}</span>`).join('')}</div>
+        <div class="slot-words">${socketStr}</div>
+      </div>`;
+    } else {
+      html += `<div class="slot">
+        <div class="slot-icon">${info.icon}</div>
+        <div class="slot-label">${info.label}</div>
+      </div>`;
+    }
+  }
+  html += '</div>';
+
+  // === 필터 + 일괄 분해 ===
+  const tierCounts = { all: state.equipInv.length, common: 0, magic: 0, rare: 0, unique: 0 };
+  for (const eq of state.equipInv) tierCounts[eq.tier]++;
+  const filter = state.equipFilter || 'all';
+  const filteredEq = filter === 'all'
+    ? state.equipInv
+    : state.equipInv.filter(eq => eq.tier === filter);
+
+  html += '<div class="section-h">획득한 장비 <span class="sub">' + state.equipInv.length + '개</span></div>';
+
+  if (state.equipInv.length > 0) {
+    html += '<div class="filter-row">';
+    const filterDefs = [
+      { key: 'all', label: '전체', color: '#aaa' },
+      { key: 'common', label: '일반', color: W.EQUIPMENT_TIERS.common.color },
+      { key: 'magic', label: '매직', color: W.EQUIPMENT_TIERS.magic.color },
+      { key: 'rare', label: '레어', color: W.EQUIPMENT_TIERS.rare.color },
+      { key: 'unique', label: '유니크', color: W.EQUIPMENT_TIERS.unique.color },
+    ];
+    for (const f of filterDefs) {
+      const cnt = tierCounts[f.key];
+      if (f.key !== 'all' && cnt === 0) continue; // 0개 등급은 숨김
+      const activeStyle = filter === f.key ? `border-color:${f.color};color:${f.color};background:${f.color}22` : '';
+      html += `<div class="filter-chip ${filter === f.key ? 'active' : ''}" style="${activeStyle}" onclick="setEquipFilter('${f.key}')">${f.label}<span class="count">${cnt}</span></div>`;
+    }
+    if (filteredEq.length > 0) {
+      html += `<button class="bulk-btn" onclick="confirmBulkDisassemble()">🔨 일괄 분해</button>`;
+    }
+    html += '</div>';
+  }
+
+  // 자동 분해 토글 (장비 없어도 표시)
+  html += `<div class="auto-row">
+    <span class="label">🔄 드롭시 자동 분해:</span>
+    <span class="toggle-pill ${state.autoDisCommon ? 'on' : ''}" onclick="toggleAutoDis('common')">
+      <span class="check">${state.autoDisCommon ? '✓' : '·'}</span>
+      <span style="color:${W.EQUIPMENT_TIERS.common.color}">일반</span>
+    </span>
+    <span class="toggle-pill ${state.autoDisMagic ? 'on' : ''}" onclick="toggleAutoDis('magic')">
+      <span class="check">${state.autoDisMagic ? '✓' : '·'}</span>
+      <span style="color:${W.EQUIPMENT_TIERS.magic.color}">매직</span>
+    </span>
+    ${state.autoDisCount > 0 ? `<span style="margin-left:auto;color:#666;font-size:10px">누적 ${state.autoDisCount}회</span>` : ''}
+  </div>`;
+
+  if (state.equipInv.length === 0) {
+    html += '<div class="empty-msg">아직 획득한 장비가 없어요.<br>전투에서 드롭됩니다.</div>';
+  } else if (filteredEq.length === 0) {
+    html += '<div class="empty-msg">이 등급에 해당하는 장비가 없어요.</div>';
+  } else {
+    html += '<div class="eq-list">';
+    // 최신순 + 필터링된 인덱스 유지
+    const orderedIndices = [];
+    for (let i = state.equipInv.length - 1; i >= 0; i--) {
+      const eq = state.equipInv[i];
+      if (filter === 'all' || eq.tier === filter) orderedIndices.push(i);
+    }
+    for (const i of orderedIndices) html += renderEquipItem(state.equipInv[i], i);
+    html += '</div>';
+  }
+  tabContent.innerHTML = html;
+}
+function renderEquipItem(eq, idx) {
+  const tier = W.EQUIPMENT_TIERS[eq.tier];
+  const type = W.EQUIPMENT_TYPES[eq.type];
+  const statClass = eq.statType === 'attack' ? 'atk' : eq.statType === 'defense' ? 'def' : '';
+  const statSymbol = eq.statType === 'attack' ? 'ATK' : eq.statType === 'defense' ? 'DEF' : 'HP';
+  const socketsHtml = Array.from({length: eq.sockets}, (_, i) =>
+    `<div class="socket-dot ${i < eq.socketedWordIds.filter(x=>x).length ? 'filled' : ''}"></div>`
+  ).join('');
+  return `<div class="eq-item" style="border-left-color:${tier.color}" onclick="openEquipModal(${idx})">
+    <div class="eq-icon">${type.icon}</div>
+    <div class="eq-info">
+      <div class="eq-name" style="color:${tier.color}">${eq.name} <span style="color:#888;font-size:10px">[${tier.name}]</span></div>
+      <div class="eq-meta">
+        <span class="eq-stat ${statClass}">${statSymbol} +${eq.statValue}</span>
+        <span class="eq-letters">${eq.letters.map(c => `<span class="eq-letter">${c}</span>`).join('')}</span>
+        <span class="eq-sockets">${socketsHtml}</span>
+      </div>
+    </div>
+  </div>`;
+}
+function renderInvTab() {
+  let html = '<div class="section-h">알파벳 인벤토리 <span class="sub">획득 ' + state.totalDrops + ' 처치 ' + state.totalKills + '</span></div>';
+
+  // 합성 박스 (상단)
+  const slots = state.composeSlots || [];
+  const currentText = slots.map(s => s.letter).join('');
+  const isValidWord = currentText.length > 0 && W.SEASON_1.wordPool.includes(currentText);
+
+  html += '<div class="compose-box">';
+  html += `<div class="title">🔮 단어 합성 ${currentText ? `— <span style="color:${isValidWord ? '#6aff8a' : '#888'}">${currentText}</span>` : ''}</div>`;
+  html += '<div class="compose-slots" id="composeSlots">';
+  const MAX_SLOTS = 6;
+  for (let i = 0; i < MAX_SLOTS; i++) {
+    const s = slots[i];
+    if (s) {
+      html += `<div class="word-slot filled" data-slot-idx="${i}" onclick="removeFromSlot(${i})">${s.letter}</div>`;
+    } else {
+      html += `<div class="word-slot empty" data-slot-idx="${i}"></div>`;
+    }
+  }
+  html += '</div>';
+  html += '<div class="compose-actions">';
+  html += `<button class="btn-compose" onclick="tryCompose()" ${slots.length === 0 ? 'disabled' : ''}>✨ 합성</button>`;
+  if (slots.length > 0) {
+    html += `<button class="btn-clear" onclick="clearComposeSlots()">⟲ 비우기</button>`;
+  }
+  html += '</div>';
+  if (currentText.length > 0 && !isValidWord) {
+    html += `<div style="text-align:center;color:#888;font-size:10px;margin-top:6px">시즌 풀에 없는 단어</div>`;
+  } else if (isValidWord) {
+    const hint = W.SEASON_1.wordHints[currentText] || '';
+    const existing = state.wordInv.find(w => w.text === currentText);
+    if (existing) {
+      html += `<div style="text-align:center;color:#aaff88;font-size:11px;margin-top:6px">
+        💪 ${currentText} = ${hint} → 강화 (+${existing.enhanceLevel} → +${existing.enhanceLevel + 1})
+      </div>`;
+    } else {
+      html += `<div style="text-align:center;color:#6aff8a;font-size:11px;margin-top:6px">✓ ${currentText} = ${hint}</div>`;
+    }
+  }
+  html += '</div>';
+
+  // 알파벳 그리드
+  html += '<div class="alpha-grid">';
+  for (let i = 0; i < 26; i++) {
+    const c = String.fromCharCode(65 + i);
+    const n = state.letterInv[c] || 0;
+    const ownedWith = state.equipInv.filter(eq => eq.letters.includes(c)).length;
+    const cellHtml = `<div class="alpha-cell ${n > 0 ? 'has' : ''}"
+        data-letter="${c}"
+        ${n > 0 ? `draggable="true" onclick="addLetterToSlot('${c}')"` : ''}
+        ondragstart="onDragStart(event, '${c}')"
+        ondragend="onDragEnd(event)">
+      <div class="letter">${c}</div>
+      <div class="count">${n}</div>
+      ${ownedWith > 0 ? `<div class="equip-hint" title="장비 ${ownedWith}개 보유">+${ownedWith}</div>` : ''}
+      ${ownedWith > 0 ? `<div class="disassemble-btn" onclick="event.stopPropagation(); openLetterDisassemble('${c}')" title="이 글자 가진 장비 분해">🔨</div>` : ''}
+    </div>`;
+    html += cellHtml;
+  }
+  html += '</div>';
+  html += `<div style="margin-top:10px;text-align:center;color:#aaa;font-size:11px;">
+    💡 글자 셀을 탭하거나 드래그해서 위 슬롯에 추가하세요<br>
+    <span style="color:#888;font-size:10px">우상단 🔨 = 해당 글자 가진 장비 분해</span>
+  </div>`;
+  html += `<div style="margin-top:6px;text-align:center;color:#aaa;font-size:11px;">
+    📖 '단어' 탭에서 발견한 단어를 확인하세요
+  </div>`;
+  html += `<button class="reset-btn" onclick="confirmReset()">⚠️ 게임 데이터 초기화</button>`;
+  html += `<div style="text-align:center;margin-top:12px;color:#555;font-size:10px;line-height:1.6">
+    Pixel art by <b>Matheus Tanuri / Marth</b><br>
+    <span style="opacity:0.7">MiniRogue Dungeon (itch.io)</span>
+  </div>`;
+  tabContent.innerHTML = html;
+  // 드래그 이벤트 등록 (슬롯)
+  setTimeout(setupSlotDropZones, 0);
+}
+
+function setupSlotDropZones() {
+  const slots = document.querySelectorAll('.word-slot');
+  slots.forEach(slot => {
+    slot.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      slot.classList.add('drag-over');
+    });
+    slot.addEventListener('dragleave', () => slot.classList.remove('drag-over'));
+    slot.addEventListener('drop', (e) => {
+      e.preventDefault();
+      slot.classList.remove('drag-over');
+      const letter = e.dataTransfer.getData('text/plain');
+      if (letter) addLetterToSlot(letter);
+    });
+  });
+}
+function renderWordTab() {
+  state.seenWordTab = true;
+  document.getElementById('wordBadge').style.display = 'none';
+  const pool = W.SEASON_1.wordPool;
+  const owned = state.wordInv;
+  const ownedByText = {};
+  for (const w of owned) {
+    if (!ownedByText[w.text]) ownedByText[w.text] = [];
+    ownedByText[w.text].push(w);
+  }
+  const discovered = new Set(state.discoveredWords);
+  // 발견된 단어 (한 번이라도 합성한 적 있음)
+  const discoveredList = pool.filter(t => discovered.has(t));
+  const undiscoveredList = pool.filter(t => !discovered.has(t));
+
+  let html = `<div class="section-h">${W.SEASON_1.name} <span class="sub">${discoveredList.length}/${pool.length} 발견</span></div>`;
+  html += `<div style="text-align:center;color:#888;font-size:11px;margin:-4px 0 12px">
+    💡 단어 합성은 <b style="color:#ffaa44">인벤토리 탭</b>에서 글자를 슬롯에 넣어 만드세요
+  </div>`;
+
+  // 발견한 단어 (강화 가능)
+  if (discoveredList.length > 0) {
+    html += '<div class="section-h">📖 발견한 단어 <span class="sub">' + discoveredList.length + '개</span></div>';
+    html += '<div class="word-list">';
+    for (const text of discoveredList) {
+      const has = ownedByText[text] || [];
+      const kind = has.length > 0 ? 'owned' : 'composable';
+      html += renderWordCard(text, has, kind);
+    }
+    html += '</div>';
+  }
+
+  // 미발견 단어 (도감 — ??? + 한국어 뜻)
+  if (undiscoveredList.length > 0) {
+    html += '<div class="section-h">🔒 미발견 단어 <span class="sub">' + undiscoveredList.length + '개</span></div>';
+    html += '<div class="word-list">';
+    for (const text of undiscoveredList) {
+      html += renderWordCard(text, [], 'undiscovered');
+    }
+    html += '</div>';
+  }
+  tabContent.innerHTML = html;
+}
+function renderWordCard(text, instances, kind) {
+  const tempWord = W.createWord(text, W.SEASON_1);
+  const elem = W.ELEMENTS[tempWord.element];
+  const stats = W.effectiveStats(tempWord);
+  const specStr = stats.special ? `<span class="special">${SPECIAL_LABELS[stats.special]}</span>` : '';
+  const targetStr = stats.targets > 1 ? `${stats.targets}타겟` : '단일';
+  const hint = W.SEASON_1.wordHints[text] || '';
+
+  // 미발견 단어: ??? + 한국어 뜻 + 글자수 힌트
+  if (kind === 'undiscovered') {
+    return `<div class="word-card undiscovered">
+      <div>
+        <span class="word-text-hidden">${'?'.repeat(text.length)}</span>
+        <span class="word-elem-badge" style="background:${elem.color}">${elem.name}</span>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+        <span class="hint-meaning">🎯 ${hint}</span>
+        <span class="hint-length">(${text.length}글자)</span>
+      </div>
+      <div class="word-stats">
+        <span><span class="label">DMG</span> ${stats.damage}</span>
+        <span><span class="label">CD</span> ${stats.cooldown}s</span>
+        <span>${targetStr}</span>
+        ${stats.hits > 1 ? `<span>×${stats.hits}히트</span>` : ''}
+        ${specStr}
+      </div>
+    </div>`;
+  }
+
+  // 발견된 단어 (owned/composable): 강화 모달 열림
+  const miss = W.missingLetters(state.letterInv, text);
+  const need = [...text];
+  const lockedClass = kind === 'composable' ? 'available' : '';
+  const ownedHtml = instances.length > 0
+    ? `<div class="word-instances">${instances.map(w => {
+        const socketed = isWordSocketed(w.id);
+        return `<span class="word-instance ${socketed ? 'socketed' : ''}">+${w.enhanceLevel}${socketed ? ' 🔗' : ''}</span>`;
+      }).join('')}</div>` : '';
+  const needHtml = `<div class="word-need">${need.map(c => {
+    const isMissing = (miss[c] || 0) > 0;
+    return `<span class="ltr ${isMissing ? 'missing' : ''}">${c}</span>`;
+  }).join('')}</div>`;
+  return `<div class="word-card ${lockedClass}" onclick="openWordModal('${text}')">
+    <div>
+      <span class="word-text" style="color:${elem.color}">${text}</span>
+      <span class="word-elem-badge" style="background:${elem.color}">${elem.name}</span>
+      ${hint ? `<span style="color:#aaa;font-size:11px;margin-left:8px">${hint}</span>` : ''}
+    </div>
+    <div class="word-stats">
+      <span><span class="label">DMG</span> ${stats.damage}</span>
+      <span><span class="label">CD</span> ${stats.cooldown}s</span>
+      <span>${targetStr}</span>
+      ${stats.hits > 1 ? `<span>×${stats.hits}히트</span>` : ''}
+      ${specStr}
+    </div>
+    ${needHtml}
+    ${ownedHtml}
+  </div>`;
+}
+function isWordSocketed(wordId) {
+  for (const slot of ['weapon','armor','accessory']) {
+    const eq = state.equipped[slot];
+    if (eq && eq.socketedWordIds.includes(wordId)) return true;
+  }
+  for (const eq of state.equipInv) {
+    if (eq.socketedWordIds.includes(wordId)) return true;
+  }
+  return false;
+}
+function renderActiveTab() {
+  if (state.activeTab === 'equip') renderEquipTab();
+  else if (state.activeTab === 'inv') renderInvTab();
+  else renderWordTab();
+}
+
+// ============== Modal ==============
+const modal = document.getElementById('modal');
+const modalContent = document.getElementById('modalContent');
+function showModal(html) { modalContent.innerHTML = html; modal.classList.add('show'); }
+function hideModal() { modal.classList.remove('show'); }
+
+// === 직업 선택 ===
+function openClassSelector() {
+  const current = state.player.heroClass;
+  let html = `<h3>⚔️ 직업 선택</h3>`;
+  html += `<div style="text-align:center;color:#aaa;font-size:11px;margin-bottom:12px;margin-top:-4px">
+    직업마다 능력치와 특수 효과가 다릅니다
+  </div>`;
+  html += `<div class="class-grid">`;
+  for (const [key, cls] of Object.entries(HERO_CLASSES)) {
+    const unlocked = isClassUnlocked(key);
+    const isCurrent = key === current;
+    const cardClass = `class-card ${isCurrent ? 'current' : ''} ${!unlocked ? 'locked' : ''}`;
+    const onclick = unlocked ? `onclick="setHeroClass('${key}')"` : '';
+    html += `<div class="${cardClass}" ${onclick}>`;
+    if (isCurrent) html += `<div class="current-badge">사용 중</div>`;
+    if (!unlocked) html += `<div class="lock-overlay">🔒</div>`;
+    html += `<div class="ce">${cls.emoji}</div>`;
+    html += `<div class="cn">${cls.name}</div>`;
+    html += `<div class="cd">${cls.desc}</div>`;
+    html += `<div class="cs">
+      <span class="stat" style="color:#ff6a4a">⚔${cls.baseAtk}</span>
+      <span class="stat" style="color:#6aaeff">🛡${cls.baseDef}</span>
+      <span class="stat" style="color:#6aff8a">❤${cls.baseHp}</span>
+    </div>`;
+    html += `<div class="passive-text">${cls.passive}</div>`;
+    if (!unlocked) {
+      const prog = getUnlockProgress(key);
+      html += `<div class="unlock-bar"><div class="unlock-fill" style="width:${prog.ratio*100}%"></div></div>`;
+      html += `<div class="unlock-text">${prog.label} (${prog.current}/${prog.needed})</div>`;
+    }
+    html += `</div>`;
+  }
+  html += `</div>`;
+  html += `<div class="modal-actions"><button class="btn" onclick="hideModal()">닫기</button></div>`;
+  showModal(html);
+}
+
+function setHeroClass(key) {
+  if (!isClassUnlocked(key)) { toast('아직 잠긴 직업입니다'); return; }
+  if (state.player.heroClass === key) { hideModal(); return; }
+  const cls = HERO_CLASSES[key];
+  state.player.heroClass = key;
+  // 능력치 재계산 (playerStats가 cls에서 가져옴)
+  // HP는 비율 유지
+  const prevMaxHp = state.player.maxHp;
+  const newStats = playerStats();
+  const ratio = state.player.hp / prevMaxHp;
+  state.player.maxHp = newStats.hp;
+  state.player.hp = Math.max(1, Math.round(newStats.hp * ratio));
+  toast(`${cls.emoji} <b style="color:#ffd28a">${cls.name}</b>로 변경!`);
+  refreshHud();
+  hideModal();
+  renderActiveTab();
+  scheduleSave();
+}
+modal.addEventListener('click', e => { if (e.target === modal) hideModal(); });
+
+function openEquipModal(idx) {
+  const eq = state.equipInv[idx]; if (!eq) return;
+  const tier = W.EQUIPMENT_TIERS[eq.tier];
+  const slotName = { weapon:'무기', armor:'방어구', accessory:'장신구' }[eq.type];
+  const currentlyEquipped = state.equipped[eq.type];
+  let html = `<h3 style="color:${tier.color}">${eq.name}</h3>`;
+  html += `<div style="font-size:12px;color:#888;text-align:center;margin-bottom:8px">${tier.name} ${slotName}</div>`;
+  html += `<div style="text-align:center;margin-bottom:10px">
+    ${eq.letters.map(c => `<span class="eq-letter" style="font-size:14px;padding:4px 8px;margin:2px">${c}</span>`).join('')}
+  </div>`;
+  html += `<div style="text-align:center;margin-bottom:12px">
+    <span class="eq-stat ${eq.statType==='attack'?'atk':eq.statType==='defense'?'def':''}" style="font-size:14px">
+      ${eq.statType==='attack'?'공격':eq.statType==='defense'?'방어':'HP'} +${eq.statValue}
+    </span>
+  </div>`;
+  const socketedCount = eq.socketedWordIds.filter(x=>x).length;
+  html += `<div style="text-align:center;margin-bottom:12px;font-size:11px;color:#aaa">소켓 ${socketedCount}/${eq.sockets}</div>`;
+  if (socketedCount > 0) {
+    html += '<div style="text-align:center;margin-bottom:12px">';
+    for (const wid of eq.socketedWordIds) {
+      if (!wid) continue;
+      const w = getWordById(wid); if (!w) continue;
+      const ec = W.ELEMENTS[w.element].color;
+      html += `<span class="word-instance" style="background:${ec}33;color:${ec};border-color:${ec};margin:2px">${w.text}+${w.enhanceLevel}</span>`;
+    }
+    html += '</div>';
+  }
+  if (currentlyEquipped) {
+    html += `<div style="font-size:11px;color:#aaa;text-align:center;margin-bottom:6px">
+      현재 장착: <span style="color:${W.EQUIPMENT_TIERS[currentlyEquipped.tier].color}">${currentlyEquipped.name}</span> (+${currentlyEquipped.statValue})
+    </div>`;
+  }
+  html += `<div class="modal-actions">
+    <button class="btn primary" onclick="equipItem(${idx})">장착</button>
+    <button class="btn danger" onclick="disassembleItem(${idx})">분해</button>
+    <button class="btn" onclick="hideModal()">취소</button>
+  </div>`;
+  showModal(html);
+}
+function openSlotModal(slot) {
+  const eq = state.equipped[slot]; if (!eq) { hideModal(); return; }
+  const tier = W.EQUIPMENT_TIERS[eq.tier];
+  const slotName = { weapon:'무기', armor:'방어구', accessory:'장신구' }[slot];
+  let html = `<h3 style="color:${tier.color}">${eq.name}</h3>`;
+  html += `<div style="font-size:12px;color:#888;text-align:center;margin-bottom:8px">${tier.name} ${slotName} (장착됨)</div>`;
+  html += `<div style="text-align:center;margin-bottom:10px">
+    ${eq.letters.map(c => `<span class="eq-letter" style="font-size:14px;padding:4px 8px;margin:2px">${c}</span>`).join('')}
+  </div>`;
+  html += `<div style="text-align:center;margin-bottom:12px">
+    <span class="eq-stat" style="font-size:14px">
+      ${eq.statType==='attack'?'공격':eq.statType==='defense'?'방어':'HP'} +${eq.statValue}
+    </span>
+  </div>`;
+  const socketedCount = eq.socketedWordIds.filter(x=>x).length;
+  html += `<div style="font-size:12px;color:#ffaa44;margin-bottom:8px;text-align:center">소켓 ${socketedCount}/${eq.sockets}</div>`;
+  html += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">';
+  for (let i = 0; i < eq.sockets; i++) {
+    const wid = eq.socketedWordIds[i];
+    if (wid) {
+      const w = getWordById(wid);
+      if (w) {
+        const ec = W.ELEMENTS[w.element].color;
+        const stats = W.effectiveStats(w);
+        html += `<div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(0,0,0,0.3);border-radius:4px;border-left:3px solid ${ec}">
+          <div style="flex:1">
+            <span class="word-text" style="color:${ec};font-size:12px">${w.text}</span>
+            <span class="word-elem-badge" style="background:${ec};font-size:9px">${W.ELEMENTS[w.element].name}</span>
+            <span style="color:#aaa;font-size:10px"> +${w.enhanceLevel}</span>
+            <div style="font-size:10px;color:#888;margin-top:2px">DMG ${stats.damage} / CD ${stats.cooldown}s${stats.special ? ' / '+SPECIAL_LABELS[stats.special] : ''}</div>
+          </div>
+          <button class="btn btn-small danger" onclick="unsocketFromEquipped('${slot}', ${i})">제거</button>
+        </div>`;
+      }
+    } else {
+      html += `<div style="padding:8px;border:1px dashed #555;border-radius:4px;text-align:center;color:#777;font-size:11px;cursor:pointer" onclick="openSocketPicker('${slot}', ${i})">
+        💎 빈 소켓 — 단어를 끼우려면 탭
+      </div>`;
+    }
+  }
+  html += '</div>';
+  html += `<div class="modal-actions">
+    <button class="btn danger" onclick="unequipSlot('${slot}')">장비 해제</button>
+    <button class="btn" onclick="hideModal()">닫기</button>
+  </div>`;
+  showModal(html);
+}
+function openSocketPicker(slot, socketIdx) {
+  const available = state.wordInv.filter(w => !isWordSocketed(w.id));
+  let html = `<h3>소켓에 끼울 단어 선택</h3>`;
+  if (available.length === 0) {
+    html += `<div class="empty-msg">사용 가능한 단어가 없습니다.<br>다른 소켓에서 빼거나 새로 합성하세요.</div>`;
+    html += `<div class="modal-actions"><button class="btn" onclick="openSlotModal('${slot}')">뒤로</button></div>`;
+    showModal(html); return;
+  }
+  html += '<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px;max-height:50vh;overflow-y:auto">';
+  for (const w of available.sort((a,b) => a.text.localeCompare(b.text) || b.enhanceLevel - a.enhanceLevel)) {
+    const ec = W.ELEMENTS[w.element].color;
+    const stats = W.effectiveStats(w);
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:6px;background:rgba(255,255,255,0.04);border-radius:4px;border-left:3px solid ${ec};cursor:pointer" onclick="socketWordById('${slot}', ${socketIdx}, '${w.id}')">
+      <div style="flex:1">
+        <span class="word-text" style="color:${ec};font-size:12px">${w.text}</span>
+        <span class="word-elem-badge" style="background:${ec};font-size:9px">${W.ELEMENTS[w.element].name}</span>
+        <span style="color:#aaa;font-size:10px"> +${w.enhanceLevel}</span>
+        <div style="font-size:10px;color:#888;margin-top:2px">DMG ${stats.damage} / CD ${stats.cooldown}s</div>
+      </div>
+    </div>`;
+  }
+  html += '</div>';
+  html += `<div class="modal-actions"><button class="btn" onclick="openSlotModal('${slot}')">뒤로</button></div>`;
+  showModal(html);
+}
+function socketWordById(slot, socketIdx, wordId) {
+  const eq = state.equipped[slot]; if (!eq) return;
+  if (eq.socketedWordIds[socketIdx]) return;
+  eq.socketedWordIds[socketIdx] = wordId;
+  state.socketTimers[wordId] = 1000;
+  toast('🔗 단어 장착!');
+  scheduleSave();
+  openSlotModal(slot);
+  renderActiveTab();
+}
+function unsocketFromEquipped(slot, socketIdx) {
+  const eq = state.equipped[slot]; if (!eq) return;
+  const wid = eq.socketedWordIds[socketIdx];
+  if (!wid) return;
+  eq.socketedWordIds[socketIdx] = null;
+  delete state.socketTimers[wid];
+  toast('🔓 단어 제거');
+  scheduleSave();
+  openSlotModal(slot);
+  renderActiveTab();
+}
+function openWordModal(text) {
+  // 미발견 단어는 모달 X — 인벤 탭으로 안내
+  if (!state.discoveredWords.includes(text)) {
+    toast('🔮 인벤토리 탭에서 글자를 모아 합성하세요!');
+    return;
+  }
+  const owned = state.wordInv.find(w => w.text === text);
+  const can = W.canCompose(state.letterInv, text);
+  const miss = W.missingLetters(state.letterInv, text);
+  const tempWord = W.createWord(text, W.SEASON_1);
+  const elem = W.ELEMENTS[tempWord.element];
+  const baseStats = W.effectiveStats(tempWord);
+  const ownedStats = owned ? W.effectiveStats(owned) : null;
+  const hint = W.SEASON_1.wordHints[text] || '';
+  let html = `<h3 style="color:${elem.color}">${text} <span class="word-elem-badge" style="background:${elem.color};font-size:11px;margin-left:8px">${elem.name}</span></h3>`;
+  if (hint) html += `<div style="text-align:center;color:#aaa;font-size:12px;margin-bottom:8px;margin-top:-4px">🎯 ${hint}</div>`;
+
+  // 현재 보유 강화 레벨 + 효과
+  if (owned) {
+    html += `<div style="background:rgba(255,170,68,0.08);padding:10px;border-radius:4px;margin-bottom:10px;font-size:12px;border:1px solid #4a3020">
+      <div style="color:#ffaa44;margin-bottom:4px">보유 중 <b>+${owned.enhanceLevel}</b> ${isWordSocketed(owned.id) ? '🔗 장착됨' : ''}</div>
+      <div>DMG <b>${ownedStats.damage}</b> / CD <b>${ownedStats.cooldown}</b>초 / ${ownedStats.targets}타겟${ownedStats.hits > 1 ? ' / '+ownedStats.hits+'히트' : ''}${ownedStats.critChance > 0 ? ' / 크리 '+(ownedStats.critChance*100)+'%' : ''}</div>
+      ${ownedStats.special ? `<div style="color:#ff44ff;margin-top:4px">특수: ${SPECIAL_LABELS[ownedStats.special]}</div>` : ''}
+    </div>`;
+  } else {
+    html += `<div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:10px;font-size:12px">
+      <div style="color:#aaa;margin-bottom:4px">기본 효과 (+0)</div>
+      <div>DMG ${baseStats.damage} / CD ${baseStats.cooldown}초 / ${baseStats.targets}타겟${baseStats.hits > 1 ? ' / '+baseStats.hits+'히트' : ''}</div>
+      ${baseStats.special ? `<div style="color:#ff44ff;margin-top:4px">특수: ${SPECIAL_LABELS[baseStats.special]}</div>` : ''}
+    </div>`;
+  }
+
+  // 강화 미리보기
+  if (owned) {
+    const nextWord = { ...owned, enhanceLevel: owned.enhanceLevel + 1 };
+    const nextStats = W.effectiveStats(nextWord);
+    html += `<div style="background:rgba(100,255,150,0.06);padding:8px;border-radius:4px;margin-bottom:10px;font-size:11px;border:1px dashed #3a6a3a">
+      <div style="color:#aaff88;margin-bottom:4px">💪 강화 시 (+${owned.enhanceLevel + 1})</div>
+      <div style="color:#ddd">DMG <b style="color:#ffaa44">${nextStats.damage}</b> / CD <b style="color:#6aaeff">${nextStats.cooldown}</b>초</div>
+    </div>`;
+  }
+
+  html += `<div style="color:#aaa;font-size:12px;margin-bottom:6px">필요 글자 ${can ? '✅' : '❌'}</div>`;
+  html += `<div class="word-need" style="margin-bottom:12px">`;
+  for (const c of text) {
+    const isMissing = (miss[c] || 0) > 0;
+    const haveCount = state.letterInv[c] || 0;
+    html += `<span class="ltr ${isMissing ? 'missing' : ''}">${c}<span style="font-size:8px;margin-left:2px">(${haveCount})</span></span>`;
+  }
+  html += '</div>';
+
+  // 스마트 분해 (편의 기능)
+  if (!can) {
+    const missingChars = Object.keys(miss);
+    const helperEquips = state.equipInv.filter(eq =>
+      eq.letters.some(c => miss[c] > 0) && (eq.tier === 'common' || eq.tier === 'magic'));
+    if (helperEquips.length > 0) {
+      html += `<button class="btn" onclick="smartDisassembleForWord('${text}')" style="width:100%;margin-bottom:10px;background:linear-gradient(180deg,#3a5525,#1a3015);color:#aaffaa">
+        🔨 부족 글자(${missingChars.join(',')}) 모으기 — 일반/매직 ${helperEquips.length}개 분해
+      </button>`;
+    }
+  }
+
+  html += `<div style="text-align:center;color:#888;font-size:10px;margin-bottom:10px;line-height:1.6">
+    💡 합성/강화는 <b style="color:#ffaa44">인벤토리 탭</b>에서<br>
+    같은 단어를 다시 합성하면 자동으로 강화됩니다
+  </div>`;
+  html += `<div class="modal-actions">
+    <button class="btn" onclick="hideModal()">닫기</button>
+  </div>`;
+  showModal(html);
+}
+function composeNewWord(text) {
+  const r = W.compose(state.letterInv, text, W.SEASON_1);
+  if (!r.ok) { toast('합성 실패: ' + r.reason); return false; }
+  state.letterInv = r.inv;
+  state.wordInv.push(r.word);
+  if (!state.discoveredWords.includes(text)) state.discoveredWords.push(text);
+  const ec = W.ELEMENTS[r.word.element].color;
+  const hint = W.SEASON_1.wordHints[text] || '';
+  toast(`✨ <b style="color:${ec}">${text}</b>${hint ? ' = '+hint : ''} 합성!`);
+  scheduleSave();
+  hideModal();
+  renderActiveTab();
+  return true;
+}
+
+// === 합성 슬롯 (인벤 탭) ===
+const MAX_COMPOSE_SLOTS = 6;
+
+function addLetterToSlot(letter) {
+  if (!state.composeSlots) state.composeSlots = [];
+  if (state.composeSlots.length >= MAX_COMPOSE_SLOTS) {
+    toast(`슬롯은 최대 ${MAX_COMPOSE_SLOTS}개까지`);
+    return;
+  }
+  if (!state.letterInv[letter] || state.letterInv[letter] <= 0) {
+    toast(`'${letter}' 글자가 없습니다`);
+    return;
+  }
+  state.letterInv[letter]--;
+  state.composeSlots.push({ letter });
+  renderActiveTab();
+}
+
+function removeFromSlot(idx) {
+  if (!state.composeSlots || !state.composeSlots[idx]) return;
+  const item = state.composeSlots.splice(idx, 1)[0];
+  state.letterInv[item.letter] = (state.letterInv[item.letter] || 0) + 1;
+  renderActiveTab();
+}
+
+function clearComposeSlots() {
+  if (!state.composeSlots) return;
+  for (const s of state.composeSlots) {
+    state.letterInv[s.letter] = (state.letterInv[s.letter] || 0) + 1;
+  }
+  state.composeSlots = [];
+  renderActiveTab();
+}
+
+function tryCompose() {
+  const slots = state.composeSlots || [];
+  if (slots.length === 0) { toast('글자를 슬롯에 넣으세요'); return; }
+  const text = slots.map(s => s.letter).join('');
+  // 풀 검증
+  if (!W.SEASON_1.wordPool.includes(text)) {
+    toast(`❌ "${text}"는 이 시즌의 단어가 아닙니다`);
+    return;
+  }
+  // 이미 슬롯의 글자들은 letterInv에서 차감된 상태 (재합성 시에도 글자 소모됨)
+  state.composeSlots = [];
+  const ec = W.ELEMENTS[W.createWord(text, W.SEASON_1).element].color;
+  const hint = W.SEASON_1.wordHints[text] || '';
+  const existing = state.wordInv.find(w => w.text === text);
+  if (existing) {
+    // 보유 중 — 강화
+    existing.enhanceLevel++;
+    toast(`💪 <b style="color:${ec}">${text}</b>${hint ? ' = '+hint : ''} +${existing.enhanceLevel} 강화!`);
+  } else {
+    // 새 합성
+    const w = W.createWord(text, W.SEASON_1);
+    state.wordInv.push(w);
+    if (!state.discoveredWords.includes(text)) {
+      state.discoveredWords.push(text);
+      scheduleLeaderboardSync();
+    }
+    toast(`✨ <b style="color:${ec}">${text}</b>${hint ? ' = '+hint : ''} 합성!`);
+  }
+  renderActiveTab();
+  scheduleSave();
+}
+
+// 드래그 핸들러
+let _draggingLetter = null;
+function onDragStart(e, letter) {
+  if (!state.letterInv[letter] || state.letterInv[letter] <= 0) {
+    e.preventDefault(); return;
+  }
+  _draggingLetter = letter;
+  e.dataTransfer.effectAllowed = 'move';
+  e.dataTransfer.setData('text/plain', letter);
+  e.currentTarget.classList.add('dragging');
+}
+function onDragEnd(e) {
+  _draggingLetter = null;
+  e.currentTarget.classList.remove('dragging');
+}
+
+// === 기존 handleComposeInput은 호환성 위해 유지 ===
+function handleComposeInput() {
+  const input = document.getElementById('wordInput');
+  if (!input) return;
+  const text = input.value.toUpperCase().trim();
+  if (!text) {
+    toast('영어 단어를 입력하세요');
+    input.focus();
+    return;
+  }
+  // 시즌 풀 검증
+  if (!W.SEASON_1.wordPool.includes(text)) {
+    toast(`❌ "${text}"는 이 시즌의 단어가 아닙니다`);
+    // 입력은 유지 (실수일 수도)
+    input.focus();
+    return;
+  }
+  // 글자 검증
+  if (!W.canCompose(state.letterInv, text)) {
+    const miss = W.missingLetters(state.letterInv, text);
+    const missStr = Object.entries(miss).map(([c, n]) => `${c}×${n}`).join(', ');
+    toast(`❌ 글자 부족: ${missStr}`);
+    input.focus();
+    return;
+  }
+  // 이미 보유한 단어면 모달 띄워서 강화 옵션 보여줌
+  const existing = state.wordInv.filter(w => w.text === text);
+  if (existing.length > 0) {
+    input.value = '';
+    openWordModal(text);
+    return;
+  }
+  // 새 합성
+  composeNewWord(text);
+  input.value = '';
+}
+function enhanceWordById(wordId) {
+  const w = state.wordInv.find(x => x.id === wordId);
+  if (!w) return;
+  if (!W.canCompose(state.letterInv, w.text)) { toast('글자 부족'); return; }
+  state.letterInv = W.consume(state.letterInv, w.text);
+  w.enhanceLevel++;
+  const ec = W.ELEMENTS[w.element].color;
+  toast(`💪 <b style="color:${ec}">${w.text}</b> +${w.enhanceLevel} 강화!`);
+  scheduleSave();
+  openWordModal(w.text);
+  renderActiveTab();
+}
+function equipItem(idx) {
+  const eq = state.equipInv[idx]; if (!eq) return;
+  const old = state.equipped[eq.type];
+  state.equipped[eq.type] = eq;
+  state.equipInv.splice(idx, 1);
+  if (old) state.equipInv.push(old);
+  for (const wid of eq.socketedWordIds) if (wid) state.socketTimers[wid] = 1000;
+  toast(`${eq.name} 장착!`);
+  hideModal(); refreshHud(); renderActiveTab(); scheduleSave();
+}
+function unequipSlot(slot) {
+  const eq = state.equipped[slot]; if (!eq) return;
+  state.equipped[slot] = null;
+  state.equipInv.push(eq);
+  toast(`${eq.name} 해제`);
+  hideModal(); refreshHud(); renderActiveTab(); scheduleSave();
+}
+function disassembleItem(idx) {
+  const eq = state.equipInv[idx]; if (!eq) return;
+  const dis = W.disassembleEquipment(eq);
+  for (const c of dis.letters) state.letterInv[c] = (state.letterInv[c]||0) + 1;
+  state.equipInv.splice(idx, 1);
+  toast(`🔨 ${eq.name} 분해 → ${dis.letters.join(',')} 획득`);
+  if (!state.seenWordTab) document.getElementById('wordBadge').style.display = 'inline-block';
+  hideModal(); renderActiveTab(); scheduleSave();
+}
+
+function setEquipFilter(key) {
+  state.equipFilter = key;
+  renderActiveTab();
+  scheduleSave();
+}
+
+function toggleAutoDis(tier) {
+  if (tier === 'common') state.autoDisCommon = !state.autoDisCommon;
+  if (tier === 'magic')  state.autoDisMagic  = !state.autoDisMagic;
+  toast(state[tier === 'common' ? 'autoDisCommon' : 'autoDisMagic']
+    ? `🔄 ${W.EQUIPMENT_TIERS[tier].name} 자동 분해 켜짐`
+    : `🔄 ${W.EQUIPMENT_TIERS[tier].name} 자동 분해 꺼짐`);
+  renderActiveTab();
+  scheduleSave();
+}
+
+function confirmBulkDisassemble() {
+  const filter = state.equipFilter || 'all';
+  const targets = filter === 'all'
+    ? state.equipInv.slice()
+    : state.equipInv.filter(eq => eq.tier === filter);
+  if (targets.length === 0) { toast('분해할 장비 없음'); return; }
+  // 미리보기: 글자 합계 + 소켓 단어 합계
+  const letterCounts = {};
+  let socketedWords = 0;
+  for (const eq of targets) {
+    for (const c of eq.letters) letterCounts[c] = (letterCounts[c]||0) + 1;
+    socketedWords += eq.socketedWordIds.filter(x => x).length;
+  }
+  const lettersStr = Object.entries(letterCounts).sort()
+    .map(([c, n]) => `<span class="eq-letter" style="font-size:11px;margin:1px">${c}×${n}</span>`).join('');
+  const totalLetters = Object.values(letterCounts).reduce((a,b) => a+b, 0);
+
+  const filterName = filter === 'all' ? '전체' : W.EQUIPMENT_TIERS[filter].name;
+  let html = `<h3 style="color:#ff8a6a">일괄 분해 확인</h3>`;
+  html += `<div style="text-align:center;color:#aaa;font-size:12px;margin-bottom:10px">
+    <b style="color:#ffaa44">${filterName}</b> 등급 <b>${targets.length}개</b> 장비를 분해합니다.
+  </div>`;
+  html += `<div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:8px;font-size:11px">
+    <div style="color:#aaa;margin-bottom:6px">획득 예정 (${totalLetters}글자):</div>
+    <div style="line-height:1.6">${lettersStr || '<span style=color:#666>없음</span>'}</div>
+  </div>`;
+  if (socketedWords > 0) {
+    html += `<div style="font-size:11px;color:#aaff88;text-align:center;margin-bottom:8px">
+      💡 소켓된 단어 ${socketedWords}개는 보존됩니다
+    </div>`;
+  }
+  html += `<div class="modal-actions">
+    <button class="btn danger" onclick="executeBulkDisassemble()">분해 실행</button>
+    <button class="btn" onclick="hideModal()">취소</button>
+  </div>`;
+  showModal(html);
+}
+
+function executeBulkDisassemble() {
+  const filter = state.equipFilter || 'all';
+  // 인덱스 역순으로 splice (앞에서 지우면 인덱스 흔들림)
+  const toRemove = [];
+  for (let i = state.equipInv.length - 1; i >= 0; i--) {
+    const eq = state.equipInv[i];
+    if (filter === 'all' || eq.tier === filter) toRemove.push(i);
+  }
+  let totalLetters = 0;
+  for (const i of toRemove) {
+    const eq = state.equipInv[i];
+    const dis = W.disassembleEquipment(eq);
+    for (const c of dis.letters) {
+      state.letterInv[c] = (state.letterInv[c]||0) + 1;
+      totalLetters++;
+    }
+    state.equipInv.splice(i, 1);
+  }
+  toast(`🔨 ${toRemove.length}개 분해 → ${totalLetters}글자 획득`);
+  if (!state.seenWordTab) document.getElementById('wordBadge').style.display = 'inline-block';
+  hideModal();
+  renderActiveTab();
+  scheduleSave();
+}
+
+// === 글자별 분해 (A) ===
+function openLetterDisassemble(letter) {
+  const targets = state.equipInv.filter(eq => eq.letters.includes(letter));
+  const have = state.letterInv[letter] || 0;
+  let html = `<h3>알파벳 <span style="color:#ffd28a;font-family:'Press Start 2P'">${letter}</span></h3>`;
+  html += `<div style="text-align:center;color:#aaa;font-size:12px;margin-bottom:12px">
+    현재 보유: <b style="color:#ffaa44">${have}개</b>
+  </div>`;
+  if (targets.length === 0) {
+    html += `<div class="empty-msg">${letter}를 가진 장비가 없습니다.<br>다른 글자를 시도해보세요.</div>`;
+    html += `<div class="modal-actions"><button class="btn" onclick="hideModal()">닫기</button></div>`;
+    showModal(html);
+    return;
+  }
+  // 등급별 그룹화
+  const byTier = { common: [], magic: [], rare: [], unique: [] };
+  for (const eq of targets) byTier[eq.tier].push(eq);
+  // 모든 letter count 미리보기
+  const letterCounts = {};
+  for (const eq of targets) {
+    for (const c of eq.letters) letterCounts[c] = (letterCounts[c]||0)+1;
+  }
+  const totalLetters = Object.values(letterCounts).reduce((a,b)=>a+b,0);
+  const targetCount = letterCounts[letter] || 0;
+
+  html += `<div style="background:rgba(0,0,0,0.3);padding:8px;border-radius:4px;margin-bottom:10px;font-size:11px">
+    <div style="color:#aaa;margin-bottom:6px">${letter} 가진 장비 ${targets.length}개 분해 시:</div>
+    <div style="margin-bottom:6px"><b style="color:#ffaa44">${letter} 획득: ${targetCount}개</b></div>
+    <div style="color:#888;font-size:10px">전체 ${totalLetters}글자 + 다른 글자도 함께 회수</div>
+  </div>`;
+
+  // 등급별 카운트 표시
+  html += `<div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap;font-size:11px">`;
+  for (const t of ['common','magic','rare','unique']) {
+    const n = byTier[t].length;
+    if (n === 0) continue;
+    const tc = W.EQUIPMENT_TIERS[t];
+    html += `<span style="padding:3px 8px;background:${tc.color}22;color:${tc.color};border-radius:8px">${tc.name} ${n}</span>`;
+  }
+  html += `</div>`;
+
+  // 옵션: 일반만 / 일반+매직 / 모두
+  html += `<div style="color:#aaff88;font-size:11px;text-align:center;margin-bottom:8px">
+    💡 좋은 장비를 보호하려면 일반/매직만 선택
+  </div>`;
+  html += `<div style="display:flex;flex-direction:column;gap:6px;margin-bottom:12px">`;
+  if (byTier.common.length > 0) {
+    html += `<button class="btn" onclick="executeLetterDis('${letter}', 'common_only')">일반만 분해 (${byTier.common.length}개)</button>`;
+  }
+  if (byTier.common.length + byTier.magic.length > 0) {
+    html += `<button class="btn" onclick="executeLetterDis('${letter}', 'common_magic')">일반+매직 분해 (${byTier.common.length + byTier.magic.length}개)</button>`;
+  }
+  html += `<button class="btn danger" onclick="executeLetterDis('${letter}', 'all')">전체 분해 (${targets.length}개)</button>`;
+  html += `</div>`;
+  html += `<div class="modal-actions"><button class="btn" onclick="hideModal()">취소</button></div>`;
+  showModal(html);
+}
+
+function executeLetterDis(letter, mode) {
+  const allowedTiers = mode === 'common_only' ? ['common']
+                     : mode === 'common_magic' ? ['common','magic']
+                     : ['common','magic','rare','unique'];
+  const toRemove = [];
+  for (let i = state.equipInv.length - 1; i >= 0; i--) {
+    const eq = state.equipInv[i];
+    if (eq.letters.includes(letter) && allowedTiers.includes(eq.tier)) toRemove.push(i);
+  }
+  let total = 0;
+  let targetGain = 0;
+  for (const i of toRemove) {
+    const eq = state.equipInv[i];
+    const dis = W.disassembleEquipment(eq);
+    for (const c of dis.letters) {
+      state.letterInv[c] = (state.letterInv[c]||0) + 1;
+      total++;
+      if (c === letter) targetGain++;
+    }
+    state.equipInv.splice(i, 1);
+  }
+  toast(`🔨 ${toRemove.length}개 분해 → ${letter} <b>+${targetGain}</b> (총 ${total}글자)`);
+  hideModal();
+  renderActiveTab();
+  scheduleSave();
+}
+
+// 단어 합성 모달에서 호출: 부족 글자를 가진 일반/매직 장비를 분해
+function smartDisassembleForWord(text) {
+  const miss = W.missingLetters(state.letterInv, text);
+  const missingChars = Object.keys(miss);
+  if (missingChars.length === 0) { toast('이미 모든 글자 충분'); return; }
+  // 부족 글자를 1개라도 포함한 일반/매직 장비를 그리디 분해
+  // 단, 분해는 부족 글자가 충분해질 때까지만
+  const haveSnapshot = { ...state.letterInv };
+  const toRemove = [];
+  // 우선순위: 부족 글자를 많이 가진 장비 먼저
+  const candidates = state.equipInv
+    .map((eq, idx) => ({ eq, idx,
+      missingCovered: eq.letters.filter(c => miss[c] > 0).length }))
+    .filter(x => (x.eq.tier === 'common' || x.eq.tier === 'magic') && x.missingCovered > 0)
+    .sort((a, b) => b.missingCovered - a.missingCovered);
+  if (candidates.length === 0) {
+    toast('부족 글자 가진 일반/매직 장비가 없습니다');
+    return;
+  }
+  // 그리디: 필요한 만큼만 분해
+  const stillMissing = { ...miss };
+  for (const cand of candidates) {
+    const stillNeeded = Object.values(stillMissing).some(v => v > 0);
+    if (!stillNeeded) break;
+    toRemove.push(cand.idx);
+    for (const c of cand.eq.letters) {
+      if (stillMissing[c] && stillMissing[c] > 0) stillMissing[c]--;
+    }
+  }
+  // 인덱스 역순 정렬 후 분해
+  toRemove.sort((a,b) => b - a);
+  let total = 0;
+  for (const i of toRemove) {
+    const eq = state.equipInv[i];
+    const dis = W.disassembleEquipment(eq);
+    for (const c of dis.letters) {
+      state.letterInv[c] = (state.letterInv[c]||0) + 1;
+      total++;
+    }
+    state.equipInv.splice(i, 1);
+  }
+  toast(`🔨 ${toRemove.length}개 분해 → ${total}글자 획득 (${text} 합성 준비)`);
+  hideModal();
+  // 단어 모달 다시 열어서 합성 가능한지 보여줌
+  openWordModal(text);
+  scheduleSave();
+}
+function confirmReset() {
+  showModal(`<h3>게임 초기화</h3>
+    <div style="text-align:center;color:#aaa;font-size:12px;margin-bottom:16px">
+      모든 진행상황이 삭제됩니다.<br>정말 초기화하시겠어요?
+    </div>
+    <div class="modal-actions">
+      <button class="btn danger" onclick="resetSave()">초기화</button>
+      <button class="btn" onclick="hideModal()">취소</button>
+    </div>`);
+}
+function showStageMenu() {
+  const lb = state.multi || {};
+  const nickname = lb.nickname;
+  showModal(`<h3>STAGE ${state.stage}</h3>
+    <div style="text-align:center;font-size:12px;color:#aaa;margin-bottom:12px">
+      최고 기록: <b>${state.bestStage}</b> · 총 처치: <b>${state.totalKills}</b> · 보스: <b>${state.bossKills || 0}</b><br>
+      발견 단어: <b>${(state.discoveredWords || []).length}</b> · 총 획득: <b>${state.totalDrops}</b>
+    </div>
+    <div style="border-top:1px solid #2a2030;padding-top:12px">
+      <div style="color:#ffaa44;font-size:12px;margin-bottom:8px">🌐 멀티플레이</div>
+      ${nickname
+        ? `<div style="font-size:11px;color:#aaa;margin-bottom:8px">닉네임: <b style="color:#ffd28a">${nickname}</b>${lb.lastSyncOk ? ' <span style="color:#6aff8a">●</span> 동기화됨' : ' <span style="color:#aa6a6a">●</span> 미접속'}</div>`
+        : `<div style="font-size:11px;color:#aa6a6a;margin-bottom:8px">닉네임 미설정</div>`}
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <button class="btn primary" onclick="openMultiLeaderboard()">🏆 글로벌 순위</button>
+        <button class="btn" onclick="openMultiSettings()">⚙️ 닉네임 / 서버 설정</button>
+      </div>
+    </div>
+    <div class="modal-actions" style="margin-top:12px">
+      <button class="btn" onclick="hideModal()">닫기</button>
+    </div>`);
+}
+
+// ============== 멀티플레이 (1단계: Leaderboard) ==============
+const DEFAULT_SERVER = 'http://localhost:3000'; // 사용자가 설정에서 변경 가능
+
+function initMultiState() {
+  if (!state.multi) state.multi = {};
+  if (!state.multi.serverUrl) state.multi.serverUrl = DEFAULT_SERVER;
+  // 닉네임은 사용자가 등록해야 함
+}
+
+let _lbSyncTimer = null;
+function scheduleLeaderboardSync() {
+  if (!state.multi || !state.multi.nickname) return;
+  if (_lbSyncTimer) clearTimeout(_lbSyncTimer);
+  _lbSyncTimer = setTimeout(() => { submitLeaderboard(); }, 2500); // 2.5초 debounce
+}
+
+async function submitLeaderboard() {
+  initMultiState();
+  if (!state.multi.nickname) return;
+  const url = state.multi.serverUrl.replace(/\/+$/, '');
+  const payload = {
+    nickname: state.multi.nickname,
+    bestStage: state.bestStage || state.stage,
+    discovered: (state.discoveredWords || []).length,
+    totalKills: state.totalKills || 0,
+    bossKills: state.bossKills || 0,
+    heroClass: state.player.heroClass || 'knight',
+  };
+  try {
+    const res = await fetch(url + '/leaderboard/submit', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    state.multi.lastSyncOk = !!data.ok;
+    state.multi.lastSyncAt = Date.now();
+  } catch (e) {
+    state.multi.lastSyncOk = false;
+    console.warn('leaderboard sync failed', e.message);
+  }
+}
+
+function openMultiSettings() {
+  initMultiState();
+  const cur = state.multi.nickname || '';
+  const url = state.multi.serverUrl;
+  let html = `<h3>⚙️ 멀티 설정</h3>`;
+  html += `<div style="margin-bottom:12px">
+    <div style="color:#aaa;font-size:11px;margin-bottom:4px">닉네임 (1-12자, 한글/영문/숫자)</div>
+    <input type="text" id="multiNickname" value="${cur}" maxlength="12"
+      style="width:100%;padding:8px;background:rgba(0,0,0,0.4);border:1px solid #4a3020;border-radius:4px;color:#ffd28a;font-family:'Jua';font-size:13px"
+      placeholder="예: 댕청이">
+  </div>`;
+  html += `<div style="margin-bottom:12px">
+    <div style="color:#aaa;font-size:11px;margin-bottom:4px">서버 URL</div>
+    <input type="text" id="multiServer" value="${url}"
+      style="width:100%;padding:8px;background:rgba(0,0,0,0.4);border:1px solid #4a3020;border-radius:4px;color:#aaa;font-size:11px;font-family:monospace"
+      placeholder="http://localhost:3000">
+    <div style="color:#666;font-size:10px;margin-top:3px">자체 서버를 운영하지 않는다면 그대로 두세요</div>
+  </div>`;
+  html += `<div class="modal-actions">
+    <button class="btn primary" onclick="saveMultiSettings()">저장</button>
+    <button class="btn" onclick="hideModal()">취소</button>
+  </div>`;
+  showModal(html);
+}
+
+function saveMultiSettings() {
+  initMultiState();
+  const nick = document.getElementById('multiNickname').value.trim();
+  const url = document.getElementById('multiServer').value.trim();
+  if (!nick) { toast('닉네임을 입력하세요'); return; }
+  if (!/^[가-힣a-zA-Z0-9_\-]{1,12}$/.test(nick)) {
+    toast('닉네임은 1-12자, 한글/영문/숫자만'); return;
+  }
+  state.multi.nickname = nick;
+  state.multi.serverUrl = url || DEFAULT_SERVER;
+  toast(`👋 ${nick}님, 환영합니다!`);
+  hideModal();
+  submitLeaderboard();
+  scheduleSave();
+}
+
+async function openMultiLeaderboard(type = 'stage') {
+  initMultiState();
+  let html = `<h3>🏆 글로벌 순위</h3>`;
+  html += `<div style="display:flex;gap:4px;margin-bottom:10px;flex-wrap:wrap;justify-content:center">
+    ${[
+      ['stage', '🏔️ 최고 스테이지'],
+      ['words', '📖 단어 발견'],
+      ['bossKills', '💀 보스 처치'],
+      ['kills', '⚔️ 총 처치'],
+    ].map(([k, label]) => `
+      <button class="filter-chip ${type===k?'active':''}"
+        style="${type===k?'border-color:#ffaa44;color:#ffaa44;background:#ffaa4422':''}"
+        onclick="openMultiLeaderboard('${k}')">${label}</button>
+    `).join('')}
+  </div>`;
+  html += `<div id="lbBody" style="min-height:200px"><div style="text-align:center;color:#888;padding:24px">불러오는 중...</div></div>`;
+  html += `<div style="text-align:center;color:#666;font-size:10px;margin-top:8px">매주 월요일 00:00 UTC 리셋</div>`;
+  html += `<div class="modal-actions"><button class="btn" onclick="hideModal()">닫기</button></div>`;
+  showModal(html);
+
+  const url = state.multi.serverUrl.replace(/\/+$/, '');
+  try {
+    const res = await fetch(`${url}/leaderboard?type=${type}&limit=20`);
+    const data = await res.json();
+    renderLeaderboardBody(data, type);
+  } catch (e) {
+    document.getElementById('lbBody').innerHTML = `
+      <div style="text-align:center;color:#aa6a6a;padding:24px;font-size:12px">
+        ❌ 서버에 연결할 수 없어요<br>
+        <span style="color:#666;font-size:10px">설정에서 서버 URL을 확인하세요</span>
+      </div>`;
+  }
+}
+
+function renderLeaderboardBody(data, type) {
+  const body = document.getElementById('lbBody');
+  if (!body) return;
+  if (!data.entries || data.entries.length === 0) {
+    body.innerHTML = `<div style="text-align:center;color:#888;padding:24px;font-size:12px">
+      이번 주 기록이 아직 없어요<br>
+      <span style="color:#666;font-size:10px">${data.week}</span>
+    </div>`;
+    return;
+  }
+  const myNick = state.multi.nickname;
+  const valKey = type === 'words' ? 'discovered'
+    : type === 'kills' ? 'totalKills'
+    : type === 'bossKills' ? 'bossKills'
+    : 'bestStage';
+  const valLabel = type === 'words' ? '발견' : type === 'kills' ? '처치' : type === 'bossKills' ? '보스' : '스테이지';
+  const clsEmoji = { knight: '⚔️', mage: '🔮', rogue: '🗡️', archer: '🏹' };
+  let html = `<div style="font-size:10px;color:#666;text-align:right;margin-bottom:4px">${data.week} · ${data.count}명</div>`;
+  html += `<div style="display:flex;flex-direction:column;gap:3px">`;
+  for (const e of data.entries) {
+    const isMe = e.nickname === myNick;
+    const medalColor = e.rank === 1 ? '#ffd700' : e.rank === 2 ? '#c0c0c0' : e.rank === 3 ? '#cd7f32' : '#666';
+    const medal = e.rank <= 3 ? ['🥇','🥈','🥉'][e.rank-1] : `#${e.rank}`;
+    html += `<div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${isMe?'rgba(255,170,68,0.15)':'rgba(255,255,255,0.03)'};border-radius:4px;border:1px solid ${isMe?'#ffaa44':'#2a2030'}">
+      <div style="min-width:24px;color:${medalColor};font-family:'Press Start 2P';font-size:11px">${medal}</div>
+      <div style="font-size:16px">${clsEmoji[e.heroClass] || '⚔️'}</div>
+      <div style="flex:1;color:${isMe?'#ffd28a':'#ddd'};font-family:'Jua';font-size:13px">${e.nickname}${isMe?' (나)':''}</div>
+      <div style="color:#ffaa44;font-weight:bold;font-size:14px">${e[valKey]}</div>
+      <div style="color:#666;font-size:10px">${valLabel}</div>
+    </div>`;
+  }
+  html += `</div>`;
+  body.innerHTML = html;
+}
+window.openEquipModal = openEquipModal;
+window.openSlotModal = openSlotModal;
+window.openSocketPicker = openSocketPicker;
+window.socketWordById = socketWordById;
+window.unsocketFromEquipped = unsocketFromEquipped;
+window.openWordModal = openWordModal;
+window.composeNewWord = composeNewWord;
+window.handleComposeInput = handleComposeInput;
+window.addLetterToSlot = addLetterToSlot;
+window.removeFromSlot = removeFromSlot;
+window.clearComposeSlots = clearComposeSlots;
+window.tryCompose = tryCompose;
+window.onDragStart = onDragStart;
+window.onDragEnd = onDragEnd;
+window.enhanceWordById = enhanceWordById;
+window.equipItem = equipItem;
+window.unequipSlot = unequipSlot;
+window.disassembleItem = disassembleItem;
+window.setEquipFilter = setEquipFilter;
+window.toggleAutoDis = toggleAutoDis;
+window.confirmBulkDisassemble = confirmBulkDisassemble;
+window.executeBulkDisassemble = executeBulkDisassemble;
+window.openLetterDisassemble = openLetterDisassemble;
+window.executeLetterDis = executeLetterDis;
+window.smartDisassembleForWord = smartDisassembleForWord;
+window.openClassSelector = openClassSelector;
+window.setHeroClass = setHeroClass;
+window.confirmReset = confirmReset;
+window.resetSave = resetSave;
+window.hideModal = hideModal;
+window.showStageMenu = showStageMenu;
+window.openMultiLeaderboard = openMultiLeaderboard;
+window.openMultiSettings = openMultiSettings;
+window.saveMultiSettings = saveMultiSettings;
+
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    state.activeTab = t.dataset.tab;
+    renderActiveTab();
+  });
+});
+
+window.addEventListener('load', async () => {
+  resizeCanvas();
+  await waitSpritesReady();
+  const loaded = loadSave();
+  if (loaded) toast(`이어하기 — 스테이지 ${state.stage}`);
+  document.querySelectorAll('.tab').forEach(t => {
+    t.classList.toggle('active', t.dataset.tab === state.activeTab);
+  });
+  refreshHud();
+  renderActiveTab();
+  spawnEnemy();
+  lastTime = performance.now();
+  lastRenderTime = performance.now();
+  requestAnimationFrame(loop);
+});
+</script>
+</body>
+</html>

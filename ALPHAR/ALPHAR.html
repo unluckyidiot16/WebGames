@@ -1081,6 +1081,75 @@
     font-family: var(--font-mono);
   }
 
+  /* ===== 피격 비네트 (붉은 외곽광) ===== */
+  .damage-vignette {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 48;
+    opacity: 0;
+    transition: opacity 0.18s ease-out;
+    /* radial gradient: 가장자리만 빨갛게, 중앙은 투명 */
+    background: radial-gradient(
+      ellipse at center,
+      transparent 35%,
+      rgba(220, 38, 38, 0.18) 65%,
+      rgba(220, 38, 38, 0.55) 100%
+    );
+  }
+  .damage-vignette.active {
+    opacity: 1;
+    /* 페이드 인은 즉시, 페이드 아웃은 느리게 */
+    transition: opacity 0.05s ease-in;
+  }
+  .damage-vignette.fading {
+    opacity: 0;
+    transition: opacity 0.45s ease-out;
+  }
+
+  /* ===== 피격 방향 인디케이터 ===== */
+  .hit-indicator {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 0; height: 0;
+    pointer-events: none;
+    z-index: 49;
+    /* transform: translate(-50%, -50%) rotate(...)는 inline 으로 적용 */
+    opacity: 0;
+    transition: opacity 0.3s ease-out;
+  }
+  .hit-indicator.visible {
+    opacity: 1;
+    transition: opacity 0.08s ease-in;
+  }
+  .hit-indicator .arc {
+    position: absolute;
+    /* 원점(0,0)에서 위쪽(yaw=0 방향)으로 호 그리기. 화면 중앙에서 위쪽 가장자리까지 ~250px */
+    left: -110px;
+    top: -260px;
+    width: 220px;
+    height: 80px;
+    border: 4px solid rgba(220, 38, 38, 0.85);
+    border-bottom: none;
+    border-left: none;
+    border-right: none;
+    border-radius: 110px 110px 0 0 / 80px 80px 0 0;
+    filter: drop-shadow(0 0 8px rgba(220, 38, 38, 0.7));
+  }
+  .hit-indicator .arc::before {
+    /* 호 위에 작은 데미지 마커 (▼ 모양) */
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: -16px;
+    width: 0; height: 0;
+    margin-left: -8px;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-top: 14px solid rgba(220, 38, 38, 0.95);
+    filter: drop-shadow(0 0 6px rgba(220, 38, 38, 0.8));
+  }
+
   /* Mission HUD */
   .hud {
     position: absolute;
@@ -2543,6 +2612,7 @@ class World {
     this.input = { move: new THREE.Vector2() };
     this.walls = [];          // {x,z,w,h} AABBs
     this.letters = [];        // {mesh, letter, picked}
+    this.healPacks = [];      // {mesh, picked, baseY}
     this.extractZones = [];  // [{x, z, r}, ...] 최대 2개
     this.canExtract = false;
 
@@ -2694,6 +2764,7 @@ class World {
     }
     this.walls = [];
     this.letters = [];
+    this.healPacks = [];
     this.extractZones = [];
     this.bullets = [];
     this.enemies = [];
@@ -2705,6 +2776,11 @@ class World {
     this._dead = false;
     this._playerHitFlash = 0;
     this._cameraShake = 0;
+    // 무적시간 (피격 후 짧게)
+    this._invincibility = 0;
+    // 마지막 피격 방향 (UI 인디케이터용, 라디안. null = 없음/만료)
+    this._lastHitDir = null;
+    this._lastHitTimer = 0;
     // 1인칭 시점 리셋
     this._pitch = 0;
     this._pendingYawDelta = 0;
@@ -2974,6 +3050,38 @@ class World {
       }
     }
 
+    // === 힐팩 스폰: 방 안에만, 챕터당 1~3개. 어려운 모드는 절반. ===
+    const isHardDifficulty = cc.difficulty === 'hard';
+    // 기본 1~3개. 어려운 모드는 0.5배 (확률적으로 0~1개)
+    let healCountTarget = 1 + Math.floor(rng() * 3); // 1, 2, or 3
+    if (isHardDifficulty) healCountTarget = Math.floor(healCountTarget / 2); // 0 or 1
+    // 스폰 룸 + 추출 룸이 아닌 일반 룸 중에서 랜덤하게 골라 배치
+    const healPlaced = [];
+    const normalRooms = rooms.filter(r => r !== spawnRoom && !extractRooms.includes(r));
+    // 셔플
+    for (let i = normalRooms.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [normalRooms[i], normalRooms[j]] = [normalRooms[j], normalRooms[i]];
+    }
+    for (let h = 0; h < healCountTarget && h < normalRooms.length; h++) {
+      const room = normalRooms[h];
+      let attempts = 0;
+      while (attempts++ < 20) {
+        const hx = room.x + 1 + rng() * (room.w - 2);
+        const hz = room.z + 1 + rng() * (room.h - 2);
+        const wx = hx - N/2;
+        const wz = hz - N/2;
+        // 글자/다른 힐팩과 너무 가깝지 않게
+        const nearLetter = placed.some(p => Math.hypot(p.x - wx, p.z - wz) < 1.5);
+        const nearHeal = healPlaced.some(p => Math.hypot(p.x - wx, p.z - wz) < 4.0);
+        if (!nearLetter && !nearHeal) {
+          this._addHealPack(wx, wz);
+          healPlaced.push({ x: wx, z: wz });
+          break;
+        }
+      }
+    }
+
     // === 적 스폰: 모든 방에 최소 2마리 + 챕터 밀도 곱 ===
     const density = this._enemyDensity || 1.0;
 
@@ -3229,6 +3337,15 @@ class World {
       bombMat: g.userData.bombMat || null,
       isBoss: false,
       bodyH: bh,
+      // === AI 상태 (시야 + 반응 지연) ===
+      aiState: 'idle',                  // 'idle' | 'detected' | 'active'
+      reactionTimer: 0,                  // detected 시 카운트다운 (0이 되면 active)
+      lostTimer: 0,                      // active 시 LOS 잃으면 카운트업 → 3초 이상 idle 복귀
+      facing: Math.random() * Math.PI * 2, // 초기 yaw (라디안). idle 시 천천히 변함
+      idleTurnTimer: 1 + Math.random() * 2, // idle 회전 변경 타이머
+      // 시야 파라미터 (rusher/swarmer는 좀 더 멀리, sniper는 매우 멀리)
+      visionRange: type === 'sniper' ? 22 : (type === 'hunter' ? 16 : 14),
+      visionAngle: type === 'sniper' ? 1.0 : (type === 'tank' ? 1.4 : 1.2), // 라디안 (반각). sniper는 좁은 시야
     });
   }
 
@@ -3312,6 +3429,14 @@ class World {
       // overseer용: 소환 쿨다운
       summonCooldown: cfg.summonInterval || 0,
       bodyH: bh,
+      // === AI 상태 — 보스는 항상 active (시야 시스템 우회) ===
+      aiState: 'active',
+      reactionTimer: 0,
+      lostTimer: 0,
+      facing: 0,
+      idleTurnTimer: 0,
+      visionRange: 999,
+      visionAngle: Math.PI, // 전방위
     });
 
     // 등장 알림
@@ -3333,11 +3458,29 @@ class World {
     return true;
   }
 
-  _damagePlayer(amount) {
+  _damagePlayer(amount, sourceX, sourceZ) {
     if (this._dead) return;
+    // 무적시간 중이면 데미지 무시 (0보다 크면 무적)
+    if (this._invincibility > 0) return;
     this.hp = Math.max(0, this.hp - amount);
-    this._playerHitFlash = 0.18;
-    this._cameraShake = 0.25;
+    this._playerHitFlash = 0.35; // 좀 더 길게 (인지성)
+    this._cameraShake = 0.32;
+    this._invincibility = 0.6; // 0.6초 무적
+    // 피격 방향 기록 (UI 인디케이터용)
+    if (sourceX != null && sourceZ != null && this.player) {
+      const dx = sourceX - this.player.position.x;
+      const dz = sourceZ - this.player.position.z;
+      // 플레이어 yaw 기준 local 프레임으로 회전 (Three.js: forward = -z when rotation.y = 0)
+      const yaw = this.player.rotation.y;
+      const cs = Math.cos(yaw), sn = Math.sin(yaw);
+      // world (dx, dz) → local (dx', dz'): 회전 행렬 Ry(-yaw) 적용
+      const localX =  cs * dx - sn * dz;
+      const localZ =  sn * dx + cs * dz;
+      // 인디케이터 각도 (0 = 앞 = 화면 상단, +π/2 = 우, ±π = 뒤, -π/2 = 좌)
+      // 우리 좌표계에서 forward = local -z 이므로 atan2(localX, -localZ)
+      this._lastHitDir = Math.atan2(localX, -localZ);
+      this._lastHitTimer = 1.2; // 인디케이터 1.2초 표시
+    }
     // 머티리얼 붉게
     for (const m of this.playerParts.hitMats) {
       m.mat.color.setHex(0xff6060);
@@ -3346,6 +3489,8 @@ class World {
     }
     if (this.playerHpBar) this._updateHpBar(this.playerHpBar, this.hp, this.hpMax);
     this.onEvents.onHpChange?.(this.hp, this.hpMax);
+    // 피격 이벤트 (UI 효과용)
+    this.onEvents.onPlayerHit?.(this._lastHitDir);
     if (this.hp <= 0) {
       this._dead = true;
       this.onEvents.onPlayerDeath?.();
@@ -3937,6 +4082,66 @@ class World {
     this.letters.push({ mesh: group, letter, picked: false, baseY: 1.0 });
   }
 
+  _addHealPack(x, z) {
+    const group = new THREE.Group();
+    // 받침대 (어두운 의료 박스)
+    const base = new THREE.Mesh(
+      new THREE.BoxGeometry(0.45, 0.3, 0.45),
+      new THREE.MeshStandardMaterial({
+        color: 0x16221a,
+        emissive: 0x2a5fa8,
+        emissiveIntensity: 0.15,
+        roughness: 0.55,
+      })
+    );
+    base.position.y = 0.15;
+    group.add(base);
+    // 흰색 본체 (작은 의료 키트)
+    const kit = new THREE.Mesh(
+      new THREE.BoxGeometry(0.4, 0.3, 0.4),
+      new THREE.MeshStandardMaterial({
+        color: 0xf8fafc,
+        emissive: 0xc8d4e0,
+        emissiveIntensity: 0.4,
+        roughness: 0.45,
+      })
+    );
+    kit.position.y = 0.85;
+    group.add(kit);
+    // 초록 십자가 (앞면)
+    const crossMat = new THREE.MeshStandardMaterial({
+      color: 0x4ade80,
+      emissive: 0x22c55e,
+      emissiveIntensity: 1.1,
+      roughness: 0.4,
+    });
+    // 수평 바
+    const crossH = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.08, 0.04), crossMat);
+    crossH.position.set(0, 0.85, -0.205);
+    group.add(crossH);
+    // 수직 바
+    const crossV = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.28, 0.04), crossMat);
+    crossV.position.set(0, 0.85, -0.205);
+    group.add(crossV);
+    // 옆면에도 동일하게 (4면)
+    const crossH2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.28), crossMat);
+    crossH2.position.set(0.205, 0.85, 0);
+    group.add(crossH2);
+    const crossV2 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.28, 0.08), crossMat);
+    crossV2.position.set(0.205, 0.85, 0);
+    group.add(crossV2);
+    const crossH3 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.08, 0.28), crossMat);
+    crossH3.position.set(-0.205, 0.85, 0);
+    group.add(crossH3);
+    const crossV3 = new THREE.Mesh(new THREE.BoxGeometry(0.04, 0.28, 0.08), crossMat);
+    crossV3.position.set(-0.205, 0.85, 0);
+    group.add(crossV3);
+
+    group.position.set(x, 0, z);
+    this.worldGroup.add(group);
+    this.healPacks.push({ mesh: group, picked: false, baseY: 0.85 });
+  }
+
   _addExtractZone(x, z, r) {
     // 빛나는 디스크
     const geo = new THREE.RingGeometry(r * 0.7, r, 32);
@@ -4078,6 +4283,17 @@ class World {
       ctx.fillRect(lx - 2, lz - 2, 4, 4);
     }
 
+    // 힐팩 (초록 십자가)
+    ctx.fillStyle = '#4ade80';
+    for (const h of this.healPacks) {
+      if (h.picked) continue;
+      const hx = (h.mesh.position.x + N/2) * scale;
+      const hz = (h.mesh.position.z + N/2) * scale;
+      // 작은 십자
+      ctx.fillRect(hx - 1, hz - 3, 2, 6);
+      ctx.fillRect(hx - 3, hz - 1, 6, 2);
+    }
+
     // 적 표시 (타입별 색상/모양 — 보스는 큰 별)
     for (const e of this.enemies) {
       const ex = (e.x + N/2) * scale;
@@ -4196,6 +4412,18 @@ class World {
           m.mat.emissive.setHex(0x000000);
           m.mat.emissiveIntensity = 0;
         }
+      }
+    }
+    // 무적시간 카운트다운
+    if (this._invincibility > 0) {
+      this._invincibility = Math.max(0, this._invincibility - dt);
+    }
+    // 피격 방향 인디케이터 타이머
+    if (this._lastHitTimer > 0) {
+      this._lastHitTimer = Math.max(0, this._lastHitTimer - dt);
+      if (this._lastHitTimer <= 0) {
+        this._lastHitDir = null;
+        this.onEvents.onPlayerHit?.(null); // UI에서 인디케이터 숨김
       }
     }
     if (this._cameraShake > 0) {
@@ -4352,6 +4580,21 @@ class World {
               e.headMat.emissiveIntensity = 1.0;
               // HP 바 갱신
               this._updateHpBar(e.hpBar, e.hp, e.maxHp);
+              // 피격 → 즉시 active 상태 (자기) + 짧은 반응 지연 후 동료 알림
+              if (e.aiState !== 'active') {
+                e.aiState = 'active';
+                e.reactionTimer = 0;
+                e.lostTimer = 0;
+              }
+              // 가까운 동료도 detect (8 타일 반경, 반응 지연 0.5~1.0s)
+              for (const ally of this.enemies) {
+                if (ally === e || ally.aiState === 'active') continue;
+                const ad = Math.hypot(ally.x - e.x, ally.z - e.z);
+                if (ad < 8) {
+                  ally.aiState = 'detected';
+                  ally.reactionTimer = 0.5 + Math.random() * 0.5;
+                }
+              }
             }
             // 관통이면 다음 적 계속 체크, 아니면 break
             if (!b.pierce) break;
@@ -4364,7 +4607,7 @@ class World {
           const ddz = b.mesh.position.z - this.player.position.z;
           if (Math.hypot(ddx, ddz) < 0.55) {
             const dmg = b.dmg || 12;
-            this._damagePlayer(dmg);
+            this._damagePlayer(dmg, b.mesh.position.x, b.mesh.position.z);
             this.worldGroup.remove(b.mesh);
             this.bullets.splice(i, 1);
             consumed = true;
@@ -4409,6 +4652,103 @@ class World {
         const nx = dist > 0.001 ? dx / dist : 0;
         const nz = dist > 0.001 ? dz / dist : 0;
 
+        // ===== 시야 + 반응 지연 상태 머신 =====
+        // 보스는 항상 active. 일반 적만 시야 시스템 적용.
+        if (!enemy.isBoss) {
+          const inRange = dist < enemy.visionRange;
+          const hasLOS = inRange ? this._hasLineOfSight({ x: enemy.x, z: enemy.z }, this.player.position) : false;
+          // 적이 보는 방향(facing)과 플레이어 방향(angle to player) 사이 각도 차
+          // angle to player: atan2(dx, dz) (+ idle facing 정렬 위해 같은 좌표계 사용)
+          const angleToPlayer = Math.atan2(dx, dz);
+          let angleDiff = angleToPlayer - enemy.facing;
+          // -PI~PI 정규화
+          while (angleDiff > Math.PI)  angleDiff -= Math.PI * 2;
+          while (angleDiff < -Math.PI) angleDiff += Math.PI * 2;
+          const inFOV = Math.abs(angleDiff) < enemy.visionAngle;
+
+          // sniper는 시야 안에서만 발견 가능, 다른 적은 거리 가까우면(접근 감지) 시야 무시
+          const closeBypass = (enemy.type !== 'sniper') && dist < 3.5; // 매우 가까우면 뒤에서도 알아챔
+          const canDetect = inRange && hasLOS && (inFOV || closeBypass);
+
+          if (enemy.aiState === 'idle') {
+            // idle: 천천히 facing 회전 (둘러보기)
+            enemy.idleTurnTimer -= dt;
+            if (enemy.idleTurnTimer <= 0) {
+              enemy.facing += (Math.random() - 0.5) * Math.PI * 0.8;
+              enemy.idleTurnTimer = 1.5 + Math.random() * 2.5;
+            }
+            if (canDetect) {
+              enemy.aiState = 'detected';
+              // 반응 지연: 0.5 ~ 1.5초 (적 타입별로 미세 조정)
+              const reactBase = enemy.type === 'sniper' ? 1.2 : (enemy.type === 'rusher' ? 0.6 : 0.9);
+              enemy.reactionTimer = reactBase + Math.random() * 0.5;
+            }
+            // idle 시 mesh yaw 갱신 + AI 행동 스킵
+            enemy.mesh.rotation.y = enemy.facing;
+            enemy.mesh.position.set(enemy.x + shakeX, 0, enemy.z + shakeZ);
+            enemy.hpBar.group.position.set(enemy.x, 2.45, enemy.z);
+            continue;
+          }
+
+          if (enemy.aiState === 'detected') {
+            // 반응 지연 중: 플레이어를 향해 천천히 회전, 아직 공격 X
+            enemy.reactionTimer -= dt;
+            // 플레이어 방향으로 facing 보간 (자연스럽게)
+            const targetAngle = angleToPlayer;
+            let turnDiff = targetAngle - enemy.facing;
+            while (turnDiff > Math.PI)  turnDiff -= Math.PI * 2;
+            while (turnDiff < -Math.PI) turnDiff += Math.PI * 2;
+            enemy.facing += turnDiff * Math.min(1, dt * 6);
+            // 플레이어가 시야를 벗어나면 아주 천천히 다시 idle로 (1초 후)
+            if (!canDetect) {
+              enemy.lostTimer = (enemy.lostTimer || 0) + dt;
+              if (enemy.lostTimer > 1.0) {
+                enemy.aiState = 'idle';
+                enemy.lostTimer = 0;
+                enemy.idleTurnTimer = 1.5;
+              }
+            } else {
+              enemy.lostTimer = 0;
+            }
+            // 반응 지연 끝 → active
+            if (enemy.reactionTimer <= 0 && canDetect) {
+              enemy.aiState = 'active';
+              enemy.lostTimer = 0;
+            }
+            enemy.mesh.rotation.y = enemy.facing;
+            enemy.mesh.position.set(enemy.x + shakeX, 0, enemy.z + shakeZ);
+            enemy.hpBar.group.position.set(enemy.x, 2.45, enemy.z);
+            continue;
+          }
+
+          // active 상태: LOS 잃으면 카운트 → 3초 이상 못 보면 다시 idle
+          if (enemy.aiState === 'active') {
+            if (!hasLOS) {
+              enemy.lostTimer = (enemy.lostTimer || 0) + dt;
+              if (enemy.lostTimer > 3.0) {
+                enemy.aiState = 'idle';
+                enemy.lostTimer = 0;
+                enemy.idleTurnTimer = 1.5;
+                enemy.facing = enemy.facing; // 유지
+                enemy.mesh.rotation.y = enemy.facing;
+                enemy.mesh.position.set(enemy.x + shakeX, 0, enemy.z + shakeZ);
+                enemy.hpBar.group.position.set(enemy.x, 2.45, enemy.z);
+                continue;
+              }
+            } else {
+              enemy.lostTimer = 0;
+            }
+            // active일 때 facing은 플레이어 방향으로 부드럽게
+            const targetAngle = angleToPlayer;
+            let turnDiff = targetAngle - enemy.facing;
+            while (turnDiff > Math.PI)  turnDiff -= Math.PI * 2;
+            while (turnDiff < -Math.PI) turnDiff += Math.PI * 2;
+            enemy.facing += turnDiff * Math.min(1, dt * 8);
+            enemy.mesh.rotation.y = enemy.facing;
+          }
+        }
+        // 이후 코드는 active 상태에서만 도달 (보스 포함)
+
         const tryMove = (sx, sz) => {
           // X 슬라이딩 충돌
           const nX = enemy.x + sx;
@@ -4421,7 +4761,7 @@ class World {
           // 직선 추격
           if (dist > 0.8) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
           if (dist < 1.0 && this._contactCooldown <= 0 && !this._dead) {
-            this._damagePlayer(enemy.contactDmg || 10);
+            this._damagePlayer(enemy.contactDmg || 10, enemy.x, enemy.z);
             this._contactCooldown = 0.5;
           }
         } else if (enemy.behavior === 'shoot') {
@@ -4453,14 +4793,14 @@ class World {
           // swarmer: rush와 비슷하지만 빠르고 데미지 작음. 항상 추격.
           if (dist > 0.7) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
           if (dist < 0.9 && this._contactCooldown <= 0 && !this._dead) {
-            this._damagePlayer(enemy.contactDmg || 6);
+            this._damagePlayer(enemy.contactDmg || 6, enemy.x, enemy.z);
             this._contactCooldown = 0.4;
           }
         } else if (enemy.behavior === 'tank') {
           // tank: 느린 추격 + 큰 접촉 데미지. 거리 멀어도 계속 추격.
           if (dist > 0.9) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
           if (dist < 1.3 && this._contactCooldown <= 0 && !this._dead) {
-            this._damagePlayer(enemy.contactDmg || 18);
+            this._damagePlayer(enemy.contactDmg || 18, enemy.x, enemy.z);
             this._contactCooldown = 0.7;
           }
         } else if (enemy.behavior === 'bomb') {
@@ -4478,7 +4818,7 @@ class World {
               const pdist = Math.hypot(this.player.position.x - enemy.x, this.player.position.z - enemy.z);
               if (pdist < explodeR && !this._dead) {
                 const falloff = 1.0 - pdist / explodeR;
-                this._damagePlayer(Math.round((enemy.contactDmg || 30) * falloff));
+                this._damagePlayer(Math.round((enemy.contactDmg || 30) * falloff), enemy.x, enemy.z);
               }
               // 같은 방의 다른 적도 피해 (자폭 연쇄)
               for (const o of this.enemies) {
@@ -4515,7 +4855,7 @@ class World {
             enemy.chargeTimer -= dt;
             tryMove(enemy.chargeDirX * cfg.chargeSpeed * dt, enemy.chargeDirZ * cfg.chargeSpeed * dt);
             if (dist < 1.6 && this._contactCooldown <= 0 && !this._dead) {
-              this._damagePlayer(enemy.contactDmg || 25);
+              this._damagePlayer(enemy.contactDmg || 25, enemy.x, enemy.z);
               this._contactCooldown = 0.8;
               this._cameraShake = Math.max(this._cameraShake, 0.5);
             }
@@ -4527,7 +4867,7 @@ class World {
             // 일반 추격
             if (dist > 1.0) tryMove(nx * enemy.speed * phaseSpeedMul * dt, nz * enemy.speed * phaseSpeedMul * dt);
             if (dist < 1.4 && this._contactCooldown <= 0 && !this._dead) {
-              this._damagePlayer(enemy.contactDmg || 25);
+              this._damagePlayer(enemy.contactDmg || 25, enemy.x, enemy.z);
               this._contactCooldown = 0.7;
             }
             // 차지 트리거
@@ -4586,7 +4926,7 @@ class World {
 
           // 접촉 데미지 (가까이 붙으면)
           if (dist < 1.8 && this._contactCooldown <= 0 && !this._dead) {
-            this._damagePlayer(enemy.contactDmg || 30);
+            this._damagePlayer(enemy.contactDmg || 30, enemy.x, enemy.z);
             this._contactCooldown = 0.7;
           }
         }
@@ -4699,6 +5039,29 @@ class World {
           // 거부됨: 잠시 쿨다운 두기 (연속 호출 방지)
           l.cooldown = 1.0;
         }
+      }
+    }
+
+    // 힐팩 픽업 + 회전 (HP가 max가 아닐 때만 작동)
+    for (const h of this.healPacks) {
+      if (h.picked) continue;
+      h.mesh.rotation.y += dt * 1.2;
+      // 살짝 위아래 바운스
+      const bounce = Math.sin(performance.now() * 0.003 + h.mesh.position.x) * 0.08;
+      // 옆면 십자가들 + 본체 키트 모두 같이 움직임 (children 1~6번)
+      for (let ci = 1; ci < h.mesh.children.length; ci++) {
+        h.mesh.children[ci].position.y = h.baseY + bounce;
+      }
+      const d = Math.hypot(h.mesh.position.x - px, h.mesh.position.z - pz);
+      if (d < 0.9 && this.hp < this.hpMax && !this._dead) {
+        // 회복
+        const heal = 30;
+        this.hp = Math.min(this.hpMax, this.hp + heal);
+        if (this.playerHpBar) this._updateHpBar(this.playerHpBar, this.hp, this.hpMax);
+        this.onEvents.onHpChange?.(this.hp, this.hpMax);
+        this.onEvents.onHealPickup?.(heal);
+        h.picked = true;
+        h.mesh.visible = false;
       }
     }
 
@@ -5370,6 +5733,12 @@ function MissionScreen({ state, dispatch }) {
     return () => document.removeEventListener('pointerlockchange', onChange);
   }, []);
 
+  // 피격 효과 상태 (붉은 비네트 + 방향 인디케이터)
+  const [hitFlash, setHitFlash] = useState(0); // 0 = 없음, 1 = active, 2 = fading
+  const [hitDir, setHitDir] = useState(null);  // 라디안 또는 null
+  const hitFadeTimer = useRef(null);
+  const hitFlashTimer = useRef(null);
+
   // World 셋업 (1회)
   useEffect(() => {
     if (!canvasRef.current) return;
@@ -5396,6 +5765,24 @@ function MissionScreen({ state, dispatch }) {
       },
       onAmmoChange: (ammo, max, reloading) => setAmmoState({ ammo, max, reloading }),
       onHpChange: (hp, max) => setHpState({ hp, max }),
+      onHealPickup: (amount) => {
+        setPickToast(`+${amount} HP`);
+        setTimeout(() => setPickToast(null), 900);
+      },
+      onPlayerHit: (dir) => {
+        // dir: 라디안 (플레이어 yaw 기준 상대 각도) 또는 null (만료)
+        if (dir == null) {
+          setHitDir(null);
+          return;
+        }
+        setHitDir(dir);
+        // 비네트: active → 0.18초 후 fading → 0.45초 후 사라짐
+        setHitFlash(1);
+        if (hitFlashTimer.current) clearTimeout(hitFlashTimer.current);
+        if (hitFadeTimer.current) clearTimeout(hitFadeTimer.current);
+        hitFlashTimer.current = setTimeout(() => setHitFlash(2), 180);
+        hitFadeTimer.current = setTimeout(() => setHitFlash(0), 180 + 450);
+      },
       onPlayerDeath: () => {
         setIsDead(true);
         // 1.8초 후 자동 베이스 복귀 - 사망 시 글자 50% 보존
@@ -5430,7 +5817,9 @@ function MissionScreen({ state, dispatch }) {
       },
     }, gear, skin);
     worldRef.current = w;
-    w.buildMap(state.missionSeed, getChapterConfig(state.chapter || 1));
+    // 난이도를 chapterConfig에 합쳐서 전달 (heal pack 스폰 빈도 조절용)
+    const cc = { ...getChapterConfig(state.chapter || 1), difficulty: state.difficulty || 'easy' };
+    w.buildMap(state.missionSeed, cc);
     if (minimapCanvasNode.current) w.setMinimapCanvas(minimapCanvasNode.current);
     w.start();
     return () => {
@@ -5495,6 +5884,15 @@ function MissionScreen({ state, dispatch }) {
   return html`
     <div class="mission mode-${inputMode}">
       <canvas ref=${canvasRef}></canvas>
+
+      <!-- 피격 비네트 (붉은 외곽광) -->
+      <div class="damage-vignette ${hitFlash === 1 ? 'active' : (hitFlash === 2 ? 'fading' : '')}"></div>
+
+      <!-- 피격 방향 인디케이터 (항상 렌더링하고 class로 표시/숨김 토글) -->
+      <div class="hit-indicator ${hitDir != null ? 'visible' : ''}"
+           style=${`transform: translate(-50%, -50%) rotate(${hitDir || 0}rad)`}>
+        <div class="arc"></div>
+      </div>
 
       ${inputMode === 'mouse' ? html`
         <div class="aim-cursor ${ammoState.reloading ? 'reloading' : ''} ${ammoState.ammo === 0 ? 'empty' : ''}" ref=${aimRef}>
