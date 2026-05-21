@@ -1195,6 +1195,58 @@
     100% { opacity: 0; transform: translate(-50%, -10px); }
   }
 
+  /* === Boss alert === */
+  .boss-alert {
+    position: absolute;
+    top: 18%;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 18px 36px;
+    text-align: center;
+    pointer-events: none;
+    z-index: 50;
+    animation: bossAlertIn 0.35s ease-out, bossAlertHold 2.4s ease;
+    border: 2px solid var(--danger);
+    background: linear-gradient(180deg, rgba(60, 18, 18, 0.96) 0%, rgba(20, 8, 8, 0.96) 100%);
+    box-shadow: 0 0 28px rgba(196, 69, 69, 0.6), inset 0 0 16px rgba(196, 69, 69, 0.2);
+  }
+  .boss-alert.kill {
+    border-color: var(--accent);
+    background: linear-gradient(180deg, rgba(60, 48, 14, 0.96) 0%, rgba(28, 22, 8, 0.96) 100%);
+    box-shadow: 0 0 32px rgba(212, 166, 71, 0.7), inset 0 0 16px rgba(212, 166, 71, 0.25);
+  }
+  .boss-alert-label {
+    font-family: var(--font-display);
+    font-size: 13px;
+    letter-spacing: 0.3em;
+    color: var(--danger);
+    margin-bottom: 4px;
+  }
+  .boss-alert-label.kill { color: var(--accent); }
+  .boss-alert-name {
+    font-family: var(--font-display);
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 0.2em;
+    color: var(--text);
+    text-shadow: 0 0 12px rgba(255, 255, 255, 0.3);
+  }
+  .boss-alert-coin {
+    margin-top: 6px;
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--accent);
+    letter-spacing: 0.1em;
+  }
+  @keyframes bossAlertIn {
+    0%   { opacity: 0; transform: translate(-50%, -20px) scale(0.85); }
+    100% { opacity: 1; transform: translate(-50%, 0) scale(1); }
+  }
+  @keyframes bossAlertHold {
+    0%, 80% { opacity: 1; }
+    100%    { opacity: 0; }
+  }
+
   /* Scrollbar */
   ::-webkit-scrollbar { width: 6px; }
   ::-webkit-scrollbar-track { background: var(--panel); }
@@ -1293,21 +1345,33 @@ const SLOT_LABEL_KO = { weapon: '무기', bag: '가방', boots: '신발' };
 
 // === 장비 카탈로그 (id 기반) ===
 // 각 슬롯의 첫 항목 (tier 1)은 기본 장비 — 무료, 사망해도 잃지 않음
+// 무기 특수 효과(spec):
+//   - pellets: N — 한 번 발사로 N발 산탄 (각각 데미지)
+//   - spread:  radian — 산탄/일반탄 퍼짐 각도
+//   - pierce:  true — 첫 적 관통하여 뒤의 적도 맞춤
+//   - critMul: N — 헤드샷 / 거리 보너스 (UI 안내용)
 const GEAR_CATALOG = {
   weapon: [
-    { id: 'pistol_1', name: '권총 1호',  tier: 1, damage: 10, fireRate: 0.30, magazine: 12, cost: 0 },
-    { id: 'pistol_2', name: '권총 2호',  tier: 2, damage: 15, fireRate: 0.26, magazine: 14, cost: 80 },
-    { id: 'smg_1',    name: '기관단총',  tier: 2, damage: 7,  fireRate: 0.10, magazine: 25, cost: 200 },
-    { id: 'rifle_1',  name: '전술 소총', tier: 3, damage: 25, fireRate: 0.45, magazine: 8,  cost: 250 },
+    { id: 'pistol_1',  name: '권총 1호',     tier: 1, damage: 10, fireRate: 0.30, magazine: 12, cost: 0,   spread: 0.02 },
+    { id: 'pistol_2',  name: '권총 2호',     tier: 2, damage: 15, fireRate: 0.26, magazine: 14, cost: 80,  spread: 0.018 },
+    { id: 'smg_1',     name: '기관단총',     tier: 2, damage: 7,  fireRate: 0.10, magazine: 25, cost: 200, spread: 0.045 },
+    { id: 'revolver',  name: '리볼버',       tier: 2, damage: 30, fireRate: 0.55, magazine: 6,  cost: 220, spread: 0.012 },
+    { id: 'shotgun_1', name: '단발 산탄총',  tier: 2, damage: 8,  fireRate: 0.65, magazine: 6,  cost: 240, spread: 0.20, pellets: 5 },
+    { id: 'rifle_1',   name: '전술 소총',    tier: 3, damage: 25, fireRate: 0.45, magazine: 8,  cost: 250, spread: 0.014 },
+    { id: 'shotgun_2', name: '연발 산탄총',  tier: 3, damage: 9,  fireRate: 0.40, magazine: 10, cost: 380, spread: 0.18, pellets: 6 },
+    { id: 'magnum',    name: '관통 매그넘',  tier: 3, damage: 22, fireRate: 0.50, magazine: 6,  cost: 400, spread: 0.010, pierce: true },
+    { id: 'sniper_1',  name: '저격소총',     tier: 4, damage: 60, fireRate: 0.95, magazine: 4,  cost: 520, spread: 0.005, pierce: true },
   ],
   bag: [
-    { id: 'light',  name: '작은 가방', tier: 1, capacity: 10, cost: 0 },
-    { id: 'medium', name: '중간 가방', tier: 2, capacity: 20, cost: 60 },
-    { id: 'heavy',  name: '큰 가방',   tier: 3, capacity: 30, cost: 150 },
+    { id: 'light',    name: '작은 가방', tier: 1, capacity: 10, cost: 0 },
+    { id: 'medium',   name: '중간 가방', tier: 2, capacity: 20, cost: 60 },
+    { id: 'tactical', name: '전술 가방', tier: 2, capacity: 25, cost: 100 },
+    { id: 'heavy',    name: '큰 가방',   tier: 3, capacity: 30, cost: 150 },
   ],
   boots: [
     { id: 'worn',    name: '낡은 운동화', tier: 1, speedMul: 1.0,  cost: 0 },
     { id: 'running', name: '달리기화',    tier: 2, speedMul: 1.25, cost: 100 },
+    { id: 'leather', name: '가죽부츠',    tier: 2, speedMul: 1.35, cost: 170 },
     { id: 'combat',  name: '전투화',      tier: 3, speedMul: 1.5,  cost: 250 },
   ],
 };
@@ -1333,25 +1397,86 @@ const DEFAULT_GEAR = {
 // === 챕터 시스템 ===
 // 챕터별 던전 크기 / 등장 알파벳 / 적 밀도 차등
 // 알파벳 누적: 빈도 높은 것부터 누적해서 풀 확장 (낮은 챕터 클리어 후 높은 챕터에서 새 글자 획득)
+// boss: 챕터의 가장 큰 방에 등장하는 보스 ID (null이면 보스 없음)
 const CHAPTER_CONFIG = [
   { name: '입문', roomTarget: 12, roomMin: 5, roomMax: 7,  enemyDensity: 0.7, enemyHpMul: 0.8, enemySpeedMul: 0.9, color: '#5fa85f',
     letters: 'AEIORSTNLD',
-    floor: 0x2a3540, wall: 0x4a5868, bg: 0x202d3a, ambient: 0.7, sun: 1.0, fogStart: 30, fogEnd: 60 },
+    floor: 0x2a3540, wall: 0x4a5868, bg: 0x202d3a, ambient: 0.7, sun: 1.0, fogStart: 30, fogEnd: 60,
+    boss: null },
   { name: '훈련', roomTarget: 16, roomMin: 5, roomMax: 8,  enemyDensity: 1.0, enemyHpMul: 1.0, enemySpeedMul: 1.0, color: '#d4a647',
     letters: 'AEIORSTNLDHCMUPGY',
-    floor: 0x1f2630, wall: 0x3a4555, bg: 0x141a24, ambient: 0.55, sun: 0.85, fogStart: 24, fogEnd: 50 },
+    floor: 0x1f2630, wall: 0x3a4555, bg: 0x141a24, ambient: 0.55, sun: 0.85, fogStart: 24, fogEnd: 50,
+    boss: null },
+  { name: '사막', roomTarget: 18, roomMin: 5, roomMax: 9,  enemyDensity: 1.15, enemyHpMul: 1.1, enemySpeedMul: 1.05, color: '#d4b347',
+    letters: 'AEIORSTNLDHCMUPGYBFK',
+    floor: 0x5a4a2a, wall: 0x8a6e3a, bg: 0x6e5a30, ambient: 0.85, sun: 1.1, fogStart: 26, fogEnd: 52,
+    boss: null },
   { name: '심화', roomTarget: 20, roomMin: 6, roomMax: 9,  enemyDensity: 1.3, enemyHpMul: 1.25, enemySpeedMul: 1.1, color: '#d47a47',
     letters: 'AEIORSTNLDHCMUPGYBFKWV',
-    floor: 0x171c26, wall: 0x2a3340, bg: 0x0e1118, ambient: 0.4, sun: 0.7, fogStart: 18, fogEnd: 38 },
+    floor: 0x171c26, wall: 0x2a3340, bg: 0x0e1118, ambient: 0.4, sun: 0.7, fogStart: 18, fogEnd: 38,
+    boss: 'brute' },
+  { name: '빙하', roomTarget: 22, roomMin: 6, roomMax: 9,  enemyDensity: 1.4, enemyHpMul: 1.4, enemySpeedMul: 1.15, color: '#7ac0d4',
+    letters: 'AEIORSTNLDHCMUPGYBFKWVJX',
+    floor: 0x2a3a4a, wall: 0x4a6a80, bg: 0x1a2838, ambient: 0.65, sun: 0.95, fogStart: 22, fogEnd: 44,
+    boss: null },
   { name: '전문', roomTarget: 24, roomMin: 6, roomMax: 10, enemyDensity: 1.5, enemyHpMul: 1.6, enemySpeedMul: 1.25, color: '#d44a47',
     letters: 'ABCDEFGHIJKLMNOPQRSTUVWXYZ',
-    floor: 0x12161e, wall: 0x1f2730, bg: 0x080a10, ambient: 0.28, sun: 0.55, fogStart: 14, fogEnd: 28 },
+    floor: 0x12161e, wall: 0x1f2730, bg: 0x080a10, ambient: 0.28, sun: 0.55, fogStart: 14, fogEnd: 28,
+    boss: 'overseer' },
 ];
 const MAX_CHAPTER = CHAPTER_CONFIG.length;
 
 function getChapterConfig(chapter) {
   return CHAPTER_CONFIG[Math.min(chapter, MAX_CHAPTER) - 1] || CHAPTER_CONFIG[0];
 }
+
+// === 적 카탈로그 (데이터 주도형) ===
+// 각 적의 색상/형태/스탯/AI 행동 패턴 정의
+// behavior: 'rush' (직선 추격 + 접촉), 'shoot' (거리 유지 + 사격), 'hunt' (추격 + 사격),
+//           'tank' (느린 추격 + 큰 접촉 데미지), 'bomb' (접근 후 자폭), 'swarm' (작고 빠른 그룹 추격)
+const ENEMY_CATALOG = {
+  rusher:  { hp: 20, speed: 3.0, fireRate: 0,   fireRange: 0,  coinDrop: 5,  behavior: 'rush',  contactDmg: 10,
+             bodyColor: 0xa83a3a, headColor: 0xb04545, bodyW: 0.55, bodyH: 1.0,  markerColor: 0xff5050 },
+  sniper:  { hp: 10, speed: 2.0, fireRate: 2.0, fireRange: 16, coinDrop: 8,  behavior: 'shoot', bulletDmg: 15,
+             bodyColor: 0x3a5cb0, headColor: 0x4565c0, bodyW: 0.5,  bodyH: 1.0,  markerColor: 0xff5050 },
+  hunter:  { hp: 15, speed: 2.6, fireRate: 1.2, fireRange: 9,  coinDrop: 12, behavior: 'hunt',  bulletDmg: 10,
+             bodyColor: 0xc06030, headColor: 0xd07040, bodyW: 0.55, bodyH: 1.05, markerColor: 0xff5050 },
+  swarmer: { hp: 6,  speed: 4.2, fireRate: 0,   fireRange: 0,  coinDrop: 3,  behavior: 'swarm', contactDmg: 6,
+             bodyColor: 0xb04a8a, headColor: 0xc05a9a, bodyW: 0.35, bodyH: 0.65, markerColor: 0xff70b0 },
+  tank:    { hp: 60, speed: 1.6, fireRate: 0,   fireRange: 0,  coinDrop: 18, behavior: 'tank',  contactDmg: 18,
+             bodyColor: 0x5a5a3a, headColor: 0x6a6a4a, bodyW: 0.85, bodyH: 1.3,  markerColor: 0xffaa30 },
+  bomber:  { hp: 12, speed: 3.2, fireRate: 0,   fireRange: 0,  coinDrop: 10, behavior: 'bomb',  contactDmg: 30,
+             bodyColor: 0xc8a020, headColor: 0xd8b030, bodyW: 0.5,  bodyH: 0.9,  markerColor: 0xff3030 },
+};
+
+// === 보스 카탈로그 ===
+// 보스는 거대한 적 — HP/데미지 매우 높고, 페이즈 패턴(HP 임계점에서 행동 변화)
+// phase2HpRatio: 이 비율 이하 HP에서 phase2 진입 (이동/공격 패턴 강화)
+// scale: 메시 크기 배수 (시각적 위압감)
+const BOSS_CATALOG = {
+  brute: {
+    name: 'BRUTE',
+    hp: 280, speed: 1.8, contactDmg: 25, coinDrop: 80, scale: 1.9,
+    bodyColor: 0x6a2828, headColor: 0x8a3838, markerColor: 0xff3030,
+    behavior: 'brute',   // 직선 돌진 + 가끔 차지
+    phase2HpRatio: 0.5,
+    chargeInterval: 4.5, // 4.5초마다 돌진
+    chargeSpeed: 6.0,
+    chargeDuration: 1.5,
+  },
+  overseer: {
+    name: 'OVERSEER',
+    hp: 400, speed: 1.5, contactDmg: 30, coinDrop: 150, scale: 2.2,
+    bodyColor: 0x4a2a6a, headColor: 0x6a3a8a, markerColor: 0xff60ff,
+    behavior: 'overseer', // 거리 유지 + 다중 사격 + 호위 소환
+    phase2HpRatio: 0.4,
+    fireRate: 1.4,        // 1.4초마다 3발 부채꼴 사격
+    fireRange: 18,
+    bulletDmg: 12,
+    summonInterval: 8.0,  // 8초마다 swarmer 2-3마리 소환
+    summonCount: 2,
+  },
+};
 
 // 단어가 챕터 letters 풀 안의 글자만 사용하는지 검사
 function wordInChapter(word, chapterLetters) {
@@ -2161,14 +2286,79 @@ class World {
 
     // === 적 스폰: 모든 방에 최소 2마리 + 챕터 밀도 곱 ===
     const density = this._enemyDensity || 1.0;
+
+    // 챕터별 적 풀 (가중치 추첨)
+    // 챕터 인덱스로 풀 결정 — chapterConfig.boss 와 별개
+    const chapterIdx = Math.max(0, CHAPTER_CONFIG.findIndex(c => c === cc));
+    const enemyPools = [
+      // 입문(0): 기본 적만
+      [['rusher', 70], ['sniper', 20], ['swarmer', 10]],
+      // 훈련(1): 헌터 등장
+      [['rusher', 45], ['sniper', 25], ['hunter', 20], ['swarmer', 10]],
+      // 사막(2): 자폭병 등장
+      [['rusher', 35], ['sniper', 20], ['hunter', 20], ['swarmer', 15], ['bomber', 10]],
+      // 심화(3): 탱크 등장
+      [['rusher', 30], ['sniper', 20], ['hunter', 20], ['swarmer', 10], ['bomber', 10], ['tank', 10]],
+      // 빙하(4): 다양한 적 혼합
+      [['rusher', 25], ['sniper', 20], ['hunter', 20], ['swarmer', 15], ['bomber', 10], ['tank', 10]],
+      // 전문(5): 모든 적
+      [['rusher', 20], ['sniper', 20], ['hunter', 20], ['swarmer', 15], ['bomber', 12], ['tank', 13]],
+    ];
+    const enemyPool = enemyPools[Math.min(chapterIdx, enemyPools.length - 1)];
+    const totalWeight = enemyPool.reduce((s, e) => s + e[1], 0);
+    const pickEnemyType = () => {
+      let r = rng() * totalWeight;
+      for (const [type, w] of enemyPool) {
+        r -= w;
+        if (r <= 0) return type;
+      }
+      return enemyPool[0][0];
+    };
+
+    // 보스가 있는 챕터면, 가장 큰 방 (스폰 방 제외)을 보스방으로 예약
+    let bossRoom = null;
+    if (cc.boss) {
+      const candidates = rooms.filter(r => r !== spawnRoom);
+      if (candidates.length > 0) {
+        bossRoom = candidates.reduce((best, r) =>
+          (r.w * r.h) > (best.w * best.h) ? r : best, candidates[0]);
+      }
+    }
+
     for (const room of rooms) {
       if (room === spawnRoom) continue;
+
+      // 보스방: 보스 1마리 + 호위 2-3마리만 (일반 적 스폰 스킵)
+      if (room === bossRoom) {
+        const bx = room.x + room.w / 2 - N/2;
+        const bz = room.z + room.h / 2 - N/2;
+        this._addBoss(bx, bz, cc.boss);
+        // 호위
+        const escortCount = 2 + Math.floor(rng() * 2);
+        for (let i = 0; i < escortCount; i++) {
+          let attempts = 0;
+          while (attempts++ < 15) {
+            const ex = room.x + 1 + rng() * (room.w - 2);
+            const ez = room.z + 1 + rng() * (room.h - 2);
+            const wx = ex - N/2;
+            const wz = ez - N/2;
+            if (Math.hypot(wx - bx, wz - bz) > 2.5 &&
+                placed.every(p => Math.hypot(p.x - wx, p.z - wz) > 1.5)) {
+              const type = rng() < 0.6 ? 'rusher' : 'swarmer';
+              this._addEnemy(wx, wz, type);
+              break;
+            }
+          }
+        }
+        continue;
+      }
+
       const area = room.w * room.h;
       let baseCount;
       if (area < 36) baseCount = 2;
       else if (area < 56) baseCount = 2 + Math.floor(rng() * 2);
       else baseCount = 3 + Math.floor(rng() * 2);
-      // 챕터 1 = 70% (대략), 챕터 4 = 150%
+      // 챕터 1 = 70% (대략), 챕터 6 = 150%
       const enemyCount = Math.max(1, Math.round(baseCount * density));
 
       for (let i = 0; i < enemyCount; i++) {
@@ -2180,8 +2370,7 @@ class World {
           const wz = ez - N/2;
           // 글자랑 너무 가까운 스폰 피하기
           if (placed.every(p => Math.hypot(p.x - wx, p.z - wz) > 1.5)) {
-            const r = rng();
-            const type = r < 0.5 ? 'rusher' : r < 0.75 ? 'sniper' : 'hunter';
+            const type = pickEnemyType();
             this._addEnemy(wx, wz, type);
             break;
           }
@@ -2232,71 +2421,48 @@ class World {
   }
 
   _addEnemy(x, z, type) {
+    const cfg = ENEMY_CATALOG[type] || ENEMY_CATALOG.rusher;
     const g = new THREE.Group();
-    let bodyMat, headMat;
-    if (type === 'rusher') {
-      // 빨강: 추격형
-      bodyMat = new THREE.MeshStandardMaterial({ color: 0xa83a3a, roughness: 0.7 });
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.0, 0.55), bodyMat);
-      body.position.y = 0.5;
-      g.add(body);
-      headMat = new THREE.MeshStandardMaterial({ color: 0xb04545, roughness: 0.7 });
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), headMat);
-      head.position.y = 1.2;
-      g.add(head);
-      // 위 마커
-      const marker = new THREE.Mesh(
-        new THREE.BoxGeometry(0.18, 0.05, 0.36),
-        new THREE.MeshStandardMaterial({ color: 0xff5050, emissive: 0xff5050, emissiveIntensity: 0.7 })
-      );
-      marker.position.y = 1.43;
-      g.add(marker);
-      // 눈
-      const eye = new THREE.Mesh(
-        new THREE.BoxGeometry(0.32, 0.08, 0.02),
-        new THREE.MeshStandardMaterial({ color: 0x1a0808 })
-      );
-      eye.position.set(0, 1.22, -0.21);
-      g.add(eye);
-    } else if (type === 'sniper') {
-      // 파랑: 원거리형 (멈춰서 사격)
-      bodyMat = new THREE.MeshStandardMaterial({ color: 0x3a5cb0, roughness: 0.7 });
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.5, 1.0, 0.5), bodyMat);
-      body.position.y = 0.5;
-      g.add(body);
-      headMat = new THREE.MeshStandardMaterial({ color: 0x4565c0, roughness: 0.7 });
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.38, 0.38), headMat);
-      head.position.y = 1.19;
-      g.add(head);
-      const marker = new THREE.Mesh(
-        new THREE.BoxGeometry(0.18, 0.05, 0.36),
-        new THREE.MeshStandardMaterial({ color: 0xff5050, emissive: 0xff5050, emissiveIntensity: 0.7 })
-      );
-      marker.position.y = 1.4;
-      g.add(marker);
+    const bw = cfg.bodyW, bh = cfg.bodyH;
+    const headSize = Math.min(0.4, bw * 0.75);
+
+    const bodyMat = new THREE.MeshStandardMaterial({ color: cfg.bodyColor, roughness: 0.7 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bw), bodyMat);
+    body.position.y = bh / 2;
+    g.add(body);
+
+    const headMat = new THREE.MeshStandardMaterial({ color: cfg.headColor, roughness: 0.7 });
+    const head = new THREE.Mesh(new THREE.BoxGeometry(headSize, headSize, headSize), headMat);
+    head.position.y = bh + headSize / 2;
+    g.add(head);
+
+    // 위 마커 (식별용)
+    const marker = new THREE.Mesh(
+      new THREE.BoxGeometry(0.18, 0.05, 0.36),
+      new THREE.MeshStandardMaterial({ color: cfg.markerColor, emissive: cfg.markerColor, emissiveIntensity: 0.7 })
+    );
+    marker.position.y = bh + headSize + 0.05;
+    g.add(marker);
+
+    // 눈 (모든 적 공통)
+    const eye = new THREE.Mesh(
+      new THREE.BoxGeometry(headSize * 0.8, 0.08, 0.02),
+      new THREE.MeshStandardMaterial({ color: 0x1a0808 })
+    );
+    eye.position.set(0, bh + headSize / 2 + 0.02, -headSize / 2 - 0.01);
+    g.add(eye);
+
+    // 타입별 장식
+    if (type === 'sniper') {
+      // 긴 총
       const weapon = new THREE.Mesh(
         new THREE.BoxGeometry(0.08, 0.08, 0.4),
         new THREE.MeshStandardMaterial({ color: 0x1a1f28, roughness: 0.3, metalness: 0.6 })
       );
       weapon.position.set(0.2, 0.8, -0.3);
       g.add(weapon);
-    } else { // hunter (추격 + 사격 하이브리드)
-      bodyMat = new THREE.MeshStandardMaterial({ color: 0xc06030, roughness: 0.65 });
-      const body = new THREE.Mesh(new THREE.BoxGeometry(0.55, 1.05, 0.55), bodyMat);
-      body.position.y = 0.525;
-      g.add(body);
-      headMat = new THREE.MeshStandardMaterial({ color: 0xd07040, roughness: 0.7 });
-      const head = new THREE.Mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), headMat);
-      head.position.y = 1.25;
-      g.add(head);
-      // 위 마커
-      const marker = new THREE.Mesh(
-        new THREE.BoxGeometry(0.18, 0.05, 0.36),
-        new THREE.MeshStandardMaterial({ color: 0xff5050, emissive: 0xff5050, emissiveIntensity: 0.7 })
-      );
-      marker.position.y = 1.48;
-      g.add(marker);
-      // 두 무기 (양쪽 - 추격 사격 식별)
+    } else if (type === 'hunter') {
+      // 양손 무기
       const wpnMat = new THREE.MeshStandardMaterial({ color: 0x1a1f28, roughness: 0.3, metalness: 0.6 });
       const wpnL = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.35), wpnMat);
       wpnL.position.set(-0.22, 0.82, -0.25);
@@ -2304,19 +2470,47 @@ class World {
       const wpnR = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.07, 0.35), wpnMat);
       wpnR.position.set(0.22, 0.82, -0.25);
       g.add(wpnR);
+    } else if (type === 'tank') {
+      // 어깨 장갑판 (두꺼운 박스)
+      const armorMat = new THREE.MeshStandardMaterial({ color: 0x3a3a25, roughness: 0.6, metalness: 0.4 });
+      const shoulderL = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.3, 0.7), armorMat);
+      shoulderL.position.set(-bw / 2 - 0.08, bh * 0.75, 0);
+      g.add(shoulderL);
+      const shoulderR = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.3, 0.7), armorMat);
+      shoulderR.position.set(bw / 2 + 0.08, bh * 0.75, 0);
+      g.add(shoulderR);
+      // 가슴 판
+      const chest = new THREE.Mesh(new THREE.BoxGeometry(bw + 0.05, 0.5, 0.1), armorMat);
+      chest.position.set(0, bh * 0.55, -bw / 2 - 0.04);
+      g.add(chest);
+    } else if (type === 'bomber') {
+      // 폭탄 (가슴에 빛나는 구체)
+      const bombMat = new THREE.MeshStandardMaterial({
+        color: 0xff2020, emissive: 0xff3030, emissiveIntensity: 1.2, roughness: 0.3,
+      });
+      const bomb = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.25, 0.25), bombMat);
+      bomb.position.set(0, bh * 0.55, -bw / 2 - 0.08);
+      g.add(bomb);
+      // bomber는 자폭 깜빡임용 ref
+      g.userData.bombMat = bombMat;
+    } else if (type === 'swarmer') {
+      // 가시 (양쪽 작은 돌기)
+      const spikeMat = new THREE.MeshStandardMaterial({ color: 0x6a2050, roughness: 0.7 });
+      const sL = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.1), spikeMat);
+      sL.position.set(-bw / 2 - 0.04, bh * 0.7, 0);
+      g.add(sL);
+      const sR = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.2, 0.1), spikeMat);
+      sR.position.set(bw / 2 + 0.04, bh * 0.7, 0);
+      g.add(sR);
     }
+
     g.position.set(x, 0, z);
     this.worldGroup.add(g);
 
-    const baseConfig = {
-      rusher: { hp: 20, speed: 3.0, fireRate: 0, fireRange: 0, coinDrop: 5 },
-      sniper: { hp: 10, speed: 2.0, fireRate: 2.0, fireRange: 16, coinDrop: 8 },
-      hunter: { hp: 15, speed: 2.6, fireRate: 1.2, fireRange: 9, coinDrop: 12 },
-    }[type];
     const hpMul = this._chapterConfig?.enemyHpMul || 1.0;
     const speedMul = this._chapterConfig?.enemySpeedMul || 1.0;
-    const hp = Math.round(baseConfig.hp * hpMul);
-    const speed = baseConfig.speed * speedMul;
+    const hp = Math.round(cfg.hp * hpMul);
+    const speed = cfg.speed * speedMul;
 
     // 머리 위 HP 바
     const hpBar = this._makeHpBar(0.7);
@@ -2329,15 +2523,109 @@ class World {
       maxHp: hp,
       speed: speed,
       fireCooldown: 1.0 + Math.random() * 1.5,
-      fireRate: baseConfig.fireRate,
-      fireRange: baseConfig.fireRange,
-      coinDrop: baseConfig.coinDrop,
+      fireRate: cfg.fireRate,
+      fireRange: cfg.fireRange,
+      coinDrop: cfg.coinDrop,
+      behavior: cfg.behavior,
+      contactDmg: cfg.contactDmg || 0,
+      bulletDmg: cfg.bulletDmg || 10,
       bodyMat, headMat,
       origBodyColor: bodyMat.color.getHex(),
       origHeadColor: headMat.color.getHex(),
       hitFlash: 0,
       hpBar,
+      // bomber 전용: 자폭 거리 도달 시 카운트다운
+      bombTimer: type === 'bomber' ? 0 : null,
+      bombMat: g.userData.bombMat || null,
+      isBoss: false,
+      bodyH: bh,
     });
+  }
+
+  // 보스 추가 — 거대한 적, HP/데미지 매우 높음, 페이즈 패턴
+  _addBoss(x, z, bossId) {
+    const cfg = BOSS_CATALOG[bossId];
+    if (!cfg) return;
+    const g = new THREE.Group();
+    const scale = cfg.scale;
+    const bw = 0.6 * scale, bh = 1.1 * scale;
+    const headSize = 0.45 * scale;
+
+    const bodyMat = new THREE.MeshStandardMaterial({ color: cfg.bodyColor, roughness: 0.6, metalness: 0.2 });
+    const body = new THREE.Mesh(new THREE.BoxGeometry(bw, bh, bw), bodyMat);
+    body.position.y = bh / 2;
+    g.add(body);
+
+    const headMat = new THREE.MeshStandardMaterial({ color: cfg.headColor, roughness: 0.55, metalness: 0.3 });
+    const head = new THREE.Mesh(new THREE.BoxGeometry(headSize, headSize, headSize), headMat);
+    head.position.y = bh + headSize / 2;
+    g.add(head);
+
+    // 큰 마커 (식별)
+    const marker = new THREE.Mesh(
+      new THREE.BoxGeometry(0.35 * scale, 0.08, 0.7 * scale),
+      new THREE.MeshStandardMaterial({ color: cfg.markerColor, emissive: cfg.markerColor, emissiveIntensity: 1.0 })
+    );
+    marker.position.y = bh + headSize + 0.1;
+    g.add(marker);
+
+    // 눈
+    const eye = new THREE.Mesh(
+      new THREE.BoxGeometry(headSize * 0.85, 0.12, 0.02),
+      new THREE.MeshStandardMaterial({ color: cfg.markerColor, emissive: cfg.markerColor, emissiveIntensity: 0.8 })
+    );
+    eye.position.set(0, bh + headSize / 2 + 0.04, -headSize / 2 - 0.01);
+    g.add(eye);
+
+    // 어깨 장식 (위협감)
+    const ornMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.4, metalness: 0.7 });
+    const ornL = new THREE.Mesh(new THREE.BoxGeometry(0.25 * scale, 0.45 * scale, 0.25 * scale), ornMat);
+    ornL.position.set(-bw / 2 - 0.05, bh * 0.85, 0);
+    g.add(ornL);
+    const ornR = new THREE.Mesh(new THREE.BoxGeometry(0.25 * scale, 0.45 * scale, 0.25 * scale), ornMat);
+    ornR.position.set(bw / 2 + 0.05, bh * 0.85, 0);
+    g.add(ornR);
+
+    g.position.set(x, 0, z);
+    this.worldGroup.add(g);
+
+    // 보스 HP 바 — 더 크게
+    const hpBar = this._makeHpBar(2.2);
+    this.worldGroup.add(hpBar.group);
+
+    this.enemies.push({
+      mesh: g, type: 'boss', bossId,
+      x, z,
+      hp: cfg.hp,
+      maxHp: cfg.hp,
+      speed: cfg.speed,
+      fireCooldown: 2.5,
+      fireRate: cfg.fireRate || 0,
+      fireRange: cfg.fireRange || 0,
+      coinDrop: cfg.coinDrop,
+      behavior: cfg.behavior,
+      contactDmg: cfg.contactDmg || 20,
+      bulletDmg: cfg.bulletDmg || 12,
+      bodyMat, headMat,
+      origBodyColor: bodyMat.color.getHex(),
+      origHeadColor: headMat.color.getHex(),
+      hitFlash: 0,
+      hpBar,
+      isBoss: true,
+      bossCfg: cfg,
+      phase: 1,
+      // brute용: 차지 상태
+      chargeCooldown: cfg.chargeInterval || 0,
+      charging: false,
+      chargeTimer: 0,
+      chargeDirX: 0, chargeDirZ: 0,
+      // overseer용: 소환 쿨다운
+      summonCooldown: cfg.summonInterval || 0,
+      bodyH: bh,
+    });
+
+    // 등장 알림
+    this.onEvents.onBossSpawn?.(cfg.name);
   }
 
   _hasLineOfSight(a, b) {
@@ -2374,14 +2662,21 @@ class World {
     }
   }
 
-  _fireEnemyBullet(enemy) {
+  _fireEnemyBullet(enemy, angleOffset = 0) {
     if (!this.player) return;
     const dx = this.player.position.x - enemy.x;
     const dz = this.player.position.z - enemy.z;
     const dist = Math.hypot(dx, dz);
     if (dist < 0.001) return;
-    const nx = dx / dist;
-    const nz = dz / dist;
+    let nx = dx / dist;
+    let nz = dz / dist;
+    // 부채꼴/멀티샷용 각도 오프셋
+    if (angleOffset !== 0) {
+      const cs = Math.cos(angleOffset), sn = Math.sin(angleOffset);
+      const rx = nx * cs - nz * sn;
+      const rz = nx * sn + nz * cs;
+      nx = rx; nz = rz;
+    }
     const speed = 18;
     if (!this._enemyBulletGeo) this._enemyBulletGeo = new THREE.BoxGeometry(0.14, 0.14, 0.55);
     if (!this._enemyBulletMat) this._enemyBulletMat = new THREE.MeshStandardMaterial({
@@ -2391,7 +2686,7 @@ class World {
     mesh.position.set(enemy.x + nx * 0.6, 1.0, enemy.z + nz * 0.6);
     mesh.rotation.y = Math.atan2(nx, nz);
     this.worldGroup.add(mesh);
-    const dmg = enemy.type === 'sniper' ? 15 : 10; // sniper 더 아픔
+    const dmg = enemy.bulletDmg || 10;
     this.bullets.push({
       mesh, vx: nx * speed, vz: nz * speed, life: 1.5, source: 'enemy', dmg,
     });
@@ -2432,32 +2727,48 @@ class World {
       this.reload();
       return;
     }
-    this._fireCooldown = this.gear.weapon.fireRate;
+    const weapon = this.gear.weapon;
+    this._fireCooldown = weapon.fireRate;
 
-    const angle = this.player.rotation.y + Math.PI; // 캐릭터 정면(-Z)
-    const dx = Math.sin(angle);
-    const dz = Math.cos(angle);
+    const baseAngle = this.player.rotation.y + Math.PI; // 캐릭터 정면(-Z)
     const speed = 32;
 
-    // 총알 메시 (앰버 발광 박스)
     if (!this._bulletGeo) this._bulletGeo = new THREE.BoxGeometry(0.18, 0.18, 0.7);
     if (!this._bulletMat) this._bulletMat = new THREE.MeshStandardMaterial({
       color: 0xfff0a0, emissive: 0xffb030, emissiveIntensity: 1.5, roughness: 0.4,
     });
-    const mesh = new THREE.Mesh(this._bulletGeo, this._bulletMat);
-    mesh.position.set(
-      this.player.position.x + dx * 1.0,
-      1.5,
-      this.player.position.z + dz * 1.0
-    );
-    mesh.rotation.y = angle;
-    this.worldGroup.add(mesh);
 
-    this.bullets.push({
-      mesh, vx: dx * speed, vz: dz * speed, life: 1.2,
-    });
+    // pellets > 1 이면 산탄, 아니면 단발 (spread 만큼 무작위 편차)
+    const pelletCount = weapon.pellets || 1;
+    const spread = weapon.spread || 0.02;
+    // 산탄총은 각 펠릿 데미지 분리 — 명시 damage가 펠릿당
+    // 일반 단발은 spread 만큼만 무작위 편차
+    const perBulletDmg = weapon.damage;
 
-    // 탄약 차감
+    for (let p = 0; p < pelletCount; p++) {
+      // 산탄은 전체 spread를 채움, 단발은 spread/2 이내 무작위
+      const off = pelletCount > 1
+        ? (p / (pelletCount - 1) - 0.5) * spread * 2 + (Math.random() - 0.5) * spread * 0.3
+        : (Math.random() - 0.5) * spread;
+      const angle = baseAngle + off;
+      const dx = Math.sin(angle);
+      const dz = Math.cos(angle);
+      const mesh = new THREE.Mesh(this._bulletGeo, this._bulletMat);
+      mesh.position.set(
+        this.player.position.x + dx * 1.0,
+        1.5,
+        this.player.position.z + dz * 1.0
+      );
+      mesh.rotation.y = angle;
+      this.worldGroup.add(mesh);
+      this.bullets.push({
+        mesh, vx: dx * speed, vz: dz * speed, life: 1.2,
+        dmg: perBulletDmg,
+        pierce: !!weapon.pierce,
+      });
+    }
+
+    // 탄약 차감 (한 번 발사 = 1탄)
     this.ammo--;
     this.onEvents.onAmmoChange?.(this.ammo, this.magazineMax, false);
   }
@@ -2872,10 +3183,33 @@ class World {
       ctx.fillRect(lx - 2, lz - 2, 4, 4);
     }
 
-    // 적 (빨강 - rusher=원, sniper=사각, hunter=다이아몬드)
+    // 적 표시 (타입별 색상/모양 — 보스는 큰 별)
     for (const e of this.enemies) {
       const ex = (e.x + N/2) * scale;
       const ez = (e.z + N/2) * scale;
+      if (e.isBoss) {
+        // 보스: 큰 별 + 외곽 링 (펄스)
+        const pulse = 1.0 + Math.sin(performance.now() * 0.006) * 0.25;
+        ctx.fillStyle = '#ff60ff';
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 1.5;
+        const r = 5.5 * pulse;
+        // 별 모양 (5각)
+        ctx.beginPath();
+        for (let i = 0; i < 10; i++) {
+          const ang = (i / 10) * Math.PI * 2 - Math.PI / 2;
+          const rr = i % 2 === 0 ? r : r * 0.45;
+          const xx = ex + Math.cos(ang) * rr;
+          const yy = ez + Math.sin(ang) * rr;
+          if (i === 0) ctx.moveTo(xx, yy);
+          else ctx.lineTo(xx, yy);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+        continue;
+      }
+      // 일반 적: 타입별 색상 + 모양
       ctx.fillStyle = '#d44a47';
       if (e.type === 'rusher') {
         ctx.beginPath();
@@ -2883,13 +3217,36 @@ class World {
         ctx.fill();
       } else if (e.type === 'sniper') {
         ctx.fillRect(ex - 2.5, ez - 2.5, 5, 5);
-      } else { // hunter - 다이아몬드 (회전된 사각)
+      } else if (e.type === 'hunter') {
+        // 다이아몬드
         ctx.beginPath();
         ctx.moveTo(ex, ez - 3);
         ctx.lineTo(ex + 3, ez);
         ctx.lineTo(ex, ez + 3);
         ctx.lineTo(ex - 3, ez);
         ctx.closePath();
+        ctx.fill();
+      } else if (e.type === 'swarmer') {
+        // 작은 핑크 점
+        ctx.fillStyle = '#ff70b0';
+        ctx.beginPath();
+        ctx.arc(ex, ez, 1.6, 0, Math.PI * 2);
+        ctx.fill();
+      } else if (e.type === 'tank') {
+        // 큰 황토색 사각 + 외곽
+        ctx.fillStyle = '#ffaa30';
+        ctx.fillRect(ex - 3.5, ez - 3.5, 7, 7);
+        ctx.strokeStyle = '#806020';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(ex - 3.5, ez - 3.5, 7, 7);
+      } else if (e.type === 'bomber') {
+        // 노랑 깜빡임 (자폭 카운트다운이면 빠르게)
+        const flash = e.bombTimer > 0
+          ? (Math.sin(performance.now() * 0.025) > 0 ? '#ff3030' : '#ffcc20')
+          : '#ffcc20';
+        ctx.fillStyle = flash;
+        ctx.beginPath();
+        ctx.arc(ex, ez, 2.8, 0, Math.PI * 2);
         ctx.fill();
       }
     }
@@ -3028,21 +3385,34 @@ class World {
       }
       // 플레이어 총알 ↔ 적 충돌 (적 총알은 플레이어 체크)
       if (b.source !== 'enemy') {
+        // 이미 맞은 적은 패스 (piercing 시 같은 적에 여러 번 안 맞도록)
+        if (!b.hitEnemies) b.hitEnemies = new Set();
         for (let j = this.enemies.length - 1; j >= 0; j--) {
           const e = this.enemies[j];
-          // logical pos 기준 거리 (shake offset 영향 제거)
+          if (b.hitEnemies.has(e)) continue;
+          // 보스/대형 적은 판정 반경 더 큼
+          const hitR = e.isBoss ? 0.9 : (e.type === 'tank' ? 0.7 : 0.55);
           const ddx = b.mesh.position.x - e.x;
           const ddz = b.mesh.position.z - e.z;
-          if (Math.hypot(ddx, ddz) < 0.55) {
-            e.hp -= this.gear.weapon.damage;
-            this.worldGroup.remove(b.mesh);
-            this.bullets.splice(i, 1);
-            consumed = true;
+          if (Math.hypot(ddx, ddz) < hitR) {
+            const dmg = (b.dmg != null) ? b.dmg : this.gear.weapon.damage;
+            e.hp -= dmg;
+            b.hitEnemies.add(e);
+            // 관통 무기가 아니면 탄알 소멸
+            if (!b.pierce) {
+              this.worldGroup.remove(b.mesh);
+              this.bullets.splice(i, 1);
+              consumed = true;
+            }
             if (e.hp <= 0) {
               this.worldGroup.remove(e.mesh);
               this.worldGroup.remove(e.hpBar.group);
               this.enemies.splice(j, 1);
-              this.onEvents.onEnemyKill?.(e.type, e.coinDrop);
+              if (e.isBoss) {
+                this.onEvents.onBossKill?.(e.bossId, e.coinDrop);
+              } else {
+                this.onEvents.onEnemyKill?.(e.type, e.coinDrop);
+              }
             } else {
               // 피격 효과: 붉게 + shake
               e.hitFlash = 0.12;
@@ -3055,7 +3425,8 @@ class World {
               // HP 바 갱신
               this._updateHpBar(e.hpBar, e.hp, e.maxHp);
             }
-            break;
+            // 관통이면 다음 적 계속 체크, 아니면 break
+            if (!b.pierce) break;
           }
         }
       } else {
@@ -3078,6 +3449,8 @@ class World {
     // 적 AI + 피격 효과
     if (this.player) {
       for (const enemy of this.enemies) {
+        // hp 0 이하는 다음 프레임에 정리됨 — AI 스킵
+        if (enemy.hp <= 0) continue;
         // 피격 효과 처리 (붉게 + shake offset)
         let shakeX = 0, shakeZ = 0;
         if (enemy.hitFlash > 0) {
@@ -3116,19 +3489,17 @@ class World {
           if (this._isOpen(enemy.x, nZ, 0.35)) enemy.z = nZ;
         };
 
-        if (enemy.type === 'rusher') {
+        if (enemy.behavior === 'rush') {
           // 직선 추격
           if (dist > 0.8) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
-          // 접촉 데미지 (쿨다운 0.5초 공유)
           if (dist < 1.0 && this._contactCooldown <= 0 && !this._dead) {
-            this._damagePlayer(10);
+            this._damagePlayer(enemy.contactDmg || 10);
             this._contactCooldown = 0.5;
           }
-        } else if (enemy.type === 'sniper') {
+        } else if (enemy.behavior === 'shoot') {
           // 거리 유지 (5~14) + 사격
           if (dist < 5)       tryMove(-nx * enemy.speed * dt,        -nz * enemy.speed * dt);
           else if (dist > 14) tryMove( nx * enemy.speed * 0.6 * dt,  nz * enemy.speed * 0.6 * dt);
-          // 사격
           enemy.fireCooldown -= dt;
           if (enemy.fireCooldown <= 0 && dist < enemy.fireRange) {
             if (this._hasLineOfSight({ x: enemy.x, z: enemy.z }, this.player.position)) {
@@ -3138,21 +3509,157 @@ class World {
               enemy.fireCooldown = 0.3;
             }
           }
-        } else { // hunter: 추격 + 사격
-          // 시야 안에 있을 때만 행동, 너무 가까우면 살짝 거리 유지
+        } else if (enemy.behavior === 'hunt') {
           const hasLOS = this._hasLineOfSight({ x: enemy.x, z: enemy.z }, this.player.position);
           if (hasLOS && dist < 2.5) {
-            // 살짝 후퇴해서 사격 거리 유지
             tryMove(-nx * enemy.speed * 0.5 * dt, -nz * enemy.speed * 0.5 * dt);
           } else if (dist > 1.2) {
-            // 추격 (시야 없으면 마지막 방향으로 접근)
             tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
           }
-          // 사격: 시야 + 사거리 안에 있으면
           enemy.fireCooldown -= dt;
           if (enemy.fireCooldown <= 0 && dist < enemy.fireRange && hasLOS) {
             this._fireEnemyBullet(enemy);
             enemy.fireCooldown = enemy.fireRate;
+          }
+        } else if (enemy.behavior === 'swarm') {
+          // swarmer: rush와 비슷하지만 빠르고 데미지 작음. 항상 추격.
+          if (dist > 0.7) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
+          if (dist < 0.9 && this._contactCooldown <= 0 && !this._dead) {
+            this._damagePlayer(enemy.contactDmg || 6);
+            this._contactCooldown = 0.4;
+          }
+        } else if (enemy.behavior === 'tank') {
+          // tank: 느린 추격 + 큰 접촉 데미지. 거리 멀어도 계속 추격.
+          if (dist > 0.9) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
+          if (dist < 1.3 && this._contactCooldown <= 0 && !this._dead) {
+            this._damagePlayer(enemy.contactDmg || 18);
+            this._contactCooldown = 0.7;
+          }
+        } else if (enemy.behavior === 'bomb') {
+          // bomber: 추격하다가 가까워지면 카운트다운 + 자폭 (반경 데미지)
+          if (enemy.bombTimer > 0) {
+            // 카운트다운 중 — 깜빡임
+            enemy.bombTimer -= dt;
+            if (enemy.bombMat) {
+              const flash = Math.sin(performance.now() * 0.025) * 0.5 + 1.0;
+              enemy.bombMat.emissiveIntensity = flash * 2.0;
+            }
+            // 폭발
+            if (enemy.bombTimer <= 0) {
+              const explodeR = 2.2;
+              const pdist = Math.hypot(this.player.position.x - enemy.x, this.player.position.z - enemy.z);
+              if (pdist < explodeR && !this._dead) {
+                const falloff = 1.0 - pdist / explodeR;
+                this._damagePlayer(Math.round((enemy.contactDmg || 30) * falloff));
+              }
+              // 같은 방의 다른 적도 피해 (자폭 연쇄)
+              for (const o of this.enemies) {
+                if (o === enemy || o.hp <= 0 || o.isBoss) continue;
+                const od = Math.hypot(o.x - enemy.x, o.z - enemy.z);
+                if (od < explodeR) {
+                  o.hp = Math.max(0, o.hp - 25);
+                  this._updateHpBar(o.hpBar, o.hp, o.maxHp);
+                }
+              }
+              // 폭발 시각 효과 (큰 깜빡임)
+              this._cameraShake = Math.max(this._cameraShake, 0.4);
+              enemy.hp = 0;  // 자폭으로 사망
+            }
+          } else {
+            // 평소엔 추격
+            if (dist > 0.8) tryMove(nx * enemy.speed * dt, nz * enemy.speed * dt);
+            // 1.5 이내로 들어오면 자폭 카운트다운 시작
+            if (dist < 1.5) enemy.bombTimer = 0.7;
+          }
+        } else if (enemy.behavior === 'brute') {
+          // BRUTE 보스: 직선 추격 + 주기적 차지
+          const cfg = enemy.bossCfg;
+          // 페이즈 전환
+          if (enemy.phase === 1 && enemy.hp <= enemy.maxHp * cfg.phase2HpRatio) {
+            enemy.phase = 2;
+            enemy.chargeCooldown = 1.5; // 페이즈 진입 직후 차지
+            this._cameraShake = Math.max(this._cameraShake, 0.5);
+          }
+          const phaseSpeedMul = enemy.phase === 2 ? 1.25 : 1.0;
+
+          if (enemy.charging) {
+            // 차지 중: 빠른 직선 이동, 충돌 시 큰 데미지
+            enemy.chargeTimer -= dt;
+            tryMove(enemy.chargeDirX * cfg.chargeSpeed * dt, enemy.chargeDirZ * cfg.chargeSpeed * dt);
+            if (dist < 1.6 && this._contactCooldown <= 0 && !this._dead) {
+              this._damagePlayer(enemy.contactDmg || 25);
+              this._contactCooldown = 0.8;
+              this._cameraShake = Math.max(this._cameraShake, 0.5);
+            }
+            if (enemy.chargeTimer <= 0) {
+              enemy.charging = false;
+              enemy.chargeCooldown = cfg.chargeInterval * (enemy.phase === 2 ? 0.65 : 1.0);
+            }
+          } else {
+            // 일반 추격
+            if (dist > 1.0) tryMove(nx * enemy.speed * phaseSpeedMul * dt, nz * enemy.speed * phaseSpeedMul * dt);
+            if (dist < 1.4 && this._contactCooldown <= 0 && !this._dead) {
+              this._damagePlayer(enemy.contactDmg || 25);
+              this._contactCooldown = 0.7;
+            }
+            // 차지 트리거
+            enemy.chargeCooldown -= dt;
+            if (enemy.chargeCooldown <= 0 && dist > 3.5 && dist < 18) {
+              enemy.charging = true;
+              enemy.chargeTimer = cfg.chargeDuration;
+              enemy.chargeDirX = nx;
+              enemy.chargeDirZ = nz;
+            }
+          }
+        } else if (enemy.behavior === 'overseer') {
+          // OVERSEER 보스: 거리 유지 + 부채꼴 사격 + 호위 소환
+          const cfg = enemy.bossCfg;
+          if (enemy.phase === 1 && enemy.hp <= enemy.maxHp * cfg.phase2HpRatio) {
+            enemy.phase = 2;
+            this._cameraShake = Math.max(this._cameraShake, 0.5);
+          }
+          const fireRateMul = enemy.phase === 2 ? 0.65 : 1.0;
+          const shotsPerVolley = enemy.phase === 2 ? 5 : 3;
+
+          // 거리 유지 (7~16)
+          if (dist < 7)       tryMove(-nx * enemy.speed * dt,        -nz * enemy.speed * dt);
+          else if (dist > 16) tryMove( nx * enemy.speed * 0.7 * dt,  nz * enemy.speed * 0.7 * dt);
+
+          // 사격 (부채꼴)
+          enemy.fireCooldown -= dt;
+          if (enemy.fireCooldown <= 0 && dist < cfg.fireRange) {
+            if (this._hasLineOfSight({ x: enemy.x, z: enemy.z }, this.player.position)) {
+              const spread = 0.25;
+              for (let i = 0; i < shotsPerVolley; i++) {
+                const off = (i - (shotsPerVolley - 1) / 2) * spread;
+                this._fireEnemyBullet(enemy, off);
+              }
+              enemy.fireCooldown = cfg.fireRate * fireRateMul;
+            } else {
+              enemy.fireCooldown = 0.5;
+            }
+          }
+
+          // 호위 소환
+          enemy.summonCooldown -= dt;
+          if (enemy.summonCooldown <= 0) {
+            const summonCount = enemy.phase === 2 ? cfg.summonCount + 1 : cfg.summonCount;
+            for (let i = 0; i < summonCount; i++) {
+              // 보스 근처 4방향에 소환
+              const ang = (i / summonCount) * Math.PI * 2 + Math.random() * 0.3;
+              const sx = enemy.x + Math.cos(ang) * 2.5;
+              const sz = enemy.z + Math.sin(ang) * 2.5;
+              if (this._isOpen(sx, sz, 0.4)) {
+                this._addEnemy(sx, sz, 'swarmer');
+              }
+            }
+            enemy.summonCooldown = cfg.summonInterval * (enemy.phase === 2 ? 0.7 : 1.0);
+          }
+
+          // 접촉 데미지 (가까이 붙으면)
+          if (dist < 1.8 && this._contactCooldown <= 0 && !this._dead) {
+            this._damagePlayer(enemy.contactDmg || 30);
+            this._contactCooldown = 0.7;
           }
         }
 
@@ -3160,8 +3667,24 @@ class World {
         enemy.mesh.rotation.y = Math.atan2(dx, dz) + Math.PI;
         // 시각 위치 = 논리 위치 + shake
         enemy.mesh.position.set(enemy.x + shakeX, 0, enemy.z + shakeZ);
-        // HP 바 위치 (회전 영향 없음, 머리 위)
-        enemy.hpBar.group.position.set(enemy.x, 2.45, enemy.z);
+        // HP 바 위치 (보스는 더 높이, 일반 적은 머리 위)
+        const barY = enemy.isBoss ? (enemy.bodyH + 1.0) : 2.45;
+        enemy.hpBar.group.position.set(enemy.x, barY, enemy.z);
+      }
+
+      // 자폭 등으로 hp <= 0 된 적 정리 (탄 충돌 외 경로로 사망한 경우)
+      for (let j = this.enemies.length - 1; j >= 0; j--) {
+        const e = this.enemies[j];
+        if (e.hp <= 0) {
+          this.worldGroup.remove(e.mesh);
+          this.worldGroup.remove(e.hpBar.group);
+          this.enemies.splice(j, 1);
+          if (e.isBoss) {
+            this.onEvents.onBossKill?.(e.bossId, e.coinDrop);
+          } else {
+            this.onEvents.onEnemyKill?.(e.type, e.coinDrop);
+          }
+        }
       }
     }
 
@@ -3716,6 +4239,7 @@ function MissionScreen({ state, dispatch }) {
   const [paused, setPaused] = useState(false);
   const [pickToast, setPickToast] = useState(null);
   const [bountyFlash, setBountyFlash] = useState(false);
+  const [bossAlert, setBossAlert] = useState(null);  // { name, type: 'spawn'|'kill', coin? }
   const bountyTimerRef = useRef(null);
 
   // World 셋업 (1회)
@@ -3759,6 +4283,19 @@ function MissionScreen({ state, dispatch }) {
         setBountyFlash(true);
         if (bountyTimerRef.current) clearTimeout(bountyTimerRef.current);
         bountyTimerRef.current = setTimeout(() => setBountyFlash(false), 350);
+      },
+      onBossSpawn: (bossName) => {
+        setBossAlert({ name: bossName, type: 'spawn' });
+        setTimeout(() => setBossAlert(null), 2800);
+      },
+      onBossKill: (bossId, coinDrop) => {
+        const cfg = BOSS_CATALOG[bossId];
+        dispatch({ type: 'EARN_COIN_MISSION', amount: coinDrop });
+        setBossAlert({ name: cfg?.name || 'BOSS', type: 'kill', coin: coinDrop });
+        setTimeout(() => setBossAlert(null), 3200);
+        setBountyFlash(true);
+        if (bountyTimerRef.current) clearTimeout(bountyTimerRef.current);
+        bountyTimerRef.current = setTimeout(() => setBountyFlash(false), 600);
       },
     }, gear);
     worldRef.current = w;
@@ -3938,6 +4475,14 @@ function MissionScreen({ state, dispatch }) {
         ` : ''}
 
         ${pickToast ? html`<div class="toast">${pickToast}</div>` : ''}
+
+        ${bossAlert ? html`
+          <div class="boss-alert ${bossAlert.type === 'kill' ? 'kill' : 'spawn'}">
+            ${bossAlert.type === 'spawn'
+              ? html`<div class="boss-alert-label">⚠ 보스 출현</div><div class="boss-alert-name">${bossAlert.name}</div>`
+              : html`<div class="boss-alert-label kill">▼ 보스 처치</div><div class="boss-alert-name">${bossAlert.name}</div><div class="boss-alert-coin">+ ${bossAlert.coin} ◈</div>`}
+          </div>
+        ` : ''}
 
         ${isDead ? html`
           <div class="death-overlay">
