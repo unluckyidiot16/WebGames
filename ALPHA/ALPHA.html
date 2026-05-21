@@ -265,6 +265,33 @@
     letter-spacing: 0.1em;
   }
 
+  /* 사냥/보스 퀘스트 변형 */
+  .quest.kill { border-left: 3px solid var(--info); }
+  .quest.boss { border-left: 3px solid var(--danger); background: linear-gradient(90deg, rgba(196,69,69,0.08) 0%, var(--panel-2) 60%); }
+  .quest-kind-tag {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    padding: 1px 5px;
+    border: 1px solid;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .quest-kind-tag.hunt { color: var(--info); border-color: var(--info); }
+  .quest-kind-tag.boss { color: var(--danger); border-color: var(--danger); background: rgba(196,69,69,0.1); }
+  .quest .auto-tag {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+    font-style: italic;
+  }
+  .quest .reward-tag {
+    color: var(--accent) !important;
+    border-color: var(--accent) !important;
+  }
+
   /* Inventory */
   .inv-grid {
     display: grid;
@@ -1486,17 +1513,79 @@ function wordInChapter(word, chapterLetters) {
   return true;
 }
 
+// === 사냥 퀘스트 (특정 적 N마리 처치) ===
+// 챕터별 등장 가능한 적이 다르므로, fromChapter로 최소 챕터 제한
+const HUNT_QUESTS = [
+  { id: 'hunt_rusher_5',  kind: 'kill', target: 'rusher',  count: 5, reward: 25, fromChapter: 1,
+    prompt: { ko: '추격병 5마리 처치', en: 'Eliminate 5 rushers' } },
+  { id: 'hunt_sniper_3',  kind: 'kill', target: 'sniper',  count: 3, reward: 30, fromChapter: 1,
+    prompt: { ko: '저격병 3마리 처치', en: 'Eliminate 3 snipers' } },
+  { id: 'hunt_hunter_3',  kind: 'kill', target: 'hunter',  count: 3, reward: 40, fromChapter: 2,
+    prompt: { ko: '헌터 3마리 처치', en: 'Eliminate 3 hunters' } },
+  { id: 'hunt_swarmer_8', kind: 'kill', target: 'swarmer', count: 8, reward: 30, fromChapter: 1,
+    prompt: { ko: '스워머 8마리 처치', en: 'Eliminate 8 swarmers' } },
+  { id: 'hunt_bomber_3',  kind: 'kill', target: 'bomber',  count: 3, reward: 45, fromChapter: 3,
+    prompt: { ko: '자폭병 3마리 처치', en: 'Eliminate 3 bombers' } },
+  { id: 'hunt_tank_2',    kind: 'kill', target: 'tank',    count: 2, reward: 60, fromChapter: 4,
+    prompt: { ko: '탱크 2마리 처치', en: 'Eliminate 2 tanks' } },
+  { id: 'hunt_any_15',    kind: 'kill', target: 'any',     count: 15, reward: 40, fromChapter: 1,
+    prompt: { ko: '적 15마리 처치 (종류 무관)', en: 'Eliminate any 15 enemies' } },
+];
+const HUNT_QUEST_BY_ID = Object.fromEntries(HUNT_QUESTS.map(q => [q.id, q]));
+
+// === 보스 퀘스트 (자동 생성: 보스 있는 챕터에 1개 추가) ===
+const BOSS_QUESTS = {
+  brute:    { id: 'boss_brute',    kind: 'kill_boss', target: 'brute',    reward: 150,
+              prompt: { ko: 'BRUTE 보스 처치', en: 'Defeat BRUTE boss' } },
+  overseer: { id: 'boss_overseer', kind: 'kill_boss', target: 'overseer', reward: 250,
+              prompt: { ko: 'OVERSEER 보스 처치', en: 'Defeat OVERSEER boss' } },
+};
+
+// 퀘스트 정보 룩업 — kind에 따라 다른 카탈로그
+function getQuestInfo(quest) {
+  if (!quest) return null;
+  if (quest.kind === 'kill')      return HUNT_QUEST_BY_ID[quest.id];
+  if (quest.kind === 'kill_boss') return Object.values(BOSS_QUESTS).find(b => b.id === quest.id);
+  return WORD_BY_ID[quest.id]; // 기본은 word 퀘스트
+}
+
 const PICK_QUESTS = (n, chapter = 1, excludeIds = []) => {
   const config = getChapterConfig(chapter);
   // 챕터 letters 안의 글자만 쓰는 단어만 — 불가능한 단어는 절대 포함 X
-  // (excludeIds: 이미 있는 퀘스트 id는 제외 — 중복 방지)
   const excludeSet = new Set(excludeIds);
-  const pool = WORDS.filter(w =>
+  const wordPool = WORDS.filter(w =>
     wordInChapter(w.word, config.letters) && !excludeSet.has(w.id)
   );
-  const shuffled = [...pool].sort(() => Math.random() - 0.5);
-  // pool < n 이어도 fallback 없음 — 가능한 만큼만 반환
-  return shuffled.slice(0, n).map(w => ({ id: w.id, completed: false }));
+  const shuffledWords = [...wordPool].sort(() => Math.random() - 0.5);
+
+  // 사냥 퀘스트 (이 챕터에서 가능한 것 중 1-2개)
+  const huntPool = HUNT_QUESTS.filter(h =>
+    h.fromChapter <= chapter && !excludeSet.has(h.id)
+  );
+  const huntPick = [...huntPool].sort(() => Math.random() - 0.5).slice(0, Math.min(2, huntPool.length));
+
+  // 보스 퀘스트 — 챕터에 보스 있으면 무조건 추가 (챕터 진행 조건)
+  const bossQuest = config.boss ? BOSS_QUESTS[config.boss] : null;
+
+  // 결합: word (n - hunt - boss) + hunt + boss
+  const huntCount = huntPick.length;
+  const bossCount = bossQuest ? 1 : 0;
+  const wordCount = Math.max(1, n - huntCount - bossCount);
+
+  const quests = [];
+  // word 먼저
+  for (const w of shuffledWords.slice(0, wordCount)) {
+    quests.push({ id: w.id, kind: 'word', completed: false });
+  }
+  // hunt
+  for (const h of huntPick) {
+    quests.push({ id: h.id, kind: 'kill', target: h.target, progress: 0, count: h.count, completed: false });
+  }
+  // boss
+  if (bossQuest) {
+    quests.push({ id: bossQuest.id, kind: 'kill_boss', target: bossQuest.target, completed: false });
+  }
+  return quests;
 };
 
 // === 영단어 사전 (자유 제출 검증용) ===
@@ -1588,10 +1677,19 @@ function loadState() {
       if (s.scene === 'mission') s.scene = 'base';
       // 퀘스트 마이그레이션 - 현재 챕터에서 불가능한 미완료 퀘스트를 교체
       // (구버전 PICK_QUESTS fallback이 불가능한 단어를 박아둔 경우 복구)
+      // 또한 구버전 quest는 kind 필드 없음 → 'word'로 간주
       if (Array.isArray(s.quests)) {
         const chapterLetters = getChapterConfig(s.chapter).letters;
         const stuckIds = [];
         const keepQuests = s.quests.filter(q => {
+          // kind 마이그레이션 (구버전은 kind 없음 → word)
+          if (!q.kind) q.kind = 'word';
+          // word 퀘스트만 검증 — 사냥/보스는 별도 처리
+          if (q.kind !== 'word') {
+            // hunt/boss 퀘스트는 그대로 유지 (단, target/count 누락 시 정리)
+            if (q.kind === 'kill' && (q.target == null || q.count == null)) return false;
+            return true;
+          }
           const w = WORD_BY_ID[q.id];
           if (!w) return false;                              // 알 수 없는 id 제거
           if (q.completed) return true;                      // 완료된 건 유지
@@ -1599,11 +1697,13 @@ function loadState() {
           if (!fits) { stuckIds.push(q.id); return false; }  // 불가능한 미완료는 교체 대상
           return true;
         });
-        if (stuckIds.length > 0) {
+        if (stuckIds.length > 0 || keepQuests.length < 3) {
           const existingIds = keepQuests.map(q => q.id);
           const need = 5 - keepQuests.length;
           const replacements = need > 0 ? PICK_QUESTS(need, s.chapter, existingIds) : [];
           s.quests = [...keepQuests, ...replacements];
+        } else {
+          s.quests = keepQuests;
         }
       }
       return s;
@@ -1643,6 +1743,28 @@ function resolveGear(state) {
     weapon: GEAR_BY_ID[state.equipped?.weapon || DEFAULT_GEAR.weapon],
     bag:    GEAR_BY_ID[state.equipped?.bag    || DEFAULT_GEAR.bag],
     boots:  GEAR_BY_ID[state.equipped?.boots  || DEFAULT_GEAR.boots],
+  };
+}
+
+// 챕터 진행 헬퍼 — 모든 퀘스트 완료 시 다음 챕터 + 새 퀘스트 풀 + 보너스
+// alreadyRewarded: 직전 액션에서 이미 지급한 보상 (toast 합산용)
+function applyChapterProgressIfAllDone(s, alreadyRewarded = 0) {
+  const allDone = s.quests.length > 0 && s.quests.every(q => q.completed);
+  if (!allDone) return s;
+  const chapterBonus = 100 + s.chapter * 50;
+  const newChapter = Math.min(MAX_CHAPTER, s.chapter + 1);
+  const chapterAdvanced = newChapter > s.chapter;
+  const newMaxChapter = chapterAdvanced ? Math.max(s.maxChapter || 1, newChapter) : (s.maxChapter || 1);
+  const chapterName = chapterAdvanced ? getChapterConfig(newChapter).name : '';
+  return {
+    ...s,
+    quests: PICK_QUESTS(5, newChapter),
+    chapter: newChapter,
+    maxChapter: newMaxChapter,
+    coins: s.coins + chapterBonus,
+    extractedToast: chapterAdvanced
+      ? `${s.chapter}단계 완료! 다음 단계 "${chapterName}" 열림 +${alreadyRewarded + chapterBonus} 코인`
+      : `마지막 단계 완료! +${alreadyRewarded + chapterBonus} 코인`,
   };
 }
 
@@ -1779,6 +1901,9 @@ function reducer(s, a) {
       };
     }
     case 'SUBMIT_QUEST': {
+      // word 퀘스트 제출 (사냥/보스는 KILL_ENEMY/KILL_BOSS로 자동 진행)
+      const quest = s.quests.find(q => q.id === a.questId);
+      if (!quest || quest.kind !== 'word') return s;
       const w = WORD_BY_ID[a.questId];
       if (!w) return s;
       const need = letterCounts(w.word);
@@ -1792,26 +1917,76 @@ function reducer(s, a) {
         q.id === a.questId ? { ...q, completed: true } : q
       );
       const reward = w.word.length * 10; // 단어 길이 × 10 코인
-      // 모든 퀘스트 완료시 새 퀘스트 풀 + 챕터 보너스 + 챕터 +1
-      const allDone = newQuests.every(q => q.completed);
-      const chapterBonus = allDone ? 100 + s.chapter * 50 : 0;
-      const newChapter = allDone ? Math.min(MAX_CHAPTER, s.chapter + 1) : s.chapter;
-      const chapterAdvanced = allDone && newChapter > s.chapter;
+      return applyChapterProgressIfAllDone({
+        ...s,
+        baseInventory: newInv,
+        quests: newQuests,
+        completedCount: s.completedCount + 1,
+        coins: s.coins + reward,
+        extractedToast: `"${w.word}" 제출! +${reward} 코인`,
+      }, reward);
+    }
+    case 'KILL_ENEMY': {
+      // 사냥 퀘스트 진행도 증가 (target === a.enemyType 또는 'any')
+      let anyChange = false;
+      let completedReward = 0;
+      const completedNames = [];
+      const newQuests = s.quests.map(q => {
+        if (q.kind !== 'kill' || q.completed) return q;
+        if (q.target !== a.enemyType && q.target !== 'any') return q;
+        anyChange = true;
+        const newProgress = (q.progress || 0) + 1;
+        if (newProgress >= q.count) {
+          const info = HUNT_QUEST_BY_ID[q.id];
+          if (info) {
+            completedReward += info.reward;
+            completedNames.push(info.prompt?.ko || q.id);
+          }
+          return { ...q, progress: q.count, completed: true };
+        }
+        return { ...q, progress: newProgress };
+      });
+      if (!anyChange) return s;
+      const next = {
+        ...s,
+        quests: newQuests,
+        coins: s.coins + completedReward,
+      };
+      if (completedReward > 0) {
+        next.extractedToast = `사냥 완료! "${completedNames.join(', ')}" +${completedReward} 코인`;
+      }
+      return applyChapterProgressIfAllDone(next, completedReward);
+    }
+    case 'KILL_BOSS': {
+      // 보스 퀘스트 자동 완료 + 챕터 즉시 진행 (다른 퀘스트는 부분 진행 상태로 폐기)
+      let completedReward = 0;
+      let completedName = null;
+      const newQuests = s.quests.map(q => {
+        if (q.kind !== 'kill_boss' || q.completed) return q;
+        if (q.target !== a.bossId) return q;
+        const info = Object.values(BOSS_QUESTS).find(b => b.id === q.id);
+        if (info) {
+          completedReward += info.reward;
+          completedName = info.prompt?.ko || q.id;
+        }
+        return { ...q, completed: true };
+      });
+      if (completedName == null) return s;
+      // 챕터 클리어! 보스 보상 + 챕터 보너스 + 새 챕터 진행
+      const chapterBonus = 100 + s.chapter * 50;
+      const newChapter = Math.min(MAX_CHAPTER, s.chapter + 1);
+      const chapterAdvanced = newChapter > s.chapter;
       const newMaxChapter = chapterAdvanced ? Math.max(s.maxChapter || 1, newChapter) : (s.maxChapter || 1);
       const chapterName = chapterAdvanced ? getChapterConfig(newChapter).name : '';
       return {
         ...s,
-        baseInventory: newInv,
-        quests: allDone ? PICK_QUESTS(5, newChapter) : newQuests,
+        quests: PICK_QUESTS(5, newChapter),
         chapter: newChapter,
         maxChapter: newMaxChapter,
-        completedCount: s.completedCount + 1,
-        coins: s.coins + reward + chapterBonus,
-        extractedToast: allDone
-          ? (chapterAdvanced
-              ? `${s.chapter}단계 완료! 다음 단계 "${chapterName}" 열림 +${reward + chapterBonus} 코인`
-              : `마지막 단계 완료! +${reward + chapterBonus} 코인`)
-          : `"${w.word}" 제출! +${reward} 코인`,
+        coins: s.coins + completedReward + chapterBonus,
+        extractedToast: chapterAdvanced
+          ? `보스 처치! "${completedName}" — 다음 단계 "${chapterName}" 열림 +${completedReward + chapterBonus} 코인`
+          : `최종 보스 처치! "${completedName}" +${completedReward + chapterBonus} 코인`,
       };
     }
     case 'FREE_SUBMIT': {
@@ -2012,6 +2187,7 @@ class World {
     this.extractZones = [];
     this.bullets = [];
     this.enemies = [];
+    this._muzzleFlashes = [];
     this.ammo = this.magazineMax;
     this._reloading = false;
     this._reloadTimer = 0;
@@ -2718,6 +2894,69 @@ class World {
     return true;
   }
 
+  // 무기별 탄알 메시 캐시 — id별 다른 geometry/material
+  _getBulletAssets(weapon) {
+    if (!this._bulletAssetCache) this._bulletAssetCache = {};
+    const cache = this._bulletAssetCache;
+    if (cache[weapon.id]) return cache[weapon.id];
+
+    // 무기 카테고리 판정
+    const isPellet = (weapon.pellets || 1) > 1;
+    const isPierce = !!weapon.pierce;
+    // 산탄: 작은 탄, 매그넘/저격: 두꺼운 탄, 기본: 표준
+    let bw, bh, bd, color, emissive, emissiveIntensity;
+    if (isPellet) {
+      bw = 0.10; bh = 0.10; bd = 0.40;
+      color = 0xffd060; emissive = 0xff9020; emissiveIntensity = 1.2;
+    } else if (isPierce) {
+      bw = 0.28; bh = 0.28; bd = 1.0;
+      color = 0xfff0c0; emissive = 0xffd040; emissiveIntensity = 2.2;
+    } else if (weapon.id === 'revolver') {
+      bw = 0.22; bh = 0.22; bd = 0.8;
+      color = 0xffefa0; emissive = 0xffb040; emissiveIntensity = 1.8;
+    } else if (weapon.id === 'smg_1') {
+      bw = 0.14; bh = 0.14; bd = 0.55;
+      color = 0xfff0a0; emissive = 0xffa030; emissiveIntensity = 1.3;
+    } else {
+      bw = 0.18; bh = 0.18; bd = 0.7;
+      color = 0xfff0a0; emissive = 0xffb030; emissiveIntensity = 1.5;
+    }
+    cache[weapon.id] = {
+      geo: new THREE.BoxGeometry(bw, bh, bd),
+      mat: new THREE.MeshStandardMaterial({
+        color, emissive, emissiveIntensity, roughness: 0.4,
+      }),
+    };
+    return cache[weapon.id];
+  }
+
+  // 머즐 플래시 — 짧게 보이고 사라지는 박스, 무기별 크기/색
+  _spawnMuzzleFlash(weapon, x, y, z, angle) {
+    if (!this._muzzleFlashes) this._muzzleFlashes = [];
+    const isPellet = (weapon.pellets || 1) > 1;
+    const isPierce = !!weapon.pierce;
+    let size, life, color;
+    if (isPellet) {
+      size = 0.75; life = 0.10; color = 0xffaa30;
+    } else if (isPierce) {
+      size = 0.45; life = 0.09; color = 0xfff080;
+    } else if (weapon.id === 'revolver') {
+      size = 0.55; life = 0.09; color = 0xffc040;
+    } else if (weapon.id === 'smg_1') {
+      size = 0.28; life = 0.05; color = 0xffd060;
+    } else {
+      size = 0.35; life = 0.07; color = 0xffc060;
+    }
+    const mat = new THREE.MeshBasicMaterial({
+      color, transparent: true, opacity: 1.0,
+    });
+    const mesh = new THREE.Mesh(new THREE.BoxGeometry(size, size, size * 0.6), mat);
+    mesh.position.set(x, y, z);
+    mesh.rotation.y = angle;
+    this.worldGroup.add(mesh);
+    this._muzzleFlashes.push({ mesh, mat, life, maxLife: life });
+  }
+
   _fire() {
     if (!this.player) return;
     if (this._fireCooldown > 0) return;
@@ -2732,18 +2971,37 @@ class World {
 
     const baseAngle = this.player.rotation.y + Math.PI; // 캐릭터 정면(-Z)
     const speed = 32;
+    const isPellet = (weapon.pellets || 1) > 1;
+    const isPierce = !!weapon.pierce;
 
-    if (!this._bulletGeo) this._bulletGeo = new THREE.BoxGeometry(0.18, 0.18, 0.7);
-    if (!this._bulletMat) this._bulletMat = new THREE.MeshStandardMaterial({
-      color: 0xfff0a0, emissive: 0xffb030, emissiveIntensity: 1.5, roughness: 0.4,
-    });
+    // 무기별 탄알 자산
+    const bulletAssets = this._getBulletAssets(weapon);
 
     // pellets > 1 이면 산탄, 아니면 단발 (spread 만큼 무작위 편차)
     const pelletCount = weapon.pellets || 1;
     const spread = weapon.spread || 0.02;
-    // 산탄총은 각 펠릿 데미지 분리 — 명시 damage가 펠릿당
-    // 일반 단발은 spread 만큼만 무작위 편차
     const perBulletDmg = weapon.damage;
+    const bulletLife = isPierce ? 1.5 : 1.2;  // 관통 무기는 좀 더 멀리
+
+    // 머즐 플래시 (총구 위치)
+    const dxF = Math.sin(baseAngle);
+    const dzF = Math.cos(baseAngle);
+    this._spawnMuzzleFlash(
+      weapon,
+      this.player.position.x + dxF * 1.1,
+      1.55,
+      this.player.position.z + dzF * 1.1,
+      baseAngle
+    );
+
+    // 무기별 카메라 흔들림 (산탄 > 매그넘/저격 > 리볼버 > 기본)
+    let shake = 0;
+    if (isPellet) shake = 0.18;
+    else if (isPierce) shake = 0.12;
+    else if (weapon.id === 'revolver') shake = 0.10;
+    else if (weapon.id === 'smg_1') shake = 0.04;
+    else shake = 0.06;
+    this._cameraShake = Math.max(this._cameraShake, shake);
 
     for (let p = 0; p < pelletCount; p++) {
       // 산탄은 전체 spread를 채움, 단발은 spread/2 이내 무작위
@@ -2753,7 +3011,7 @@ class World {
       const angle = baseAngle + off;
       const dx = Math.sin(angle);
       const dz = Math.cos(angle);
-      const mesh = new THREE.Mesh(this._bulletGeo, this._bulletMat);
+      const mesh = new THREE.Mesh(bulletAssets.geo, bulletAssets.mat);
       mesh.position.set(
         this.player.position.x + dx * 1.0,
         1.5,
@@ -2762,9 +3020,9 @@ class World {
       mesh.rotation.y = angle;
       this.worldGroup.add(mesh);
       this.bullets.push({
-        mesh, vx: dx * speed, vz: dz * speed, life: 1.2,
+        mesh, vx: dx * speed, vz: dz * speed, life: bulletLife,
         dmg: perBulletDmg,
-        pierce: !!weapon.pierce,
+        pierce: isPierce,
       });
     }
 
@@ -3307,6 +3565,25 @@ class World {
       this._cameraShake = Math.max(0, this._cameraShake - dt * 1.8);
     }
     this._contactCooldown = Math.max(0, this._contactCooldown - dt);
+
+    // 머즐 플래시 페이드아웃
+    if (this._muzzleFlashes && this._muzzleFlashes.length > 0) {
+      for (let i = this._muzzleFlashes.length - 1; i >= 0; i--) {
+        const fl = this._muzzleFlashes[i];
+        fl.life -= dt;
+        if (fl.life <= 0) {
+          this.worldGroup.remove(fl.mesh);
+          fl.mat.dispose();
+          fl.mesh.geometry.dispose();
+          this._muzzleFlashes.splice(i, 1);
+        } else {
+          fl.mat.opacity = fl.life / fl.maxLife;
+          // 살짝 커지면서 사라지게
+          const s = 1.0 + (1.0 - fl.life / fl.maxLife) * 0.4;
+          fl.mesh.scale.set(s, s, s);
+        }
+      }
+    }
 
     // 이동
     const speed = 5.5 * this.gear.boots.speedMul; // tiles per second × boots multiplier
@@ -3993,7 +4270,53 @@ function BaseScreen({ state, dispatch }) {
         </div>
         <div class="quest-list">
           ${state.quests.map(q => {
+            // === 사냥 퀘스트 ===
+            if (q.kind === 'kill') {
+              const info = HUNT_QUEST_BY_ID[q.id];
+              if (!info) return null;
+              const prompt = info.prompt[state.language] || info.prompt.ko;
+              const progress = q.progress || 0;
+              return html`
+                <div class="quest kill ${q.completed ? 'completed' : ''}">
+                  <div class="quest-prompt">
+                    <span class="quest-kind-tag hunt">⌖ 사냥</span>${prompt}
+                  </div>
+                  <div class="quest-meta">
+                    <span class="needed">
+                      <span class=${q.completed ? 'have' : 'miss'}>${progress} / ${q.count}</span>
+                      <span class="reward-tag">보상 ${info.reward}◈</span>
+                    </span>
+                    ${q.completed
+                      ? html`<span class="completed-tag">// 완료</span>`
+                      : html`<span class="auto-tag">자동 완료</span>`}
+                  </div>
+                </div>
+              `;
+            }
+            // === 보스 퀘스트 ===
+            if (q.kind === 'kill_boss') {
+              const info = Object.values(BOSS_QUESTS).find(b => b.id === q.id);
+              if (!info) return null;
+              const prompt = info.prompt[state.language] || info.prompt.ko;
+              return html`
+                <div class="quest boss ${q.completed ? 'completed' : ''}">
+                  <div class="quest-prompt">
+                    <span class="quest-kind-tag boss">★ 보스</span>${prompt}
+                  </div>
+                  <div class="quest-meta">
+                    <span class="needed">
+                      <span class="reward-tag">보상 ${info.reward}◈</span>
+                    </span>
+                    ${q.completed
+                      ? html`<span class="completed-tag">// 처치</span>`
+                      : html`<span class="auto-tag">자동 완료</span>`}
+                  </div>
+                </div>
+              `;
+            }
+            // === 단어 퀘스트 (기존) ===
             const w = WORD_BY_ID[q.id];
+            if (!w) return null;
             const need = letterCounts(w.word);
             const have = state.baseInventory;
             const canSubmit = Object.entries(need).every(([l, n]) => (have[l] || 0) >= n);
@@ -4277,6 +4600,7 @@ function MissionScreen({ state, dispatch }) {
       onEnemyKill: (type, coinDrop) => {
         if (!coinDrop) return;
         dispatch({ type: 'EARN_COIN_MISSION', amount: coinDrop });
+        dispatch({ type: 'KILL_ENEMY', enemyType: type });
         setPickToast(`+ ${coinDrop} ◈`);
         setTimeout(() => setPickToast(null), 700);
         // BOUNTY 카운터 플래시
@@ -4291,6 +4615,7 @@ function MissionScreen({ state, dispatch }) {
       onBossKill: (bossId, coinDrop) => {
         const cfg = BOSS_CATALOG[bossId];
         dispatch({ type: 'EARN_COIN_MISSION', amount: coinDrop });
+        dispatch({ type: 'KILL_BOSS', bossId });
         setBossAlert({ name: cfg?.name || 'BOSS', type: 'kill', coin: coinDrop });
         setTimeout(() => setBossAlert(null), 3200);
         setBountyFlash(true);
@@ -4386,8 +4711,15 @@ function MissionScreen({ state, dispatch }) {
             <div class="hud-quest-label">임무</div>
             <div class="hud-quest-text">
               ${state.quests.filter(q => !q.completed).slice(0, 1).map(q => {
-                const w = WORD_BY_ID[q.id];
-                return w.prompt[state.language] || w.prompt.ko;
+                const info = getQuestInfo(q);
+                if (!info) return '';
+                if (q.kind === 'kill') {
+                  return `⌖ ${info.prompt[state.language] || info.prompt.ko} (${q.progress || 0}/${q.count})`;
+                }
+                if (q.kind === 'kill_boss') {
+                  return `★ ${info.prompt[state.language] || info.prompt.ko}`;
+                }
+                return info.prompt[state.language] || info.prompt.ko;
               })} <span style="color: var(--text-mute); font-family: var(--font-mono); font-size: 11px;">(+${state.quests.filter(q => !q.completed).length - 1})</span>
             </div>
           </div>
