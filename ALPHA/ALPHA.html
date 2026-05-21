@@ -116,6 +116,254 @@
   }
   .coin-display .coin-icon { font-size: 16px; }
   .coin-display .coin-amount { font-weight: bold; letter-spacing: 0.05em; }
+
+  /* === Hardcore Mark 표시 === */
+  .mark-display {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    border: 1px solid var(--danger);
+    background: rgba(196, 69, 69, 0.10);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--danger);
+  }
+  .mark-display .mark-icon { font-size: 16px; }
+  .mark-display .mark-amount { font-weight: bold; letter-spacing: 0.05em; }
+
+  /* === 헤더 버튼 (업적/스킨) === */
+  .header-btn {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.15em;
+    padding: 6px 12px;
+    border: 1px solid var(--line);
+    background: var(--panel);
+    color: var(--text-mute);
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  body:not(.input-touch) .header-btn:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* === Modal === */
+  .modal-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    z-index: 100;
+    display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal {
+    background: var(--panel);
+    border: 1px solid var(--line-2);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.7);
+    width: 90%;
+    max-width: 720px;
+    max-height: 85vh;
+    display: flex; flex-direction: column;
+  }
+  .modal-head {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 18px;
+    border-bottom: 1px solid var(--line);
+  }
+  .modal-title {
+    font-family: var(--font-display);
+    font-size: 20px;
+    letter-spacing: 0.15em;
+    color: var(--accent);
+  }
+  .modal-close {
+    font-size: 18px;
+    width: 28px; height: 28px;
+    color: var(--text-mute);
+    border: 1px solid var(--line);
+  }
+  body:not(.input-touch) .modal-close:hover { color: var(--danger); border-color: var(--danger); }
+  .modal-body {
+    padding: 16px 18px;
+    overflow-y: auto;
+  }
+  .modal-desc {
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-mute);
+    margin-bottom: 14px;
+    line-height: 1.5;
+  }
+
+  /* === 업적 모달 === */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+  .stat-box {
+    text-align: center;
+    padding: 12px 8px;
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+  }
+  .stat-num {
+    font-family: var(--font-display);
+    font-size: 24px;
+    color: var(--accent);
+    line-height: 1.1;
+  }
+  .stat-lbl {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text-mute);
+    letter-spacing: 0.1em;
+    margin-top: 4px;
+  }
+  .ach-list {
+    display: flex; flex-direction: column; gap: 10px;
+  }
+  .ach-item {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    padding: 12px;
+  }
+  .ach-item.done { border-color: var(--success); background: rgba(95, 168, 95, 0.06); }
+  .ach-row {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 8px;
+  }
+  .ach-name {
+    font-family: var(--font-display);
+    font-size: 14px;
+    letter-spacing: 0.08em;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+  .ach-desc {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--text-mute);
+  }
+  .ach-reward { display: flex; align-items: center; gap: 8px; }
+  .ach-skin-preview {
+    width: 32px; height: 32px;
+    border: 1px solid var(--line-2);
+  }
+  .ach-skin-name {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--accent);
+  }
+  .ach-progress {
+    position: relative;
+    height: 14px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .ach-progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent-2));
+    transition: width 0.3s;
+  }
+  .ach-item.done .ach-progress-bar { background: var(--success); }
+  .ach-progress-text {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 10px;
+    color: var(--text);
+    text-shadow: 0 0 4px rgba(0,0,0,0.8);
+  }
+
+  /* === 스킨 모달 === */
+  .skin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+  }
+  .skin-card {
+    background: var(--panel-2);
+    border: 1px solid var(--line);
+    padding: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .skin-card.locked { cursor: not-allowed; opacity: 0.55; }
+  .skin-card.equipped { border-color: var(--accent); background: rgba(212, 166, 71, 0.08); }
+  body:not(.input-touch) .skin-card:not(.locked):not(.equipped):hover { border-color: var(--text); }
+  .skin-preview {
+    position: relative;
+    width: 100%;
+    height: 80px;
+    margin-bottom: 8px;
+    border: 1px solid var(--line-2);
+  }
+  .skin-lock {
+    position: absolute;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 24px;
+    background: rgba(10, 13, 18, 0.65);
+  }
+  .skin-name {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 0.1em;
+    color: var(--text);
+  }
+  .skin-eq-tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--accent);
+    letter-spacing: 0.15em;
+    margin-top: 4px;
+  }
+  .skin-hint {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    color: var(--text-mute);
+    margin-top: 4px;
+    line-height: 1.3;
+  }
+
+  /* === 상점 하드코어 섹션 === */
+  .shop-hardcore-divider {
+    margin: 14px 0 6px;
+    padding: 6px 10px;
+    background: rgba(196, 69, 69, 0.12);
+    border: 1px solid var(--danger);
+    color: var(--danger);
+    font-family: var(--font-display);
+    font-size: 11px;
+    letter-spacing: 0.25em;
+    text-align: center;
+  }
+  .shop-item.hardcore {
+    border-left: 3px solid var(--danger);
+    background: linear-gradient(90deg, rgba(196, 69, 69, 0.06) 0%, var(--panel-2) 60%);
+  }
+  .shop-buy.hardcore {
+    border-color: var(--danger);
+    color: var(--danger);
+    background: rgba(196, 69, 69, 0.06);
+  }
+  body:not(.input-touch) .shop-buy.hardcore:not(:disabled):hover {
+    background: rgba(196, 69, 69, 0.18);
+  }
+
+  /* item-card 티어 색상 (인벤토리) */
+  .item-card-tier { font-family: var(--font-mono); font-size: 10px; padding: 1px 4px; border: 1px solid var(--accent); color: var(--accent); }
+  .item-card-tier.tier-1 { color: #8b8678; border-color: #8b8678; }
+  .item-card-tier.tier-2 { color: #5fa85f; border-color: #5fa85f; }
+  .item-card-tier.tier-3 { color: #5a8fb8; border-color: #5a8fb8; }
+  .item-card-tier.tier-4 { color: #d4a647; border-color: #d4a647; }
+  .item-card-tier.tier-5 { color: #d44a47; border-color: #d44a47; }
+  .item-card-tier.tier-6 { color: #ff60ff; border-color: #ff60ff; background: rgba(255, 96, 255, 0.08); }
+  .item-card.hardcore { border-left: 3px solid var(--danger); }
+  .shop-tier.tier-6 { color: #ff60ff; border-color: #ff60ff; background: rgba(255, 96, 255, 0.12); text-shadow: 0 0 8px rgba(255, 96, 255, 0.6); }
   .lang-switch button:not(.active) { cursor: pointer; }
   body:not(.input-touch) .lang-switch button:not(.active):hover { color: var(--text); }
 
@@ -1434,6 +1682,63 @@ const GEAR_BY_ID = (() => {
   return map;
 })();
 
+// === 캐릭터 스킨 (색상만) ===
+// 플레이어 메시의 몸통(vest)/다리(pants) 색상만 변경. 모양/구조는 동일.
+// locked: true 인 스킨은 업적 달성으로 해제
+const SKINS = {
+  default:  { name: '기본',          vest: 0x2a3140, pants: 0x6b5a3e, locked: false },
+  veteran:  { name: '베테랑',        vest: 0x6a2828, pants: 0x4a1818, locked: true },
+  hunter:   { name: '사냥꾼',        vest: 0x6a5a30, pants: 0x4a3a20, locked: true },
+  shadow:   { name: '섀도우',        vest: 0x14141e, pants: 0x0a0a14, locked: true },
+  phantom:  { name: '환영',          vest: 0x4a2a6a, pants: 0x2a1a4a, locked: true },
+  crimson:  { name: '주홍 처형자',   vest: 0x8a2020, pants: 0x4a0a0a, locked: true },
+  golden:   { name: '황금 전설',     vest: 0xc09a30, pants: 0x6a5018, locked: true },
+};
+
+// === 업적 시스템 ===
+// stat: state.stats[stat] 누적치 / target: 달성 기준 / skin: 해제할 스킨 id
+const ACHIEVEMENTS = [
+  { id: 'first_boss',      name: '첫 보스',         desc: '아무 보스 1회 처치',          stat: 'bossKills',          target: 1,   skin: 'veteran' },
+  { id: 'kill_50',         name: '학살자',          desc: '적 50마리 누적 처치',         stat: 'enemyKills',         target: 50,  skin: 'hunter' },
+  { id: 'extract_20',      name: '베테랑 추출자',   desc: '추출 성공 20회',              stat: 'extractCount',       target: 20,  skin: 'shadow' },
+  { id: 'boss_master_5',   name: '보스 마스터',     desc: '보스 5회 처치',               stat: 'bossKills',          target: 5,   skin: 'phantom' },
+  { id: 'hardcore_boss_5', name: '하드코어 사냥꾼', desc: '하드모드 보스 5회 처치',      stat: 'hardcoreBossKills',  target: 5,   skin: 'crimson' },
+  { id: 'kill_500',        name: '전설',            desc: '적 500마리 누적 처치',        stat: 'enemyKills',         target: 500, skin: 'golden' },
+];
+const ACHIEVEMENT_BY_SKIN = Object.fromEntries(ACHIEVEMENTS.map(a => [a.skin, a]));
+
+// === 하드코어 전용 장비 (Hardcore Mark ☠ 화폐로만 구매) ===
+// 하드모드에서만 드롭되는 마크로만 살 수 있음. 일반 장비보다 극단적 트레이드오프.
+const HARDCORE_GEAR = {
+  weapon: [
+    { id: 'overdrive_pistol', name: '오버드라이브 권총', tier: 6, damage: 30,  fireRate: 0.32, magazine: 6,  markCost: 5,  spread: 0.018 },
+    { id: 'reaper',           name: '리퍼 산탄총',       tier: 6, damage: 14,  fireRate: 0.30, magazine: 12, markCost: 8,  spread: 0.18, pellets: 5, pierce: true },
+    { id: 'phantom_smg',      name: '환영 SMG',          tier: 6, damage: 6,   fireRate: 0.06, magazine: 40, markCost: 7,  spread: 0.05 },
+    { id: 'executioner',      name: '집행자',            tier: 6, damage: 100, fireRate: 0.9,  magazine: 3,  markCost: 10, spread: 0.005, pierce: true },
+    { id: 'void_railgun',     name: '공허 레일건',       tier: 6, damage: 200, fireRate: 1.4,  magazine: 2,  markCost: 15, spread: 0.001, pierce: true },
+  ],
+  bag: [
+    { id: 'void_bag',  name: '공허 가방', tier: 6, capacity: 70, markCost: 12 },
+  ],
+  boots: [
+    { id: 'voidwalker', name: '공허 보행자', tier: 6, speedMul: 2.0, markCost: 14 },
+  ],
+};
+
+// 하드코어 장비 id 룩업
+const HARDCORE_GEAR_BY_ID = (() => {
+  const map = {};
+  for (const slot of Object.keys(HARDCORE_GEAR)) {
+    for (const item of HARDCORE_GEAR[slot]) {
+      map[item.id] = { ...item, slot, hardcoreOnly: true };
+    }
+  }
+  return map;
+})();
+
+// 통합 룩업: 일반 + 하드코어. GEAR_BY_ID는 일반만, ALL_GEAR_BY_ID는 둘 다.
+const ALL_GEAR_BY_ID = { ...GEAR_BY_ID, ...HARDCORE_GEAR_BY_ID };
+
 // 기본 (tier 1) 장비 id
 const DEFAULT_GEAR = {
   weapon: 'pistol_1',
@@ -1683,6 +1988,21 @@ function loadState() {
       }
       if (typeof s.coins !== 'number') s.coins = 0;
       if (typeof s.missionCoins !== 'number') s.missionCoins = 0;
+      if (typeof s.hardcoreMarks !== 'number') s.hardcoreMarks = 0;
+      if (typeof s.missionHardcoreMarks !== 'number') s.missionHardcoreMarks = 0;
+      if (!s.stats || typeof s.stats !== 'object') {
+        s.stats = { enemyKills: 0, bossKills: 0, hardcoreBossKills: 0, extractCount: 0 };
+      } else {
+        // 누락된 stat 키 보강
+        if (typeof s.stats.enemyKills !== 'number')         s.stats.enemyKills = 0;
+        if (typeof s.stats.bossKills !== 'number')          s.stats.bossKills = 0;
+        if (typeof s.stats.hardcoreBossKills !== 'number')  s.stats.hardcoreBossKills = 0;
+        if (typeof s.stats.extractCount !== 'number')       s.stats.extractCount = 0;
+      }
+      if (!Array.isArray(s.unlockedSkins)) s.unlockedSkins = ['default'];
+      if (!s.equippedSkin || !SKINS[s.equippedSkin]) s.equippedSkin = 'default';
+      // 장착 중인 스킨이 잠금 해제 목록에 없으면 default로 폴백
+      if (!s.unlockedSkins.includes(s.equippedSkin)) s.equippedSkin = 'default';
       if (!Array.isArray(s.freeSubmitted)) s.freeSubmitted = [];
       if (typeof s.chapter !== 'number') s.chapter = 1;
       if (typeof s.maxChapter !== 'number') s.maxChapter = s.chapter || 1;
@@ -1751,6 +2071,16 @@ function freshState() {
     maxChapter: 1,                  // 클리어로 잠금 해제된 최대 챕터
     coins: 0,                       // 보상 화폐 (베이스 누적)
     missionCoins: 0,                // 미션 중 적 처치로 누적된 코인 (추출/사망 시 정산)
+    hardcoreMarks: 0,               // 하드모드 전용 화폐 ☠ — 하드코어 장비 구매
+    missionHardcoreMarks: 0,        // 미션 중 누적된 마크 (추출 시 정산)
+    stats: {                        // 업적용 누적 통계
+      enemyKills: 0,
+      bossKills: 0,
+      hardcoreBossKills: 0,
+      extractCount: 0,
+    },
+    unlockedSkins: ['default'],     // 해제된 스킨 id 배열
+    equippedSkin: 'default',        // 장착 중인 스킨 id
     freeSubmitted: [],              // 자유 제출한 단어 목록 (중복 방지)
     missionSeed: 0,
     extractedToast: null,
@@ -1760,9 +2090,31 @@ function freshState() {
 // state로부터 장착된 gear 객체 가져오는 헬퍼 (UI/World 전달용)
 function resolveGear(state) {
   return {
-    weapon: GEAR_BY_ID[state.equipped?.weapon || DEFAULT_GEAR.weapon],
-    bag:    GEAR_BY_ID[state.equipped?.bag    || DEFAULT_GEAR.bag],
-    boots:  GEAR_BY_ID[state.equipped?.boots  || DEFAULT_GEAR.boots],
+    weapon: ALL_GEAR_BY_ID[state.equipped?.weapon] || GEAR_BY_ID[DEFAULT_GEAR.weapon],
+    bag:    ALL_GEAR_BY_ID[state.equipped?.bag]    || GEAR_BY_ID[DEFAULT_GEAR.bag],
+    boots:  ALL_GEAR_BY_ID[state.equipped?.boots]  || GEAR_BY_ID[DEFAULT_GEAR.boots],
+  };
+}
+
+// 업적 체크 — stats 기준으로 잠금 해제 스킨 추가. 
+// 반환 state는 toast에 업적 알림 append.
+function checkAchievements(s) {
+  const stats = s.stats || {};
+  const unlocked = s.unlockedSkins || ['default'];
+  const newlyUnlocked = [];
+  for (const ach of ACHIEVEMENTS) {
+    if (unlocked.includes(ach.skin)) continue;
+    if ((stats[ach.stat] || 0) >= ach.target) {
+      newlyUnlocked.push(ach);
+    }
+  }
+  if (newlyUnlocked.length === 0) return s;
+  const newSkins = [...unlocked, ...newlyUnlocked.map(a => a.skin)];
+  const achToast = newlyUnlocked.map(a => `★ 업적 달성: ${a.name}`).join(' · ');
+  return {
+    ...s,
+    unlockedSkins: newSkins,
+    extractedToast: s.extractedToast ? `${s.extractedToast} · ${achToast}` : achToast,
   };
 }
 
@@ -1805,7 +2157,7 @@ function reducer(s, a) {
     case 'COLLECT_LETTER': {
       // 가방 용량 체크
       const total = Object.values(s.missionInventory).reduce((a, b) => a + b, 0);
-      if (total >= GEAR_BY_ID[s.equipped.bag].capacity) return s;
+      if (total >= ALL_GEAR_BY_ID[s.equipped.bag].capacity) return s;
       return {
         ...s,
         missionInventory: {
@@ -1819,26 +2171,51 @@ function reducer(s, a) {
       const total = Object.values(s.missionInventory).reduce((a, b) => a + b, 0);
       for (const k in s.missionInventory) merged[k] = (merged[k] || 0) + (s.missionInventory[k] || 0);
       const earned = s.missionCoins || 0;
+      const markEarned = s.missionHardcoreMarks || 0;
+      // 하드모드에서 추출 성공 시 추가 마크 1개 보너스
+      const extractBonusMark = (s.difficulty === 'hard') ? 1 : 0;
+      const totalMark = markEarned + extractBonusMark;
       const coinNote = earned > 0 ? ` · +${earned} ◈` : '';
-      return {
+      const markNote = totalMark > 0 ? ` · +${totalMark} ☠` : '';
+      const newStats = {
+        ...(s.stats || {}),
+        extractCount: (s.stats?.extractCount || 0) + 1,
+      };
+      const next = {
         ...s,
         scene: 'base',
         baseInventory: merged,
         missionInventory: EMPTY_INV(),
         coins: (s.coins || 0) + earned,
         missionCoins: 0,
-        extractedToast: `+${total} 글자 회수${coinNote}`,
+        hardcoreMarks: (s.hardcoreMarks || 0) + totalMark,
+        missionHardcoreMarks: 0,
+        stats: newStats,
+        extractedToast: `+${total} 글자 회수${coinNote}${markNote}`,
       };
+      return checkAchievements(next);
     }
     case 'EARN_COIN_MISSION':
       // 미션 중 적 처치 코인 누적
       return { ...s, missionCoins: (s.missionCoins || 0) + (a.amount || 0) };
     case 'BUY_GEAR': {
-      const item = GEAR_BY_ID[a.gearId];
+      // 일반 / 하드코어 분기 — markCost가 있으면 마크 화폐, 없으면 코인
+      const item = ALL_GEAR_BY_ID[a.gearId];
       if (!item) return s;
       const slot = item.slot;
       // 이미 보유 중이면 무시
       if (s.ownedGear[slot].includes(item.id)) return s;
+      if (item.markCost != null) {
+        // 하드코어 장비 — 마크로 결제
+        if ((s.hardcoreMarks || 0) < item.markCost) return s;
+        return {
+          ...s,
+          hardcoreMarks: s.hardcoreMarks - item.markCost,
+          ownedGear: { ...s.ownedGear, [slot]: [...s.ownedGear[slot], item.id] },
+          extractedToast: `${item.name} 구매! -${item.markCost} ☠`,
+        };
+      }
+      // 일반 장비 — 코인 결제
       if ((s.coins || 0) < item.cost) return s;
       return {
         ...s,
@@ -1848,11 +2225,21 @@ function reducer(s, a) {
       };
     }
     case 'EQUIP_GEAR': {
-      const item = GEAR_BY_ID[a.gearId];
+      const item = ALL_GEAR_BY_ID[a.gearId];
       if (!item) return s;
       const slot = item.slot;
       if (!s.ownedGear[slot].includes(item.id)) return s;
       return { ...s, equipped: { ...s.equipped, [slot]: item.id } };
+    }
+    case 'EQUIP_SKIN': {
+      if (!SKINS[a.skinId]) return s;
+      // 잠금 해제된 스킨만 장착 가능
+      if (!(s.unlockedSkins || ['default']).includes(a.skinId)) return s;
+      return {
+        ...s,
+        equippedSkin: a.skinId,
+        extractedToast: `스킨 변경: ${SKINS[a.skinId].name}`,
+      };
     }
     case 'ABANDON_MISSION': {
       // reason: 'manual' (메뉴 포기) | 'death' (사망)
@@ -1878,7 +2265,7 @@ function reducer(s, a) {
         if (!isEasy) {
           for (const slot of ['weapon', 'bag', 'boots']) {
             const equippedId = s.equipped[slot];
-            const equippedItem = GEAR_BY_ID[equippedId];
+            const equippedItem = ALL_GEAR_BY_ID[equippedId];
             if (equippedItem && equippedItem.tier > 1) {
               // 보유 목록에서 제거
               newOwned[slot] = s.ownedGear[slot].filter(id => id !== equippedId);
@@ -1901,13 +2288,14 @@ function reducer(s, a) {
           missionInventory: EMPTY_INV(),
           coins: (s.coins || 0) + earnedKept,
           missionCoins: 0,
+          missionHardcoreMarks: 0,  // 사망 시 미션 마크 잃음
           ownedGear: newOwned,
           equipped: newEquipped,
           extractedToast: (kept > 0 ? `사망: ${kept}글자 회수 / ${lost}글자 손실` : `사망: 글자를 모두 잃었어요`) + coinNote + lossNote,
         };
       }
       // manual abandon: 글자와 미션 코인 모두 잃음, 장비 유지
-      return { ...s, scene: 'base', missionInventory: EMPTY_INV(), missionCoins: 0, extractedToast: '임무 포기 - 주운 글자를 모두 잃었어요' };
+      return { ...s, scene: 'base', missionInventory: EMPTY_INV(), missionCoins: 0, missionHardcoreMarks: 0, extractedToast: '임무 포기 - 주운 글자를 모두 잃었어요' };
     }
     case 'CLEAR_TOAST':
       return { ...s, extractedToast: null };
@@ -1947,6 +2335,11 @@ function reducer(s, a) {
       }, reward);
     }
     case 'KILL_ENEMY': {
+      // stats 누적 (업적 추적)
+      const newStats = {
+        ...(s.stats || {}),
+        enemyKills: (s.stats?.enemyKills || 0) + 1,
+      };
       // 사냥 퀘스트 진행도 증가 (target === a.enemyType 또는 'any')
       let anyChange = false;
       let completedReward = 0;
@@ -1966,16 +2359,16 @@ function reducer(s, a) {
         }
         return { ...q, progress: newProgress };
       });
-      if (!anyChange) return s;
-      const next = {
-        ...s,
-        quests: newQuests,
-        coins: s.coins + completedReward,
-      };
-      if (completedReward > 0) {
-        next.extractedToast = `사냥 완료! "${completedNames.join(', ')}" +${completedReward} 코인`;
+      let next = { ...s, stats: newStats };
+      if (anyChange) {
+        next.quests = newQuests;
+        next.coins = s.coins + completedReward;
+        if (completedReward > 0) {
+          next.extractedToast = `사냥 완료! "${completedNames.join(', ')}" +${completedReward} 코인`;
+        }
+        next = applyChapterProgressIfAllDone(next, completedReward);
       }
-      return applyChapterProgressIfAllDone(next, completedReward);
+      return checkAchievements(next);
     }
     case 'KILL_BOSS': {
       // 보스 퀘스트 자동 완료 + 챕터 즉시 진행 (다른 퀘스트는 부분 진행 상태로 폐기)
@@ -1992,22 +2385,39 @@ function reducer(s, a) {
         return { ...q, completed: true };
       });
       if (completedName == null) return s;
+
+      // stats 업데이트
+      const isHardcore = s.difficulty === 'hard';
+      const newStats = {
+        ...(s.stats || {}),
+        bossKills: (s.stats?.bossKills || 0) + 1,
+        hardcoreBossKills: (s.stats?.hardcoreBossKills || 0) + (isHardcore ? 1 : 0),
+      };
+
+      // 하드모드 보스 → 미션 마크 누적 (추출 시 정산)
+      // brute: 3 mark, overseer: 5 mark
+      const markDrop = isHardcore ? (a.bossId === 'overseer' ? 5 : 3) : 0;
+
       // 챕터 클리어! 보스 보상 + 챕터 보너스 + 새 챕터 진행
       const chapterBonus = 100 + s.chapter * 50;
       const newChapter = Math.min(MAX_CHAPTER, s.chapter + 1);
       const chapterAdvanced = newChapter > s.chapter;
       const newMaxChapter = chapterAdvanced ? Math.max(s.maxChapter || 1, newChapter) : (s.maxChapter || 1);
       const chapterName = chapterAdvanced ? getChapterConfig(newChapter).name : '';
-      return {
+      const markMsg = markDrop > 0 ? ` ☠${markDrop}` : '';
+      const next = {
         ...s,
+        stats: newStats,
+        missionHardcoreMarks: (s.missionHardcoreMarks || 0) + markDrop,
         quests: PICK_QUESTS(5, newChapter),
         chapter: newChapter,
         maxChapter: newMaxChapter,
         coins: s.coins + completedReward + chapterBonus,
         extractedToast: chapterAdvanced
-          ? `보스 처치! "${completedName}" — 다음 단계 "${chapterName}" 열림 +${completedReward + chapterBonus} 코인`
-          : `최종 보스 처치! "${completedName}" +${completedReward + chapterBonus} 코인`,
+          ? `보스 처치! "${completedName}" — 다음 단계 "${chapterName}" 열림 +${completedReward + chapterBonus} 코인${markMsg}`
+          : `최종 보스 처치! "${completedName}" +${completedReward + chapterBonus} 코인${markMsg}`,
       };
+      return checkAchievements(next);
     }
     case 'FREE_SUBMIT': {
       const result = tryFreeSubmit(a.word, s);
@@ -2044,10 +2454,12 @@ const MAP_SIZE = 100;
 const WALL_HEIGHT = 2;
 
 class World {
-  constructor(canvas, onEvents, gear) {
+  constructor(canvas, onEvents, gear, skin) {
     this.canvas = canvas;
     this.onEvents = onEvents;
     this.gear = gear || { weapon: GEAR_BY_ID['pistol_1'], bag: GEAR_BY_ID['light'], boots: GEAR_BY_ID['worn'] };
+    // 캐릭터 스킨 (vest/pants 색상). 없으면 default.
+    this.skin = skin || SKINS.default;
 
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: true, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -3063,9 +3475,12 @@ class World {
     const g = new THREE.Group();
 
     // ===== 마인크래프트 스티브 비율 머티리얼 =====
+    // skin: vest(몸통)와 pants(다리) 색상 적용. 나머지는 고정.
+    const skinVest = (this.skin && typeof this.skin.vest === 'number') ? this.skin.vest : 0x2a3140;
+    const skinPants = (this.skin && typeof this.skin.pants === 'number') ? this.skin.pants : 0x6b5a3e;
     const matSkin  = new THREE.MeshStandardMaterial({ color: 0xd4a780, roughness: 0.75 });  // 머리/팔
-    const matVest  = new THREE.MeshStandardMaterial({ color: 0x2a3140, roughness: 0.65 });  // 몸통/헬멧
-    const matPants = new THREE.MeshStandardMaterial({ color: 0x6b5a3e, roughness: 0.8 });   // 다리
+    const matVest  = new THREE.MeshStandardMaterial({ color: skinVest, roughness: 0.65 });  // 몸통/헬멧 — 스킨 색상
+    const matPants = new THREE.MeshStandardMaterial({ color: skinPants, roughness: 0.8 });  // 다리 — 스킨 색상
     const matBoot  = new THREE.MeshStandardMaterial({ color: 0x1a1300, roughness: 0.55 });
     const matAccent= new THREE.MeshStandardMaterial({ color: 0xd4a647, roughness: 0.4, emissive: 0xd4a647, emissiveIntensity: 0.15 });
     const matGun   = new THREE.MeshStandardMaterial({ color: 0x1a1f28, roughness: 0.3, metalness: 0.6 });
@@ -4255,6 +4670,8 @@ function BaseScreen({ state, dispatch }) {
     () => Object.values(state.baseInventory).reduce((a, b) => a + b, 0),
     [state.baseInventory]
   );
+  const [showAchievements, setShowAchievements] = useState(false);
+  const [showSkins, setShowSkins] = useState(false);
 
   return html`
     <div class="base">
@@ -4275,6 +4692,14 @@ function BaseScreen({ state, dispatch }) {
             <span class="coin-icon">◈</span>
             <span class="coin-amount">${state.coins || 0}</span>
           </div>
+          ${(state.hardcoreMarks > 0 || state.difficulty === 'hard') ? html`
+            <div class="mark-display" title="하드코어 마크 — 하드모드에서만 획득">
+              <span class="mark-icon">☠</span>
+              <span class="mark-amount">${state.hardcoreMarks || 0}</span>
+            </div>
+          ` : ''}
+          <button class="header-btn" onClick=${() => setShowAchievements(true)} title="업적 진행도">★ 업적</button>
+          <button class="header-btn" onClick=${() => setShowSkins(true)} title="캐릭터 스킨 변경">👤 스킨</button>
           <div class="lang-switch">
             <button class=${state.language === 'ko' ? 'active' : ''} onClick=${() => dispatch({ type: 'SET_LANG', lang: 'ko' })}>KO</button>
             <button class=${state.language === 'en' ? 'active' : ''} onClick=${() => dispatch({ type: 'SET_LANG', lang: 'en' })}>EN</button>
@@ -4423,7 +4848,7 @@ function BaseScreen({ state, dispatch }) {
         </div>
         <div class="item-inv">
           ${['weapon', 'bag', 'boots'].flatMap(slot =>
-            state.ownedGear[slot].map(id => GEAR_BY_ID[id])
+            state.ownedGear[slot].map(id => ALL_GEAR_BY_ID[id]).filter(Boolean)
           ).map(item => {
             const slot = item.slot;
             const equipped = state.equipped[slot] === item.id;
@@ -4432,12 +4857,13 @@ function BaseScreen({ state, dispatch }) {
               : slot === 'bag'
                 ? `용량 ${item.capacity}`
                 : `속도 ${item.speedMul.toFixed(2)}x`;
+            const isHardcore = !!item.hardcoreOnly;
             return html`
-              <div class="item-card ${equipped ? 'equipped' : ''}"
+              <div class="item-card ${equipped ? 'equipped' : ''} ${isHardcore ? 'hardcore' : ''}"
                    onClick=${() => !equipped && dispatch({ type: 'EQUIP_GEAR', gearId: item.id })}>
                 <div class="item-card-head">
                   <span class="item-card-slot">${SLOT_LABEL_KO[slot] || slot}</span>
-                  <span class="item-card-tier">T${item.tier}</span>
+                  <span class="item-card-tier tier-${item.tier}">T${item.tier}</span>
                 </div>
                 <div class="item-card-name">${item.name}</div>
                 <div class="item-card-stats">${statLine}</div>
@@ -4459,7 +4885,7 @@ function BaseScreen({ state, dispatch }) {
         </div>
         <div class="equip-slots">
           ${['weapon', 'bag', 'boots'].map(slot => {
-            const equipped = GEAR_BY_ID[state.equipped[slot]];
+            const equipped = ALL_GEAR_BY_ID[state.equipped[slot]];
             const statLine = slot === 'weapon'
               ? `공격 ${equipped.damage} · ${(1/equipped.fireRate).toFixed(1)}/초 · 탄창 ${equipped.magazine}`
               : slot === 'bag'
@@ -4517,6 +4943,41 @@ function BaseScreen({ state, dispatch }) {
           ${Object.values(state.ownedGear).reduce((a, b) => a + b.length, 0) === 3 ? '' : html`
             <div class="shop-hint">손실한 장비는 다시 구매할 수 있습니다</div>
           `}
+
+          <!-- 하드코어 섹션 — 마크가 있거나 하드모드일 때만 표시 -->
+          ${(state.hardcoreMarks > 0 || state.difficulty === 'hard') ? html`
+            <div class="shop-hardcore-divider">
+              <span>HARDCORE — ☠ ${state.hardcoreMarks || 0}</span>
+            </div>
+            ${['weapon', 'bag', 'boots'].flatMap(slot =>
+              HARDCORE_GEAR[slot].filter(item => !state.ownedGear[slot].includes(item.id)).map(item => {
+                let statLine;
+                if (slot === 'weapon') {
+                  const tags = [];
+                  if (item.pellets) tags.push(`산탄 ${item.pellets}발`);
+                  if (item.pierce)  tags.push('관통');
+                  const tagStr = tags.length > 0 ? ' · ' + tags.join(' · ') : '';
+                  statLine = `공격 ${item.damage} · ${(1/item.fireRate).toFixed(1)}/초 · 탄창 ${item.magazine}${tagStr}`;
+                } else if (slot === 'bag') {
+                  statLine = `용량 ${item.capacity}`;
+                } else {
+                  statLine = `속도 ${item.speedMul.toFixed(2)}x`;
+                }
+                const affordable = (state.hardcoreMarks || 0) >= item.markCost;
+                return html`
+                  <div class="shop-item hardcore ${affordable ? '' : 'locked'}">
+                    <div style="flex: 1;">
+                      <div class="shop-name">${item.name} <span class="shop-tier tier-6">T${item.tier}</span></div>
+                      <div class="shop-stats">${SLOT_LABEL_KO[slot] || slot} · ${statLine}</div>
+                    </div>
+                    <button class="shop-buy hardcore" disabled=${!affordable} onClick=${() => dispatch({ type: 'BUY_GEAR', gearId: item.id })}>
+                      ☠ ${item.markCost}
+                    </button>
+                  </div>
+                `;
+              })
+            )}
+          ` : ''}
         </div>
       </div>
       </div><!-- /.right-column -->
@@ -4556,6 +5017,86 @@ function BaseScreen({ state, dispatch }) {
           출발 ▶
         </button>
       </div>
+
+      <!-- 업적 모달 -->
+      ${showAchievements ? html`
+        <div class="modal-backdrop" onClick=${() => setShowAchievements(false)}>
+          <div class="modal" onClick=${(e) => e.stopPropagation()}>
+            <div class="modal-head">
+              <div class="modal-title">★ 업적</div>
+              <button class="modal-close" onClick=${() => setShowAchievements(false)}>✕</button>
+            </div>
+            <div class="modal-body">
+              <div class="stats-row">
+                <div class="stat-box"><div class="stat-num">${state.stats?.enemyKills || 0}</div><div class="stat-lbl">적 처치</div></div>
+                <div class="stat-box"><div class="stat-num">${state.stats?.bossKills || 0}</div><div class="stat-lbl">보스 처치</div></div>
+                <div class="stat-box"><div class="stat-num">${state.stats?.extractCount || 0}</div><div class="stat-lbl">추출 성공</div></div>
+                <div class="stat-box"><div class="stat-num">${state.stats?.hardcoreBossKills || 0}</div><div class="stat-lbl">하드코어 보스</div></div>
+              </div>
+              <div class="ach-list">
+                ${ACHIEVEMENTS.map(ach => {
+                  const cur = state.stats?.[ach.stat] || 0;
+                  const done = (state.unlockedSkins || []).includes(ach.skin);
+                  const pct = Math.min(100, (cur / ach.target) * 100);
+                  const skin = SKINS[ach.skin];
+                  return html`
+                    <div class="ach-item ${done ? 'done' : ''}">
+                      <div class="ach-row">
+                        <div class="ach-info">
+                          <div class="ach-name">${done ? '✓ ' : ''}${ach.name}</div>
+                          <div class="ach-desc">${ach.desc}</div>
+                        </div>
+                        <div class="ach-reward">
+                          <div class="ach-skin-preview" style=${`background: linear-gradient(180deg, #${skin.vest.toString(16).padStart(6,'0')} 50%, #${skin.pants.toString(16).padStart(6,'0')} 50%);`}></div>
+                          <div class="ach-skin-name">${skin.name}</div>
+                        </div>
+                      </div>
+                      <div class="ach-progress">
+                        <div class="ach-progress-bar" style=${`width: ${pct}%`}></div>
+                        <span class="ach-progress-text">${Math.min(cur, ach.target)} / ${ach.target}</span>
+                      </div>
+                    </div>
+                  `;
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
+
+      <!-- 스킨 모달 -->
+      ${showSkins ? html`
+        <div class="modal-backdrop" onClick=${() => setShowSkins(false)}>
+          <div class="modal" onClick=${(e) => e.stopPropagation()}>
+            <div class="modal-head">
+              <div class="modal-title">👤 캐릭터 스킨</div>
+              <button class="modal-close" onClick=${() => setShowSkins(false)}>✕</button>
+            </div>
+            <div class="modal-body">
+              <div class="modal-desc">업적 달성으로 스킨을 잠금 해제하세요. 색상만 변경되며 능력에 영향 없습니다.</div>
+              <div class="skin-grid">
+                ${Object.keys(SKINS).map(skinId => {
+                  const skin = SKINS[skinId];
+                  const unlocked = (state.unlockedSkins || ['default']).includes(skinId);
+                  const equipped = state.equippedSkin === skinId;
+                  const ach = ACHIEVEMENT_BY_SKIN[skinId];
+                  return html`
+                    <div class="skin-card ${unlocked ? '' : 'locked'} ${equipped ? 'equipped' : ''}"
+                         onClick=${() => unlocked && dispatch({ type: 'EQUIP_SKIN', skinId })}>
+                      <div class="skin-preview" style=${`background: linear-gradient(180deg, #${skin.vest.toString(16).padStart(6,'0')} 50%, #${skin.pants.toString(16).padStart(6,'0')} 50%);`}>
+                        ${unlocked ? '' : html`<div class="skin-lock">🔒</div>`}
+                      </div>
+                      <div class="skin-name">${skin.name}</div>
+                      ${equipped ? html`<div class="skin-eq-tag">장착중</div>` : ''}
+                      ${!unlocked && ach ? html`<div class="skin-hint">${ach.desc}</div>` : ''}
+                    </div>
+                  `;
+                })}
+              </div>
+            </div>
+          </div>
+        </div>
+      ` : ''}
     </div>
   `;
 }
@@ -4596,11 +5137,12 @@ function MissionScreen({ state, dispatch }) {
   useEffect(() => {
     if (!canvasRef.current) return;
     const gear = resolveGear(stateRef.current);
+    const skin = SKINS[stateRef.current.equippedSkin || 'default'] || SKINS.default;
     const w = new World(canvasRef.current, {
       onLetterPickup: (letter) => {
         const s = stateRef.current;
         const total = Object.values(s.missionInventory).reduce((a, b) => a + b, 0);
-        if (total >= GEAR_BY_ID[s.equipped.bag].capacity) {
+        if (total >= ALL_GEAR_BY_ID[s.equipped.bag].capacity) {
           setPickToast('가방 가득 참!');
           setTimeout(() => setPickToast(null), 1200);
           return false; // 픽업 거부 -> World가 letter를 다시 visible 처리
@@ -4649,7 +5191,7 @@ function MissionScreen({ state, dispatch }) {
         if (bountyTimerRef.current) clearTimeout(bountyTimerRef.current);
         bountyTimerRef.current = setTimeout(() => setBountyFlash(false), 600);
       },
-    }, gear);
+    }, gear, skin);
     worldRef.current = w;
     w.buildMap(state.missionSeed, getChapterConfig(state.chapter || 1));
     if (minimapCanvasNode.current) w.setMinimapCanvas(minimapCanvasNode.current);
@@ -4787,7 +5329,7 @@ function MissionScreen({ state, dispatch }) {
         <!-- 하단 좌측: 가방 카운터 + 코인 + 주운 글자 -->
         <div class="hud-bottom-left">
           <div class="hud-bag">
-            가방 <b>${bagTotal}</b><span style="color: var(--text-mute);"> / ${GEAR_BY_ID[state.equipped.bag].capacity}</span>
+            가방 <b>${bagTotal}</b><span style="color: var(--text-mute);"> / ${ALL_GEAR_BY_ID[state.equipped.bag].capacity}</span>
           </div>
           ${(state.missionCoins || 0) > 0 ? html`
             <div class="hud-bounty ${bountyFlash ? 'flash' : ''}">
