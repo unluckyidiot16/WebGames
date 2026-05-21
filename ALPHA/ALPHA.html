@@ -533,7 +533,12 @@
   }
   .shop-item.locked { opacity: 0.5; }
   .shop-name { font-family: var(--font-display); font-size: 12px; letter-spacing: 0.08em; }
-  .shop-tier { color: var(--accent); font-family: var(--font-mono); font-size: 9px; margin-left: 4px; }
+  .shop-tier { color: var(--accent); font-family: var(--font-mono); font-size: 9px; margin-left: 4px; padding: 1px 5px; border: 1px solid var(--accent); }
+  .shop-tier.tier-1 { color: #8b8678;  border-color: #8b8678; }
+  .shop-tier.tier-2 { color: #5fa85f;  border-color: #5fa85f; }
+  .shop-tier.tier-3 { color: #5a8fb8;  border-color: #5a8fb8; }
+  .shop-tier.tier-4 { color: #d4a647;  border-color: #d4a647; background: rgba(212, 166, 71, 0.08); }
+  .shop-tier.tier-5 { color: #d44a47;  border-color: #d44a47; background: rgba(196, 69, 69, 0.12); text-shadow: 0 0 6px rgba(212, 74, 71, 0.5); }
   .shop-stats { font-family: var(--font-mono); font-size: 10px; color: var(--text-mute); margin-top: 2px; }
   .shop-buy {
     padding: 4px 12px;
@@ -1379,27 +1384,42 @@ const SLOT_LABEL_KO = { weapon: '무기', bag: '가방', boots: '신발' };
 //   - critMul: N — 헤드샷 / 거리 보너스 (UI 안내용)
 const GEAR_CATALOG = {
   weapon: [
-    { id: 'pistol_1',  name: '권총 1호',     tier: 1, damage: 10, fireRate: 0.30, magazine: 12, cost: 0,   spread: 0.02 },
-    { id: 'pistol_2',  name: '권총 2호',     tier: 2, damage: 15, fireRate: 0.26, magazine: 14, cost: 80,  spread: 0.018 },
-    { id: 'smg_1',     name: '기관단총',     tier: 2, damage: 7,  fireRate: 0.10, magazine: 25, cost: 200, spread: 0.045 },
-    { id: 'revolver',  name: '리볼버',       tier: 2, damage: 30, fireRate: 0.55, magazine: 6,  cost: 220, spread: 0.012 },
-    { id: 'shotgun_1', name: '단발 산탄총',  tier: 2, damage: 8,  fireRate: 0.65, magazine: 6,  cost: 240, spread: 0.20, pellets: 5 },
-    { id: 'rifle_1',   name: '전술 소총',    tier: 3, damage: 25, fireRate: 0.45, magazine: 8,  cost: 250, spread: 0.014 },
-    { id: 'shotgun_2', name: '연발 산탄총',  tier: 3, damage: 9,  fireRate: 0.40, magazine: 10, cost: 380, spread: 0.18, pellets: 6 },
-    { id: 'magnum',    name: '관통 매그넘',  tier: 3, damage: 22, fireRate: 0.50, magazine: 6,  cost: 400, spread: 0.010, pierce: true },
-    { id: 'sniper_1',  name: '저격소총',     tier: 4, damage: 60, fireRate: 0.95, magazine: 4,  cost: 520, spread: 0.005, pierce: true },
+    // T1 — 시작 장비
+    { id: 'pistol_1',     name: '권총 1호',       tier: 1, damage: 10, fireRate: 0.30, magazine: 12, cost: 0,    spread: 0.02 },
+    // T2 — 초기 업그레이드
+    { id: 'pistol_2',     name: '권총 2호',       tier: 2, damage: 15, fireRate: 0.26, magazine: 14, cost: 80,   spread: 0.018 },
+    { id: 'smg_1',        name: '기관단총',       tier: 2, damage: 7,  fireRate: 0.10, magazine: 25, cost: 200,  spread: 0.045 },
+    { id: 'revolver',     name: '리볼버',         tier: 2, damage: 30, fireRate: 0.55, magazine: 6,  cost: 220,  spread: 0.012 },
+    { id: 'shotgun_1',    name: '단발 산탄총',    tier: 2, damage: 8,  fireRate: 0.65, magazine: 6,  cost: 240,  spread: 0.20,  pellets: 5 },
+    // T3 — 중급
+    { id: 'rifle_1',      name: '전술 소총',      tier: 3, damage: 25, fireRate: 0.45, magazine: 8,  cost: 250,  spread: 0.014 },
+    { id: 'shotgun_2',    name: '연발 산탄총',    tier: 3, damage: 9,  fireRate: 0.40, magazine: 10, cost: 380,  spread: 0.18,  pellets: 6 },
+    { id: 'magnum',       name: '관통 매그넘',    tier: 3, damage: 22, fireRate: 0.50, magazine: 6,  cost: 400,  spread: 0.010, pierce: true },
+    // T4 — 고급
+    { id: 'sniper_1',     name: '저격소총',       tier: 4, damage: 60, fireRate: 0.95, magazine: 4,  cost: 520,  spread: 0.005, pierce: true },
+    { id: 'auto_shotgun', name: '자동 산탄총',    tier: 4, damage: 10, fireRate: 0.28, magazine: 12, cost: 700,  spread: 0.17,  pellets: 5 },
+    { id: 'lmg',          name: '경기관총',       tier: 4, damage: 12, fireRate: 0.08, magazine: 50, cost: 780,  spread: 0.040 },
+    // T5 — 최상위 (전설)
+    { id: 'plasma_rifle', name: '플라즈마 라이플', tier: 5, damage: 28, fireRate: 0.18, magazine: 18, cost: 1100, spread: 0.012 },
+    { id: 'railgun',      name: '레일건',         tier: 5, damage: 120, fireRate: 1.30, magazine: 3, cost: 1400, spread: 0.002, pierce: true },
   ],
   bag: [
-    { id: 'light',    name: '작은 가방', tier: 1, capacity: 10, cost: 0 },
-    { id: 'medium',   name: '중간 가방', tier: 2, capacity: 20, cost: 60 },
-    { id: 'tactical', name: '전술 가방', tier: 2, capacity: 25, cost: 100 },
-    { id: 'heavy',    name: '큰 가방',   tier: 3, capacity: 30, cost: 150 },
+    { id: 'light',     name: '작은 가방',   tier: 1, capacity: 10, cost: 0 },
+    { id: 'medium',    name: '중간 가방',   tier: 2, capacity: 20, cost: 60 },
+    { id: 'tactical',  name: '전술 가방',   tier: 2, capacity: 25, cost: 100 },
+    { id: 'raider',    name: '약탈자 가방', tier: 3, capacity: 28, cost: 180 },
+    { id: 'heavy',     name: '큰 가방',     tier: 3, capacity: 30, cost: 150 },
+    { id: 'commander', name: '사령관 가방', tier: 4, capacity: 40, cost: 350 },
+    { id: 'operator',  name: '오퍼레이터 가방', tier: 5, capacity: 50, cost: 800 },
   ],
   boots: [
-    { id: 'worn',    name: '낡은 운동화', tier: 1, speedMul: 1.0,  cost: 0 },
-    { id: 'running', name: '달리기화',    tier: 2, speedMul: 1.25, cost: 100 },
-    { id: 'leather', name: '가죽부츠',    tier: 2, speedMul: 1.35, cost: 170 },
-    { id: 'combat',  name: '전투화',      tier: 3, speedMul: 1.5,  cost: 250 },
+    { id: 'worn',     name: '낡은 운동화', tier: 1, speedMul: 1.0,  cost: 0 },
+    { id: 'running',  name: '달리기화',    tier: 2, speedMul: 1.25, cost: 100 },
+    { id: 'leather',  name: '가죽부츠',    tier: 2, speedMul: 1.35, cost: 170 },
+    { id: 'scout',    name: '정찰화',      tier: 3, speedMul: 1.45, cost: 220 },
+    { id: 'combat',   name: '전투화',      tier: 3, speedMul: 1.5,  cost: 250 },
+    { id: 'military', name: '군화',        tier: 4, speedMul: 1.65, cost: 420 },
+    { id: 'phantom',  name: '환영 부츠',   tier: 5, speedMul: 1.85, cost: 900 },
   ],
 };
 
@@ -4468,16 +4488,23 @@ function BaseScreen({ state, dispatch }) {
         <div class="shop-list">
           ${['weapon', 'bag', 'boots'].flatMap(slot =>
             GEAR_CATALOG[slot].filter(item => item.cost > 0 && !state.ownedGear[slot].includes(item.id)).map(item => {
-              const statLine = slot === 'weapon'
-                ? `공격 ${item.damage} · ${(1/item.fireRate).toFixed(1)}/초 · 탄창 ${item.magazine}`
-                : slot === 'bag'
-                  ? `용량 ${item.capacity}`
-                  : `속도 ${item.speedMul.toFixed(2)}x`;
+              let statLine;
+              if (slot === 'weapon') {
+                const tags = [];
+                if (item.pellets) tags.push(`산탄 ${item.pellets}발`);
+                if (item.pierce)  tags.push('관통');
+                const tagStr = tags.length > 0 ? ' · ' + tags.join(' · ') : '';
+                statLine = `공격 ${item.damage} · ${(1/item.fireRate).toFixed(1)}/초 · 탄창 ${item.magazine}${tagStr}`;
+              } else if (slot === 'bag') {
+                statLine = `용량 ${item.capacity}`;
+              } else {
+                statLine = `속도 ${item.speedMul.toFixed(2)}x`;
+              }
               const affordable = (state.coins || 0) >= item.cost;
               return html`
                 <div class="shop-item ${affordable ? '' : 'locked'}">
                   <div style="flex: 1;">
-                    <div class="shop-name">${item.name} <span class="shop-tier">T${item.tier}</span></div>
+                    <div class="shop-name">${item.name} <span class="shop-tier tier-${item.tier}">T${item.tier}</span></div>
                     <div class="shop-stats">${SLOT_LABEL_KO[slot] || slot} · ${statLine}</div>
                   </div>
                   <button class="shop-buy" disabled=${!affordable} onClick=${() => dispatch({ type: 'BUY_GEAR', gearId: item.id })}>
