@@ -482,6 +482,131 @@
   .modal-actions { display: flex; gap: 8px; margin-top: 12px; }
   .modal-actions .btn { flex: 1; }
 
+  /* 튜토리얼 오버레이 */
+  .tut-bg {
+    position: absolute; inset: 0;
+    background: rgba(0,0,0,0.92);
+    display: none; flex-direction: column;
+    z-index: 200;
+    padding: 20px 16px;
+    overflow-y: auto;
+  }
+  .tut-bg.show { display: flex; animation: tutFadeIn 0.3s ease; }
+  @keyframes tutFadeIn { from { opacity: 0; } to { opacity: 1; } }
+  .tut-skip {
+    position: absolute; top: 12px; right: 12px;
+    padding: 5px 12px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid #3a2a30;
+    border-radius: 4px;
+    color: #888;
+    font-size: 11px;
+    font-family: 'Jua';
+    cursor: pointer;
+    z-index: 10;
+  }
+  .tut-skip:hover { color: #ffd28a; border-color: #4a3020; }
+  .tut-card {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center;
+    padding: 40px 16px 20px;
+    min-height: 100%;
+    box-sizing: border-box;
+  }
+  .tut-emoji {
+    font-size: 56px;
+    margin-bottom: 16px;
+    animation: tutBob 1.8s ease-in-out infinite;
+  }
+  @keyframes tutBob {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-6px); }
+  }
+  .tut-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: 16px; color: #ffaa44;
+    margin-bottom: 12px; text-align: center;
+    line-height: 1.5;
+  }
+  .tut-body {
+    font-family: 'Jua'; font-size: 14px;
+    color: #ddd; line-height: 1.7;
+    text-align: center; max-width: 360px;
+    margin-bottom: 18px;
+  }
+  .tut-body b { color: #ffd28a; }
+  .tut-body .hl { color: #6aff8a; }
+  .tut-demo {
+    padding: 12px 14px;
+    background: rgba(255,170,68,0.08);
+    border: 1px solid #4a3020;
+    border-radius: 6px;
+    margin: 6px 0 18px;
+    font-family: 'Press Start 2P', monospace;
+    font-size: 13px;
+    color: #ffd28a;
+    text-align: center;
+    line-height: 1.8;
+    min-width: 260px;
+  }
+  .tut-demo .ltr {
+    display: inline-block;
+    padding: 4px 8px;
+    margin: 0 2px;
+    background: rgba(255,170,68,0.15);
+    border: 1px solid #ffaa44;
+    border-radius: 3px;
+  }
+  .tut-demo .arrow { color: #888; margin: 0 6px; }
+  .tut-demo .result { color: #6aff8a; }
+  .tut-dots {
+    display: flex; gap: 8px; justify-content: center;
+    margin: 12px 0 18px;
+  }
+  .tut-dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #3a2a30;
+    transition: all 0.2s;
+  }
+  .tut-dot.active {
+    background: #ffaa44;
+    transform: scale(1.3);
+    box-shadow: 0 0 6px rgba(255,170,68,0.5);
+  }
+  .tut-nav {
+    display: flex; gap: 10px;
+    width: 100%; max-width: 360px;
+  }
+  .tut-nav button {
+    flex: 1;
+    padding: 12px;
+    border-radius: 6px;
+    font-family: 'Jua'; font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.1s;
+  }
+  .tut-nav button:active { transform: scale(0.97); }
+  .tut-nav .btn-prev {
+    background: rgba(255,255,255,0.08);
+    color: #aaa;
+    border: 1px solid #3a2a30;
+  }
+  .tut-nav .btn-prev:disabled { opacity: 0.3; cursor: not-allowed; }
+  .tut-nav .btn-next {
+    background: linear-gradient(180deg, #ffaa44, #cc7722);
+    color: #1a0a0a;
+    border-bottom: 2px solid #5a3010;
+  }
+  .tut-nav .btn-start {
+    background: linear-gradient(180deg, #2a8a4a, #155a25);
+    color: #fff;
+    border-bottom: 2px solid #052a05;
+  }
+
+
   .section-h {
     font-size: 13px; color: #ffaa44;
     margin-bottom: 8px; margin-top: 4px; font-weight: bold;
@@ -665,6 +790,11 @@
 
   <div class="modal-bg" id="modal">
     <div class="modal" id="modalContent"></div>
+  </div>
+
+  <div class="tut-bg" id="tutBg">
+    <button class="tut-skip" onclick="closeTutorial(true)">건너뛰기 ✕</button>
+    <div class="tut-card" id="tutCard"></div>
   </div>
 </div>
 
@@ -1173,6 +1303,7 @@ function defaultState() {
     equipFilter: 'all',
     autoDisCommon: false, autoDisMagic: false,
     autoDisCount: 0,
+    tutorialSeen: false,
   };
 }
 let state = defaultState();
@@ -2774,7 +2905,7 @@ function showStageMenu() {
       최고 기록: <b>${state.bestStage}</b> · 총 처치: <b>${state.totalKills}</b> · 보스: <b>${state.bossKills || 0}</b><br>
       발견 단어: <b>${(state.discoveredWords || []).length}</b> · 총 획득: <b>${state.totalDrops}</b>
     </div>
-    <div style="border-top:1px solid #2a2030;padding-top:12px">
+    <div style="border-top:1px solid #2a2030;padding-top:12px;margin-bottom:12px">
       <div style="color:#ffaa44;font-size:12px;margin-bottom:8px">🌐 멀티플레이</div>
       ${nickname
         ? `<div style="font-size:11px;color:#aaa;margin-bottom:8px">닉네임: <b style="color:#ffd28a">${nickname}</b>${lb.lastSyncOk ? ' <span style="color:#6aff8a">●</span> 동기화됨' : ' <span style="color:#aa6a6a">●</span> 미접속'}</div>`
@@ -2784,9 +2915,121 @@ function showStageMenu() {
         <button class="btn" onclick="openMultiSettings()">⚙️ 닉네임 / 서버 설정</button>
       </div>
     </div>
+    <div style="border-top:1px solid #2a2030;padding-top:12px">
+      <button class="btn" onclick="hideModal(); startTutorial(true)" style="width:100%;background:linear-gradient(180deg,#3a5525,#1a3015);color:#aaffaa">
+        📖 튜토리얼 다시 보기
+      </button>
+    </div>
     <div class="modal-actions" style="margin-top:12px">
       <button class="btn" onclick="hideModal()">닫기</button>
     </div>`);
+}
+
+// ============== 튜토리얼 ==============
+const TUTORIAL_SLIDES = [
+  {
+    emoji: '⚔️',
+    title: 'WORDRUNE',
+    body: `<b>워드룬</b>에 오신 것을 환영합니다!<br>
+      영어 단어로 마법을 만들어<br>
+      몬스터를 처치하는 게임이에요.<br><br>
+      <span class="hl">자동 전투</span> · <span class="hl">단어 학습</span> · <span class="hl">장비 강화</span>`,
+  },
+  {
+    emoji: '🗡️',
+    title: '자동 전투',
+    body: `캐릭터는 <b>자동으로 싸워요</b>.<br>
+      몬스터를 처치하면 <b style="color:#ffaa44">알파벳</b>과<br>
+      <b style="color:#aaffaa">장비</b>를 얻을 수 있어요.<br><br>
+      여러분은 더 강해질 방법을<br>
+      <span class="hl">선택</span>하기만 하면 돼요!`,
+    demo: `<div style="display:flex;align-items:center;justify-content:center;gap:10px;font-size:14px">
+      <span>🦹</span><span class="arrow">→</span><span style="color:#ffaa44">A B C</span><span class="arrow">+</span><span style="color:#aaffaa">⚔️</span>
+    </div>`,
+  },
+  {
+    emoji: '🔮',
+    title: '단어 합성',
+    body: `<b>인벤토리 탭</b>에서 알파벳을<br>
+      슬롯에 넣어 <b style="color:#ff6a4a">영어 단어</b>를 만들어요.<br><br>
+      예: <span class="hl">F + I + R + E = FIRE (불)</span><br>
+      만든 단어는 <b>마법</b>이 되어요!`,
+    demo: `<span class="ltr">F</span><span class="ltr">I</span><span class="ltr">R</span><span class="ltr">E</span>
+      <span class="arrow">→</span><span class="result">🔥 FIRE</span>`,
+  },
+  {
+    emoji: '💪',
+    title: '강화 & 도감',
+    body: `같은 단어를 <b>다시 합성</b>하면<br>
+      <span class="hl">자동 강화</span>되어 더 강해져요!<br><br>
+      <b>단어 탭</b>에서 모은 단어를<br>
+      <b style="color:#ffaa44">도감</b>으로 확인하세요.`,
+    demo: `<div style="font-size:13px">FIRE +0 → FIRE +1 → FIRE +2</div>
+      <div style="margin-top:8px;font-size:11px;color:#aaa">합성할수록 더 강력해져요</div>`,
+  },
+  {
+    emoji: '🛡️',
+    title: '장비 & 직업',
+    body: `<b>장비 탭</b>에서 무기/방어구를 장착하고,<br>
+      단어를 장비에 <b style="color:#ffaa44">소켓</b>해서 마법을 발동!<br><br>
+      <b>직업</b>도 바꿔보세요 — 단어를 모으면<br>
+      🔮마법사 🗡️도적 🏹궁수가 잠금 해제돼요.`,
+  },
+];
+
+let _tutorialIdx = 0;
+let _tutorialFromMenu = false;
+
+function startTutorial(fromMenu = false) {
+  _tutorialIdx = 0;
+  _tutorialFromMenu = fromMenu;
+  document.getElementById('tutBg').classList.add('show');
+  renderTutorialSlide();
+}
+
+function renderTutorialSlide() {
+  const slide = TUTORIAL_SLIDES[_tutorialIdx];
+  const isFirst = _tutorialIdx === 0;
+  const isLast = _tutorialIdx === TUTORIAL_SLIDES.length - 1;
+  let html = `<div class="tut-emoji">${slide.emoji}</div>`;
+  html += `<div class="tut-title">${slide.title}</div>`;
+  html += `<div class="tut-body">${slide.body}</div>`;
+  if (slide.demo) html += `<div class="tut-demo">${slide.demo}</div>`;
+  html += `<div class="tut-dots">`;
+  for (let i = 0; i < TUTORIAL_SLIDES.length; i++) {
+    html += `<div class="tut-dot ${i === _tutorialIdx ? 'active' : ''}"></div>`;
+  }
+  html += `</div>`;
+  html += `<div class="tut-nav">`;
+  html += `<button class="btn-prev" ${isFirst ? 'disabled' : ''} onclick="tutorialPrev()">‹ 이전</button>`;
+  if (isLast) {
+    html += `<button class="btn-start" onclick="closeTutorial(false)">🎮 시작하기!</button>`;
+  } else {
+    html += `<button class="btn-next" onclick="tutorialNext()">다음 ›</button>`;
+  }
+  html += `</div>`;
+  document.getElementById('tutCard').innerHTML = html;
+}
+
+function tutorialNext() {
+  if (_tutorialIdx < TUTORIAL_SLIDES.length - 1) {
+    _tutorialIdx++;
+    renderTutorialSlide();
+  }
+}
+function tutorialPrev() {
+  if (_tutorialIdx > 0) {
+    _tutorialIdx--;
+    renderTutorialSlide();
+  }
+}
+function closeTutorial(skipped) {
+  document.getElementById('tutBg').classList.remove('show');
+  state.tutorialSeen = true;
+  scheduleSave();
+  if (!_tutorialFromMenu) {
+    toast(skipped ? '튜토리얼은 STAGE 메뉴에서 다시 볼 수 있어요' : '🎮 행운을 빕니다!');
+  }
 }
 
 // ============== 멀티플레이 (1단계: Leaderboard) ==============
@@ -2975,6 +3218,10 @@ window.showStageMenu = showStageMenu;
 window.openMultiLeaderboard = openMultiLeaderboard;
 window.openMultiSettings = openMultiSettings;
 window.saveMultiSettings = saveMultiSettings;
+window.startTutorial = startTutorial;
+window.tutorialNext = tutorialNext;
+window.tutorialPrev = tutorialPrev;
+window.closeTutorial = closeTutorial;
 
 document.querySelectorAll('.tab').forEach(t => {
   t.addEventListener('click', () => {
@@ -2999,6 +3246,10 @@ window.addEventListener('load', async () => {
   lastTime = performance.now();
   lastRenderTime = performance.now();
   requestAnimationFrame(loop);
+  // 튜토리얼 자동 진입 (첫 진입 + 안 봤으면)
+  if (!state.tutorialSeen) {
+    setTimeout(() => startTutorial(false), 600);
+  }
 });
 </script>
 </body>
