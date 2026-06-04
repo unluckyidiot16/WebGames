@@ -195,6 +195,27 @@ h2.sect{font-size:15px;color:var(--gold);margin:4px 2px 10px;letter-spacing:.5px
 @keyframes sparkleA{0%{transform:translate(0,0) scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 .countpop{display:inline-block;animation:countPop .5s ease}
 @keyframes countPop{0%{transform:scale(1);color:var(--gold)}40%{transform:scale(1.5);color:var(--good)}100%{transform:scale(1)}}
+.homebadge{position:absolute;top:-6px;right:-6px;min-width:22px;height:22px;line-height:22px;border-radius:11px;background:var(--bad);color:#fff;font-size:12px;font-weight:bold;padding:0 6px;box-shadow:0 2px 6px rgba(0,0,0,.5)}
+.daygrid{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;margin-bottom:10px}
+.daycell{border:1px solid #2c3c66;border-radius:8px;padding:6px 2px;text-align:center;font-size:10px;background:#101a33;position:relative}
+.daycell.done{opacity:.45;border-color:#2e7d4f}
+.daycell.today{border-color:var(--gold);box-shadow:0 0 8px rgba(255,207,77,.3)}
+.daycell .dn{font-weight:bold;color:var(--dim)}
+.daycell .dr{font-weight:bold;margin-top:2px}
+.daycell .chk{position:absolute;top:1px;right:3px;color:var(--good);font-size:11px}
+.mrow{background:#16203b;border:1px solid #2c3c66;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.mrow .mtxt{flex:1}
+.mrow .mtitle{font-weight:bold;font-size:14px}
+.mrow .mprog{height:6px;background:#0a0f1e;border-radius:4px;overflow:hidden;margin-top:5px}
+.mrow .mpf{height:100%;background:linear-gradient(90deg,#56e08a,#37b56a);border-radius:4px;transition:width .4s}
+.mrow .mrew{font-size:11px;color:var(--gold);margin-top:3px}
+.dexrow{background:#16203b;border:1px solid #2c3c66;border-radius:10px;padding:10px 12px;margin-bottom:8px;display:flex;align-items:center;gap:10px}
+.dexrow.locked{opacity:.5}
+.dexrow.done{border-color:#2e7d4f}
+.dexrow .dtxt{flex:1}
+.shardpick{display:flex;gap:6px;justify-content:center;margin:10px 0}
+.shardpick .sp{cursor:pointer;border:2px solid #2c3c66;border-radius:10px;padding:8px 14px;font-weight:bold;font-size:15px;background:#101a33}
+.shardpick .sp.sel{border-color:var(--gold);background:rgba(255,207,77,.1)}
 
 .detail-overlay{position:absolute;inset:0;background:rgba(8,12,22,.95);z-index:40;display:flex;flex-direction:column;padding:16px;overflow-y:auto}
 .detail-sprite{width:150px;height:150px;image-rendering:pixelated;margin:6px auto;display:block;filter:drop-shadow(0 8px 12px rgba(0,0,0,.5))}
@@ -230,6 +251,7 @@ h2.sect{font-size:15px;color:var(--gold);margin:4px 2px 10px;letter-spacing:.5px
 
       <div id="returnPlayer" class="menu" style="display:none">
         <button class="btn big gold" id="toBattle">⚔️ BATTLE (PvP)</button>
+        <button class="btn big" id="toRewards" style="position:relative">🎉 REWARDS<span id="rewardBadge" class="homebadge" style="display:none"></span></button>
         <button class="btn big" id="toGacha">🎁 SUMMON</button>
         <button class="btn big alt" id="toShop">🛒 SHARD SHOP</button>
         <button class="btn big alt" id="toBox">📦 MY MONSTERS</button>
@@ -278,6 +300,23 @@ h2.sect{font-size:15px;color:var(--gold);margin:4px 2px 10px;letter-spacing:.5px
       <h2 class="sect">Buy a Monster with Shards</h2>
       <div class="muted" style="margin-bottom:10px">Prices: <span class="rar C">C</span> 80 · <span class="rar R">R</span> 200 · <span class="rar SR">SR</span> 500 &nbsp;(of that monster's type). Only base forms are sold — evolve them to grow!</div>
       <div class="grid" id="shopMonsters"></div>
+    </div>
+  </div>
+
+  <!-- ============ REWARDS ============ -->
+  <div class="scene" id="rewards">
+    <div class="bar"><button class="btn alt" data-home>‹</button><span class="title">Rewards</span>
+      <span class="spacer"></span><span class="coin">🪙 <i id="rwCoins">0</i></span></div>
+    <div class="pad">
+      <h2 class="sect">Daily Login</h2>
+      <div class="card" id="dailyCard" style="margin-bottom:16px"></div>
+
+      <h2 class="sect">Daily Missions</h2>
+      <div id="missionList" style="margin-bottom:16px"></div>
+
+      <h2 class="sect">Collection Rewards</h2>
+      <div class="muted" style="margin-bottom:8px">Owned species: <b id="dexCount">0</b> / 30</div>
+      <div id="dexList"></div>
     </div>
   </div>
 
@@ -426,17 +465,78 @@ function moveSetFor(id){
 }
 
 /* =========================================================
-   SAVE / STATE
+   SAVE / STATE  (versioned, forward-compatible migrations)
 ========================================================= */
-const SAVE_KEY='mtb_save_v1';
+const SAVE_KEY='mtb_save_v1';   // storage key stays stable; schema version lives INSIDE the save
+const SCHEMA_VERSION=3;          // bump when adding a migration step below
 const LV_CAP=30;
 let S = null;
-function freshSave(){ return {name:'', coins:300, box:[], party:[], nextUid:1, shards:{W:8,F:8,G:8}}; }
-function load(){ try{ S=JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){ S=null; } if(!S) S=null; if(S) migrate(); }
-function migrate(){
-  if(!S.shards) S.shards={W:0,F:0,G:0}; ['W','F','G'].forEach(k=>{ if(typeof S.shards[k]!=='number') S.shards[k]=0; });
-  // awaken stars on each monster
-  if(Array.isArray(S.box)) S.box.forEach(o=>{ if(typeof o.stars!=='number') o.stars=0; });
+
+// A brand-new save is created at the LATEST schema version.
+function freshSave(){
+  return {
+    v: SCHEMA_VERSION,
+    name:'', coins:300, nextUid:1,
+    box:[], party:[],
+    shards:{W:8,F:8,G:8},
+    // daily rewards / missions (schema v3)
+    daily:{ lastClaim:null, streak:0, missions:{}, missionDate:null },
+    // collection rewards (schema v3)
+    dex:{ claimed:[] }   // list of reward milestone ids already granted
+  };
+}
+
+/* ---- Migration steps ----
+   Each entry upgrades a save FROM version (index+1) TO (index+2).
+   They run in order, so an ancient save is brought fully up to date.
+   Always write migrations defensively (assume fields may be missing). */
+const MIGRATIONS = [
+  // v1 -> v2 : introduced shards + per-monster awaken stars
+  function(s){
+    if(!s.shards || typeof s.shards!=='object') s.shards={W:0,F:0,G:0};
+    ['W','F','G'].forEach(k=>{ if(typeof s.shards[k]!=='number') s.shards[k]=0; });
+    if(Array.isArray(s.box)) s.box.forEach(o=>{ if(typeof o.stars!=='number') o.stars=0; });
+  },
+  // v2 -> v3 : daily rewards/missions + dex completion rewards
+  function(s){
+    if(!s.daily || typeof s.daily!=='object') s.daily={ lastClaim:null, streak:0, missions:{}, missionDate:null };
+    if(typeof s.daily.streak!=='number') s.daily.streak=0;
+    if(!('lastClaim' in s.daily)) s.daily.lastClaim=null;
+    if(!s.daily.missions || typeof s.daily.missions!=='object') s.daily.missions={};
+    if(!('missionDate' in s.daily)) s.daily.missionDate=null;
+    if(!s.dex || typeof s.dex!=='object') s.dex={ claimed:[] };
+    if(!Array.isArray(s.dex.claimed)) s.dex.claimed=[];
+  }
+];
+
+function migrate(s){
+  // legacy saves had no version field -> treat as v1
+  if(typeof s.v!=='number') s.v=1;
+  // guard against a future save being opened by older code
+  if(s.v>SCHEMA_VERSION) s.v=SCHEMA_VERSION;
+  while(s.v < SCHEMA_VERSION){
+    const step = MIGRATIONS[s.v-1];      // migration to go from v -> v+1
+    if(typeof step==='function'){ try{ step(s); }catch(e){ console.warn('migration step failed',s.v,e); } }
+    s.v++;
+  }
+  // final integrity pass: never leave required structures undefined
+  if(!Array.isArray(s.box)) s.box=[];
+  if(!Array.isArray(s.party)) s.party=[];
+  if(typeof s.coins!=='number') s.coins=0;
+  if(typeof s.nextUid!=='number') s.nextUid=(s.box.reduce((mx,o)=>Math.max(mx,o.uid||0),0)+1);
+  if(!s.shards) s.shards={W:0,F:0,G:0};
+  s.box.forEach(o=>{ if(typeof o.stars!=='number') o.stars=0; if(typeof o.exp!=='number') o.exp=0; });
+  // drop party refs to monsters that no longer exist
+  s.party = s.party.filter(uid=>s.box.some(o=>o.uid===uid)).slice(0,3);
+  return s;
+}
+
+function load(){
+  let raw=null;
+  try{ raw=JSON.parse(localStorage.getItem(SAVE_KEY)); }catch(e){ raw=null; }
+  if(!raw || typeof raw!=='object'){ S=null; return; }
+  S = migrate(raw);
+  save(); // persist any upgrades immediately
 }
 function save(){ try{ localStorage.setItem(SAVE_KEY, JSON.stringify(S)); }catch(e){} }
 // each owned monster: {uid, id, lv, exp, stars}
@@ -465,6 +565,99 @@ const AWAKEN_CAP_STEP=5;                 // +5 max-level per awaken
 // shard cost per awaken: scales by rarity and by which star you're buying (1st cheaper than 2nd)
 function awakenShardCost(rar, nextStar){ const base={C:40,R:70,SR:110}[rar]; return base * nextStar; }
 function awakenCoinCost(nextStar){ return 300*nextStar; }
+
+/* =========================================================
+   DAILY REWARDS / MISSIONS  +  DEX COMPLETION
+========================================================= */
+function todayKey(){ const d=new Date(); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+function yesterdayKey(){ const d=new Date(); d.setDate(d.getDate()-1); return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate(); }
+// 7-day login streak rewards (loops after day 7, day 7 is the big one)
+const DAILY_REWARDS=[
+  {coins:80,  sh:0},   // day 1
+  {coins:120, sh:0},   // day 2
+  {coins:0,   sh:10},  // day 3 (shards, player-chosen type)
+  {coins:150, sh:0},   // day 4
+  {coins:0,   sh:15},  // day 5
+  {coins:200, sh:0},   // day 6
+  {coins:300, sh:25}   // day 7 — jackpot
+];
+function dailyAvailable(){ return !S.daily.lastClaim || S.daily.lastClaim!==todayKey(); }
+function dailyDayIndex(){ // which reward to give today (0-based), based on streak
+  return (S.daily.streak % DAILY_REWARDS.length);
+}
+function claimDaily(shardType){
+  if(!dailyAvailable()) return null;
+  // streak: +1 if claimed yesterday, else reset to 1
+  if(S.daily.lastClaim===yesterdayKey()) S.daily.streak+=1; else S.daily.streak=1;
+  const idx=(S.daily.streak-1)%DAILY_REWARDS.length;
+  const rw=DAILY_REWARDS[idx];
+  S.coins+=rw.coins||0;
+  if(rw.sh){ S.shards[shardType||'W']+=rw.sh; }
+  S.daily.lastClaim=todayKey();
+  save();
+  return {rw, idx, type:shardType||'W'};
+}
+
+// Daily missions: refresh each day, reward shards/coins on completion+claim
+const MISSION_DEFS=[
+  {id:'win3',   text:'Win 3 battles',         goal:3, reward:{coins:120}},
+  {id:'summon1',text:'Summon 1 time',         goal:1, reward:{coins:0, sh:10}},
+  {id:'train2', text:'Train a monster 2×',    goal:2, reward:{coins:80}}
+];
+function ensureMissions(){
+  if(S.daily.missionDate!==todayKey()){
+    S.daily.missionDate=todayKey();
+    S.daily.missions={};
+    MISSION_DEFS.forEach(m=>{ S.daily.missions[m.id]={prog:0, claimed:false}; });
+    save();
+  }
+}
+function missionProgress(id, amount=1){
+  ensureMissions();
+  const m=S.daily.missions[id]; if(!m || m.claimed) return;
+  const def=MISSION_DEFS.find(d=>d.id===id); if(!def) return;
+  m.prog=Math.min(def.goal, (m.prog||0)+amount);
+  save();
+}
+function claimMission(id, shardType){
+  ensureMissions();
+  const m=S.daily.missions[id]; const def=MISSION_DEFS.find(d=>d.id===id);
+  if(!m||!def||m.claimed||m.prog<def.goal) return null;
+  m.claimed=true;
+  if(def.reward.coins) S.coins+=def.reward.coins;
+  if(def.reward.sh) S.shards[shardType||'W']+=def.reward.sh;
+  save();
+  return def.reward;
+}
+
+// Dex completion: reward milestones for number of UNIQUE species owned (counts evolved forms too)
+function uniqueSpeciesCount(){ return new Set(S.box.map(o=>o.id)).size; }
+const DEX_MILESTONES=[
+  {id:'d5',  need:5,  reward:{coins:200},            label:'5 species'},
+  {id:'d10', need:10, reward:{coins:400, sh:20},     label:'10 species'},
+  {id:'d15', need:15, reward:{coins:600, sh:30},     label:'15 species'},
+  {id:'d20', need:20, reward:{coins:1000, sh:50},    label:'20 species'},
+  {id:'d30', need:30, reward:{coins:3000, sh:150},   label:'ALL 30 — Master!'}
+];
+function dexClaimable(){ const n=uniqueSpeciesCount(); return DEX_MILESTONES.filter(d=>n>=d.need && !S.dex.claimed.includes(d.id)); }
+function claimDex(id, shardType){
+  const d=DEX_MILESTONES.find(x=>x.id===id);
+  if(!d || S.dex.claimed.includes(id) || uniqueSpeciesCount()<d.need) return null;
+  S.dex.claimed.push(id);
+  if(d.reward.coins) S.coins+=d.reward.coins;
+  if(d.reward.sh) S.shards[shardType||'W']+=d.reward.sh;
+  save();
+  return d.reward;
+}
+// total count of unclaimed rewards (for the home badge)
+function pendingRewardCount(){
+  let n=0; if(dailyAvailable()) n++;
+  ensureMissions();
+  MISSION_DEFS.forEach(m=>{ const st=S.daily.missions[m.id]; if(st && !st.claimed && st.prog>=m.goal) n++; });
+  n+=dexClaimable().length;
+  return n;
+}
+
 
 /* =========================================================
    NAV
@@ -497,6 +690,7 @@ function renderHome(){
   if(S && S.name){
     document.getElementById('newPlayer').style.display='none';
     document.getElementById('returnPlayer').style.display='flex';
+    updateRewardBadge();
   } else {
     document.getElementById('newPlayer').style.display='block';
     document.getElementById('returnPlayer').style.display='none';
@@ -523,6 +717,7 @@ document.getElementById('startBtn').onclick=()=>{
   toast('Welcome, '+nm+'! Your team is ready.');
 };
 document.getElementById('toBattle').onclick=()=>startMatch();
+document.getElementById('toRewards').onclick=()=>{ renderRewards(); show('rewards'); };
 document.getElementById('toGacha').onclick=()=>{ renderGacha(); show('gacha'); };
 document.getElementById('toShop').onclick=()=>{ renderShop(); show('shop'); };
 document.getElementById('toBox').onclick=()=>{ renderBox(); show('box'); };
@@ -572,6 +767,7 @@ async function pull(n){
   if(S.coins<cost){ toast('Not enough coins!'); return; }
   const shBefore={W:S.shards.W,F:S.shards.F,G:S.shards.G}; // snapshot for delta fx
   S.coins-=cost;
+  missionProgress('summon1', n); // summoning progresses the daily mission
   let ids=[];
   for(let i=0;i<n;i++) ids.push(doPull());
   if(n===10 && !ids.some(id=>ROSTER[id].r!=='C')) ids[9]=randIdByRarity('R'); // pity
@@ -698,6 +894,93 @@ function sparkleAt(el, type){
   el.classList.remove('evo-glow'); void el.offsetWidth; el.classList.add('evo-glow');
 }
 
+/* =========================================================
+   REWARDS SCREEN (daily / missions / dex)
+========================================================= */
+let pendingShardChoice=null; // {cb}
+function askShardType(cb){
+  // simple inline modal to pick which shard type to receive
+  const ov=document.createElement('div'); ov.className='overlay'; ov.style.zIndex='80';
+  ov.innerHTML=`<div style="font-weight:bold;font-size:17px">Choose your shard type</div>
+    <div class="shardpick" id="spPick">
+      <div class="sp" data-t="W">${TYPE_EMOJI.W} Water</div>
+      <div class="sp" data-t="F">${TYPE_EMOJI.F} Fire</div>
+      <div class="sp" data-t="G">${TYPE_EMOJI.G} Grass</div>
+    </div>
+    <button class="btn alt" id="spCancel">Cancel</button>`;
+  document.body.appendChild(ov);
+  ov.querySelectorAll('.sp').forEach(b=>b.onclick=()=>{ const t=b.dataset.t; ov.remove(); cb(t); });
+  ov.querySelector('#spCancel').onclick=()=>ov.remove();
+}
+
+function renderRewards(){
+  ensureMissions();
+  document.getElementById('rwCoins').textContent=S.coins;
+  // ---- daily ----
+  const dc=document.getElementById('dailyCard');
+  const avail=dailyAvailable();
+  const todayIdx=avail ? ((S.daily.lastClaim===yesterdayKey()? S.daily.streak : 0) % DAILY_REWARDS.length) : -1;
+  let cells='';
+  DAILY_REWARDS.forEach((rw,i)=>{
+    const claimedIdx = (S.daily.streak-1) % DAILY_REWARDS.length;
+    const claimedThisCycle = (!avail && i === claimedIdx);
+    const isToday = avail && i===todayIdx;
+    const rtxt = rw.sh? `+${rw.sh}💎` : `+${rw.coins}🪙`;
+    cells+=`<div class="daycell ${isToday?'today':''} ${claimedThisCycle?'done':''}">
+      <div class="dn">Day ${i+1}</div><div class="dr">${rtxt}</div>${claimedThisCycle?'<span class="chk">✓</span>':''}</div>`;
+  });
+  dc.innerHTML=`<div class="daygrid">${cells}</div>
+    <div style="text-align:center" class="muted">Current streak: <b style="color:var(--gold)">${S.daily.streak} day${S.daily.streak===1?'':'s'}</b></div>
+    <button class="btn big gold" id="claimDaily" style="margin-top:10px" ${avail?'':'disabled'}>${avail?'🎁 CLAIM DAILY REWARD':'✓ Come back tomorrow'}</button>`;
+  if(avail) dc.querySelector('#claimDaily').onclick=()=>{
+    const idx=(S.daily.lastClaim===yesterdayKey()? S.daily.streak : 0)%DAILY_REWARDS.length;
+    const rw=DAILY_REWARDS[idx];
+    const give=(type)=>{ const r=claimDaily(type); if(r){ toast(`Day ${((S.daily.streak-1)%7)+1}: +${rw.coins?rw.coins+'🪙':''}${rw.sh?(' +'+rw.sh+' '+TYPE_NAME[type]+' shards'):''}`); renderRewards(); updateRewardBadge(); } };
+    if(rw.sh) askShardType(give); else give('W');
+  };
+  // ---- missions ----
+  const ml=document.getElementById('missionList'); ml.innerHTML='';
+  MISSION_DEFS.forEach(def=>{
+    const st=S.daily.missions[def.id]||{prog:0,claimed:false};
+    const done=st.prog>=def.goal;
+    const rtxt=def.reward.sh?`+${def.reward.sh} shards`:`+${def.reward.coins} 🪙`;
+    const d=document.createElement('div'); d.className='mrow';
+    d.innerHTML=`<div class="mtxt"><div class="mtitle">${def.text}</div>
+      <div class="mprog"><div class="mpf" style="width:${Math.min(100,st.prog/def.goal*100)}%"></div></div>
+      <div class="mrew">Reward: ${rtxt} &nbsp;·&nbsp; ${Math.min(st.prog,def.goal)}/${def.goal}</div></div>
+      <button class="btn ${st.claimed?'alt':'gold'}" ${(!done||st.claimed)?'disabled':''}>${st.claimed?'✓':'Claim'}</button>`;
+    const btn=d.querySelector('button');
+    if(done && !st.claimed) btn.onclick=()=>{
+      const give=(type)=>{ const r=claimMission(def.id,type); if(r){ toast('Mission complete! '+(r.coins?('+'+r.coins+'🪙'):('+'+r.sh+' '+TYPE_NAME[type]+' shards'))); renderRewards(); updateRewardBadge(); } };
+      if(def.reward.sh) askShardType(give); else give('W');
+    };
+    ml.appendChild(d);
+  });
+  // ---- dex ----
+  document.getElementById('dexCount').textContent=uniqueSpeciesCount();
+  const dl=document.getElementById('dexList'); dl.innerHTML='';
+  const n=uniqueSpeciesCount();
+  DEX_MILESTONES.forEach(d=>{
+    const reached=n>=d.need; const claimed=S.dex.claimed.includes(d.id);
+    const rtxt=`${d.reward.coins?d.reward.coins+'🪙':''}${d.reward.sh?(' +'+d.reward.sh+'💎'):''}`;
+    const row=document.createElement('div'); row.className='dexrow '+(claimed?'done':(reached?'':'locked'));
+    row.innerHTML=`<div class="dtxt"><div style="font-weight:bold">${d.label}</div>
+      <div class="muted" style="font-size:11px">Reward: ${rtxt} &nbsp;·&nbsp; ${Math.min(n,d.need)}/${d.need} species</div></div>
+      <button class="btn ${claimed?'alt':'gold'}" ${(!reached||claimed)?'disabled':''}>${claimed?'✓':'Claim'}</button>`;
+    const btn=row.querySelector('button');
+    if(reached && !claimed) btn.onclick=()=>{
+      const give=(type)=>{ const r=claimDex(d.id,type); if(r){ toast('Collection reward! '+(r.coins?('+'+r.coins+'🪙'):'')+(r.sh?(' +'+r.sh+' '+TYPE_NAME[type]+' shards'):'')); renderRewards(); updateRewardBadge(); } };
+      if(d.reward.sh) askShardType(give); else give('W');
+    };
+    dl.appendChild(row);
+  });
+}
+
+function updateRewardBadge(){
+  const b=document.getElementById('rewardBadge'); if(!b) return;
+  const n=pendingRewardCount();
+  if(n>0){ b.textContent=n; b.style.display='inline-block'; } else b.style.display='none';
+}
 
 /* =========================================================
    BOX + DETAIL + EVOLVE
@@ -802,7 +1085,7 @@ function showDetail(uid){
   ov.querySelector('#togP').onclick=()=>{ toggleParty(uid); ov.remove(); renderBox(); };
   const tb=ov.querySelector('#trainBtn');
   if(tb && canTrain) tb.onclick=()=>{
-    S.shards[m.t]-=shCost; S.coins-=coinCost; o.lv++; save();
+    S.shards[m.t]-=shCost; S.coins-=coinCost; o.lv++; missionProgress('train2',1); save();
     const img=ov.querySelector('.detail-sprite'); img.classList.add('evo-glow');
     toast(m.name+' grew to Lv'+o.lv+'!');
     setTimeout(()=>{ showDetail(uid); renderBox(); },300); // re-open with updated stats
@@ -1136,8 +1419,13 @@ function winBattle(){
   B.over=true;
   const reward=120 + Math.floor(Math.random()*60);
   S.coins+=reward;
-  // exp to party survivors
-  B.my.forEach(b=>{ if(b.srcUid>0){ const o=S.box.find(x=>x.uid===b.srcUid); if(o){ o.exp+=18; while(o.exp>=expNeed(o.lv)){ o.exp-=expNeed(o.lv); o.lv++; } } } });
+  // exp to party survivors (respect each monster's awaken-adjusted level cap)
+  B.my.forEach(b=>{ if(b.srcUid>0){ const o=S.box.find(x=>x.uid===b.srcUid); if(o){
+    o.exp+=18;
+    while(o.lv<monCap(o) && o.exp>=expNeed(o.lv)){ o.exp-=expNeed(o.lv); o.lv++; }
+    if(o.lv>=monCap(o)) o.exp=0; // at cap, stop accumulating
+  } } });
+  missionProgress('win3',1);
   save();
   showResult(true,reward);
 }
