@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>English Word Pac-Man</title>
-    <script> /* Layout */
+    <style> /* Layout */
     body { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; padding: 1rem; margin: 0; }
     #game-ui { text-align: center; margin-bottom: 0.5rem; width: 100%; max-width: 28rem; }
     .ui-row { display: flex; justify-content: space-between; font-size: 1.25rem; font-weight: bold; margin-bottom: 0.25rem; }
@@ -24,7 +24,7 @@
 
     /* Hide d-pad on desktop */
     @media (min-width: 1024px) { .d-pad { display: none; } }
-    </script>
+    </style>
     <style>
         body {
             background-color: #000;
@@ -157,6 +157,7 @@
 
     let scaredTimer = 0;
     const SCARED_DURATION = 400; // 도망 모드 유지 시간 (프레임)
+    let stageToken = 0; // 스테이지 전환 시 옛 setTimeout 콜백 무효화용
 
     let player = {
         x: 9 * TILE_SIZE,
@@ -317,6 +318,7 @@
     }
 
     function initStage() {
+        stageToken++;
         if (currentStage < 30) {
             currentTargetWord = STAGE_WORDS[currentStage];
             stageNumEl.innerText = currentStage + 1;
@@ -516,8 +518,10 @@
                     score += 200;
                     scoreEl.innerText = score;
 
-                    // 집으로 복귀 후 부활
+                    // 집으로 복귀 후 부활 (스테이지가 바뀌면 무효)
+                    const tokenAtKill = stageToken;
                     setTimeout(() => {
+                        if (tokenAtKill !== stageToken) return; // 옛 스테이지 콜백 무시
                         g.x = g.startX;
                         g.y = g.startY;
                         g.state = 'normal';
@@ -592,6 +596,7 @@
     function gameOver() {
         gameRunning = false;
         cancelAnimationFrame(animationId);
+        animationId = null;
         overlay.classList.remove('hidden');
         overlayTitle.innerText = "GAME OVER";
         overlayMsg.innerText = `도달한 스테이지: ${isInfinite ? "무한" : currentStage + 1} / 최종 점수: ${score}`;
